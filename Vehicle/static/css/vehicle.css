@@ -1,0 +1,93 @@
+.floating-card {
+    position: absolute;
+    top: 10%;
+    left: 5.5%;
+    width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 1;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar:hover ~ .floating-card {
+    left: 15%;
+}
+
+  .vehicle-card {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+  }
+  .vehicle-card:last-child {
+    border-bottom: none;
+  }
+  .vehicle-header {
+    font-weight: bold;
+    color: #333;
+  }
+  .vehicle-info {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Toggle Slider */
+.toggle-slider {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 120px;
+  height: 40px;
+  background: white;
+  border-radius: 25px;
+  border: 2px solid #d1d1d1;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Map & List Labels */
+.toggle-option {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+/* Sliding Button */
+.slider-button {
+  position: absolute;
+  top: 1%;
+  left: 2px;
+  width: 55px;
+  height: 36px;
+  background: #000000d0;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+/* Active State */
+.active .slider-button {
+  left: 63px;
+}
+
+.active .map-option {
+  color: #d1d1d1;
+}
+
+.active .list-option {
+  color: white;
+}
