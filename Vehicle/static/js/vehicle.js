@@ -69,7 +69,7 @@ if (storedMarkers) {
 
   function initMap() {
     const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Default center
-    const offset = -5; // Adjust this value to shift the map to the right
+    const offset = -2; // Adjust this value to shift the map to the right
   
     // Calculate the new center based on the offset
     const newCenter = {
@@ -158,13 +158,13 @@ sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
 
   function getCarIconUrlBySpeed(speedInKmh) {
     if (speedInKmh === 0) {
-      return "http://64.227.135.38/cariconyellow.png";
+      return "assets/images/car_yellow.png";
     } else if (speedInKmh > 0 && speedInKmh <= 40) {
-      return "http://64.227.135.38/caricongreen.png";
+      return "assets/images/car_green.png";
     } else if (speedInKmh > 40 && speedInKmh <= 60) {
-      return "http://64.227.135.38/cariconblue.png";
+      return "assets/images/car_blue.png";
     } else {
-      return "http://64.227.135.38/cariconred.png";
+      return "assets/images/car_red.png";
     }
   }
 
@@ -178,7 +178,7 @@ function getCarIconBySpeed(speed, imei) {
     if (speedInKmh === 0) {
         // Check for last zero speed time
         if (lastZeroSpeedTime[imei]) {
-            const timeDiff = now - lastZeroSpeedTime[imei];
+            const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
             const hoursDiff = timeDiff / (1000 * 60 * 60);
             if (hoursDiff >= 3) {
                 iconUrl = "http://64.227.135.38/cariconblack.png";
