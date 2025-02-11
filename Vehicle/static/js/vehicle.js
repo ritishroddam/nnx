@@ -567,8 +567,8 @@ function removeSOS(imei) {
     if (addressCache[key]) {
       callback(addressCache[key]);
     } else {
-      const geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyCPEMAElTxMzur0DK-Mh3fPUVmdQVBJu8A";
-
+      const geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0";
+      
       fetch(geocodeUrl)
         .then((response) => response.json())
         .then((data) => {
