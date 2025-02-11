@@ -102,7 +102,7 @@ restoreMarkers();
     setInterval(function () {
       if (countdownTimer > 0) {
         countdownTimer--;
-        document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+        // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
       } else {
     updateMap();
     countdownTimer = refreshInterval / 1000;  // Reset countdown

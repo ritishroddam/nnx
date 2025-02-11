@@ -213,6 +213,10 @@ def log_data(json_data):
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
+@app.route('/')
+def index():
+    return render_template('vehicle.js')
+
 
 @app.route('/api/data', methods=['GET', 'POST'])
 def receive_data():
