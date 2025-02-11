@@ -7,7 +7,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script>
     <script>
       // Pass the API URL to JavaScript
-      const apiUrl = "{{ url_for('receive_data') }}";
+      const apiUrl = "{{ url_for('Vehicle.receive_data'') }}";
     </script>
 {% endblock %}
 
