@@ -69,7 +69,7 @@ if (storedMarkers) {
 
   function initMap() {
     const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Default center
-    const offset = 10; // Adjust this value to shift the map to the right
+    const offset = -5; // Adjust this value to shift the map to the right
   
     // Calculate the new center based on the offset
     const newCenter = {
