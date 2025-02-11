@@ -36,34 +36,34 @@ document.querySelector(".toggle-slider").addEventListener("click", function() {
 // Car appears on the map
 
 var map;
-var markers = {};
-var geocoder;
-var addressCache = {};
-var lastZeroSpeedTime = {};
-var refreshInterval = 5000; // 1min for page reload
-var infoWindow;
-var countdownTimer = refreshInterval / 1000;
-var openMarker = null;
-var firstFit = true;
-var manualClose = false;
-var dataAvailable = true;
-var sosActiveMarkers = {};
+  var markers = {};
+  var geocoder;
+  var addressCache = {};
+  var lastZeroSpeedTime = {};
+  var refreshInterval = 5000; // 1min for page reload
+  var infoWindow;
+  var countdownTimer = refreshInterval / 1000;
+  var openMarker = null;
+  var firstFit = true;
+  var manualClose = false;
+  var dataAvailable = true;
+  var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 
   // Restore markers from session storage if available
 function restoreMarkers() {
-  const storedMarkers = sessionStorage.getItem('vehicleMarkers');
-  if (storedMarkers) {
-      const markerData = JSON.parse(storedMarkers);
-      markerData.forEach(device => {
-          const latLng = new google.maps.LatLng(device.lat, device.lon);
-          const imei = device.imei;
-          const iconUrl = device.iconUrl;
-          const rotation = device.rotation;
-          markers[imei] = createCustomMarker(latLng, iconUrl, rotation);
-          addMarkerClickListener(markers[imei], latLng, device);
-      });
-  }
+const storedMarkers = sessionStorage.getItem('vehicleMarkers');
+if (storedMarkers) {
+    const markerData = JSON.parse(storedMarkers);
+    markerData.forEach(device => {
+        const latLng = new google.maps.LatLng(device.lat, device.lon);
+        const imei = device.imei;
+        const iconUrl = device.iconUrl;
+        const rotation = device.rotation;
+        markers[imei] = createCustomMarker(latLng, iconUrl, rotation);
+        addMarkerClickListener(markers[imei], latLng, device);
+    });
+}
 }
 
   function initMap() {
@@ -102,14 +102,12 @@ restoreMarkers();
     setInterval(function () {
       if (countdownTimer > 0) {
         countdownTimer--;
-        // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+        document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
       } else {
     updateMap();
     countdownTimer = refreshInterval / 1000;  // Reset countdown
   }
-}, 1000)
-
-};
+}, 1000)};
 
   // Save the current state of markers into session storage
 function saveMarkers() {
@@ -255,138 +253,78 @@ function checkForDataTimeout(imei) {
 return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric characters
 }
 
-function updateMap() {
-  fetch("/api/data")
-    .then(response => response.json())
-    .then(data => {
-      var imeiSet = new Set(); // Track unique IMEI numbers
-      var bounds = new google.maps.LatLngBounds();
-      dataAvailable = true;
-      countdownTimer = refreshInterval / 1000;
 
-      data.forEach(device => {
-        const imei = sanitizeIMEI(device.imei);
 
-        if (!imeiSet.has(imei)) {
-          imeiSet.add(imei); // Mark IMEI as processed
 
-          if (device.latitude && device.longitude && device.speed != null && device.course != null) {
-            const coords = parseCoordinates(device.latitude, device.longitude);
-            const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-            const iconUrl = getCarIconBySpeed(device.speed, imei);
-            const rotation = device.course;
+      function updateMap() {
+    fetch("/api/data")
+        .then(response => response.json())
+        .then(data => {
+            var imeiSet = new Set(); // Track unique IMEI numbers
+            var bounds = new google.maps.LatLngBounds();
+            dataAvailable = true;
+            countdownTimer = refreshInterval / 1000;
 
-            if (markers[imei]) {
-              // Update existing marker
-              animateMarker(markers[imei], latLng);
-              updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-              markers[imei].device = device; // Update device data
-              updateInfoWindow(markers[imei], latLng, device, coords);
-            } else {
-              // Create a new marker
-              markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-              addMarkerClickListener(markers[imei], latLng, device, coords);
+            data.forEach(device => {
+                const imei = sanitizeIMEI(device.imei);
+
+                if (!imeiSet.has(imei)) {
+                    imeiSet.add(imei); // Mark IMEI as processed
+
+                    if (device.latitude && device.longitude && device.speed != null && device.course != null) {
+                        const coords = parseCoordinates(device.latitude, device.longitude);
+                        const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+                        const iconUrl = getCarIconBySpeed(device.speed, imei);
+                        const rotation = device.course;
+
+                        if (markers[imei]) {
+                            // Update existing marker
+                            animateMarker(markers[imei], latLng);
+                            updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+                            markers[imei].device = device; // Update device data
+                            updateInfoWindow(markers[imei], latLng, device, coords);
+                        } else {
+                            // Create a new marker
+                            markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+                            addMarkerClickListener(markers[imei], latLng, device, coords);
+                        }
+
+                        if (device.sos === "1") {
+                            triggerSOS(imei, markers[imei]);
+                        } else {
+                            removeSOS(imei);
+                        }
+
+                        // Update last data received time
+                        lastDataReceivedTime[imei] = new Date();
+
+                        bounds.extend(latLng);
+                    }
+
+                    // Check if data is missing for more than 1 hour
+                    checkForDataTimeout(imei);
+                }
+            });
+
+            saveMarkers();
+
+            if (!bounds.isEmpty() && firstFit) {
+                map.fitBounds(bounds);
+                firstFit = false;
             }
 
-            if (device.sos === "1") {
-              triggerSOS(imei, markers[imei]);
-            } else {
-              removeSOS(imei);
-            }
-
-            // Update last data received time
-            lastDataReceivedTime[imei] = new Date();
-
-            bounds.extend(latLng);
-          }
-
-          // Check if data is missing for more than 1 hour
-          checkForDataTimeout(imei);
-        }
-      });
-
-      saveMarkers();
-
-      if (!bounds.isEmpty() && firstFit) {
-        map.fitBounds(bounds);
-        firstFit = false;
-      }
-
-      // Apply current speed filter after updating markers
-      filterVehicles();
-    })
-    .catch(error => {
-      console.error("Error fetching data:", error);
-      dataAvailable = false;
-    });
+            // Apply current speed filter after updating markers
+            // filterVehiclesBySpeed();
+          filterVehicles();
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+            dataAvailable = false;
+        });
 }
 
-//       function updateMap() {
-//     fetch("/api/data")
-//         .then(response => response.json())
-//         .then(data => {
-//             var imeiSet = new Set(); // Track unique IMEI numbers
-//             var bounds = new google.maps.LatLngBounds();
-//             dataAvailable = true;
-//             countdownTimer = refreshInterval / 1000;
+  
 
-//             data.forEach(device => {
-//                 const imei = sanitizeIMEI(device.imei);
-
-//                 if (!imeiSet.has(imei)) {
-//                     imeiSet.add(imei); // Mark IMEI as processed
-
-//                     if (device.latitude && device.longitude && device.speed != null && device.course != null) {
-//                         const coords = parseCoordinates(device.latitude, device.longitude);
-//                         const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-//                         const iconUrl = getCarIconBySpeed(device.speed, imei);
-//                         const rotation = device.course;
-
-//                         if (markers[imei]) {
-//                             // Update existing marker
-//                             animateMarker(markers[imei], latLng);
-//                             updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-//                             markers[imei].device = device; // Update device data
-//                             updateInfoWindow(markers[imei], latLng, device, coords);
-//                         } else {
-//                             // Create a new marker
-//                             markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-//                             addMarkerClickListener(markers[imei], latLng, device, coords);
-//                         }
-
-//                         if (device.sos === "1") {
-//                             triggerSOS(imei, markers[imei]);
-//                         } else {
-//                             removeSOS(imei);
-//                         }
-
-//                         // Update last data received time
-//                         lastDataReceivedTime[imei] = new Date();
-
-//                         bounds.extend(latLng);
-//                     }
-
-//                     // Check if data is missing for more than 1 hour
-//                     checkForDataTimeout(imei);
-//                 }
-//             });
-
-//             saveMarkers();
-
-//             if (!bounds.isEmpty() && firstFit) {
-//                 map.fitBounds(bounds);
-//                 firstFit = false;
-//             }
-
-//             // Apply current speed filter after updating markers
-//             // filterVehiclesBySpeed();
-//           filterVehicles();
-//         })
-//         .catch(error => {
-//             console.error("Error fetching data:", error);
-//             dataAvailable = false;
-//         });
-// }
 
 
       function triggerSOS(imei, marker) {
@@ -435,7 +373,7 @@ function removeSOS(imei) {
   }
 
 
-  function addMarkerClickListener(marker, latLng, device, coords) {
+      function addMarkerClickListener(marker, latLng, device, coords) {
     geocodeLatLng(latLng, function (address) {
         marker.div.addEventListener("click", function () {
             if (openMarker !== marker) {
@@ -515,6 +453,12 @@ function removeSOS(imei) {
 }
 
 
+
+
+
+
+
+// dfhsgf
   function updateInfoWindow(marker, latLng, device, coords) {
     geocodeLatLng(latLng, function (address) {
       if (openMarker === marker && !manualClose) {
@@ -542,6 +486,8 @@ function removeSOS(imei) {
       }
     });
   }
+
+
 
       function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
@@ -636,8 +582,8 @@ function removeSOS(imei) {
     if (addressCache[key]) {
       callback(addressCache[key]);
     } else {
-      const geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0";
-      
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyCPEMAElTxMzur0DK-Mh3fPUVmdQVBJu8A`;
+
       fetch(geocodeUrl)
         .then((response) => response.json())
         .then((data) => {
