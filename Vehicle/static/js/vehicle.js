@@ -257,7 +257,7 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 
 
       function updateMap() {
-    fetch("/api/data")
+    fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             var imeiSet = new Set(); // Track unique IMEI numbers
