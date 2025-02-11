@@ -99,15 +99,15 @@ function restoreMarkers() {
     // Restore markers from the previous session
 restoreMarkers();
 
-//     setInterval(function () {
-//       if (countdownTimer > 0) {
-//         countdownTimer--;
-//         document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-//       } else {
-//     updateMap();
-//     countdownTimer = refreshInterval / 1000;  // Reset countdown
-//   }
-// }, 1000)
+    setInterval(function () {
+      if (countdownTimer > 0) {
+        countdownTimer--;
+        // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+      } else {
+    updateMap();
+    countdownTimer = refreshInterval / 1000;  // Reset countdown
+  }
+}, 1000)
 
 };
 
