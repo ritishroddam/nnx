@@ -216,7 +216,7 @@ def log_data(json_data):
 
 @app.route('/')
 def index():
-    return render_template('alldevice.html')
+    return render_template('Vehicle.map')
 
 @app.route('/api/data', methods=['GET', 'POST'])
 def receive_data():
