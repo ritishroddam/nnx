@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 
 MONGO_URI = os.getenv(
     'MONGO_URI',

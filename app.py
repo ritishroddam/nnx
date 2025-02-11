@@ -16,7 +16,7 @@ def default():
     return render_template("base.html") 
 
 if __name__ == '__main__':
-    map_server_path = os.path.join(os.path.dirname(__file__), 'liveVehicles/map_server.py')
+    map_server_path = os.path.join(os.path.dirname(__file__), 'Vehicle/map_server.py')
     subprocess.Popen(['python', map_server_path])
 
     app.run(host = "64.227.137.175", port = 8888, debug=True)
