@@ -322,38 +322,3 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
     run_servers()
-
-
-# def run_servers():
-#     HOST = "67.227.137.175"
-#     PORT = 8000
-#     server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
-#     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
-
-#     server_thread = threading.Thread(target=server.serve_forever)
-#     server_thread.daemon = True
-#     server_thread.start()
-
-#     flask_thread = threading.Thread(target=start_flask_server)
-#     flask_thread.daemon = True
-#     flask_thread.start()
-
-#     signal.signal(signal.SIGINT, signal_handler)
-#     signal.signal(signal.SIGTERM, signal_handler)
-
-#     print("Server running. Press Ctrl+C to stop.")
-#     try:
-#         while True:
-#             pass
-#     except KeyboardInterrupt:
-#         print("Server shutting down...")
-#         server.shutdown()
-#         server.server_close()
-#         sys.exit(0)
-
-# def signal_handler(signal, frame):
-#     print("Received signal:", signal)
-#     sys.exit(0)
-
-# if __name__ == "__main__":
-#     run_servers()
