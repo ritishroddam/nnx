@@ -360,13 +360,13 @@ function removeSOS(imei) {
     const ampm = hour >= 12 ? "PM" : "AM";
     hour = hour % 12 || 12;
 
-    const formattedDate = ${day}/${month}/${year};
-    const formattedTime = ${hour}:${minute}:${second} ${ampm};
+    const formattedDate = `${day}/${month}/${year}`;
+    const formattedTime = `${hour}:${minute}:${second} ${ampm}`;
     return { formattedDate, formattedTime };
   }
 
 
-      function addMarkerClickListener(marker, latLng, device, coords) {
+  function addMarkerClickListener(marker, latLng, device, coords) {
     geocodeLatLng(latLng, function (address) {
         marker.div.addEventListener("click", function () {
             if (openMarker !== marker) {
@@ -375,7 +375,7 @@ function removeSOS(imei) {
                     : '<span class="missing-data">N/A</span>';
                 const speed =
                     device.speed !== null && device.speed !== undefined
-                        ? ${convertSpeedToKmh(device.speed).toFixed(2)} km/h
+                        ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
                         : '<span class="missing-data">Unknown</span>';
                 const lat =
                     coords.lat !== null && coords.lat !== undefined
@@ -514,8 +514,8 @@ function removeSOS(imei) {
   function createCustomMarker(latLng, iconUrl, rotation, device) {
     const div = document.createElement("div");
     div.className = "custom-marker";
-    div.style.backgroundImage = url(${iconUrl});
-    div.style.transform = rotate(${rotation}deg);
+    div.style.backgroundImage = `url(${iconUrl})`;
+    div.style.transform = `rotate(${rotation}deg)`;
 
     const marker = new google.maps.OverlayView();
     marker.div = div;
@@ -551,8 +551,8 @@ function removeSOS(imei) {
 //////////////////////
   function updateCustomMarker(marker, latLng, iconUrl, rotation) {
     marker.latLng = latLng;
-    marker.div.style.backgroundImage = url(${iconUrl});
-    marker.div.style.transform = rotate(${rotation}deg);
+    marker.div.style.backgroundImage = `url(${iconUrl})`;
+    marker.div.style.transform = `rotate(${rotation}deg)`;
     marker.draw();
 
     addMarkerClickListener(marker, latLng, {}, {});
@@ -562,7 +562,7 @@ function removeSOS(imei) {
   function geocodeLatLng(latLng, callback) {
     const lat = latLng.lat().toFixed(6);
     const lon = latLng.lng().toFixed(6);
-    const key = ${lat},${lon};
+    const key = `${lat},${lon}`;
 
     if (addressCache[key]) {
       callback(addressCache[key]);
