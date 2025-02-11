@@ -69,7 +69,7 @@ function restoreMarkers() {
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 20.5937, lng: 78.9629 },
-      zoom: 5,
+      zoom: 12,
       gestureHandling: "greedy",
       zoomControl: true,
       zoomControlOptions: {
