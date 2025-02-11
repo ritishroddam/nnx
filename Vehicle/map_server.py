@@ -50,7 +50,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
             data = self.request.recv(4096).decode('utf-8').strip()
-            print("hi")
             print("Received raw data:", data)
 
             json_data = self.parse_json_data(data)
