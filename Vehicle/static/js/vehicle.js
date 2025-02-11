@@ -68,11 +68,22 @@ if (storedMarkers) {
 }
 
   function initMap() {
+    const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Default center
+    const offset = 10; // Adjust this value to shift the map to the right
+  
+    // Calculate the new center based on the offset
+    const newCenter = {
+      lat: defaultCenter.lat,
+      lng: defaultCenter.lng + offset
+    };
+
     map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 20.5937, lng: 78.9629 },
+      
+      center: newCenter,
       zoom: 5,
       gestureHandling: "greedy",
       zoomControl: true,
+
       zoomControlOptions: {
         position: google.maps.ControlPosition.RIGHT_BOTTOM,
       },
