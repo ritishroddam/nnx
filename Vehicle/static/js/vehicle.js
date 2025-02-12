@@ -156,88 +156,45 @@ sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
     return speedMph * 1.60934; // Convert mph to km/h
   }
 
-//   function getCarIconUrlBySpeed(speedInKmh) {
-//     if (speedInKmh === 0) {
-//       return "/nnx-main/assets/images/car_yellow.png";
-//     } else if (speedInKmh > 0 && speedInKmh <= 40) {
-//       return "/nnx-main/assets/images/car_green.png";
-//     } else if (speedInKmh > 40 && speedInKmh <= 60) {
-//       return "/nnx-main/assets/images/car_blue.png";
-//     } else {
-//       return "/nnx-main/assets/images/car_red.png";
-//     }
-//   }
-
-// // Function to check if speed is zero for more than 3 hours
-// function getCarIconBySpeed(speed, imei) {
-//     const speedInKmh = convertSpeedToKmh(speed);
-//     let iconUrl = getCarIconUrlBySpeed(speedInKmh);
-    
-//     const now = new Date();
-
-//     if (speedInKmh === 0) {
-//         // Check for last zero speed time
-//         if (lastZeroSpeedTime[imei]) {
-//             const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
-//             const hoursDiff = timeDiff / (1000 * 60 * 60);
-//             if (hoursDiff >= 3) {
-//                 iconUrl = "nnx-main/assets/images/car_black.png";
-//             }
-//         } else {
-//             lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
-//         }
-//     } else if (speedInKmh > 0) {
-//         // Reset if speed increases from 0
-//         if (lastZeroSpeedTime[imei]) {
-//             delete lastZeroSpeedTime[imei];
-//         }
-//     }
-
-//     return iconUrl;
-// }
-
-
-//let lastZeroSpeedTime = {};
-
-function getCarIconUrlBySpeed(speedInKmh) {
-    const basePath = "/nnx-main/assets/images/";
-
+  function getCarIconUrlBySpeed(speedInKmh) {
     if (speedInKmh === 0) {
-        return `${basePath}car_yellow.png`;
+      return "/nnx-main/assets/images/car_yellow.png";
     } else if (speedInKmh > 0 && speedInKmh <= 40) {
-        return `${basePath}car_green.png`;
+      return "/nnx-main/assets/images/car_green.png";
     } else if (speedInKmh > 40 && speedInKmh <= 60) {
-        return `${basePath}car_blue.png`;
+      return "/nnx-main/assets/images/car_blue.png";
     } else {
-        return `${basePath}car_red.png`;
+      return "/nnx-main/assets/images/car_red.png";
     }
-}
+  }
 
+// Function to check if speed is zero for more than 3 hours
 function getCarIconBySpeed(speed, imei) {
-    const basePath = "/nnx-main/assets/images/";
     const speedInKmh = convertSpeedToKmh(speed);
-
-    console.log("Speed:", speed, "Converted Speed:", speedInKmh);
-
     let iconUrl = getCarIconUrlBySpeed(speedInKmh);
-    const now = Date.now();
+    
+    const now = new Date();
 
     if (speedInKmh === 0) {
-        if (!lastZeroSpeedTime[imei]) {
-            lastZeroSpeedTime[imei] = now;
-        } else {
-            const hoursDiff = (now - lastZeroSpeedTime[imei]) / (1000 * 60 * 60);
+        // Check for last zero speed time
+        if (lastZeroSpeedTime[imei]) {
+            const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
             if (hoursDiff >= 3) {
-                iconUrl = `${basePath}car_black.png`;
+                iconUrl = "nnx-main/assets/images/car_black.png";
             }
+        } else {
+            lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
         }
-    } else {
-        delete lastZeroSpeedTime[imei]; // Reset when speed increases
+    } else if (speedInKmh > 0) {
+        // Reset if speed increases from 0
+        if (lastZeroSpeedTime[imei]) {
+            delete lastZeroSpeedTime[imei];
+        }
     }
 
-    return `${iconUrl}?t=${Date.now()}`; // Force image refresh
+    return iconUrl;
 }
-
 
 
 // Function to check if data is missing for more than 1 hour
