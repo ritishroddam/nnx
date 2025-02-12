@@ -126,9 +126,9 @@
 
 .custom-marker {
   position: absolute;
-  width: 87px;
-  height: 155px;
-  background-size: cover;
+  width: 32px;
+  height: 32px;
+  background-size: contain;
   transform-origin: center;
   transition: transform 0.3s ease;
 }
