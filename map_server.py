@@ -287,7 +287,7 @@ def get_logs():
 
 
 def start_flask_server():
-    app.run( host="0.0.0.0", port = 8000, debug=True, use_reloader=False)
+    app.run( host="0.0.0.0", port = 8002, debug=True, use_reloader=False)
 
 def run_servers():
     HOST = "0.0.0.0"
