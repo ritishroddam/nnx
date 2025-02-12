@@ -10,21 +10,23 @@
 {% block h1 %}
   Vehicle Map
 {% endblock %}
- 
+
 {% block content %}
+
   {% block topbar_icons %}
-    <div class="filter-container">
-      <label for="speed-filter">Filter by Speed:</label>
-        <select id="speed-filter" onchange="filterVehicles()">
-          <option value="all">All</option>
-          <option value="0">0 km/h</option>
-          <option value="0-40">0-40 km/h</option>
-          <option value="40-60">40-60 km/h</option>
-          <option value="60+">Above 60 km/h</option>
-          <option value="sos">SOS alert</option>
-        </select>
-    </div>
+  <div class="filter-container">
+    <label for="speed-filter">Filter by Speed:</label>
+      <select id="speed-filter" onchange="filterVehicles()">
+        <option value="all">All</option>
+        <option value="0">0 km/h</option>
+        <option value="0-40">0-40 km/h</option>
+        <option value="40-60">40-60 km/h</option>
+        <option value="60+">Above 60 km/h</option>
+        <option value="sos">SOS alert</option>
+      </select>
+  </div>
   {% endblock %}
+  
  <div class="icon-legend">
      <div>
        <img
