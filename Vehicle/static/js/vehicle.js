@@ -502,8 +502,8 @@ function removeSOS(imei) {
 
 
 
-      function filterVehicles() {
-  const filterValue = document.getElementById("speed-filter").value;
+  function filterVehicles() {
+    const filterValue = document.getElementById("speed-filter").value;
 
   Object.keys(markers).forEach((imei) => {
     const marker = markers[imei];
