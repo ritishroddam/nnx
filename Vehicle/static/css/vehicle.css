@@ -128,7 +128,7 @@
   position: absolute;
   width: 32px;
   height: 32px;
-  background-size: contain;
+  background-size: 32px 32px;
   transform-origin: center;
   transition: transform 0.3s ease;
 }
