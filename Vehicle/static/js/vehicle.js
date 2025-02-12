@@ -158,13 +158,13 @@ sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
 
   function getCarIconUrlBySpeed(speedInKmh) {
     if (speedInKmh === 0) {
-      return "{{ url_for('static', filename='images/car_yellow.png') }}";
+      return "/static/images/car_black.png";
     } else if (speedInKmh > 0 && speedInKmh <= 40) {
-      return "{{ url_for('static', filename='images/car_green.png') }}";
+      return "/static/images/car_green.png";
     } else if (speedInKmh > 40 && speedInKmh <= 60) {
-      return "{{ url_for('static', filename='images/car_blue.png') }}";
+      return "/static/images/car_blue.png";
     } else {
-      return "{{ url_for('static', filename='images/car_red.png') }}";
+      return "/static/images/car_red.png";
     }
   }
 
@@ -181,7 +181,7 @@ function getCarIconBySpeed(speed, imei) {
             const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
             const hoursDiff = timeDiff / (1000 * 60 * 60);
             if (hoursDiff >= 3) {
-                iconUrl = "{{ url_for('static', filename='images/car_black.png') }}";
+                iconUrl = "/static/images/car_black.png";
             }
         } else {
             lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
