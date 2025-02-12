@@ -13,7 +13,7 @@ Vehicle Map
 
 
 {% block content %}
-<div class="icon-legend">
+<!-- <div class="icon-legend">
     <div>
       <img
         src="/nnx-main/assets/images/car_yellow.png"
@@ -44,7 +44,31 @@ Vehicle Map
         alt="Black Car"
       />Stationary for more than 3 hours
     </div>
-  </div>
+  </div> -->
+
+<div class="icon-legend">
+    <div>
+      <img src="/nnx-main/assets/images/car_yellow.png" alt="Yellow Car" />
+      <span>Stationary (0 km/h)</span>
+    </div>
+    <div>
+      <img src="/nnx-main/assets/images/car_green.png" alt="Green Car" />
+      <span>Slow Speed (1-40 km/h)</span>
+    </div>
+    <div>
+      <img src="/nnx-main/assets/images/car_blue.png" alt="Blue Car" />
+      <span>Moderate Speed (41-60 km/h)</span>
+    </div>
+    <div>
+      <img src="/nnx-main/assets/images/car_red.png" alt="Red Car" />
+      <span>High Speed (Above 60 km/h)</span>
+    </div>
+    <div>
+      <img src="/nnx-main/assets/images/car_black.png" alt="Black Car" />
+      <span>Stationary for more than 3 hours</span>
+    </div>
+</div>
+
 
   <div class="filter-container">
     <label for="speed-filter">Filter by Speed:</label>
