@@ -181,7 +181,7 @@ function getCarIconBySpeed(speed, imei) {
             const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
             const hoursDiff = timeDiff / (1000 * 60 * 60);
             if (hoursDiff >= 3) {
-                iconUrl = "http://64.227.135.38/cariconblack.png";
+                iconUrl = "assets/images/car_black.png";
             }
         } else {
             lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
