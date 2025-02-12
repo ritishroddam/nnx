@@ -1,96 +1,17 @@
-<!-- {% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block head %}
-    <title>Home</title>
-    <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
-    <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script> 
-{% endblock %}
-
-{% block h1 %}
-Vehicle Map
-{% endblock %}
-
-
-{% block content %}
-<div class="icon-legend">
-    <div>
-      <img
-        src="{{ url_for('static', filename='images/car_yellow.png') }}"
-        alt="Yellow Car"
-      />Stationary (0 km/h)
-    </div>
-    <div>
-      <img
-        src="{{ url_for('static', filename='images/car_green.png') }}"
-        alt="Green Car"
-      />Slow Speed (0-40 km/h)
-    </div>
-    <div>
-      <img
-        src="{{ url_for('static', filename='images/car_blue.png') }}"
-        alt="Blue Car"
-      />Moderate Speed (40-60 km/h)
-    </div>
-    <div>
-      <img
-        src="{{ url_for('static', filename='images/car_red.png') }}"
-        alt="Red Car"
-      />High Speed (Above 60 km/h)
-    </div>
-    <div>
-      <img
-        src="{{ url_for('static', filename='images/car_black.png') }}"
-        alt="Black Car"
-      />Stationary for more than 3 hours
-    </div>
-  </div>
-
-  <div class="filter-container">
-    <label for="speed-filter">Filter by Speed:</label>
-      <select id="speed-filter" onchange="filterVehicles()">
-        <option value="all">All</option>
-        <option value="0">0 km/h</option>
-        <option value="0-40">0-40 km/h</option>
-        <option value="40-60">40-60 km/h</option>
-        <option value="60+">Above 60 km/h</option>
-        <option value="sos">SOS alert</option>
-      </select>
-  </div>
-
-    <div id="map"></div>
-    <div class="floating-card" style="z-index: 1;">
-      <div class="toggle-container">
-        <div class="toggle-slider">
-            <div class="toggle-option map-option">🗺️ Map</div>
-            <div class="toggle-option list-option">📋 List</div>
-            <div class="slider-button"></div>
-        </div>
-    </div>
-      <h3>All Vehicles: <span id="vehicle-count"></span></h3>
-      <div id="vehicle-list"></div>
-    </div>
-{% endblock %}
- -->
-
- {% extends "base.html" %}
-
- {% block head %}
      <title>Home</title>
      <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
      <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
-     <script>
-         // Pass the API URL to JavaScript
-         const apiUrl = "{{ url_for('Vehicle.receive_data') }}";
-     </script>
      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script>
- {% endblock %}
+{% endblock %}
  
- {% block h1 %}
- Vehicle Map
- {% endblock %}
+{% block h1 %}
+  Vehicle Map
+{% endblock %}
  
- {% block content %}
+{% block content %}
  <div class="icon-legend">
      <div>
        <img
