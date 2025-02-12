@@ -197,7 +197,7 @@ sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
 // }
 
 
-let lastZeroSpeedTime = {};
+//let lastZeroSpeedTime = {};
 
 function getCarIconUrlBySpeed(speedInKmh) {
     const basePath = "/nnx-main/assets/images/";
