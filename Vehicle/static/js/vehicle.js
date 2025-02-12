@@ -156,45 +156,86 @@ sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
     return speedMph * 1.60934; // Convert mph to km/h
   }
 
-  function getCarIconUrlBySpeed(speedInKmh) {
-    if (speedInKmh === 0) {
-      return "/nnx-main/assets/images/car_yellow.png";
-    } else if (speedInKmh > 0 && speedInKmh <= 40) {
-      return "/nnx-main/assets/images/car_green.png";
-    } else if (speedInKmh > 40 && speedInKmh <= 60) {
-      return "/nnx-main/assets/images/car_blue.png";
-    } else {
-      return "/nnx-main/assets/images/car_red.png";
-    }
+//   function getCarIconUrlBySpeed(speedInKmh) {
+//     if (speedInKmh === 0) {
+//       return "/nnx-main/assets/images/car_yellow.png";
+//     } else if (speedInKmh > 0 && speedInKmh <= 40) {
+//       return "/nnx-main/assets/images/car_green.png";
+//     } else if (speedInKmh > 40 && speedInKmh <= 60) {
+//       return "/nnx-main/assets/images/car_blue.png";
+//     } else {
+//       return "/nnx-main/assets/images/car_red.png";
+//     }
+//   }
+
+// // Function to check if speed is zero for more than 3 hours
+// function getCarIconBySpeed(speed, imei) {
+//     const speedInKmh = convertSpeedToKmh(speed);
+//     let iconUrl = getCarIconUrlBySpeed(speedInKmh);
+    
+//     const now = new Date();
+
+//     if (speedInKmh === 0) {
+//         // Check for last zero speed time
+//         if (lastZeroSpeedTime[imei]) {
+//             const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
+//             const hoursDiff = timeDiff / (1000 * 60 * 60);
+//             if (hoursDiff >= 3) {
+//                 iconUrl = "nnx-main/assets/images/car_black.png";
+//             }
+//         } else {
+//             lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
+//         }
+//     } else if (speedInKmh > 0) {
+//         // Reset if speed increases from 0
+//         if (lastZeroSpeedTime[imei]) {
+//             delete lastZeroSpeedTime[imei];
+//         }
+//     }
+
+//     return iconUrl;
+// }
+
+
+function getCarIconUrlBySpeed(speedInKmh) {
+  const basePath = "/nnx-main/assets/images/";
+  
+  if (speedInKmh === 0) {
+      return `${basePath}car_yellow.png`;
+  } else if (speedInKmh > 0 && speedInKmh <= 40) {
+      return `${basePath}car_green.png`;
+  } else if (speedInKmh > 40 && speedInKmh <= 60) {
+      return `${basePath}car_blue.png`;
+  } else {
+      return `${basePath}car_red.png`;
   }
+}
 
 // Function to check if speed is zero for more than 3 hours
 function getCarIconBySpeed(speed, imei) {
-    const speedInKmh = convertSpeedToKmh(speed);
-    let iconUrl = getCarIconUrlBySpeed(speedInKmh);
-    
-    const now = new Date();
+  const basePath = "/nnx-main/assets/images/";
+  const speedInKmh = convertSpeedToKmh(speed);
+  let iconUrl = getCarIconUrlBySpeed(speedInKmh);
+  
+  const now = Date.now();
 
-    if (speedInKmh === 0) {
-        // Check for last zero speed time
-        if (lastZeroSpeedTime[imei]) {
-            const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
-            const hoursDiff = timeDiff / (1000 * 60 * 60);
-            if (hoursDiff >= 3) {
-                iconUrl = "nnx-main/assets/images/car_black.png";
-            }
-        } else {
-            lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
-        }
-    } else if (speedInKmh > 0) {
-        // Reset if speed increases from 0
-        if (lastZeroSpeedTime[imei]) {
-            delete lastZeroSpeedTime[imei];
-        }
-    }
+  if (speedInKmh === 0) {
+      if (!lastZeroSpeedTime[imei]) {
+          lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
+      } else {
+          const hoursDiff = (now - lastZeroSpeedTime[imei]) / (1000 * 60 * 60);
+          if (hoursDiff >= 3) {
+              iconUrl = `${basePath}car_black.png`;
+          }
+      }
+  } else {
+      // Reset last zero speed time if speed increases
+      delete lastZeroSpeedTime[imei];
+  }
 
-    return iconUrl;
+  return iconUrl;
 }
+
 
 // Function to check if data is missing for more than 1 hour
 function checkForDataTimeout(imei) {
