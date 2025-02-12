@@ -4,7 +4,8 @@
     <title>Home</title>
     <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
     <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script>
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=places,drawing&callback=initMap" async defer></script> -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script> 
 {% endblock %}
 
 {% block h1 %}
@@ -16,31 +17,31 @@ Vehicle Map
 <div class="icon-legend">
     <div>
       <img
-        src="http://64.227.135.38/cariconyellow.png"
+        src="{{ url_for('static', filename='images/car_yellow.png') }}"
         alt="Yellow Car"
       />Stationary (0 km/h)
     </div>
     <div>
       <img
-        src="http://64.227.135.38/caricongreen.png"
+        src="{{ url_for('static', filename='images/car_green.png') }}"
         alt="Green Car"
       />Slow Speed (0-40 km/h)
     </div>
     <div>
       <img
-        src="http://64.227.135.38/cariconblue.png"
+        src="{{ url_for('static', filename='images/car_blue.png') }}"
         alt="Blue Car"
       />Moderate Speed (40-60 km/h)
     </div>
     <div>
       <img
-        src="http://64.227.135.38/cariconred.png"
+        src="{{ url_for('static', filename='images/car_red.png') }}"
         alt="Red Car"
       />High Speed (Above 60 km/h)
     </div>
     <div>
       <img
-        src="http://64.227.135.38/cariconblack.png"
+        src="{{ url_for('static', filename='images/car_black.png') }}"
         alt="Black Car"
       />Stationary for more than 3 hours
     </div>
