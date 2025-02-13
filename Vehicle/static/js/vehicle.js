@@ -646,43 +646,6 @@ function removeSOS(imei) {
 
 
       
-  // function createCustomMarker(latLng, iconUrl, rotation, device) {
-  //   const div = document.createElement("div");
-  //   div.className = "custom-marker";
-  //   div.style.backgroundImage = `url(${iconUrl})`;
-  //   div.style.transform = `rotate(${rotation}deg)`;
-
-  //   const marker = new google.maps.OverlayView();
-  //   marker.div = div;
-  //   marker.latLng = latLng;
-  //   marker.device = device;
-
-  //   marker.onAdd = function () {
-  //     const panes = this.getPanes();
-  //     panes.overlayMouseTarget.appendChild(div);
-  //   };
-
-  //   marker.draw = function () {
-  //     const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
-  //     if (point) {
-  //       div.style.left = point.x - div.offsetWidth / 2 + "px";
-  //       div.style.top = point.y - div.offsetHeight / 2 + "px";
-  //     }
-  //   };
-
-  //   marker.onRemove = function () {
-  //     div.parentNode.removeChild(div);
-  //   };
-
-  //   marker.setVisible = function (visible) {
-  //       div.style.display = visible ? "block" : "none";
-  //   };
-
-  //   marker.setMap(map);
-  //   addMarkerClickListener(marker, latLng, {}, {});
-  //   return marker;
-  // }
-
   function createCustomMarker(latLng, iconUrl, rotation, device) {
     const div = document.createElement("div");
     div.className = "custom-marker";
@@ -695,20 +658,20 @@ function removeSOS(imei) {
     marker.device = device;
 
     marker.onAdd = function () {
-        const panes = this.getPanes();
-        panes.overlayMouseTarget.appendChild(div);
+      const panes = this.getPanes();
+      panes.overlayMouseTarget.appendChild(div);
     };
 
     marker.draw = function () {
-        const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
-        if (point) {
-            div.style.left = point.x - div.offsetWidth / 2 + "px";
-            div.style.top = point.y - div.offsetHeight / 2 + "px";
-        }
+      const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
+      if (point) {
+        div.style.left = point.x - div.offsetWidth / 2 + "px";
+        div.style.top = point.y - div.offsetHeight / 2 + "px";
+      }
     };
 
     marker.onRemove = function () {
-        div.parentNode.removeChild(div);
+      div.parentNode.removeChild(div);
     };
 
     marker.setVisible = function (visible) {
@@ -716,27 +679,64 @@ function removeSOS(imei) {
     };
 
     marker.setMap(map);
-    addMarkerClickListener(marker, latLng, device, {});
+    addMarkerClickListener(marker, latLng, {}, {});
     return marker;
-}
+  }
+
+  // function createCustomMarker(latLng, iconUrl, rotation, device) {
+  //   const div = document.createElement("div");
+  //   div.className = "custom-marker";
+  //   div.style.backgroundImage = `url(${iconUrl})`;
+  //   div.style.transform = `rotate(${rotation}deg)`;
+
+  //   const marker = new google.maps.OverlayView();
+  //   marker.div = div;
+  //   marker.latLng = latLng;
+  //   marker.device = device;
+
+  //   marker.onAdd = function () {
+  //       const panes = this.getPanes();
+  //       panes.overlayMouseTarget.appendChild(div);
+  //   };
+
+  //   marker.draw = function () {
+  //       const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
+  //       if (point) {
+  //           div.style.left = point.x - div.offsetWidth / 2 + "px";
+  //           div.style.top = point.y - div.offsetHeight / 2 + "px";
+  //       }
+  //   };
+
+//     marker.onRemove = function () {
+//         div.parentNode.removeChild(div);
+//     };
+
+//     marker.setVisible = function (visible) {
+//         div.style.display = visible ? "block" : "none";
+//     };
+
+//     marker.setMap(map);
+//     addMarkerClickListener(marker, latLng, device, {});
+//     return marker;
+// }
 
 
 //////////////////////
-  // function updateCustomMarker(marker, latLng, iconUrl, rotation) {
-  //   marker.latLng = latLng;
-  //   marker.div.style.backgroundImage = `url(${iconUrl})`;
-  //   marker.div.style.transform = `rotate(${rotation}deg)`;
-  //   marker.draw();
-
-  //   addMarkerClickListener(marker, latLng, {}, {});
-  // }
-
   function updateCustomMarker(marker, latLng, iconUrl, rotation) {
     marker.latLng = latLng;
     marker.div.style.backgroundImage = `url(${iconUrl})`;
     marker.div.style.transform = `rotate(${rotation}deg)`;
     marker.draw();
-}
+
+    addMarkerClickListener(marker, latLng, {}, {});
+  }
+
+//   function updateCustomMarker(marker, latLng, iconUrl, rotation) {
+//     marker.latLng = latLng;
+//     marker.div.style.backgroundImage = `url(${iconUrl})`;
+//     marker.div.style.transform = `rotate(${rotation}deg)`;
+//     marker.draw();
+// }
 
 //////////////////////
   function geocodeLatLng(latLng, callback) {
