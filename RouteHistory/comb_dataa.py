@@ -32,7 +32,7 @@ def page():
 
 @route_bp.route('/list')
 def list():
-    return render_template('vehicle-list.html')
+    return render_template('vehicle_list.html')
 
 @route_bp.route('/data')
 def data():
