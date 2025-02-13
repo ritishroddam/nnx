@@ -152,27 +152,66 @@ function setupWebSocket() {
     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
 }
 
+// function updateVehicleMarker(device) {
+//     const imei = sanitizeIMEI(device.imei);
+//     if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
+    
+//     const coords = parseCoordinates(device.latitude, device.longitude);
+//     const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+//     const iconUrl = getCarIconBySpeed(device.speed, imei);
+//     const rotation = device.course;
+    
+//     if (markers[imei]) {
+//         animateMarker(markers[imei], latLng);
+//         updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+//         markers[imei].device = device;
+//         updateInfoWindow(markers[imei], latLng, device, coords);
+//     } else {
+//         markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+//         addMarkerClickListener(markers[imei], latLng, device, coords);
+//     }
+//     lastDataReceivedTime[imei] = new Date();
+//     checkForDataTimeout(imei);
+//     saveMarkers();
+// }
+
 function updateVehicleMarker(device) {
-    const imei = sanitizeIMEI(device.imei);
-    if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
-    
-    const coords = parseCoordinates(device.latitude, device.longitude);
-    const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-    const iconUrl = getCarIconBySpeed(device.speed, imei);
-    const rotation = device.course;
-    
-    if (markers[imei]) {
-        animateMarker(markers[imei], latLng);
-        updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-        markers[imei].device = device;
-        updateInfoWindow(markers[imei], latLng, device, coords);
-    } else {
-        markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-        addMarkerClickListener(markers[imei], latLng, device, coords);
-    }
-    lastDataReceivedTime[imei] = new Date();
-    checkForDataTimeout(imei);
-    saveMarkers();
+  const imei = sanitizeIMEI(device.imei);
+  if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
+
+  const coords = parseCoordinates(device.latitude, device.longitude);
+  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+  const iconUrl = getCarIconBySpeed(device.speed, imei);
+  const rotation = device.course;
+
+  // Check if the device's date and time match the current date and time
+  const currentDate = new Date();
+  const deviceDate = new Date(`20${device.date.slice(4, 6)}-${device.date.slice(2, 4)}-${device.date.slice(0, 2)}T${device.time.slice(0, 2)}:${device.time.slice(2, 4)}:${device.time.slice(4, 6)}Z`);
+
+  const timeDifference = Math.abs(currentDate - deviceDate) / 1000; // Difference in seconds
+  const maxAllowedDifference = 60; // Allow a maximum difference of 60 seconds
+
+  if (timeDifference > maxAllowedDifference) {
+      // Hide the marker if the date and time do not match
+      if (markers[imei]) {
+          markers[imei].setVisible(false);
+      }
+      return;
+  }
+
+  if (markers[imei]) {
+      animateMarker(markers[imei], latLng);
+      updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+      markers[imei].device = device;
+      updateInfoWindow(markers[imei], latLng, device, coords);
+      markers[imei].setVisible(true); // Ensure the marker is visible
+  } else {
+      markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+      addMarkerClickListener(markers[imei], latLng, device, coords);
+  }
+  lastDataReceivedTime[imei] = new Date();
+  checkForDataTimeout(imei);
+  saveMarkers();
 }
 
   // Save the current state of markers into session storage
