@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import sys
 from io import BytesIO
+from flask import Blueprint, render_template
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Needed to use flash
@@ -14,10 +15,16 @@ client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-277
 db = client['CordonEV']
 collection = db['device_inventory']
 
-@app.route('/')
-def index():
-    devices = list(collection.find({}))
-    return render_template('index.html', devices=devices)
+device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')
+
+@device_bp.route('/page')
+def page():
+    return render_template('index.html')
+
+# @app.route('/')
+# def index():
+#     devices = list(collection.find({}))
+#     return render_template('index.html', devices=devices)
 
 @app.route('/manual_entry', methods=['POST'])
 def manual_entry():

@@ -4,11 +4,13 @@ import os
 import requests
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.dashboard_backend import dashboard_bp
+from DeviceInvy.DeviceBackend import device_bp
 
 app = Flask(__name__)
 
 app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
+app.register_blueprint(device_bp, url_prefix='/device')
 
 @app.route('/')
 def index():
