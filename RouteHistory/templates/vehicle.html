@@ -61,19 +61,19 @@
         <h3>Driver: Info</h3>
         <div class="info-row">
             <span>Name:</span>
-            <strong>{{ vehicle_data[0]['Driver Name'] }}</strong>
+            <strong>{{ vehicle_data[0]['Driver Name'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
             <span>License:</span>
-            <strong>{{ vehicle_data[0]['License Number'] }}</strong>
+            <strong>{{ vehicle_data[0]['License Number'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
             <span>Phone:</span>
-            <strong>{{ vehicle_data[0]['Phone Number'] }}</strong>
+            <strong>{{ vehicle_data[0]['Phone Number'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
             <span>Status:</span>
-            <strong>{{ vehicle_data[0]['Current Status'] }}</strong>
+            <strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
     </div>        
 
@@ -83,31 +83,31 @@
     <div class="right-column">
 
       <div class="info-box">
-        <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] }} : Info</h3>
+        <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
         <div class="info-row">
           <span>Vehicle Model:</span
-          ><strong>{{ vehicle_data[0]['Vehicle Model'] }}</strong>
+          ><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
           <span>Vehicle Make:</span
-          ><strong>{{ vehicle_data[0]['Vehicle Make'] }}</strong>
+          ><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
           <span>Status:</span
-          ><strong>{{ vehicle_data[0]['Current Status'] }}</strong>
+          ><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
-          <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] }}</strong>
+          <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
-          <span>Time:</span><strong>{{ vehicle_data[0]['Time'] }}</strong>
+          <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
-          <span>Date:</span><strong>{{ vehicle_data[0]['Date'] }}</strong>
+          <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
         <div class="info-row">
           <span>Odometer:</span
-          ><strong>{{ vehicle_data[0]['Odometer'] }}</strong>
+          ><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data Available'}}</strong>
         </div>
       </div>
 
@@ -122,7 +122,7 @@
 
       <div class="alarm-section">
         <h3>
-         {{ vehicle_data[0]['License Plate Number'] }} : Alarms
+          {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
         </h3>
         <table>
           <thead>
@@ -155,7 +155,7 @@
   </div>
   
   <script id="vehicle-data" type="application/json">
-    {{ vehicle_data | tojson }}
+    {{ vehicle_data | tojson if vehicle_data else 'No Data Available'}}
     </script>
 
     <script>
@@ -374,7 +374,7 @@ document.getElementById("controls-container").style.display = 'block';
 
 
 document.addEventListener("DOMContentLoaded", () => {
-const imei = "{{ vehicle_data[0]['IMEI Number'] }}";
+const imei = "{{ vehicle_data[0]['IMEI Number'] if vehicle_data else 'No Data Available'}}";
 
 if (imei) {
 fetch(`/vehicle/${imei}/alerts`)
