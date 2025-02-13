@@ -184,15 +184,15 @@ function updateVehicleMarker(device) {
   const iconUrl = getCarIconBySpeed(device.speed, imei);
   const rotation = device.course;
 
-  // Check if the device's date and time are within 5 minutes of the current date and time
+  // Check if the device's date matches the current date
   const currentDate = new Date();
-  const deviceDate = new Date(`20${device.date.slice(4, 6)}-${device.date.slice(2, 4)}-${device.date.slice(0, 2)}T${device.time.slice(0, 2)}:${device.time.slice(2, 4)}:${device.time.slice(4, 6)}Z`);
+  const deviceDate = new Date(`20${device.date.slice(4, 6)}-${device.date.slice(2, 4)}-${device.date.slice(0, 2)}`);
 
-  const timeDifference = Math.abs(currentDate - deviceDate) / 1000; // Difference in seconds
-  const maxAllowedDifference = 5 * 60; // Allow a maximum difference of 5 minutes (300 seconds)
+  const currentDateString = currentDate.toISOString().slice(0, 10); // Format: YYYY-MM-DD
+  const deviceDateString = deviceDate.toISOString().slice(0, 10); // Format: YYYY-MM-DD
 
-  if (timeDifference > maxAllowedDifference) {
-      // Hide the marker if the date and time do not match
+  if (currentDateString !== deviceDateString) {
+      // Hide the marker if the date does not match
       if (markers[imei]) {
           markers[imei].setVisible(false);
       }
