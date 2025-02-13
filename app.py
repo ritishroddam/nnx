@@ -3,10 +3,12 @@ import subprocess
 import os
 import requests
 from Vehicle.VehicleBackend import vehicle_bp
+from Dashboard.dashboard_backend import dashboard_bp
 
 app = Flask(__name__)
 
 app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
+app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 
 @app.route('/')
 def index():

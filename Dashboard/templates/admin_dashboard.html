@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Dashboard</title>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/style.css') }}"
+/>
+<link
+  href="{{ url_for('static', filename='font/ethnocentric-cdnfonts/ethnocentricrg.ttf') }}"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+<script src="../static/js/preloader.js" defer></script>
+<script src="../static/js/script.js" defer></script>
+{% endblock %}
+ 
+{% block h1 %}
+  DASHBOARD
+{% endblock %}
+ 
+{% block content %}
+<section class="dashboard">
+    <div class="cards">
+      <div class="card" style="background-color: #6261cc">
+        <div class="card-content">
+          <h3>Number of Devices</h3>
+          <p>Users</p>
+        </div>
+        <div class="card-chart">
+          <!-- Placeholder for chart/graph -->
+        </div>
+      </div>
+      <div class="card" style="background-color: #3d99f5">
+        <div class="card-content">
+          <h3>Number of Sim</h3>
+          <p>Income</p>
+        </div>
+        <div class="card-chart">
+          <!-- Placeholder for chart/graph -->
+        </div>
+      </div>
+      <div class="card" style="background-color: #edad21">
+        <div class="card-content">
+          <h3>Number of Customers</h3>
+          <p>Conversion Rate</p>
+        </div>
+        <div class="card-chart">
+          <!-- Placeholder for chart/graph -->
+        </div>
+      </div>
+      <div class="card" style="background-color: #db5d5d">
+        <div class="card-content">
+          <h3>Number of Employees</h3>
+          <p>Sessions</p>
+        </div>
+        <div class="card-chart">
+          <!-- Placeholder for chart/graph -->
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-row">
+      <!-- Graph Container -->
+      <div class="graph-container">
+        <div class="graph-title">Graph</div>
+        <div class="graph-box"></div>
+      </div>
+
+      <!-- Traffic Container -->
+      <div class="traffic-container">
+        <h2>Traffic</h2>
+        <div id="traffic-container">
+          <h2>Live Traffic Updates</h2>
+          <div id="map"></div>
+          <div id="traffic-info">
+            <div id="scrolling-text">
+              <p id="traffic-status">Loading traffic information...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Weather Section -->
+      <div class="weather-section">
+        <div class="weather-container">
+          <h1>Weather</h1>
+          <div id="weather">
+            <p>Loading weather...</p>
+          </div>
+        </div>
+        <div class="datetime-container">
+          <div id="clock"></div>
+          <div id="date"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+ {% endblock %}

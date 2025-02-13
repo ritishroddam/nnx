@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block head %}
+     <title>Home</title>
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+     <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+     <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script> -->
+
+     <style>
+        .flash-box {
+          padding: 10px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          font-size: 14px;
+          font-weight: 600;
+          text-align: center;
+        }
+  
+        .flash-success {
+          background-color: #38b000;
+          color: #ffffff;
+        }
+  
+        .flash-danger {
+          background-color: #e63946;
+          color: #ffffff;
+        }
+  
+        input[type="text"],
+        input[type="date"],
+        input[type="file"] {
+          width: 100%;
+          max-width: 300px;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          box-sizing: border-box;
+        }
+          .table-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 20px;
+    }
+  
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          overflow: hidden;
+      }
+  
+      thead {
+          position: sticky;
+          top: 0; 
+          z-index: 2;
+          background-color: #042f5d;
+      }
+  
+      th, td {
+          padding: 12px 15px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+      }
+  
+      th {
+          background-color: #042f5d;
+          color: white;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+      }
+  
+      td {
+          background-color: #fdfdfd;
+          color: black;
+      }
+  
+      td button {
+          padding: 8px 12px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+      }
+  
+      td button:hover {
+          background-color: #218838;
+      }
+  
+  
+      table tbody tr:hover {
+          background-color: #f1f1f1;
+          transform: scale(1.02);
+          transition: all 0.2s ease;
+      }
+        .btn {
+          padding: 10px 15px;
+          color: white;
+          background-color: #007bff;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          text-decoration: none;
+        }
+  
+        .btn:hover {
+          background-color: #0056b3;
+        }
+  
+        .hidden {
+          display: none;
+        }
+  
+        .error {
+          color: red;
+          font-size: 0.9em;
+          margin-top: -15px;
+          margin-bottom: 15px;
+        }
+  
+        .success {
+          background-color: #28a745;
+        }
+  
+        .danger {
+          background-color: #dc3545;
+        }
+  
+        #manualEntryForm,
+        #uploadBox {
+          background-color: white;
+          padding: 20px;
+          border: 2px solid #ccc;
+          border-radius: 10px;
+          max-width: 400px;
+          margin: 0 auto;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          color: #333;
+        }
+  
+        .status-btn {
+          border: none;
+          padding: 5px 10px;
+          border-radius: 5px;
+          color: white;
+          cursor: default;
+        }
+  
+        .status-active {
+          background-color: #28a745;
+        }
+  
+        .status-inactive {
+          background-color: #dc3545;
+        }
+  
+        .error-box {
+          padding: 10px;
+          background-color: #dc3545;
+          color: white;
+          border-radius: 5px;
+          margin-bottom: 10px;
+        }
+  
+        .preloader {
+          display: none;
+          border: 6px solid #f3f3f3;
+          border-radius: 50%;
+          border-top: 6px solid #3498db;
+          width: 30px;
+          height: 30px;
+          animation: spin 2s linear infinite;
+          margin: 10px auto;
+        }
+  
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        /* Edit/Delete button styles */
+        .action-btn {
+          padding: 5px 10px;
+          color: white;
+          background-color: #007bff;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-right: 5px;
+        }
+  
+        .action-btn.edit {
+          background-color: #28a745;
+        }
+  
+        .action-btn.delete {
+          background-color: #dc3545;
+        }
+  
+        .action-btn:hover {
+          opacity: 0.8;
+        }
+        .icon-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        }
+  
+        .edit-icon {
+          color: #007bff;
+        }
+  
+        .delete-icon {
+          color: #dc3545;
+        }
+        .dropdown .submenu {
+      display: none;
+      list-style: none;
+      padding-left: 15px;
+    }
+  
+    .dropdown:hover .submenu {
+      display: block;
+    }
+  
+    .submenu li {
+      margin: 5px 0;
+    }
+  
+    .submenu li a {
+      text-decoration: none;
+      color: #fff;
+    }
+  
+    .submenu li a:hover {
+      text-decoration: underline;
+    }
+          
+  .table-responsive {
+      margin: auto;
+      width: 95%; 
+  }
+  
+  .btn-primary {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+  }
+  .btn-primary:hover {
+      background-color: #0056b3; 
+    }
+  .form-control{
+      width: 300px;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-right: 10px;
+          }
+      </style>
+{% endblock %}
+ 
+{% block h1 %}
+  Vehicle Map
+{% endblock %}
+ 
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+      <div style="display: block;">
+      <h1 class="text-center">Vehicle List</h1>
+        <br><br>
+        </div>
+
+      <div class="table-responsive">
+<table class="table table-striped table-bordered mt-3">
+<thead class="thead-dark">
+<tr>
+  <th>License Plate Number</th>
+  <th>Action</th>
+</tr>
+</thead>
+<tbody>
+{% for vehicle in vehicle_list %}
+<tr>
+  <td>{{ vehicle['License Plate Number'] }}</td>
+  <td>
+    <a href="{{ url_for('show_vehicle_data', vehicle_number=vehicle['License Plate Number']) }}" class="btn btn-primary">
+      View Details
+    </a>
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+    </div>
+  </section>
+
+
+  <script>
+    // Automatically set warranty to 1 year from Date In
+    document.getElementById("DateIn").addEventListener("change", function () {
+      var dateIn = new Date(this.value);
+      var warrantyDate = new Date(dateIn);
+      warrantyDate.setFullYear(warrantyDate.getFullYear() + 1);
+      document.getElementById("Warranty").value = warrantyDate
+        .toISOString()
+        .split("T")[0];
+    });
+
+    document
+      .getElementById("manualEntryBtn")
+      .addEventListener("click", function () {
+        document.getElementById("manualEntryForm").classList.remove("hidden");
+        // Focus on the IMEI input field
+        document.getElementById("IMEI").focus();
+      });
+
+    document
+      .getElementById("uploadBtn")
+      .addEventListener("click", function () {
+        document.getElementById("uploadBox").classList.toggle("hidden");
+      });
+
+    document
+      .getElementById("cancelBtn")
+      .addEventListener("click", function () {
+        document.getElementById("manualEntryForm").classList.add("hidden");
+      });
+
+    document
+      .getElementById("cancelUploadBtn")
+      .addEventListener("click", function () {
+        document.getElementById("uploadBox").classList.add("hidden");
+      });
+
+    document
+      .getElementById("uploadForm")
+      .addEventListener("submit", function () {
+        document.querySelector(".preloader").style.display = "block";
+      });
+
+    document
+      .getElementById("manualForm")
+      .addEventListener("submit", function (event) {
+        var imei = document.getElementById("IMEI").value;
+        var glNumber = document.getElementById("GLNumber").value;
+        var imeiError = document.getElementById("imeiError");
+        var glError = document.getElementById("glError");
+
+        // IMEI validation
+        if (imei.length !== 15 || isNaN(imei)) {
+          imeiError.classList.remove("hidden");
+          event.preventDefault();
+        } else {
+          imeiError.classList.add("hidden");
+        }
+
+        // GL Number validation
+        if (glNumber.length !== 13 || isNaN(glNumber)) {
+          glError.classList.remove("hidden");
+          event.preventDefault();
+        } else {
+          glError.classList.add("hidden");
+        }
+      });
+
+    function editDevice(deviceId) {
+      const row = document.querySelector(`tr[data-id='${deviceId}']`);
+
+      const imei = row.cells[0].innerText;
+      const glNumber = row.cells[1].innerText;
+      const deviceModel = row.cells[2].innerText;
+      const deviceMake = row.cells[3].innerText;
+      const dateIn = row.cells[4].innerText;
+      const warranty = row.cells[5].innerText;
+      const sentBy = row.cells[6].innerText;
+      const outwardTo = row.cells[7].innerText;
+      const status = row.cells[8].innerText;
+
+      row.cells[0].innerHTML = `<input type="text" value="${imei}" />`;
+      row.cells[1].innerHTML = `<input type="text" value="${glNumber}" />`;
+      row.cells[2].innerHTML = `<input type="text" value="${deviceModel}" />`;
+      row.cells[3].innerHTML = `<input type="text" value="${deviceMake}" />`;
+      row.cells[4].innerHTML = `<input type="date" value="${dateIn}" />`;
+      row.cells[5].innerHTML = `<input type="date" value="${warranty}" />`;
+      row.cells[6].innerHTML = `<input type="text" value="${sentBy}" />`;
+      row.cells[7].innerHTML = `<input type="text" value="${outwardTo}" />`;
+      row.cells[8].innerHTML = `
+<input type="radio" name="status-${deviceId}" value="Active" ${
+        status === "Active" ? "checked" : ""
+      } /> Active
+<input type="radio" name="status-${deviceId}" value="Inactive" ${
+        status === "Inactive" ? "checked" : ""
+      } /> Inactive
+`;
+
+      row.cells[9].innerHTML = `
+<button class="icon-btn save-icon" onclick="saveDevice('${deviceId}')">💾</button>
+<button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
+`;
+    }
+
+    function saveDevice(deviceId) {
+      const row = document.querySelector(`tr[data-id='${deviceId}']`);
+
+      const updatedData = {
+        IMEI: row.cells[0].querySelector("input").value,
+        GLNumber: row.cells[1].querySelector("input").value,
+        DeviceModel: row.cells[2].querySelector("input").value,
+        DeviceMake: row.cells[3].querySelector("input").value,
+        DateIn: row.cells[4].querySelector("input").value,
+        Warranty: row.cells[5].querySelector("input").value,
+        SentBy: row.cells[6].querySelector("input").value,
+        OutwardTo: row.cells[7].querySelector("input").value,
+        Status: row.cells[8].querySelector(
+          'input[name="status-' + deviceId + '"]:checked'
+        ).value,
+      };
+
+      fetch(`/edit_device/${deviceId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            row.cells[0].innerText = updatedData.IMEI;
+            row.cells[1].innerText = updatedData.GLNumber;
+            row.cells[2].innerText = updatedData.DeviceModel;
+            row.cells[3].innerText = updatedData.DeviceMake;
+            row.cells[4].innerText = updatedData.DateIn;
+            row.cells[5].innerText = updatedData.Warranty;
+            row.cells[6].innerText = updatedData.SentBy;
+            row.cells[7].innerText = updatedData.OutwardTo;
+            row.cells[8].innerHTML = `
+  <button class="status-btn ${
+    updatedData.Status === "Active" ? "status-active" : "status-inactive"
+  }" disabled>${updatedData.Status}</button>
+`;
+            row.cells[9].innerHTML = `
+  <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
+  <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
+`;
+          } else {
+            alert("Failed to save the device.");
+          }
+        });
+    }
+
+    function deleteDevice(deviceId) {
+      if (confirm("Are you sure you want to delete this device?")) {
+        fetch(`/delete_device/${deviceId}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              document.querySelector(`tr[data-id='${deviceId}']`).remove();
+            } else {
+              alert("Failed to delete the device.");
+            }
+          });
+      }
+    }
+  </script>
+ {% endblock %}
