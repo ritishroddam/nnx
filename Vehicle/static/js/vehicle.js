@@ -147,7 +147,7 @@ setupWebSocket();
 // }, 1000)};
 
 function setupWebSocket() {
-    socket = io("http://your-server-ip:5000");
+    socket = io("http://64.227.137.175:8000");
     socket.on("vehicle_update", (data) => updateVehicleMarker(data));
     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
 }
