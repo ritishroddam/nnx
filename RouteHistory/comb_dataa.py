@@ -4,6 +4,7 @@ from flask_cors import CORS
 from datetime import datetime, timedelta
 import sys
 import os
+from flask import Blueprint, render_template
 
 app = Flask(__name__, template_folder="templates")
 CORS(app)
@@ -23,9 +24,23 @@ def convert_to_decimal(degrees_minutes, direction):
         decimal = -decimal
     return decimal
 
-@app.route("/", methods=["GET"])
-def index():
-    return redirect("/vehicle")
+route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
+
+@route_bp.route('/page')
+def page():
+    return render_template('vehicle.html')
+
+@route_bp.route('/list')
+def list():
+    return render_template('vehicle-list.html')
+
+@route_bp.route('/data')
+def data():
+    return render_template('data.html')
+
+# @app.route("/", methods=["GET"])
+# def index():
+#     return redirect("/vehicle")
 
 @app.route("/vehicle", methods=["GET"])
 def show_all_vehicles():
