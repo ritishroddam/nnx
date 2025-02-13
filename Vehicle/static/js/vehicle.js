@@ -50,6 +50,7 @@ var map;
   var dataAvailable = true;
   var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
+var socket;
 
   // Restore markers from session storage if available
 function restoreMarkers() {
@@ -132,31 +133,76 @@ if (storedMarkers) {
 
     // Restore markers from the previous session
 restoreMarkers();
+setupWebSocket();
+}
 
-    setInterval(function () {
-      if (countdownTimer > 0) {
-        countdownTimer--;
-        // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-      } else {
-    updateMap();
-    countdownTimer = refreshInterval / 1000;  // Reset countdown
-  }
-}, 1000)};
+//     setInterval(function () {
+//       if (countdownTimer > 0) {
+//         countdownTimer--;
+//         // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+//       } else {
+//     updateMap();
+//     countdownTimer = refreshInterval / 1000;  // Reset countdown
+//   }
+// }, 1000)};
+
+function setupWebSocket() {
+    socket = io("http://your-server-ip:5000");
+    socket.on("vehicle_update", (data) => updateVehicleMarker(data));
+    socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
+}
+
+function updateVehicleMarker(device) {
+    const imei = sanitizeIMEI(device.imei);
+    if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
+    
+    const coords = parseCoordinates(device.latitude, device.longitude);
+    const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+    const iconUrl = getCarIconBySpeed(device.speed, imei);
+    const rotation = device.course;
+    
+    if (markers[imei]) {
+        animateMarker(markers[imei], latLng);
+        updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+        markers[imei].device = device;
+        updateInfoWindow(markers[imei], latLng, device, coords);
+    } else {
+        markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+        addMarkerClickListener(markers[imei], latLng, device, coords);
+    }
+    lastDataReceivedTime[imei] = new Date();
+    checkForDataTimeout(imei);
+    saveMarkers();
+}
 
   // Save the current state of markers into session storage
+// function saveMarkers() {
+// const markerData = [];
+// Object.keys(markers).forEach(imei => {
+//     const marker = markers[imei];
+//     markerData.push({
+//         imei: imei,
+//         lat: marker.latLng.lat(),
+//         lon: marker.latLng.lng(),
+//         iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
+//         rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
+//     });
+// });
+// sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
+// }
+
 function saveMarkers() {
-const markerData = [];
-Object.keys(markers).forEach(imei => {
-    const marker = markers[imei];
-    markerData.push({
-        imei: imei,
-        lat: marker.latLng.lat(),
-        lon: marker.latLng.lng(),
-        iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
-        rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
+    const markerData = Object.keys(markers).map(imei => {
+        const marker = markers[imei];
+        return {
+            imei: imei,
+            lat: marker.latLng.lat(),
+            lon: marker.latLng.lng(),
+            iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
+            rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
+        };
     });
-});
-sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
+    sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
 }
 
 
