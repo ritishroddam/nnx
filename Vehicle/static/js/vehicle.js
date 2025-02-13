@@ -87,6 +87,28 @@ if (storedMarkers) {
       zoomControlOptions: {
         position: google.maps.ControlPosition.RIGHT_BOTTOM,
       },
+        styles: [
+            {
+                featureType: "poi", // Hide all Points of Interest (Landmarks)
+                elementType: "all",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "transit", // Hide transit stations
+                elementType: "all",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "administrative", // Hide government buildings
+                elementType: "all",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "road", // Hide road labels (optional)
+                elementType: "labels",
+                stylers: [{ visibility: "off" }]
+            }
+        ]
     });
 
     geocoder = new google.maps.Geocoder();
