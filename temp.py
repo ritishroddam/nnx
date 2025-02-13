@@ -57,19 +57,77 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def parse_json_data(self, data):
         try:
             parts = data.split(',')
-            if len(parts) >= 35:
+            print(f"Parsed data parts: {parts}")
+            expected_fields_count = 35
+
+            if len(parts) >= expected_fields_count:
                 binary_string = parts[14].strip('#')
-                ignition, door, sos = binary_string[:3] if len(binary_string) >= 3 else ('0', '0', '0')
-                return {
-                    'imei': parts[0], 'header': parts[1], 'time': parts[2],
-                    'gps': parts[3], 'latitude': parts[4], 'dir1': parts[5],
-                    'longitude': parts[6], 'dir2': parts[7], 'speed': parts[8],
-                    'course': parts[9], 'date': parts[10], 'sos': sos,
-                    'address': parts[25] if len(parts) > 25 else ''
+                print(f"Binary string: {binary_string}")
+                
+                ignition, door, sos, r1, r2, ac, r3, main_power, harsh_speed, arm, sleep = ('0',) * 11
+                
+                if len(binary_string) >= 11:
+                    ignition = binary_string[0]
+                    door = binary_string[1]
+                    sos = binary_string[2]
+                    r1 = binary_string[3]
+                    r2 = binary_string[4]
+                    ac = binary_string[5]
+                    r3 = binary_string[6]
+                    main_power = binary_string[7]
+                    harsh_speed = binary_string[8]
+                    arm = binary_string[9]
+                    sleep = binary_string[10]
+                
+                latitude = parts[4] if parts[4] != '-' else ''
+                longitude = parts[6] if parts[6] != '-' else ''
+                
+                address = parts[25] if len(parts) > 25 else ''  # Store address data
+
+                json_data = {
+                    'imei': parts[0],
+                    'header': parts[1],
+                    'time': parts[2],
+                    'gps': parts[3],
+                    'latitude': latitude,
+                    'dir1': parts[5],
+                    'longitude': longitude,
+                    'dir2': parts[7],
+                    'speed': parts[8],
+                    'course': parts[9],
+                    'date': parts[10],
+                    'checksum': parts[13] if len(parts) > 13 else '0',
+                    'ignition': ignition,
+                    'door': door,
+                    'sos': sos,
+                    'r1': r1,
+                    'r2': r2,
+                    'ac': ac,
+                    'r3': r3,
+                    'main_power': main_power,
+                    'harsh_speed': harsh_speed,
+                    'arm': arm,
+                    'sleep': sleep,
+                    'accelerometer': parts[12],
+                    'adc': parts[15],
+                    'one_wire': parts[16],
+                    'i_btn': parts[17],
+                    'odometer': parts[18],
+                    'temp': parts[19],
+                    'internal_bat': parts[20],
+                    'gsm_sig': parts[21],
+                    'mcc': parts[22],
+                    'mnc': parts[23],
+                    'cellid': parts[24],
+                    'address': address
                 }
+                return json_data
+            else:
+                print(f"Received data does not contain at least {expected_fields_count} fields.")
+                return None
         except Exception as e:
             print("Error parsing JSON data:", e)
-        return None
+            return None
 
     def store_data_in_mongodb(self, json_data):
         try:
