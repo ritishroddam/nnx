@@ -89,7 +89,22 @@ if (storedMarkers) {
       },
         styles: [
             {
-                featureType: "poi", // Hide Points of Interest (Landmarks)
+                featureType: "poi", // Hide all Points of Interest (Landmarks)
+                elementType: "all",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "transit", // Hide transit stations
+                elementType: "all",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "administrative", // Hide government buildings
+                elementType: "all",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "road", // Hide road labels (optional)
                 elementType: "labels",
                 stylers: [{ visibility: "off" }]
             }
