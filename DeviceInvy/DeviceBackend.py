@@ -12,7 +12,7 @@ app.secret_key = os.urandom(24)  # Needed to use flash
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client['CordonEV']
+db = client['nnx']
 collection = db['device_inventory']
 
 device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')
