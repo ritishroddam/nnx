@@ -169,7 +169,7 @@ def handle_disconnect():
     print("Client disconnected from WebSocket")
 
 def start_flask_server():
-    socketio.run(app, host='0.0.0.0', port=8002, debug=True, use_reloader=False)
+    socketio.run(app, host='0.0.0.0', port=8555, debug=True, use_reloader=False)
 
 def run_servers():
     server = ThreadedTCPServer(('0.0.0.0', 8000), MyTCPHandler)
