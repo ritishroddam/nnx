@@ -50,6 +50,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
             data = self.request.recv(4096).decode('utf-8').strip()
+            print("hi")
             print("Received raw data:", data)
 
             json_data = self.parse_json_data(data)
@@ -74,7 +75,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         print("SOS alert reset.")
 
                 if json_data.get('gps') == 'A':
-                    print("GPS is active. Storing data in MongoDB...")
                     self.store_data_in_mongodb(json_data)
 
                 if 'latitude' in json_data and 'longitude' in json_data:
@@ -173,20 +173,16 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def store_data_in_mongodb(self, json_data):
         try:
-            # print("Storing data in MongoDB:", json_data)
-            print(f"Attempting to store data in MongoDB: {json_data}")
+            print("Storing data in MongoDB:", json_data)
             collection.update_one(
                 {'imei': json_data['imei'], 'date': json_data['date']},
                 {'$set': json_data},
                 upsert=True
             )
-            print(f"MongoDB update result: {result.raw_result}")
-        except Exception as e:
-            print(f"Error storing data in MongoDB: {e}")
             
-        #     print("Data stored/updated in MongoDB.")
-        # except Exception as e:
-        #     print("Error storing data in MongoDB:", e)    
+            print("Data stored/updated in MongoDB.")
+        except Exception as e:
+            print("Error storing data in MongoDB:", e)    
 
     def log_sos_to_mongodb(self, json_data):
         try:
@@ -220,8 +216,7 @@ def log_data(json_data):
 
 @app.route('/')
 def index():
-    return render_template('vehicle.js')
-
+    return render_template('Vehicle/templates/vehicleMap.html')
 
 @app.route('/api/data', methods=['GET', 'POST'])
 def receive_data():
@@ -292,7 +287,7 @@ def get_logs():
 
 
 def start_flask_server():
-    app.run( host="0.0.0.0", port = 8002, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=8002, debug=True, use_reloader=False)
 
 def run_servers():
     HOST = "0.0.0.0"
@@ -327,3 +322,38 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
     run_servers()
+
+
+# def run_servers():
+#     HOST = "0.0.0.0"
+#     PORT = 8000
+#     server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
+#     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
+
+#     server_thread = threading.Thread(target=server.serve_forever)
+#     server_thread.daemon = True
+#     server_thread.start()
+
+#     flask_thread = threading.Thread(target=start_flask_server)
+#     flask_thread.daemon = True
+#     flask_thread.start()
+
+#     signal.signal(signal.SIGINT, signal_handler)
+#     signal.signal(signal.SIGTERM, signal_handler)
+
+#     print("Server running. Press Ctrl+C to stop.")
+#     try:
+#         while True:
+#             pass
+#     except KeyboardInterrupt:
+#         print("Server shutting down...")
+#         server.shutdown()
+#         server.server_close()
+#         sys.exit(0)
+
+# def signal_handler(signal, frame):
+#     print("Received signal:", signal)
+#     sys.exit(0)
+
+# if __name__ == "__main__":
+#     run_servers()
