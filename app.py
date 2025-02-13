@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
-app.register_blueprint(device_bp, url_prefix='/device')
+app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 
 @app.route('/')
 def index():

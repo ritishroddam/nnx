@@ -19,7 +19,7 @@ device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_f
 
 @device_bp.route('/page')
 def page():
-    return render_template('index.html')
+    return render_template('device.html')
 
 # @app.route('/')
 # def index():
