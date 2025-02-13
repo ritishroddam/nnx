@@ -87,6 +87,13 @@ if (storedMarkers) {
       zoomControlOptions: {
         position: google.maps.ControlPosition.RIGHT_BOTTOM,
       },
+        styles: [
+            {
+                featureType: "poi", // Hide Points of Interest (Landmarks)
+                elementType: "labels",
+                stylers: [{ visibility: "off" }]
+            }
+        ]
     });
 
     geocoder = new google.maps.Geocoder();
