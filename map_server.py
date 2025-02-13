@@ -39,7 +39,13 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 #     def handle(self):
 #         try:
-#             data = self.request.recv(4096).decode('utf-8').strip()
+#             data = self.request.recv(4096)
+#             try:
+#                 data = data.decode('utf-8').strip()
+#             except UnicodeDecodeError:
+#                 print("\nReceived non-UTF-8 data, handling as binary data")
+#                 data = data.hex()  # Convert binary data to hex string for processing
+
 #             print("\nReceived raw data:", data)
 #             json_data = self.parse_json_data(data)
             
@@ -151,8 +157,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             try:
                 data = data.decode('utf-8').strip()
             except UnicodeDecodeError:
-                print("Received non-UTF-8 data, handling as binary data")
-                data = data.hex()  # Convert binary data to hex string for processing
+                print("\nReceived non-UTF-8 data, displaying raw bytes")
+                print(data)  # Display the raw bytes of the data
+                return  # Exit the method as we cannot process non-UTF-8 data
 
             print("\nReceived raw data:", data)
             json_data = self.parse_json_data(data)
