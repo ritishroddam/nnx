@@ -16,7 +16,7 @@
 {% block content %}
 <div class="header">
     <span class="back-arrow">&larr;</span>
-    <h2>{{ vehicle_data[0]['License Plate Number'] }}</h2>
+    <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
   </div>
 
   <div class="dashboard-container">
