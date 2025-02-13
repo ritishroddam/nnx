@@ -40,7 +40,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
             data = self.request.recv(4096).decode('utf-8').strip()
-            print("Received raw data:", data)
+            print("\nReceived raw data:", data)
             json_data = self.parse_json_data(data)
             
             if json_data:
@@ -57,7 +57,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def parse_json_data(self, data):
         try:
             parts = data.split(',')
-            print(f"Parsed data parts: {parts}")
+            print(f"\nParsed data parts: {parts}")
             expected_fields_count = 35
 
             if len(parts) >= expected_fields_count:
