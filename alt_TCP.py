@@ -6,7 +6,7 @@ from app0011 import C_TS_VLT_APP_0011
 
 # Connect to MongoDB
 client = MongoClient('mongodb+srv://doadmin:4sEK57130lRk9C6L@db-mongodb-blr1-19677-8a3b7549.mongo.ondigitalocean.com/admin?tls=true&authSource=admin')
-db = client['CordonEV']
+db = client['nnx']
 collection = db['atlanta']
 
 class C_TS_VLT_APP_0011(socketserver.BaseRequestHandler):

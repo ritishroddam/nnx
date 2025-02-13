@@ -16,7 +16,7 @@ MONGO_URI = os.getenv(
     'mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin'
 )
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-db = client['CordonEV']
+db = client['nnx']
 collection = db['atlanta']
 sos_logs_collection = db['sos_logs']  # MongoDB collection for SOS logs
 
