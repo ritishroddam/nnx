@@ -365,26 +365,33 @@ function initMap() {
 const toggleButton = document.createElement("button");
 toggleButton.textContent = "Switch to Standard Map";
 toggleButton.style.position = "absolute";
-toggleButton.style.bottom = "20px";  // Move to bottom
-toggleButton.style.right = "20px";   // Move to right
+toggleButton.style.bottom = "20px";
+toggleButton.style.right = "20px";
 toggleButton.style.zIndex = "1000";
 toggleButton.style.padding = "10px 15px";
 toggleButton.style.background = "#fff";
-toggleButton.style.border = "1px solid #ccc"; // Add a border for visibility
-toggleButton.style.borderRadius = "5px"; // Rounded corners
+toggleButton.style.border = "1px solid #ccc";
+toggleButton.style.borderRadius = "5px";
 toggleButton.style.cursor = "pointer";
-toggleButton.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.3)"; // Add a shadow for better visibility
+toggleButton.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.3)";
 toggleButton.style.fontSize = "14px";
 toggleButton.style.fontWeight = "bold";
 toggleButton.style.color = "#333";
 
 document.getElementById("map").appendChild(toggleButton);
 
+// Set initial mode to dark mode
 let darkMode = true;
+
 toggleButton.addEventListener("click", function () {
-    darkMode = !darkMode;
-    map.setOptions({ styles: darkMode ? darkModeStyle : standardStyle });
-    toggleButton.textContent = darkMode ? "Switch to Standard Map" : "Switch to Dark Map";
+    if (darkMode) {
+        map.setOptions({ styles: standardStyle });
+        toggleButton.textContent = "Switch to Dark Map";
+    } else {
+        map.setOptions({ styles: darkModeStyle });
+        toggleButton.textContent = "Switch to Standard Map";
+    }
+    darkMode = !darkMode; // Toggle the state
 });
 }
 
