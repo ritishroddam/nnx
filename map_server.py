@@ -6,7 +6,7 @@ import signal
 import sys
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
-from pymongo import DESCENDING, MongoClient
+from pymongo import MongoClient
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO
 
@@ -266,54 +266,18 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 def index():
     return render_template('Vehicle/templates/vehicleMap.html')
 
-# @app.route('/api/data', methods=['GET'])
-# def get_vehicle_data():
-#     try:
-#         imei = request.args.get('imei')
-#         today = datetime.now().strftime('%d%m%y')
-#         query = {'date': today}
-#         if imei:
-#             query['imei'] = imei
-#         vehicles = list(collection.find(query))
-#         for v in vehicles:
-#             v['_id'] = str(v['_id'])
-#         return jsonify(vehicles)
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 @app.route('/api/data', methods=['GET'])
 def get_vehicle_data():
     try:
         imei = request.args.get('imei')
-        latest = request.args.get('latest', 'false').lower() == 'true'  # Check if latest=true is passed
-        query = {}
-
+        today = datetime.now().strftime('%d%m%y')
+        query = {'date': today}
         if imei:
             query['imei'] = imei
-
-        if latest:
-            # Fetch the most recent data for each IMEI
-            pipeline = [
-                {"$sort": {"timestamp": DESCENDING}},  # Sort by latest timestamp
-                {"$group": {
-                    "_id": "$imei",
-                    "latest_record": {"$first": "$$ROOT"}  # Pick the latest record per IMEI
-                }},
-                {"$replaceRoot": {"newRoot": "$latest_record"}}
-            ]
-            vehicles = list(collection.aggregate(pipeline))
-        else:
-            # Default behavior - Fetch all today's records
-            today = datetime.now().strftime('%d%m%y')
-            query['date'] = today
-            vehicles = list(collection.find(query).sort("timestamp", DESCENDING))
-
-        # Convert ObjectId to string
+        vehicles = list(collection.find(query))
         for v in vehicles:
             v['_id'] = str(v['_id'])
-
         return jsonify(vehicles)
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
