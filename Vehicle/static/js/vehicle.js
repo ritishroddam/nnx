@@ -68,112 +68,153 @@ if (storedMarkers) {
 }
 }
 
-  function initMap() {
-    const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Default center
-    const offset = -2; // Adjust this value to shift the map to the right
+//   function initMap() {
+//     const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Default center
+//     const offset = -2; // Adjust this value to shift the map to the right
   
-    // Calculate the new center based on the offset
-    const newCenter = {
+//     // Calculate the new center based on the offset
+//     const newCenter = {
+//       lat: defaultCenter.lat,
+//       lng: defaultCenter.lng + offset
+//     };
+
+//     map = new google.maps.Map(document.getElementById("map"), {
+      
+//       center: newCenter,
+//       zoom: 5,
+//       gestureHandling: "greedy",
+//       zoomControl: true,
+
+//       zoomControlOptions: {
+//         position: google.maps.ControlPosition.RIGHT_BOTTOM,
+//       },
+//         styles: [
+//             {
+//                 featureType: "poi", // Hide all Points of Interest (Landmarks)
+//                 elementType: "all",
+//                 stylers: [{ visibility: "off" }]
+//             },
+//             {
+//                 featureType: "transit", // Hide transit stations
+//                 elementType: "all",
+//                 stylers: [{ visibility: "off" }]
+//             },
+//             {
+//                 featureType: "administrative", // Hide government buildings
+//                 elementType: "all",
+//                 stylers: [{ visibility: "off" }]
+//             },
+//             {
+//                 featureType: "road", // Hide road labels (optional)
+//                 elementType: "labels",
+//                 stylers: [{ visibility: "off" }]
+//             }
+//         ]
+//     });
+
+//     geocoder = new google.maps.Geocoder();
+//     infoWindow = new google.maps.InfoWindow();
+
+//     google.maps.event.addListener(infoWindow, "closeclick", function () {
+//       const infoWindowDiv = document.querySelector(".info-window");
+
+//       if (infoWindowDiv) {
+//         infoWindowDiv.classList.remove("show");
+//         infoWindowDiv.classList.add("hide");
+
+//         setTimeout(function () {
+//           infoWindow.close();
+//         }, 300);
+//       }
+
+//       manualClose = true;
+//       openMarker = null;
+//     });
+
+//     // Restore markers from the previous session
+// restoreMarkers();
+// setupWebSocket();
+// }
+
+function initMap() {
+  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+  const offset = -2;
+
+  const newCenter = {
       lat: defaultCenter.lat,
       lng: defaultCenter.lng + offset
-    };
+  };
 
-    map = new google.maps.Map(document.getElementById("map"), {
-      
+  const darkModeStyle = [
+      { elementType: "geometry", stylers: [{ color: "#212121" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
+      { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+  ];
+
+  const standardStyle = [];
+
+  map = new google.maps.Map(document.getElementById("map"), {
       center: newCenter,
       zoom: 5,
       gestureHandling: "greedy",
       zoomControl: true,
+      mapTypeControl: false, // Disable default map type buttons
+      styles: darkModeStyle // Default to dark mode
+  });
 
-      zoomControlOptions: {
-        position: google.maps.ControlPosition.RIGHT_BOTTOM,
-      },
-        styles: [
-            {
-                featureType: "poi", // Hide all Points of Interest (Landmarks)
-                elementType: "all",
-                stylers: [{ visibility: "off" }]
-            },
-            {
-                featureType: "transit", // Hide transit stations
-                elementType: "all",
-                stylers: [{ visibility: "off" }]
-            },
-            {
-                featureType: "administrative", // Hide government buildings
-                elementType: "all",
-                stylers: [{ visibility: "off" }]
-            },
-            {
-                featureType: "road", // Hide road labels (optional)
-                elementType: "labels",
-                stylers: [{ visibility: "off" }]
-            }
-        ]
-    });
+  geocoder = new google.maps.Geocoder();
+  infoWindow = new google.maps.InfoWindow();
 
-    geocoder = new google.maps.Geocoder();
-    infoWindow = new google.maps.InfoWindow();
-
-    google.maps.event.addListener(infoWindow, "closeclick", function () {
+  google.maps.event.addListener(infoWindow, "closeclick", function () {
       const infoWindowDiv = document.querySelector(".info-window");
 
       if (infoWindowDiv) {
-        infoWindowDiv.classList.remove("show");
-        infoWindowDiv.classList.add("hide");
+          infoWindowDiv.classList.remove("show");
+          infoWindowDiv.classList.add("hide");
 
-        setTimeout(function () {
-          infoWindow.close();
-        }, 300);
+          setTimeout(function () {
+              infoWindow.close();
+          }, 300);
       }
 
       manualClose = true;
       openMarker = null;
-    });
+  });
 
-    // Restore markers from the previous session
-restoreMarkers();
-setupWebSocket();
+  restoreMarkers();
+  setupWebSocket();
+
+  // Add Toggle Button
+  const toggleButton = document.createElement("button");
+  toggleButton.textContent = "Switch to Standard Map";
+  toggleButton.style.position = "absolute";
+  toggleButton.style.top = "10px";
+  toggleButton.style.right = "10px";
+  toggleButton.style.zIndex = "1000";
+  toggleButton.style.padding = "10px";
+  toggleButton.style.background = "#fff";
+  toggleButton.style.border = "none";
+  toggleButton.style.cursor = "pointer";
+
+  document.getElementById("map").appendChild(toggleButton);
+
+  let darkMode = true;
+  toggleButton.addEventListener("click", function () {
+      darkMode = !darkMode;
+      map.setOptions({ styles: darkMode ? darkModeStyle : standardStyle });
+      toggleButton.textContent = darkMode ? "Switch to Standard Map" : "Switch to Dark Map";
+  });
 }
 
-//     setInterval(function () {
-//       if (countdownTimer > 0) {
-//         countdownTimer--;
-//         // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-//       } else {
-//     updateMap();
-//     countdownTimer = refreshInterval / 1000;  // Reset countdown
-//   }
-// }, 1000)};
 
 function setupWebSocket() {
     socket = io("http://64.227.137.175:8555");
     socket.on("vehicle_update", (data) => updateVehicleMarker(data));
     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
 }
-
-// function updateVehicleMarker(device) {
-//     const imei = sanitizeIMEI(device.imei);
-//     if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
-    
-//     const coords = parseCoordinates(device.latitude, device.longitude);
-//     const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-//     const iconUrl = getCarIconBySpeed(device.speed, imei);
-//     const rotation = device.course;
-    
-//     if (markers[imei]) {
-//         animateMarker(markers[imei], latLng);
-//         updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-//         markers[imei].device = device;
-//         updateInfoWindow(markers[imei], latLng, device, coords);
-//     } else {
-//         markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-//         addMarkerClickListener(markers[imei], latLng, device, coords);
-//     }
-//     lastDataReceivedTime[imei] = new Date();
-//     checkForDataTimeout(imei);
-//     saveMarkers();
-// }
 
 function updateVehicleMarker(device) {
   const imei = sanitizeIMEI(device.imei);

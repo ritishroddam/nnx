@@ -161,3 +161,24 @@
           opacity: 1;
         }
       }
+
+
+      /* ///////////////////MAP//////////////////// */
+
+      #map-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        padding: 10px 15px;
+        background: #fff;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    #map-toggle:hover {
+        background: #f0f0f0;
+    }
