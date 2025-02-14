@@ -282,7 +282,7 @@ def index():
 #         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/data', methods=['GET'])
-def get_latest_vehicle_data():
+def get_vehicle_data():
     try:
         imei = request.args.get('imei')
         latest = request.args.get('latest', 'false').lower() == 'true'  # Check if latest=true is passed
