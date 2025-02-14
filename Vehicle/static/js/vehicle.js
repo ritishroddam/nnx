@@ -153,19 +153,19 @@ function initMap() {
       { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
       { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
       { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
-      { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
-      { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
-      { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
-      { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }
+      // { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
+      // { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
+      // { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
+      // { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }
   ];
 
   // Standard Mode Styles (Hides POI, Transit, etc.)
-  const standardStyle = [
-      { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
-      { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
-      { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
-      { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }
-  ];
+  // const standardStyle = [
+  //     { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
+  //     { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
+  //     { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
+  //     { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }
+  // ];
 
   // Initialize Map
   map = new google.maps.Map(document.getElementById("map"), {
@@ -174,6 +174,7 @@ function initMap() {
       gestureHandling: "greedy",
       zoomControl: true,
       mapTypeControl: false, // Disable default map type buttons
+      clickableIcons: false, // Disable POI icons
       styles: darkModeStyle // Default to dark mode
   });
 
