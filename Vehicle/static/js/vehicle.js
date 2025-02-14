@@ -385,11 +385,11 @@ let darkMode = true;
 
 toggleButton.addEventListener("click", function () {
     if (darkMode) {
-        map.setOptions({ styles: lightModeStyle });
-        toggleButton.textContent = "Switch to Dark Map";
-    } else {
         map.setOptions({ styles: darkModeStyle });
         toggleButton.textContent = "Switch to Standard Map";
+    } else {
+        map.setOptions({ styles: lightModeStyle });
+        toggleButton.textContent = "Switch to Dark Map";
     }
     darkMode = !darkMode; // Toggle the state
 });
