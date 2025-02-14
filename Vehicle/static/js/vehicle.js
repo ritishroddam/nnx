@@ -68,74 +68,6 @@ if (storedMarkers) {
 }
 }
 
-//   function initMap() {
-//     const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Default center
-//     const offset = -2; // Adjust this value to shift the map to the right
-  
-//     // Calculate the new center based on the offset
-//     const newCenter = {
-//       lat: defaultCenter.lat,
-//       lng: defaultCenter.lng + offset
-//     };
-
-//     map = new google.maps.Map(document.getElementById("map"), {
-      
-//       center: newCenter,
-//       zoom: 5,
-//       gestureHandling: "greedy",
-//       zoomControl: true,
-
-//       zoomControlOptions: {
-//         position: google.maps.ControlPosition.RIGHT_BOTTOM,
-//       },
-//         styles: [
-//             {
-//                 featureType: "poi", // Hide all Points of Interest (Landmarks)
-//                 elementType: "all",
-//                 stylers: [{ visibility: "off" }]
-//             },
-//             {
-//                 featureType: "transit", // Hide transit stations
-//                 elementType: "all",
-//                 stylers: [{ visibility: "off" }]
-//             },
-//             {
-//                 featureType: "administrative", // Hide government buildings
-//                 elementType: "all",
-//                 stylers: [{ visibility: "off" }]
-//             },
-//             {
-//                 featureType: "road", // Hide road labels (optional)
-//                 elementType: "labels",
-//                 stylers: [{ visibility: "off" }]
-//             }
-//         ]
-//     });
-
-//     geocoder = new google.maps.Geocoder();
-//     infoWindow = new google.maps.InfoWindow();
-
-//     google.maps.event.addListener(infoWindow, "closeclick", function () {
-//       const infoWindowDiv = document.querySelector(".info-window");
-
-//       if (infoWindowDiv) {
-//         infoWindowDiv.classList.remove("show");
-//         infoWindowDiv.classList.add("hide");
-
-//         setTimeout(function () {
-//           infoWindow.close();
-//         }, 300);
-//       }
-
-//       manualClose = true;
-//       openMarker = null;
-//     });
-
-//     // Restore markers from the previous session
-// restoreMarkers();
-// setupWebSocket();
-// }
-
 function initMap() {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
   const offset = -2;
@@ -153,10 +85,6 @@ function initMap() {
       { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
       { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
       { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
-      // { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
-      // { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
-      // { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
-      // { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }
   ];
 
   const lightModeStyle = [
@@ -320,14 +248,6 @@ function initMap() {
     }
   ];
 
-  // Standard Mode Styles (Hides POI, Transit, etc.)
-  // const standardStyle = [
-  //     { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
-  //     { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
-  //     { featureType: "administrative", elementType: "all", stylers: [{ visibility: "off" }] },
-  //     { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] }
-  // ];
-
   // Initialize Map
   map = new google.maps.Map(document.getElementById("map"), {
       center: newCenter,
@@ -397,11 +317,31 @@ toggleButton.addEventListener("click", function () {
 
 
 
+// function setupWebSocket() {
+//     socket = io("http://64.227.137.175:8555");
+//     socket.on("vehicle_update", (data) => updateVehicleMarker(data));
+//     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
+// }
+
 function setupWebSocket() {
-    socket = io("http://64.227.137.175:8555");
-    socket.on("vehicle_update", (data) => updateVehicleMarker(data));
-    socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
+  socket = io("http://64.227.137.175:8555");
+
+  socket.on("vehicle_update", (data) => {
+      if (data && data.timestamp) {
+          const imei = sanitizeIMEI(data.imei);
+          const lastTimestamp = lastDataReceivedTime[imei] || 0;
+
+          // Only update if this data is newer
+          if (new Date(data.timestamp) > new Date(lastTimestamp)) {
+              updateVehicleMarker(data);
+              lastDataReceivedTime[imei] = data.timestamp; // Store the latest timestamp
+          }
+      }
+  });
+
+  socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
 }
+
 
 function updateVehicleMarker(device) {
   const imei = sanitizeIMEI(device.imei);
@@ -441,22 +381,6 @@ function updateVehicleMarker(device) {
   checkForDataTimeout(imei);
   saveMarkers();
 }
-
-  // Save the current state of markers into session storage
-// function saveMarkers() {
-// const markerData = [];
-// Object.keys(markers).forEach(imei => {
-//     const marker = markers[imei];
-//     markerData.push({
-//         imei: imei,
-//         lat: marker.latLng.lat(),
-//         lon: marker.latLng.lng(),
-//         iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
-//         rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
-//     });
-// });
-// sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
-// }
 
 function saveMarkers() {
     const markerData = Object.keys(markers).map(imei => {
@@ -602,80 +526,137 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 }
 
 
+// function updateMap() {
+//     fetch('/api/data')
+//         .then(response => response.json())
+//         .then(data => {
+//             var imeiSet = new Set(); // Track unique IMEI numbers
+//             var bounds = new google.maps.LatLngBounds();
+//             dataAvailable = true;
+//             countdownTimer = refreshInterval / 1000;
 
+//             data.forEach(device => {
+//                 const imei = sanitizeIMEI(device.imei);
 
-      function updateMap() {
-    fetch('/api/data')
-        .then(response => response.json())
-        .then(data => {
-            var imeiSet = new Set(); // Track unique IMEI numbers
-            var bounds = new google.maps.LatLngBounds();
-            dataAvailable = true;
-            countdownTimer = refreshInterval / 1000;
+//                 if (!imeiSet.has(imei)) {
+//                     imeiSet.add(imei); // Mark IMEI as processed
 
-            data.forEach(device => {
-                const imei = sanitizeIMEI(device.imei);
+//                     if (device.latitude && device.longitude && device.speed != null && device.course != null) {
+//                         const coords = parseCoordinates(device.latitude, device.longitude);
+//                         const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+//                         const iconUrl = getCarIconBySpeed(device.speed, imei);
+//                         const rotation = device.course;
 
-                if (!imeiSet.has(imei)) {
-                    imeiSet.add(imei); // Mark IMEI as processed
+//                         if (markers[imei]) {
+//                             // Update existing marker
+//                             animateMarker(markers[imei], latLng);
+//                             updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+//                             markers[imei].device = device; // Update device data
+//                             updateInfoWindow(markers[imei], latLng, device, coords);
+//                         } else {
+//                             // Create a new marker
+//                             markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+//                             addMarkerClickListener(markers[imei], latLng, device, coords);
+//                         }
 
-                    if (device.latitude && device.longitude && device.speed != null && device.course != null) {
-                        const coords = parseCoordinates(device.latitude, device.longitude);
-                        const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-                        const iconUrl = getCarIconBySpeed(device.speed, imei);
-                        const rotation = device.course;
+//                         if (device.sos === "1") {
+//                             triggerSOS(imei, markers[imei]);
+//                         } else {
+//                             removeSOS(imei);
+//                         }
 
-                        if (markers[imei]) {
-                            // Update existing marker
-                            animateMarker(markers[imei], latLng);
-                            updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-                            markers[imei].device = device; // Update device data
-                            updateInfoWindow(markers[imei], latLng, device, coords);
-                        } else {
-                            // Create a new marker
-                            markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-                            addMarkerClickListener(markers[imei], latLng, device, coords);
-                        }
+//                         // Update last data received time
+//                         lastDataReceivedTime[imei] = new Date();
 
-                        if (device.sos === "1") {
-                            triggerSOS(imei, markers[imei]);
-                        } else {
-                            removeSOS(imei);
-                        }
+//                         bounds.extend(latLng);
+//                     }
 
-                        // Update last data received time
-                        lastDataReceivedTime[imei] = new Date();
+//                     // Check if data is missing for more than 1 hour
+//                     checkForDataTimeout(imei);
+//                 }
+//             });
 
-                        bounds.extend(latLng);
-                    }
+//             saveMarkers();
 
-                    // Check if data is missing for more than 1 hour
-                    checkForDataTimeout(imei);
-                }
-            });
+//             if (!bounds.isEmpty() && firstFit) {
+//                 map.fitBounds(bounds);
+//                 firstFit = false;
+//             }
 
-            saveMarkers();
+//             // Apply current speed filter after updating markers
+//             // filterVehiclesBySpeed();
+//           filterVehicles();
+//         })
+//         .catch(error => {
+//             console.error("Error fetching data:", error);
+//             dataAvailable = false;
+//         });
+// }
 
-            if (!bounds.isEmpty() && firstFit) {
-                map.fitBounds(bounds);
-                firstFit = false;
-            }
+function updateMap() {
+  fetch('/api/data?latest=true') // Ensure backend sends the latest records
+      .then(response => response.json())
+      .then(data => {
+          var imeiSet = new Set();
+          var bounds = new google.maps.LatLngBounds();
+          dataAvailable = true;
+          countdownTimer = refreshInterval / 1000;
 
-            // Apply current speed filter after updating markers
-            // filterVehiclesBySpeed();
-          filterVehicles();
-        })
-        .catch(error => {
-            console.error("Error fetching data:", error);
-            dataAvailable = false;
-        });
+          data.forEach(device => {
+              const imei = sanitizeIMEI(device.imei);
+
+              if (!imeiSet.has(imei)) {
+                  imeiSet.add(imei);
+
+                  if (device.latitude && device.longitude && device.speed !== null) {
+                      const coords = parseCoordinates(device.latitude, device.longitude);
+                      const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+                      const iconUrl = getCarIconBySpeed(device.speed, imei);
+                      const rotation = device.course;
+
+                      if (markers[imei]) {
+                          // Update existing marker
+                          animateMarker(markers[imei], latLng);
+                          updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+                          markers[imei].device = device;
+                          updateInfoWindow(markers[imei], latLng, device, coords);
+                      } else {
+                          // Create new marker
+                          markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+                          addMarkerClickListener(markers[imei], latLng, device, coords);
+                      }
+
+                      if (device.sos === "1") {
+                          triggerSOS(imei, markers[imei]);
+                      } else {
+                          removeSOS(imei);
+                      }
+
+                      // Update latest timestamp
+                      lastDataReceivedTime[imei] = device.timestamp;
+
+                      bounds.extend(latLng);
+                  }
+
+                  // Check if data is missing for more than 1 hour
+                  checkForDataTimeout(imei);
+              }
+          });
+
+          saveMarkers();
+
+          if (!bounds.isEmpty() && firstFit) {
+              map.fitBounds(bounds);
+              firstFit = false;
+          }
+      })
+      .catch(error => {
+          console.error("Error fetching data:", error);
+          dataAvailable = false;
+      });
 }
 
-  
-
-
-
-      function triggerSOS(imei, marker) {
+function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
     // Add the SOS icon
     const sosDiv = document.createElement("div");
@@ -801,12 +782,6 @@ function removeSOS(imei) {
 }
 
 
-
-
-
-
-
-// dfhsgf
   function updateInfoWindow(marker, latLng, device, coords) {
     geocodeLatLng(latLng, function (address) {
       if (openMarker === marker && !manualClose) {
@@ -911,43 +886,6 @@ function removeSOS(imei) {
     return marker;
   }
 
-  // function createCustomMarker(latLng, iconUrl, rotation, device) {
-  //   const div = document.createElement("div");
-  //   div.className = "custom-marker";
-  //   div.style.backgroundImage = `url(${iconUrl})`;
-  //   div.style.transform = `rotate(${rotation}deg)`;
-
-  //   const marker = new google.maps.OverlayView();
-  //   marker.div = div;
-  //   marker.latLng = latLng;
-  //   marker.device = device;
-
-  //   marker.onAdd = function () {
-  //       const panes = this.getPanes();
-  //       panes.overlayMouseTarget.appendChild(div);
-  //   };
-
-  //   marker.draw = function () {
-  //       const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
-  //       if (point) {
-  //           div.style.left = point.x - div.offsetWidth / 2 + "px";
-  //           div.style.top = point.y - div.offsetHeight / 2 + "px";
-  //       }
-  //   };
-
-//     marker.onRemove = function () {
-//         div.parentNode.removeChild(div);
-//     };
-
-//     marker.setVisible = function (visible) {
-//         div.style.display = visible ? "block" : "none";
-//     };
-
-//     marker.setMap(map);
-//     addMarkerClickListener(marker, latLng, device, {});
-//     return marker;
-// }
-
 
 //////////////////////
   function updateCustomMarker(marker, latLng, iconUrl, rotation) {
@@ -958,13 +896,6 @@ function removeSOS(imei) {
 
     addMarkerClickListener(marker, latLng, {}, {});
   }
-
-//   function updateCustomMarker(marker, latLng, iconUrl, rotation) {
-//     marker.latLng = latLng;
-//     marker.div.style.backgroundImage = `url(${iconUrl})`;
-//     marker.div.style.transform = `rotate(${rotation}deg)`;
-//     marker.draw();
-// }
 
 //////////////////////
   function geocodeLatLng(latLng, callback) {
