@@ -363,7 +363,7 @@ function initMap() {
 
   // Add Toggle Button
 const toggleButton = document.createElement("button");
-toggleButton.textContent = "Switch to Standard Map";
+toggleButton.textContent = "Switch to Dark Map";
 toggleButton.style.position = "absolute";
 toggleButton.style.bottom = "20px";
 toggleButton.style.right = "20px";
