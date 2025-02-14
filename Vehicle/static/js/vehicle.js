@@ -172,7 +172,7 @@ function initMap() {
       "elementType": "labels.icon",
       "stylers": [
         {
-          "visibility": "on"
+          "visibility": "off"
         }
       ]
     },
