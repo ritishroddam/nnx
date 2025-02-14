@@ -224,7 +224,7 @@ function initMap() {
       "elementType": "geometry",
       "stylers": [
         {
-          "color": "#e5e5e5"
+          "color": "#f2ffde"
         }
       ]
     },
