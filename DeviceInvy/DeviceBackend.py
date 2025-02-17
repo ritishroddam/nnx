@@ -17,10 +17,6 @@ collection = db['device_inventory']
 
 device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')
 
-@app.route('/')
-def home():
-    return redirect(url_for('page'))
-
 @device_bp.route('/page')
 def page():
     return render_template('device.html')
@@ -65,7 +61,7 @@ def manual_entry():
 
 @app.route('/download_template')
 def download_template():
-    path = r"/root/CordonNX/CordonNX/naya/templates/device_inventory_template.xlsx"
+    path = r"/root/nnx/DeviceInvy/templates/device_inventory_template.xlsx"
     return send_file(path, as_attachment=True)
 
 @app.route('/upload', methods=['POST'])

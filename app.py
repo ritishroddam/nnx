@@ -1,7 +1,7 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify
 import subprocess
 import os
-import requests
+#import requests
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.dashboard_backend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
