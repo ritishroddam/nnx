@@ -61,7 +61,7 @@ def manual_entry():
 
     collection.insert_one(data)
     flash("Device added successfully!", "success")
-    return redirect(url_for('page'))
+    return redirect(url_for('DeviceInvy.page'))
 
 @app.route('/download_template')
 def download_template():
