@@ -61,7 +61,7 @@ def manual_entry():
 
     collection.insert_one(data)
     flash("Device added successfully!", "success")
-    return redirect(url_for('index'))
+    return redirect(url_for('page'))
 
 @app.route('/download_template')
 def download_template():
@@ -207,6 +207,7 @@ def delete_device(device_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+app.register_blueprint(device_bp, url_prefix="/device")
 
 if __name__ == '__main__':
     # port = int(sys.argv[1]) if len(sys.argv > 1) else 8003
