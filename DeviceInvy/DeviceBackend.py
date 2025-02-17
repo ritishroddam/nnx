@@ -17,6 +17,10 @@ collection = db['device_inventory']
 
 device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')
 
+@app.route('/')
+def home():
+    return redirect(url_for('page'))
+
 @device_bp.route('/page')
 def page():
     return render_template('device.html')
