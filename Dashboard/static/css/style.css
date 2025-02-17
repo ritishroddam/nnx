@@ -305,6 +305,11 @@ body.light-mode .timeframe-buttons button.active {
   /* General Styles */
 
 /* Cards */
+body{
+    margin: 50px 0 0 100px;
+    padding: 20px;
+}
+
 .cards {
     display: flex;
     gap: 20px;
