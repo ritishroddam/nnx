@@ -36,15 +36,15 @@ document.querySelector(".toggle-slider").addEventListener("click", function() {
 
 // Car appears on the map
 
-var map;
-  var markers = {};
-  var geocoder;
-  var addressCache = {};
-  var lastZeroSpeedTime = {};
-  var refreshInterval = 5000; // 1min for page reload
-  var infoWindow;
-  var countdownTimer = refreshInterval / 1000;
-  var openMarker = null;
+  var map;
+    var markers = {};
+    var geocoder;
+    var addressCache = {};
+    var lastZeroSpeedTime = {};
+    var refreshInterval = 5000; // 1min for page reload
+    var infoWindow;
+    var countdownTimer = refreshInterval / 1000;
+    var openMarker = null;
   var firstFit = true;
   var manualClose = false;
   var dataAvailable = true;
@@ -69,13 +69,13 @@ if (storedMarkers) {
 }
 
 function initMap() {
-  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-  const offset = -2;
+  // const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+  // const offset = -2;
 
-  const newCenter = {
-      lat: defaultCenter.lat,
-      lng: defaultCenter.lng + offset
-  };
+  // const newCenter = {
+  //     lat: defaultCenter.lat,
+  //     lng: defaultCenter.lng + offset
+  // };
 
   // Dark Mode Styles
   const darkModeStyle = [
@@ -250,10 +250,14 @@ function initMap() {
 
   // Initialize Map
   map = new google.maps.Map(document.getElementById("map"), {
-      center: newCenter,
+      // center: newCenter,
+      center: { lat: 20.5937, lng: 78.9629 },
       zoom: 5,
       gestureHandling: "greedy",
       zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
       mapTypeControl: false, // Disable default map type buttons
       clickableIcons: false, // Disable POI icons
       styles: lightModeStyle // Default to dark mode
@@ -824,7 +828,7 @@ function removeSOS(imei) {
     if (addressCache[key]) {
       callback(addressCache[key]);
     } else {
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyCPEMAElTxMzur0DK-Mh3fPUVmdQVBJu8A`;
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=`;
 
       fetch(geocodeUrl)
         .then((response) => response.json())

@@ -299,7 +299,7 @@ body.light-mode .timeframe-buttons button.active {
 
 
 
-  
+
 
 
   /* General Styles */
@@ -398,29 +398,6 @@ hr.divider {
     margin: 20px 0;
 }
 
-/* Light Mode Styles */
-body.light-mode {
-    background-color: #f5f5f5;
-    color: #000000;
-}
-
-body.light-mode .card {
-    background-color: #ffffff;
-    color: #000;
-}
-
-body.light-mode .timeframe-buttons button {
-    background-color: #ffffff;
-    color: #000;
-}
-
-body.light-mode .timeframe-buttons button:hover {
-    background-color: #ddd;
-}
-
-body.light-mode .timeframe-buttons button.active {
-    background-color: #ccc;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -32,6 +32,13 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
+    
+    def __init__(self, server_address, handler_cls):
+        super().__init__(server_address, handler_cls)
+        self.shutdown_event = threading.Event()
+
+    def server_close(self):
+        super().server_close()
 
 # class MyTCPHandler(socketserver.BaseRequestHandler):
 #     lock = threading.Lock()
@@ -149,6 +156,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     lock = threading.Lock()
+    sos_active = False
     sos_alert_triggered = False
 
     def handle(self):
