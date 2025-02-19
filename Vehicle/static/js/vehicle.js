@@ -28,6 +28,31 @@
 
 // renderVehicles();
 
+
+document.querySelector(".toggle-slider").addEventListener("click", function() {
+  this.classList.toggle("active");
+});
+
+
+
+// Car appears on the map
+
+var map;
+  var markers = {};
+  var geocoder;
+  var addressCache = {};
+  var lastZeroSpeedTime = {};
+  var refreshInterval = 5000; // 1min for page reload
+  var infoWindow;
+  var countdownTimer = refreshInterval / 1000;
+  var openMarker = null;
+  var firstFit = true;
+  var manualClose = false;
+  var dataAvailable = true;
+  var sosActiveMarkers = {};
+var lastDataReceivedTime = {};
+var socket;
+
 let vehicleData = {}; // Store latest data based on IMEI
 
 function renderVehicles() {
@@ -55,30 +80,6 @@ function renderVehicles() {
         listContainer.appendChild(vehicleElement);
     });
 }
-
-document.querySelector(".toggle-slider").addEventListener("click", function() {
-  this.classList.toggle("active");
-});
-
-
-
-// Car appears on the map
-
-var map;
-  var markers = {};
-  var geocoder;
-  var addressCache = {};
-  var lastZeroSpeedTime = {};
-  var refreshInterval = 5000; // 1min for page reload
-  var infoWindow;
-  var countdownTimer = refreshInterval / 1000;
-  var openMarker = null;
-  var firstFit = true;
-  var manualClose = false;
-  var dataAvailable = true;
-  var sosActiveMarkers = {};
-var lastDataReceivedTime = {};
-var socket;
 
   // Restore markers from session storage if available
 function restoreMarkers() {
@@ -347,13 +348,11 @@ toggleButton.addEventListener("click", function () {
 
 function setupWebSocket() {
     socket = io("http://64.227.137.175:8555");
-    // socket.on("vehicle_update", (data) => updateVehicleMarker(data));
-    // socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
     socket.on("vehicle_update", (device) => {
       const imei = device.imei;
       if (!imei) return;
 
-      const coords = parseCoordinates(device.latitude, device.longitude);
+      // const coords = parseCoordinates(device.latitude, device.longitude);
       const formattedTime = formatDateTime(device.date, device.time);
 
       vehicleData[imei] = {
@@ -373,6 +372,9 @@ function setupWebSocket() {
 
 setupWebSocket();
 
+//     socket.on("vehicle_update", (data) => updateVehicleMarker(data));
+//     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
+// }
 
 function updateVehicleMarker(device) {
   const imei = sanitizeIMEI(device.imei);
@@ -428,19 +430,39 @@ function saveMarkers() {
 }
 
 
+  // function parseCoordinates(lat, lon) {
+  //   const parsedLat =
+  //     parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
+  //   const parsedLon =
+  //     parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
+
+  //   if (isNaN(parsedLat) || isNaN(parsedLon)) {
+  //     console.error("Invalid coordinates:", lat, lon);
+  //     return { lat: 0, lon: 0 };
+  //   }
+
+  //   return { lat: parsedLat, lon: parsedLon };
+  // }
+
   function parseCoordinates(lat, lon) {
+    if (!lat || !lon || lat.length < 4 || lon.length < 4) {
+        console.error("Invalid coordinate inputs:", lat, lon);
+        return { lat: 0, lon: 0 };
+    }
+
     const parsedLat =
-      parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
+        parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
     const parsedLon =
-      parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
+        parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
 
     if (isNaN(parsedLat) || isNaN(parsedLon)) {
-      console.error("Invalid coordinates:", lat, lon);
-      return { lat: 0, lon: 0 };
+        console.error("Invalid parsed coordinates:", lat, lon);
+        return { lat: 0, lon: 0 };
     }
 
     return { lat: parsedLat, lon: parsedLon };
-  }
+}
+
 
   function convertSpeedToKmh(speedMph) {
     return speedMph * 1.60934; // Convert mph to km/h
