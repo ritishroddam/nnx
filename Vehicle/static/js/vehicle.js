@@ -500,12 +500,71 @@ function updateVehiclePosition(imei, newLat, newLng, speed) {
       });
 
       vehicleMarkers[imei] = L.marker([newLat, newLng], { icon }).addTo(map);
-      vehicleMarkers[imei].bindTooltip(`Speed: ${speed} km/h`).openTooltip();
+      lastPositions[imei] = [newLat, newLng]; // Store last position
   } else {
-      // Animate movement
-      let oldLatLng = vehicleMarkers[imei].getLatLng();
-      animateMarker(vehicleMarkers[imei], oldLatLng, [newLat, newLng]);
+      // Animate smoothly instead of jumping
+      animateVehicleMovement(imei, lastPositions[imei], [newLat, newLng]);
+      lastPositions[imei] = [newLat, newLng]; // Update last position
   }
+}
+
+// Function to smoothly animate marker movement
+function animateVehicleMovement(imei, fromLatLng, toLatLng) {
+  let marker = vehicleMarkers[imei];
+
+  if (!marker) return;
+
+  let duration = 5000; // 5 seconds for realistic movement
+
+  let motion = L.motion.polyline(
+      [fromLatLng, toLatLng],
+      {
+          color: 'transparent' // Hide polyline
+      },
+      {
+          duration: duration,
+          auto: true
+      }
+  ).addTo(map);
+
+  let startTime = Date.now();
+  
+  function step() {
+      let elapsed = Date.now() - startTime;
+      let progress = Math.min(elapsed / duration, 1);
+
+      let lat = fromLatLng[0] + (toLatLng[0] - fromLatLng[0]) * progress;
+      let lng = fromLatLng[1] + (toLatLng[1] - fromLatLng[1]) * progress;
+
+      marker.setLatLng([lat, lng]);
+
+      if (progress < 1) {
+          requestAnimationFrame(step);
+      } else {
+          motion.remove(); // Remove animation path after movement
+      }
+  }
+
+  requestAnimationFrame(step);
+
+  // Rotate marker based on movement direction
+  let angle = getBearing(fromLatLng, toLatLng);
+  marker.getElement().style.transform = `rotate(${angle}deg)`;
+}
+
+// Function to calculate direction (bearing)
+function getBearing(start, end) {
+  let startLat = (start[0] * Math.PI) / 180;
+  let startLng = (start[1] * Math.PI) / 180;
+  let endLat = (end[0] * Math.PI) / 180;
+  let endLng = (end[1] * Math.PI) / 180;
+
+  let dLng = endLng - startLng;
+  let y = Math.sin(dLng) * Math.cos(endLat);
+  let x = Math.cos(startLat) * Math.sin(endLat) -
+          Math.sin(startLat) * Math.cos(endLat) * Math.cos(dLng);
+  let brng = Math.atan2(y, x);
+  return ((brng * 180) / Math.PI + 360) % 360;
 }
 
 
