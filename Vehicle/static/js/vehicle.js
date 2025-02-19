@@ -1,8 +1,8 @@
-const vehicles = [
-    { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
-    { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
-    { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
-];
+// const vehicles = [
+//     { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
+//     { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
+//     { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
+// ];
 
 function renderVehicles() {
   const listContainer = document.getElementById("vehicle-list");
