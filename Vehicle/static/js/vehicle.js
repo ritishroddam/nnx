@@ -486,14 +486,11 @@ function checkForDataTimeout(imei) {
 
 
 ////////////////////////////////////////////////////////////////////
-function updateVehiclePosition(imei, latitude, longitude, speed) {
-  if (!latitude || !longitude) {
+function updateVehiclePosition(imei, newLat, newLng, speed) {
+  if (!newLat || !newLng) {
       console.warn(`No GPS data for IMEI: ${imei}`);
       return;
   }
-
-  // Store the last known data
-  lastVehicleData[imei] = { latitude, longitude, speed };
 
   if (!vehicleMarkers[imei]) {
       // Create a new marker if it doesn't exist
@@ -502,12 +499,12 @@ function updateVehiclePosition(imei, latitude, longitude, speed) {
           iconSize: [32, 32]
       });
 
-      vehicleMarkers[imei] = L.marker([latitude, longitude], { icon }).addTo(map);
+      vehicleMarkers[imei] = L.marker([newLat, newLng], { icon }).addTo(map);
       vehicleMarkers[imei].bindTooltip(`Speed: ${speed} km/h`).openTooltip();
   } else {
-      // Smooth transition for movement
+      // Animate movement
       let oldLatLng = vehicleMarkers[imei].getLatLng();
-      animateMarker(vehicleMarkers[imei], oldLatLng, [latitude, longitude]);
+      animateMarker(vehicleMarkers[imei], oldLatLng, [newLat, newLng]);
   }
 }
 
@@ -542,7 +539,8 @@ function updateVehiclePosition(imei, latitude, longitude, speed) {
 
   function animateMarker(marker, fromLatLng, toLatLng) {
     let start = null;
-    let duration = 1000; // 1 second transition
+    let duration = 2000; // 2 seconds transition
+
     function step(timestamp) {
         if (!start) start = timestamp;
         let progress = (timestamp - start) / duration;
@@ -555,6 +553,7 @@ function updateVehiclePosition(imei, latitude, longitude, speed) {
             marker.setLatLng(toLatLng);
         }
     }
+
     requestAnimationFrame(step);
 }
 
