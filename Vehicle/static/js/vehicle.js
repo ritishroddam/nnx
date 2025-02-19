@@ -4,6 +4,8 @@
 //     { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
 // ];
 
+let vehicles = []; 
+
 function renderVehicles() {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
@@ -31,6 +33,11 @@ renderVehicles();
 document.querySelector(".toggle-slider").addEventListener("click", function() {
   this.classList.toggle("active");
 });
+
+function updateVehicles(newData) {
+  vehicles = newData; // Update with live data
+  renderVehicles(); // Re-render the list
+}
 
 
 
