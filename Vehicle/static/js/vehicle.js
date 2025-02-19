@@ -59,6 +59,9 @@ var map;
 var lastDataReceivedTime = {};
 var socket;
 
+let vehicleMarkers = {}; // Store all markers with IMEI as key
+let lastVehicleData = {}; // Store last received data
+
   // Restore markers from session storage if available
 function restoreMarkers() {
 const storedMarkers = sessionStorage.getItem('vehicleMarkers');
@@ -482,30 +485,87 @@ function checkForDataTimeout(imei) {
 }
 
 
-  function animateMarker(marker, newPosition, duration = 6000) {
-    const startPosition = marker.latLng;
-    const startTime = performance.now();
-
-    function moveMarker(currentTime) {
-      const elapsedTime = currentTime - startTime;
-      const progress = Math.min(elapsedTime / duration, 1);
-      const lat =
-        startPosition.lat() +
-        (newPosition.lat() - startPosition.lat()) * progress;
-      const lng =
-        startPosition.lng() +
-        (newPosition.lng() - startPosition.lng()) * progress;
-
-      marker.latLng = new google.maps.LatLng(lat, lng);
-      marker.draw();
-
-      if (progress < 1) {
-        requestAnimationFrame(moveMarker);
-      }
-    }
-
-    requestAnimationFrame(moveMarker);
+////////////////////////////////////////////////////////////////////
+function updateVehiclePosition(imei, latitude, longitude, speed) {
+  if (!latitude || !longitude) {
+      console.warn(`No GPS data for IMEI: ${imei}`);
+      return;
   }
+
+  // Store the last known data
+  lastVehicleData[imei] = { latitude, longitude, speed };
+
+  if (!vehicleMarkers[imei]) {
+      // Create a new marker if it doesn't exist
+      let icon = L.icon({
+          iconUrl: 'car.png',
+          iconSize: [32, 32]
+      });
+
+      vehicleMarkers[imei] = L.marker([latitude, longitude], { icon }).addTo(map);
+      vehicleMarkers[imei].bindTooltip(`Speed: ${speed} km/h`).openTooltip();
+  } else {
+      // Smooth transition for movement
+      let oldLatLng = vehicleMarkers[imei].getLatLng();
+      animateMarker(vehicleMarkers[imei], oldLatLng, [latitude, longitude]);
+  }
+}
+
+
+
+//////////////////////////////////////////////////////////////////
+
+  // function animateMarker(marker, newPosition, duration = 6000) {
+  //   const startPosition = marker.latLng;
+  //   const startTime = performance.now();
+
+  //   function moveMarker(currentTime) {
+  //     const elapsedTime = currentTime - startTime;
+  //     const progress = Math.min(elapsedTime / duration, 1);
+  //     const lat =
+  //       startPosition.lat() +
+  //       (newPosition.lat() - startPosition.lat()) * progress;
+  //     const lng =
+  //       startPosition.lng() +
+  //       (newPosition.lng() - startPosition.lng()) * progress;
+
+  //     marker.latLng = new google.maps.LatLng(lat, lng);
+  //     marker.draw();
+
+  //     if (progress < 1) {
+  //       requestAnimationFrame(moveMarker);
+  //     }
+  //   }
+
+  //   requestAnimationFrame(moveMarker);
+  // }
+
+  function animateMarker(marker, fromLatLng, toLatLng) {
+    let start = null;
+    let duration = 1000; // 1 second transition
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        let progress = (timestamp - start) / duration;
+        if (progress < 1) {
+            let lat = fromLatLng.lat + (toLatLng[0] - fromLatLng.lat) * progress;
+            let lng = fromLatLng.lng + (toLatLng[1] - fromLatLng.lng) * progress;
+            marker.setLatLng([lat, lng]);
+            requestAnimationFrame(step);
+        } else {
+            marker.setLatLng(toLatLng);
+        }
+    }
+    requestAnimationFrame(step);
+}
+
+function displayLastKnownPositions() {
+  Object.keys(lastVehicleData).forEach(imei => {
+      let data = lastVehicleData[imei];
+      updateVehiclePosition(imei, data.latitude, data.longitude, data.speed);
+  });
+}
+
+setInterval(displayLastKnownPositions, 5000);
 
 
   function sanitizeIMEI(imei) {
