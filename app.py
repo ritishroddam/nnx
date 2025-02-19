@@ -1,7 +1,7 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify
 import subprocess
 import os
-#import requests
+import requests
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.dashboard_backend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
@@ -25,9 +25,9 @@ def default():
 @app.route('/api/data', methods=['GET', 'POST'])
 def proxy_api_data():
     if request.method == 'POST':
-        response = requests.post('http://127.0.0.1:8002/api/data', json=request.get_json())
+        response = requests.post('http://64.227.137.175:8002/api/data', json=request.get_json())
     else:
-        response = requests.get('http://127.0.0.1:8002/api/data', params=request.args)
+        response = requests.get('http://64.227.137.175:8002/api/data', params=request.args)
     return jsonify(response.json())
 
 if __name__ == '__main__':
