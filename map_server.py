@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='Vehicle/templates')
 
 MONGO_URI = os.getenv(
     'MONGO_URI',
@@ -210,7 +210,7 @@ def log_data(json_data):
 
 @app.route('/')
 def index():
-    return render_template('Vehicle/vehicleMap.html')
+    return render_template('vehicleMap.html')
 
 @app.route('/api/data', methods=['GET', 'POST'])
 def receive_data():
