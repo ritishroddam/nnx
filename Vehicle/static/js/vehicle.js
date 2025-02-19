@@ -1,33 +1,32 @@
-// const vehicles = [
-//     { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
-//     { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
-//     { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
-// ];
+const vehicles = [
+    { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
+    { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
+    { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
+];
 
-// function renderVehicles() {
-//   const listContainer = document.getElementById("vehicle-list");
-//   const countContainer = document.getElementById("vehicle-count");
-//   listContainer.innerHTML = "";
-//   countContainer.innerText = vehicles.length;
+function renderVehicles() {
+  const listContainer = document.getElementById("vehicle-list");
+  const countContainer = document.getElementById("vehicle-count");
+  listContainer.innerHTML = "";
+  countContainer.innerText = vehicles.length;
 
-//   vehicles.forEach(vehicle => {
-//     const vehicleElement = document.createElement("div");
-//     vehicleElement.classList.add("vehicle-card");
-//     vehicleElement.innerHTML = `
-//       <div class="vehicle-header">${vehicle.id} - ${vehicle.status}</div>
-//       <div class="vehicle-info">
-//         <strong>Duration:</strong> ${vehicle.duration} <br>
-//         <strong>Speed:</strong> ${vehicle.speed} <br>
-//         <strong>Battery:</strong> ${vehicle.voltage} <br>
-//         <strong>Location:</strong> ${vehicle.location}
-//       </div>
-//     `;
-//     listContainer.appendChild(vehicleElement);
-//   });
-// }
+  vehicles.forEach(vehicle => {
+    const vehicleElement = document.createElement("div");
+    vehicleElement.classList.add("vehicle-card");
+    vehicleElement.innerHTML = `
+      <div class="vehicle-header">${vehicle.id} - ${vehicle.status}</div>
+      <div class="vehicle-info">
+        <strong>Duration:</strong> ${vehicle.duration} <br>
+        <strong>Speed:</strong> ${vehicle.speed} <br>
+        <strong>Battery:</strong> ${vehicle.voltage} <br>
+        <strong>Location:</strong> ${vehicle.location}
+      </div>
+    `;
+    listContainer.appendChild(vehicleElement);
+  });
+}
 
-// renderVehicles();
-
+renderVehicles();
 
 document.querySelector(".toggle-slider").addEventListener("click", function() {
   this.classList.toggle("active");
@@ -52,34 +51,6 @@ var map;
   var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 var socket;
-
-let vehicleData = {}; // Store latest data based on IMEI
-
-function renderVehicles() {
-    const listContainer = document.getElementById("vehicle-list");
-    const countContainer = document.getElementById("vehicle-count");
-    listContainer.innerHTML = "";
-
-    // Convert object to array and sort by latest timestamp
-    const sortedVehicles = Object.values(vehicleData).sort((a, b) => b.timestamp - a.timestamp);
-
-    countContainer.innerText = sortedVehicles.length;
-
-    sortedVehicles.forEach(vehicle => {
-        const vehicleElement = document.createElement("div");
-        vehicleElement.classList.add("vehicle-card");
-        vehicleElement.innerHTML = `
-            <div class="vehicle-header">${vehicle.imei} - ${vehicle.status}</div>
-            <div class="vehicle-info">
-                <strong>Speed:</strong> ${vehicle.speed} km/h <br>
-                <strong>Battery:</strong> ${vehicle.voltage} <br>
-                <strong>Location:</strong> ${vehicle.address || "Unknown"} <br>
-                <strong>Last Update:</strong> ${vehicle.formattedTime}
-            </div>
-        `;
-        listContainer.appendChild(vehicleElement);
-    });
-}
 
   // Restore markers from session storage if available
 function restoreMarkers() {
@@ -348,33 +319,9 @@ toggleButton.addEventListener("click", function () {
 
 function setupWebSocket() {
     socket = io("http://64.227.137.175:8555");
-    socket.on("vehicle_update", (device) => {
-      const imei = device.imei;
-      if (!imei) return;
-
-      // const coords = parseCoordinates(device.latitude, device.longitude);
-      const formattedTime = formatDateTime(device.date, device.time);
-
-      vehicleData[imei] = {
-          imei: imei,
-          speed: convertSpeedToKmh(device.speed).toFixed(2),
-          voltage: device.voltage || "N/A",
-          address: device.address || "Fetching...",
-          formattedTime: `${formattedTime.formattedDate} ${formattedTime.formattedTime}`,
-          timestamp: new Date().getTime() // Store timestamp to sort latest updates
-      };
-
-      renderVehicles(); // Update UI with new data
-  });
-
-  socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
+    socket.on("vehicle_update", (data) => updateVehicleMarker(data));
+    socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
 }
-
-setupWebSocket();
-
-//     socket.on("vehicle_update", (data) => updateVehicleMarker(data));
-//     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
-// }
 
 function updateVehicleMarker(device) {
   const imei = sanitizeIMEI(device.imei);
@@ -430,39 +377,19 @@ function saveMarkers() {
 }
 
 
-  // function parseCoordinates(lat, lon) {
-  //   const parsedLat =
-  //     parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
-  //   const parsedLon =
-  //     parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
-
-  //   if (isNaN(parsedLat) || isNaN(parsedLon)) {
-  //     console.error("Invalid coordinates:", lat, lon);
-  //     return { lat: 0, lon: 0 };
-  //   }
-
-  //   return { lat: parsedLat, lon: parsedLon };
-  // }
-
   function parseCoordinates(lat, lon) {
-    if (!lat || !lon || lat.length < 4 || lon.length < 4) {
-        console.error("Invalid coordinate inputs:", lat, lon);
-        return { lat: 0, lon: 0 };
-    }
-
     const parsedLat =
-        parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
+      parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
     const parsedLon =
-        parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
+      parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
 
     if (isNaN(parsedLat) || isNaN(parsedLon)) {
-        console.error("Invalid parsed coordinates:", lat, lon);
-        return { lat: 0, lon: 0 };
+      console.error("Invalid coordinates:", lat, lon);
+      return { lat: 0, lon: 0 };
     }
 
     return { lat: parsedLat, lon: parsedLon };
-}
-
+  }
 
   function convertSpeedToKmh(speedMph) {
     return speedMph * 1.60934; // Convert mph to km/h
