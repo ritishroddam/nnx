@@ -1,4 +1,3 @@
-from socket import SocketIO
 import threading
 import socketserver
 import json
@@ -10,6 +9,7 @@ import sys
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 from flask_cors import CORS
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 socketio = SocketIO(app)  # ✅ Correct initialization
