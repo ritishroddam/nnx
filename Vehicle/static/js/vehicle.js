@@ -316,17 +316,7 @@ toggleButton.addEventListener("click", function () {
         toggleButton.textContent = "Switch to Dark Map";
     }
     darkMode = !darkMode; // Toggle the state
-});
-
-setInterval(function () {
-  if (countdownTimer > 0) {
-    countdownTimer--;
-    document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-  } else {
-updateMap();
-countdownTimer = refreshInterval / 1000;  // Reset countdown
-}
-}, 1000)};
+})};
 
 function fetchVehicleData() {
   fetch('/api/data')
@@ -346,88 +336,73 @@ function fetchVehicleData() {
 }
 
 
-// function setupWebSocket() {
-//     socket = io("http://64.227.137.175:8555");
-//     socket.on("vehicle_update", (data) => updateVehicleMarker(data));
-//     socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
-// }
+function setupWebSocket() {
+    socket = io("http://64.227.137.175:8555");
+    socket.on("vehicle_update", (data) => updateVehicleMarker(data));
+    socket.on("sos_alert", (data) => triggerSOS(data.imei, markers[data.imei]));
+}
 
-// function fetchVehicleData() {
-//   fetch('/get_vehicle_data')
-//       .then(response => response.json())
-//       .then(data => {
-//           updateMap(data);
-//       })
-//       .catch(error => console.error('Error fetching vehicle data:', error));
-// }
+function fetchVehicleData() {
+  fetch('/get_vehicle_data')
+      .then(response => response.json())
+      .then(data => {
+          updateMap(data);
+      })
+      .catch(error => console.error('Error fetching vehicle data:', error));
+}
 
-// function updateVehicleMarker(device) {
-//   const imei = sanitizeIMEI(device.imei);
-//   if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
+function updateVehicleMarker(device) {
+  const imei = sanitizeIMEI(device.imei);
+  if (!device.latitude || !device.longitude || device.speed === null || device.course === null) return;
 
-//   const coords = parseCoordinates(device.latitude, device.longitude);
-//   const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-//   const iconUrl = getCarIconBySpeed(device.speed, imei);
-//   const rotation = device.course;
+  const coords = parseCoordinates(device.latitude, device.longitude);
+  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+  const iconUrl = getCarIconBySpeed(device.speed, imei);
+  const rotation = device.course;
 
-//   // Check if the device's date matches the current date
-//   const currentDate = new Date();
-//   const deviceDate = new Date(`20${device.date.slice(4, 6)}-${device.date.slice(2, 4)}-${device.date.slice(0, 2)}`);
+  // Check if the device's date matches the current date
+  const currentDate = new Date();
+  const deviceDate = new Date(`20${device.date.slice(4, 6)}-${device.date.slice(2, 4)}-${device.date.slice(0, 2)}`);
 
-//   const currentDateString = currentDate.toISOString().slice(0, 10); // Format: YYYY-MM-DD
-//   const deviceDateString = deviceDate.toISOString().slice(0, 10); // Format: YYYY-MM-DD
+  const currentDateString = currentDate.toISOString().slice(0, 10); // Format: YYYY-MM-DD
+  const deviceDateString = deviceDate.toISOString().slice(0, 10); // Format: YYYY-MM-DD
 
-//   if (currentDateString !== deviceDateString) {
-//       // Hide the marker if the date does not match
-//       if (markers[imei]) {
-//           markers[imei].setVisible(false);
-//       }
-//       return;
-//   }
+  if (currentDateString !== deviceDateString) {
+      // Hide the marker if the date does not match
+      if (markers[imei]) {
+          markers[imei].setVisible(false);
+      }
+      return;
+  }
 
-//   if (markers[imei]) {
-//       animateMarker(markers[imei], latLng);
-//       updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-//       markers[imei].device = device;
-//       updateInfoWindow(markers[imei], latLng, device, coords);
-//       markers[imei].setVisible(true); // Ensure the marker is visible
-//   } else {
-//       markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-//       addMarkerClickListener(markers[imei], latLng, device, coords);
-//   }
-//   lastDataReceivedTime[imei] = new Date();
-//   checkForDataTimeout(imei);
-//   saveMarkers();
-// }
-
-// function saveMarkers() {
-//     const markerData = Object.keys(markers).map(imei => {
-//         const marker = markers[imei];
-//         return {
-//             imei: imei,
-//             lat: marker.latLng.lat(),
-//             lon: marker.latLng.lng(),
-//             iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
-//             rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
-//         };
-//     });
-//     sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
-// }
+  if (markers[imei]) {
+      animateMarker(markers[imei], latLng);
+      updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+      markers[imei].device = device;
+      updateInfoWindow(markers[imei], latLng, device, coords);
+      markers[imei].setVisible(true); // Ensure the marker is visible
+  } else {
+      markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+      addMarkerClickListener(markers[imei], latLng, device, coords);
+  }
+  lastDataReceivedTime[imei] = new Date();
+  checkForDataTimeout(imei);
+  saveMarkers();
+}
 
 function saveMarkers() {
-  const markerData = [];
-  Object.keys(markers).forEach(imei => {
-      const marker = markers[imei];
-      markerData.push({
-          imei: imei,
-          lat: marker.latLng.lat(),
-          lon: marker.latLng.lng(),
-          iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
-          rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
-      });
-  });
-  sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
-  }
+    const markerData = Object.keys(markers).map(imei => {
+        const marker = markers[imei];
+        return {
+            imei: imei,
+            lat: marker.latLng.lat(),
+            lon: marker.latLng.lng(),
+            iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
+            rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
+        };
+    });
+    sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
+}
 
 
   function parseCoordinates(lat, lon) {

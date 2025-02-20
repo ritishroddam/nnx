@@ -1,3 +1,4 @@
+from socket import SocketIO
 import threading
 import socketserver
 import json
@@ -10,6 +11,7 @@ from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")  # Enable WebSocket
 
 MONGO_URI = os.getenv(
     'MONGO_URI',
@@ -31,61 +33,92 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     distance = R * c
     return distance
 
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    allow_reuse_address = True
+# class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+#     allow_reuse_address = True
 
-    def __init__(self, server_address, handler_cls):
-        super().__init__(server_address, handler_cls)
-        self.shutdown_event = threading.Event()
+#     def __init__(self, server_address, handler_cls):
+#         super().__init__(server_address, handler_cls)
+#         self.shutdown_event = threading.Event()
 
-    def server_close(self):
-        super().server_close()
+#     def server_close(self):
+#         super().server_close()
 
-class MyTCPHandler(socketserver.BaseRequestHandler):
+# class MyTCPHandler(socketserver.BaseRequestHandler):
 
-    lock = threading.Lock()
-    sos_active = False
-    sos_alert_triggered = False
+#     lock = threading.Lock()
+#     sos_active = False
+#     sos_alert_triggered = False
 
-    def handle(self):
-        try:
-            data = self.request.recv(4096).decode('utf-8').strip()
-            print("Received raw data:", data)
+#     def handle(self):
+#         try:
+#             data = self.request.recv(4096).decode('utf-8').strip()
+#             print("Received raw data:", data)
 
-            json_data = self.parse_json_data(data)
-            if json_data:
-                print("Valid JSON data:", json_data)
+#             json_data = self.parse_json_data(data)
+#             if json_data:
+#                 print("Valid JSON data:", json_data)
 
-                sos_state = json_data.get('sos', '0')
-                print(f"SOS state received: {sos_state}")
+#                 sos_state = json_data.get('sos', '0')
+#                 print(f"SOS state received: {sos_state}")
 
-                with MyTCPHandler.lock:
-                    if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
-                        MyTCPHandler.sos_active = True
-                        MyTCPHandler.sos_alert_triggered = True
-                        print("SOS alert triggered!")
+#                 with MyTCPHandler.lock:
+#                     if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
+#                         MyTCPHandler.sos_active = True
+#                         MyTCPHandler.sos_alert_triggered = True
+#                         print("SOS alert triggered!")
 
-                        # Log SOS to MongoDB
-                        self.log_sos_to_mongodb(json_data)
+#                         # Log SOS to MongoDB
+#                         self.log_sos_to_mongodb(json_data)
 
-                    elif sos_state == '0' and MyTCPHandler.sos_active:
-                        MyTCPHandler.sos_active = False
-                        MyTCPHandler.sos_alert_triggered = False
-                        print("SOS alert reset.")
+#                     elif sos_state == '0' and MyTCPHandler.sos_active:
+#                         MyTCPHandler.sos_active = False
+#                         MyTCPHandler.sos_alert_triggered = False
+#                         print("SOS alert reset.")
 
-                if json_data.get('gps') == 'A':
-                    self.store_data_in_mongodb(json_data)
+#                 if json_data.get('gps') == 'A':
+#                     self.store_data_in_mongodb(json_data)
 
-                if 'latitude' in json_data and 'longitude' in json_data:
-                    latitude = json_data['latitude']
-                    longitude = json_data['longitude']
-                    print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
+#                 if 'latitude' in json_data and 'longitude' in json_data:
+#                     latitude = json_data['latitude']
+#                     longitude = json_data['longitude']
+#                     print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
 
-            else:
-                print("Invalid JSON format")
+#             else:
+#                 print("Invalid JSON format")
 
-        except Exception as e:
-            print("Error handling request:", e)
+#         except Exception as e:
+#             print("Error handling request:", e)
+
+
+# Handle incoming WebSocket connections
+@socketio.on('connect')
+def handle_connect():
+    print("Client connected!")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print("Client disconnected!")
+
+# WebSocket handler for receiving GPS data
+@socketio.on('gps_data')
+def handle_gps_data(data):
+    try:
+        print("Received GPS Data:", data)
+        json_data = parse_json_data(data)
+
+        if json_data:
+            collection.update_one(
+                {'imei': json_data['imei'], 'date': json_data['date']},
+                {'$set': json_data},
+                upsert=True
+            )
+            print("Data stored in MongoDB.")
+
+            # Broadcast new GPS data to all clients
+            socketio.emit('update_map', json_data)
+
+    except Exception as e:
+        print("Error processing GPS data:", e)
 
 
     def parse_json_data(self, data):
@@ -293,35 +326,40 @@ def get_logs():
         return jsonify({'error': str(e)}), 500
 
 
-def start_flask_server():
-    app.run(host='0.0.0.0', port=8555, debug=True, use_reloader=False)
+# def start_flask_server():
+#     app.run(host='0.0.0.0', port=8555, debug=True, use_reloader=False)
 
+# def run_servers():
+#     HOST = "0.0.0.0"
+#     PORT = 8000
+#     server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
+#     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
+
+#     server_thread = threading.Thread(target=server.serve_forever)
+#     server_thread.daemon = True
+#     server_thread.start()
+
+#     flask_thread = threading.Thread(target=start_flask_server)
+#     flask_thread.daemon = True
+#     flask_thread.start()
+
+#     signal.signal(signal.SIGINT, signal_handler)
+#     signal.signal(signal.SIGTERM, signal_handler)
+
+#     print("Server running. Press Ctrl+C to stop.")
+#     while True:
+#         try:
+#             signal.pause()
+#         except KeyboardInterrupt:
+#             print("Server shutting down...")
+#             server.shutdown()
+#             server.server_close()
+#             sys.exit(0)
+
+# Start Flask + WebSocket Server
 def run_servers():
-    HOST = "0.0.0.0"
-    PORT = 8000
-    server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
-    print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
-
-    server_thread = threading.Thread(target=server.serve_forever)
-    server_thread.daemon = True
-    server_thread.start()
-
-    flask_thread = threading.Thread(target=start_flask_server)
-    flask_thread.daemon = True
-    flask_thread.start()
-
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
-    print("Server running. Press Ctrl+C to stop.")
-    while True:
-        try:
-            signal.pause()
-        except KeyboardInterrupt:
-            print("Server shutting down...")
-            server.shutdown()
-            server.server_close()
-            sys.exit(0)
+    print("Starting WebSocket Server with Flask...")
+    socketio.run(app, host="0.0.0.0", port=8555, debug=True, use_reloader=False)
 
 def signal_handler(signal, frame):
     print("Received signal:", signal)
