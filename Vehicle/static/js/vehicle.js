@@ -328,6 +328,15 @@ countdownTimer = refreshInterval / 1000;  // Reset countdown
 }
 }, 1000)};
 
+function fetchVehicleData() {
+  fetch('/api/data')
+      .then(response => response.json())
+      .then(data => {
+          console.log("Fetched Data:", data); // Debugging
+          updateMap(data);
+      })
+      .catch(error => console.error('Error fetching vehicle data:', error));
+}
 
 
 // function setupWebSocket() {
@@ -881,4 +890,9 @@ function removeSOS(imei) {
     }
   }
 
-  window.onload = initMap;
+  // window.onload = initMap;
+  window.onload = function() {
+    initMap(); // Initialize the map
+    fetchVehicleData(); // Fetch and display vehicle data
+};
+
