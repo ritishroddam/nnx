@@ -343,7 +343,7 @@ function setupWebSocket() {
 }
 
 function fetchVehicleData() {
-  fetch('/get_vehicle_data')
+  fetch('/api/data')
       .then(response => response.json())
       .then(data => {
           updateMap(data);
