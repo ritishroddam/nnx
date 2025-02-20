@@ -34,15 +34,15 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     distance = R * c
     return distance
 
-# class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-#     allow_reuse_address = True
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
 
-#     def __init__(self, server_address, handler_cls):
-#         super().__init__(server_address, handler_cls)
-#         self.shutdown_event = threading.Event()
+    def __init__(self, server_address, handler_cls):
+        super().__init__(server_address, handler_cls)
+        self.shutdown_event = threading.Event()
 
-#     def server_close(self):
-#         super().server_close()
+    def server_close(self):
+        super().server_close()
 
 # class MyTCPHandler(socketserver.BaseRequestHandler):
 
