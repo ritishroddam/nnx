@@ -330,12 +330,19 @@ countdownTimer = refreshInterval / 1000;  // Reset countdown
 
 function fetchVehicleData() {
   fetch('/api/data')
-      .then(response => response.json())
+      .then(response => {
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+      })
       .then(data => {
-          console.log("Fetched Data:", data); // Debugging
+          console.log("Fetched Data:", data);
           updateMap(data);
       })
-      .catch(error => console.error('Error fetching vehicle data:', error));
+      .catch(error => {
+          console.error("Error fetching vehicle data:", error);
+      });
 }
 
 

@@ -224,7 +224,9 @@ def receive_data():
             else:
                 return jsonify({'error': 'No JSON data received'}), 400
         except Exception as e:
+            print("Error in POST /api/data:", str(e))  # Log error
             return jsonify({'error': str(e)}), 500
+
     elif request.method == 'GET':
         try:
             imei = request.args.get('imei')
@@ -237,34 +239,45 @@ def receive_data():
             cursor = collection.find(query)
             vehicles = list(cursor)
 
+            if not vehicles:
+                print("No vehicle data found for today.")  # Debugging log
+                return jsonify({'error': 'No data found'}), 404
+
             landmarks_cursor = db.landmarks.find({})
             landmarks = list(landmarks_cursor)
 
             for vehicle in vehicles:
-                vehicle_lat = float(vehicle.get('latitude', 0))
-                vehicle_lon = float(vehicle.get('longitude', 0))
+                try:
+                    vehicle_lat = float(vehicle.get('latitude', 0))
+                    vehicle_lon = float(vehicle.get('longitude', 0))
 
-                nearest_landmark = None
-                min_distance = float('inf')
+                    nearest_landmark = None
+                    min_distance = float('inf')
 
-                for landmark in landmarks:
-                    landmark_lat = float(landmark['latitude'])
-                    landmark_lon = float(landmark['longitude'])
+                    for landmark in landmarks:
+                        landmark_lat = float(landmark['latitude'])
+                        landmark_lon = float(landmark['longitude'])
 
-                    distance = calculate_distance(vehicle_lat, vehicle_lon, landmark_lat, landmark_lon)
-                    if distance < min_distance:
-                        min_distance = distance
-                        nearest_landmark = landmark
+                        distance = calculate_distance(vehicle_lat, vehicle_lon, landmark_lat, landmark_lon)
+                        if distance < min_distance:
+                            min_distance = distance
+                            nearest_landmark = landmark
 
-                vehicle['nearest_landmark'] = nearest_landmark['name'] if nearest_landmark else None
-                vehicle['distance_to_landmark'] = min_distance if nearest_landmark else None
-                vehicle['_id'] = str(vehicle['_id'])
+                    vehicle['nearest_landmark'] = nearest_landmark['name'] if nearest_landmark else None
+                    vehicle['distance_to_landmark'] = min_distance if nearest_landmark else None
+                    vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
+                except Exception as e:
+                    print(f"Error processing vehicle data: {str(e)}")  # Log per-vehicle errors
 
             return jsonify(vehicles)
+
         except Exception as e:
+            print("Error in GET /api/data:", str(e))  # Log error
             return jsonify({'error': str(e)}), 500
+
     else:
         return jsonify({'error': 'Method not allowed'}), 405
+
 
 # //////////////////////////////////////////////////////////////
 @app.route('/api/logs', methods=['GET'])
