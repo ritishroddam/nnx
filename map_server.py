@@ -12,7 +12,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-socketio = SocketIO(app)  # ✅ Correct initialization
+socketio = SocketIO(app, cors_allowed_origins="*")  # Enable WebSocket
 
 MONGO_URI = os.getenv(
     'MONGO_URI',
