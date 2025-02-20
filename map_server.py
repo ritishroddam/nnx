@@ -12,7 +12,7 @@ from math import radians, sin, cos, sqrt, atan2
 from flask_cors import CORS
 
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode='eventlet')  # ✅ Correct initialization
+socketio = SocketIO(app)  # ✅ Correct initialization
 
 MONGO_URI = os.getenv(
     'MONGO_URI',
