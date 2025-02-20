@@ -34,7 +34,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
 
 if __name__ == "__main__":
-    host = "64.227.137.175"  # Listen on all network interfaces
+    host = "0.0.0.0"  # Listen on all network interfaces
     port = 8800
     server_shutdown = threading.Event()
 
