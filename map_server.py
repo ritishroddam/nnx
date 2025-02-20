@@ -9,9 +9,11 @@ import signal
 import sys
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
+from flask_cors import CORS
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Enable WebSocket
+CORS(app)
+socketio = SocketIO(app)
 
 MONGO_URI = os.getenv(
     'MONGO_URI',
