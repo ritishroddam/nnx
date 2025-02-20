@@ -14,7 +14,7 @@ app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 app.register_blueprint(route_bp, url_prefix='/routeHistory')
 
-@app.route('/Vehicle/')
+@app.route('/')
 def index():
     return render_template('vehicleMap.html')
 
