@@ -43,12 +43,13 @@ function renderVehicles(vehicles) {
   listContainer.innerHTML = "";
   countContainer.innerText = vehicles.length;
 
-  const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-  const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
   vehicles.forEach(vehicle => {
       const vehicleElement = document.createElement("div");
       vehicleElement.classList.add("vehicle-card");
+
+      const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+      const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+
       vehicleElement.innerHTML = `
           <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
           <div class="vehicle-info">
