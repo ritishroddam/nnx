@@ -360,7 +360,7 @@ def get_logs():
 # Start Flask + WebSocket Server
 def run_servers():
     print("Starting WebSocket Server with Flask...")
-    socketio.run(app, host="0.0.0.0", port=8555, debug=True, use_reloader=False)
+    socketio.run(app, host="0.0.0.0", port=8555, debug=True)
 
 def signal_handler(signal, frame):
     print("Received signal:", signal)
