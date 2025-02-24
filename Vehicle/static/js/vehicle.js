@@ -1,32 +1,65 @@
-const vehicles = [
-  { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
-  { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
-  { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
-];
+// const vehicles = [
+//   { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
+//   { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
+//   { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
+// ];
 
-function renderVehicles() {
-const listContainer = document.getElementById("vehicle-list");
-const countContainer = document.getElementById("vehicle-count");
-listContainer.innerHTML = "";
-countContainer.innerText = vehicles.length;
+// function renderVehicles() {
+// const listContainer = document.getElementById("vehicle-list");
+// const countContainer = document.getElementById("vehicle-count");
+// listContainer.innerHTML = "";
+// countContainer.innerText = vehicles.length;
 
-vehicles.forEach(vehicle => {
-  const vehicleElement = document.createElement("div");
-  vehicleElement.classList.add("vehicle-card");
-  vehicleElement.innerHTML = `
-    <div class="vehicle-header">${vehicle.id} - ${vehicle.status}</div>
-    <div class="vehicle-info">
-      <strong>Duration:</strong> ${vehicle.duration} <br>
-      <strong>Speed:</strong> ${vehicle.speed} <br>
-      <strong>Battery:</strong> ${vehicle.voltage} <br>
-      <strong>Location:</strong> ${vehicle.location}
-    </div>
-  `;
-  listContainer.appendChild(vehicleElement);
-});
+// vehicles.forEach(vehicle => {
+//   const vehicleElement = document.createElement("div");
+//   vehicleElement.classList.add("vehicle-card");
+//   vehicleElement.innerHTML = `
+//     <div class="vehicle-header">${vehicle.id} - ${vehicle.status}</div>
+//     <div class="vehicle-info">
+//       <strong>Duration:</strong> ${vehicle.duration} <br>
+//       <strong>Speed:</strong> ${vehicle.speed} <br>
+//       <strong>Battery:</strong> ${vehicle.voltage} <br>
+//       <strong>Location:</strong> ${vehicle.location}
+//     </div>
+//   `;
+//   listContainer.appendChild(vehicleElement);
+// });
+// }
+
+function fetchVehicleData() {
+  fetch('/vehicle/api/vehicles')
+      .then(response => response.json())
+      .then(data => {
+          renderVehicles(data);
+      })
+      .catch(error => {
+          console.error('Error fetching vehicle data:', error);
+      });
 }
 
-renderVehicles();
+function renderVehicles(vehicles) {
+  const listContainer = document.getElementById("vehicle-list");
+  const countContainer = document.getElementById("vehicle-count");
+  listContainer.innerHTML = "";
+  countContainer.innerText = vehicles.length;
+
+  vehicles.forEach(vehicle => {
+      const vehicleElement = document.createElement("div");
+      vehicleElement.classList.add("vehicle-card");
+      vehicleElement.innerHTML = `
+          <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
+          <div class="vehicle-info">
+              <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
+              <strong>Lat:</strong> ${vehicle.latitude ? vehicle.latitude.toFixed(6) : 'Unknown'} <br>
+              <strong>Lon:</strong> ${vehicle.longitude ? vehicle.longitude.toFixed(6) : 'Unknown'} <br>
+              <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
+              <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
+              <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
+          </div>
+      `;
+      listContainer.appendChild(vehicleElement);
+  });
+}
 
 document.querySelector(".toggle-slider").addEventListener("click", function() {
 this.classList.toggle("active");
@@ -867,4 +900,7 @@ function populateVehicleTable() {
   });
 }
 
-window.onload = initMap;
+window.onload = function() {
+  initMap();
+  fetchVehicleData();
+};
