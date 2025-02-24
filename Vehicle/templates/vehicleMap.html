@@ -25,6 +25,13 @@
         <option value="sos">SOS alert</option>
       </select>
   </div>
+  <div class="toggle-container">
+    <div class="toggle-slider">
+      <div class="toggle-option map-option">🗺️ Map</div>
+      <div class="toggle-option list-option">📋 List</div>
+      <div class="slider-button"></div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block content %}
@@ -53,15 +60,8 @@
 
   <div id="map" class="map"></div>
   <div class="floating-card" style="z-index: 1;">
-       <div class="toggle-container">
-         <div class="toggle-slider">
-             <div class="toggle-option map-option">🗺️ Map</div>
-             <div class="toggle-option list-option">📋 List</div>
-             <div class="slider-button"></div>
-         </div>
-     </div>
-       <h3>All Vehicles: <span id="vehicle-count"></span></h3>
-       <div id="vehicle-list"></div>
+    <h3>All Vehicles: <span id="vehicle-count"></span></h3>
+    <div id="vehicle-list"></div>
   </div>
 {% endblock %}
 
