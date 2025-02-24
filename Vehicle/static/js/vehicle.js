@@ -1247,13 +1247,13 @@ function convertSpeedToKmh(speedMph) {
 
 function getCarIconUrlBySpeed(speedInKmh) {
   if (speedInKmh === 0) {
-    return "assets/images/car_yellow.png";
+    return "/vehicle/static/images/car_yellow.png";
   } else if (speedInKmh > 0 && speedInKmh <= 40) {
-    return "assets/images/car_green.png";
+    return "/vehicle/static/images/car_green.png";
   } else if (speedInKmh > 40 && speedInKmh <= 60) {
-    return "assets/images/car_blue.png";
+    return "/vehicle/static/images/car_blue.png";
   } else {
-    return "assets/images/car_red.png";
+    return "/vehicle/static/images/car_red.png";
   }
 }
 
@@ -1270,7 +1270,7 @@ function getCarIconBySpeed(speed, imei) {
           const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
           const hoursDiff = timeDiff / (1000 * 60 * 60);
           if (hoursDiff >= 3) {
-              iconUrl = "http://64.227.135.38/cariconblack.png";
+              iconUrl = "/vehicle/static/images/car_black.png";
           }
       } else {
           lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
