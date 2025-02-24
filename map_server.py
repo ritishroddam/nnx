@@ -346,6 +346,7 @@ from math import radians, sin, cos, sqrt, atan2
 import socketio
 import eventlet
 import eventlet.wsgi
+from collections.abc import MutableMapping
 
 app = Flask(__name__)
 CORS(app)
