@@ -358,13 +358,13 @@ def get_logs():
 #             sys.exit(0)
 
 # Start Flask + WebSocket Server
-def run_servers():
-    print("Starting WebSocket Server with Flask...")
-    socketio.run(app, host="0.0.0.0", port=8555, debug=True, use_reloader=False)
+# def run_servers():
+#     print("Starting WebSocket Server with Flask...")
+#     socketio.run(app, host="0.0.0.0", port=8555, debug=True, use_reloader=False)
 
 def signal_handler(signal, frame):
     print("Received signal:", signal)
     sys.exit(0)
 
-if __name__ == "__main__":
-    run_servers()
+# if __name__ == "__main__":
+#     run_servers()
