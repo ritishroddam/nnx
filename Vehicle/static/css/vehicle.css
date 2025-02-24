@@ -57,7 +57,7 @@
   width: 80px;
   height: 30px;
   background: white;
-  border-radius: 15px;
+  border-radius: 10px;
   border: 1px solid #d1d1d1;
   overflow: hidden;
   cursor: pointer;
@@ -81,13 +81,13 @@
   width: 45px;
   height: 27px;
   background: #000000d0;
-  border-radius: 15px;
+  border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 /* Active State */
 .active .slider-button {
-  left: 40px;
+  left: 33px;
 }
 
 .active .map-option {
