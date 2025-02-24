@@ -370,6 +370,8 @@
 # #     run_servers()
 
 
+# map_server.py
+
 import threading
 import socketserver
 import json
@@ -711,5 +713,6 @@ def signal_handler(signal, frame):
     print("Received signal:", signal)
     sys.exit(0)
 
-# if __name__ == "__main__":
-#     run_servers()
+if __name__ == "__main__":
+    if os.getenv('RUN_MAP_SERVER') == 'true':
+        run_servers()

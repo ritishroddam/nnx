@@ -31,7 +31,12 @@ def proxy_api_data():
     return jsonify(response.json())
 
 if __name__ == '__main__':
+    # map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
+    # subprocess.Popen(['python', map_server_path])
+
     map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
-    subprocess.Popen(['python', map_server_path])
+    env = os.environ.copy()
+    env['RUN_MAP_SERVER'] = 'true'
+    subprocess.Popen(['python', map_server_path], env=env)
 
     app.run(host='64.227.137.175', port=8888, debug=True)
