@@ -13,8 +13,7 @@
   Vehicle Map
 {% endblock %}
 
-{% block content %}
-  {% block topbar_icons %}
+{% block topbar_icons %}
   <div class="filter-container">
     <label for="speed-filter">Filter by Speed:</label>
       <select id="speed-filter" onchange="filterVehicles()">
@@ -26,8 +25,9 @@
         <option value="sos">SOS alert</option>
       </select>
   </div>
-  {% endblock %}
-  
+{% endblock %}
+
+{% block content %}
   <div class="icon-legend">
      <div>
        <img src="{{ url_for('Vehicle.static', filename='images/car_yellow.png') }}" alt="Yellow Car" />
