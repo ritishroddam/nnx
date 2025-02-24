@@ -81,13 +81,13 @@
   width: 45px;
   height: 27px;
   background: #000000d0;
-  border-radius: 25px;
+  border-radius: 15px;
   transition: all 0.3s ease;
 }
 
 /* Active State */
 .active .slider-button {
-  left: 45px;
+  left: 41px;
 }
 
 .active .map-option {
