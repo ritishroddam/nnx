@@ -43,6 +43,9 @@ function renderVehicles(vehicles) {
   listContainer.innerHTML = "";
   countContainer.innerText = vehicles.length;
 
+  const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+  const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+
   vehicles.forEach(vehicle => {
       const vehicleElement = document.createElement("div");
       vehicleElement.classList.add("vehicle-card");
@@ -50,8 +53,8 @@ function renderVehicles(vehicles) {
           <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
           <div class="vehicle-info">
               <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
-              <strong>Lat:</strong> ${vehicle.latitude ? vehicle.latitude.toFixed(6) : 'Unknown'} <br>
-              <strong>Lon:</strong> ${vehicle.longitude ? vehicle.longitude.toFixed(6) : 'Unknown'} <br>
+              <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
+              <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
               <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
               <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
               <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
@@ -878,10 +881,10 @@ function populateVehicleTable() {
       const speed = device.speed !== null && device.speed !== undefined
           ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
           : 'Unknown';
-      const lat = coords.lat !== null && coords.lat !== undefined
+      const latitude = coords.lat !== null && coords.lat !== undefined
           ? coords.lat.toFixed(6)
           : 'Unknown';
-      const lon = coords.lon !== null && coords.lon !== undefined
+      const longitude = coords.lon !== null && coords.lon !== undefined
           ? coords.lon.toFixed(6)
           : 'Unknown';
       const date = device.date || 'N/A';
@@ -892,8 +895,8 @@ function populateVehicleTable() {
       const row = tableBody.insertRow();
       row.insertCell(0).innerText = device.imei;
       row.insertCell(1).innerText = speed;
-      row.insertCell(2).innerText = lat;
-      row.insertCell(3).innerText = lon;
+      row.insertCell(2).innerText = latitude;
+      row.insertCell(3).innerText = longitude;
       row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
       row.insertCell(5).innerText = address;
       row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
