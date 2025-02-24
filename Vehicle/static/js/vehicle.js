@@ -875,6 +875,8 @@ function removeSOS(imei) {
   // window.onload = initMap;
   window.onload = function() {
     initMap(); // Initialize the map
-    fetchVehicleData(); // Fetch and display vehicle data
+    // fetchVehicleData(); // Fetch and display vehicle data
+    setupWebSocket();
+    fetchVehicleData();
 };
 
