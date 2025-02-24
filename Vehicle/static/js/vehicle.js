@@ -77,14 +77,29 @@ function initMap() {
   };
 
   // Dark Mode Styles
+  // const darkModeStyle = [
+  //     { elementType: "geometry", stylers: [{ color: "#212121" }] },
+  //     { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+  //     { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+  //     { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
+  //     { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
+  //     { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+  //     { elementType: "labels.icon", stylers: [{ "visibility": "off" }]},
+  // ];
+
   const darkModeStyle = [
-      { elementType: "geometry", stylers: [{ color: "#212121" }] },
-      { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-      { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-      { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
-      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
-      { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
-      { elementType: "labels.icon", stylers: [{ "visibility": "off" }]},
+    { elementType: "geometry", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
+    { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { featureType: "road", elementType: "labels.text", stylers: [{ visibility: "off" }] },
+    { featureType: "administrative", elementType: "geometry", stylers: [{ visibility: "off" }] },
+    { featureType: "administrative", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { featureType: "administrative", elementType: "labels.text", stylers: [{ visibility: "off" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
+    { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   ];
 
   const lightModeStyle = [
