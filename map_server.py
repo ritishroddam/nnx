@@ -7,9 +7,11 @@ from flask import Flask, render_template, jsonify, request
 import signal
 import sys
 from datetime import datetime
+from flask_cors import CORS
 from math import radians, sin, cos, sqrt, atan2
 
 app = Flask(__name__)
+CORS(app)
 
 MONGO_URI = os.getenv(
     'MONGO_URI',
