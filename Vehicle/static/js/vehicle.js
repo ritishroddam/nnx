@@ -37,18 +37,18 @@ document.querySelector(".toggle-slider").addEventListener("click", function() {
 // Car appears on the map
 
 var map;
-  var markers = {};
-  var geocoder;
-  var addressCache = {};
-  var lastZeroSpeedTime = {};
-  var refreshInterval = 5000; // 1min for page reload
-  var infoWindow;
-  var countdownTimer = refreshInterval / 1000;
-  var openMarker = null;
-  var firstFit = true;
-  var manualClose = false;
-  var dataAvailable = true;
-  var sosActiveMarkers = {};
+var markers = {};
+var geocoder;
+var addressCache = {};
+var lastZeroSpeedTime = {};
+var refreshInterval = 5000; // 1min for page reload
+var infoWindow;
+var countdownTimer = refreshInterval / 1000;
+var openMarker = null;
+var firstFit = true;
+var manualClose = false;
+var dataAvailable = true;
+var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 var socket;
 
