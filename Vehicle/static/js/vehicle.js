@@ -648,148 +648,85 @@ function removeSOS(imei) {
   }
 
 
-//   function addMarkerClickListener(marker, latLng, device, coords) {
-//     geocodeLatLng(latLng, function (address) {
-//         marker.div.addEventListener("click", function () {
-//             if (openMarker !== marker) {
-//                 const imei = device.imei
-//                     ? device.imei
-//                     : '<span class="missing-data">N/A</span>';
-//                 const speed =
-//                     device.speed !== null && device.speed !== undefined
-//                         ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-//                         : '<span class="missing-data">Unknown</span>';
-//                 const lat =
-//                     coords.lat !== null && coords.lat !== undefined
-//                         ? coords.lat.toFixed(6)
-//                         : '<span class="missing-data">Unknown</span>';
-//                 const lon =
-//                     coords.lon !== null && coords.lon !== undefined
-//                         ? coords.lon.toFixed(6)
-//                         : '<span class="missing-data">Unknown</span>';
-//                 const date = device.date || "N/A";
-//                 const time = device.time || "N/A";
-//                 const addressText = address
-//                     ? address
-//                     : '<span class="missing-data">Location unknown</span>';
+  function addMarkerClickListener(marker, latLng, device, coords) {
+    geocodeLatLng(latLng, function (address) {
+        marker.div.addEventListener("click", function () {
+            if (openMarker !== marker) {
+                const imei = device.imei
+                    ? device.imei
+                    : '<span class="missing-data">N/A</span>';
+                const speed =
+                    device.speed !== null && device.speed !== undefined
+                        ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+                        : '<span class="missing-data">Unknown</span>';
+                const lat =
+                    coords.lat !== null && coords.lat !== undefined
+                        ? coords.lat.toFixed(6)
+                        : '<span class="missing-data">Unknown</span>';
+                const lon =
+                    coords.lon !== null && coords.lon !== undefined
+                        ? coords.lon.toFixed(6)
+                        : '<span class="missing-data">Unknown</span>';
+                const date = device.date || "N/A";
+                const time = device.time || "N/A";
+                const addressText = address
+                    ? address
+                    : '<span class="missing-data">Location unknown</span>';
 
-//                 const { formattedDate, formattedTime } = formatDateTime(date, time);
-//                 const content = `<div class="info-window show">
-//                         <strong>IMEI:</strong> ${imei}<br>
-//                         <hr>
-//                         <p><strong>Speed:</strong> ${speed}</p>
-//                         <p><strong>Lat:</strong> ${lat}</p>
-//                         <p><strong>Lon:</strong> ${lon}</p>
-//                         <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
-//                         <p class="address"><strong>Location:</strong> ${addressText}</p>
-//                         <p><strong>Data:</strong> <a href="device-details.html?imei=${device.imei || "N/A"}" target="_blank">View Data</a></p>
-//                     </div>`;
+                const { formattedDate, formattedTime } = formatDateTime(date, time);
+                const content = `<div class="info-window show">
+                        <strong>IMEI:</strong> ${imei}<br>
+                        <hr>
+                        <p><strong>Speed:</strong> ${speed}</p>
+                        <p><strong>Lat:</strong> ${lat}</p>
+                        <p><strong>Lon:</strong> ${lon}</p>
+                        <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
+                        <p class="address"><strong>Location:</strong> ${addressText}</p>
+                        <p><strong>Data:</strong> <a href="device-details.html?imei=${device.imei || "N/A"}" target="_blank">View Data</a></p>
+                    </div>`;
 
-//                 // Send the location to the backend
-//                 // if (addressText !== "Location unknown") {
-//                 //     // Send the IMEI and address to the backend for storage
-//                 //     fetch("/api/store-location", {
-//                 //         method: "POST",
-//                 //         headers: {
-//                 //             "Content-Type": "application/json",
-//                 //         },
-//                 //         body: JSON.stringify({
-//                 //             imei: imei,
-//                 //             location: addressText,
-//                 //         }),
-//                 //     })
-//                 //         .then(response => response.json())
-//                 //         .then(data => {
-//                 //             console.log("Location stored in database:", data);
-//                 //         })
-//                 //         .catch(error => {
-//                 //             console.error("Error storing location:", error);
-//                 //         });
-//                 // }
+                // Send the location to the backend
+                if (addressText !== "Location unknown") {
+                    // Send the IMEI and address to the backend for storage
+                    fetch("/api/store-location", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            imei: imei,
+                            location: addressText,
+                        }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("Location stored in database:", data);
+                        })
+                        .catch(error => {
+                            console.log("Error storing location:", error);
+                        });
+                }
 
-//                 if (openMarker !== marker) {
-//                     infoWindow.setContent(content);
-//                     infoWindow.setPosition(latLng);
+                if (openMarker !== marker) {
+                    infoWindow.setContent(content);
+                    infoWindow.setPosition(latLng);
 
-//                     const infoWindowDiv = document.querySelector(".info-window");
+                    const infoWindowDiv = document.querySelector(".info-window");
 
-//                     if (infoWindowDiv) {
-//                         infoWindowDiv.classList.remove("hide");
-//                         infoWindowDiv.classList.add("show");
-//                     }
+                    if (infoWindowDiv) {
+                        infoWindowDiv.classList.remove("hide");
+                        infoWindowDiv.classList.add("show");
+                    }
 
-//                     infoWindow.open(map, marker);
-//                     openMarker = marker;
-//                     manualClose = false;
-//                 }
-//             }
-//         });
-//     });
-// }
-
-function addMarkerClickListener(marker, latLng, device, coords) {
-  marker.div.addEventListener("click", function () {
-      if (openMarker !== marker) {
-          const imei = device.imei ? device.imei : '<span class="missing-data">N/A</span>';
-
-          // Fetch the most recent data for the vehicle based on IMEI
-          fetch(`/api/vehicle/${imei}`)
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error(`HTTP error! Status: ${response.status}`);
-                  }
-                  return response.json();
-              })
-              .then(data => {
-                  const speed = data.speed !== null && data.speed !== undefined
-                      ? `${convertSpeedToKmh(data.speed).toFixed(2)} km/h`
-                      : '<span class="missing-data">Unknown</span>';
-                  const lat = data.latitude !== null && data.latitude !== undefined
-                      ? parseCoordinates(data.latitude, data.longitude).lat.toFixed(6)
-                      : '<span class="missing-data">Unknown</span>';
-                  const lon = data.longitude !== null && data.longitude !== undefined
-                      ? parseCoordinates(data.latitude, data.longitude).lon.toFixed(6)
-                      : '<span class="missing-data">Unknown</span>';
-                  const date = data.date || "N/A";
-                  const time = data.time || "N/A";
-                  const addressText = data.address
-                      ? data.address
-                      : '<span class="missing-data">Location unknown</span>';
-
-                  const { formattedDate, formattedTime } = formatDateTime(date, time);
-                  const content = `<div class="info-window show">
-                          <strong>IMEI:</strong> ${imei}<br>
-                          <hr>
-                          <p><strong>Speed:</strong> ${speed}</p>
-                          <p><strong>Lat:</strong> ${lat}</p>
-                          <p><strong>Lon:</strong> ${lon}</p>
-                          <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
-                          <p class="address"><strong>Location:</strong> ${addressText}</p>
-                          <p><strong>Data:</strong> <a href="device-details.html?imei=${imei}" target="_blank">View Data</a></p>
-                      </div>`;
-
-                  if (openMarker !== marker) {
-                      infoWindow.setContent(content);
-                      infoWindow.setPosition(latLng);
-
-                      const infoWindowDiv = document.querySelector(".info-window");
-
-                      if (infoWindowDiv) {
-                          infoWindowDiv.classList.remove("hide");
-                          infoWindowDiv.classList.add("show");
-                      }
-
-                      infoWindow.open(map, marker);
-                      openMarker = marker;
-                      manualClose = false;
-                  }
-              })
-              .catch(error => {
-                  console.error("Error fetching vehicle data:", error);
-              });
-      }
-  });
+                    infoWindow.open(map, marker);
+                    openMarker = marker;
+                    manualClose = false;
+                }
+            }
+        });
+    });
 }
+
 
 
   function updateInfoWindow(marker, latLng, device, coords) {
