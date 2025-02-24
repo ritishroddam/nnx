@@ -14,13 +14,6 @@
 {% endblock %}
 
 {% block topbar_icons %}
-  <div class="toggle-container">
-    <div class="toggle-slider">
-      <div class="toggle-option map-option">🗺️ Map</div>
-      <div class="toggle-option list-option">📋 List</div>
-      <div class="slider-button"></div>
-    </div>
-  </div>
   <div class="filter-container">
     <label for="speed-filter">Filter by Speed:</label>
       <select id="speed-filter" onchange="filterVehicles()">
@@ -31,6 +24,13 @@
         <option value="60+">Above 60 km/h</option>
         <option value="sos">SOS alert</option>
       </select>
+  </div>
+  <div class="toggle-container">
+    <div class="toggle-slider">
+      <div class="toggle-option map-option">🗺️ Map</div>
+      <div class="toggle-option list-option">📋 List</div>
+      <div class="slider-button"></div>
+    </div>
   </div>
 {% endblock %}
 
