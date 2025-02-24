@@ -836,4 +836,49 @@ function geocodeLatLng(latLng, callback) {
   }
 }
 
+function showMapView() {
+  document.getElementById('map').style.display = 'block';
+  document.getElementById('vehicle-table-container').style.display = 'none';
+}
+
+function showListView() {
+  document.getElementById('map').style.display = 'none';
+  document.getElementById('vehicle-table-container').style.display = 'block';
+  populateVehicleTable();
+}
+
+function populateVehicleTable() {
+  const tableBody = document.getElementById('vehicle-table').getElementsByTagName('tbody')[0];
+  tableBody.innerHTML = ''; // Clear existing rows
+
+  Object.keys(markers).forEach(imei => {
+      const marker = markers[imei];
+      const device = marker.device;
+      const coords = marker.latLng;
+
+      const speed = device.speed !== null && device.speed !== undefined
+          ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+          : 'Unknown';
+      const lat = coords.lat !== null && coords.lat !== undefined
+          ? coords.lat.toFixed(6)
+          : 'Unknown';
+      const lon = coords.lon !== null && coords.lon !== undefined
+          ? coords.lon.toFixed(6)
+          : 'Unknown';
+      const date = device.date || 'N/A';
+      const time = device.time || 'N/A';
+      const address = device.address || 'Location unknown';
+      const { formattedDate, formattedTime } = formatDateTime(date, time);
+
+      const row = tableBody.insertRow();
+      row.insertCell(0).innerText = device.imei;
+      row.insertCell(1).innerText = speed;
+      row.insertCell(2).innerText = lat;
+      row.insertCell(3).innerText = lon;
+      row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
+      row.insertCell(5).innerText = address;
+      row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+  });
+}
+
 window.onload = initMap;
