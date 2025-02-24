@@ -25,9 +25,9 @@ def default():
 @app.route('/api/data', methods=['GET', 'POST'])
 def proxy_api_data():
     if request.method == 'POST':
-        response = requests.post('http://64.227.137.175:8002/api/data', json=request.get_json())
+        response = requests.post('http://64.227.137.175:8555/api/data', json=request.get_json())
     else:
-        response = requests.get('http://64.227.137.175:8002/api/data', params=request.args)
+        response = requests.get('http://64.227.137.175:8555/api/data', params=request.args)
     return jsonify(response.json())
 
 if __name__ == '__main__':

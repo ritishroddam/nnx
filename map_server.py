@@ -642,7 +642,8 @@ def get_logs():
 
 
 def start_flask_server():
-    app.run(host='0.0.0.0', port=8555, debug=True, use_reloader=False)
+    # app.run(host='0.0.0.0', port=8555, debug=True, use_reloader=False)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 8555)), app)
 
 def run_servers():
     HOST = "0.0.0.0"
