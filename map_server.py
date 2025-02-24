@@ -44,51 +44,51 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     def server_close(self):
         super().server_close()
 
-# class MyTCPHandler(socketserver.BaseRequestHandler):
+class MyTCPHandler(socketserver.BaseRequestHandler):
 
-#     lock = threading.Lock()
-#     sos_active = False
-#     sos_alert_triggered = False
+    lock = threading.Lock()
+    sos_active = False
+    sos_alert_triggered = False
 
-#     def handle(self):
-#         try:
-#             data = self.request.recv(4096).decode('utf-8').strip()
-#             print("Received raw data:", data)
+    def handle(self):
+        try:
+            data = self.request.recv(4096).decode('utf-8').strip()
+            print("Received raw data:", data)
 
-#             json_data = self.parse_json_data(data)
-#             if json_data:
-#                 print("Valid JSON data:", json_data)
+            json_data = self.parse_json_data(data)
+            if json_data:
+                print("Valid JSON data:", json_data)
 
-#                 sos_state = json_data.get('sos', '0')
-#                 print(f"SOS state received: {sos_state}")
+                sos_state = json_data.get('sos', '0')
+                print(f"SOS state received: {sos_state}")
 
-#                 with MyTCPHandler.lock:
-#                     if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
-#                         MyTCPHandler.sos_active = True
-#                         MyTCPHandler.sos_alert_triggered = True
-#                         print("SOS alert triggered!")
+                with MyTCPHandler.lock:
+                    if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
+                        MyTCPHandler.sos_active = True
+                        MyTCPHandler.sos_alert_triggered = True
+                        print("SOS alert triggered!")
 
-#                         # Log SOS to MongoDB
-#                         self.log_sos_to_mongodb(json_data)
+                        # Log SOS to MongoDB
+                        self.log_sos_to_mongodb(json_data)
 
-#                     elif sos_state == '0' and MyTCPHandler.sos_active:
-#                         MyTCPHandler.sos_active = False
-#                         MyTCPHandler.sos_alert_triggered = False
-#                         print("SOS alert reset.")
+                    elif sos_state == '0' and MyTCPHandler.sos_active:
+                        MyTCPHandler.sos_active = False
+                        MyTCPHandler.sos_alert_triggered = False
+                        print("SOS alert reset.")
 
-#                 if json_data.get('gps') == 'A':
-#                     self.store_data_in_mongodb(json_data)
+                if json_data.get('gps') == 'A':
+                    self.store_data_in_mongodb(json_data)
 
-#                 if 'latitude' in json_data and 'longitude' in json_data:
-#                     latitude = json_data['latitude']
-#                     longitude = json_data['longitude']
-#                     print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
+                if 'latitude' in json_data and 'longitude' in json_data:
+                    latitude = json_data['latitude']
+                    longitude = json_data['longitude']
+                    print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
 
-#             else:
-#                 print("Invalid JSON format")
+            else:
+                print("Invalid JSON format")
 
-#         except Exception as e:
-#             print("Error handling request:", e)
+        except Exception as e:
+            print("Error handling request:", e)
 
 
 # Handle incoming WebSocket connections
@@ -242,9 +242,9 @@ def log_data(json_data):
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
-@app.route('/')
-def index():
-    return render_template('vehicleMap.html')
+# @app.route('/')
+# def index():
+#     return render_template('vehicleMap.html')
 
 @app.route('/api/data', methods=['GET', 'POST'])
 def receive_data():
@@ -327,35 +327,35 @@ def get_logs():
         return jsonify({'error': str(e)}), 500
 
 
-# def start_flask_server():
-#     app.run(host='0.0.0.0', port=8555, debug=True, use_reloader=False)
+def start_flask_server():
+    app.run(host='0.0.0.0', port=8555, debug=True, use_reloader=False)
 
-# def run_servers():
-#     HOST = "0.0.0.0"
-#     PORT = 8000
-#     server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
-#     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
+def run_servers():
+    HOST = "0.0.0.0"
+    PORT = 8000
+    server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
+    print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
 
-#     server_thread = threading.Thread(target=server.serve_forever)
-#     server_thread.daemon = True
-#     server_thread.start()
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.daemon = True
+    server_thread.start()
 
-#     flask_thread = threading.Thread(target=start_flask_server)
-#     flask_thread.daemon = True
-#     flask_thread.start()
+    flask_thread = threading.Thread(target=start_flask_server)
+    flask_thread.daemon = True
+    flask_thread.start()
 
-#     signal.signal(signal.SIGINT, signal_handler)
-#     signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
-#     print("Server running. Press Ctrl+C to stop.")
-#     while True:
-#         try:
-#             signal.pause()
-#         except KeyboardInterrupt:
-#             print("Server shutting down...")
-#             server.shutdown()
-#             server.server_close()
-#             sys.exit(0)
+    print("Server running. Press Ctrl+C to stop.")
+    while True:
+        try:
+            signal.pause()
+        except KeyboardInterrupt:
+            print("Server shutting down...")
+            server.shutdown()
+            server.server_close()
+            sys.exit(0)
 
 # Start Flask + WebSocket Server
 # def run_servers():
