@@ -43,7 +43,7 @@ function renderVehicles(vehicles) {
   listContainer.innerHTML = "";
   
   const imeiSet = new Set(); // Track unique IMEI numbers
-  countContainer.innerText = imeiSet.size;
+  
 
   vehicles.forEach(vehicle => {
       const imei = sanitizeIMEI(vehicle.imei);
@@ -70,6 +70,7 @@ function renderVehicles(vehicles) {
           `;
           listContainer.appendChild(vehicleElement);
       }
+      countContainer.innerText = imeiSet.size;
   });
 }
 
