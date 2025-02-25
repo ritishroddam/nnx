@@ -867,7 +867,7 @@ function showMapView() {
 function showListView() {
   document.getElementById('map').style.display = 'none';
   document.getElementById('vehicle-table-container').style.display = 'block';
-  populateVehicleTable();
+  // populateVehicleTable();
 }
 
 function populateVehicleTable() {
