@@ -598,7 +598,7 @@ if (!sosActiveMarkers[imei]) {
   // Automatically remove the SOS after 60 seconds
   setTimeout(() => {
     removeSOS(imei);
-  }, 60000);
+  }, 120000);
 }
 }
 
