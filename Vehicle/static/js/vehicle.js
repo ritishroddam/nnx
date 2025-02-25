@@ -41,9 +41,9 @@ function renderVehicles(vehicles) {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
-  countContainer.innerText = vehicles.length;
-
+  
   const imeiSet = new Set(); // Track unique IMEI numbers
+  countContainer.innerText = imeiSet.length;
 
   vehicles.forEach(vehicle => {
       const imei = sanitizeIMEI(vehicle.imei);
