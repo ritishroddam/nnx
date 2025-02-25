@@ -182,16 +182,30 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             print("Error parsing JSON data:", e)
             return None
 
+    # def store_data_in_mongodb(self, json_data):
+    #     try:
+    #         collection.update_one(
+    #             {'imei': json_data['imei'], 'date': json_data['date']},
+    #             {'$set': json_data},
+    #             upsert=True
+    #         )
+    #         print("Data stored/updated in MongoDB.")
+    #     except Exception as e:
+    #         print("Error storing data in MongoDB:", e)    
+
     def store_data_in_mongodb(self, json_data):
         try:
-            collection.update_one(
+            result = collection.update_one(
                 {'imei': json_data['imei'], 'date': json_data['date']},
                 {'$set': json_data},
                 upsert=True
             )
-            print("Data stored/updated in MongoDB.")
+            if result.upserted_id is not None:
+                print("Data stored in MongoDB.")
+            else:
+                print("Data updated in MongoDB.")
         except Exception as e:
-            print("Error storing data in MongoDB:", e)    
+            print("Error storing data in MongoDB:", e)
 
     def log_sos_to_mongodb(self, json_data):
         try:
