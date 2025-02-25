@@ -195,15 +195,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def store_data_in_mongodb(self, json_data):
         try:
-            result = collection.update_one(
-                {'imei': json_data['imei'], 'date': json_data['date']},
-                {'$set': json_data},
-                upsert=True
-            )
-            if result.upserted_id is not None:
-                print("Data stored in MongoDB.")
-            else:
-                print("Data updated in MongoDB.")
+            collection.insert_one(json_data)
+            print("Data stored in MongoDB.")
         except Exception as e:
             print("Error storing data in MongoDB:", e)
 
