@@ -1,31 +1,3 @@
-// const vehicles = [
-//   { id: "KA51AH8074", status: "Idling", duration: "2h 33m", speed: "0 km/h", voltage: "10.36V", location: "Horamavu Agara" },
-//   { id: "KA03AG3033", status: "Stopped", duration: "1d 13h", speed: "0 km/h", voltage: "12.23V", location: "Thirumala Layout" },
-//   { id: "KA03AK0471", status: "Stopped", duration: "12h 21m", speed: "0 km/h", voltage: "X.XXV", location: "Bangalore Urban" }
-// ];
-
-// function renderVehicles() {
-// const listContainer = document.getElementById("vehicle-list");
-// const countContainer = document.getElementById("vehicle-count");
-// listContainer.innerHTML = "";
-// countContainer.innerText = vehicles.length;
-
-// vehicles.forEach(vehicle => {
-//   const vehicleElement = document.createElement("div");
-//   vehicleElement.classList.add("vehicle-card");
-//   vehicleElement.innerHTML = `
-//     <div class="vehicle-header">${vehicle.id} - ${vehicle.status}</div>
-//     <div class="vehicle-info">
-//       <strong>Duration:</strong> ${vehicle.duration} <br>
-//       <strong>Speed:</strong> ${vehicle.speed} <br>
-//       <strong>Battery:</strong> ${vehicle.voltage} <br>
-//       <strong>Location:</strong> ${vehicle.location}
-//     </div>
-//   `;
-//   listContainer.appendChild(vehicleElement);
-// });
-// }
-
 function fetchVehicleData() {
   fetch('/vehicle/api/vehicles')
       .then(response => response.json())
@@ -37,31 +9,67 @@ function fetchVehicleData() {
       });
 }
 
+// function renderVehicles(vehicles) {
+//   const listContainer = document.getElementById("vehicle-list");
+//   const countContainer = document.getElementById("vehicle-count");
+//   listContainer.innerHTML = "";
+//   countContainer.innerText = vehicles.length;
+
+//   vehicles.forEach(vehicle => {
+//       const vehicleElement = document.createElement("div");
+//       vehicleElement.classList.add("vehicle-card");
+
+//       const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+//       const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+
+//       vehicleElement.innerHTML = `
+//           <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
+//           <div class="vehicle-info">
+//               <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
+//               <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
+//               <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
+//               <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
+//               <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
+//               <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
+//           </div>
+//       `;
+//       listContainer.appendChild(vehicleElement);
+//   });
+// }
+
 function renderVehicles(vehicles) {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
   countContainer.innerText = vehicles.length;
 
+  const imeiSet = new Set(); // Track unique IMEI numbers
+
   vehicles.forEach(vehicle => {
-      const vehicleElement = document.createElement("div");
-      vehicleElement.classList.add("vehicle-card");
+      const imei = sanitizeIMEI(vehicle.imei);
 
-      const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-      const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+      if (!imeiSet.has(imei)) {
+          imeiSet.add(imei); // Mark IMEI as processed
 
-      vehicleElement.innerHTML = `
-          <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
-          <div class="vehicle-info">
-              <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
-              <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
-              <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
-              <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
-              <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
-              <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
-          </div>
-      `;
-      listContainer.appendChild(vehicleElement);
+          const vehicleElement = document.createElement("div");
+          vehicleElement.classList.add("vehicle-card");
+
+          const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+          const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+
+          vehicleElement.innerHTML = `
+              <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
+              <div class="vehicle-info">
+                  <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
+                  <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
+                  <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
+                  <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
+                  <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
+                  <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
+              </div>
+          `;
+          listContainer.appendChild(vehicleElement);
+      }
   });
 }
 
@@ -870,37 +878,77 @@ function showListView() {
   populateVehicleTable();
 }
 
+// function populateVehicleTable() {
+//   const tableBody = document.getElementById('vehicle-table').getElementsByTagName('tbody')[0];
+//   tableBody.innerHTML = ''; // Clear existing rows
+
+//   Object.keys(markers).forEach(imei => {
+//       const marker = markers[imei];
+//       const device = marker.device;
+//       const coords = marker.latLng;
+
+//       const speed = device.speed !== null && device.speed !== undefined
+//           ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+//           : 'Unknown';
+//       const latitude = coords.lat !== null && coords.lat !== undefined
+//           ? coords.lat.toFixed(6)
+//           : 'Unknown';
+//       const longitude = coords.lon !== null && coords.lon !== undefined
+//           ? coords.lon.toFixed(6)
+//           : 'Unknown';
+//       const date = device.date || 'N/A';
+//       const time = device.time || 'N/A';
+//       const address = device.address || 'Location unknown';
+//       const { formattedDate, formattedTime } = formatDateTime(date, time);
+
+//       const row = tableBody.insertRow();
+//       row.insertCell(0).innerText = device.imei;
+//       row.insertCell(1).innerText = speed;
+//       row.insertCell(2).innerText = latitude;
+//       row.insertCell(3).innerText = longitude;
+//       row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
+//       row.insertCell(5).innerText = address;
+//       row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+//   });
+// }
+
 function populateVehicleTable() {
   const tableBody = document.getElementById('vehicle-table').getElementsByTagName('tbody')[0];
   tableBody.innerHTML = ''; // Clear existing rows
 
+  const imeiSet = new Set(); // Track unique IMEI numbers
+
   Object.keys(markers).forEach(imei => {
-      const marker = markers[imei];
-      const device = marker.device;
-      const coords = marker.latLng;
+      if (!imeiSet.has(imei)) {
+          imeiSet.add(imei); // Mark IMEI as processed
 
-      const speed = device.speed !== null && device.speed !== undefined
-          ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-          : 'Unknown';
-      const latitude = coords.lat !== null && coords.lat !== undefined
-          ? coords.lat.toFixed(6)
-          : 'Unknown';
-      const longitude = coords.lon !== null && coords.lon !== undefined
-          ? coords.lon.toFixed(6)
-          : 'Unknown';
-      const date = device.date || 'N/A';
-      const time = device.time || 'N/A';
-      const address = device.address || 'Location unknown';
-      const { formattedDate, formattedTime } = formatDateTime(date, time);
+          const marker = markers[imei];
+          const device = marker.device;
+          const coords = marker.latLng;
 
-      const row = tableBody.insertRow();
-      row.insertCell(0).innerText = device.imei;
-      row.insertCell(1).innerText = speed;
-      row.insertCell(2).innerText = latitude;
-      row.insertCell(3).innerText = longitude;
-      row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
-      row.insertCell(5).innerText = address;
-      row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+          const speed = device.speed !== null && device.speed !== undefined
+              ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+              : 'Unknown';
+          const latitude = coords.lat !== null && coords.lat !== undefined
+              ? coords.lat.toFixed(6)
+              : 'Unknown';
+          const longitude = coords.lon !== null && coords.lon !== undefined
+              ? coords.lon.toFixed(6)
+              : 'Unknown';
+          const date = device.date || 'N/A';
+          const time = device.time || 'N/A';
+          const address = device.address || 'Location unknown';
+          const { formattedDate, formattedTime } = formatDateTime(date, time);
+
+          const row = tableBody.insertRow();
+          row.insertCell(0).innerText = device.imei;
+          row.insertCell(1).innerText = speed;
+          row.insertCell(2).innerText = latitude;
+          row.insertCell(3).innerText = longitude;
+          row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
+          row.insertCell(5).innerText = address;
+          row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+      }
   });
 }
 
