@@ -89,7 +89,7 @@ function renderVehicles(vehicles) {
 
           listContainer.appendChild(vehicleElement);
       }
-      listContainer.appendChild(vehicleElement);
+      countContainer.innerText = imeiSet.size;
   });
 }
 
