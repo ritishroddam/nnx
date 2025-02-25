@@ -13,9 +13,8 @@ function fetchVehicleData() {
 //   const listContainer = document.getElementById("vehicle-list");
 //   const countContainer = document.getElementById("vehicle-count");
 //   listContainer.innerHTML = "";
-  
+
 //   const imeiSet = new Set(); // Track unique IMEI numbers
-  
 
 //   vehicles.forEach(vehicle => {
 //       const imei = sanitizeIMEI(vehicle.imei);
@@ -25,6 +24,7 @@ function fetchVehicleData() {
 
 //           const vehicleElement = document.createElement("div");
 //           vehicleElement.classList.add("vehicle-card");
+//           vehicleElement.setAttribute("data-imei", vehicle.imei);
 
 //           const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
 //           const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
@@ -40,6 +40,16 @@ function fetchVehicleData() {
 //                   <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
 //               </div>
 //           `;
+
+//           // Add hover event listener to zoom in on the map
+//           vehicleElement.addEventListener("mouseover", () => {
+//               const marker = markers[imei];
+//               if (marker) {
+//                   map.setZoom(15);
+//                   map.panTo(marker.latLng);
+//               }
+//           });
+
 //           listContainer.appendChild(vehicleElement);
 //       }
 //       countContainer.innerText = imeiSet.size;
@@ -50,6 +60,7 @@ function renderVehicles(vehicles) {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
+  countContainer.innerText = vehicles.length;
 
   const imeiSet = new Set(); // Track unique IMEI numbers
 
@@ -78,18 +89,23 @@ function renderVehicles(vehicles) {
               </div>
           `;
 
-          // Add hover event listener to zoom in on the map
+          // Add hover event listener to zoom in on the map and show info window
           vehicleElement.addEventListener("mouseover", () => {
               const marker = markers[imei];
               if (marker) {
+                  const offset = 5; // Set the map offset
+                  const latLng = new google.maps.LatLng(marker.latLng.lat() + offset, marker.latLng.lng());
                   map.setZoom(15);
-                  map.panTo(marker.latLng);
+                  map.panTo(latLng);
+
+                  // Show the info window
+                  const coords = { lat: marker.latLng.lat(), lon: marker.latLng.lng() };
+                  updateInfoWindow(marker, marker.latLng, marker.device, coords);
               }
           });
 
           listContainer.appendChild(vehicleElement);
       }
-      countContainer.innerText = imeiSet.size;
   });
 }
 
@@ -746,36 +762,55 @@ function formatDateTime(dateString, timeString) {
 
 
 
-// dfhsgf
+// Updates Info window content
+// function updateInfoWindow(marker, latLng, device, coords) {
+//   geocodeLatLng(latLng, function (address) {
+//     if (openMarker === marker && !manualClose) {
+//       const { formattedDate, formattedTime } = formatDateTime(
+//         device.date,
+//         device.time
+//       );
+//       const content = `<div class="info-window show">
+//               <strong>IMEI:</strong> ${device.imei}<br>
+//               <hr>
+//               <p><strong>Speed:</strong> ${convertSpeedToKmh(
+//                 device.speed
+//               ).toFixed(2)} km/h</p>
+//               <p><strong>Lat:</strong> ${coords.lat.toFixed(6)}</p>
+//               <p><strong>Lon:</strong> ${coords.lon.toFixed(6)}</p>
+//               <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
+//               <p class="address"><strong>Location:</strong> ${address}</p>
+//               <p><strong>Data:</strong> <a href="device-details.html?imei=${
+//                 device.imei
+//               }" target="_blank">View Data</a></p>
+//           </div>`;
+//       infoWindow.setContent(content);
+//       infoWindow.setPosition(latLng);
+//       infoWindow.open(map, marker);
+//     }
+//   });
+// }
+
 function updateInfoWindow(marker, latLng, device, coords) {
   geocodeLatLng(latLng, function (address) {
-    if (openMarker === marker && !manualClose) {
-      const { formattedDate, formattedTime } = formatDateTime(
-        device.date,
-        device.time
-      );
-      const content = `<div class="info-window show">
-              <strong>IMEI:</strong> ${device.imei}<br>
-              <hr>
-              <p><strong>Speed:</strong> ${convertSpeedToKmh(
-                device.speed
-              ).toFixed(2)} km/h</p>
-              <p><strong>Lat:</strong> ${coords.lat.toFixed(6)}</p>
-              <p><strong>Lon:</strong> ${coords.lon.toFixed(6)}</p>
-              <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
-              <p class="address"><strong>Location:</strong> ${address}</p>
-              <p><strong>Data:</strong> <a href="device-details.html?imei=${
-                device.imei
-              }" target="_blank">View Data</a></p>
-          </div>`;
-      infoWindow.setContent(content);
-      infoWindow.setPosition(latLng);
-      infoWindow.open(map, marker);
-    }
+      if (openMarker === marker && !manualClose) {
+          const { formattedDate, formattedTime } = formatDateTime(device.date, device.time);
+          const content = `<div class="info-window show">
+                  <strong>IMEI:</strong> ${device.imei}<br>
+                  <hr>
+                  <p><strong>Speed:</strong> ${convertSpeedToKmh(device.speed).toFixed(2)} km/h</p>
+                  <p><strong>Lat:</strong> ${coords.lat.toFixed(6)}</p>
+                  <p><strong>Lon:</strong> ${coords.lon.toFixed(6)}</p>
+                  <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
+                  <p class="address"><strong>Location:</strong> ${address}</p>
+                  <p><strong>Data:</strong> <a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a></p>
+              </div>`;
+          infoWindow.setContent(content);
+          infoWindow.setPosition(latLng);
+          infoWindow.open(map, marker);
+      }
   });
 }
-
-
 
     function filterVehicles() {
 const filterValue = document.getElementById("speed-filter").value;
@@ -811,45 +846,6 @@ Object.keys(markers).forEach((imei) => {
   marker.setVisible(isVisible);
 });
 }
-
-
-    
-// function createCustomMarker(latLng, iconUrl, rotation, device) {
-//   const div = document.createElement("div");
-//   div.className = "custom-marker";
-//   div.style.backgroundImage = `url(${iconUrl})`;
-//   div.style.transform = `rotate(${rotation}deg)`;
-
-//   const marker = new google.maps.OverlayView();
-//   marker.div = div;
-//   marker.latLng = latLng;
-//   marker.device = device;
-
-//   marker.onAdd = function () {
-//     const panes = this.getPanes();
-//     panes.overlayMouseTarget.appendChild(div);
-//   };
-
-//   marker.draw = function () {
-//     const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
-//     if (point) {
-//       div.style.left = point.x - div.offsetWidth / 2 + "px";
-//       div.style.top = point.y - div.offsetHeight / 2 + "px";
-//     }
-//   };
-
-//   marker.onRemove = function () {
-//     div.parentNode.removeChild(div);
-//   };
-
-//   marker.setVisible = function (visible) {
-//       div.style.display = visible ? "block" : "none";
-//   };
-
-//   marker.setMap(map);
-//   addMarkerClickListener(marker, latLng, {}, {});
-//   return marker;
-// }
 
 function createCustomMarker(latLng, iconUrl, rotation, device) {
   const div = document.createElement("div");
