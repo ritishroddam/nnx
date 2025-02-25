@@ -531,6 +531,8 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
           dataAvailable = true;
           countdownTimer = refreshInterval / 1000;
 
+          const countContainer = document.getElementById("countee");
+
           data.forEach(device => {
               const imei = sanitizeIMEI(device.imei);
 
@@ -570,6 +572,7 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
                   // Check if data is missing for more than 1 hour
                   checkForDataTimeout(imei);
               }
+              countContainer.innerText = imeiSet.size;
           });
 
           saveMarkers();
