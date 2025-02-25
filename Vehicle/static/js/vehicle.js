@@ -27,14 +27,14 @@
 // }
 
 function fetchVehicleData() {
-  // fetch('/vehicle/api/vehicles')
-  //     .then(response => response.json())
-  //     .then(data => {
-  //         renderVehicles(data);
-  //     })
-  //     .catch(error => {
-  //         console.error('Error fetching vehicle data:', error);
-  //     });
+  fetch('/vehicle/api/vehicles')
+      .then(response => response.json())
+      .then(data => {
+          renderVehicles(data);
+      })
+      .catch(error => {
+          console.error('Error fetching vehicle data:', error);
+      });
 }
 
 function renderVehicles(vehicles) {
@@ -598,7 +598,7 @@ if (!sosActiveMarkers[imei]) {
   // Automatically remove the SOS after 60 seconds
   setTimeout(() => {
     removeSOS(imei);
-  }, 120000);
+  }, 60000);
 }
 }
 
@@ -867,7 +867,7 @@ function showMapView() {
 function showListView() {
   document.getElementById('map').style.display = 'none';
   document.getElementById('vehicle-table-container').style.display = 'block';
-  // populateVehicleTable();
+  populateVehicleTable();
 }
 
 function populateVehicleTable() {
