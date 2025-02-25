@@ -60,7 +60,6 @@ function renderVehicles(vehicles) {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
-  countContainer.innerText = vehicles.length;
 
   const imeiSet = new Set(); // Track unique IMEI numbers
 
@@ -89,25 +88,22 @@ function renderVehicles(vehicles) {
               </div>
           `;
 
-          // Add hover event listener to zoom in on the map and show info window
+          // Add hover event listener to zoom in on the map and show the info window
           vehicleElement.addEventListener("mouseover", () => {
               const marker = markers[imei];
               if (marker) {
-                  const offset = 5; // Set the map offset
-                  const latLng = new google.maps.LatLng(marker.latLng.lat() + offset, marker.latLng.lng());
                   map.setZoom(15);
-                  map.panTo(latLng);
-
-                  // Show the info window
-                  const coords = { lat: marker.latLng.lat(), lon: marker.latLng.lng() };
-                  updateInfoWindow(marker, marker.latLng, marker.device, coords);
+                  map.panTo(marker.latLng);
+                  updateInfoWindow(marker, marker.latLng, marker.device, { lat: marker.latLng.lat(), lon: marker.latLng.lng() });
               }
           });
 
           listContainer.appendChild(vehicleElement);
       }
+      countContainer.innerText = imeiSet.size;
   });
 }
+
 
 document.querySelector(".toggle-slider").addEventListener("click", function() {
 this.classList.toggle("active");
@@ -793,7 +789,7 @@ function formatDateTime(dateString, timeString) {
 
 function updateInfoWindow(marker, latLng, device, coords) {
   geocodeLatLng(latLng, function (address) {
-      if (openMarker === marker && !manualClose) {
+      if (openMarker !== marker || manualClose) {
           const { formattedDate, formattedTime } = formatDateTime(device.date, device.time);
           const content = `<div class="info-window show">
                   <strong>IMEI:</strong> ${device.imei}<br>
@@ -808,6 +804,8 @@ function updateInfoWindow(marker, latLng, device, coords) {
           infoWindow.setContent(content);
           infoWindow.setPosition(latLng);
           infoWindow.open(map, marker);
+          openMarker = marker;
+          manualClose = false;
       }
   });
 }
