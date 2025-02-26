@@ -1032,85 +1032,208 @@ function renderVehicles(vehicles) {
     });
 }
 
+// function initMap() {
+//   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+//   const offset = -5;
+
+//   const newCenter = {
+//       lat: defaultCenter.lat,
+//       lng: defaultCenter.lng + offset
+//   };
+
+//   // Dark Mode Styles
+//   const darkModeStyle = [
+//       { elementType: "geometry", stylers: [{ color: "#212121" }] },
+//       { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+//       { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+//       { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
+//       { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
+//       { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+//       { elementType: "labels.icon", stylers: [{ "visibility": "off" }]},
+//   ];
+
+//   // Default/Light Mode Styles
+//   const lightModeStyle = [
+//     { "elementType": "geometry",  "stylers": [{"color": "#f5f5f5"}]},
+//     {"elementType": "labels.icon","stylers": [{"visibility": "off"}]},
+//     {"elementType": "labels.text.fill","stylers": [{"color": "#616161"}]},
+//     {"elementType": "labels.text.stroke","stylers": [{"color": "#f5f5f5"}]},
+//     {"featureType": "administrative.land_parcel","elementType": "labels.text.fill","stylers": [{"color": "#bdbdbd"}]},
+//     {"featureType": "poi","elementType": "geometry","stylers": [{"color": "#eeeeee"}]},
+//     {"featureType": "poi","elementType": "labels.text.fill","stylers": [{"color": "#757575"}]},
+//     {"featureType": "poi.park","elementType": "geometry","stylers": [{"color": "#defff0"}]},
+//     {"featureType": "poi.park","elementType": "labels.text.fill","stylers": [{"color": "#9e9e9e"}]},
+//     {"featureType": "road","elementType": "geometry","stylers": [{"color": "#ffffff"}]},
+//     {"featureType": "road.arterial","elementType": "labels.text.fill","stylers": [{"color": "#757575"}]},
+//     {"featureType": "road.highway","elementType": "geometry","stylers": [{"color": "#dadada"}]},
+//     {"featureType": "road.highway","elementType": "labels.text.fill","stylers": [{"color": "#616161"}]},
+//     {"featureType": "road.local","elementType": "labels.text.fill","stylers": [ {"color": "#9e9e9e"}]},
+//     {"featureType": "transit.line","elementType": "geometry", "stylers": [{"color": "#e5e5e5"}]},
+//     {"featureType": "transit.station","elementType": "geometry","stylers": [{"color": "#eeeeee"}]},
+//     {"featureType": "water","elementType": "geometry","stylers": [{"color": "#def2ff"}]},
+//     {"featureType": "water","elementType": "labels.text.fill","stylers": [{"color": "#9e9e9e"}]}
+//   ];
+
+//   // Initialize Map
+//   map = new google.maps.Map(document.getElementById("map"), {
+//       center: newCenter,
+//       zoom: 5,
+//       gestureHandling: "greedy",
+//       zoomControl: true,
+//       mapTypeControl: false, // Disable default map type buttons
+//       clickableIcons: false, // Disable POI icons
+//       styles: lightModeStyle, // Default to dark mode
+//       zoomControlOptions: {
+//           position: google.maps.ControlPosition.RIGHT_BOTTOM,
+//       },
+//   });
+
+//   geocoder = new google.maps.Geocoder();
+//   infoWindow = new google.maps.InfoWindow();
+
+//   google.maps.event.addListener(infoWindow, "closeclick", function () {
+//       const infoWindowDiv = document.querySelector(".info-window");
+
+//       if (infoWindowDiv) {
+//           infoWindowDiv.classList.remove("show");
+//           infoWindowDiv.classList.add("hide");
+
+//           setTimeout(function () {
+//               infoWindow.close();
+//           }, 300);
+//       }
+
+//       manualClose = true;
+//       openMarker = null;
+//   });
+
+//   restoreMarkers();
+//   fetchVehicleData();
+
+//   // Add Toggle Button
+//   const toggleButton = document.createElement("button");
+//   toggleButton.textContent = "Switch to Dark Map";
+//   toggleButton.style.position = "absolute";
+//   toggleButton.style.bottom = "20px";
+//   toggleButton.style.right = "20px";
+//   toggleButton.style.zIndex = "1000";
+//   toggleButton.style.padding = "10px 15px";
+//   toggleButton.style.background = "#fff";
+//   toggleButton.style.border = "1px solid #ccc";
+//   toggleButton.style.borderRadius = "5px";
+//   toggleButton.style.cursor = "pointer";
+//   toggleButton.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.3)";
+//   toggleButton.style.fontSize = "14px";
+//   toggleButton.style.fontWeight = "bold";
+//   toggleButton.style.color = "#333";
+
+//   document.getElementById("map").appendChild(toggleButton);
+
+//   // Set initial mode to dark mode
+//   let darkMode = true;
+
+//   toggleButton.addEventListener("click", function () {
+//       if (darkMode) {
+//           map.setOptions({ styles: darkModeStyle });
+//           toggleButton.textContent = "Switch to Standard Map";
+//       } else {
+//           map.setOptions({ styles: lightModeStyle });
+//           toggleButton.textContent = "Switch to Dark Map";
+//       }
+//       darkMode = !darkMode; // Toggle the state
+//   });
+  
+//   setInterval(function () {
+//         if (countdownTimer > 0) {
+//           countdownTimer--;
+//           // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+//         } else {
+//       updateMap();
+//       fetchVehicleData();
+//       countdownTimer = refreshInterval / 1000;  // Reset countdown
+//     }
+//     }, 1000)
+// };
+
 function initMap() {
-  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-  const offset = -5;
-
-  const newCenter = {
-      lat: defaultCenter.lat,
-      lng: defaultCenter.lng + offset
-  };
-
-  // Dark Mode Styles
-  const darkModeStyle = [
-      { elementType: "geometry", stylers: [{ color: "#212121" }] },
-      { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-      { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-      { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
-      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
-      { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
-      { elementType: "labels.icon", stylers: [{ "visibility": "off" }]},
-  ];
-
-  // Default/Light Mode Styles
-  const lightModeStyle = [
-    { "elementType": "geometry",  "stylers": [{"color": "#f5f5f5"}]},
-    {"elementType": "labels.icon","stylers": [{"visibility": "off"}]},
-    {"elementType": "labels.text.fill","stylers": [{"color": "#616161"}]},
-    {"elementType": "labels.text.stroke","stylers": [{"color": "#f5f5f5"}]},
-    {"featureType": "administrative.land_parcel","elementType": "labels.text.fill","stylers": [{"color": "#bdbdbd"}]},
-    {"featureType": "poi","elementType": "geometry","stylers": [{"color": "#eeeeee"}]},
-    {"featureType": "poi","elementType": "labels.text.fill","stylers": [{"color": "#757575"}]},
-    {"featureType": "poi.park","elementType": "geometry","stylers": [{"color": "#defff0"}]},
-    {"featureType": "poi.park","elementType": "labels.text.fill","stylers": [{"color": "#9e9e9e"}]},
-    {"featureType": "road","elementType": "geometry","stylers": [{"color": "#ffffff"}]},
-    {"featureType": "road.arterial","elementType": "labels.text.fill","stylers": [{"color": "#757575"}]},
-    {"featureType": "road.highway","elementType": "geometry","stylers": [{"color": "#dadada"}]},
-    {"featureType": "road.highway","elementType": "labels.text.fill","stylers": [{"color": "#616161"}]},
-    {"featureType": "road.local","elementType": "labels.text.fill","stylers": [ {"color": "#9e9e9e"}]},
-    {"featureType": "transit.line","elementType": "geometry", "stylers": [{"color": "#e5e5e5"}]},
-    {"featureType": "transit.station","elementType": "geometry","stylers": [{"color": "#eeeeee"}]},
-    {"featureType": "water","elementType": "geometry","stylers": [{"color": "#def2ff"}]},
-    {"featureType": "water","elementType": "labels.text.fill","stylers": [{"color": "#9e9e9e"}]}
-  ];
-
-  // Initialize Map
-  map = new google.maps.Map(document.getElementById("map"), {
-      center: newCenter,
-      zoom: 5,
-      gestureHandling: "greedy",
-      zoomControl: true,
-      mapTypeControl: false, // Disable default map type buttons
-      clickableIcons: false, // Disable POI icons
-      styles: lightModeStyle, // Default to dark mode
-      zoomControlOptions: {
+    const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+    const offset = -5;
+  
+    const newCenter = {
+        lat: defaultCenter.lat,
+        lng: defaultCenter.lng + offset
+    };
+  
+    // Dark Mode Styles
+    const darkModeStyle = [
+        { elementType: "geometry", stylers: [{ color: "#212121" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#373737" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
+        { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+        { elementType: "labels.icon", stylers: [{ "visibility": "off" }]},
+    ];
+  
+    const lightModeStyle = [
+      { "elementType": "geometry",  "stylers": [{"color": "#f5f5f5"}]},
+      {"elementType": "labels.icon","stylers": [{"visibility": "off"}]},
+      {"elementType": "labels.text.fill","stylers": [{"color": "#616161"}]},
+      {"elementType": "labels.text.stroke","stylers": [{"color": "#f5f5f5"}]},
+      {"featureType": "administrative.land_parcel","elementType": "labels.text.fill","stylers": [{"color": "#bdbdbd"}]},
+      {"featureType": "poi","elementType": "geometry","stylers": [{"color": "#eeeeee"}]},
+      {"featureType": "poi","elementType": "labels.text.fill","stylers": [{"color": "#757575"}]},
+      {"featureType": "poi.park","elementType": "geometry","stylers": [{"color": "#defff0"}]},
+      {"featureType": "poi.park","elementType": "labels.text.fill","stylers": [{"color": "#9e9e9e"}]},
+      {"featureType": "road","elementType": "geometry","stylers": [{"color": "#ffffff"}]},
+      {"featureType": "road.arterial","elementType": "labels.text.fill","stylers": [{"color": "#757575"}]},
+      {"featureType": "road.highway","elementType": "geometry","stylers": [{"color": "#dadada"}]},
+      {"featureType": "road.highway","elementType": "labels.text.fill","stylers": [{"color": "#616161"}]},
+      {"featureType": "road.local","elementType": "labels.text.fill","stylers": [ {"color": "#9e9e9e"}]},
+      {"featureType": "transit.line","elementType": "geometry", "stylers": [{"color": "#e5e5e5"}]},
+      {"featureType": "transit.station","elementType": "geometry","stylers": [{"color": "#eeeeee"}]},
+      {"featureType": "water","elementType": "geometry","stylers": [{"color": "#def2ff"}]},
+      {"featureType": "water","elementType": "labels.text.fill","stylers": [{"color": "#9e9e9e"}]}
+    ];
+  
+    // Initialize Map
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: newCenter,
+        zoom: 5,
+        gestureHandling: "greedy",
+        zoomControl: true,
+        mapTypeControl: false, // Disable default map type buttons
+        clickableIcons: false, // Disable POI icons
+        styles: lightModeStyle, // Default to dark mode
+        zoomControlOptions: {
           position: google.maps.ControlPosition.RIGHT_BOTTOM,
-      },
-  });
-
-  geocoder = new google.maps.Geocoder();
-  infoWindow = new google.maps.InfoWindow();
-
-  google.maps.event.addListener(infoWindow, "closeclick", function () {
-      const infoWindowDiv = document.querySelector(".info-window");
-
-      if (infoWindowDiv) {
-          infoWindowDiv.classList.remove("show");
-          infoWindowDiv.classList.add("hide");
-
-          setTimeout(function () {
-              infoWindow.close();
-          }, 300);
-      }
-
-      manualClose = true;
-      openMarker = null;
-  });
-
-  restoreMarkers();
-  fetchVehicleData();
-
-  // Add Toggle Button
+        },
+    });
+  
+    geocoder = new google.maps.Geocoder();
+    infoWindow = new google.maps.InfoWindow();
+  
+    google.maps.event.addListener(infoWindow, "closeclick", function () {
+        const infoWindowDiv = document.querySelector(".info-window");
+  
+        if (infoWindowDiv) {
+            infoWindowDiv.classList.remove("show");
+            infoWindowDiv.classList.add("hide");
+  
+            setTimeout(function () {
+                infoWindow.close();
+            }, 300);
+        }
+  
+        manualClose = true;
+        openMarker = null;
+    });
+  
+     restoreMarkers();
+    // setupWebSocket();
+    
+  
+    // Add Toggle Button
   const toggleButton = document.createElement("button");
   toggleButton.textContent = "Switch to Dark Map";
   toggleButton.style.position = "absolute";
@@ -1126,12 +1249,12 @@ function initMap() {
   toggleButton.style.fontSize = "14px";
   toggleButton.style.fontWeight = "bold";
   toggleButton.style.color = "#333";
-
+  
   document.getElementById("map").appendChild(toggleButton);
-
+  
   // Set initial mode to dark mode
   let darkMode = true;
-
+  
   toggleButton.addEventListener("click", function () {
       if (darkMode) {
           map.setOptions({ styles: darkModeStyle });
@@ -1143,18 +1266,17 @@ function initMap() {
       darkMode = !darkMode; // Toggle the state
   });
   
-  setInterval(function () {
-        if (countdownTimer > 0) {
-          countdownTimer--;
-          // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-        } else {
-      updateMap();
-      fetchVehicleData();
-      countdownTimer = refreshInterval / 1000;  // Reset countdown
-    }
-    }, 1000)
+    setInterval(function () {
+      if (countdownTimer > 0) {
+        countdownTimer--;
+        // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+      } else {
+    updateMap();
+    fetchVehicleData();
+    countdownTimer = refreshInterval / 1000;  // Reset countdown
+  }
+  }, 1000)
 };
-
 
 // Save the current state of markers into session storage
 function saveMarkers() {
