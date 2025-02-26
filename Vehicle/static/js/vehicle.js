@@ -396,6 +396,7 @@ toggleButton.addEventListener("click", function () {
       // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
     } else {
   updateMap();
+  fetchVehicleData();
   countdownTimer = refreshInterval / 1000;  // Reset countdown
 }
 }, 1000)};
