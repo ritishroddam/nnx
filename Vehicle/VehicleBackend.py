@@ -24,7 +24,7 @@ MONGO_URI = os.getenv(
 )
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['nnx']
-collection = db['atlanta']
+collection = db['distinctAtlanta']
 
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
 def get_vehicles():

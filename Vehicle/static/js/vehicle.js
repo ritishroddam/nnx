@@ -60,47 +60,41 @@ function renderVehicles(vehicles) {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
-
-  const imeiSet = new Set(); // Track unique IMEI numbers
+  countContainer.innerText = vehicles.length;
 
   vehicles.forEach(vehicle => {
       const imei = sanitizeIMEI(vehicle.imei);
 
-      if (!imeiSet.has(imei)) {
-          imeiSet.add(imei); // Mark IMEI as processed
+      const vehicleElement = document.createElement("div");
+      vehicleElement.classList.add("vehicle-card");
+      vehicleElement.setAttribute("data-imei", vehicle.imei);
 
-          const vehicleElement = document.createElement("div");
-          vehicleElement.classList.add("vehicle-card");
-          vehicleElement.setAttribute("data-imei", vehicle.imei);
+      const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+      const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
-          const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-          const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+      vehicleElement.innerHTML = `
+          <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
+          <div class="vehicle-info">
+              <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
+              <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
+              <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
+              <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
+              <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
+              <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
+          </div>
+      `;
 
-          vehicleElement.innerHTML = `
-              <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
-              <div class="vehicle-info">
-                  <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
-                  <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
-                  <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
-                  <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
-                  <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
-                  <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
-              </div>
-          `;
+      // Add hover event listener to zoom in on the map and show the info window
+      vehicleElement.addEventListener("mouseover", () => {
+          const marker = markers[imei];
+          if (marker) {
+              map.setZoom(15);
+              map.panTo(marker.latLng);
+              updateInfoWindow(marker, marker.latLng, marker.device, { lat: marker.latLng.lat(), lon: marker.latLng.lng() });
+          }
+      });
 
-          // Add hover event listener to zoom in on the map and show the info window
-          vehicleElement.addEventListener("mouseover", () => {
-              const marker = markers[imei];
-              if (marker) {
-                  map.setZoom(15);
-                  map.panTo(marker.latLng);
-                  updateInfoWindow(marker, marker.latLng, marker.device, { lat: marker.latLng.lat(), lon: marker.latLng.lng() });
-              }
-          });
-
-          listContainer.appendChild(vehicleElement);
-      }
-      countContainer.innerText = imeiSet.size;
+      listContainer.appendChild(vehicleElement);
   });
 }
 
@@ -553,11 +547,80 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 
 
 
-    function updateMap() {
-  fetch('/api/data')
+//     function updateMap() {
+//   fetch('/api/data')
+//       .then(response => response.json())
+//       .then(data => {
+//           var imeiSet = new Set(); // Track unique IMEI numbers
+//           var bounds = new google.maps.LatLngBounds();
+//           dataAvailable = true;
+//           countdownTimer = refreshInterval / 1000;
+
+//           const countContainer = document.getElementById("countee");
+
+//           data.forEach(device => {
+//               const imei = sanitizeIMEI(device.imei);
+
+//               if (!imeiSet.has(imei)) {
+//                   imeiSet.add(imei); // Mark IMEI as processed
+
+//                   if (device.latitude && device.longitude && device.speed != null && device.course != null) {
+//                       const coords = parseCoordinates(device.latitude, device.longitude);
+//                       const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+//                       const iconUrl = getCarIconBySpeed(device.speed, imei);
+//                       const rotation = device.course;
+
+//                       if (markers[imei]) {
+//                           // Update existing marker
+//                           animateMarker(markers[imei], latLng);
+//                           updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+//                           markers[imei].device = device; // Update device data
+//                           updateInfoWindow(markers[imei], latLng, device, coords);
+//                       } else {
+//                           // Create a new marker
+//                           markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+//                           addMarkerClickListener(markers[imei], latLng, device, coords);
+//                       }
+
+//                       if (device.sos === "1") {
+//                           triggerSOS(imei, markers[imei]);
+//                       } else {
+//                           removeSOS(imei);
+//                       }
+
+//                       // Update last data received time
+//                       lastDataReceivedTime[imei] = new Date();
+
+//                       bounds.extend(latLng);
+//                   }
+
+//                   // Check if data is missing for more than 1 hour
+//                   checkForDataTimeout(imei);
+//               }
+//               countContainer.innerText = imeiSet.size;
+//           });
+
+//           saveMarkers();
+
+//           if (!bounds.isEmpty() && firstFit) {
+//               map.fitBounds(bounds);
+//               firstFit = false;
+//           }
+
+//           // Apply current speed filter after updating markers
+//           // filterVehiclesBySpeed();
+//         filterVehicles();
+//       })
+//       .catch(error => {
+//           console.error("Error fetching data:", error);
+//           dataAvailable = false;
+//       });
+// }
+
+function updateMap() {
+  fetch('/vehicle/api/vehicles')
       .then(response => response.json())
       .then(data => {
-          var imeiSet = new Set(); // Track unique IMEI numbers
           var bounds = new google.maps.LatLngBounds();
           dataAvailable = true;
           countdownTimer = refreshInterval / 1000;
@@ -567,43 +630,38 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
           data.forEach(device => {
               const imei = sanitizeIMEI(device.imei);
 
-              if (!imeiSet.has(imei)) {
-                  imeiSet.add(imei); // Mark IMEI as processed
+              if (device.latitude && device.longitude && device.speed != null && device.course != null) {
+                  const coords = parseCoordinates(device.latitude, device.longitude);
+                  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+                  const iconUrl = getCarIconBySpeed(device.speed, imei);
+                  const rotation = device.course;
 
-                  if (device.latitude && device.longitude && device.speed != null && device.course != null) {
-                      const coords = parseCoordinates(device.latitude, device.longitude);
-                      const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-                      const iconUrl = getCarIconBySpeed(device.speed, imei);
-                      const rotation = device.course;
-
-                      if (markers[imei]) {
-                          // Update existing marker
-                          animateMarker(markers[imei], latLng);
-                          updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-                          markers[imei].device = device; // Update device data
-                          updateInfoWindow(markers[imei], latLng, device, coords);
-                      } else {
-                          // Create a new marker
-                          markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
-                          addMarkerClickListener(markers[imei], latLng, device, coords);
-                      }
-
-                      if (device.sos === "1") {
-                          triggerSOS(imei, markers[imei]);
-                      } else {
-                          removeSOS(imei);
-                      }
-
-                      // Update last data received time
-                      lastDataReceivedTime[imei] = new Date();
-
-                      bounds.extend(latLng);
+                  if (markers[imei]) {
+                      // Update existing marker
+                      animateMarker(markers[imei], latLng);
+                      updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+                      markers[imei].device = device; // Update device data
+                      updateInfoWindow(markers[imei], latLng, device, coords);
+                  } else {
+                      // Create a new marker
+                      markers[imei] = createCustomMarker(latLng, iconUrl, rotation, device);
+                      addMarkerClickListener(markers[imei], latLng, device, coords);
                   }
 
-                  // Check if data is missing for more than 1 hour
-                  checkForDataTimeout(imei);
+                  if (device.sos === "1") {
+                      triggerSOS(imei, markers[imei]);
+                  } else {
+                      removeSOS(imei);
+                  }
+
+                  // Update last data received time
+                  lastDataReceivedTime[imei] = new Date();
+
+                  bounds.extend(latLng);
               }
-              countContainer.innerText = imeiSet.size;
+
+              // Check if data is missing for more than 1 hour
+              checkForDataTimeout(imei);
           });
 
           saveMarkers();
@@ -614,18 +672,13 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
           }
 
           // Apply current speed filter after updating markers
-          // filterVehiclesBySpeed();
-        filterVehicles();
+          filterVehicles();
       })
       .catch(error => {
           console.error("Error fetching data:", error);
           dataAvailable = false;
       });
 }
-
-
-
-
 
     function triggerSOS(imei, marker) {
 if (!sosActiveMarkers[imei]) {
@@ -941,43 +994,77 @@ function showListView() {
   populateVehicleTable();
 }
 
+// function populateVehicleTable() {
+//   const tableBody = document.getElementById('vehicle-table').getElementsByTagName('tbody')[0];
+//   tableBody.innerHTML = ''; // Clear existing rows
+
+//   const imeiSet = new Set(); // Track unique IMEI numbers
+
+//   Object.keys(markers).forEach(imei => {
+//       if (!imeiSet.has(imei)) {
+//           imeiSet.add(imei); // Mark IMEI as processed
+
+//           const marker = markers[imei];
+//           const device = marker.device;
+//           const coords = marker.latLng;
+
+//           const speed = device.speed !== null && device.speed !== undefined
+//               ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+//               : 'Unknown';
+//           const latitude = coords.lat !== null && coords.lat !== undefined
+//               ? coords.lat.toFixed(6)
+//               : 'Unknown';
+//           const longitude = coords.lon !== null && coords.lon !== undefined
+//               ? coords.lon.toFixed(6)
+//               : 'Unknown';
+//           const date = device.date || 'N/A';
+//           const time = device.time || 'N/A';
+//           const address = device.address || 'Location unknown';
+//           const { formattedDate, formattedTime } = formatDateTime(date, time);
+
+//           const row = tableBody.insertRow();
+//           row.insertCell(0).innerText = device.imei;
+//           row.insertCell(1).innerText = speed;
+//           row.insertCell(2).innerText = latitude;
+//           row.insertCell(3).innerText = longitude;
+//           row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
+//           row.insertCell(5).innerText = address;
+//           row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+//       }
+//   });
+// }
+
 function populateVehicleTable() {
   const tableBody = document.getElementById('vehicle-table').getElementsByTagName('tbody')[0];
   tableBody.innerHTML = ''; // Clear existing rows
 
-  const imeiSet = new Set(); // Track unique IMEI numbers
-
   Object.keys(markers).forEach(imei => {
-      if (!imeiSet.has(imei)) {
-          imeiSet.add(imei); // Mark IMEI as processed
+      const marker = markers[imei];
+      const device = marker.device;
+      const coords = marker.latLng;
 
-          const marker = markers[imei];
-          const device = marker.device;
-          const coords = marker.latLng;
+      const speed = device.speed !== null && device.speed !== undefined
+          ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+          : 'Unknown';
+      const latitude = coords.lat !== null && coords.lat !== undefined
+          ? coords.lat.toFixed(6)
+          : 'Unknown';
+      const longitude = coords.lon !== null && coords.lon !== undefined
+          ? coords.lon.toFixed(6)
+          : 'Unknown';
+      const date = device.date || 'N/A';
+      const time = device.time || 'N/A';
+      const address = device.address || 'Location unknown';
+      const { formattedDate, formattedTime } = formatDateTime(date, time);
 
-          const speed = device.speed !== null && device.speed !== undefined
-              ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-              : 'Unknown';
-          const latitude = coords.lat !== null && coords.lat !== undefined
-              ? coords.lat.toFixed(6)
-              : 'Unknown';
-          const longitude = coords.lon !== null && coords.lon !== undefined
-              ? coords.lon.toFixed(6)
-              : 'Unknown';
-          const date = device.date || 'N/A';
-          const time = device.time || 'N/A';
-          const address = device.address || 'Location unknown';
-          const { formattedDate, formattedTime } = formatDateTime(date, time);
-
-          const row = tableBody.insertRow();
-          row.insertCell(0).innerText = device.imei;
-          row.insertCell(1).innerText = speed;
-          row.insertCell(2).innerText = latitude;
-          row.insertCell(3).innerText = longitude;
-          row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
-          row.insertCell(5).innerText = address;
-          row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
-      }
+      const row = tableBody.insertRow();
+      row.insertCell(0).innerText = device.imei;
+      row.insertCell(1).innerText = speed;
+      row.insertCell(2).innerText = latitude;
+      row.insertCell(3).innerText = longitude;
+      row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
+      row.insertCell(5).innerText = address;
+      row.insertCell(6).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
   });
 }
 
