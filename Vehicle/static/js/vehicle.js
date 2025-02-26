@@ -789,7 +789,7 @@ function formatDateTime(dateString, timeString) {
 
 function updateInfoWindow(marker, latLng, device, coords) {
   geocodeLatLng(latLng, function (address) {
-      if (openMarker !== marker || !manualClose) {
+      if (openMarker === marker && !manualClose) {
           const { formattedDate, formattedTime } = formatDateTime(device.date, device.time);
           const content = `<div class="info-window show">
                   <strong>IMEI:</strong> ${device.imei}<br>

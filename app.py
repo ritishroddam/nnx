@@ -2,6 +2,7 @@ from flask import Flask, render_template, send_from_directory, request, jsonify
 import subprocess
 import os
 import requests
+import threading
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.dashboard_backend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
@@ -30,9 +31,12 @@ def proxy_api_data():
         response = requests.get('http://64.227.137.175:8555/api/data', params=request.args)
     return jsonify(response.json())
 
+def run_distinct_vehicle_data_store():
+    os.system('python distinctVehicleDataStore.py')
+
 if __name__ == '__main__':
     map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
     subprocess.Popen(['python', map_server_path])
-
+    threading.Thread(target=run_distinct_vehicle_data_store, daemon=True).start()
 
     app.run(host='64.227.137.175', port=8888, debug=True)
