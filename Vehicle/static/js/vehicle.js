@@ -551,18 +551,19 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
   fetch('/api/data')
       .then(response => response.json())
       .then(data => {
-          var imeiSet = new Set(); // Track unique IMEI numbers
+          // var imeiSet = new Set(); // Track unique IMEI numbers
           var bounds = new google.maps.LatLngBounds();
           dataAvailable = true;
           countdownTimer = refreshInterval / 1000;
 
           const countContainer = document.getElementById("countee");
+          countContainer.innerText = data.length;
 
           data.forEach(device => {
               const imei = sanitizeIMEI(device.imei);
 
-              if (!imeiSet.has(imei)) {
-                  imeiSet.add(imei); // Mark IMEI as processed
+              // if (!imeiSet.has(imei)) {
+              //     imeiSet.add(imei); // Mark IMEI as processed
 
                   if (device.latitude && device.longitude && device.speed != null && device.course != null) {
                       const coords = parseCoordinates(device.latitude, device.longitude);
@@ -596,8 +597,8 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 
                   // Check if data is missing for more than 1 hour
                   checkForDataTimeout(imei);
-              }
-              countContainer.innerText = imeiSet.size;
+              // }
+
           });
 
           saveMarkers();

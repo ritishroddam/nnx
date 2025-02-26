@@ -27,6 +27,7 @@ MONGO_URI = os.getenv(
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['nnx']
 collection = db['atlanta']
+distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  # MongoDB collection for SOS logs
 
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -257,7 +258,7 @@ def receive_data():
             if imei:
                 query['imei'] = imei
 
-            cursor = collection.find(query)
+            cursor = distinctCollection.find(query)
             vehicles = list(cursor)
 
             if not vehicles:
