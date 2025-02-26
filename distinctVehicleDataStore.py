@@ -62,8 +62,8 @@ atlanta_collection = db['atlanta']
 distinct_atlanta_collection = db['distinctAtlanta']
 
 def clean_imei(imei):
-    # Remove the \x01ATL prefix and return the 15-digit number
-    return imei.replace('\x01ATL', '')
+    # Extract the last 15 characters of the IMEI
+    return imei[-15:]
 
 def update_distinct_atlanta():
     try:
