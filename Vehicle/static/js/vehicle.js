@@ -618,7 +618,7 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 // }
 
 function updateMap() {
-  fetch('/vehicle/api/vehicles')
+  fetch('/api/data')
       .then(response => response.json())
       .then(data => {
           var bounds = new google.maps.LatLngBounds();
