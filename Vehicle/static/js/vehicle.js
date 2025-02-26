@@ -417,7 +417,8 @@ toggleButton.addEventListener("click", function () {
 //   fetchVehicleData();
 //   countdownTimer = refreshInterval / 1000;  // Reset countdown
 // }
-// }, 1000)};
+// }, 1000)
+};
 
 // Save the current state of markers into session storage
 function saveMarkers() {
