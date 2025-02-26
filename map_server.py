@@ -255,7 +255,7 @@ def receive_data():
             today = datetime.now().strftime('%d%m%y')
 
 
-            cursor = collection.find()
+            cursor = distinctCollection.find()
             vehicles = list(cursor)
 
             if not vehicles:
