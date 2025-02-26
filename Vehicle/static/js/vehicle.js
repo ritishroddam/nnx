@@ -1155,6 +1155,8 @@ function renderVehicles(vehicles) {
 //     }, 1000)
 // };
 
+var countdownTimer = refreshInterval / 1000
+
 function initMap() {
     const defaultCenter = { lat: 20.5937, lng: 78.9629 };
     const offset = -5;
