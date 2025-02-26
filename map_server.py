@@ -254,11 +254,8 @@ def receive_data():
             imei = request.args.get('imei')
             today = datetime.now().strftime('%d%m%y')
 
-            query = {'date': today}
-            if imei:
-                query['imei'] = imei
 
-            cursor = distinctCollection.find(query)
+            cursor = collection.find()
             vehicles = list(cursor)
 
             if not vehicles:
