@@ -790,12 +790,17 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
 
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+    const vehicleElementHeader = document.querySelector(`.vehicle-card.vehicle-header[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
         if (document.body.classList.contains("dark-mode")) {
             vehicleElement.style.backgroundColor = "white"; // Highlight with white border in dark mode
+            vehicleElement.style.color = "black"; // Highlight with white border in dark mode
+            vehicleElementHeader.style.color = "black"; // Highlight with white border in dark mode
         } else {
             vehicleElement.style.backgroundColor = "black"; // Highlight with black border in light mode
+            vehicleElement.style.color = "white"; // Highlight with black border in light mode
+            vehicleElementHeader.style.color = "white"; // Highlight with black border in light mode
         }
     }
   });

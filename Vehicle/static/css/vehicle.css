@@ -26,6 +26,7 @@
   .vehicle-card {
     border-bottom: 1px solid #ddd;
     padding: 10px;
+    border-radius: 10px;
   }
   .vehicle-card:last-child {
     border-bottom: none;
@@ -206,11 +207,11 @@
   color: white;
 }
 
-.dark-mode ::-webkit-scrollbar-thumb {
-  background: white;
-}
-
 .dark-mode .floating-card .vehicle-header {
   font-weight: bold;
   color: white;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: white;
 }
