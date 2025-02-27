@@ -402,20 +402,20 @@ function restoreMarkers() {
 };
 
 // Save the current state of markers into session storage
-function saveMarkers() {
-const markerData = [];
-Object.keys(markers).forEach(imei => {
-  const marker = markers[imei];
-  markerData.push({
-      imei: imei,
-      lat: marker.latLng.lat(),
-      lon: marker.latLng.lng(),
-      iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
-      rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
-  });
-});
-sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
-}
+// function saveMarkers() {
+// const markerData = [];
+// Object.keys(markers).forEach(imei => {
+//   const marker = markers[imei];
+//   markerData.push({
+//       imei: imei,
+//       lat: marker.latLng.lat(),
+//       lon: marker.latLng.lng(),
+//       iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
+//       rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
+//   });
+// });
+// sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
+// }
 
 
 function parseCoordinates(lat, lon) {
@@ -603,7 +603,7 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 
           });
 
-          saveMarkers();
+          // saveMarkers();
 
           if (!bounds.isEmpty() && firstFit) {
               map.fitBounds(bounds);
