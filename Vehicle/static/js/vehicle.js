@@ -805,6 +805,10 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
         if (vehicleHeader) {
             vehicleHeader.style.color = "white"; // Change font color to white
         }
+        const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
+        if (vehicleHeader) {
+            vehicleHeader.style.color = "white"; // Change font color to white
+        }
     }
   });
 
@@ -817,6 +821,10 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
           if (vehicleHeader) {
               vehicleHeader.style.color = ""; // Reset font color
           }
+          const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
+        if (vehicleHeader) {
+            vehicleHeader.style.color = ""; // Change font color to white
+        }
       }
   });
 
