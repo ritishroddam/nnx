@@ -48,7 +48,7 @@ socket.on('sos_alert', function(data) {
 function updateVehicleData(vehicle) {
   const imei = sanitizeIMEI(vehicle.imei);
   const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
-  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+  const latLng = new google.maps.LatLng(coords.lat.toFixed(6), coords.lon.toFixed(6));
   const iconUrl = getCarIconBySpeed(vehicle.speed, imei, vehicle.date, vehicle.time);
   const rotation = vehicle.course;
 
@@ -98,6 +98,8 @@ function renderVehicles(vehicles) {
 
         const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
         const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+        
+        const { formattedDate, formattedTime } = formatDateTime(device.date, device.time);
 
         vehicleElement.innerHTML = `
             <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
@@ -105,7 +107,7 @@ function renderVehicles(vehicles) {
                 <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
                 <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
                 <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
-                <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
+                <strong>Last Update:</strong> ${formattedDate || 'N/A'} ${formattedTime || 'N/A'} <br>
                 <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
                 <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
             </div>
