@@ -745,6 +745,73 @@ Object.keys(markers).forEach((imei) => {
 });
 }
 
+// function createCustomMarker(latLng, iconUrl, rotation, device) {
+//   const div = document.createElement("div");
+//   div.className = "custom-marker";
+//   div.style.backgroundImage = `url(${iconUrl})`;
+//   div.style.transform = `rotate(${rotation}deg)`;
+
+//   const marker = new google.maps.OverlayView();
+//   marker.div = div;
+//   marker.latLng = latLng;
+//   marker.device = device;
+
+//   marker.onAdd = function () {
+//       const panes = this.getPanes();
+//       panes.overlayMouseTarget.appendChild(div);
+//   };
+
+//   marker.draw = function () {
+//       const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
+//       if (point) {
+//           div.style.left = point.x - div.offsetWidth / 2 + "px";
+//           div.style.top = point.y - div.offsetHeight / 2 + "px";
+//       }
+//   };
+
+//   marker.onRemove = function () {
+//       div.parentNode.removeChild(div);
+//   };
+
+//   marker.setVisible = function (visible) {
+//       div.style.display = visible ? "block" : "none";
+//   };
+
+//   marker.setMap(map);
+
+//   // Add hover event listener to scroll the floating card
+//   div.addEventListener("mouseover", () => {
+//     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+//     const vehicleElementFloating = document.querySelector(`.floating-card .vehicle-info`);
+    
+//     if (vehicleElement) {
+//       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
+//       if(document.body.classList.contains("dark-mode")) {
+//         vehicleElement.style.backgroundColor = "white"; // Highlight with black border
+//         if(vehicleElementFloating) vehicleElementFloating.style.color = "black";
+//       }
+//       else{
+//         vehicleElement.style.backgroundColor = "black"; // Highlight with black border
+//         vehicleElement.style.color = "white";
+//         if(vehicleElementFloating) vehicleElementFloating.style.color = "white";
+//       }
+//     }
+//   });
+
+//   div.addEventListener("mouseout", () => {
+//     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+//     if (vehicleElement) {
+//         vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
+//         vehicleElement.style.border = ""; // Remove border
+//         vehicleElement.style.color = "";
+//     }
+//   });
+
+//   addMarkerClickListener(marker, latLng, device, {});
+//   return marker;
+// }
+
 function createCustomMarker(latLng, iconUrl, rotation, device) {
   const div = document.createElement("div");
   div.className = "custom-marker";
@@ -779,23 +846,18 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
 
   marker.setMap(map);
 
-  // Add hover event listener to scroll the floating card
+  // Add hover event listener to scroll the floating card and change text color
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-    const vehicleElementFloating = document.querySelector(`.floating-card .vehicle-info`);
-    
     if (vehicleElement) {
-      vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-
-      if(document.body.classList.contains("dark-mode")) {
-        vehicleElement.style.backgroundColor = "white"; // Highlight with black border
-        if(vehicleElementFloating) vehicleElementFloating.style.color = "black";
-      }
-      else{
-        vehicleElement.style.backgroundColor = "black"; // Highlight with black border
-        vehicleElement.style.color = "white";
-        if(vehicleElementFloating) vehicleElementFloating.style.color = "white";
-      }
+        vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (document.body.classList.contains("dark-mode")) {
+            vehicleElement.style.backgroundColor = "white"; // Set background color in dark mode
+            vehicleElement.style.color = "black"; // Set text color in dark mode
+        } else {
+            vehicleElement.style.backgroundColor = "black"; // Set background color in light mode
+            vehicleElement.style.color = "white"; // Set text color in light mode
+        }
     }
   });
 
@@ -803,8 +865,8 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-        vehicleElement.style.border = ""; // Remove border
-        vehicleElement.style.color = "";
+        vehicleElement.style.backgroundColor = ""; // Reset background color
+        vehicleElement.style.color = ""; // Reset text color
     }
   });
 
