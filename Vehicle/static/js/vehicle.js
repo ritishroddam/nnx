@@ -782,7 +782,7 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
   // Add hover event listener to scroll the floating card
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-    const vehicleElementFloating = document.querySelector(`.floating-card .vehicle-info[data-imei="${device.imei}"]`);
+    const vehicleElementFloating = document.querySelector(`.floating-card .vehicle-info`);
     
     if (vehicleElement) {
       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
