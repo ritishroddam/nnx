@@ -806,8 +806,8 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
             vehicleHeader.style.color = "white"; // Change font color to white
         }
         const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
-        if (vehicleHeader) {
-            vehicleHeader.style.color = "white"; // Change font color to white
+        if (vehicleInfo) {
+            vehicleInfo.style.color = "white"; // Change font color to white
         }
     }
   });
@@ -822,8 +822,8 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
               vehicleHeader.style.color = ""; // Reset font color
           }
           const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
-        if (vehicleHeader) {
-            vehicleHeader.style.color = ""; // Change font color to white
+        if (vehicleInfo) {
+            vehicleInfo.style.color = ""; // Change font color to white
         }
       }
   });
