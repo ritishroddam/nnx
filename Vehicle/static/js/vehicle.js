@@ -22,8 +22,7 @@ function updateVehicleData(vehicle) {
     const imei = sanitizeIMEI(vehicle.imei);
     const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
     const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-    // const iconUrl = getCarIconBySpeed(vehicle.speed, imei);
-    const iconUrl = getCarIconByLastDataReceivedTime(lastDataReceivedTime, imei);
+    const iconUrl = getCarIconBySpeed(vehicle.speed, imei);
     const rotation = vehicle.course;
 
     if (markers[imei]) {
@@ -435,34 +434,6 @@ function getCarIconBySpeed(speed, imei) {
   
   const now = new Date();
 
-  if (speedInKmh === 0) {
-      // Check for last zero speed time
-      if (lastZeroSpeedTime[imei]) {
-          const timeDiff = now - new Date(lastZeroSpeedTime[imei]);
-          const hoursDiff = timeDiff / (1000 * 60 * 60);
-          if (hoursDiff >= 3) {
-              iconUrl = "/vehicle/static/images/car_black.png";
-          }
-      } else {
-          lastZeroSpeedTime[imei] = now; // Store the time when speed became 0
-      }
-  } else if (speedInKmh > 0) {
-      // Reset if speed increases from 0
-      if (lastZeroSpeedTime[imei]) {
-          delete lastZeroSpeedTime[imei];
-      }
-  }
-
-  return iconUrl;
-}
-
-// Function to get car icon based on last data received time
-function getCarIconByLastDataReceivedTime(lastDataReceivedTime, imei) {
-  let iconUrl = "/vehicle/static/images/car_default.png"; // Default icon
-
-  const now = new Date();
-
-  // Check if the last data received time is more than a day
   if (lastDataReceivedTime[imei]) {
     const timeDiff = now - new Date(lastDataReceivedTime[imei]);
     const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
@@ -567,8 +538,7 @@ function updateMap() {
                   if (device.latitude && device.longitude && device.speed != null && device.course != null) {
                       const coords = parseCoordinates(device.latitude, device.longitude);
                       const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-                      // const iconUrl = getCarIconBySpeed(device.speed, imei);
-                      const iconUrl = getCarIconByLastDataReceivedTime(lastDataReceivedTime, imei);
+                      const iconUrl = getCarIconBySpeed(device.speed, imei);
                       const rotation = device.course;
 
                       if (markers[imei]) {
@@ -591,6 +561,7 @@ function updateMap() {
 
                       // Update last data received time
                       lastDataReceivedTime[imei] = new Date();
+
                       bounds.extend(latLng);
                   }
 
