@@ -436,6 +436,7 @@ function getCarIconBySpeed(speed, imei) {
 
   if (lastDataReceivedTime[imei]) {
     console.log("lastDataReceivedTime[imei]: ", lastDataReceivedTime[imei]);
+    console.log("current date: ", now);
     const timeDiff = now - new Date(lastDataReceivedTime[imei]);
     const daysDiff = timeDiff / (1000 * 60 * 60 * 3);
     if (daysDiff >= 1) {
