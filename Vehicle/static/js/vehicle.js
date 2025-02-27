@@ -686,26 +686,26 @@ function formatDateTime(dateString, timeString) {
                   </div>`;
 
               // Send the location to the backend
-              if (addressText !== "Location unknown") {
-                  // Send the IMEI and address to the backend for storage
-                  fetch("/api/store-location", {
-                      method: "POST",
-                      headers: {
-                          "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                          imei: imei,
-                          location: addressText,
-                      }),
-                  })
-                      .then(response => response.json())
-                      .then(data => {
-                          console.log("Location stored in database:", data);
-                      })
-                      .catch(error => {
-                          console.error("Error storing location:", error);
-                      });
-              }
+              // if (addressText !== "Location unknown") {
+              //     // Send the IMEI and address to the backend for storage
+              //     fetch("/api/store-location", {
+              //         method: "POST",
+              //         headers: {
+              //             "Content-Type": "application/json",
+              //         },
+              //         body: JSON.stringify({
+              //             imei: imei,
+              //             location: addressText,
+              //         }),
+              //     })
+              //         .then(response => response.json())
+              //         .then(data => {
+              //             console.log("Location stored in database:", data);
+              //         })
+              //         .catch(error => {
+              //             console.error("Error storing location:", error);
+              //         });
+              // }
 
               if (openMarker !== marker) {
                   infoWindow.setContent(content);
