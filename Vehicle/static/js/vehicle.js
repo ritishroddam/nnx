@@ -22,7 +22,7 @@ function updateVehicleData(vehicle) {
     const imei = sanitizeIMEI(vehicle.imei);
     const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
     const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-    const iconUrl = getCarIconBySpeed(vehicle.speed, imei);
+    const iconUrl = getCarIconBySpeed(vehicle.speed, imei, lastDataReceivedTime[imei]);
     const rotation = vehicle.course;
 
     if (markers[imei]) {
@@ -428,14 +428,14 @@ function getCarIconUrlBySpeed(speedInKmh) {
 }
 
 // Function to check if speed is zero for more than 3 hours
-function getCarIconBySpeed(speed, imei) {
+function getCarIconBySpeed(speed, imei, time) {
   const speedInKmh = convertSpeedToKmh(speed);
   let iconUrl = getCarIconUrlBySpeed(speedInKmh);
   
   const now = new Date();
 
-  if (lastDataReceivedTime[imei]) {
-    const timeDiff = now - new Date(lastDataReceivedTime[imei]);
+  if (time) {
+    const timeDiff = now - new Date(time);
     const daysDiff = timeDiff / (1000 * 60 * 60 * 3);
     if (daysDiff >= 1) {
       iconUrl = "/vehicle/static/images/car_black.png";
@@ -539,7 +539,7 @@ function updateMap() {
                   if (device.latitude && device.longitude && device.speed != null && device.course != null) {
                       const coords = parseCoordinates(device.latitude, device.longitude);
                       const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-                      const iconUrl = getCarIconBySpeed(device.speed, imei);
+                      const iconUrl = getCarIconBySpeed(device.speed, imei, lastDataReceivedTime[imei]);
                       const rotation = device.course;
 
                       if (markers[imei]) {
