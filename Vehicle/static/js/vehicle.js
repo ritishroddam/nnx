@@ -801,7 +801,7 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        vehicleElement.style.border = "10px solid black"; // Highlight with black border
+        vehicleElement.style.border = "2px solid black"; // Highlight with black border
     }
   });
 
