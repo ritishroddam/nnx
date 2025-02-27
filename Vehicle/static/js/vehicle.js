@@ -780,11 +780,23 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
   marker.setMap(map);
 
   // Add hover event listener to scroll the floating card
+  // div.addEventListener("mouseover", () => {
+  //   const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+  //   if (vehicleElement) {
+  //       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+  //       vehicleElement.style.border = "3px solid black"; // Highlight with black border
+  //   }
+  // });
+
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        vehicleElement.style.border = "3px solid black"; // Highlight with black border
+        if (document.body.classList.contains("dark-mode")) {
+            vehicleElement.style.border = "3px solid white"; // Highlight with white border in dark mode
+        } else {
+            vehicleElement.style.border = "3px solid black"; // Highlight with black border in light mode
+        }
     }
   });
 
