@@ -793,9 +793,9 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
         if (document.body.classList.contains("dark-mode")) {
-            vehicleElement.style.border = "3px solid white"; // Highlight with white border in dark mode
+            vehicleElement.style.backgroundColor = "white"; // Highlight with white border in dark mode
         } else {
-            vehicleElement.style.border = "3px solid black"; // Highlight with black border in light mode
+            vehicleElement.style.backgroundColor = "black"; // Highlight with black border in light mode
         }
     }
   });
