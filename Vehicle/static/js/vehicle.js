@@ -361,12 +361,29 @@ function getCarIconUrlBySpeed(speedInKmh) {
 //   return iconUrl;
 // }
 
+function convertToDate(ddmmyyyy, hhmmss) {
+  // Extract day, month, and year
+  let day = ddmmyyyy.substring(0, 2);
+  let month = ddmmyyyy.substring(2, 4);
+  let year = ddmmyyyy.substring(4, 8);
+
+  // Extract hours, minutes, and seconds
+  let hours = hhmmss.substring(0, 2);
+  let minutes = hhmmss.substring(2, 4);
+  let seconds = hhmmss.substring(4, 6);
+
+  // JavaScript Date uses month index starting from 0 (January is 0)
+  let dateObj = new Date(year, month - 1, day, hours, minutes, seconds);
+
+  return dateObj;
+}
+
 function getCarIconBySpeed(speed, imei, date, time) {
   const speedInKmh = convertSpeedToKmh(speed);
   let iconUrl = getCarIconUrlBySpeed(speedInKmh);
   
   const now = new Date();
-  const lastUpdateTime = formatDateTime(date, time);
+  const lastUpdateTime = convertToDate(date, time);
   console.log(date,time);
   console.log(lastUpdateTime);
   const timeDiff = now - lastUpdateTime;
