@@ -215,48 +215,6 @@ function fetchVehicleData() {
       });
 }
 
-// function renderVehicles(vehicles) {
-//   const listContainer = document.getElementById("vehicle-list");
-//   const countContainer = document.getElementById("vehicle-count");
-//   listContainer.innerHTML = "";
-//   countContainer.innerText = vehicles.length;
-
-//   vehicles.forEach(vehicle => {
-//       const imei = sanitizeIMEI(vehicle.imei);
-
-//       const vehicleElement = document.createElement("div");
-//       vehicleElement.classList.add("vehicle-card");
-//       vehicleElement.setAttribute("data-imei", vehicle.imei);
-
-//       const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-//       const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
-//       vehicleElement.innerHTML = `
-//           <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
-//           <div class="vehicle-info">
-//               <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
-//               <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
-//               <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
-//               <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
-//               <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
-//               <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
-//           </div>
-//       `;
-
-//       // Add hover event listener to zoom in on the map and show the info window
-//       vehicleElement.addEventListener("mouseover", () => {
-//           const marker = markers[imei];
-//           if (marker) {
-//               map.setZoom(15);
-//               map.panTo(marker.latLng);
-//               updateInfoWindow(marker, marker.latLng, marker.device, { lat: marker.latLng.lat(), lon: marker.latLng.lng() });
-//           }
-//       });
-
-//       listContainer.appendChild(vehicleElement);
-//   });
-// }
-
 function renderVehicles(vehicles) {
     const listContainer = document.getElementById("vehicle-list");
     const countContainer = document.getElementById("vehicle-count");
@@ -289,7 +247,7 @@ function renderVehicles(vehicles) {
         vehicleElement.addEventListener("mouseover", () => {
             const marker = markers[imei];
             if (marker) {
-                map.setZoom(15);
+                map.setZoom(20);
                 map.panTo(marker.latLng);
                 updateInfoWindow(marker, marker.latLng, marker.device, { lat: marker.latLng.lat(), lon: marker.latLng.lng() });
             }
@@ -906,10 +864,18 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
 
   // Add hover event listener to scroll the floating card
   div.addEventListener("mouseover", () => {
-      const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-      if (vehicleElement) {
-          vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+    const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+    if (vehicleElement) {
+        vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        vehicleElement.style.border = "2px solid black"; // Highlight with black border
+    }
+  });
+
+  div.addEventListener("mouseout", () => {
+    const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+    if (vehicleElement) {
+        vehicleElement.style.border = ""; // Remove border
+    }
   });
 
   addMarkerClickListener(marker, latLng, device, {});
