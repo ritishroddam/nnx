@@ -162,16 +162,16 @@ function initMap() {
 }
 
 
-function fetchVehicleData() {
-  fetch('/vehicle/api/vehicles')
-      .then(response => response.json())
-      .then(data => {
-          renderVehicles(data);
-      })
-      .catch(error => {
-          console.error('Error fetching vehicle data:', error);
-      });
-}
+// function fetchVehicleData() {
+//   fetch('/vehicle/api/vehicles')
+//       .then(response => response.json())
+//       .then(data => {
+//           renderVehicles(data);
+//       })
+//       .catch(error => {
+//           console.error('Error fetching vehicle data:', error);
+//       });
+// }
 
 function renderVehicles(vehicles) {
     const listContainer = document.getElementById("vehicle-list");
