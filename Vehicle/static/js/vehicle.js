@@ -45,9 +45,9 @@ function updateVehicleData(vehicle) {
     renderVehicles(Object.values(markers).map(marker => marker.device));
 }
 
-function fetchVehicleData() {
-    socket.emit('request_vehicle_data');
-}
+// function fetchVehicleData() {
+//     socket.emit('request_vehicle_data');
+// }
 
 function initMap() {
     const defaultCenter = { lat: 20.5937, lng: 78.9629 };
@@ -162,16 +162,16 @@ function initMap() {
 }
 
 
-// function fetchVehicleData() {
-//   fetch('/vehicle/api/vehicles')
-//       .then(response => response.json())
-//       .then(data => {
-//           renderVehicles(data);
-//       })
-//       .catch(error => {
-//           console.error('Error fetching vehicle data:', error);
-//       });
-// }
+function fetchVehicleData() {
+  fetch('/vehicle/api/vehicles')
+      .then(response => response.json())
+      .then(data => {
+          renderVehicles(data);
+      })
+      .catch(error => {
+          console.error('Error fetching vehicle data:', error);
+      });
+}
 
 function renderVehicles(vehicles) {
     const listContainer = document.getElementById("vehicle-list");
