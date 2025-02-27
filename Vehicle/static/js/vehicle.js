@@ -367,6 +367,8 @@ function convertToDate(ddmmyyyy, hhmmss) {
   let month = ddmmyyyy.substring(2, 4);
   let year = ddmmyyyy.substring(4, 8);
 
+  year += 2000;
+  
   // Extract hours, minutes, and seconds
   let hours = hhmmss.substring(0, 2);
   let minutes = hhmmss.substring(2, 4);
