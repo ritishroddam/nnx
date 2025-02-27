@@ -544,7 +544,7 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 
 
 
-    function updateMap() {
+function updateMap() {
   fetch('/vehicle/api/vehicles')
       .then(response => response.json())
       .then(data => {
