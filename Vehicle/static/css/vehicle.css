@@ -210,7 +210,7 @@
   background: white;
 }
 
-.dark-mode.vehicle-header {
+.dark-mode .floating-card .vehicle-header {
   font-weight: bold;
   color: white;
 }
