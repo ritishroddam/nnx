@@ -435,12 +435,11 @@ function getCarIconBySpeed(speed, imei) {
   const now = new Date();
 
   if (lastDataReceivedTime[imei]) {
-    console.log("lastDataReceivedTime[imei]: ", lastDataReceivedTime[imei]);
-    console.log("current date: ", now);
     const timeDiff = now - new Date(lastDataReceivedTime[imei]);
     const daysDiff = timeDiff / (1000 * 60 * 60 * 3);
     if (daysDiff >= 1) {
       iconUrl = "/vehicle/static/images/car_black.png";
+      console.log(iconUrl);
     }
   }
 
