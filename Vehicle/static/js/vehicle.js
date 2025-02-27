@@ -22,7 +22,8 @@ function updateVehicleData(vehicle) {
     const imei = sanitizeIMEI(vehicle.imei);
     const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
     const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-    const iconUrl = getCarIconBySpeed(vehicle.speed, imei);
+    // const iconUrl = getCarIconBySpeed(vehicle.speed, imei);
+    const iconUrl = getCarIconByLastDataReceivedTime(lastDataReceivedTime, imei);
     const rotation = vehicle.course;
 
     if (markers[imei]) {
@@ -397,23 +398,6 @@ function restoreMarkers() {
   }}, 1000)
 };
 
-// Save the current state of markers into session storage
-// function saveMarkers() {
-// const markerData = [];
-// Object.keys(markers).forEach(imei => {
-//   const marker = markers[imei];
-//   markerData.push({
-//       imei: imei,
-//       lat: marker.latLng.lat(),
-//       lon: marker.latLng.lng(),
-//       iconUrl: marker.div.style.backgroundImage.replace('url(', '').replace(')', ''),
-//       rotation: parseFloat(marker.div.style.transform.replace('rotate(', '').replace('deg)', ''))
-//   });
-// });
-// sessionStorage.setItem('vehicleMarkers', JSON.stringify(markerData));
-// }
-
-
 function parseCoordinates(lat, lon) {
   const parsedLat =
     parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
@@ -467,6 +451,24 @@ function getCarIconBySpeed(speed, imei) {
       if (lastZeroSpeedTime[imei]) {
           delete lastZeroSpeedTime[imei];
       }
+  }
+
+  return iconUrl;
+}
+
+// Function to get car icon based on last data received time
+function getCarIconByLastDataReceivedTime(lastDataReceivedTime, imei) {
+  let iconUrl = "/vehicle/static/images/car_default.png"; // Default icon
+
+  const now = new Date();
+
+  // Check if the last data received time is more than a day
+  if (lastDataReceivedTime[imei]) {
+    const timeDiff = now - new Date(lastDataReceivedTime[imei]);
+    const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+    if (daysDiff >= 1) {
+      iconUrl = "/vehicle/static/images/car_black.png";
+    }
   }
 
   return iconUrl;
@@ -565,7 +567,8 @@ function updateMap() {
                   if (device.latitude && device.longitude && device.speed != null && device.course != null) {
                       const coords = parseCoordinates(device.latitude, device.longitude);
                       const latLng = new google.maps.LatLng(coords.lat, coords.lon);
-                      const iconUrl = getCarIconBySpeed(device.speed, imei);
+                      // const iconUrl = getCarIconBySpeed(device.speed, imei);
+                      const iconUrl = getCarIconByLastDataReceivedTime(lastDataReceivedTime, imei);
                       const rotation = device.course;
 
                       if (markers[imei]) {
@@ -588,7 +591,6 @@ function updateMap() {
 
                       // Update last data received time
                       lastDataReceivedTime[imei] = new Date();
-
                       bounds.extend(latLng);
                   }
 
@@ -797,7 +799,7 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        vehicleElement.style.border = "5px solid black"; // Highlight with black border
+        vehicleElement.style.border = "3px solid black"; // Highlight with black border
     }
   });
 
