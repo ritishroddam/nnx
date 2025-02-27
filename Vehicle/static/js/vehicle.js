@@ -790,7 +790,7 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
 
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-    const vehicleElementHeader = document.querySelector(`.vehicle-card.vehicle-header[data-imei="${device.imei}"]`);
+    const vehicleElementHeader = document.querySelector(`vehicle-header[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
         if (document.body.classList.contains("dark-mode")) {
