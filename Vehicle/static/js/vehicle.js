@@ -45,10 +45,6 @@ function updateVehicleData(vehicle) {
     renderVehicles(Object.values(markers).map(marker => marker.device));
 }
 
-// function fetchVehicleData() {
-//     socket.emit('request_vehicle_data');
-// }
-
 function initMap() {
     const defaultCenter = { lat: 20.5937, lng: 78.9629 };
     const offset = -2;
@@ -549,7 +545,7 @@ return imei.replace(/[^\w]/g, '').trim();  // Removes all non-alphanumeric chara
 
 
     function updateMap() {
-  fetch('/api/data')
+  fetch('/vehicle/api/vehicles')
       .then(response => response.json())
       .then(data => {
           // var imeiSet = new Set(); // Track unique IMEI numbers
