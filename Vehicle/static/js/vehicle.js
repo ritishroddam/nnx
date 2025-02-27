@@ -745,72 +745,11 @@ Object.keys(markers).forEach((imei) => {
 });
 }
 
-// function createCustomMarker(latLng, iconUrl, rotation, device) {
-//   const div = document.createElement("div");
-//   div.className = "custom-marker";
-//   div.style.backgroundImage = `url(${iconUrl})`;
-//   div.style.transform = `rotate(${rotation}deg)`;
-
-//   const marker = new google.maps.OverlayView();
-//   marker.div = div;
-//   marker.latLng = latLng;
-//   marker.device = device;
-
-//   marker.onAdd = function () {
-//       const panes = this.getPanes();
-//       panes.overlayMouseTarget.appendChild(div);
-//   };
-
-//   marker.draw = function () {
-//       const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
-//       if (point) {
-//           div.style.left = point.x - div.offsetWidth / 2 + "px";
-//           div.style.top = point.y - div.offsetHeight / 2 + "px";
-//       }
-//   };
-
-//   marker.onRemove = function () {
-//       div.parentNode.removeChild(div);
-//   };
-
-//   marker.setVisible = function (visible) {
-//       div.style.display = visible ? "block" : "none";
-//   };
-
-//   marker.setMap(map);
-
-//   // Add hover event listener to scroll the floating card
-//   div.addEventListener("mouseover", () => {
-//     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-//     if (vehicleElement) {
-//         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-//         vehicleElement.style.border = "3px solid black"; // Highlight with black border
-//     }
-//   });
-
-//   div.addEventListener("mouseout", () => {
-//     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-//     if (vehicleElement) {
-//         vehicleElement.style.border = ""; // Remove border
-//     }
-//   });
-
-//   addMarkerClickListener(marker, latLng, device, {});
-//   return marker;
-// }
-
 function createCustomMarker(latLng, iconUrl, rotation, device) {
   const div = document.createElement("div");
   div.className = "custom-marker";
   div.style.backgroundImage = `url(${iconUrl})`;
   div.style.transform = `rotate(${rotation}deg)`;
-  div.style.width = "30px";
-  div.style.height = "30px";
-  div.style.backgroundSize = "contain";
-  div.style.backgroundRepeat = "no-repeat";
-  div.style.position = "absolute";
-  div.style.cursor = "pointer";
-  div.style.transition = "opacity 0.3s ease-in-out, transform 0.2s ease-in-out";
 
   const marker = new google.maps.OverlayView();
   marker.div = div;
@@ -836,57 +775,32 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
 
   marker.setVisible = function (visible) {
       div.style.display = visible ? "block" : "none";
-      div.style.opacity = visible ? "1" : "0";
   };
 
-  // Hover effect on vehicle list
+  marker.setMap(map);
+
+  // Add hover event listener to scroll the floating card
   div.addEventListener("mouseover", () => {
-      const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-      const vehicleElementHeader = document.querySelector(`.vehicle-header[data-imei="${device.imei}"]`);
-
-      if (vehicleElement) {
-          vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-
-          if (document.body.classList.contains("dark-mode")) {
-              vehicleElement.style.backgroundColor = "white";
-              vehicleElement.style.color = "black";
-              if (vehicleElementHeader) vehicleElementHeader.style.color = "black";
-          } else {
-              vehicleElement.style.backgroundColor = "black";
-              vehicleElement.style.color = "white";
-              if (vehicleElementHeader) vehicleElementHeader.style.color = "white";
-          }
+    const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+    if (vehicleElement) {
+        vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        vehicleElement.style.backgroundColor = "black"; // Highlight with black border
+        vehicleElement.style.color = "white";
       }
   });
 
   div.addEventListener("mouseout", () => {
-      const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-      if (vehicleElement) {
-          vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-          vehicleElement.style.backgroundColor = "";
-          vehicleElement.style.color = "";
-      }
-  });
-
-  // Click effect on vehicle list
-  div.addEventListener("click", () => {
-      document.querySelectorAll(".vehicle-card").forEach(el => {
-          el.style.border = ""; // Reset other elements
-          el.style.boxShadow = "";
-      });
-
-      const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-      if (vehicleElement) {
-          vehicleElement.style.border = "3px solid #007bff";
-          vehicleElement.style.boxShadow = "0 0 10px rgba(0, 123, 255, 0.8)";
-      }
+    const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
+    if (vehicleElement) {
+        vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
+        vehicleElement.style.border = ""; // Remove border
+        vehicleElement.style.color = "";
+    }
   });
 
   addMarkerClickListener(marker, latLng, device, {});
   return marker;
 }
-
 
 //////////////////////
 function updateCustomMarker(marker, latLng, iconUrl, rotation) {
