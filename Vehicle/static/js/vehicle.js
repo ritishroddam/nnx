@@ -801,8 +801,9 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
         vehicleElement.style.backgroundColor = "black";
+        const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
         if (vehicleHeader) {
-          vehicleHeader.style.color = "white"; // Change font color to white
+            vehicleHeader.style.color = "white"; // Change font color to white
         }
     }
   });
@@ -812,7 +813,7 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
       if (vehicleElement) {
           vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
           vehicleElement.style.backgroundColor = ""; // Reset background color
-          const vehicleHeader = vehicleElement.querySelector('.vehicle-header');
+          const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
           if (vehicleHeader) {
               vehicleHeader.style.color = ""; // Reset font color
           }
