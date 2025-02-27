@@ -48,7 +48,7 @@ socket.on('sos_alert', function(data) {
 function updateVehicleData(vehicle) {
   const imei = sanitizeIMEI(vehicle.imei);
   const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
-  const latLng = new google.maps.LatLng(coords.lat.toFixed(6), coords.lon.toFixed(6));
+  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
   const iconUrl = getCarIconBySpeed(vehicle.speed, imei, vehicle.date, vehicle.time);
   const rotation = vehicle.course;
 
@@ -99,7 +99,7 @@ function renderVehicles(vehicles) {
         const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
         const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
         
-        const { formattedDate, formattedTime } = formatDateTime(device.date, device.time);
+        const { formattedDate, formattedTime } = formatDateTime(vehicle.date, vehicle.time);
 
         vehicleElement.innerHTML = `
             <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
