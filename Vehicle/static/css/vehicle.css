@@ -209,3 +209,8 @@
 .dark-mode ::-webkit-scrollbar-thumb {
   background: white;
 }
+
+.dark-mode.vehicle-header {
+  font-weight: bold;
+  color: white;
+}
