@@ -295,9 +295,11 @@ function restoreMarkers() {
       if (darkMode) {
           map.setOptions({ styles: darkModeStyle });
           toggleButton.textContent = "Switch to Standard Map";
+          document.body.classList.remove("dark-mode");
       } else {
           map.setOptions({ styles: lightModeStyle });
           toggleButton.textContent = "Switch to Dark Map";
+          document.body.classList.add("dark-mode");
       }
       darkMode = !darkMode; // Toggle the state
   });

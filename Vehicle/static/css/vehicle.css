@@ -194,3 +194,18 @@
     #map-toggle:hover {
         background: #f0f0f0;
     }
+
+
+/* Dark Mode Styles */
+.dark-mode .floating-card {
+  background: #000000d0;
+  color: white;
+}
+
+.dark-mode .floating-card .vehicle-info {
+  color: white;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: white;
+}
