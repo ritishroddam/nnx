@@ -49,48 +49,6 @@ function fetchVehicleData() {
     socket.emit('request_vehicle_data');
 }
 
-// function renderVehicles(vehicles) {
-//     const listContainer = document.getElementById("vehicle-list");
-//     const countContainer = document.getElementById("vehicle-count");
-//     listContainer.innerHTML = "";
-//     countContainer.innerText = vehicles.length;
-
-//     vehicles.forEach(vehicle => {
-//         const imei = sanitizeIMEI(vehicle.imei);
-
-//         const vehicleElement = document.createElement("div");
-//         vehicleElement.classList.add("vehicle-card");
-//         vehicleElement.setAttribute("data-imei", vehicle.imei);
-
-//         const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-//         const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
-//         vehicleElement.innerHTML = `
-//             <div class="vehicle-header">${vehicle.imei} - ${vehicle.status || 'Unknown'}</div>
-//             <div class="vehicle-info">
-//                 <strong>Speed:</strong> ${vehicle.speed ? convertSpeedToKmh(vehicle.speed).toFixed(2) + ' km/h' : 'Unknown'} <br>
-//                 <strong>Lat:</strong> ${latitude !== null ? latitude.toFixed(6) : 'Unknown'} <br>
-//                 <strong>Lon:</strong> ${longitude !== null ? longitude.toFixed(6) : 'Unknown'} <br>
-//                 <strong>Last Update:</strong> ${vehicle.date || 'N/A'} ${vehicle.time || 'N/A'} <br>
-//                 <strong>Location:</strong> ${vehicle.address || 'Location unknown'} <br>
-//                 <strong>Data:</strong> <a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>
-//             </div>
-//         `;
-
-//         // Add hover event listener to zoom in on the map and show the info window
-//         vehicleElement.addEventListener("mouseover", () => {
-//             const marker = markers[imei];
-//             if (marker) {
-//                 map.setZoom(15);
-//                 map.panTo(marker.latLng);
-//                 updateInfoWindow(marker, marker.latLng, marker.device, { lat: marker.latLng.lat(), lon: marker.latLng.lng() });
-//             }
-//         });
-
-//         listContainer.appendChild(vehicleElement);
-//     });
-// }
-
 function initMap() {
     const defaultCenter = { lat: 20.5937, lng: 78.9629 };
     const offset = -2;
@@ -279,30 +237,6 @@ function updateInfoWindow(marker, latLng, device, coords) {
         }
     });
 }
-
-// function updateInfoWindow(marker, latLng, device, coords) {
-//   geocodeLatLng(latLng, function (address) {
-//       if (openMarker === marker && !manualClose) {
-//           const { formattedDate, formattedTime } = formatDateTime(device.date, device.time);
-//           const content = `<div class="info-window show">
-//                   <strong>IMEI:</strong> ${device.imei}<br>
-//                   <hr>
-//                   <p><strong>Speed:</strong> ${convertSpeedToKmh(device.speed).toFixed(2)} km/h</p>
-//                   <p><strong>Lat:</strong> ${coords.lat.toFixed(6)}</p>
-//                   <p><strong>Lon:</strong> ${coords.lon.toFixed(6)}</p>
-//                   <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p> 
-//                   <p class="address"><strong>Location:</strong> ${address}</p>
-//                   <p><strong>Data:</strong> <a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a></p>
-//               </div>`;
-//           infoWindow.setContent(content);
-//           infoWindow.setPosition(latLng);
-//           infoWindow.open(map, marker);
-//           openMarker = marker;
-//           manualClose = false;
-//       }
-//   });
-// }
-
 
 document.querySelector(".toggle-slider").addEventListener("click", function() {
 this.classList.toggle("active");
@@ -867,7 +801,7 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        vehicleElement.style.border = "2px solid black"; // Highlight with black border
+        vehicleElement.style.border = "10px solid black"; // Highlight with black border
     }
   });
 
