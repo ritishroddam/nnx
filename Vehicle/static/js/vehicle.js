@@ -436,7 +436,7 @@ function getCarIconBySpeed(speed, imei) {
 
   if (lastDataReceivedTime[imei]) {
     const timeDiff = now - new Date(lastDataReceivedTime[imei]);
-    const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+    const daysDiff = timeDiff / (1000 * 60 * 60 * 3);
     if (daysDiff >= 1) {
       iconUrl = "/vehicle/static/images/car_black.png";
     }
