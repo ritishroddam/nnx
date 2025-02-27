@@ -48,7 +48,7 @@ socket.on('sos_alert', function(data) {
 function updateVehicleData(vehicle) {
   const imei = sanitizeIMEI(vehicle.imei);
   const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
-  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+  const latLng = new google.maps.LatLng(coords.lat.toFixed(6), coords.lon.toFixed(6));
   const iconUrl = getCarIconBySpeed(vehicle.speed, imei, vehicle.date, vehicle.time);
   const rotation = vehicle.course;
 
