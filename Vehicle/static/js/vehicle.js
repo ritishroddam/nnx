@@ -643,17 +643,6 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
         const isDarkMode = document.body.classList.contains("dark-mode");
 
         if(darkMode) {
-          vehicleElement.style.backgroundColor = "#ccc";
-          const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
-          if (vehicleHeader) {
-              vehicleHeader.style.color = "#000000d0"; // Change font color to white
-          }
-          const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
-          if (vehicleInfo) {
-              vehicleInfo.style.color = "#000000d0"; // Change font color to white
-          }
-        }
-        else {
           vehicleElement.style.backgroundColor = "#000000d0";
           const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
           if (vehicleHeader) {
@@ -662,6 +651,17 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
           const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
           if (vehicleInfo) {
               vehicleInfo.style.color = "#ccc"; // Change font color to white
+          }
+        }
+        else {
+          vehicleElement.style.backgroundColor = "#ccc";
+          const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
+          if (vehicleHeader) {
+              vehicleHeader.style.color = "#000000d0"; // Change font color to white
+          }
+          const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
+          if (vehicleInfo) {
+              vehicleInfo.style.color = "#000000d0"; // Change font color to white
           }
         }    
     }
