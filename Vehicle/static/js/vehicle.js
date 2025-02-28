@@ -835,6 +835,20 @@ function populateVehicleTable() {
   });
 }
 
+function showCard() {
+  const floatingCard = document.querySelector('.floating-card');
+  floatingCard.style.display = 'block';
+  const sliderButton = document.querySelector('.slider-card-button');
+  sliderButton.classList.remove('active');
+}
+
+function hideCard() {
+  const floatingCard = document.querySelector('.floating-card');
+  floatingCard.style.display = 'none';
+  const sliderButton = document.querySelector('.slider-card-button');
+  sliderButton.classList.add('active');
+}
+
 window.onload = function() {
   initMap();
   fetchVehicleData();

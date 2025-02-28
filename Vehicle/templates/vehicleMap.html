@@ -62,7 +62,19 @@
 
   <div id="map" class="map"></div>
   
+  <!-- <div class="floating-card" style="z-index: 1;">
+    <h3>All Vehicles: <span id="vehicle-count"></span></h3>
+    <div id="vehicle-list"></div>
+  </div> -->
+
   <div class="floating-card" style="z-index: 1;">
+    <div class="toggle-card-container">
+      <div class="toggle-card-slider">
+        <div class="toggle-card-option show-option" onclick="showCard()">Show</div>
+        <div class="toggle-card-option hide-option" onclick="hideCard()">Hide</div>
+        <div class="slider-card-button"></div>
+      </div>
+    </div>
     <h3>All Vehicles: <span id="vehicle-count"></span></h3>
     <div id="vehicle-list"></div>
   </div>
