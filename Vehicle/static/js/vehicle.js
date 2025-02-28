@@ -779,27 +779,11 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
 
   marker.setMap(map);
 
-  // Add hover event listener to scroll the floating card and change text color
-  // div.addEventListener("mouseover", () => {
-  //   const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-  //   if (vehicleElement) {
-  //       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-  //       vehicleElement.style.backgroundColor = "black";
-  //   }
-  // });
-
-  // div.addEventListener("mouseout", () => {
-  //   const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-  //   if (vehicleElement) {
-  //       vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-  //       vehicleElement.style.backgroundColor = ""; // Reset background color
-  //   }
-  // });
-
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
     if (vehicleElement) {
         vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        vehicleElement.style.transition = "none";
         vehicleElement.style.backgroundColor = "black";
         const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
         if (vehicleHeader) {
