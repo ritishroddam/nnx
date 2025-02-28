@@ -323,9 +323,8 @@ function convertToDate(ddmmyyyy, hhmmss) {
   let day = ddmmyyyy.substring(0, 2);
   let month = ddmmyyyy.substring(2, 4);
   let year = ddmmyyyy.substring(4, 6);
-  console.log(year);
+
   year = parseInt(year) + 2000
-  console.log(year);
   
   // Extract hours, minutes, and seconds
   let hours = hhmmss.substring(0, 2);
@@ -350,7 +349,6 @@ function getCarIconBySpeed(speed, imei, date, time) {
 
   if (dayDiff >= 1) {
     iconUrl = "/vehicle/static/images/car_black.png";
-    console.log(iconUrl);
   }
 
   return iconUrl;
