@@ -11,17 +11,18 @@
     width: 350px;
     max-height: 80vh;
     overflow-y: auto;
-    background: white;
+    background: #ccc;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 10px;
     z-index: 1;
     transition: left 0.3s ease;
+    color: #000000d0;
   }
 
   .sidebar:hover ~ .floating-card {
     left: 15%;
-}
+  }
 
   .vehicle-card {
     border-bottom: 1px solid #ddd;
@@ -38,7 +39,7 @@
   }
   .vehicle-info {
     font-size: 14px;
-    color: #666;
+    color: #000000d0;
   }
 
   .toggle-container {
@@ -105,11 +106,11 @@
 }
 
 .active .map-option {
-  color: #d1d1d1;
+  color: #ccc;
 }
 
 .active .list-option {
-  color: white;
+  color: #ccc;
 }
 
 
@@ -190,7 +191,7 @@
         cursor: pointer;
         font-size: 14px;
         border-radius: 5px;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 2px 2px 5px #000000d0;
     }
     
     #map-toggle:hover {
@@ -201,18 +202,18 @@
 /* Dark Mode Styles */
 .dark-mode .floating-card {
   background: #000000d0;
-  color: white;
+  color: #ccc;
 }
 
 .dark-mode .floating-card .vehicle-info {
-  color: white;
+  color: #ccc;
 }
 
 .dark-mode .floating-card .vehicle-header {
   font-weight: bold;
-  color: white;
+  color: #ccc;
 }
 
 .dark-mode ::-webkit-scrollbar-thumb {
-  background: white;
+  background: #ccc;
 }
