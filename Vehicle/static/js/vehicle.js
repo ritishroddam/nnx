@@ -833,6 +833,14 @@ function populateVehicleTable() {
   });
 }
 
+document.getElementById('toggle-card-switch').addEventListener('change', function() {
+  if (this.checked) {
+    showCard();
+  } else {
+    hideCard();
+  }
+});
+
 function showCard() {
   const vehicleCard = document.querySelectorAll('.vehicle-card');
   vehicleCard.forEach(tag => {
