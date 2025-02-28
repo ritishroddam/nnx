@@ -33,8 +33,9 @@
   }
 
   .vehicle-card {
-    border-bottom: 1px solid #000000d0;
-    border-top: 1px solid #000000d0;
+    /* border-bottom: 1px solid #000000d0;
+    border-top: 1px solid #000000d0; */
+    box-shadow: 0px 2px 12px rgba(240, 239, 239, 0.897);
     padding: 10px;
     border-radius: 10px;
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
