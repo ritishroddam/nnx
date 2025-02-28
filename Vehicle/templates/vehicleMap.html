@@ -1,3 +1,41 @@
+{% extends "base.html" %}
+
+{% block head %}
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script> 
+  <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
+  <script src="{{ url_for('Vehicle.static', filename='js/config.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.motion/dist/leaflet.motion.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap" async defer></script>
+{% endblock %}
+
+{% block h1 %}
+  Vehicle Map
+{% endblock %}
+
+{% block topbar_icons %}
+  <div class="filter-container">
+    <label for="speed-filter">Filter by Speed:</label>
+      <select class="speed-filter" onchange="filterVehicles()">
+        <option value="all">All</option>
+        <option value="0">0 km/h</option>
+        <option value="0-40">0-40 km/h</option>
+        <option value="40-60">40-60 km/h</option>
+        <option value="60+">Above 60 km/h</option>
+        <option value="sos">SOS alert</option>
+      </select>
+  </div>
+  <div class="toggle-container">
+    <div class="toggle-slider">
+      <div class="toggle-option map-option" onclick="showMapView()"> <i class="fa-solid fa-map"></i></div>
+      <div class="toggle-option list-option" onclick="showListView()"> <i class="fa-solid fa-list"></i></div>
+      <div class="slider-button"></div>
+    </div>
+  </div>
+  <span id="countee"></span>
+{% endblock %}
+
 {% block content %}
   <div class="icon-legend">
      <div>
@@ -24,8 +62,7 @@
 
   <div id="map" class="map"></div>
   
-  <div class="floating-card" id="floating-card" style="z-index: 1;">
-    <button onclick="toggleFloatingCard()">Toggle Card</button>
+  <div class="floating-card" style="z-index: 1;">
     <h3>All Vehicles: <span id="vehicle-count"></span></h3>
     <div id="vehicle-list"></div>
   </div>
@@ -49,15 +86,4 @@
       </tbody>
     </table>
   </div>
-
-  <script>
-    function toggleFloatingCard() {
-      const card = document.getElementById('floating-card');
-      if (card.style.display === 'none') {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
-    }
-  </script>
 {% endblock %}
