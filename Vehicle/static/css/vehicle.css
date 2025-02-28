@@ -24,6 +24,10 @@
     color: #000000d0;
   }
 
+  .dark-mode .floating-card h3{
+    color: #ccc;
+  }
+
   .dark-mode .floating-card {
     color: #ccc;
   }
