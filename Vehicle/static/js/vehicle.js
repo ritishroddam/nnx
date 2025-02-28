@@ -683,36 +683,18 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
             }
             const vehicleInfo = vehicleElement.querySelector('.vehicle-info');
             if (vehicleInfo) {
-                vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong) {
+              vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
+              
+              const vehicleInfoStrong = vehicleElement.querySelector('strong');
+              if (vehicleInfoStrong) {
                 vehicleInfoStrong.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong2 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong2) {
-                vehicleInfoStrong2.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong3 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong3) {
-                vehicleInfoStrong.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong4 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong4) {
-                vehicleInfoStrong4.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong5 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong5) {
-                vehicleInfoStrong5.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong6 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong6) {
-                vehicleInfoStrong6.style.color = "#000000d0"; // Light font color for dark mode
-            }
-            const vehicleInfoA = vehicleElement.querySelector('a');
-            if (vehicleInfoA) {
+              }
+              const vehicleInfoA = vehicleElement.querySelector('a');
+              if (vehicleInfoA) {
                 vehicleInfoA.style.color = "#000000d0"; // Light font color for dark mode
+              }
             }
+            
         } else {
             vehicleElement.style.backgroundColor = "#000000d0"; // Dark background for light mode
             const vehicleHeader = vehicleElement.querySelector('.vehicle-header');
@@ -721,36 +703,19 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
             }
             const vehicleInfo = vehicleElement.querySelector('.vehicle-info');
             if (vehicleInfo) {
-                vehicleInfo.style.color = "#ccc"; // Light font color for light mode
+              vehicleInfo.style.color = "#ccc"; // Light font color for light mode
+            
+              const vehicleInfoStrong = vehicleElement.querySelector('strong');
+              if (vehicleInfoStrong) {
+                  vehicleInfoStrong.style.color = "#ccc"; // Light font color for dark mode
+              }
+              const vehicleInfoA = vehicleElement.querySelector('a');
+              if (vehicleInfoA) {
+                  vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
+              }
+
             }
-            const vehicleInfoStrong = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong) {
-                vehicleInfoStrong.style.color = "#ccc"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong2 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong2) {
-                vehicleInfoStrong2.style.color = "#ccc"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong3 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong3) {
-                vehicleInfoStrong.style.color = "#ccc"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong4 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong4) {
-                vehicleInfoStrong4.style.color = "#ccc"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong5 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong5) {
-                vehicleInfoStrong5.style.color = "#ccc"; // Light font color for dark mode
-            }
-            const vehicleInfoStrong6 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong6) {
-                vehicleInfoStrong6.style.color = "#ccc"; // Light font color for dark mode
-            }
-            const vehicleInfoA = vehicleElement.querySelector('a');
-            if (vehicleInfoA) {
-                vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
-            }
+            
         }
     }
   });
@@ -766,36 +731,19 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
           }
           const vehicleInfo = vehicleElement.querySelector('.vehicle-info');
           if (vehicleInfo) {
-              vehicleInfo.style.color = ""; // Reset font color
-          }
-          const vehicleInfoStrong = vehicleElement.querySelector('strong');
+            vehicleInfo.style.color = ""; // Reset font color
+
+            const vehicleInfoStrong = vehicleElement.querySelector('strong');
             if (vehicleInfoStrong) {
-                vehicleInfoStrong.style.color = ""; // Light font color for dark mode
-            }
-            const vehicleInfoStrong2 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong2) {
-                vehicleInfoStrong2.style.color = ""; // Light font color for dark mode
-            }
-            const vehicleInfoStrong3 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong3) {
-                vehicleInfoStrong.style.color = ""; // Light font color for dark mode
-            }
-            const vehicleInfoStrong4 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong4) {
-                vehicleInfoStrong4.style.color = ""; // Light font color for dark mode
-            }
-            const vehicleInfoStrong5 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong5) {
-                vehicleInfoStrong5.style.color = ""; // Light font color for dark mode
-            }
-            const vehicleInfoStrong6 = vehicleElement.querySelector('strong');
-            if (vehicleInfoStrong6) {
-                vehicleInfoStrong6.style.color = ""; // Light font color for dark mode
+              vehicleInfoStrong.style.color = ""; // Light font color for dark mode
             }
             const vehicleInfoA = vehicleElement.querySelector('a');
             if (vehicleInfoA) {
-                vehicleInfoA.style.color = ""; // Light font color for dark mode
+              vehicleInfoA.style.color = ""; // Light font color for dark mode
             }
+
+          }
+          
       }
   });
 
