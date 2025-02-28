@@ -240,3 +240,8 @@
 .dark-mode ::-webkit-scrollbar-thumb {
   background: #ccc;
 }
+
+.speed-filter {
+  height: 20px;
+  border-radius: 10px;
+}
