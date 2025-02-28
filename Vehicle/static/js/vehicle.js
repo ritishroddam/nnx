@@ -685,6 +685,14 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
             if (vehicleInfo) {
                 vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
             }
+            const vehicleInfoStrong = vehicleElement.querySelector('strong');
+            if (vehicleInfoStrong) {
+                vehicleInfoStrong.style.color = "#000000d0"; // Light font color for dark mode
+            }
+            const vehicleInfoA = vehicleElement.querySelector('a');
+            if (vehicleInfoA) {
+                vehicleInfoA.style.color = "#000000d0"; // Light font color for dark mode
+            }
         } else {
             vehicleElement.style.backgroundColor = "#000000d0"; // Dark background for light mode
             const vehicleHeader = vehicleElement.querySelector('.vehicle-header');
@@ -694,6 +702,14 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
             const vehicleInfo = vehicleElement.querySelector('.vehicle-info');
             if (vehicleInfo) {
                 vehicleInfo.style.color = "#ccc"; // Light font color for light mode
+            }
+            const vehicleInfoStrong = vehicleElement.querySelector('strong');
+            if (vehicleInfoStrong) {
+                vehicleInfoStrong.style.color = "#ccc"; // Light font color for dark mode
+            }
+            const vehicleInfoA = vehicleElement.querySelector('a');
+            if (vehicleInfoA) {
+                vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
             }
         }
     }
