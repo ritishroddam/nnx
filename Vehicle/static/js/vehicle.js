@@ -836,14 +836,14 @@ function populateVehicleTable() {
 }
 
 function showCard() {
-  const floatingCard = document.querySelector('.floating-card');
+  const floatingCard = document.querySelector('.vehicle-card');
   floatingCard.style.display = 'block';
   const sliderButton = document.querySelector('.slider-card-button');
   sliderButton.classList.remove('active');
 }
 
 function hideCard() {
-  const floatingCard = document.querySelector('.floating-card');
+  const floatingCard = document.querySelector('.vehicle-card');
   floatingCard.style.display = 'none';
   const sliderButton = document.querySelector('.slider-card-button');
   sliderButton.classList.add('active');
