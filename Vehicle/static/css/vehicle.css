@@ -33,7 +33,7 @@
   }
 
   .vehicle-card {
-    box-shadow: 0px 2px 12px #616060;
+    box-shadow: 0px 3px 12px #222222;
     padding: 10px;
     border-radius: 10px;
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
@@ -41,7 +41,7 @@
   }
   
   .dark-mode .vehicle-card {
-    box-shadow: 0px 2px 12px #cccccc90;
+    box-shadow: 0px 3px 12px #cccccc90;
   }
 
   .vehicle-card:last-child {
