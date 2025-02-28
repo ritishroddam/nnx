@@ -37,13 +37,17 @@
     font-weight: bold;
     color: #333;
   }
-  
+
   .vehicle-info {
     font-size: 14px;
     color: #000000d0;
   }
 
   .vehicle-info strong{
+    color: #000000d0;
+  }
+
+  .vehicle-info a{
     color: #000000d0;
   }
 
