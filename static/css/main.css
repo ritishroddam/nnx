@@ -3,6 +3,10 @@
     padding: 0;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
+    color: #ccc#000000d0;
+}
+
+.dark-mode *{
     color: #ccc;
 }
 
@@ -28,6 +32,7 @@ body {
     transform: translateY(-50%);
     width: 60px;
     background: #000000d0;
+    color: #ccc;
     backdrop-filter: blur(10px);
     padding: 1% 0.5%;
     border-radius: 15px;
@@ -161,7 +166,7 @@ body {
     align-items: center;
     padding: 15px 20px;
     border-radius: 15px;
-    color: white;
+    color: #ccc;
     margin-bottom: 50px;
     z-index: 1; /* Ensure the topbar is above the map */
     transition: left 0.3s ease-in-out, width 0.3s ease-in-out;

@@ -46,9 +46,15 @@
   .vehicle-info strong{
     color: #000000d0;
   }
+  .dark-mode .vehicle-info strong{
+    color: #000000d0;
+  }
 
   .vehicle-info a{
     color: #000000d0;
+  }
+  .dark-mode .vehicle-info a{
+    color: #ccc;
   }
 
   .toggle-container {
