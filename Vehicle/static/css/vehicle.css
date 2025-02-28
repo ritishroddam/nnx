@@ -20,6 +20,14 @@
     color: #000000d0;
   }
 
+  .floating-card h3{
+    color: #000000d0;
+  }
+
+  .dark-mode .floating-card {
+    color: #ccc;
+  }
+
   .sidebar:hover ~ .floating-card {
     left: 15%;
   }
