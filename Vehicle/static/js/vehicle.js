@@ -54,18 +54,15 @@ function updateVehicleData(vehicle) {
 }
 
 function fetchVehicleData() {
-  if (!document.getElementById("toggle-card-switch").checked) {
-    hideCard();
-  } else {
-    fetch("/vehicle/api/vehicles")
-      .then((response) => response.json())
-      .then((data) => {
-        renderVehicles(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching vehicle data:", error);
-      });
-  }
+  fetch("/vehicle/api/vehicles")
+    .then((response) => response.json())
+    .then((data) => {
+      renderVehicles(data);
+      showHidecar();
+    })
+    .catch((error) => {
+      console.error("Error fetching vehicle data:", error);
+    });
 }
 
 function renderVehicles(vehicles) {
