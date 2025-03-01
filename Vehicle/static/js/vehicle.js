@@ -124,8 +124,8 @@ function renderVehicles(vehicles) {
     listContainer.appendChild(vehicleElement);
   });
 
-  filterVehicles();
-  showHidecar();
+  // filterVehicles();
+  // showHidecar();
 }
 
 function updateInfoWindow(marker, latLng, device, coords) {
