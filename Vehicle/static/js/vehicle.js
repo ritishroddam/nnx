@@ -1130,7 +1130,9 @@ function showCard() {
   });
 
   const sliderButton = document.querySelector(".slider-card-button");
-  sliderButton.classList.remove("active");
+  if (sliderButton) {
+    sliderButton.classList.remove("active");
+  }
 }
 
 function hideCard() {
@@ -1140,7 +1142,9 @@ function hideCard() {
   });
 
   const sliderButton = document.querySelector(".slider-card-button");
-  sliderButton.classList.add("active");
+  if (sliderButton) {
+    sliderButton.classList.add("active");
+  }
 }
 
 window.onload = function () {
