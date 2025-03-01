@@ -973,8 +973,8 @@ function showCard() {
   const vehiclCount = document.getElementById("vehicle-counter");
   vehiclCount.style.display = "block";
 
-  const sliderButton = document.querySelector(".slider-card-button");
-  sliderButton.classList.remove("active");
+  // const sliderButton = document.querySelector(".slider-card-button");
+  // sliderButton.classList.remove("active");
 }
 
 function hideCard() {
@@ -986,8 +986,8 @@ function hideCard() {
   const vehiclCount = document.getElementById("vehicle-counter");
   vehiclCount.style.display = "none";
 
-  const sliderButton = document.querySelector(".slider-card-button");
-  sliderButton.classList.add("active");
+  // const sliderButton = document.querySelector(".slider-card-button");
+  // sliderButton.classList.add("active");
 }
 
 window.onload = function () {
