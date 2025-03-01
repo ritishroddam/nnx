@@ -991,10 +991,10 @@ let toggleVIew = true;
 function toggleView() {
   if (toggleVIew) {
     showMapView();
-    toggleVIew = false;
+    toggleVIew = true;
   } else {
     showListView();
-    toggleVIew = true;
+    toggleVIew = false;
   }
 }
 
