@@ -987,7 +987,7 @@ function geocodeLatLng(latLng, callback) {
   }
 }
 
-let toggleVIew = true;
+let toggleVIew = false;
 function toggleView() {
   if (toggleVIew) {
     showMapView();
