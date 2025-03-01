@@ -676,40 +676,93 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
+// function filterVehicles() {
+//   const filterValue = document.getElementById("speed-filter").value;
+
+//   Object.keys(markers).forEach((imei) => {
+//     const marker = markers[imei];
+//     const speedKmh = marker.device.speed
+//       ? convertSpeedToKmh(marker.device.speed)
+//       : 0; // Speed in km/h
+//     const hasSOS = marker.device.sos === "1"; // Check if SOS is active
+//     let isVisible = false;
+
+//     switch (filterValue) {
+//       case "0":
+//         isVisible = speedKmh === 0;
+//         break;
+//       case "0-40":
+//         isVisible = speedKmh > 0 && speedKmh <= 40;
+//         break;
+//       case "40-60":
+//         isVisible = speedKmh > 40 && speedKmh <= 60;
+//         break;
+//       case "60+":
+//         isVisible = speedKmh > 60;
+//         break;
+//       case "sos":
+//         isVisible = hasSOS;
+//         break;
+//       default: // "all"
+//         isVisible = true;
+//         break;
+//     }
+
+//     // Set marker visibility
+//     marker.setVisible(isVisible);
+//   });
+// }
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
+  const now = new Date();
 
   Object.keys(markers).forEach((imei) => {
     const marker = markers[imei];
-    const speedKmh = marker.device.speed
-      ? convertSpeedToKmh(marker.device.speed)
-      : 0; // Speed in km/h
-    const hasSOS = marker.device.sos === "1"; // Check if SOS is active
-    let isVisible = false;
+    const device = marker.device;
+    const lastUpdate = new Date(device.lastUpdate);
+    const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
 
-    switch (filterValue) {
-      case "0":
-        isVisible = speedKmh === 0;
-        break;
-      case "0-40":
-        isVisible = speedKmh > 0 && speedKmh <= 40;
-        break;
-      case "40-60":
-        isVisible = speedKmh > 40 && speedKmh <= 60;
-        break;
-      case "60+":
-        isVisible = speedKmh > 60;
-        break;
-      case "sos":
-        isVisible = hasSOS;
-        break;
-      default: // "all"
-        isVisible = true;
-        break;
+    let showMarker = false;
+
+    if (filterValue === "all") {
+      showMarker = true;
+    } else if (filterValue === "offline" && hoursSinceLastUpdate > 24) {
+      showMarker = true;
+    } else if (
+      filterValue === "0" &&
+      device.speed === 0 &&
+      hoursSinceLastUpdate <= 24
+    ) {
+      showMarker = true;
+    } else if (
+      filterValue === "0-40" &&
+      device.speed > 0 &&
+      device.speed <= 40 &&
+      hoursSinceLastUpdate <= 24
+    ) {
+      showMarker = true;
+    } else if (
+      filterValue === "40-60" &&
+      device.speed > 40 &&
+      device.speed <= 60 &&
+      hoursSinceLastUpdate <= 24
+    ) {
+      showMarker = true;
+    } else if (
+      filterValue === "60+" &&
+      device.speed > 60 &&
+      hoursSinceLastUpdate <= 24
+    ) {
+      showMarker = true;
+    } else if (
+      filterValue === "sos" &&
+      device.sos &&
+      hoursSinceLastUpdate <= 24
+    ) {
+      showMarker = true;
     }
 
-    // Set marker visibility
-    marker.setVisible(isVisible);
+    marker.setVisible(showMarker);
   });
 }
 
