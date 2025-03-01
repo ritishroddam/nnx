@@ -803,7 +803,7 @@ function updateFloatingCard(vehicles, filterValue) {
       </div>`;
 
       vehicleElement.addEventListener("mouseover", () => {
-        const marker = vehicles[imei];
+        const marker = markers[imei];
         if (marker) {
           map.setZoom(20);
           map.panTo(marker.latLng);
@@ -852,38 +852,6 @@ function createCustomMarker(latLng, iconUrl, rotation, device) {
   };
 
   marker.setMap(map);
-
-  // div.addEventListener("mouseover", () => {
-  //   const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-  //   if (vehicleElement) {
-  //       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-  //       vehicleElement.style.backgroundColor = "#000000d0";
-  //       const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
-  //       if (vehicleHeader) {
-  //           vehicleHeader.style.color = "#ccc"; // Change font color to white
-  //       }
-  //       const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
-  //       if (vehicleInfo) {
-  //           vehicleInfo.style.color = "#ccc"; // Change font color to white
-  //       }
-  //   }
-  // });
-
-  // div.addEventListener("mouseout", () => {
-  //     const vehicleElement = document.querySelector(`.vehicle-card[data-imei="${device.imei}"]`);
-  //     if (vehicleElement) {
-  //         vehicleElement.style.transition = "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-  //         vehicleElement.style.backgroundColor = ""; // Reset background color
-  //         const vehicleHeader = vehicleElement.querySelector('.vehicle-header'); // Correctly select vehicleHeader
-  //         if (vehicleHeader) {
-  //             vehicleHeader.style.color = ""; // Reset font color
-  //         }
-  //         const vehicleInfo = vehicleElement.querySelector('.vehicle-info'); // Correctly select vehicleHeader
-  //       if (vehicleInfo) {
-  //           vehicleInfo.style.color = ""; // Change font color to white
-  //       }
-  //     }
-  // });
 
   div.addEventListener("mouseover", () => {
     const vehicleElement = document.querySelector(
