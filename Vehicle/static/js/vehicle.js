@@ -124,7 +124,7 @@ function renderVehicles(vehicles) {
     listContainer.appendChild(vehicleElement);
   });
 
-  // filterVehicles();
+  filterVehicles();
   showHidecar();
 }
 
@@ -800,67 +800,24 @@ function updateFloatingCard(vehicles, filterValue) {
         <strong>Data:</strong> <a href="device-details.html?imei=${
           vehicle.imei
         }" target="_blank">View Data</a>
-      </div>
-    `;
+      </div>`;
+
+      vehicleElement.addEventListener("mouseover", () => {
+        const marker = markers[imei];
+        if (marker) {
+          map.setZoom(20);
+          map.panTo(marker.latLng);
+          updateInfoWindow(marker, marker.latLng, marker.device, {
+            lat: marker.latLng.lat(),
+            lon: marker.latLng.lng(),
+          });
+        }
+      });
 
       vehicleList.appendChild(vehicleElement);
     });
   }
 }
-
-// function filterVehicles() {
-//   const filterValue = document.getElementById("speed-filter").value;
-//   const now = new Date();
-
-//   Object.keys(markers).forEach((imei) => {
-//     const marker = markers[imei];
-//     const device = marker.device;
-//     const lastUpdate = convertToDate(date, time);
-//     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
-
-//     let showMarker = false;
-
-//     if (filterValue === "all") {
-//       showMarker = true;
-//     } else if (filterValue === "offline" && hoursSinceLastUpdate > 24) {
-//       showMarker = true;
-//     } else if (
-//       filterValue === "0" &&
-//       device.speed === 0 &&
-//       hoursSinceLastUpdate <= 24
-//     ) {
-//       showMarker = true;
-//     } else if (
-//       filterValue === "0-40" &&
-//       device.speed > 0 &&
-//       device.speed <= 40 &&
-//       hoursSinceLastUpdate <= 24
-//     ) {
-//       showMarker = true;
-//     } else if (
-//       filterValue === "40-60" &&
-//       device.speed > 40 &&
-//       device.speed <= 60 &&
-//       hoursSinceLastUpdate <= 24
-//     ) {
-//       showMarker = true;
-//     } else if (
-//       filterValue === "60+" &&
-//       device.speed > 60 &&
-//       hoursSinceLastUpdate <= 24
-//     ) {
-//       showMarker = true;
-//     } else if (
-//       filterValue === "sos" &&
-//       device.sos &&
-//       hoursSinceLastUpdate <= 24
-//     ) {
-//       showMarker = true;
-//     }
-
-//     marker.setVisible(showMarker);
-//   });
-// }
 
 function createCustomMarker(latLng, iconUrl, rotation, device) {
   const div = document.createElement("div");
