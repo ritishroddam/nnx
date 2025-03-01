@@ -125,10 +125,7 @@ function renderVehicles(vehicles) {
     listContainer.appendChild(vehicleElement);
   });
 
-  const filterValue = document.getElementById("speed-filter").value;
-
-  updateFloatingCard(filteredVehicles, filterValue);
-  filteredVehicles = [];
+  filterVehicles();
   showHidecar();
 }
 
@@ -682,11 +679,9 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
-let filteredVehicles = [];
-
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
-
+  let filteredVehicles = [];
   const now = new Date();
 
   Object.keys(markers).forEach((imei) => {
