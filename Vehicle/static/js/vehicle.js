@@ -124,6 +124,11 @@ function renderVehicles(vehicles) {
 
     listContainer.appendChild(vehicleElement);
   });
+
+  const filterValue = document.getElementById("speed-filter").value;
+
+  updateFloatingCard(filteredVehicles, filterValue);
+  showHidecar();
 }
 
 function updateInfoWindow(marker, latLng, device, coords) {
@@ -676,9 +681,11 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
+let filteredVehicles = [];
+
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
-  let filteredVehicles = [];
+
   const now = new Date();
 
   Object.keys(markers).forEach((imei) => {
@@ -1104,6 +1111,14 @@ document
       hideCard();
     }
   });
+
+function showHidecar() {
+  if (document.getElementById("toggle-card-switch").checked) {
+    showCard();
+  } else {
+    hideCard();
+  }
+}
 
 function showCard() {
   const vehicleCard = document.querySelectorAll(".vehicle-card");
