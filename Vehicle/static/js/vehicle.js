@@ -730,7 +730,9 @@ function filterVehicles() {
 }
 
 function updateFloatingCard(vehicles, filterValue) {
-  if (document.getElementById("toggle-card-switch").checked === true) {
+  if (document.getElementById("toggle-card-switch").checked === false) {
+    hideCard();
+  } else {
     const vehicleList = document.getElementById("vehicle-list");
     const vehicleCounter = document.getElementById("vehicle-counter");
     const vehicleCount = document.getElementById("vehicle-count");
