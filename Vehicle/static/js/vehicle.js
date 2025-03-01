@@ -128,6 +128,7 @@ function renderVehicles(vehicles) {
   const filterValue = document.getElementById("speed-filter").value;
 
   updateFloatingCard(filteredVehicles, filterValue);
+  filteredVehicles = [];
   showHidecar();
 }
 
