@@ -291,6 +291,10 @@
   transition: 0.4s;
 }
 
+input:checked + .slider:before {
+  background-color: #000000d0;
+}
+
 .dark-mode .slider:before {
   background-color: #000000d0;
 }
