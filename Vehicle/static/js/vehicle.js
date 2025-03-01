@@ -383,7 +383,9 @@ function initMap() {
       // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
     } else {
       updateMap();
-      fetchVehicleData();
+      if (document.getElementById("toggle-card-switch").checked === true) {
+        fetchVehicleData();
+      }
       countdownTimer = refreshInterval / 1000; // Reset countdown
     }
   }, 1000);
