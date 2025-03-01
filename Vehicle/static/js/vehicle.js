@@ -54,14 +54,18 @@ function updateVehicleData(vehicle) {
 }
 
 function fetchVehicleData() {
-  fetch("/vehicle/api/vehicles")
-    .then((response) => response.json())
-    .then((data) => {
-      renderVehicles(data);
-    })
-    .catch((error) => {
-      console.error("Error fetching vehicle data:", error);
-    });
+  if (!document.getElementById("toggle-card-switch").checked) {
+    hideCard();
+  } else {
+    fetch("/vehicle/api/vehicles")
+      .then((response) => response.json())
+      .then((data) => {
+        renderVehicles(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching vehicle data:", error);
+      });
+  }
 }
 
 function renderVehicles(vehicles) {
@@ -731,56 +735,61 @@ function filterVehicles() {
 }
 
 function updateFloatingCard(vehicles, filterValue) {
-  const vehicleList = document.getElementById("vehicle-list");
-  const vehicleCounter = document.getElementById("vehicle-counter");
-  const vehicleCount = document.getElementById("vehicle-count");
+  if (!document.getElementById("toggle-card-switch").checked) {
+    hideCard();
+  } else {
+    const vehicleList = document.getElementById("vehicle-list");
+    const vehicleCounter = document.getElementById("vehicle-counter");
+    const vehicleCount = document.getElementById("vehicle-count");
 
-  vehicleList.innerHTML = "";
-  vehicleCount.innerText = vehicles.length;
+    vehicleList.innerHTML = "";
+    vehicleCount.innerText = vehicles.length;
 
-  let headingText = "All Vehicles";
-  switch (filterValue) {
-    case "0":
-      headingText = "Stationary Vehicles";
-      break;
-    case "0-40":
-      headingText = "Slow Speed Vehicles";
-      break;
-    case "40-60":
-      headingText = "Moderate Speed Vehicles";
-      break;
-    case "60+":
-      headingText = "High Speed Vehicles";
-      break;
-    case "sos":
-      headingText = "SOS Alert Vehicles";
-      break;
-    case "offline":
-      headingText = "Offline Vehicles";
-      break;
-    default:
-      headingText = "All Vehicles";
-      break;
-  }
-  vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+    let headingText = "All Vehicles";
+    switch (filterValue) {
+      case "0":
+        headingText = "Stationary Vehicles";
+        break;
+      case "0-40":
+        headingText = "Slow Speed Vehicles";
+        break;
+      case "40-60":
+        headingText = "Moderate Speed Vehicles";
+        break;
+      case "60+":
+        headingText = "High Speed Vehicles";
+        break;
+      case "sos":
+        headingText = "SOS Alert Vehicles";
+        break;
+      case "offline":
+        headingText = "Offline Vehicles";
+        break;
+      default:
+        headingText = "All Vehicles";
+        break;
+    }
+    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
 
-  vehicles.forEach((vehicle) => {
-    const vehicleElement = document.createElement("div");
-    vehicleElement.classList.add("vehicle-card");
-    vehicleElement.setAttribute("data-imei", vehicle.imei);
+    vehicles.forEach((vehicle) => {
+      const vehicleElement = document.createElement("div");
+      vehicleElement.classList.add("vehicle-card");
+      vehicleElement.setAttribute("data-imei", vehicle.imei);
 
-    const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-    const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+      const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+      const longitude = vehicle.longitude
+        ? parseFloat(vehicle.longitude)
+        : null;
 
-    const { formattedDate, formattedTime } = formatDateTime(
-      vehicle.date,
-      vehicle.time
-    );
+      const { formattedDate, formattedTime } = formatDateTime(
+        vehicle.date,
+        vehicle.time
+      );
 
-    vehicleElement.innerHTML = `
+      vehicleElement.innerHTML = `
       <div class="vehicle-header">${vehicle.imei} - ${
-      vehicle.status || "Unknown"
-    }</div>
+        vehicle.status || "Unknown"
+      }</div>
       <div class="vehicle-info">
         <strong>Speed:</strong> ${
           vehicle.speed
@@ -790,8 +799,8 @@ function updateFloatingCard(vehicles, filterValue) {
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
         <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
-      formattedDate || "N/A"
-    } <br>
+        formattedDate || "N/A"
+      } <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?imei=${
           vehicle.imei
@@ -799,8 +808,9 @@ function updateFloatingCard(vehicles, filterValue) {
       </div>
     `;
 
-    vehicleList.appendChild(vehicleElement);
-  });
+      vehicleList.appendChild(vehicleElement);
+    });
+  }
 }
 
 // function filterVehicles() {
