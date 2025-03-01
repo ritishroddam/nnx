@@ -686,6 +686,7 @@ function filterVehicles() {
       : 0; // Speed in km/h
     const hasSOS = marker.device.sos === "1"; // Check if SOS is active
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
+    const now = new Date();
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
 
     let isVisible = false;
