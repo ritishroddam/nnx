@@ -706,9 +706,6 @@ function filterVehicles() {
       case "sos":
         isVisible = hasSOS;
         break;
-      case "offline":
-        isVisible = hoursSinceLastUpdate > 24;
-        break;
       default: // "all"
         isVisible = true;
         break;
