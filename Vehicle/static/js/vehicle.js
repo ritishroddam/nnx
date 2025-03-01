@@ -719,7 +719,7 @@ function filterVehicles() {
   Object.keys(markers).forEach((imei) => {
     const marker = markers[imei];
     const device = marker.device;
-    const lastUpdate = new Date(device.lastUpdate);
+    const lastUpdate = convertToDate(date, time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
 
     let showMarker = false;
