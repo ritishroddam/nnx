@@ -730,7 +730,7 @@ function filterVehicles() {
 }
 
 function updateFloatingCard(vehicles, filterValue) {
-  if (!document.getElementById("toggle-card-switch").checked) {
+  if (document.getElementById("toggle-card-switch").checked === false) {
     hideCard();
   } else {
     const vehicleList = document.getElementById("vehicle-list");
