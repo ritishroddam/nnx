@@ -685,7 +685,7 @@ function filterVehicles() {
       ? convertSpeedToKmh(marker.device.speed)
       : 0; // Speed in km/h
     const hasSOS = marker.device.sos === "1"; // Check if SOS is active
-    const lastUpdate = convertToDate(date, time);
+    const lastUpdate = convertToDate(marker.date, marker.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
 
     let isVisible = false;
@@ -695,16 +695,19 @@ function filterVehicles() {
         isVisible = speedKmh === 0;
         break;
       case "0-40":
-        isVisible = speedKmh > 0 && speedKmh <= 40;
+        isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate;
         break;
       case "40-60":
-        isVisible = speedKmh > 40 && speedKmh <= 60;
+        isVisible = speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate;
         break;
       case "60+":
-        isVisible = speedKmh > 60;
+        isVisible = speedKmh > 60  && hoursSinceLastUpdate;
         break;
       case "sos":
-        isVisible = hasSOS;
+        isVisible = hasSOS && hoursSinceLastUpdate;
+        break;
+      case "offline":
+        isVisible = hoursSinceLastUpdate > 24;
         break;
       default: // "all"
         isVisible = true;
