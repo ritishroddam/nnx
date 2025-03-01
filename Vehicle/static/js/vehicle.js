@@ -124,7 +124,7 @@ function renderVehicles(vehicles) {
     listContainer.appendChild(vehicleElement);
   });
 
-  // filterVehicles();
+  filterVehicles();
   // showHidecar();
 }
 
