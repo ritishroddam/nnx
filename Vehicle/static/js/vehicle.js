@@ -969,6 +969,10 @@ function showCard() {
   vehicleCard.forEach((tag) => {
     tag.style.display = "block";
   });
+
+  const vehiclCount = document.getElementById("vehicle-counter");
+  vehiclCount.style.display = "block";
+
   const sliderButton = document.querySelector(".slider-card-button");
   sliderButton.classList.remove("active");
 }
@@ -978,6 +982,10 @@ function hideCard() {
   vehicleCard.forEach((tag) => {
     tag.style.display = "none";
   });
+
+  const vehiclCount = document.getElementById("vehicle-counter");
+  vehiclCount.style.display = "none";
+
   const sliderButton = document.querySelector(".slider-card-button");
   sliderButton.classList.add("active");
 }
