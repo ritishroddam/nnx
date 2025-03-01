@@ -693,19 +693,20 @@ function filterVehicles() {
 
     switch (filterValue) {
       case "0":
-        isVisible = speedKmh === 0;
+        isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
         break;
       case "0-40":
-        isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate;
+        isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
         break;
       case "40-60":
-        isVisible = speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate;
+        isVisible =
+          speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
         break;
       case "60+":
-        isVisible = speedKmh > 60 && hoursSinceLastUpdate;
+        isVisible = speedKmh > 60 && hoursSinceLastUpdate < 24;
         break;
       case "sos":
-        isVisible = hasSOS && hoursSinceLastUpdate;
+        isVisible = hasSOS && hoursSinceLastUpdate < 24;
         break;
       case "offline":
         isVisible = hoursSinceLastUpdate > 24;
