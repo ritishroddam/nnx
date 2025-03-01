@@ -87,28 +87,26 @@ function renderVehicles(vehicles) {
     );
 
     vehicleElement.innerHTML = `
-            <div class="vehicle-header">${vehicle.imei} - ${
+      <div class="vehicle-header">${vehicle.imei} - ${
       vehicle.status || "Unknown"
     }</div>
-            <div class="vehicle-info">
-                <strong>Speed:</strong> ${
-                  vehicle.speed
-                    ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
-                    : "Unknown"
-                } <br>
-                <strong>Lat:</strong> ${latitude} <br>
-                <strong>Lon:</strong> ${longitude} <br>
-                <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
+      <div class="vehicle-info">
+        <strong>Speed:</strong> ${
+          vehicle.speed
+            ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
+            : "Unknown"
+        } <br>
+        <strong>Lat:</strong> ${latitude} <br>
+        <strong>Lon:</strong> ${longitude} <br>
+        <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
       formattedDate || "N/A"
     } <br>
-                <strong>Location:</strong> ${
-                  vehicle.address || "Location unknown"
-                } <br>
-                <strong>Data:</strong> <a href="device-details.html?imei=${
-                  vehicle.imei
-                }" target="_blank">View Data</a>
-            </div>
-        `;
+        <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
+        <strong>Data:</strong> <a href="device-details.html?imei=${
+          vehicle.imei
+        }" target="_blank">View Data</a>
+      </div>
+    `;
 
     // Add hover event listener to zoom in on the map and show the info window
     vehicleElement.addEventListener("mouseover", () => {
