@@ -1,61 +1,55 @@
- // Automatically set warranty to 1 year from Date In
-      document.getElementById("DateIn").addEventListener("change", function () {
-        var dateIn = new Date(this.value);
-        var warrantyDate = new Date(dateIn);
-        warrantyDate.setFullYear(warrantyDate.getFullYear() + 1);
-        document.getElementById("Warranty").value = warrantyDate
-          .toISOString()
-          .split("T")[0];
-      });
+// Automatically set warranty to 1 year from Date In
+document.getElementById("DateIn").addEventListener("change", function () {
+  var dateIn = new Date(this.value);
+  var warrantyDate = new Date(dateIn);
+  warrantyDate.setFullYear(warrantyDate.getFullYear() + 1);
+  document.getElementById("Warranty").value = warrantyDate
+    .toISOString()
+    .split("T")[0];
+});
 
-      document
-        .getElementById("manualEntryBtn")
-        .addEventListener("click", function () {
-          document.getElementById("manualEntryForm").classList.remove("hidden");
-          // Focus on the IMEI input field
-          document.getElementById("IMEI").focus();
-        });
+document
+  .getElementById("manualEntryBtn")
+  .addEventListener("click", function () {
+    document.getElementById("manualEntryForm").classList.remove("hidden");
+    // Focus on the IMEI input field
+    document.getElementById("IMEI").focus();
+  });
 
-      document
-        .getElementById("uploadBtn")
-        .addEventListener("click", function () {
-          document.getElementById("uploadBox").classList.toggle("hidden");
-        });
+document.getElementById("uploadBtn").addEventListener("click", function () {
+  document.getElementById("uploadBox").classList.toggle("hidden");
+});
 
-      document
-        .getElementById("cancelBtn")
-        .addEventListener("click", function () {
-          document.getElementById("manualEntryForm").classList.add("hidden");
-        });
+document.getElementById("cancelBtn").addEventListener("click", function () {
+  document.getElementById("manualEntryForm").classList.add("hidden");
+});
 
-      document
-        .getElementById("cancelUploadBtn")
-        .addEventListener("click", function () {
-          document.getElementById("uploadBox").classList.add("hidden");
-        });
+document
+  .getElementById("cancelUploadBtn")
+  .addEventListener("click", function () {
+    document.getElementById("uploadBox").classList.add("hidden");
+  });
 
-      document
-        .getElementById("uploadForm")
-        .addEventListener("submit", function () {
-          document.querySelector(".preloader").style.display = "block";
-        });
+document.getElementById("uploadForm").addEventListener("submit", function () {
+  document.querySelector(".preloader").style.display = "block";
+});
 
-      document
-        .getElementById("manualForm")
-        .addEventListener("submit", function (event) {
-          var imei = document.getElementById("IMEI").value;
-          var imeiError = document.getElementById("imeiError");
+document
+  .getElementById("manualForm")
+  .addEventListener("submit", function (event) {
+    var imei = document.getElementById("IMEI").value;
+    var imeiError = document.getElementById("imeiError");
 
-          // IMEI validation
-          if (imei.length !== 15 || isNaN(imei)) {
-            imeiError.classList.remove("hidden");
-            event.preventDefault();
-          } else {
-            imeiError.classList.add("hidden");
-          }
-        });
+    // IMEI validation
+    if (imei.length !== 15 || isNaN(imei)) {
+      imeiError.classList.remove("hidden");
+      event.preventDefault();
+    } else {
+      imeiError.classList.add("hidden");
+    }
+  });
 
-      document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
   const dateInInput = document.getElementById("DateIn");
 
   // Set the max date to today
@@ -71,33 +65,35 @@
   });
 });
 
-      document.getElementById("Package").addEventListener("change", function () {
-    var tenureContainer = document.getElementById("TenureContainer");
-    var tenureInput = document.getElementById("Tenure");
-    if (this.value === "Package") {
-      tenureContainer.classList.remove("hidden");
-      tenureInput.setAttribute("required", "true");
-    } else {
-      tenureContainer.classList.add("hidden");
-      tenureInput.removeAttribute("required");
-    }
-  });
-      
-////////////////// Download ////////////////////////
-      document.getElementById("downloadExcel").addEventListener("click", function() {
-    window.location.href = "/download_template";
+document.getElementById("Package").addEventListener("change", function () {
+  var tenureContainer = document.getElementById("TenureContainer");
+  var tenureInput = document.getElementById("Tenure");
+  if (this.value === "Package") {
+    tenureContainer.classList.remove("hidden");
+    tenureInput.setAttribute("required", "true");
+  } else {
+    tenureContainer.classList.add("hidden");
+    tenureInput.removeAttribute("required");
+  }
 });
 
+////////////////// Download ////////////////////////
+document.getElementById("downloadExcel").addEventListener("click", function () {
+  window.location.href = "/download_template";
+});
 
-      function editDevice(deviceId) {
-  console.log("Edit button clicked for device ID:", deviceId); 
+function editDevice(deviceId) {
+  console.log("Edit button clicked for device ID:", deviceId);
 
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
 
   // Extract existing values from the row
   const imei = row.cells[0].innerText;
   // const glNumber = row.cells[1].innerText;
-  const glNumber = row.cells[1].innerText.trim() === "None" ? "" : row.cells[1].innerText.trim();
+  const glNumber =
+    row.cells[1].innerText.trim() === "None"
+      ? ""
+      : row.cells[1].innerText.trim();
   const deviceModel = row.cells[2].innerText;
   const deviceMake = row.cells[3].innerText;
   const dateIn = row.cells[4].innerText;
@@ -113,26 +109,36 @@
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
   row.cells[2].innerHTML = `<input type="text" value="${deviceModel}" />`;
   row.cells[3].innerHTML = `<input type="text" value="${deviceMake}" />`;
-  
- 
 
   row.cells[4].innerHTML = `<input type="date" value="${dateIn}" />`;
   row.cells[5].innerHTML = `<input type="date" value="${warranty}" />`;
   row.cells[6].innerHTML = `<input type="text" value="${sentBy}" />`;
   row.cells[7].innerHTML = `<input type="text" value="${outwardTo}" />`;
-         row.cells[8].innerHTML = `
+  row.cells[8].innerHTML = `
     <select id="editPackage">
-      <option value="Rental" ${packageValue === "Rental" ? "selected" : ""}>Rental</option>
-      <option value="Package" ${packageValue === "Package" ? "selected" : ""}>Package</option>
-      <option value="Outrate" ${packageValue === "Outrate" ? "selected" : ""}>Outrate</option>
+      <option value="Rental" ${
+        packageValue === "Rental" ? "selected" : ""
+      }>Rental</option>
+      <option value="Package" ${
+        packageValue === "Package" ? "selected" : ""
+      }>Package</option>
+      <option value="Outrate" ${
+        packageValue === "Outrate" ? "selected" : ""
+      }>Outrate</option>
     </select>
   `;
 
-  row.cells[9].innerHTML = `<input type="text" id="editTenure" value="${tenureValue}" ${packageValue === "Package" ? "" : "disabled"} />`;
+  row.cells[9].innerHTML = `<input type="text" id="editTenure" value="${tenureValue}" ${
+    packageValue === "Package" ? "" : "disabled"
+  } />`;
 
   row.cells[10].innerHTML = `
-    <input type="radio" name="status-${deviceId}" value="Active" ${status === "Active" ? "checked" : ""} /> Active
-    <input type="radio" name="status-${deviceId}" value="Inactive" ${status === "Inactive" ? "checked" : ""} /> Inactive
+    <input type="radio" name="status-${deviceId}" value="Active" ${
+    status === "Active" ? "checked" : ""
+  } /> Active
+    <input type="radio" name="status-${deviceId}" value="Inactive" ${
+    status === "Inactive" ? "checked" : ""
+  } /> Inactive
   `;
 
   row.cells[11].innerHTML = `
@@ -141,13 +147,14 @@
   `;
 
   // Enable/disable "Tenure" based on "Package" selection
-  document.getElementById("editPackage").addEventListener("change", function () {
-    document.getElementById("editTenure").disabled = this.value !== "Package";
-  });
+  document
+    .getElementById("editPackage")
+    .addEventListener("change", function () {
+      document.getElementById("editTenure").disabled = this.value !== "Package";
+    });
 }
-      
 
-      function validateIMEI(input) {
+function validateIMEI(input) {
   let imei = input.value;
   if (!/^\d{0,15}$/.test(imei)) {
     input.value = imei.slice(0, 15); // Restrict to 15 digits
@@ -161,7 +168,7 @@ function validateGLNumber(input) {
   }
 }
 
-      function saveDevice(deviceId) {
+function saveDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
 
   const imeiValue = row.cells[0].querySelector("input").value.trim();
@@ -175,7 +182,9 @@ function validateGLNumber(input) {
   const outwardTo = row.cells[7].querySelector("input").value.trim();
   const packageValue = row.cells[8].querySelector("select").value;
   const tenureValue = row.cells[9].querySelector("input").value.trim();
-  const status = row.cells[10].querySelector(`input[name="status-${deviceId}"]:checked`).value.trim();
+  const status = row.cells[10]
+    .querySelector(`input[name="status-${deviceId}"]:checked`)
+    .value.trim();
 
   console.log("Updated Data:", {
     IMEI: imeiValue,
@@ -263,36 +272,32 @@ function validateGLNumber(input) {
     });
 }
 
-
-
 function cancelEdit(deviceId) {
   // Reload the page to reset the changes (or implement inline reset)
   location.reload();
 }
 
-      function deleteDevice(deviceId) {
-    if (confirm("Are you sure you want to delete this device?")) {
-        fetch(`/delete_device/${deviceId}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Remove the row from the table
-                document.querySelector(`tr[data-id='${deviceId}']`).remove();
-                alert("Device deleted successfully!");
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error("Error deleting device:", error);
-            alert("An error occurred. Please try again.");
-        });
-    }
+function deleteDevice(deviceId) {
+  if (confirm("Are you sure you want to delete this device?")) {
+    fetch(`/delete_device/${deviceId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Remove the row from the table
+          document.querySelector(`tr[data-id='${deviceId}']`).remove();
+          alert("Device deleted successfully!");
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting device:", error);
+        alert("An error occurred. Please try again.");
+      });
+  }
 }
-
-     

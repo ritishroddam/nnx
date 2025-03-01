@@ -1,227 +1,228 @@
 {% extends "base.html" %}
 
 {% block head %}
-     <title>ADMIN - Vehicle Data</title>
-     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-     <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
-     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap" async defer></script>
+<title>ADMIN - Vehicle Data</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&libraries=drawing&callback=initMap"
+  async defer></script>
 {% endblock %}
- 
+
 {% block h1 %}
-  Vehicle Data
+Vehicle Data
 {% endblock %}
- 
+
 {% block content %}
 <div class="header">
-    <span class="back-arrow">&larr;</span>
-    <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
-  </div>
+  <span class="back-arrow">&larr;</span>
+  <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
+</div>
 
-  <div class="dashboard-container">
+<div class="dashboard-container">
 
-    <div class="left-column">
+  <div class="left-column">
 
-      <div class="map-section">
-        <h3>Route history</h3>
-      
-        <div id="map"></div>
+    <div class="map-section">
+      <h3>Route history</h3>
 
-        <form id="vehicle-form">
-          <label for="start_date">Start Date:</label>
-          <input type="date" id="start_date" name="start_date" required>
-          <label for="end_date">End Date:</label>
-          <input type="date" id="end_date" name="end_date" required>
-          <button type="submit">
-              <i class="fas fa-search"></i> Get Path
-          </button>
+      <div id="map"></div>
+
+      <form id="vehicle-form">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required>
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required>
+        <button type="submit">
+          <i class="fas fa-search"></i> Get Path
+        </button>
       </form>
-   
-          <div id="controls-container">
-            <button id="play-button" class="control-button">
-                <i class="fas fa-play"></i>
-            </button>
-            <button id="stop-button" class="control-button">
-                <i class="fas fa-stop"></i>
-            </button>
-            <button id="speed-2x-button" class="control-button">
-                <i class="fas fa-forward"></i> 2X
-            </button>
-            <button id="speed-4x-button" class="control-button">
-                <i class="fas fa-forward"></i> 4X
-            </button>
-            <button id="speed-8x-button" class="control-button">
-                <i class="fas fa-forward"></i> 8X
-            </button>
-        </div>
+
+      <div id="controls-container">
+        <button id="play-button" class="control-button">
+          <i class="fas fa-play"></i>
+        </button>
+        <button id="stop-button" class="control-button">
+          <i class="fas fa-stop"></i>
+        </button>
+        <button id="speed-2x-button" class="control-button">
+          <i class="fas fa-forward"></i> 2X
+        </button>
+        <button id="speed-4x-button" class="control-button">
+          <i class="fas fa-forward"></i> 4X
+        </button>
+        <button id="speed-8x-button" class="control-button">
+          <i class="fas fa-forward"></i> 8X
+        </button>
       </div>
-
-      <div class="info-box">
-        <h3>Driver: Info</h3>
-        <div class="info-row">
-            <span>Name:</span>
-            <strong>{{ vehicle_data[0]['Driver Name'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-            <span>License:</span>
-            <strong>{{ vehicle_data[0]['License Number'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-            <span>Phone:</span>
-            <strong>{{ vehicle_data[0]['Phone Number'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-            <span>Status:</span>
-            <strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-    </div>        
-
-
     </div>
 
-    <div class="right-column">
-
-      <div class="info-box">
-        <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
-        <div class="info-row">
-          <span>Vehicle Model:</span
-          ><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Vehicle Make:</span
-          ><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Status:</span
-          ><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Odometer:</span
-          ><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
+    <div class="info-box">
+      <h3>Driver: Info</h3>
+      <div class="info-row">
+        <span>Name:</span>
+        <strong>{{ vehicle_data[0]['Driver Name'] if vehicle_data else 'No Data Available'}}</strong>
       </div>
-
-      <div class="chart-section">
-        <h3>Realtime - last 5 minutes</h3>
-        {% if recent_data %}
-            <canvas id="speedChart"></canvas>
-        {% else %}
-            <p>No current/latest data</p>
-        {% endif %}
-    </div>        
-
-      <div class="alarm-section">
-        <h3>
-          {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
-        </h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Location</th>
-              <th>Severity</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if alerts %}
-              {% for alert in alerts %}
-                <tr>
-                  <td>{{ alert.timestamp }}</td>
-                  <td>{{ alert.location }}</td>
-                  <td>{{ alert.severity }}</td>
-                  <td>{{ alert.status }}</td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="4">No alerts found for the selected IMEI.</td>
-              </tr>
-            {% endif %}
-          </tbody>
-        </table>
+      <div class="info-row">
+        <span>License:</span>
+        <strong>{{ vehicle_data[0]['License Number'] if vehicle_data else 'No Data Available'}}</strong>
       </div>
+      <div class="info-row">
+        <span>Phone:</span>
+        <strong>{{ vehicle_data[0]['Phone Number'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Status:</span>
+        <strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+    </div>
+
+
+  </div>
+
+  <div class="right-column">
+
+    <div class="info-box">
+      <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
+      <div class="info-row">
+        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Odometer:</span><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h3>Realtime - last 5 minutes</h3>
+      {% if recent_data %}
+      <canvas id="speedChart"></canvas>
+      {% else %}
+      <p>No current/latest data</p>
+      {% endif %}
+    </div>
+
+    <div class="alarm-section">
+      <h3>
+        {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
+      </h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Location</th>
+            <th>Severity</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if alerts %}
+          {% for alert in alerts %}
+          <tr>
+            <td>{{ alert.timestamp }}</td>
+            <td>{{ alert.location }}</td>
+            <td>{{ alert.severity }}</td>
+            <td>{{ alert.status }}</td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="4">No alerts found for the selected IMEI.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
     </div>
   </div>
-  
-  <script id="vehicle-data" type="application/json">
+</div>
+
+<script id="vehicle-data" type="application/json">
     {{ vehicle_data | tojson if vehicle_data else 'No Data Available'}}
     </script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-    const recentData = ( recent_data | tojson );
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const recentData = (recent_data | tojson);
     const labels = recentData.map(data => data.time); // Extract times for X-axis
     const speeds = recentData.map(data => data.speed); // Extract speeds for Y-axis
 
     const ctx = document.getElementById("speedChart").getContext("2d");
     const speedChart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: labels, // Time labels
-            datasets: [
-                {
-                    label: "Speed (km/h)",
-                    data: speeds, // Speed data
-                    borderColor: "rgba(0, 122, 255, 1)",
-                    backgroundColor: "rgba(0, 122, 255, 0.2)",
-                    borderWidth: 2,
-                    fill: true,
-                },
-            ],
-        },
-        options: {
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "Time",
-                    },
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: "Speed (km/h)",
-                    },
-                },
+      type: "line",
+      data: {
+        labels: labels, // Time labels
+        datasets: [
+          {
+            label: "Speed (km/h)",
+            data: speeds, // Speed data
+            borderColor: "rgba(0, 122, 255, 1)",
+            backgroundColor: "rgba(0, 122, 255, 0.2)",
+            borderWidth: 2,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "Time",
             },
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: {
-                        color: "white", // Label text color
-                    },
-                },
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Speed (km/h)",
             },
+          },
         },
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: "white", // Label text color
+            },
+          },
+        },
+      },
     });
-});
+  });
 
-let map;
-let pathCoordinates = [];
-let carMarker;
-let pathPolyline;
-let startMarker;
-let endMarker;
-let currentIndex = 0;
-let animationInterval = null;
-let speedMultiplier = 1;
+  let map;
+  let pathCoordinates = [];
+  let carMarker;
+  let pathPolyline;
+  let startMarker;
+  let endMarker;
+  let currentIndex = 0;
+  let animationInterval = null;
+  let speedMultiplier = 1;
 
-function initMap() {
+  function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 10,
-        center: { lat: 0, lng: 0 }, // Default center, updated dynamically
+      zoom: 10,
+      center: { lat: 0, lng: 0 }, // Default center, updated dynamically
     });
 
     document.getElementById("play-button").addEventListener("click", startCarAnimation);
@@ -229,165 +230,165 @@ function initMap() {
     document.getElementById("speed-2x-button").addEventListener("click", () => setSpeed(2));
     document.getElementById("speed-4x-button").addEventListener("click", () => setSpeed(4));
     document.getElementById("speed-8x-button").addEventListener("click", () => setSpeed(8));
-}
+  }
 
-document.getElementById("vehicle-form").addEventListener("submit", function(event) {
-event.preventDefault();
+  document.getElementById("vehicle-form").addEventListener("submit", function (event) {
+    event.preventDefault();
 
-const userEnteredImei = document.getElementById("imei").value.trim();
+    const userEnteredImei = document.getElementById("imei").value.trim();
 
-// Ensure only numeric input
-if (!/^\d+$/.test(userEnteredImei)) {
-alert("Please enter a valid numeric IMEI number.");
-return;
-}
-
-const start_date = formatDateToDB(document.getElementById("start_date").value);
-const end_date = formatDateToDB(document.getElementById("end_date").value);
-
-const fetchUrl = `/get_vehicle_path?imei=${userEnteredImei}&start_date=${start_date}&end_date=${end_date}`;
-console.log("Fetch URL:", fetchUrl);
-
-fetch(fetchUrl)
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+    // Ensure only numeric input
+    if (!/^\d+$/.test(userEnteredImei)) {
+      alert("Please enter a valid numeric IMEI number.");
+      return;
     }
-    return response.json();
-})
-.then(data => {
-    if (data.length > 0) {
-        pathCoordinates = data.map(item => ({
+
+    const start_date = formatDateToDB(document.getElementById("start_date").value);
+    const end_date = formatDateToDB(document.getElementById("end_date").value);
+
+    const fetchUrl = `/get_vehicle_path?imei=${userEnteredImei}&start_date=${start_date}&end_date=${end_date}`;
+    console.log("Fetch URL:", fetchUrl);
+
+    fetch(fetchUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.length > 0) {
+          pathCoordinates = data.map(item => ({
             lat: item.latitude,
             lng: item.longitude,
             time: item.time,
-        }));
-        plotPathOnMap(pathCoordinates);
-    } else {
-        alert("No path data found for the given IMEI and date range.");
-    }
-})
-.catch(error => {
-    console.error("Error fetching path data:", error);
-    alert("Error fetching path data. Please check the console for details.");
-});
-});
+          }));
+          plotPathOnMap(pathCoordinates);
+        } else {
+          alert("No path data found for the given IMEI and date range.");
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching path data:", error);
+        alert("Error fetching path data. Please check the console for details.");
+      });
+  });
 
 
-function formatDateToDB(dateString) {
+  function formatDateToDB(dateString) {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear().toString().slice(2);
     return `${day}${month}${year}`;
-}
+  }
 
-function plotPathOnMap(pathCoordinates) {
-if (pathPolyline) pathPolyline.setMap(null);
-if (startMarker) startMarker.setMap(null);
-if (endMarker) endMarker.setMap(null);
-if (carMarker) carMarker.setMap(null); // Clear the previous car marker
+  function plotPathOnMap(pathCoordinates) {
+    if (pathPolyline) pathPolyline.setMap(null);
+    if (startMarker) startMarker.setMap(null);
+    if (endMarker) endMarker.setMap(null);
+    if (carMarker) carMarker.setMap(null); // Clear the previous car marker
 
-if (pathCoordinates.length > 0) {
-const arrowSymbol = {
-path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-scale: 2, // Adjusted scale for smaller arrows
-strokeColor: '#0000FF', // Arrow color
-strokeWeight: 2, // Arrow stroke thickness
-};
+    if (pathCoordinates.length > 0) {
+      const arrowSymbol = {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 2, // Adjusted scale for smaller arrows
+        strokeColor: '#0000FF', // Arrow color
+        strokeWeight: 2, // Arrow stroke thickness
+      };
 
-// Gradient stroke for polyline
-const gradientColors = [
-    '#ff0000', // Red
-    '#ff7300', // Orange
-    '#ffd700', // Yellow
-    '#00b300', // Green
-    '#0000ff', // Blue
-];
-const gradientIconSet = gradientColors.map((color, index) => ({
-    icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 3,
-        fillColor: color,
-        fillOpacity: 1,
-        strokeColor: color,
-        strokeWeight: 1,
-    },
-    offset: `${index * 20}%`, // Spread evenly across the line
-}));
+      // Gradient stroke for polyline
+      const gradientColors = [
+        '#ff0000', // Red
+        '#ff7300', // Orange
+        '#ffd700', // Yellow
+        '#00b300', // Green
+        '#0000ff', // Blue
+      ];
+      const gradientIconSet = gradientColors.map((color, index) => ({
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 3,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: color,
+          strokeWeight: 1,
+        },
+        offset: `${index * 20}%`, // Spread evenly across the line
+      }));
 
-pathPolyline = new google.maps.Polyline({
-path: pathCoordinates,
-geodesic: true,
-strokeColor: "#FF4500", // Polyline color (orange-red for more contrast)
-strokeOpacity: 0.9, // Slightly transparent
-strokeWeight: 3, // Line thickness
-icons: [
-{
-    icon: arrowSymbol,
-    offset: "0%", // Start position of the first arrow
-    repeat: "75px", // Distance between arrows
-},
-],
-});
+      pathPolyline = new google.maps.Polyline({
+        path: pathCoordinates,
+        geodesic: true,
+        strokeColor: "#FF4500", // Polyline color (orange-red for more contrast)
+        strokeOpacity: 0.9, // Slightly transparent
+        strokeWeight: 3, // Line thickness
+        icons: [
+          {
+            icon: arrowSymbol,
+            offset: "0%", // Start position of the first arrow
+            repeat: "75px", // Distance between arrows
+          },
+        ],
+      });
 
-pathPolyline.setMap(map);
+      pathPolyline.setMap(map);
 
-const bounds = new google.maps.LatLngBounds();
-pathCoordinates.forEach(coord => bounds.extend(coord));
-map.fitBounds(bounds);
+      const bounds = new google.maps.LatLngBounds();
+      pathCoordinates.forEach(coord => bounds.extend(coord));
+      map.fitBounds(bounds);
 
-// Markers for start and end points
-startMarker = new google.maps.Marker({
-    position: pathCoordinates[0],
-    map: map,
-    icon: {
-        url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-        scaledSize: new google.maps.Size(30, 30),
-    },
-    title: "Start",
-});
+      // Markers for start and end points
+      startMarker = new google.maps.Marker({
+        position: pathCoordinates[0],
+        map: map,
+        icon: {
+          url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+          scaledSize: new google.maps.Size(30, 30),
+        },
+        title: "Start",
+      });
 
-endMarker = new google.maps.Marker({
-    position: pathCoordinates[pathCoordinates.length - 1],
-    map: map,
-    icon: {
-        url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-        scaledSize: new google.maps.Size(30, 30),
-    },
-    title: "End",
-});
+      endMarker = new google.maps.Marker({
+        position: pathCoordinates[pathCoordinates.length - 1],
+        map: map,
+        icon: {
+          url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+          scaledSize: new google.maps.Size(30, 30),
+        },
+        title: "End",
+      });
 
-carMarker = new google.maps.Marker({
-position: pathCoordinates[0],
-map: map,
-icon: {
-url: "http://64.227.135.38/icon1.png",
-scaledSize: new google.maps.Size(50, 50), // Adjust to fit your map scale
-anchor: new google.maps.Point(25, 25), // Centered anchor for better placement
-},
-});
+      carMarker = new google.maps.Marker({
+        position: pathCoordinates[0],
+        map: map,
+        icon: {
+          url: "http://64.227.135.38/icon1.png",
+          scaledSize: new google.maps.Size(50, 50), // Adjust to fit your map scale
+          anchor: new google.maps.Point(25, 25), // Centered anchor for better placement
+        },
+      });
 
-document.getElementById("controls-container").style.display = 'block';
-}
-}
+      document.getElementById("controls-container").style.display = 'block';
+    }
+  }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-const imei = "{{ vehicle_data[0]['IMEI Number'] if vehicle_data else 'No Data Available'}}";
+  document.addEventListener("DOMContentLoaded", () => {
+    const imei = "{{ vehicle_data[0]['IMEI Number'] if vehicle_data else 'No Data Available'}}";
 
-if (imei) {
-fetch(`/vehicle/${imei}/alerts`)
-    .then(response => response.json())
-    .then(alerts => {
-        const tbody = document.querySelector(".alarm-section tbody");
-        tbody.innerHTML = ""; // Clear existing rows
+    if (imei) {
+      fetch(`/vehicle/${imei}/alerts`)
+        .then(response => response.json())
+        .then(alerts => {
+          const tbody = document.querySelector(".alarm-section tbody");
+          tbody.innerHTML = ""; // Clear existing rows
 
-        if (alerts.length === 0) {
+          if (alerts.length === 0) {
             tbody.innerHTML = "<tr><td colspan='4'>No alerts found for the selected vehicle.</td></tr>";
-        } else {
+          } else {
             alerts.forEach(alert => {
-                const row = `
+              const row = `
                     <tr>
                         <td>${alert.timestamp}</td>
                         <td>${alert.location}</td>
@@ -395,173 +396,173 @@ fetch(`/vehicle/${imei}/alerts`)
                         <td>${alert.status}</td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
+              tbody.innerHTML += row;
             });
-        }
-    })
-    .catch(error => {
-        console.error("Error fetching alerts:", error);
-        document.querySelector(".alarm-section tbody").innerHTML = 
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching alerts:", error);
+          document.querySelector(".alarm-section tbody").innerHTML =
             "<tr><td colspan='4'>Error fetching alerts</td></tr>";
-    });
-}
-});
-
-function fetchAndDisplayAlerts(imei) {
-const alertsTableBody = document.querySelector(".alarm-section tbody");
-alertsTableBody.innerHTML = ""; // Clear existing rows
-
-fetch(`/api/alerts?imei=${encodeURIComponent(imei)}`)
-.then((response) => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        });
     }
-    return response.json();
-})
-.then((alerts) => {
-    if (alerts.length === 0) {
-        alertsTableBody.innerHTML =
+  });
+
+  function fetchAndDisplayAlerts(imei) {
+    const alertsTableBody = document.querySelector(".alarm-section tbody");
+    alertsTableBody.innerHTML = ""; // Clear existing rows
+
+    fetch(`/api/alerts?imei=${encodeURIComponent(imei)}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((alerts) => {
+        if (alerts.length === 0) {
+          alertsTableBody.innerHTML =
             "<tr><td colspan='4'>No alerts found</td></tr>";
-        return;
-    }
+          return;
+        }
 
-    alerts.forEach((alert) => {
-        const row = document.createElement("tr");
+        alerts.forEach((alert) => {
+          const row = document.createElement("tr");
 
-        const timestampCell = document.createElement("td");
-        timestampCell.textContent = new Date(alert.timestamp).toLocaleString();
-        row.appendChild(timestampCell);
+          const timestampCell = document.createElement("td");
+          timestampCell.textContent = new Date(alert.timestamp).toLocaleString();
+          row.appendChild(timestampCell);
 
-        const locationCell = document.createElement("td");
-        locationCell.textContent = alert.location || "Unknown";
-        row.appendChild(locationCell);
+          const locationCell = document.createElement("td");
+          locationCell.textContent = alert.location || "Unknown";
+          row.appendChild(locationCell);
 
-        const severityCell = document.createElement("td");
-        severityCell.textContent = alert.latitude ? "Critical" : "Warning";
-        row.appendChild(severityCell);
+          const severityCell = document.createElement("td");
+          severityCell.textContent = alert.latitude ? "Critical" : "Warning";
+          row.appendChild(severityCell);
 
-        const statusCell = document.createElement("td");
-        statusCell.textContent = "Active";
-        row.appendChild(statusCell);
+          const statusCell = document.createElement("td");
+          statusCell.textContent = "Active";
+          row.appendChild(statusCell);
 
-        alertsTableBody.appendChild(row);
-    });
-})
-.catch((error) => {
-    console.error("Error fetching alerts:", error);
-    alertsTableBody.innerHTML =
-        "<tr><td colspan='4'>Error fetching alerts</td></tr>";
-});
-}
+          alertsTableBody.appendChild(row);
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+        alertsTableBody.innerHTML =
+          "<tr><td colspan='4'>Error fetching alerts</td></tr>";
+      });
+  }
 
-function calculateBearing(start, end) {
+  function calculateBearing(start, end) {
     const startLatLng = new google.maps.LatLng(start.lat, start.lng);
     const endLatLng = new google.maps.LatLng(end.lat, end.lng);
 
     return google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
-}
+  }
 
-function startCarAnimation() {
+  function startCarAnimation() {
     currentIndex = 0;
     moveCar();
-}
+  }
 
-function stopCarAnimation() {
+  function stopCarAnimation() {
     clearInterval(animationInterval);
-}
+  }
 
-function setSpeed(multiplier) {
+  function setSpeed(multiplier) {
     speedMultiplier = multiplier;
-}
+  }
 
-function moveCar() {
+  function moveCar() {
     if (currentIndex < pathCoordinates.length - 1) {
-        const start = pathCoordinates[currentIndex];
-        const end = pathCoordinates[currentIndex + 1];
-        const steps = 100;
-        const stepDuration = 10 / speedMultiplier;
+      const start = pathCoordinates[currentIndex];
+      const end = pathCoordinates[currentIndex + 1];
+      const steps = 100;
+      const stepDuration = 10 / speedMultiplier;
 
-        let stepIndex = 0;
-        const latDiff = (end.lat - start.lat) / steps;
-        const lngDiff = (end.lng - start.lng) / steps;
+      let stepIndex = 0;
+      const latDiff = (end.lat - start.lat) / steps;
+      const lngDiff = (end.lng - start.lng) / steps;
 
-        const bearing = calculateBearing(start, end);
+      const bearing = calculateBearing(start, end);
 
-        animationInterval = setInterval(() => {
-            if (stepIndex < steps) {
-                const lat = start.lat + latDiff * stepIndex;
-                const lng = start.lng + lngDiff * stepIndex;
+      animationInterval = setInterval(() => {
+        if (stepIndex < steps) {
+          const lat = start.lat + latDiff * stepIndex;
+          const lng = start.lng + lngDiff * stepIndex;
 
-                carMarker.setIcon({
-                    url: "http://64.227.135.38/icon1.png",
-                    scaledSize: new google.maps.Size(50, 50),
-                    anchor: new google.maps.Point(20, 20),
-                    rotation: bearing,
-                });
+          carMarker.setIcon({
+            url: "http://64.227.135.38/icon1.png",
+            scaledSize: new google.maps.Size(50, 50),
+            anchor: new google.maps.Point(20, 20),
+            rotation: bearing,
+          });
 
-                carMarker.setPosition({ lat, lng });
-                map.panTo({ lat, lng });
+          carMarker.setPosition({ lat, lng });
+          map.panTo({ lat, lng });
 
-                stepIndex++;
-            } else {
-                currentIndex++;
-                clearInterval(animationInterval);
-                moveCar();
-            }
-        }, stepDuration);
+          stepIndex++;
+        } else {
+          currentIndex++;
+          clearInterval(animationInterval);
+          moveCar();
+        }
+      }, stepDuration);
     }
-}
+  }
 
-window.onload = initMap;
-
-
+  window.onload = initMap;
 
 
-// Speed Chart using Chart.js
-const ctx = document.getElementById("speedChart").getContext("2d");
-const speedChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: [
-      "10:16:30",
-      "10:17:00",
-      "10:17:30",
-      "10:18:00",
-      "10:18:30",
-      "10:19:00",
-      "10:19:30",
-    ],
-    datasets: [
-      {
-        label: "Speed MPH",
-        data: [47, 42, 40, 47, 50, 40, 60],
-        borderColor: "rgba(0, 122, 255, 1)",
-        backgroundColor: "rgba(0, 122, 255, 0.2)",
-        borderWidth: 2,
-        fill: true,
+
+
+  // Speed Chart using Chart.js
+  const ctx = document.getElementById("speedChart").getContext("2d");
+  const speedChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: [
+        "10:16:30",
+        "10:17:00",
+        "10:17:30",
+        "10:18:00",
+        "10:18:30",
+        "10:19:00",
+        "10:19:30",
+      ],
+      datasets: [
+        {
+          label: "Speed MPH",
+          data: [47, 42, 40, 47, 50, 40, 60],
+          borderColor: "rgba(0, 122, 255, 1)",
+          backgroundColor: "rgba(0, 122, 255, 0.2)",
+          borderWidth: 2,
+          fill: true,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+        },
       },
-    ],
-  },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
+      plugins: {
+        legend: {
+          display: false,
+        },
       },
     },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  },
-});
+  });
 
-// Add a click event listener to the back button
-document.querySelector(".back-arrow").addEventListener("click", () => {
-  // Navigate to the previous page in the browser's history
-  window.history.back();
-});
-    </script>
+  // Add a click event listener to the back button
+  document.querySelector(".back-arrow").addEventListener("click", () => {
+    // Navigate to the previous page in the browser's history
+    window.history.back();
+  });
+</script>
 
- {% endblock %}
+{% endblock %}

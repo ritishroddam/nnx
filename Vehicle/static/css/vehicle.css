@@ -1,83 +1,83 @@
-.map{
-  height: 100%; 
+.map {
+  height: 100%;
   width: 100%;
   z-index: -1;
 }
 
 .floating-card {
-    position: absolute;
-    top: 10%;
-    left: 5.5%;
-    width: 350px;
-    max-height: 80vh;
-    overflow-y: auto;
-    background: white;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    padding: 7px;
-    z-index: 1;
-    transition: left 0.3s ease;
-    color: #000000d0;
-  }
+  position: absolute;
+  top: 10%;
+  left: 5.5%;
+  width: 350px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 7px;
+  z-index: 1;
+  transition: left 0.3s ease;
+  color: #000000d0;
+}
 
-  .floating-card h3{
-    color: #000000d0;
-  }
+.floating-card h3 {
+  color: #000000d0;
+}
 
-  .dark-mode .floating-card h3{
-    color: #ccc;
-  }
+.dark-mode .floating-card h3 {
+  color: #ccc;
+}
 
-  .dark-mode .floating-card {
-    color: #ccc;
-  }
+.dark-mode .floating-card {
+  color: #ccc;
+}
 
-  .sidebar:hover ~ .floating-card {
-    left: 15%;
-  }
+.sidebar:hover ~ .floating-card {
+  left: 15%;
+}
 
-  .vehicle-card {
-    box-shadow: 0px 0px 2px #ccc;
-    padding: 10px;
-    border-radius: 10px;
-    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-    margin-bottom: 7px;
-  }
-  
-  .dark-mode .vehicle-card {
-    box-shadow: 0px 0px 4px #cccccc90;
-  }
+.vehicle-card {
+  box-shadow: 0px 0px 2px #ccc;
+  padding: 10px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  margin-bottom: 7px;
+}
 
-  .vehicle-card:last-child {
-    border-bottom: none;
-  }
-  .vehicle-header {
-    font-weight: bold;
-    color: #333;
-  }
+.dark-mode .vehicle-card {
+  box-shadow: 0px 0px 4px #cccccc90;
+}
 
-  .vehicle-info {
-    font-size: 14px;
-    color: #000000d0;
-  }
+.vehicle-card:last-child {
+  border-bottom: none;
+}
+.vehicle-header {
+  font-weight: bold;
+  color: #333;
+}
 
-  .vehicle-info strong{
-    color: #000000d0;
-  }
-  .dark-mode .vehicle-info strong{
-    color: #ccc;
-  }
+.vehicle-info {
+  font-size: 14px;
+  color: #000000d0;
+}
 
-  .vehicle-info a{
-    color: #000000d0;
-  }
-  .dark-mode .vehicle-info a{
-    color: #ccc;
-  }
+.vehicle-info strong {
+  color: #000000d0;
+}
+.dark-mode .vehicle-info strong {
+  color: #ccc;
+}
 
-  .toggle-container {
-    display: flex;
-    align-items: center;
+.vehicle-info a {
+  color: #000000d0;
+}
+.dark-mode .vehicle-info a {
+  color: #ccc;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
 }
 
 .toggle-container {
@@ -100,11 +100,9 @@
 }
 
 ::-webkit-scrollbar {
-
   width: 8px;
 
   height: 10px;
-
 }
 ::-webkit-scrollbar-thumb {
   border-radius: 8px;
@@ -145,8 +143,6 @@
 .active .list-option {
   color: #ccc;
 }
-
-
 
 /* */
 
@@ -198,39 +194,37 @@
   animation: vehicle-blink-animation 1s alternate infinite;
 }
 
-      @keyframes sos-blink-animation {
-        0% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0;
-        }
-        100% {
-          opacity: 1;
-        }
-      }
+@keyframes sos-blink-animation {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
+/* ///////////////////MAP//////////////////// */
 
-      /* ///////////////////MAP//////////////////// */
+#map-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  padding: 10px 15px;
+  background: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px #000000d0;
+}
 
-      #map-toggle {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 1000;
-        padding: 10px 15px;
-        background: #fff;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        font-size: 14px;
-        border-radius: 5px;
-        box-shadow: 2px 2px 5px #000000d0;
-    }
-    
-    #map-toggle:hover {
-        background: #f0f0f0;
-    }
-
+#map-toggle:hover {
+  background: #f0f0f0;
+}
 
 /* Dark Mode Styles */
 .dark-mode .floating-card {
@@ -256,8 +250,6 @@
   border-radius: 8px;
 }
 
-
-
 .switch {
   position: relative;
   display: inline-block;
@@ -265,7 +257,7 @@
   height: 34px;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -279,8 +271,8 @@
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 .slider:before {
@@ -291,16 +283,16 @@
   left: 4px;
   bottom: 4px;
   background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #2196f3;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #2196f3;
 }
 
 input:checked + .slider:before {

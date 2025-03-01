@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,87 +10,95 @@
 
     {% block head %}{% endblock %}
 </head>
+
 <body>
 
-<div class="sidebar">
-    <div class="logo">
-        <img src="logo.png" alt="Logo">
-        <h2 class="sidebar-text">Cordon</h2>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h2 class="sidebar-text">Cordon</h2>
+        </div>
+
+        <ul class="menu">
+            <li>
+                <a href="{{url_for('Dashboard.page')}}" class="menu-item">
+                    <i class="fa-solid fa-chart-bar"></i> <span class="sidebar-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-car"></i>
+                    <span class="sidebar-text">Vehicles</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{{url_for('Vehicle.map')}}">Vehicle Map</a></li>
+                </ul>
+                <ul class="submenu">
+                    <li><a href="{{url_for('RouteHistory.page')}}">Route History</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-bell"></i> <span class="sidebar-text">Alerts</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-file-alt"></i> <span class="sidebar-text">Reports</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#">Daily Report</a></li>
+                    <li><a href="#">Monthly Report</a></li>
+                </ul>
+            </li>
+            <li><a href="{{url_for('DeviceInvy.page')}}" class="menu-item"><i class="fa-solid fa-archive"></i> <span
+                        class="sidebar-text">Device Inventory</span></a></li>
+            <li><a href="#" class="menu-item"><i class="fa-solid fa-camera"></i> <span
+                        class="sidebar-text">Dashcam</span></a></li>
+            <li><a href="#" class="menu-item"><i class="fa-solid fa-file"></i> <span
+                        class="sidebar-text">Documents</span></a></li>
+            <li><a href="#" class="menu-item"><i class="fa-solid fa-tools"></i> <span
+                        class="sidebar-text">Maintenance</span></a></li>
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-user"></i> <span class="sidebar-text">Drivers</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#">Driver List</a></li>
+                    <li><a href="#">Performance</a></li>
+                </ul>
+            </li>
+            <li><a href="#" class="menu-item"><i class="fa-solid fa-map-marker-alt"></i> <span
+                        class="sidebar-text">Geofence</span></a></li>
+            <li><a href="#" class="menu-item"><i class="fa-solid fa-store"></i> <span
+                        class="sidebar-text">Vendors</span></a></li>
+        </ul>
     </div>
 
-    <ul class="menu">
-        <li>
-            <a href="{{url_for('Dashboard.page')}}" class="menu-item">
-                <i class="fa-solid fa-chart-bar"></i> <span class="sidebar-text">Dashboard</span>
-            </a>
-        </li>
-        <li class="dropdown">
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-car"></i> 
-                <span class="sidebar-text">Vehicles</span> 
-                <span class="arrow">&#x25BC;</span>
-            </a>
-            <ul class="submenu">
-                <li><a href="{{url_for('Vehicle.map')}}">Vehicle Map</a></li>
-            </ul>
-            <ul class="submenu">
-                <li><a href="{{url_for('RouteHistory.page')}}">Route History</a></li>
-            </ul>
-        </li>
-        <li>
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-bell"></i> <span class="sidebar-text">Alerts</span>
-            </a>
-        </li>
-        <li class="dropdown">
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-file-alt"></i> <span class="sidebar-text">Reports</span>
-                <span class="arrow">&#x25BC;</span>
-            </a>
-            <ul class="submenu">
-                <li><a href="#">Daily Report</a></li>
-                <li><a href="#">Monthly Report</a></li>
-            </ul>
-        </li>
-        <li><a href="{{url_for('DeviceInvy.page')}}" class="menu-item"><i class="fa-solid fa-archive"></i> <span class="sidebar-text">Device Inventory</span></a></li>
-        <li><a href="#" class="menu-item"><i class="fa-solid fa-camera"></i> <span class="sidebar-text">Dashcam</span></a></li>
-        <li><a href="#" class="menu-item"><i class="fa-solid fa-file"></i> <span class="sidebar-text">Documents</span></a></li>
-        <li><a href="#" class="menu-item"><i class="fa-solid fa-tools"></i> <span class="sidebar-text">Maintenance</span></a></li>
-        <li class="dropdown">
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-user"></i> <span class="sidebar-text">Drivers</span>
-                <span class="arrow">&#x25BC;</span>
-            </a>
-            <ul class="submenu">
-                <li><a href="#">Driver List</a></li>
-                <li><a href="#">Performance</a></li>
-            </ul>
-        </li>
-        <li><a href="#" class="menu-item"><i class="fa-solid fa-map-marker-alt"></i> <span class="sidebar-text">Geofence</span></a></li>
-        <li><a href="#" class="menu-item"><i class="fa-solid fa-store"></i> <span class="sidebar-text">Vendors</span></a></li>
-    </ul>
-</div>
 
 
-
-<div class="topbar">
-    <h1>{% block h1 %} {% endblock  %}</h1>
-    <div class="topbar-icons">
-        {% block topbar_icons %}{% endblock %}
-        <div class="notification">
-            <i class="fa-solid fa-bell"></i>
-            <span class="badge">3</span>
-        </div>
-        <div class="profile"> 
-            <img src="user.png" alt="User">
+    <div class="topbar">
+        <h1>{% block h1 %} {% endblock %}</h1>
+        <div class="topbar-icons">
+            {% block topbar_icons %}{% endblock %}
+            <div class="notification">
+                <i class="fa-solid fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="profile">
+                <img src="user.png" alt="User">
+            </div>
         </div>
     </div>
-</div>
 
 
-{% block content %}{% endblock %}
-<!-- <div id="map" style = "height: 100%; width: 100%;"></div> -->
+    {% block content %}{% endblock %}
+    <!-- <div id="map" style = "height: 100%; width: 100%;"></div> -->
 
 
 </body>
-</html> 
+
+</html>
