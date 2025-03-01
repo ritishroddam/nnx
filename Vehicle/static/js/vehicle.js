@@ -987,6 +987,17 @@ function geocodeLatLng(latLng, callback) {
   }
 }
 
+let toggleVIew = true;
+function toggleView() {
+  if (toggleVIew) {
+    showMapView();
+    toggleVIew = false;
+  } else {
+    showListView();
+    toggleVIew = true;
+  }
+}
+
 function showMapView() {
   document.getElementById("map").style.display = "block";
   document.getElementById("vehicle-table-container").style.display = "none";
