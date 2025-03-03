@@ -187,12 +187,7 @@ function updateInfoWindow(marker, latLng, device, coords) {
   });
 }
 
-// document.querySelector(".toggle-slider").addEventListener("click", function () {
-//   this.classList.toggle("active");
-// });
-
 // Car appears on the map
-
 var map;
 var markers = {};
 var geocoder;
@@ -1021,8 +1016,16 @@ document.querySelector(".toggle-slider").addEventListener("click", function () {
 
   if (this.classList.contains("active")) {
     showListView();
+    const vehicleCard = document.querySelector(".floating-card");
+    if (vehicleCard) {
+      vehicleCard.style.display = "none";
+    }
   } else {
     showMapView();
+    const vehicleCard = document.querySelector(".floating-card");
+    if (vehicleCard) {
+      vehicleCard.style.display = "block";
+    }
   }
 });
 
