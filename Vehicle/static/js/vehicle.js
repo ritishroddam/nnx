@@ -1026,6 +1026,7 @@ function showMapView() {
   document.getElementById("vehicle-table-container").style.display = "none";
   document.querySelector(".floating-card").style.display = "block";
   document.querySelector(".icon-legend").style.display = "block";
+  document.querySelector(".list-floating-card").style.display = "none";
 }
 
 function showListView() {
@@ -1033,10 +1034,52 @@ function showListView() {
   document.getElementById("vehicle-table-container").style.display = "block";
   document.querySelector(".floating-card").style.display = "none";
   document.querySelector(".icon-legend").style.display = "none";
+  document.querySelector(".list-floating-card").style.display = "block";
   populateVehicleTable();
 }
 
-function populateVehicleTable() {
+// function populateVehicleTable() {
+//   const tableBody = document
+//     .getElementById("vehicle-table")
+//     .getElementsByTagName("tbody")[0];
+//   tableBody.innerHTML = ""; // Clear existing rows
+
+//   Object.keys(markers).forEach((imei) => {
+//     const marker = markers[imei];
+//     const device = marker.device;
+//     const coords = marker.latLng;
+
+//     const speed =
+//       device.speed !== null && device.speed !== undefined
+//         ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+//         : "Unknown";
+//     const latitude =
+//       coords.lat !== null && coords.lat !== undefined
+//         ? coords.lat.toFixed(6)
+//         : "Unknown";
+//     const longitude =
+//       coords.lon !== null && coords.lon !== undefined
+//         ? coords.lon.toFixed(6)
+//         : "Unknown";
+//     const date = device.date || "N/A";
+//     const time = device.time || "N/A";
+//     const address = device.address || "Location unknown";
+//     const { formattedDate, formattedTime } = formatDateTime(date, time);
+
+//     const row = tableBody.insertRow();
+//     row.insertCell(0).innerText = device.imei;
+//     row.insertCell(1).innerText = speed;
+//     row.insertCell(2).innerText = latitude.toFixed(6);
+//     row.insertCell(3).innerText = longitude.toFixed(6);
+//     row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
+//     row.insertCell(5).innerText = address;
+//     row.insertCell(
+//       6
+//     ).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+//   });
+// }
+
+function populateListVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
@@ -1076,6 +1119,20 @@ function populateVehicleTable() {
     ).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
   });
 }
+
+// Adjust new floating card size when sidebar is toggled
+document
+  .querySelector(".sidebar-toggle")
+  .addEventListener("click", function () {
+    const sidebar = document.querySelector(".sidebar");
+    const listFloatingCard = document.getElementById("list-floating-card");
+
+    if (sidebar.classList.contains("collapsed")) {
+      listFloatingCard.style.left = "60px"; // Adjust based on collapsed sidebar width
+    } else {
+      listFloatingCard.style.left = "250px"; // Adjust based on expanded sidebar width
+    }
+  });
 
 document
   .getElementById("toggle-card-switch")
