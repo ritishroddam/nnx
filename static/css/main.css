@@ -260,3 +260,21 @@ body {
   color: #fff;
   font-size: 20px;
 }
+
+.block-container {
+  position: fixed;
+  top: 11%;
+  left: 5.5%; /* Adjust based on your top bar height */
+  bottom: 1%;
+  right: 1%; /* Adjust based on your sidebar width */
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  border-radius: 20px;
+}
+
+.sidebar:hover ~ .block-container {
+  left: 14.5%;
+}
