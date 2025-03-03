@@ -1000,6 +1000,18 @@ function toggleView() {
   }
 }
 
+document.querySelector(".toggle-slider").addEventListener("click", function () {
+  this.classList.toggle("active");
+
+  if (this.classList.contains("active")) {
+    // Call function when the element is active
+    showMapView();
+  } else {
+    // Call function when the element is not active
+    showListView();
+  }
+});
+
 function showMapView() {
   document.getElementById("map").style.display = "block";
   document.getElementById("vehicle-table-container").style.display = "none";
