@@ -331,5 +331,5 @@ input:checked + .slider:before {
 }
 
 .sidebar:hover ~ .vehicle-table-container {
-  left: 250px;
+  left: 15%;
 }
