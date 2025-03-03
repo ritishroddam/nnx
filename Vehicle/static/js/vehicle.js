@@ -58,7 +58,7 @@ function fetchVehicleData() {
     .then((response) => response.json())
     .then((data) => {
       renderVehicles(data);
-      showHidecard();
+      showHidecar();
     })
     .catch((error) => {
       console.error("Error fetching vehicle data:", error);
@@ -125,7 +125,7 @@ function renderVehicles(vehicles) {
   });
 
   filterVehicles();
-  showHidecard();
+  showHidecar();
 }
 
 function updateInfoWindow(marker, latLng, device, coords) {
@@ -990,27 +990,13 @@ function geocodeLatLng(latLng, callback) {
 let toggleVIew = false;
 function toggleView() {
   if (toggleVIew) {
-    showListView();
-    toggleVIew = !toggleVIew;
-    console.log(toggleVIew);
-  } else {
     showMapView();
     toggleVIew = !toggleVIew;
-    console.log(toggleVIew);
+  } else {
+    showListView();
+    toggleVIew = !toggleVIew;
   }
 }
-
-document.querySelector(".toggle-slider").addEventListener("click", function () {
-  this.classList.toggle("active");
-
-  if (this.classList.contains("active")) {
-    // Call function when the element is active
-    showMapView();
-  } else {
-    // Call function when the element is not active
-    showListView();
-  }
-});
 
 function showMapView() {
   document.getElementById("map").style.display = "block";
@@ -1074,11 +1060,13 @@ document
     }
   });
 
-function showHidecard() {
+function showHidecar() {
   if (document.getElementById("toggle-card-switch").checked) {
     showCard();
+    console.log(document.getElementById("toggle-card-switch").checked);
   } else {
     hideCard();
+    console.log(document.getElementById("toggle-card-switch").checked);
   }
 }
 
