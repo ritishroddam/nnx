@@ -1049,7 +1049,7 @@ async function populateVehicleTable() {
     );
 
     const row = tableBody.insertRow();
-    row.insertCell(0).innerText = device.imei;
+    row.insertCell(0).innerText = vehicle.imei;
     row.insertCell(1).innerText = speed;
     row.insertCell(2).innerText = latitude.toFixed(6);
     row.insertCell(3).innerText = longitude.toFixed(6);
@@ -1057,7 +1057,7 @@ async function populateVehicleTable() {
     row.insertCell(5).innerText = address;
     row.insertCell(
       6
-    ).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
+    ).innerHTML = `<a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>`;
   });
   showHidecar();
 }
