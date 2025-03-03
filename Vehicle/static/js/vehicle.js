@@ -82,19 +82,19 @@ function removeSOS(imei) {
   }
 }
 
-function fetchVehicleData() {
-  fetch("/vehicle/api/vehicles")
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      console.error("Error fetching vehicle data:", error);
-    });
+async function fetchVehicleData() {
+  try {
+    const response = await fetch("/vehicle/api/vehicles");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching vehicle data:", error);
+    return [];
+  }
 }
 
-function renderVehicles() {
-  const vehicles = fetchVehicleData();
+async function renderVehicles() {
+  const vehicles = await fetchVehicleData();
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
@@ -1016,13 +1016,13 @@ function showListView() {
   populateVehicleTable();
 }
 
-function populateVehicleTable() {
+async function populateVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = ""; // Clear existing rows
 
-  const vehicles = fetchVehicleData();
+  const vehicles = await fetchVehicleData();
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
