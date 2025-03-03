@@ -25,6 +25,7 @@ body {
   position: fixed;
   left: 1%;
   top: 50%;
+  bottom: 1%;
   transform: translateY(-50%);
   width: 60px;
   background: #000000d0;

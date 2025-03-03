@@ -318,11 +318,11 @@ input:checked + .slider:before {
 
 .vehicle-table-container {
   position: fixed;
-  top: 60px; /* Adjust based on your top bar height */
-  bottom: 0;
-  right: 0;
-  left: 250px; /* Adjust based on your sidebar width */
-  background-color: #ccc;
+  top: 11%;
+  left: 5.5%; /* Adjust based on your top bar height */
+  bottom: 1%;
+  right: 1%; /* Adjust based on your sidebar width */
+  background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   transition: left 0.3s ease;
