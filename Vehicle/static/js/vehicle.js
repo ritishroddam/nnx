@@ -86,15 +86,16 @@ function fetchVehicleData() {
   fetch("/vehicle/api/vehicles")
     .then((response) => response.json())
     .then((data) => {
-      renderVehicles(data);
-      showHidecar();
+      return data;
     })
     .catch((error) => {
       console.error("Error fetching vehicle data:", error);
     });
 }
 
-function renderVehicles(vehicles) {
+function renderVehicles() {
+  const vehicles = fetchVehicleData();
+  showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
@@ -362,7 +363,7 @@ function initMap() {
   });
 
   restoreMarkers();
-  fetchVehicleData();
+  renderVehicles();
 
   // setupWebSocket();
 
@@ -387,7 +388,7 @@ function initMap() {
     } else {
       updateMap();
       if (document.getElementById("toggle-card-switch").checked === true) {
-        fetchVehicleData();
+        renderVehicles();
       }
       countdownTimer = refreshInterval / 1000; // Reset countdown
     }
@@ -1021,27 +1022,31 @@ function populateVehicleTable() {
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = ""; // Clear existing rows
 
-  Object.keys(markers).forEach((imei) => {
-    const marker = markers[imei];
-    const device = marker.device;
-    const coords = marker.latLng;
+  const vehicles = fetchVehicleData();
+  showHidecar();
+  const listContainer = document.getElementById("vehicle-list");
+  const countContainer = document.getElementById("vehicle-count");
+  listContainer.innerHTML = "";
+  countContainer.innerText = vehicles.length;
+
+  vehicles.forEach((vehicle) => {
+    const vehicleElement = document.createElement("div");
+    vehicleElement.classList.add("vehicle-card");
+    vehicleElement.setAttribute("data-imei", vehicle.imei);
+
+    const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+    const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
     const speed =
       device.speed !== null && device.speed !== undefined
         ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
         : "Unknown";
-    const latitude =
-      coords.lat !== null && coords.lat !== undefined
-        ? coords.lat.toFixed(6)
-        : "Unknown";
-    const longitude =
-      coords.lon !== null && coords.lon !== undefined
-        ? coords.lon.toFixed(6)
-        : "Unknown";
-    const date = device.date || "N/A";
-    const time = device.time || "N/A";
     const address = device.address || "Location unknown";
-    const { formattedDate, formattedTime } = formatDateTime(date, time);
+
+    const { formattedDate, formattedTime } = formatDateTime(
+      vehicle.date,
+      vehicle.time
+    );
 
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = device.imei;
@@ -1054,6 +1059,7 @@ function populateVehicleTable() {
       6
     ).innerHTML = `<a href="device-details.html?imei=${device.imei}" target="_blank">View Data</a>`;
   });
+  showHidecar();
 }
 
 document
@@ -1100,5 +1106,5 @@ function hideCard() {
 
 window.onload = function () {
   initMap();
-  fetchVehicleData();
+  renderVehicles();
 };
