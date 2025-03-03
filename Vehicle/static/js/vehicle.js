@@ -388,14 +388,16 @@ function initMap() {
   // Set initial mode to dark mode
   let darkMode = true;
 
-  toggleButton.addEventListener("click", function () {
+  const themeToggle = document.getElementById("theme-toggle");
+
+  themeToggle.addEventListener("click", function () {
     if (darkMode) {
       map.setOptions({ styles: darkModeStyle });
-      toggleButton.textContent = "Switch to Standard Map";
+      themeToggle.textContent = "Switch to Standard Map";
       document.body.classList.add("dark-mode");
     } else {
       map.setOptions({ styles: lightModeStyle });
-      toggleButton.textContent = "Switch to Dark Map";
+      themeToggle.textContent = "Switch to Dark Map";
       document.body.classList.remove("dark-mode");
     }
     darkMode = !darkMode; // Toggle the state
