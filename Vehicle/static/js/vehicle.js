@@ -990,10 +990,10 @@ function geocodeLatLng(latLng, callback) {
 let toggleVIew = false;
 function toggleView() {
   if (toggleVIew) {
-    showMapView();
+    showListView();
     toggleVIew = !toggleVIew;
   } else {
-    showListView();
+    showMapView();
     toggleVIew = !toggleVIew;
   }
 }
