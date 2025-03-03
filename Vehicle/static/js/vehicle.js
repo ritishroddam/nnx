@@ -987,26 +987,13 @@ function geocodeLatLng(latLng, callback) {
   }
 }
 
-// let toggleVIew = false;
-// function toggleView() {
-//   if (toggleVIew) {
-//     showMapView();
-//     toggleVIew = !toggleVIew;
-//   } else {
-//     showListView();
-//     toggleVIew = !toggleVIew;
-//   }
-// }
-
 document.querySelector(".toggle-slider").addEventListener("click", function () {
   this.classList.toggle("active");
 
   if (this.classList.contains("active")) {
-    // Call function when the element is active
-    showMapView();
-  } else {
-    // Call function when the element is not active
     showListView();
+  } else {
+    showMapView();
   }
 });
 
