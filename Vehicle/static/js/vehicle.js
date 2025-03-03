@@ -158,9 +158,9 @@ function updateInfoWindow(marker, latLng, device, coords) {
   });
 }
 
-document.querySelector(".toggle-slider").addEventListener("click", function () {
-  this.classList.toggle("active");
-});
+// document.querySelector(".toggle-slider").addEventListener("click", function () {
+//   this.classList.toggle("active");
+// });
 
 // Car appears on the map
 
