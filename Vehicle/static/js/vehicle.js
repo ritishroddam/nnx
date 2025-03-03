@@ -1016,27 +1016,21 @@ document.querySelector(".toggle-slider").addEventListener("click", function () {
 
   if (this.classList.contains("active")) {
     showListView();
-    const vehicleCard = document.querySelector(".floating-card");
-    if (vehicleCard) {
-      vehicleCard.style.display = "none";
-    }
   } else {
     showMapView();
-    const vehicleCard = document.querySelector(".floating-card");
-    if (vehicleCard) {
-      vehicleCard.style.display = "block";
-    }
   }
 });
 
 function showMapView() {
   document.getElementById("map").style.display = "block";
   document.getElementById("vehicle-table-container").style.display = "none";
+  document.querySelector(".floating-card").style.display = "block";
 }
 
 function showListView() {
   document.getElementById("map").style.display = "none";
   document.getElementById("vehicle-table-container").style.display = "block";
+  document.querySelector(".floating-card").style.display = "none";
   populateVehicleTable();
 }
 
