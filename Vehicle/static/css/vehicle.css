@@ -33,7 +33,7 @@
 }
 
 .sidebar:hover ~ .floating-card {
-  left: 15%;
+  left: 14.5%;
 }
 
 .vehicle-card {
@@ -331,5 +331,5 @@ input:checked + .slider:before {
 }
 
 .sidebar:hover ~ .vehicle-table-container {
-  left: 15%;
+  left: 14.5%;
 }
