@@ -1091,10 +1091,8 @@ document
 function showHidecar() {
   if (document.getElementById("toggle-card-switch").checked) {
     showCard();
-    console.log(document.getElementById("toggle-card-switch").checked);
   } else {
     hideCard();
-    console.log(document.getElementById("toggle-card-switch").checked);
   }
 }
 
