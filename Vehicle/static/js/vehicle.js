@@ -366,38 +366,15 @@ function initMap() {
 
   // setupWebSocket();
 
-  // Add Toggle Button
-  const toggleButton = document.createElement("button");
-  toggleButton.textContent = "Switch to Dark Map";
-  toggleButton.style.position = "absolute";
-  toggleButton.style.bottom = "20px";
-  toggleButton.style.right = "20px";
-  toggleButton.style.zIndex = "1000";
-  toggleButton.style.padding = "10px 15px";
-  toggleButton.style.background = "#fff";
-  toggleButton.style.border = "1px solid #ccc";
-  toggleButton.style.borderRadius = "5px";
-  toggleButton.style.cursor = "pointer";
-  toggleButton.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.3)";
-  toggleButton.style.fontSize = "14px";
-  toggleButton.style.fontWeight = "bold";
-  toggleButton.style.color = "#333";
-
-  document.getElementById("map").appendChild(toggleButton);
-
-  // Set initial mode to dark mode
   let darkMode = true;
-
   const themeToggle = document.getElementById("theme-toggle");
 
   themeToggle.addEventListener("click", function () {
     if (darkMode) {
       map.setOptions({ styles: darkModeStyle });
-      themeToggle.textContent = "Switch to Standard Map";
       document.body.classList.add("dark-mode");
     } else {
       map.setOptions({ styles: lightModeStyle });
-      themeToggle.textContent = "Switch to Dark Map";
       document.body.classList.remove("dark-mode");
     }
     darkMode = !darkMode; // Toggle the state
