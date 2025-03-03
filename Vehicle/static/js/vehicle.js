@@ -1031,6 +1031,7 @@ function showMapView() {
 function showListView() {
   document.getElementById("map").style.display = "none";
   document.getElementById("vehicle-table-container").style.display = "block";
+  document.querySelector(".floating-card").style.display = "none";
   document.querySelector(".icon-legend").style.display = "none";
   populateVehicleTable();
 }
