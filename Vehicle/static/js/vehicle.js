@@ -1107,4 +1107,5 @@ function hideCard() {
 window.onload = function () {
   initMap();
   renderVehicles();
+  document.querySelector(".block-container").style.display = "none";
 };
