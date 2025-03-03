@@ -235,10 +235,10 @@ body {
 }
 
 .theme-toggle {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   background-color: #ffd700; /* Sun color for light mode */
-  border-radius: 20px; /* Squarcle shape */
+  border-radius: 10px; /* Squarcle shape */
   display: flex;
   align-items: center;
   justify-content: center;
