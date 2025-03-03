@@ -29,8 +29,8 @@ body {
 .sidebar {
   position: fixed;
   left: 1%;
-  top: 11%;
-  bottom: 1%;
+  top: 427px;
+  height: 88%;
   transform: translateY(-50%);
   width: 60px;
   background: #000000d0;
