@@ -58,7 +58,7 @@ function fetchVehicleData() {
     .then((response) => response.json())
     .then((data) => {
       renderVehicles(data);
-      showHidecar();
+      showHidecard();
     })
     .catch((error) => {
       console.error("Error fetching vehicle data:", error);
@@ -125,7 +125,7 @@ function renderVehicles(vehicles) {
   });
 
   filterVehicles();
-  showHidecar();
+  showHidecard();
 }
 
 function updateInfoWindow(marker, latLng, device, coords) {
@@ -992,9 +992,11 @@ function toggleView() {
   if (toggleVIew) {
     showListView();
     toggleVIew = !toggleVIew;
+    console.log(toggleVIew);
   } else {
     showMapView();
     toggleVIew = !toggleVIew;
+    console.log(toggleVIew);
   }
 }
 
@@ -1060,13 +1062,11 @@ document
     }
   });
 
-function showHidecar() {
+function showHidecard() {
   if (document.getElementById("toggle-card-switch").checked) {
     showCard();
-    console.log(document.getElementById("toggle-card-switch").checked);
   } else {
     hideCard();
-    console.log(document.getElementById("toggle-card-switch").checked);
   }
 }
 
