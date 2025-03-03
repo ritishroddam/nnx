@@ -6,6 +6,11 @@
   /* color: #000000d0; */
 }
 
+body.dark-mode {
+  background-color: #000000d0;
+  color: #ccc;
+}
+
 body {
   display: flex;
 }
@@ -227,4 +232,25 @@ body {
 
 .sidebar:hover ~ .content {
   margin-left: 250px;
+}
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  background-color: #ffd700; /* Sun color for light mode */
+  border-radius: 20px; /* Squarcle shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.theme-toggle.dark {
+  background-color: #ccc; /* Background color for dark mode */
+}
+
+.theme-toggle i {
+  color: #fff;
+  font-size: 20px;
 }

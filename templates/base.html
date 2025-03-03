@@ -13,6 +13,24 @@
 
 <body>
 
+    <div class="topbar">
+        <h1>{% block h1 %} {% endblock %}</h1>
+        <div class="topbar-icons">
+            {% block topbar_icons %}{% endblock %}
+            <div class="notification">
+                <i class="fa-solid fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="profile">
+                <img src="user.png" alt="User">
+            </div>
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fa-solid fa-sun"></i>
+            </div>
+        </div>
+    </div>
+
+
     <div class="sidebar">
         <div class="logo">
             <img src="logo.png" alt="Logo">
@@ -77,23 +95,6 @@
                         class="sidebar-text">Vendors</span></a></li>
         </ul>
     </div>
-
-
-
-    <div class="topbar">
-        <h1>{% block h1 %} {% endblock %}</h1>
-        <div class="topbar-icons">
-            {% block topbar_icons %}{% endblock %}
-            <div class="notification">
-                <i class="fa-solid fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
-            <div class="profile">
-                <img src="user.png" alt="User">
-            </div>
-        </div>
-    </div>
-
 
     {% block content %}{% endblock %}
     <!-- <div id="map" style = "height: 100%; width: 100%;"></div> -->
