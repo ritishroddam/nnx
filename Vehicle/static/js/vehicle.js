@@ -1038,10 +1038,10 @@ async function populateVehicleTable() {
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
     const speed =
-      device.speed !== null && device.speed !== undefined
-        ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+      vehicle.speed !== null && vehicle.speed !== undefined
+        ? `${convertSpeedToKmh(vehicle.speed).toFixed(2)} km/h`
         : "Unknown";
-    const address = device.address || "Location unknown";
+    const address = vehicle.address || "Location unknown";
 
     const { formattedDate, formattedTime } = formatDateTime(
       vehicle.date,
