@@ -53,6 +53,35 @@ function updateVehicleData(vehicle) {
   renderVehicles(Object.values(markers).map((marker) => marker.device));
 }
 
+function triggerSOS(imei, marker) {
+  if (!sosActiveMarkers[imei]) {
+    // Add the SOS icon
+    const sosDiv = document.createElement("div");
+    sosDiv.className = "sos-blink";
+    marker.div.appendChild(sosDiv);
+    sosActiveMarkers[imei] = sosDiv;
+
+    // Add blinking effect to the vehicle icon
+    marker.div.classList.add("vehicle-blink");
+
+    // Automatically remove the SOS after 60 seconds
+    setTimeout(() => {
+      removeSOS(imei);
+    }, 60000);
+  }
+}
+
+function removeSOS(imei) {
+  if (sosActiveMarkers[imei]) {
+    sosActiveMarkers[imei].remove();
+    delete sosActiveMarkers[imei];
+  }
+  // Remove the blinking effect from the vehicle icon
+  if (markers[imei]) {
+    markers[imei].div.classList.remove("vehicle-blink");
+  }
+}
+
 function fetchVehicleData() {
   fetch("/vehicle/api/vehicles")
     .then((response) => response.json())
