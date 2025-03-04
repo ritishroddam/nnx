@@ -43,13 +43,22 @@ th,
 td {
   padding: 12px;
   color: black;
-  border: 1px solid rgb(33, 33, 33);
+  border: none;
   text-align: left;
+}
+
+tr {
+  border-bottom: 2px solid black;
+}
+
+tr:last-child {
+  border-bottom: none; /* Removes border from last row */
 }
 
 th {
   background-color: #e2e8f0;
   color: #333;
+  border-bottom: 2px solid black;
 }
 
 tr:nth-child(even) {
