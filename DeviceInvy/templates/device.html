@@ -2,7 +2,7 @@
 
 {% block head %}
 <title>ADMIN - Device Inventory</title>
-<link rel="stylesheet" href="{{ url_for('DeviceInvy.static', filename='css/style.css') }}" />
+<link rel="stylesheet" href="{{ url_for('DeviceInvy.static', filename='css/device.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <script defer src="{{ url_for('DeviceInvy.static', filename='js/device.js') }}"></script>
 {% endblock %}
@@ -14,7 +14,7 @@ Device Inventory
 {% block block_container %}
 <section class="dashboard">
   <div>
-    <h1>GPS Device Inventory</h1>
+    <h1 id="heading">GPS Device Inventory</h1>
 
     <button id="manualEntryBtn" class="btn success mb-4">
       Add New Device
