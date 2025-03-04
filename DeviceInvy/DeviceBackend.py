@@ -37,12 +37,12 @@ def manual_entry():
     # Validate IMEI length
     if len(data['IMEI']) != 15:
         flash("Invalid IMEI length", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('DeviceInvy.page'))
 
     # Check for duplicate IMEI or GLNumber
     if collection.find_one({"IMEI": data['IMEI']}) or collection.find_one({"GLNumber": data['GLNumber']}):
         flash("IMEI or GL Number already exists", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('DeviceInvy.page'))
 
     # If OutwardTo is filled, set Status to Active
     if data.get('OutwardTo'):
@@ -68,7 +68,7 @@ def download_template():
 def upload_file():
     if 'file' not in request.files or request.files['file'].filename == '':
         flash("No file selected", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('DeviceInvy.page'))
 
     file = request.files['file']
     if file and file.filename.endswith(('.xls', '.xlsx')):
@@ -83,12 +83,12 @@ def upload_file():
             # Validate IMEI length
             if len(imei) != 15:
                 flash(f"Invalid data at row {index + 2}", "danger")
-                return redirect(url_for('index'))
+                return redirect(url_for('DeviceInvy.page'))
 
             # Check for duplicate IMEI or GLNumber
             if collection.find_one({"IMEI": imei}) or collection.find_one({"GLNumber": gl_number}):
                 flash(f"Duplicate data at row {index + 2}", "danger")
-                return redirect(url_for('index'))
+                return redirect(url_for('DeviceInvy.page'))
 
             package_type = str(row.get("Package", "")).strip()
             tenure = str(row.get("Tenure", "")).strip() if package_type == "Package" else None
@@ -111,10 +111,10 @@ def upload_file():
         if records:
             collection.insert_many(records)
             flash("File uploaded successfully!", "success")
-        return redirect(url_for('index'))
+        return redirect(url_for('DeviceInvy.page'))
     else:
         flash("Unsupported file format", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('DeviceInvy.page'))
 
 @device_bp.route('/download_excel')
 def download_excel():
