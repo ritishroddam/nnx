@@ -106,13 +106,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
-
-let enableCopy = false;
-
-console.log("Starting enable_copy.js script");
-console.log("enableCopy status:", enableCopy);
-
-if (!enableCopy) {
-  console.log("E.C.P is not enabled, returning");
-  return;
-}
