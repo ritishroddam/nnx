@@ -34,7 +34,9 @@ table {
   border-collapse: collapse;
   margin-top: 20px;
   background-color: white;
-  border-radius: 10%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid black;
 }
 
 th,
