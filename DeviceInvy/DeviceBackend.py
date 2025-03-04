@@ -26,8 +26,8 @@ def page():
 #     devices = list(collection.find({}))
 #     return render_template('index.html', devices=devices)
 
-@app.route('/manual_entry', methods=['POST'])
-def manual_entry():
+@app.route('/manualEntry', methods=['POST'])
+def manualEntry():
     data = request.form.to_dict()
     data['IMEI'] = data['IMEI'].strip()
     # data['GLNumber'] = data['GLNumber'].strip()
