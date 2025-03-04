@@ -22,10 +22,6 @@ def page():
     devices = list(collection.find({}))
     return render_template('device.html')
 
-# @device_bp.route('/')
-# def index():
-#     return render_template('index.html', devices=devices)
-
 @device_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
     data = request.form.to_dict()
@@ -64,7 +60,7 @@ def download_template():
     path = r"/root/nnx/DeviceInvy/templates/device_inventory_template.xlsx"
     return send_file(path, as_attachment=True)
 
-@device_bp.route('/upload', methods=['POST'])
+@device_bp.route('/upload_file', methods=['POST'])
 def upload_file():
     if 'file' not in request.files or request.files['file'].filename == '':
         flash("No file selected", "danger")
