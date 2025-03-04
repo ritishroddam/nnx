@@ -2,9 +2,9 @@
 
 {% block head %}
 <title>ADMIN - Device Inventory</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+<link rel="stylesheet" href="{{ url_for('DeviceInvy.static', filename='css/style.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-<script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script defer src="{{ url_for('DeviceInvy.static', filename='js/script.js') }}"></script>
 {% endblock %}
 
 {% block h1 %}
@@ -24,7 +24,7 @@ Device Inventory
     <button id="downloadExcel" class="btn">Download Excel Sheet</button>
 
     <div id="manualEntryForm" class="hidden">
-      <form id="manualForm" action="/manual_entry" method="post">
+      <form id="manualForm" action="/DeviceInvy/manual_entry" method="post">
         <div class="mb-4">
           <label for="IMEI">IMEI</label>
           <input type="text" name="IMEI" id="IMEI" required />
@@ -87,10 +87,10 @@ Device Inventory
     </div>
     <div id="uploadBox" class="hidden">
 
-      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+      <form id="uploadForm" action="/DeviceInvy/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xls,.xlsx" required />
         <button type="submit" class="btn">Upload Excel</button>
-        <a href="/download_template" class="btn">Download Template</a>
+        <a href="/DeviceInvy/download_template" class="btn">Download Template</a>
         <div class="preloader"></div>
       </form>
       <button type="button" id="cancelUploadBtn" class="btn danger">
