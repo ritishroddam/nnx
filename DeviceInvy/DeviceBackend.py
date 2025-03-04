@@ -202,5 +202,3 @@ def delete_device(device_id):
             return jsonify({'success': False, 'message': 'Device not found'}), 404
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-
-app.register_blueprint(device_bp, url_prefix='/deviceInvy')

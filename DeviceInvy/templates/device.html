@@ -24,7 +24,7 @@ Device Inventory
     <button id="downloadExcel" class="btn">Download Excel Sheet</button>
 
     <div id="manualEntryForm" class="hidden">
-      <form id="manualForm" action="/deviceInvy/manual_entry" method="post">
+      <form id="manualForm" action="{{ url_for('DeviceInvy.manual_entry') }}" method="POST">
         <div class="mb-4">
           <label for="IMEI">IMEI</label>
           <input type="text" name="IMEI" id="IMEI" required />
@@ -87,10 +87,10 @@ Device Inventory
     </div>
     <div id="uploadBox" class="hidden">
 
-      <form id="uploadForm" action="/deviceInvy/upload" method="post" enctype="multipart/form-data">
+      <form id="uploadForm" action="{{ url_for('DeviceInvy.upload') }}" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept=".xls,.xlsx" required />
         <button type="submit" class="btn">Upload Excel</button>
-        <a href="/deviceInvy/download_template" class="btn">Download Template</a>
+        <a href="{{ url_for('DeviceInvy.download_template') }}" class="btn">Download Template</a>
         <div class="preloader"></div>
       </form>
       <button type="button" id="cancelUploadBtn" class="btn danger">
