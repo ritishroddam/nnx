@@ -19,11 +19,11 @@ device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_f
 
 @device_bp.route('/page')
 def page():
+    devices = list(collection.find({}))
     return render_template('device.html')
 
 # @device_bp.route('/')
 # def index():
-#     devices = list(collection.find({}))
 #     return render_template('index.html', devices=devices)
 
 @device_bp.route('/manual_entry', methods=['POST'])

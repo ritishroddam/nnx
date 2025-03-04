@@ -79,7 +79,7 @@ document.getElementById("Package").addEventListener("change", function () {
 
 ////////////////// Download ////////////////////////
 document.getElementById("downloadExcel").addEventListener("click", function () {
-  window.location.href = "/download_template";
+  window.location.href = "/DeviceInvy/download_template";
 });
 
 function editDevice(deviceId) {
