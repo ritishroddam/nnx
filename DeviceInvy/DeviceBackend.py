@@ -21,13 +21,13 @@ device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_f
 def page():
     return render_template('device.html')
 
-# @app.route('/')
+# @device_bp.route('/')
 # def index():
 #     devices = list(collection.find({}))
 #     return render_template('index.html', devices=devices)
 
-@app.route('/manualEntry', methods=['POST'])
-def manualEntry():
+@device_bp.route('/manual_entry', methods=['POST'])
+def manual_entry():
     data = request.form.to_dict()
     data['IMEI'] = data['IMEI'].strip()
     # data['GLNumber'] = data['GLNumber'].strip()
@@ -59,12 +59,12 @@ def manualEntry():
     flash("Device added successfully!", "success")
     return redirect(url_for('DeviceInvy.page'))
 
-@app.route('/download_template')
+@device_bp.route('/download_template')
 def download_template():
     path = r"/root/nnx/DeviceInvy/templates/device_inventory_template.xlsx"
     return send_file(path, as_attachment=True)
 
-@app.route('/upload', methods=['POST'])
+@device_bp.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files or request.files['file'].filename == '':
         flash("No file selected", "danger")
@@ -116,7 +116,7 @@ def upload_file():
         flash("Unsupported file format", "danger")
         return redirect(url_for('index'))
 
-@app.route('/download_excel')
+@device_bp.route('/download_excel')
 def download_excel():
     devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
     
@@ -138,7 +138,7 @@ def download_excel():
         headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
     )
 
-@app.route('/edit_device/<device_id>', methods=['POST'])
+@device_bp.route('/edit_device/<device_id>', methods=['POST'])
 def edit_device(device_id):
     try:
         print(f"\n=== DEBUG: Updating device with ID: {device_id} ===")  # Debug log
@@ -191,7 +191,7 @@ def edit_device(device_id):
         print(f"ERROR: {e}", file=sys.stderr)
         return jsonify({'success': False, 'message': 'Error updating device.'}), 500
 
-@app.route('/delete_device/<device_id>', methods=['DELETE'])
+@device_bp.route('/delete_device/<device_id>', methods=['DELETE'])
 def delete_device(device_id):
     try:
         result = collection.delete_one({"_id": ObjectId(device_id)})
