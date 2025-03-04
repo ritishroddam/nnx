@@ -31,9 +31,9 @@ input[type="file"] {
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
   margin-top: 20px;
-  background-color: #ccc;
+  background-color: white;
   border-radius: 10px;
   /* overflow: hidden; */
   border: 2px solid black;
