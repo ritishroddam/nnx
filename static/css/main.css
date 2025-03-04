@@ -3,11 +3,11 @@
   padding: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  /* color: #2F2F2F; */
+  /* color: black; */
 }
 
 body.dark-mode {
-  background-color: #000000;
+  background-color: #2f2f2f;
   color: #ccc;
 }
 
@@ -33,7 +33,7 @@ body {
   height: 88%;
   transform: translateY(-50%);
   width: 60px;
-  background: #2f2f2f;
+  background: black;
   color: #ccc;
   backdrop-filter: blur(10px);
   padding: 1% 0.5%;
@@ -99,7 +99,7 @@ body {
 }
 
 .menu-item:hover {
-  background-color: #2f2f2f;
+  background-color: black;
   border-radius: 5px;
 }
 
@@ -134,7 +134,7 @@ body {
 }
 
 .submenu li:hover {
-  background-color: #2f2f2f;
+  background-color: black;
   border-radius: 5px;
   padding-left: 10%;
 }
@@ -166,7 +166,7 @@ body {
   top: 2%;
   left: 1%;
   width: 98%; /* Adjusted to leave space for the sidebar */
-  background: #2f2f2f;
+  background: black;
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
@@ -277,7 +277,7 @@ body {
 }
 
 .dark-mode .block-container {
-  background-color: #2f2f2f;
+  background-color: black;
 }
 
 .sidebar:hover ~ .block-container {
