@@ -36,6 +36,8 @@ def manual_entry():
         return redirect(url_for('DeviceInvy.page'))
 
     # Check for duplicate IMEI or GLNumber
+    print (data['GLNumber'])
+
     if collection.find_one({"IMEI": data['IMEI']}) or collection.find_one({"GLNumber": data['GLNumber']}):
         flash("IMEI or GL Number already exists", "danger")
         return redirect(url_for('DeviceInvy.page'))
