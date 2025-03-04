@@ -339,7 +339,7 @@ function saveDevice(deviceId) {
     Status: status,
   };
 
-  fetch(`/edit_device/${deviceId}`, {
+  fetch(`/DeviceInvy/edit_device/${deviceId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -388,7 +388,7 @@ function cancelEdit(deviceId) {
 
 function deleteDevice(deviceId) {
   if (confirm("Are you sure you want to delete this device?")) {
-    fetch(`/delete_device/${deviceId}`, {
+    fetch(`/DeviceInvy/delete_device/${deviceId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
