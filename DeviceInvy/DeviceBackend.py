@@ -60,7 +60,8 @@ def manual_entry():
 
 @device_bp.route('/download_template')
 def download_template():
-    path = r"/root/nnx/DeviceInvy/templates/device_inventory_template.xlsx"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, 'templates', 'device_inventory_template.xlsx')
     return send_file(path, as_attachment=True)
 
 @device_bp.route('/upload_file', methods=['POST'])
