@@ -60,20 +60,20 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
             data = self.request.recv(4096).decode('utf-8').strip()
-            print("Received raw data:", data)
+            # print("Received raw data:", data)
 
             json_data = self.parse_json_data(data)
             if json_data:
-                print("Valid JSON data:", json_data)
+                # print("Valid JSON data:", json_data)
 
                 sos_state = json_data.get('sos', '0')
-                print(f"SOS state received: {sos_state}")
+                # print(f"SOS state received: {sos_state}")
 
                 with MyTCPHandler.lock:
                     if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
                         MyTCPHandler.sos_active = True
                         MyTCPHandler.sos_alert_triggered = True
-                        print("SOS alert triggered!")
+                        # print("SOS alert triggered!")
 
                         # Log SOS to MongoDB
                         self.log_sos_to_mongodb(json_data)
@@ -84,7 +84,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     elif sos_state == '0' and MyTCPHandler.sos_active:
                         MyTCPHandler.sos_active = False
                         MyTCPHandler.sos_alert_triggered = False
-                        print("SOS alert reset.")
+                        # print("SOS alert reset.")
 
                 if json_data.get('gps') == 'A':
                     self.store_data_in_mongodb(json_data)
@@ -95,7 +95,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 if 'latitude' in json_data and 'longitude' in json_data:
                     latitude = json_data['latitude']
                     longitude = json_data['longitude']
-                    print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
+                    # print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
 
             else:
                 print("Invalid JSON format")
@@ -106,13 +106,13 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def parse_json_data(self, data):
         try:
             parts = data.split(',')
-            print(f"Parsed data parts: {parts}")
+            # print(f"Parsed data parts: {parts}")
             expected_fields_count = 35
 
             if len(parts) >= expected_fields_count:
 
                 binary_string = parts[14].strip('#')
-                print(f"Binary string: {binary_string}")
+                # print(f"Binary string: {binary_string}")
 
                 ignition, door, sos = '0', '0', '0'
 
@@ -176,7 +176,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 }
                 return json_data
             else:
-                print(f"Received data does not contain at least {expected_fields_count} fields.")
+                # print(f"Received data does not contain at least {expected_fields_count} fields.")
                 return None
 
         except Exception as e:
@@ -186,7 +186,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def store_data_in_mongodb(self, json_data):
         try:
             collection.insert_one(json_data)
-            print("Data stored in MongoDB.")
+            # print("Data stored in MongoDB.")
         except Exception as e:
             print("Error storing data in MongoDB:", e)
 
@@ -200,7 +200,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 'timestamp': datetime.utcnow()
             }
             sos_logs_collection.insert_one(sos_log)
-            print("SOS alert logged in MongoDB:", sos_log)
+            # print("SOS alert logged in MongoDB:", sos_log)
         except Exception as e:
             print("Error logging SOS alert to MongoDB:", e)
 
@@ -214,7 +214,7 @@ def log_data(json_data):
             'timestamp': datetime.utcnow()
         }
         db['logs'].insert_one(log_entry)  # Store logs in 'logs' collection
-        print("Log stored in MongoDB:", log_entry)
+        # print("Log stored in MongoDB:", log_entry)
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
@@ -229,7 +229,7 @@ def receive_data():
             data = request.get_json()
             if data:
                 collection.insert_one(data)
-                print("Data received from TCP server and stored in MongoDB:", data)
+                # print("Data received from TCP server and stored in MongoDB:", data)
                 return jsonify({'message': 'Data received successfully'}), 200
             else:
                 return jsonify({'error': 'No JSON data received'}), 400
