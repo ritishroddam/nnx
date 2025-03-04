@@ -5,6 +5,7 @@ import requests
 import threading
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.dashboard_backend import dashboard_bp
+# from DeviceInvy.DeviceBackend import device_bp
 from DeviceInvy.DeviceBackend import device_bp
 from RouteHistory.comb_dataa import route_bp
 
@@ -12,6 +13,7 @@ app = Flask(__name__)
 
 app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
+# app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 app.register_blueprint(route_bp, url_prefix='/routeHistory')
 
@@ -30,6 +32,10 @@ def proxy_api_data():
     else:
         response = requests.get('http://64.227.137.175:8555/api/data', params=request.args)
     return jsonify(response.json())
+
+@app.route('/deviceInvy/static/<path:filename>')
+def custom_static(filename):
+    return send_from_directory('DeviceInvy/static', filename)
 
 def run_distinct_vehicle_data_store():
     os.system('python distinctVehicleDataStore.py')
