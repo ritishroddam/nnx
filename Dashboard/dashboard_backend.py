@@ -6,3 +6,4 @@ dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template
 @dashboard_bp.route('/page')
 def page():
     return render_template('admin_dashboard.html')
+ 

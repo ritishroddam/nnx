@@ -2,11 +2,15 @@
 
 {% block head %}
 <title>Dashboard</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<link href="{{ url_for('static', filename='font/ethnocentric-cdnfonts/ethnocentricrg.ttf') }}" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('Dashboard.static', filename='css/style.css') }}">
+
+<link rel="stylesheet"
+  href="{{ url_for('Dashboard.static', filename='font/ethnocentric-cdnfonts/ethnocentricrg.ttf') }}" />
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-<script src="../static/js/preloader.js" defer></script>
-<script src="../static/js/script.js" defer></script>
+<script src="{{ url_for('Dashboard.static', filename='js/preloader.js') }}" defer></script>
+<script defer src="{{ url_for('Dashboard.static', filename='js/dashboard.js') }}" defer></script>
+
 {% endblock %}
 
 {% block h1 %}
