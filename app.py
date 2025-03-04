@@ -9,6 +9,7 @@ from DeviceInvy.DeviceBackend import device_bp
 from RouteHistory.comb_dataa import route_bp
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24) 
 
 app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
