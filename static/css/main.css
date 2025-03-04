@@ -29,7 +29,7 @@ body {
 .sidebar {
   position: fixed;
   left: 1%;
-  top: 427px;
+  top: 432px;
   height: 88%;
   transform: translateY(-50%);
   width: 60px;
@@ -273,6 +273,7 @@ body {
   transition: left 0.3s ease;
   z-index: 1000;
   border-radius: 20px;
+  padding: 1%;
 }
 
 .sidebar:hover ~ .block-container {
