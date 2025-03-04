@@ -168,6 +168,110 @@ function validateGLNumber(input) {
   }
 }
 
+// function saveDevice(deviceId) {
+//   const row = document.querySelector(`tr[data-id='${deviceId}']`);
+
+//   const imeiValue = row.cells[0].querySelector("input").value.trim();
+//   const glNumberValue = row.cells[1].querySelector("input").value.trim();
+//   const deviceModel = row.cells[2].querySelector("input").value.trim();
+//   const deviceMake = row.cells[3].querySelector("input").value.trim();
+//   const dateIn = row.cells[4].querySelector("input").value.trim();
+//   const today = new Date().toISOString().split("T")[0];
+//   const warranty = row.cells[5].querySelector("input").value.trim();
+//   const sentBy = row.cells[6].querySelector("input").value.trim();
+//   const outwardTo = row.cells[7].querySelector("input").value.trim();
+//   const packageValue = row.cells[8].querySelector("select").value;
+//   const tenureValue = row.cells[9].querySelector("input").value.trim();
+//   const status = row.cells[10]
+//     .querySelector(`input[name="status-${deviceId}"]:checked`)
+//     .value.trim();
+
+//   console.log("Updated Data:", {
+//     IMEI: imeiValue,
+//     GLNumber: glNumberValue || null,
+//     DeviceModel: deviceModel,
+//     DeviceMake: deviceMake,
+//     DateIn: dateIn,
+//     Warranty: warranty,
+//     SentBy: sentBy,
+//     OutwardTo: outwardTo,
+//     Package: packageValue,
+//     Tenure: tenureValue || null,
+//     Status: status,
+//   });
+
+//   // Validate inputs
+//   if (imeiValue.length !== 15 || isNaN(imeiValue)) {
+//     alert("IMEI must be exactly 15 digits and numeric.");
+//     return;
+//   }
+
+//   if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {
+//     alert("GL Number must be exactly 13 digits if entered.");
+//     return;
+//   }
+
+//   if (dateIn > today) {
+//     alert("Future dates are not allowed.");
+//     return;
+//   }
+
+//   if (packageValue === "Package" && tenureValue.trim() === "") {
+//     alert("Tenure is required when Package is selected.");
+//     return;
+//   }
+
+//   const updatedData = {
+//     IMEI: imeiValue,
+//     GLNumber: glNumberValue || null,
+//     DeviceModel: deviceModel,
+//     DeviceMake: deviceMake,
+//     DateIn: dateIn,
+//     Warranty: warranty,
+//     SentBy: sentBy,
+//     OutwardTo: outwardTo,
+//     Package: packageValue,
+//     Tenure: tenureValue || null,
+//     Status: status,
+//   };
+
+//   fetch(`/edit_device/${deviceId}`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(updatedData),
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       if (data.success) {
+//         row.cells[0].innerText = updatedData.IMEI;
+//         row.cells[1].innerText = updatedData.GLNumber || "";
+//         row.cells[2].innerText = updatedData.DeviceModel;
+//         row.cells[3].innerText = updatedData.DeviceMake;
+//         row.cells[4].innerText = updatedData.DateIn;
+//         row.cells[5].innerText = updatedData.Warranty;
+//         row.cells[6].innerText = updatedData.SentBy;
+//         row.cells[7].innerText = updatedData.OutwardTo;
+//         row.cells[8].innerText = updatedData.Package;
+//         row.cells[9].innerText = updatedData.Tenure || "";
+//         row.cells[10].innerHTML = `<button class="status-btn ${
+//           updatedData.Status === "Active" ? "status-active" : "status-inactive"
+//         }" disabled>${updatedData.Status}</button>`;
+//         row.cells[11].innerHTML = `
+//           <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
+//           <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
+//         `;
+//       } else {
+//         alert("Failed to save changes. Please try again.");
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error updating device:", error);
+//       alert("An error occurred. Please try again.");
+//     });
+// }
+
 function saveDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
 
@@ -242,7 +346,12 @@ function saveDevice(deviceId) {
     },
     body: JSON.stringify(updatedData),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.success) {
         row.cells[0].innerText = updatedData.IMEI;
