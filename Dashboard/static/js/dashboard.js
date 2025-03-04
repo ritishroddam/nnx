@@ -64,49 +64,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize auto mode on page load
   autoMode();
-
-  // Add event listener for the dark mode toggle switch
-  document
-    .getElementById("dark-mode-toggle")
-    .addEventListener("click", function () {
-      toggleDarkMode();
-    });
 });
 
-// Toggle Sidebar
-function toggleSidebar() {
-  const sidebar = document.querySelector(".sidebar");
-  const mainContent = document.querySelector(".main-content");
-  sidebar.classList.toggle("collapsed");
-  mainContent.classList.toggle("expanded");
-}
-document
-  .getElementById("dark-mode-toggle")
-  .addEventListener("change", function () {
-    if (this.checked) {
-      document.body.classList.remove("dark-mode");
-      document.body.classList.add("light-mode");
-      localStorage.setItem("theme", "light");
-    } else {
-      document.body.classList.remove("light-mode");
-      document.body.classList.add("dark-mode");
-      localStorage.setItem("theme", "dark");
-    }
-  });
-
-// On page load, set the correct theme based on saved preference
-document.addEventListener("DOMContentLoaded", function () {
-  const savedTheme = localStorage.getItem("theme");
-  const darkModeToggle = document.getElementById("dark-mode-toggle");
-
-  if (savedTheme === "light") {
-    document.body.classList.add("light-mode");
-    darkModeToggle.checked = true; // Set checkbox to light mode
-  } else {
-    document.body.classList.add("dark-mode"); // Default to dark mode
-    darkModeToggle.checked = false;
-  }
-});
 // Assuming you're making an AJAX call to fetch the company image
 fetch("/get-company-image", {
   method: "POST",
