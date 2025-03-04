@@ -203,7 +203,8 @@ def delete_device(device_id):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-if __name__ == '__main__':
-    # port = int(sys.argv[1]) if len(sys.argv > 1) else 8003
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8003
-    app.run(host='0.0.0.0', port=port) 
+# if __name__ == '__main__':
+#     # port = int(sys.argv[1]) if len(sys.argv > 1) else 8003
+#     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8003
+#     app.register_blueprint(device_bp, url_prefix='/device')
+#     app.run(host='0.0.0.0', port=port)
