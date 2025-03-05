@@ -155,7 +155,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                   size: 14,
                   weight: "bold",
                 },
-                color: "#2f2f2f",
               },
             },
             tooltip: {
