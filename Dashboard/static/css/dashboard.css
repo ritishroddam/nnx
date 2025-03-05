@@ -392,13 +392,11 @@ canvas {
   transform: scale(1.1);
 }
 
-#card-content p {
+p {
   color: #fff;
 }
 
-.dark-mode #card-content p {
-  color: #fff;
-}
+
 
 /* Minimized Banner */
 .minimized-banner {
