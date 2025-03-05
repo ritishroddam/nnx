@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function renderPieChart() {
     try {
-      const response = await fetch("/dashboard/api/atlanta_pie_data");
+      const response = await fetch("/dashboard/atlanta_pie_data");
       const data = await response.json();
 
       if (!response.ok) {
