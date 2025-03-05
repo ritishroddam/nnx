@@ -131,13 +131,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const chartConfig = {
         type: "doughnut",
         data: {
-          labels: ["Total Vehicles", "Moving Vehicles", "Idle Vehicles"],
+          labels: ["Moving Vehicles", "Idle Vehicles", "Offline Vehicles"],
           datasets: [
             {
               data: [
-                data.total_devices,
                 data.moving_vehicles,
                 data.idle_vehicles,
+                data.offline_vehicles,
               ],
               backgroundColor: [gradient1, gradient2, gradient3],
               hoverBackgroundColor: ["#2ecc71", "#e67e22", "#2980b9"],
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             },
             centerText: {
               display: true,
-              text: "Total Vehicles",
+              text: "Total Vehicles: " + data.total_devices,
             },
           },
           animation: {
