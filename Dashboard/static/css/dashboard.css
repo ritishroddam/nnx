@@ -281,25 +281,6 @@ input:checked + .slider:before {
   }
 }
 
-/* Night mode styling */
-body.night-mode #traffic-container h2 {
-  background: #1b1f29; /* Darker background for night mode */
-}
-
-body.night-mode #map {
-  filter: brightness(0.6); /* Darken map for night effect */
-}
-
-body.night-mode #traffic-info {
-  background: #333;
-  color: #ddd;
-}
-
-/* Transition effect for night mode */
-body.night-mode #scrolling-text {
-  color: #dddddd; /* Lighter text color for night readability */
-}
-
 .graph-container {
   margin-top: 20px;
   flex: 1;
