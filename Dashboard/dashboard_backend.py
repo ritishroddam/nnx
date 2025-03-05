@@ -18,7 +18,7 @@ db = client['nnx']
 collection = db['distinctAtlanta']
 
 
-@dashboard_bp.route('/dashboard-data', methods=['GET'])
+@dashboard_bp.route('/dashboard_data', methods=['GET'])
 def dashboard_data():
     try:
         num_devices = db["device_inventory"].count_documents({})
@@ -36,7 +36,7 @@ def dashboard_data():
         print(f"Error fetching dashboard data: {e}")
         return jsonify({"error": "Failed to fetch dashboard data"}), 500
 
-@dashboard_bp.route('/atlanta-pie-data', methods=['GET'])
+@dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
 def atlanta_pie_data():
     try:
         # Aggregation to find the latest speed per IMEI
