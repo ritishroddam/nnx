@@ -36,8 +36,8 @@ def dashboard_data():
         print(f"Error fetching dashboard data: {e}")
         return jsonify({"error": "Failed to fetch dashboard data"}), 500
 
-@dashboard_bp.route('/api/atlanta-pie-data', methods=['GET'])
-def get_pie_chart_data():
+@dashboard_bp.route('/atlanta-pie-data', methods=['GET'])
+def atlanta_pie_data():
     try:
         # Aggregation to find the latest speed per IMEI
         pipeline = [
