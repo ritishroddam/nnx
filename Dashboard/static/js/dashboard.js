@@ -208,7 +208,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               ctx.save();
               ctx.font = "bold 18px Arial";
               ctx.textAlign = "center";
-              ctx.fillStyle = "#2f2f2f";
               ctx.fillText(text, width / 2, centerY);
               ctx.restore();
             },
