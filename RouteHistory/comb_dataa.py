@@ -26,7 +26,7 @@ route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_
 
 @route_bp.route('/page')
 def page():
-    return render_template('vehicle.html')
+    return render_template('vehicle_list.html')
 
 @route_bp.route("/vehicle", methods=["GET"])
 def show_all_vehicles():
