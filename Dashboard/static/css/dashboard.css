@@ -392,6 +392,14 @@ canvas {
   transform: scale(1.1);
 }
 
+#card-content p {
+  color: #fff;
+}
+
+.dark-mode #card-content p {
+  color: #fff;
+}
+
 /* Minimized Banner */
 .minimized-banner {
   position: fixed;
@@ -482,11 +490,13 @@ canvas {
 .submenu li a:hover {
   text-decoration: underline;
 }
+
 #vehiclesChart {
   display: block;
   margin: auto;
   background-color: transparent; /* Optional */
 }
+
 .graph-container {
   display: flex;
   justify-content: center;
