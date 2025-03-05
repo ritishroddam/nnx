@@ -281,7 +281,7 @@ input:checked + .slider:before {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* margin: 20px auto; */
+  margin: 20px auto;
   /* padding: 20px; */
   background-color: #fff;
   border-radius: 10px;
