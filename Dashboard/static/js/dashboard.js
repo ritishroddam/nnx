@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
 
   function getWeather(lat, lon) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=12.4235&lon=12.5689&appid=${apiKey}&units=metric`;
 
     fetch(url)
       .then((response) => response.json())
