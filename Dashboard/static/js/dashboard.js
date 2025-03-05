@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function getWeather(lat, lon) {
     // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=12.4235&lon=12.5689&appid=${apiKey}&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
 
     fetch(url)
       .then((response) => response.json())
