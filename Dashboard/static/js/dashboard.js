@@ -30,20 +30,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                 `;
     weatherDiv.innerHTML = weatherHTML;
-    setDayNightBackground();
-  }
-
-  function setDayNightBackground() {
-    const hour = new Date().getHours();
-    const weatherContainer = document.querySelector(".weather-container");
-    const datetimeContainer = document.querySelector(".datetime-container");
-    const backgroundColor =
-      hour >= 6 && hour < 18
-        ? "linear-gradient(to right, #eae6ee, #7ca2e7)"
-        : "linear-gradient(to right, #141E30, #243B55)";
-
-    weatherContainer.style.background = backgroundColor;
-    datetimeContainer.style.background = backgroundColor;
   }
 
   function getLocation() {
