@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function fetchDashboardData() {
     try {
-      const response = await fetch("/Dashboard/dashboard_data");
+      const response = await fetch("/dashboard/dashboard_data");
       const data = await response.json();
 
       if (response.ok) {
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function renderPieChart() {
     try {
-      const response = await fetch("/Dashboard/api/atlanta_pie_data");
+      const response = await fetch("/dashboard/api/atlanta_pie_data");
       const data = await response.json();
 
       if (!response.ok) {
