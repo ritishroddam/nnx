@@ -1,4 +1,4 @@
-.container {
+/* .container {
   display: flex;
   flex-direction: row;
 }
@@ -9,7 +9,7 @@
   margin-bottom: 30px;
 }
 
-/* Cards */
+
 .cards {
   display: flex;
   gap: 20px;
@@ -21,12 +21,12 @@
   padding: 20px;
   border-radius: 10px;
   flex: 1;
-  transition: background-color 0.3s, transform 0.3s; /* Adds smooth transition effect */
+  transition: background-color 0.3s, transform 0.3s; 
 }
 
 .card:hover {
-  transform: translateY(-5px); /* Lift card slightly on hover */
-  background-color: #3a3d47; /* Darken card background on hover */
+  transform: translateY(-5px); 
+  background-color: #3a3d47; 
 }
 
 .card-content {
@@ -50,7 +50,7 @@
   color: #f44336;
 }
 
-/* Traffic Section */
+
 .traffic {
   margin-top: 40px;
 }
@@ -79,26 +79,25 @@
   margin-right: 10px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+  transition: background-color 0.3s, color 0.3s; 
 }
 
 .timeframe-buttons button:hover {
-  background-color: #3a3d47; /* Button darkens on hover */
+  background-color: #3a3d47; 
 }
 
 .timeframe-buttons button.active {
   background-color: #414569;
 }
 
-/* Divider */
 hr.divider {
   border: none;
   height: 2px;
-  background-color: grey; /* Divider color for consistency */
-  margin: 20px 0; /* Margin for spacing around the divider */
+  background-color: grey; 
+  margin: 20px 0; 
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -112,8 +111,7 @@ hr.divider {
     margin-bottom: 20px;
   }
 }
-/* From Uiverse.io by alexruix */
-/* The switch - the box around the slider */
+
 .switch {
   font-size: 17px;
   position: relative;
@@ -122,14 +120,14 @@ hr.divider {
   height: 2em;
 }
 
-/* Hide default HTML checkbox */
+
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The slider */
+
 .slider {
   --background: #2a303d;
   position: absolute;
@@ -172,7 +170,7 @@ input:checked + .slider:before {
 .weather-section,
 .graph-container {
   flex: 1;
-  margin: 0 10px; /* Adjust spacing between sections */
+  margin: 0 10px; 
 }
 .traffic {
   width: 90%;
@@ -186,7 +184,7 @@ input:checked + .slider:before {
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 0px; /* Space between weather and datetime */
+  gap: 0px; 
 }
 
 .weather-container,
@@ -210,33 +208,32 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Added shadow for better visual depth */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
 }
 
-/* Title styling */
+
 #traffic-container h2 {
   margin: 0;
   padding: 10px;
   background: #2a303d;
   text-align: center;
   font-size: 1.5em;
-  color: #fff; /* Light text for contrast */
+  color: #fff; 
   transition: background-color 0.3s ease-in-out;
 }
 
-/* Map styling */
+
 #map {
   width: 100%;
   height: 300px;
-  transition: filter 0.3s ease-in-out; /* Smooth transition for night mode filter */
-}
+  transition: filter 0.3s ease-in-out; 
 
-/* Traffic Info styling */
+
 #traffic-info {
   padding: 20px;
   text-align: center;
   position: relative;
-  height: 40px; /* Increased height for better readability */
+  height: 40px; 
   overflow: hidden;
   background: #ffffff;
   border-top: 2px solid #ddd;
@@ -244,7 +241,7 @@ input:checked + .slider:before {
   transition: background-color 0.3s ease-in-out;
 }
 
-/* Scrolling Text styling */
+
 #scrolling-text {
   position: absolute;
   white-space: nowrap;
@@ -253,7 +250,7 @@ input:checked + .slider:before {
   color: #000000;
 }
 
-/* Scroll Animation */
+
 @keyframes scroll {
   0% {
     transform: translateX(100%);
@@ -274,7 +271,6 @@ input:checked + .slider:before {
   transition: margin-left 0.3s ease;
 }
 
-/* graph styling */
 .graph-container {
   flex: 1;
   flex-direction: column;
@@ -282,7 +278,7 @@ input:checked + .slider:before {
   justify-content: center;
   align-items: center;
   margin: 20px auto;
-  /* padding: 20px; */
+
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
@@ -299,8 +295,6 @@ canvas {
   color: #2f2f2f;
 }
 
-/*       Banner */
-/* Full Banner Styles */
 #festival-banner {
   position: fixed;
   top: 0;
@@ -322,11 +316,11 @@ canvas {
 }
 
 .banner-image {
-  max-width: 100%; /* Limit the width to the banner container */
-  max-height: 80vh; /* Limit the height to a percentage of the viewport height */
-  object-fit: contain; /* Ensures the entire image is visible */
-  margin: auto; /* Center the image */
-  display: block; /* Ensures proper alignment */
+  max-width: 100%; 
+  max-height: 80vh; 
+  object-fit: contain; 
+  margin: auto; 
+  display: block; 
 }
 
 .banner-title,
@@ -383,7 +377,7 @@ p {
   color: #fff;
 }
 
-/* Minimized Banner */
+
 .minimized-banner {
   position: fixed;
   top: 0;
@@ -403,7 +397,7 @@ p {
   display: none !important;
 }
 
-/* Keyframe Animations */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -474,6 +468,219 @@ p {
   text-decoration: underline;
 }
 
+#vehiclesChart {
+  display: block;
+  margin: auto;
+} */
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+.cards {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+.card {
+  background-color: #2a2d37;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1;
+  transition: background-color 0.3s, transform 0.3s;
+}
+.card:hover {
+  transform: translateY(-5px);
+  background-color: #3a3d47;
+}
+.card-content {
+  margin-bottom: 20px;
+}
+.card h3 {
+  margin: 0;
+  color: #fff;
+}
+.traffic {
+  margin-top: 40px;
+}
+.traffic h2 {
+  margin: 0;
+}
+.graph {
+  background-color: #2a2d37;
+  height: 30px;
+  border-radius: 10px;
+  margin-top: 20px;
+  padding: 20px;
+}
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .cards {
+    flex-direction: column;
+  }
+  .card {
+    margin-bottom: 20px;
+  }
+}
+.dashboard-row {
+  display: flex;
+  justify-content: space-between;
+}
+.graph-container,
+.traffic-container,
+.weather-section {
+  flex: 1;
+  margin: 0 10px;
+}
+.traffic {
+  width: 90%;
+}
+.weather-section {
+  margin-top: 20px;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.datetime-container,
+.weather-container {
+  margin-right: 10px;
+  width: 60%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  transition: background 0.5s ease;
+}
+#traffic-container {
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+#traffic-container h2 {
+  margin: 0;
+  padding: 10px;
+  background: #2a303d;
+  text-align: center;
+  font-size: 1.5em;
+  color: #fff;
+  transition: background-color 0.3s ease-in-out;
+}
+#map {
+  width: 100%;
+  height: 300px;
+  transition: filter 0.3s ease-in-out;
+}
+#traffic-info {
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  height: 40px;
+  overflow: hidden;
+  background: #fff;
+  border-top: 2px solid #ddd;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.3s ease-in-out;
+}
+#scrolling-text {
+  position: absolute;
+  white-space: nowrap;
+  animation: scroll 10s linear infinite;
+  font-size: 1em;
+  color: #000;
+}
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+.graph-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin-bottom: 10px;
+  position: relative;
+}
+.graph-container {
+  flex: 1;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  height: 450px;
+  color: #2f2f2f;
+  font-family: Arial, sans-serif;
+}
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 10px;
+  color: #2f2f2f;
+}
+p {
+  color: #fff;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes zoomIn {
+  from {
+    transform: scale(0.5);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px #fc0, 0 0 30px #fc0;
+  }
+  50% {
+    box-shadow: 0 0 40px gold, 0 0 60px gold;
+  }
+}
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
 #vehiclesChart {
   display: block;
   margin: auto;
