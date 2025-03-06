@@ -30,17 +30,6 @@ collection = db['atlanta']
 distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  # MongoDB collection for SOS logs
 
-def calculate_distance(lat1, lon1, lat2, lon2):
-    R = 6371.0  # Radius of the Earth in km
-    dlat = radians(lat2 - lat1)
-    dlon = radians(lon2 - lon1)
-
-    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    distance = R * c
-    return distance
-
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
 
@@ -180,7 +169,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 }
                 return json_data
             else:
-                # print(f"Received data does not contain at least {expected_fields_count} fields.")
+                print(f"Received data does not contain at least {expected_fields_count} fields.")
                 return None
 
         except Exception as e:
@@ -201,7 +190,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 'latitude': json_data['latitude'],
                 'longitude': json_data['longitude'],
                 'location': json_data['address'],
-                'timestamp': datetime.utcnow()
+                'timestamp': datetime.now()
             }
             sos_logs_collection.insert_one(sos_log)
             # print("SOS alert logged in MongoDB:", sos_log)
@@ -215,7 +204,7 @@ def log_data(json_data):
             'latitude': json_data['latitude'],
             'longitude': json_data['longitude'],
             'speed': json_data.get('speed', '0'),
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now()
         }
         db['logs'].insert_one(log_entry)  # Store logs in 'logs' collection
         # print("Log stored in MongoDB:", log_entry)
@@ -333,6 +322,18 @@ def run_servers():
 def signal_handler(signal, frame):
     print("Received signal:", signal)
     sys.exit(0)
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    R = 6371.0  # Radius of the Earth in km
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
 
 if __name__ == "__main__":
     run_servers()
