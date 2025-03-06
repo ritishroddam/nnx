@@ -79,6 +79,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         self.log_sos_to_mongodb(json_data)
 
                         # Emit SOS alert to connected clients
+                        json_data['_id'] = str(json_data['_id'])
                         sio.emit('sos_alert', json_data)
 
                     elif sos_state == '0' and MyTCPHandler.sos_active:
@@ -90,6 +91,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     self.store_data_in_mongodb(json_data)
 
                     # Emit vehicle update to connected clients
+                    json_data['_id'] = str(json_data['_id'])
                     sio.emit('vehicle_update', json_data)
 
                 if 'latitude' in json_data and 'longitude' in json_data:
