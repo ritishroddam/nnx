@@ -12,6 +12,7 @@ from Dashboard.DashboardBackend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
 from RouteHistory.routeBackend import route_bp
 from CompanyDetails.companyBackend import company_bp
+from SimInvy.SimBackend import sim_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
@@ -21,6 +22,7 @@ app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 app.register_blueprint(route_bp, url_prefix='/routeHistory')
 app.register_blueprint(company_bp, url_prefix='/companyDetails')
+app.register_blueprint(sim_bp, url_prefix='/simInvy')
 
 @app.route('/')
 def index():

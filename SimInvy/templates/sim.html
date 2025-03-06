@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+<title>GPS Sim Inventory</title>
+
+<link rel="stylesheet" href="{{ url_for('SimInvy.static', filename='css/sim.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+<script defer src="{{ url_for('SimInvy.static', filename='js/sim.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}
+Sim Inventory
+{% endblock %}
+
+{% block block_container %}
+
+<button id="manualEntryBtn" class="btn success mb-4">
+  Add New SIM
+</button>
+
+<div id="manualEntryForm" class="hidden">
+  <form id="manualForm" action="{{ url_for('SimInvy.manual_entry') }}" method="post">
+    <div class="mb-4">
+      <label for="MobileNumber">Mobile Number</label>
+      <input type="text" name="MobileNumber" id="MobileNumber" required />
+      <div id="mobileError" class="error hidden">
+        Mobile Number must be 13 digits long.
+      </div>
+    </div>
+    <div class="mb-4">
+      <label for="SimNumber">SIM Number</label>
+      <input type="text" name="SimNumber" id="SimNumber" required />
+      <div id="simError" class="error hidden">
+        SIM Number must be 20 digits long.
+      </div>
+    </div>
+    <div class="mb-4">
+      <label for="DateIn">Date In</label>
+      <input type="date" name="DateIn" id="DateIn" required max="" />
+    </div>
+    <div class="mb-4">
+      <label for="DateOut">Date Out</label>
+      <input type="date" name="DateOut" id="DateOut" max="" />
+    </div>
+    <div class="mb-4">
+      <label for="Vendor">Vendor</label>
+      <input type="text" name="Vendor" id="Vendor" required />
+    </div>
+    <button type="submit" class="btn success">Submit</button>
+    <button type="button" id="cancelBtn" class="btn danger">
+      Cancel
+    </button>
+  </form>
+</div>
+
+<!-- Upload Button -->
+<button id="uploadBtn" class="btn mb-4">Upload</button>
+<button id="downloadExcelBtn" class="btn">Download Excel</button>
+
+
+<!-- Hidden Upload Form Container -->
+<div id="uploadFormContainer" class="hidden">
+  <form id="uploadForm" action="{{ url_for('SimInvy.upload') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".xls,.xlsx" required />
+    <button type="submit" class="btn">Upload Excel</button>
+    <a href="{{ url_for('SimInvy.download_template') }}" class="btn">Download Template</a>
+    <div class="preloader"></div>
+  </form>
+</div>
+
+<div id="errorBox" class="error-box hidden"></div>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {%
+if messages %} {% for category, message in messages %}
+<div class="flash-box flash-{{ category }}">{{ message }}</div>
+{% endfor %} {% endif %} {% endwith %}
+<table>
+  <thead>
+    <tr>
+      <th>Mobile Number</th>
+      <th>SIM Number</th>
+      <th>Date In</th>
+      <th>Date Out</th>
+      <th>Vendor</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="simTable">
+    {% for sim in sims %}
+    <tr data-id="{{ sim._id }}">
+      <td>{{ sim.MobileNumber }}</td>
+      <td>{{ sim.SimNumber }}</td>
+      <td>{{ sim.DateIn }}</td>
+      <td>{{ sim.DateOut }}</td>
+      <td>{{ sim.Vendor }}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
+        <button class="icon-btn delete-icon" onclick="deleteSim('{{ sim._id }}')">🗑️</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
