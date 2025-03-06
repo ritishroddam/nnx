@@ -35,12 +35,14 @@ def proxy_api_data():
         response = requests.get('http://64.227.137.175:8555/api/data', params=request.args)
     return jsonify(response.json())
 
-def run_distinct_vehicle_data_store():
-    os.system('python distinctVehicleDataStore.py')
+# def run_distinct_vehicle_data_store():
+#     os.system('python distinctVehicleDataStore.py')
 
 if __name__ == '__main__':
     map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
     subprocess.Popen(['python', map_server_path])
-    threading.Thread(target=run_distinct_vehicle_data_store, daemon=True).start()
+    run_distinct_vehicle_data_store_path = os.path.join(os.path.dirname(__file__), 'distinctVehicleDataStore.py')
+    subprocess.Popen(['python', run_distinct_vehicle_data_store_path])
+    # threading.Thread(target=run_distinct_vehicle_data_store, daemon=True).start()
 
     app.run(host='64.227.137.175', port=8888, debug=True)
