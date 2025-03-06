@@ -71,8 +71,33 @@
                     <li><a href="#">Monthly Report</a></li>
                 </ul>
             </li>
-            <li><a href="{{url_for('DeviceInvy.page')}}" class="menu-item"><i class="fa-solid fa-archive"></i> <span
-                        class="sidebar-text">Device Inventory</span></a></li>
+            <!-- <li><a href="{{url_for('DeviceInvy.page')}}" class="menu-item"><i class="fa-solid fa-archive"></i> <span
+                        class="sidebar-text">Device Inventory</span></a></li> -->
+
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-archive"></i>
+                    <span class="sidebar-text">Inventory</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('DeviceInvy.page')}}">
+                            <i class="fa-solid fa-archive"></i>
+                            Device Inventory
+                        </a>
+                    </li>
+                </ul>
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('CompanyDetails.page')}}">
+                            <i class="fa-solid fa-archive"></i>
+                            Company Detaails
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
             <li><a href="#" class="menu-item"><i class="fa-solid fa-camera"></i> <span
                         class="sidebar-text">Dashcam</span></a></li>
             <li><a href="#" class="menu-item"><i class="fa-solid fa-file"></i> <span
