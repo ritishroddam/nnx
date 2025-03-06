@@ -227,6 +227,13 @@ def download_template():
 @company_bp.route('/edit_customer/<customer_id>', methods=['POST'])
 def edit_customer(customer_id):
     try:
+
+        try:
+            object_id = ObjectId(customer_id)
+        except Exception:
+            print("ERROR: Invalid device ID")
+            return jsonify({'success': False, 'message': 'Invalid device ID'}), 400
+
         updated_data = request.json
 
         # Validation: Ensure required fields are not empty
@@ -250,7 +257,7 @@ def edit_customer(customer_id):
 
         # Update the customer in the database
         result = customers_collection.update_one(
-            {'_id': ObjectId(customer_id)},
+            {'_id': ObjectId(object_id)},
             {'$set': updated_data}
         )
         if result.modified_count > 0:
