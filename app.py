@@ -11,7 +11,7 @@ from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.DashboardBackend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
 from RouteHistory.routeBackend import route_bp
-from CompanyDetails.CompanyBackend import company_bp
+from CompanyDetails.companyBackend import company_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
