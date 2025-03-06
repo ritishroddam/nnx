@@ -323,3 +323,7 @@ input:checked + .slider:before {
 .sidebar:hover ~ .vehicle-table-container {
   left: 14.5%;
 }
+
+.dark-mode .vehicle-table-container {
+  background-color: black;
+}
