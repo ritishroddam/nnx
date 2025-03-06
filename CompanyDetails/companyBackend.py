@@ -130,6 +130,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import pandas as pd
+import os
 import sys
 import re
 
@@ -218,7 +219,8 @@ def upload_customers():
 # Route to download the customer template
 @company_bp.route('/download_template')
 def download_template():
-    path = r"/root/CordonNX/CordonNX/nayacomp/templates/Customer_upload_template.xlsx"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, 'templates', 'Customer_upload_template.xlsx')
     return send_file(path, as_attachment=True)
 
 # Route to edit customer details
