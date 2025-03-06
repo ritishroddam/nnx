@@ -2,7 +2,10 @@ from flask import Flask, render_template, send_from_directory, request, jsonify
 import subprocess
 import os
 import requests
+import sys
 import threading
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.DashboardBackend import dashboard_bp
