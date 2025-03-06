@@ -14,9 +14,9 @@
 
 # # Route to render the main page
 # @company_bp.route('/')
-# def index():
+# def CompanyDetails.page():
 #     customers = list(customers_collection.find())
-#     return render_template('index.html', customers=customers)
+#     return render_template('CompanyDetails.page.html', customers=customers)
 
 # # Route to add a new customer manually
 # @company_bp.route('/manual_entry', methods=['POST'])
@@ -38,19 +38,19 @@
 
 #     customers_collection.insert_one(customer)
 #     flash('Customer added successfully!', 'success')
-#     return redirect(url_for('index'))
+#     return redirect(url_for('CompanyDetails.page'))
 
 # # Route to upload multiple customers from an Excel file
 # @company_bp.route('/upload_customers', methods=['POST'])
 # def upload_customers():
 #     if 'file' not in request.files:
 #         flash('No file part', 'danger')
-#         return redirect(url_for('index'))
+#         return redirect(url_for('CompanyDetails.page'))
 
 #     file = request.files['file']
 #     if file.filename == '':
 #         flash('No selected file', 'danger')
-#         return redirect(url_for('index'))
+#         return redirect(url_for('CompanyDetails.page'))
 
 #     try:
 #         df = pd.read_excel(file)
@@ -59,7 +59,7 @@
 #     except Exception as e:
 #         flash(f'Error: {str(e)}', 'danger')
 
-#     return redirect(url_for('index'))
+#     return redirect(url_for('CompanyDetails.page'))
 
 # # Route to download the customer template
 # @company_bp.route('/download_customer_template')
@@ -187,19 +187,19 @@ def manual_entry():
 
     customers_collection.insert_one(customer)
     flash('Customer added successfully!', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('CompanyDetails.page'))
 
 # Route to upload multiple customers from an Excel file
 @company_bp.route('/upload_customers', methods=['POST'])
 def upload_customers():
     if 'file' not in request.files:
         flash('No file part', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('CompanyDetails.page'))
 
     file = request.files['file']
     if file.filename == '':
         flash('No selected file', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('CompanyDetails.page'))
 
     try:
         df = pd.read_excel(file)
@@ -214,7 +214,7 @@ def upload_customers():
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
 
-    return redirect(url_for('index'))
+    return redirect(url_for('CompanyDetails.page'))
 
 # Route to download the customer template
 @company_bp.route('/download_template')
