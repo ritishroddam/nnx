@@ -47,8 +47,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     sos_alert_triggered = False
 
     def handle(self):
+        receive_data = self.request.recv(4096)
         try:
-            data = self.request.recv(4096).decode('utf-8').strip()
+            
+            data = receive_data.decode('utf-8').strip() 
             # print("Received raw data:", data)
 
             json_data = self.parse_json_data(data)
@@ -93,6 +95,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         except Exception as e:
             print("Error handling request:", e)
+            print("Error data:", receive_data.split(','))
 
     def parse_json_data(self, data):
         try:
