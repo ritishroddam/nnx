@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.DashboardBackend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
-from RouteHistory.RouteBackend import route_bp
+from RouteHistory.routeBackend import route_bp
 from CompanyDetails.CompanyBackend import company_bp
 
 app = Flask(__name__)
