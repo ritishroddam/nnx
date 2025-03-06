@@ -3,10 +3,11 @@ import subprocess
 import os
 import requests
 import threading
-from Vehicle.VehicleBackend import vehicle_bp
+from Vehicle.vehicleBackend import vehicle_bp
 from Dashboard.dashboard_backend import dashboard_bp
-from DeviceInvy.DeviceBackend import device_bp
-from RouteHistory.comb_dataa import route_bp
+from DeviceInvy.deviceBackend import device_bp
+from RouteHistory.routeBackend import route_bp
+from CompanyDetails.companyBackend import company_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
@@ -15,6 +16,7 @@ app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 app.register_blueprint(route_bp, url_prefix='/routeHistory')
+app.register_blueprint(company_bp, url_prefix='/companyDetails')
 
 @app.route('/')
 def index():
