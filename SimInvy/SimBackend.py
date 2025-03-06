@@ -13,10 +13,10 @@ client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-277
 db = client['CordonEV']
 collection = db['sim_inventory']
 
-@sim_bp.route('/')
-def index():
+@sim_bp.route('/page')
+def page():
     sims = list(collection.find({}))
-    return render_template('index.html', sims=sims)
+    return render_template('sim.html', sims=sims)
 
 @sim_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
@@ -29,28 +29,28 @@ def manual_entry():
     # Validate alphanumeric and length
     if len(data['MobileNumber']) != 10 or len(data['SimNumber']) != 20:
         flash("Invalid Mobile Number or SIM Number length", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('SimInvy.page'))
 
     # Check if Mobile Number or SIM Number is unique
     if collection.find_one({"MobileNumber": data['MobileNumber']}) or collection.find_one({"SimNumber": data['SimNumber']}):
         flash("Mobile Number or SIM Number already exists", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('SimInvy.page'))
 
     # Insert into MongoDB
     collection.insert_one(data)
     flash("SIM added successfully!", "success")
-    return redirect(url_for('index'))
+    return redirect(url_for('SimInvy.page'))
 
 @sim_bp.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         flash("No file part", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('SimInvy.page'))
 
     file = request.files['file']
     if file.filename == '':
         flash("No selected file", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('SimInvy.page'))
 
     if file and (file.filename.endswith('.xls') or file.filename.endswith('.xlsx')):
         df = pd.read_excel(file)
@@ -67,13 +67,13 @@ def upload_file():
             # Perform necessary validations
             if len(mobile_number) != 10:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
-                return redirect(url_for('index'))
+                return redirect(url_for('SimInvy.page'))
             if len(sim_number) != 20:
                 flash(f"Invalid SIM Number length at row {index + 2}, column 'SimNumber' (Length: {len(sim_number)})", "danger")
-                return redirect(url_for('index'))
+                return redirect(url_for('SimInvy.page'))
             if collection.find_one({"MobileNumber": mobile_number}) or collection.find_one({"SimNumber": sim_number}):
                 flash(f"Duplicate Mobile Number or SIM Number at row {index + 2}", "danger")
-                return redirect(url_for('index'))
+                return redirect(url_for('SimInvy.page'))
 
             # Create record to insert
             record = {
@@ -90,10 +90,10 @@ def upload_file():
             collection.insert_many(records)
             flash("File uploaded and SIMs added successfully!", "success")
 
-        return redirect(url_for('index'))
+        return redirect(url_for('SimInvy.page'))
     else:
         flash("Unsupported file format", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('SimInvy.page'))
 
 @sim_bp.route('/edit_sim/<sim_id>', methods=['POST'])
 def edit_sim(sim_id):
