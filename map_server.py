@@ -300,7 +300,7 @@ def start_flask_server():
     eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 8555)), app)
 
 def run_servers():
-    HOST = "0.0.0.0"
+    HOST = "localhost"
     PORT = 8000
     server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
