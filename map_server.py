@@ -301,7 +301,7 @@ def start_flask_server():
 
 def run_servers():
     HOST = "localhost"
-    PORT = 8554
+    PORT = 8000
     server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
 
