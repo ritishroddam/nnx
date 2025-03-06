@@ -50,10 +50,20 @@
                     <span class="arrow">&#x25BC;</span>
                 </a>
                 <ul class="submenu">
-                    <li><a href="{{url_for('Vehicle.map')}}">Vehicle Map</a></li>
+                    <li>
+                        <i class="fa-solid fa-map-location-dot" style='white-space:pre'></i>
+                        <a href="{{url_for('Vehicle.map')}}">
+                            Vehicle Map
+                        </a>
+                    </li>
                 </ul>
                 <ul class="submenu">
-                    <li><a href="{{url_for('RouteHistory.page')}}">Route History</a></li>
+                    <li>
+                        <i class="fa-solid fa-route" style='white-space:pre'></i>
+                        <a href="{{url_for('RouteHistory.page')}}">
+                            Route History
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li>
@@ -83,7 +93,7 @@
                 <ul class="submenu">
                     <li>
                         <a href="{{url_for('DeviceInvy.page')}}">
-                            <i class="fa-solid fa-archive"></i>
+                            <i class="fa-solid fa-microchip" style='white-space:pre'></i>
                             Device Inventory
                         </a>
                     </li>
@@ -91,7 +101,7 @@
                 <ul class="submenu">
                     <li>
                         <a href="{{url_for('CompanyDetails.page')}}">
-                            <i class="fa-solid fa-archive"></i>
+                            <i class="fa-solid fa-building" style='white-space:pre'></i>
                             Company Detaails
                         </a>
                     </li>
