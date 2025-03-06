@@ -101,7 +101,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 print("Invalid JSON format")
 
         except Exception as e:
-            print("Error handlingg request:", e)
+            print("Error handling request:", e)
 
     def parse_json_data(self, data):
         try:
