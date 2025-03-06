@@ -1,17 +1,15 @@
-/* General Styles */
-.container {
+/* General Styles .container {
   display: flex;
   flex-direction: row;
 }
 
-/* Sidebar */
 .sidebar {
   width: 250px;
   background-color: #212631;
   padding: 20px;
   height: 100vh;
-  transition: background-color 0.3s; /* Smooth transition */
-  border-right: 2px solid grey; /* Create the vertical line */
+  transition: background-color 0.3s;
+  border-right: 2px solid grey;
 }
 
 .logo h2 {
@@ -23,7 +21,7 @@
 .menu {
   list-style: none;
   padding: 0;
-  margin: 0; /* Ensures the menu list has no extra margin */
+  margin: 0;
 }
 
 .menu-item {
@@ -36,7 +34,7 @@
   display: block;
   padding: 10px 15px;
   border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s; /* Smooth hover effect */
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .menu-item.active a,
@@ -52,12 +50,11 @@
   margin-top: 20px;
 }
 
-/* Main Content */
 .main-content {
   flex: 1;
   padding: 20px;
-  background-color: #212631; /* Default dark mode background */
-  transition: background-color 0.3s, color 0.3s; /* Smooth transition for theme switching */
+  background-color: #212631;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .navbar {
@@ -102,7 +99,6 @@
   border-radius: 50%;
 }
 
-/* Cards */
 .cards {
   display: flex;
   gap: 20px;
@@ -114,12 +110,12 @@
   padding: 20px;
   border-radius: 10px;
   flex: 1;
-  transition: background-color 0.3s, transform 0.3s; /* Adds smooth transition effect */
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .card:hover {
-  transform: translateY(-5px); /* Lift card slightly on hover */
-  background-color: #3a3d47; /* Darken card background on hover */
+  transform: translateY(-5px);
+  background-color: #3a3d47;
 }
 
 .card-content {
@@ -143,7 +139,6 @@
   color: #f44336;
 }
 
-/* Traffic Section */
 .traffic {
   margin-top: 40px;
 }
@@ -172,38 +167,32 @@
   margin-right: 10px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .timeframe-buttons button:hover {
-  background-color: #3a3d47; /* Button darkens on hover */
+  background-color: #3a3d47;
 }
 
 .timeframe-buttons button.active {
   background-color: #414569;
 }
 
-/* Divider */
 hr.divider {
   border: none;
   height: 2px;
-  background-color: grey; /* Divider color for consistency */
-  margin: 20px 0; /* Margin for spacing around the divider */
+  background-color: grey;
+  margin: 20px 0;
 }
 
-/* Light Mode Styles */
 body.light-mode {
   background-color: #f5f5f5;
   color: #ffffff;
 }
 
 body.light-mode .main-content {
-  background-color: #e0e0e0; /* Light mode main content */
+  background-color: #e0e0e0;
 }
-
-/* body.light-mode .sidebar {
-    background-color: #fff;
-} */
 
 body.light-mode .menu-item a {
   color: #ffffff;
@@ -233,7 +222,6 @@ body.light-mode .timeframe-buttons button.active {
   background-color: #ccc;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -252,8 +240,7 @@ body.light-mode .timeframe-buttons button.active {
     margin-bottom: 20px;
   }
 }
-/* From Uiverse.io by alexruix */
-/* The switch - the box around the slider */
+
 .switch {
   font-size: 17px;
   position: relative;
@@ -262,14 +249,12 @@ body.light-mode .timeframe-buttons button.active {
   height: 2em;
 }
 
-/* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The slider */
 .slider {
   --background: #2a303d;
   position: absolute;
@@ -312,7 +297,7 @@ input:checked + .slider:before {
 .weather-section,
 .graph-container {
   flex: 1;
-  margin: 0 10px; /* Adjust spacing between sections */
+  margin: 0 10px;
 }
 .traffic {
   width: 90%;
@@ -326,7 +311,7 @@ input:checked + .slider:before {
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 0px; /* Space between weather and datetime */
+  gap: 0px;
 }
 
 .weather-container,
@@ -345,10 +330,10 @@ input:checked + .slider:before {
 #traffic-container {
   border-radius: 10px;
   overflow: hidden;
-  width: 100%; /* Ensure traffic container takes full width of its container */
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0px; /* Space between map and traffic info */
+  gap: 0px;
 }
 
 #traffic-container h2 {
@@ -406,13 +391,12 @@ input:checked + .slider:before {
 
 .graph-box {
   width: 500px;
-  height: 400px; /* Adjust as needed */
-  background-color: #2a303d; /* Adjust as needed */
+  height: 400px;
+  background-color: #2a303d;
   border-radius: 20px;
   position: relative;
 }
 
-/* /////////////////////////////////////////////// */
 .header {
   background-color: #2b3f56;
   padding: 1rem;
@@ -426,15 +410,15 @@ input:checked + .slider:before {
 .back-arrow {
   font-size: 2rem;
   cursor: pointer;
-  transition: color 0.3s ease, transform 0.3s ease; /* Smooth transition for hover effects */
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 .back-arrow:hover {
   color: #ffffff;
-  transform: scale(1.2); /* Slightly enlarge the arrow */
+  transform: scale(1.2);
 }
 .dashboard-container {
   display: flex;
-  height: calc(100vh - 60px); /* Full height minus header */
+  height: calc(100vh - 60px);
 }
 .left-column {
   flex: 2;
@@ -495,7 +479,7 @@ button {
 }
 canvas {
   width: 100% !important;
-  height: 160px !important; /* Adjust chart height */
+  height: 160px !important;
 }
 .alarm-section {
   background-color: #22334a;
@@ -514,8 +498,6 @@ canvas {
 .alarm-section th {
   color: #a0a8b2;
 }
-
-/* /////////////////////////////////////////////// */
 
 #vehicle-form {
   display: flex;
@@ -559,23 +541,23 @@ canvas {
 }
 #controls-container {
   position: relative;
-  width: 70%; /* Adjusted for layout */
-  background: rgba(255, 255, 255, 0.2); /* Transparent background */
-  backdrop-filter: blur(10px); /* Glassmorphism blur effect */
+  width: 70%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
   padding: 15px;
   border-radius: 50px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Smooth drop shadow */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 15px; /* Spacing between buttons */
-  margin: 20px auto; /* Center horizontally */
+  gap: 15px;
+  margin: 20px auto;
 }
 .control-button {
-  background: linear-gradient(135deg, #007b9e, #00587a); /* Modern gradient */
+  background: linear-gradient(135deg, #007b9e, #00587a);
   color: white;
-  padding: 12px 20px; /* Spacious buttons */
+  padding: 12px 20px;
   font-size: 18px;
   border: none;
   cursor: pointer;
@@ -584,9 +566,9 @@ canvas {
   justify-content: center;
   gap: 8px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add depth to buttons */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease-in-out;
-  overflow: hidden; /* For ripple effect */
+  overflow: hidden;
   position: relative;
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
   letter-spacing: 2px;
@@ -608,18 +590,330 @@ canvas {
   opacity: 0;
 }
 .control-button i {
-  font-size: 20px; /* Slightly larger icons */
+  font-size: 20px;
 }
 .control-button:hover {
-  background: linear-gradient(
-    135deg,
-    #0098c4,
-    #007b9e
-  ); /* Lighter gradient on hover */
-  transform: translateY(-3px); /* Slight lift */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Enhance shadow */
+  background: linear-gradient(135deg, #0098c4, #007b9e);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 .control-button:active {
-  transform: translateY(0); /* Reset lift on click */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Reduce shadow */
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+} */
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+}
+.dashboard-row {
+  display: flex;
+  justify-content: space-between;
+}
+#map {
+  width: 100%;
+  height: 300px;
+}
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+.header {
+  background-color: #2b3f56;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+}
+.header h2 {
+  margin-left: 1rem;
+  font-size: 1.5rem;
+}
+.back-arrow {
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.back-arrow:hover {
+  color: #fff;
+  transform: scale(1.2);
+}
+.dashboard-container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+.left-column {
+  flex: 2;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.map-section {
+  background-color: #22334a;
+  padding: 1rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.map-section h3 {
+  margin-bottom: 0.5rem;
+}
+.map-container {
+  height: 240px;
+  background-color: #2a3e50;
+  flex-grow: 1;
+  margin-bottom: 0.5rem;
+}
+button {
+  background-color: #1f2e3a;
+  color: #fff;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.right-column {
+  flex: 1.3;
+  background-color: #2a3e50;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.info-box {
+  background-color: #22334a;
+  padding: 1rem;
+}
+.info-box h3 {
+  margin-bottom: 0.5rem;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+.chart-section {
+  background-color: #22334a;
+  padding: 1rem;
+}
+.chart-section h3 {
+  margin-bottom: 0.5rem;
+}
+canvas {
+  width: 100% !important;
+  height: 160px !important;
+}
+.alarm-section {
+  background-color: #22334a;
+  padding: 1rem;
+}
+.alarm-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.alarm-section td,
+.alarm-section th {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #444f5d;
+}
+.alarm-section th {
+  color: #a0a8b2;
+}
+#vehicle-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+#vehicle-form label {
+  font-weight: 700;
+}
+#vehicle-form input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+#vehicle-form button {
+  padding: 10px 20px;
+  background-color: #006994;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 0.3s ease;
+}
+#vehicle-form button:hover {
+  background-color: #01415b;
+}
+#map {
+  height: 400px;
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+#controls-container {
+  position: relative;
+  width: 70%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 15px;
+  border-radius: 50px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin: 20px auto;
+}
+.control-button {
+  background: linear-gradient(135deg, #007b9e, #00587a);
+  color: #fff;
+  padding: 12px 20px;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+  position: relative;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  letter-spacing: 2px;
+}
+.control-button::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+.control-button:active::after {
+  transform: scale(4);
+  opacity: 0;
+}
+.control-button i {
+  font-size: 20px;
+}
+.control-button:hover {
+  background: linear-gradient(135deg, #0098c4, #007b9e);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+.control-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #042f5d;
+}
+td,
+th {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+th {
+  background-color: #042f5d;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+td {
+  background-color: #fdfdfd;
+  color: #000;
+}
+table tbody tr:hover {
+  background-color: #f1f1f1;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+.btn {
+  padding: 10px 15px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover {
+  background-color: #0056b3;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.action-btn {
+  padding: 5px 10px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+.action-btn:hover {
+  opacity: 0.8;
+}
+.table-responsive {
+  margin: auto;
+  width: 95%;
+}
+.btn-primary {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  background-color: #0056b3;
 }
