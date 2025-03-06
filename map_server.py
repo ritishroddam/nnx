@@ -90,11 +90,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
             else:
                 print("Invalid JSON format")
-                print(f"Parsed data parts: ", data.split(','))
 
         except Exception as e:
             print("Error handling request:", e)
-            print("Received data:", data)
 
     def parse_json_data(self, data):
         try:
