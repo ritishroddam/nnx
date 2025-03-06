@@ -95,7 +95,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         except Exception as e:
             print("Error handling request:", e)
-            error_data = receive_data.decode('utf-16').strip()
+            try:
+                error_data = receive_data.decode().strip()
+            except:
+                print("Error decoding data.", e)
             print("Error data:", error_data.split(','))
 
     def parse_json_data(self, data):
