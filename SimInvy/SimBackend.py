@@ -41,7 +41,7 @@ def manual_entry():
     flash("SIM added successfully!", "success")
     return redirect(url_for('SimInvy.page'))
 
-@sim_bp.route('/upload', methods=['POST'])
+@sim_bp.route('/upload_file', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         flash("No file part", "danger")

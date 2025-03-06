@@ -62,7 +62,7 @@ Sim Inventory
 
 <!-- Hidden Upload Form Container -->
 <div id="uploadFormContainer" class="hidden">
-  <form id="uploadForm" action="{{ url_for('SimInvy.upload') }}" method="post" enctype="multipart/form-data">
+  <form id="uploadForm" action="{{ url_for('SimInvy.upload_file') }}" method="post" enctype="multipart/form-data">
     <input type="file" name="file" accept=".xls,.xlsx" required />
     <button type="submit" class="btn">Upload Excel</button>
     <a href="{{ url_for('SimInvy.download_template') }}" class="btn">Download Template</a>
