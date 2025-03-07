@@ -157,40 +157,52 @@ def upload_vehicle_file():
     try:
         df = pd.read_excel(file)
 
-        # Map fields
-        field_mapping = {
-            "LicensePlateNumber": "License Plate Number",
-            "IMEI": "IMEI Number",
-            "SIM": "SIM Number",
-            "VehicleModel": "Vehicle Model",
-            "VehicleMake": "Vehicle Make",
-            "YearOfManufacture": "Year of Manufacture",
-            "DateOfPurchase": "Date of Purchase",
-            "InsuranceNumber": "Insurance Number",
-            "DriverName": "Driver Name",
-            "CurrentStatus": "Current Status",
-            "Location": "Location",
-            "OdometerReading": "Odometer Reading",
-            "ServiceDueDate": "Service Due Date"
-        }
-        df.rename(columns=field_mapping, inplace=True)
+        records = []
 
-        records = df.to_dict(orient="records")
+        for index, row in df.iterrows():
+            license_plate_number = str(row['LicensePlateNumber']).strip()
+            imei = str(row['IMEI']).strip()
+            sim = str(row['SIM']).strip()
+            vehicle_model = str(row['VehicleModel']).strip()
+            vehicle_make = str(row['VehicleMake']).strip()
+            year_of_manufacture = str(row['YearOfManufacture']).strip()
+            date_of_purchase = str(row['DateOfPurchase']).strip()
+            insurance_number = str(row['InsuranceNumber']).strip()
+            driver_name = str(row['DriverName']).strip()
+            current_status = str(row['CurrentStatus']).strip()
+            location = str(row['Location']).strip()
+            odometer_reading = str(row['OdometerReading']).strip()
+            service_due_date = str(row['ServiceDueDate']).strip()
 
-        for record in records:
-            try:
-                record["IMEI"] = int(record["IMEI"])
-                record["SIM"] = int(record["SIM"])
-            except ValueError:
-                flash("IMEI and SIM numbers must be integers.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
 
-        vehicle_collection.insert_many(records)
-        flash("File uploaded successfully!", "success")
+
+            record = {
+                "LicensePlateNumber": license_plate_number,
+                "IMEI": imei,
+                "SIM": sim,
+                "VehicleModel": vehicle_model,
+                "VehicleMake": vehicle_make,
+                "YearOfManufacture": year_of_manufacture,
+                "DateOfPurchase": date_of_purchase,
+                "InsuranceNumber": insurance_number,
+                "DriverName": driver_name,
+                "CurrentStatus": current_status,
+                "Location": location,
+                "OdometerReading": odometer_reading,
+                "ServiceDueDate": service_due_date,
+            }
+
+            records.append(record)
+
+        if records:
+            vehicle_collection.insert_many(records)
+            flash("File uploaded and SIMs added successfully!", "success")
+
+        return redirect(url_for('VehicleDetails.page'))
+
     except Exception as e:
         flash(f"Error uploading file: {str(e)}", "danger")
-
-    return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetails.page'))
 
 # Download template route
 @vehicleDetails_bp.route('/download_vehicle_template')
