@@ -395,5 +395,5 @@ document.getElementById("uploadForm").addEventListener("submit", function () {
 document
   .getElementById("downloadExcelBtn")
   .addEventListener("click", function () {
-    window.location.href = "/vehicleDetials/download_excel";
+    window.location.href = "/vehicleDetails/download_excel";
   });
