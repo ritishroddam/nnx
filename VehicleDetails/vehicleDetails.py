@@ -54,7 +54,7 @@ def manual_entry():
     for field in required_fields:
         if not data.get(field):
             flash(f"{field} is required.", "danger")
-            return redirect(url_for('page'))
+            return redirect(url_for('vehicleDetails.html'))
         
     # Check for duplicates
     duplicate = vehicle_collection.find_one({
@@ -66,7 +66,7 @@ def manual_entry():
     })
     if duplicate:
         flash("Duplicate entry found: License Plate Number, IMEI, or SIM already exists.", "danger")
-        return redirect(url_for('page'))
+        return redirect(url_for('vehicleDetails.html'))
 
     duplicate_imei = vehicle_collection.find_one({
         "IMEI": data["IMEI"],
@@ -74,7 +74,7 @@ def manual_entry():
     })
     if duplicate_imei:
         flash(f"IMEI {data['IMEI']} is already allocated to another License Plate Number.", "danger")
-        return redirect(url_for('page'))
+        return redirect(url_for('vehicleDetails.html'))
 
     duplicate_sim = vehicle_collection.find_one({
         "SIM": data["SIM"],
@@ -82,7 +82,7 @@ def manual_entry():
     })
     if duplicate_sim:
         flash(f"SIM {data['SIM']} is already allocated to another License Plate Number.", "danger")
-        return redirect(url_for('page'))
+        return redirect(url_for('vehicleDetails.html'))
 
     # Insert record into MongoDB
     try:
@@ -91,7 +91,7 @@ def manual_entry():
     except Exception as e:
         flash(f"Error adding vehicle: {str(e)}", "danger")
 
-    return redirect(url_for('page'))
+    return redirect(url_for('vehicleDetails.html'))
 
 @vehicleDetails_bp.route('/edit_vehicle/<vehicle_id>', methods=['PATCH'])
 def edit_vehicle(vehicle_id):
@@ -150,12 +150,12 @@ def delete_vehicle(vehicle_id):
 def upload_vehicle_file():
     if 'file' not in request.files:
         flash("No file part", "danger")
-        return redirect(url_for('page'))
+        return redirect(url_for('vehicleDetails.html'))
 
     file = request.files['file']
     if file.filename == '':
         flash("No selected file", "danger")
-        return redirect(url_for('page'))
+        return redirect(url_for('vehicleDetails.html'))
 
     try:
         df = pd.read_excel(file)
@@ -185,7 +185,7 @@ def upload_vehicle_file():
     except Exception as e:
         flash(f"Error uploading file: {str(e)}", "danger")
 
-    return redirect(url_for('page'))
+    return redirect(url_for('vehicleDetails.html'))
 
 # Download template route
 @vehicleDetails_bp.route('/download_vehicle_template')
