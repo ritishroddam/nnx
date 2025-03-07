@@ -352,7 +352,7 @@ document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
     document.getElementById("manualEntryForm").classList.toggle("hidden");
-    document.getElementById("LicensePlateNumber").focus();
+    // document.getElementById("LicensePlateNumber").focus();
   });
 
 document.getElementById("cancelBtn").addEventListener("click", function () {
