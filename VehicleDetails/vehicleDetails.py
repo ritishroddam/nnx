@@ -66,7 +66,7 @@ def manual_entry():
             if vehicle_collection.find_one({"SIM": data['SIM']}):
                 flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
-        return redirect(url_for('SimInvy.page'))
+        return redirect(url_for('VehicleDetails.page'))
 
     if vehicle_collection.find_one({"IMEI": data['IMEI']}):
         flash("IMEI Number has already been allocated to another License Plate Number", "danger")
@@ -74,7 +74,7 @@ def manual_entry():
         if vehicle_collection.find_one({"SIM": data['SIM']}):
             flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
-        return redirect(url_for('SimInvy.page'))
+        return redirect(url_for('VehicleDetails.page'))
     
     if vehicle_collection.find_one({"SIM": data['SIM']}):
         flash("Sim Number has already been allocated to another License Plate Number", "danger")
