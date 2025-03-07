@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>GPS Vehicle Inventory</title>
+<link rel="stylesheet" href="{{ url_for('VehicleDetails.static', filename='css/VehicleDetails.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+<script defer src="{{ url_for('VehicleDetails.static', filename='js/VehicleDetails.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}
+Vehicle Details
+{% endblock %}
+
+{% block block_container %}
+<button id="manualEntryBtn" class="btn success mb-4">
+  Add New Vehicle
+</button>
+
+<div id="manualEntryForm" class="hidden">
+  <form id="manualForm" action="{{ url_for('VehicleDetails.manual_entry') }}" method="post">
+    <input type="hidden" name="VehicleID" id="VehicleID" />
+    <div class="mb-4">
+      <label for="LicensePlateNumber">License Plate Number</label>
+      <input type="text" name="LicensePlateNumber" id="LicensePlateNumber" required />
+      <div id="licensePlateNumberError" class="error hidden">
+        License Plate Number is required.
+      </div>
+    </div>
+    <div class="mb-4">
+      <label for="imeiSearch">IMEI</label>
+      <div class="search-dropdown">
+        <input type="text" id="imeiSearch" placeholder="Search or select IMEI" oninput="filterIMEIDropdown()"
+          autocomplete="off" />
+        <input type="hidden" name="IMEI" id="IMEI" />
+        <button type="button" id="dropdownToggle" class="dropdown-arrow" onclick="toggleDropdown()">
+          ⌄
+        </button>
+        <div id="imeiDropdown" class="dropdown-options">
+        </div>
+      </div>
+      <div id="imeiError" class="error hidden">IMEI is required.</div>
+    </div>
+
+    <div class="mb-4">
+      <label for="simSearch">SIM</label>
+      <div class="search-dropdown">
+        <input type="text" id="simSearch" placeholder="Search or select SIM" oninput="filterSIMDropdown()"
+          autocomplete="off" />
+        <input type="hidden" name="SIM" id="SIM" />
+        <button type="button" id="simDropdownToggle" class="dropdown-arrow" onclick="toggleSIMDropdown()">
+          ⌄
+        </button>
+        <select id="simDropdown" size="5" onclick="selectSIMFromDropdown()">
+        </select>
+      </div>
+      <div id="simError" class="error hidden">SIM is required.</div>
+    </div>
+
+
+
+    <div class="mb-4">
+      <label for="VehicleModel">Vehicle Model</label>
+      <input type="text" name="VehicleModel" id="VehicleModel" />
+
+    </div>
+    <div class="mb-4">
+      <label for="VehicleMake">Vehicle Make</label>
+      <input type="text" name="VehicleMake" id="VehicleMake" />
+
+    </div>
+    <div class="mb-4">
+      <label for="YearOfManufacture">Year of Manufacture</label>
+      <input type="text" name="YearOfManufacture" id="YearOfManufacture" />
+
+    </div>
+    <div class="mb-4">
+      <label for="DateOfPurchase">Date of Purchase</label>
+      <input type="date" name="DateOfPurchase" id="DateOfPurchase" />
+
+    </div>
+    <div class="mb-4">
+      <label for="InsuranceNumber">Insurance Number</label>
+      <input type="text" name="InsuranceNumber" id="InsuranceNumber" />
+    </div>
+    <div class="mb-4">
+      <label for="DriverName">Driver Name</label>
+      <input type="text" name="DriverName" id="DriverName" />
+    </div>
+    <div class="mb-4">
+      <label for="CurrentStatus">Current Status</label>
+      <input type="text" name="CurrentStatus" id="CurrentStatus" />
+    </div>
+    <div class="mb-4">
+      <label for="Location">Location</label>
+      <input type="text" name="Location" id="Location" required />
+    </div>
+    <div class="mb-4">
+      <label for="OdometerReading">Odometer Reading</label>
+      <input type="text" name="OdometerReading" id="OdometerReading" />
+    </div>
+    <div class="mb-4">
+      <label for="ServiceDueDate">Service Due Date</label>
+      <input type="date" name="ServiceDueDate" id="ServiceDueDate" />
+    </div>
+    <button type="submit" class="btn success">Submit</button>
+    <button type="button" id="cancelBtn" class="btn danger">
+      Cancel
+    </button>
+  </form>
+</div>
+
+<button id="uploadBtn" class="btn mb-4">Upload</button>
+
+
+<div id="uploadFormContainer" class="hidden">
+  <form id="uploadForm" action="{{ url_for('VehicleDetails.upload_vehicle_file') }}" method="post"
+    enctype="multipart/form-data">
+    <input type="file" name="file" accept=".xls,.xlsx" required />
+    <button type="submit" class="btn">Upload Excel</button>
+    <a href="{{ url_for('VehicleDetails.download_vehicle_template') }}" class="btn">Download Template</a>
+    <div class="preloader"></div>
+  </form>
+</div>
+
+<div id="errorBox" class="error-box hidden"></div>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {%
+if messages %} {% for category, message in messages %}
+<div class="flash-box flash-{{ category }}">{{ message }}</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Vehicle ID</th>
+      <th>License Plate Number</th>
+      <th>IMEI Number</th>
+      <th>SIM Number</th>
+      <th>Vehicle Model</th>
+      <th>Vehicle Make</th>
+      <th>Year of Manufacture</th>
+      <th>Date of Purchase</th>
+      <th>Insurance Number</th>
+      <th>Driver Name</th>
+      <th>Current Status</th>
+      <th>Location</th>
+      <th>Odometer Reading</th>
+      <th>Service Due Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for vehicle in vehicles %}
+    <tr data-id="{{ vehicle['_id'] }}">
+      <td>{{ vehicle['Vehicle ID'] }}</td>
+      <td data-editable data-key="LicensePlateNumber">{{ vehicle['LicensePlateNumber'] }}</td>
+      <td data-editable data-key="IMEI">{{ vehicle['IMEI'] }}</td>
+      <td data-editable data-key="SIM">{{ vehicle['SIM'] }}</td>
+      <td data-editable data-key="VehicleModel">{{ vehicle['VehicleModel'] }}</td>
+      <td data-editable data-key="VehicleMake">{{ vehicle['VehicleMake'] }}</td>
+      <td data-editable data-key="YearOfManufacture">{{ vehicle['YearOfManufacture'] }}</td>
+      <td data-editable data-key="DateOfPurchase">{{ vehicle['DateOfPurchase'] }}</td>
+      <td data-editable data-key="InsuranceNumber">{{ vehicle['InsuranceNumber'] }}</td>
+      <td data-editable data-key="DriverName">{{ vehicle['DriverName'] }}</td>
+      <td data-editable data-key="CurrentStatus">{{ vehicle['CurrentStatus'] }}</td>
+      <td data-editable data-key="Location">{{ vehicle['Location'] }}</td>
+      <td data-editable data-key="OdometerReading">{{ vehicle['OdometerReading'] }}</td>
+      <td data-editable data-key="ServiceDueDate">{{ vehicle['ServiceDueDate'] }}</td>
+      <td data-actions>
+        <button class="action-btn edit" onclick="editVehicle('{{ vehicle._id }}')">Edit</button>
+        <button class="action-btn delete" onclick="deleteVehicle('{{ vehicle._id }}')">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
