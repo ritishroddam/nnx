@@ -19,7 +19,6 @@ Vehicle Details
 
 <div id="manualEntryForm" class="hidden">
   <form id="manualForm" action="{{ url_for('VehicleDetails.manual_entry') }}" method="post">
-    <input type="hidden" name="VehicleID" id="VehicleID" />
     <div class="mb-4">
       <label for="LicensePlateNumber">License Plate Number</label>
       <input type="text" name="LicensePlateNumber" id="LicensePlateNumber" required />
