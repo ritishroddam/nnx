@@ -131,8 +131,9 @@ def delete_sim(sim_id):
 
 @sim_bp.route('/download_template')
 def download_template():
-    filepath = r"/root/CordonNX/CordonNX/nayasim/templates/sim_inventory_template.xlsx"
-    return send_file(filepath, as_attachment=True)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, 'templates', 'sim_inventory_template.xlsx')
+    return send_file(path, as_attachment=True)
 
 @sim_bp.route('/download_excel')
 def download_excel():
