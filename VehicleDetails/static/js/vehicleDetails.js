@@ -391,3 +391,9 @@ document.getElementById("uploadBtn").addEventListener("click", function () {
 document.getElementById("uploadForm").addEventListener("submit", function () {
   document.querySelector(".preloader").style.display = "block";
 });
+
+document
+  .getElementById("downloadExcelBtn")
+  .addEventListener("click", function () {
+    window.location.href = "/vehicleDetials/download_excel";
+  });

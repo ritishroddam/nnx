@@ -1,9 +1,10 @@
-from flask import Flask, Blueprint, render_template, request, redirect, url_for, jsonify, flash, send_file
+from flask import Flask, Blueprint, render_template, request, redirect, url_for, jsonify, flash, send_file, Response
 from pymongo import MongoClient
 import pandas as pd
 import os
 import sys
 from bson.objectid import ObjectId  # For ObjectId generation
+from io import BytesIO
 
 vehicleDetails_bp = Blueprint('VehicleDetails', __name__, static_folder='static', template_folder='templates')
 
@@ -12,7 +13,7 @@ client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-277
 db = client['nnx']
 vehicle_collection = db['vehicle_inventory']
 sim_collection = db['sim_inventory']
-
+device_collection = db['device_inventory']
 
 # Home route
 @vehicleDetails_bp.route('/page')
@@ -26,7 +27,7 @@ def page():
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
 def get_device_inventory():
     try:
-        devices = db['device_inventory'].find({}, {"IMEI": 1, "_id": 0})
+        devices = device_collection.find({}, {"IMEI": 1, "_id": 0})
         imei_list = [{"imei": device["IMEI"]} for device in devices]
         return jsonify(imei_list), 200
     except Exception as e:
@@ -193,6 +194,28 @@ def download_vehicle_template():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(base_dir, 'templates', 'vehicle_upload_template.xlsx')
     return send_file(path, as_attachment=True)
+
+@vehicleDetails_bp.route('/download_excel')
+def download_excel():
+    sims = list(vehicle_collection.find({}, {"_id": 0}))  # Fetch all SIMs (excluding _id)
+    
+    if not sims:
+        return "No data available", 404
+
+    df = pd.DataFrame(sims)  # Convert MongoDB data to DataFrame
+    
+    # Convert DataFrame to Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+
+    output.seek(0)
+
+    return Response(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
+    )
 
 
 
