@@ -177,6 +177,14 @@ def upload_vehicle_file():
 
         records = df.to_dict(orient="records")
 
+        for record in records:
+            try:
+                record["IMEI"] = int(record["IMEI"])
+                record["SIM"] = int(record["SIM"])
+            except ValueError:
+                flash("IMEI and SIM numbers must be integers.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+
         vehicle_collection.insert_many(records)
         flash("File uploaded successfully!", "success")
     except Exception as e:
