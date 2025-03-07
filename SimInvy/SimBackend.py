@@ -27,13 +27,30 @@ def manual_entry():
     data['SimNumber'] = data['SimNumber'].strip()
 
     # Validate alphanumeric and length
-    if len(data['MobileNumber']) != 10 or len(data['SimNumber']) != 20:
-        flash("Invalid Mobile Number or SIM Number length", "danger")
+    if len(data['MobileNumber']) != 10 :
+        flash("The lenght of Mobile Number must be 10", "danger")
+
+        if len(data['SimNumber']) != 20:
+            flash("The lenght of SIM Number must be 20", "danger")
+
+        return redirect(url_for('SimInvy.page'))
+
+    if  len(data['SimNumber']) != 20:
+        flash("The lenght of SIM Number must be 20", "danger")
         return redirect(url_for('SimInvy.page'))
 
     # Check if Mobile Number or SIM Number is unique
-    if collection.find_one({"MobileNumber": data['MobileNumber']}) or collection.find_one({"SimNumber": data['SimNumber']}):
-        flash("Mobile Number or SIM Number already exists", "danger")
+    if collection.find_one({"MobileNumber": data['MobileNumber']}):
+        flash("Mobile Number already exists", "danger")
+
+        if collection.find_one({"SimNumber": data['SimNumber']}):
+            flash("SIM Number already exists", "danger")
+
+        return redirect(url_for('SimInvy.page'))
+
+    if collection.find_one({"SimNumber": data['SimNumber']}):
+        flash("SIM Number already exists", "danger")
+
         return redirect(url_for('SimInvy.page'))
 
     # Insert into MongoDB

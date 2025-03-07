@@ -345,32 +345,7 @@ document
     const imeiNumber = document.getElementById("imeiSearch").value.trim();
     const simNumber = document.getElementById("simSearch").value.trim();
 
-    let duplicateError = false;
-
-    // Check for duplicates via an API call
-    try {
-      const response = await fetch("/check_duplicates", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ licensePlateNumber, imeiNumber, simNumber }),
-      });
-
-      const result = await response.json();
-      if (result.duplicate) {
-        duplicateError = true;
-        alert("Duplicate entry found: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error checking duplicates:", error);
-      alert("Unable to validate duplicate entries. Please try again later.");
-    }
-
-    if (!duplicateError) {
-      // Proceed with form submission
-      this.submit();
-    }
+    this.submit();
   });
 
 document

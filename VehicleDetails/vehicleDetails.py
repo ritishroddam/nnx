@@ -57,34 +57,30 @@ def manual_entry():
             flash(f"{field} is required.", "danger")
             return redirect(url_for('VehicleDetails.page'))
         
-    # Check for duplicates
-    duplicate = vehicle_collection.find_one({
-        "$or": [
-            {"License Plate Number": data["LicensePlateNumber"]},
-            {"IMEI Number": data["IMEI"]},
-            {"SIM Number": data["SIM"]}
-        ]
-    })
-    if duplicate:
-        flash("Duplicate entry found: License Plate Number, IMEI, or SIM already exists.", "danger")
-        return redirect(url_for('VehicleDetails.page'))
+    if vehicle_collection.find_one({"LicensePlateNumber": data['LicensePlateNumber']}):
+        flash("Liscense Plate Number already exists", "danger")
 
-    duplicate_imei = vehicle_collection.find_one({
-        "IMEI": data["IMEI"],
-        "LicensePlateNumber": {"$ne": data["LicensePlateNumber"]}
-    })
-    if duplicate_imei:
-        flash(f"IMEI {data['IMEI']} is already allocated to another License Plate Number.", "danger")
-        return redirect(url_for('VehicleDetails.page'))
+        if vehicle_collection.find_one({"IMEI": data['IMEI']}):
+            flash("IMEI Number has already been allocated to another License Plate Number", "danger")
 
-    duplicate_sim = vehicle_collection.find_one({
-        "SIM": data["SIM"],
-        "LicensePlateNumber": {"$ne": data["LicensePlateNumber"]}
-    })
-    if duplicate_sim:
-        flash(f"SIM {data['SIM']} is already allocated to another License Plate Number.", "danger")
-        return redirect(url_for('VehicleDetails.page'))
+            if vehicle_collection.find_one({"SIM": data['SIM']}):
+                flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
+        return redirect(url_for('SimInvy.page'))
+
+    if vehicle_collection.find_one({"IMEI": data['IMEI']}):
+        flash("IMEI Number has already been allocated to another License Plate Number", "danger")
+
+        if vehicle_collection.find_one({"SIM": data['SIM']}):
+            flash("Sim Number has already been allocated to another License Plate Number", "danger")
+
+        return redirect(url_for('SimInvy.page'))
+    
+    if vehicle_collection.find_one({"SIM": data['SIM']}):
+        flash("Sim Number has already been allocated to another License Plate Number", "danger")
+
+        return redirect(url_for('SimInvy.page'))
+        
     # Insert record into MongoDB
     try:
         vehicle_collection.insert_one(data)
