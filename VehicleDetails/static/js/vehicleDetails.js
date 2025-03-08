@@ -136,7 +136,7 @@ function saveVehicle(vehicleID) {
         const actionCell = row.querySelector("td[data-actions]");
         actionCell.innerHTML = `
                 <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
-                <button class="icon-btn edit-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
+                <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
             `;
 
         alert("Vehicle updated successfully!");
@@ -209,7 +209,7 @@ async function fetchSIMData() {
 
 // Populate the SIM dropdown
 function populateSIMDropdown() {
-  const simDropdown = document.getElementById("sim-Dropdown");
+  const simDropdown = document.getElementById("simDropdown");
   simDropdown.innerHTML = '<option value="" disabled>Select SIM</option>';
 
   simData.forEach((sim) => {
@@ -294,6 +294,12 @@ document
   .getElementById("manualForm")
   .addEventListener("submit", async function (event) {
     event.preventDefault(); // Prevent form from submitting immediately
+
+    const licensePlateNumber = document
+      .getElementById("LicensePlateNumber")
+      .value.trim();
+    const imeiNumber = document.getElementById("imeiSearch").value.trim();
+    const simNumber = document.getElementById("simSearch").value.trim();
 
     this.submit();
   });
