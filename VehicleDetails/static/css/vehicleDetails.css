@@ -210,15 +210,15 @@ tr:hover {
   outline: none;
 }
 
-#imeiDropdown {
+/* #imeiDropdown {
   position: absolute;
   background: #fff;
   border: 1px solid #ccc;
   max-height: 150px;
   overflow-y: auto;
   z-index: 1000;
-  /* display: none; */
-}
+
+} */
 
 .search-dropdown {
   position: relative;
