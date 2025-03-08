@@ -210,7 +210,7 @@ tr:hover {
   outline: none;
 }
 
-#imeiDropdown {
+/* #imeiDropdown {
   position: absolute;
   background: #fff;
   border: 1px solid #ccc;
@@ -218,8 +218,7 @@ tr:hover {
   overflow-y: auto;
   z-index: 1000;
   display: none;
-  /* Initially hidden */
-}
+} */
 
 .search-dropdown {
   position: relative;
@@ -241,7 +240,7 @@ tr:hover {
   z-index: 1;
 }
 
-#simDropdown {
+/* #simDropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -252,7 +251,7 @@ tr:hover {
   background: #fff;
   display: inline-block;
   z-index: 10;
-}
+} */
 
 .table-input {
   width: 100%;

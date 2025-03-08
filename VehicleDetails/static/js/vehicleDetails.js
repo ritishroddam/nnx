@@ -1,3 +1,9 @@
+$(document).ready(function () {
+  $("select").selectize({
+    sortField: "text",
+  });
+});
+
 let imeiData = []; // To store IMEI numbers from the database
 let dropdownVisible = false; // Track dropdown visibility
 
@@ -213,12 +219,6 @@ function populateSIMDropdown() {
     simDropdown.appendChild(option);
   });
 }
-
-$(document).ready(function () {
-  $("select").selectize({
-    sortField: "text",
-  });
-});
 
 // Initialize SIM data fetching
 document.addEventListener("DOMContentLoaded", fetchSIMData);

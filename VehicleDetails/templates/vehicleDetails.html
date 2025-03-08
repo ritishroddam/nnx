@@ -37,22 +37,17 @@ Vehicle Details
     </div>
     <div class="mb-4">
       <label for="imeiSearch">IMEI</label>
-      <div class="search-dropdown">
-        <input type="text" id="imeiSearch" placeholder="Search or select IMEI" oninput="filterIMEIDropdown()"
-          autocomplete="off" />
-        <input type="hidden" name="IMEI" id="IMEI" />
-        <button type="button" id="dropdownToggle" class="dropdown-arrow" onclick="toggleDropdown()">
-          ⌄
-        </button>
-        <div id="imeiDropdown" class="dropdown-options">
-        </div>
-      </div>
-      <div id="imeiError" class="error hidden">IMEI is required.</div>
-    </div>
+      <select type="text" id="imeiDropdown" placeholder="Search or select IMEI">
+      </select>
 
-    <div class="mb-4">
-      <label for="simSearch">SIM</label>
-      <!-- <div class="search-dropdown">
+
+    </div>
+    <div id="imeiError" class="error hidden">IMEI is required.</div>
+</div>
+
+<div class="mb-4">
+  <label for="simSearch">SIM</label>
+  <!-- <div class="search-dropdown">
         <input type="text" id="simSearch" placeholder="Search or select SIM" oninput="filterSIMDropdown()"
           autocomplete="off" />
         <input type="hidden" name="SIM" id="SIM" />
@@ -61,63 +56,63 @@ Vehicle Details
         </button>
         <select id="simDropdown" size="5" onclick="selectSIMFromDropdown()">
         </select>
-      </div>
-      <div id="simError" class="error hidden">SIM is required.</div> -->
+      </div>-->
 
-      <select id="sim-Dropdown" placeholder="Pick a SIM">
-      </select>
+  <select id="sim-Dropdown" placeholder="Pick a SIM">
+  </select>
+  <div id="simError" class="error hidden">SIM is required.</div>
 
-    </div>
+</div>
 
-    <div class="mb-4">
-      <label for="VehicleModel">Vehicle Model</label>
-      <input type="text" name="VehicleModel" id="VehicleModel" />
+<div class="mb-4">
+  <label for="VehicleModel">Vehicle Model</label>
+  <input type="text" name="VehicleModel" id="VehicleModel" />
 
-    </div>
-    <div class="mb-4">
-      <label for="VehicleMake">Vehicle Make</label>
-      <input type="text" name="VehicleMake" id="VehicleMake" />
+</div>
+<div class="mb-4">
+  <label for="VehicleMake">Vehicle Make</label>
+  <input type="text" name="VehicleMake" id="VehicleMake" />
 
-    </div>
-    <div class="mb-4">
-      <label for="YearOfManufacture">Year of Manufacture</label>
-      <input type="text" name="YearOfManufacture" id="YearOfManufacture" />
+</div>
+<div class="mb-4">
+  <label for="YearOfManufacture">Year of Manufacture</label>
+  <input type="text" name="YearOfManufacture" id="YearOfManufacture" />
 
-    </div>
-    <div class="mb-4">
-      <label for="DateOfPurchase">Date of Purchase</label>
-      <input type="date" name="DateOfPurchase" id="DateOfPurchase" />
+</div>
+<div class="mb-4">
+  <label for="DateOfPurchase">Date of Purchase</label>
+  <input type="date" name="DateOfPurchase" id="DateOfPurchase" />
 
-    </div>
-    <div class="mb-4">
-      <label for="InsuranceNumber">Insurance Number</label>
-      <input type="text" name="InsuranceNumber" id="InsuranceNumber" />
-    </div>
-    <div class="mb-4">
-      <label for="DriverName">Driver Name</label>
-      <input type="text" name="DriverName" id="DriverName" />
-    </div>
-    <div class="mb-4">
-      <label for="CurrentStatus">Current Status</label>
-      <input type="text" name="CurrentStatus" id="CurrentStatus" />
-    </div>
-    <div class="mb-4">
-      <label for="Location">Location</label>
-      <input type="text" name="Location" id="Location" required />
-    </div>
-    <div class="mb-4">
-      <label for="OdometerReading">Odometer Reading</label>
-      <input type="text" name="OdometerReading" id="OdometerReading" />
-    </div>
-    <div class="mb-4">
-      <label for="ServiceDueDate">Service Due Date</label>
-      <input type="date" name="ServiceDueDate" id="ServiceDueDate" />
-    </div>
-    <button type="submit" class="btn success">Submit</button>
-    <button type="button" id="cancelBtn" class="btn danger">
-      Cancel
-    </button>
-  </form>
+</div>
+<div class="mb-4">
+  <label for="InsuranceNumber">Insurance Number</label>
+  <input type="text" name="InsuranceNumber" id="InsuranceNumber" />
+</div>
+<div class="mb-4">
+  <label for="DriverName">Driver Name</label>
+  <input type="text" name="DriverName" id="DriverName" />
+</div>
+<div class="mb-4">
+  <label for="CurrentStatus">Current Status</label>
+  <input type="text" name="CurrentStatus" id="CurrentStatus" />
+</div>
+<div class="mb-4">
+  <label for="Location">Location</label>
+  <input type="text" name="Location" id="Location" required />
+</div>
+<div class="mb-4">
+  <label for="OdometerReading">Odometer Reading</label>
+  <input type="text" name="OdometerReading" id="OdometerReading" />
+</div>
+<div class="mb-4">
+  <label for="ServiceDueDate">Service Due Date</label>
+  <input type="date" name="ServiceDueDate" id="ServiceDueDate" />
+</div>
+<button type="submit" class="btn success">Submit</button>
+<button type="button" id="cancelBtn" class="btn danger">
+  Cancel
+</button>
+</form>
 </div>
 
 <button id="uploadBtn" class="btn mb-4">Upload</button>
