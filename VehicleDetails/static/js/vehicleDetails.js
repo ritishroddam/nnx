@@ -152,7 +152,7 @@ function cancelEdit(vehicleID) {
   cells.forEach((cell) => {
     const originalValue = cell.getAttribute("data-original-value");
     cell.textContent = originalValue;
-  }); 
+  });
 
   // Restore action buttons
   const actionCell = row.querySelector("td[data-actions]");
@@ -247,15 +247,6 @@ function selectSIMFromDropdown() {
   simDropdown.style.display = "none"; // Hide dropdown after selection
   simDropdownVisible = false; // Update visibility
 }
-
-// Hide SIM dropdown when clicking outside
-document.addEventListener("click", (event) => {
-  const dropdown = document.querySelector("#simDropdown").parentElement;
-  if (!dropdown.contains(event.target)) {
-    document.getElementById("simDropdown").style.display = "none";
-    simDropdownVisible = false;
-  }
-});
 
 // Initialize SIM data fetching
 document.addEventListener("DOMContentLoaded", fetchSIMData);
