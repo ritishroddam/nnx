@@ -197,11 +197,14 @@ def upload_vehicle_file():
         if records:
             vehicle_collection.insert_many(records)
             flash("File uploaded and SIMs added successfully!", "success")
+        else:
+            flash("No records found in the file", "danger")
 
         return redirect(url_for('VehicleDetails.page'))
 
     except Exception as e:
         flash(f"Error uploading file: {str(e)}", "danger")
+        print(e)
         return redirect(url_for('VehicleDetails.page'))
 
 # Download template route
