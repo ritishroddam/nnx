@@ -150,14 +150,6 @@ tr:hover {
   margin-right: 5px;
 }
 
-.action-btn.edit {
-  background-color: #28a745;
-}
-
-.action-btn.delete {
-  background-color: #dc3545;
-}
-
 .action-btn:hover {
   opacity: 0.8;
 }
