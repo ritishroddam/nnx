@@ -94,8 +94,8 @@ function editVehicle(vehicleId) {
   // Replace Edit/Delete buttons with Save/Cancel
   const actionCell = row.querySelector("td[data-actions]");
   actionCell.innerHTML = `
-    <button class="action-btn edit" onclick="saveVehicle('${vehicleId}')">Save</button>
-    <button class="action-btn delete" onclick="cancelEdit('${vehicleId}')">Cancel</button>
+    <button class="icon-btn edit" onclick="saveVehicle('${vehicleId}')">Save</button>
+    <button class="icon-btn delete" onclick="cancelEdit('${vehicleId}')">Cancel</button>
   `;
 }
 
@@ -129,8 +129,8 @@ function saveVehicle(vehicleID) {
         // Restore original action buttons
         const actionCell = row.querySelector("td[data-actions]");
         actionCell.innerHTML = `
-                <button class="action-btn edit" onclick="editVehicle('${vehicleID}')">Edit</button>
-                <button class="action-btn delete" onclick="deleteVehicle('${vehicleID}')">Delete</button>
+                <button class="icon-btn edit" onclick="editVehicle('${vehicleID}')">Edit</button>
+                <button class="icon-btn delete" onclick="deleteVehicle('${vehicleID}')">Delete</button>
             `;
 
         alert("Vehicle updated successfully!");
@@ -157,8 +157,8 @@ function cancelEdit(vehicleID) {
   // Restore action buttons
   const actionCell = row.querySelector("td[data-actions]");
   actionCell.innerHTML = `
-        <button class="action-btn edit" onclick="editVehicle('${vehicleID}')">Edit</button>
-        <button class="action-btn delete" onclick="deleteVehicle('${vehicleID}')">Delete</button>
+        <button class="icon-btn edit" onclick="editVehicle('${vehicleID}')">Edit</button>
+        <button class="icon-btn delete" onclick="deleteVehicle('${vehicleID}')">Delete</button>
     `;
 }
 
@@ -281,8 +281,8 @@ function editVehicle(vehicleID) {
   // Change action buttons to "Save" and "Cancel"
   const actionCell = row.querySelector("td[data-actions]");
   actionCell.innerHTML = `
-        <button class="action-btn edit" onclick="saveVehicle('${vehicleID}')">Save</button>
-        <button class="action-btn delete" onclick="cancelEdit('${vehicleID}')">Cancel</button>
+        <button class="icon-btn edit" onclick="saveVehicle('${vehicleID}')">💾</button>
+        <button class="icon-btn delete" onclick="cancelEdit('${vehicleID}')">❌</button>
     `;
 }
 
