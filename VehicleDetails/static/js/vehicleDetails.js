@@ -214,40 +214,6 @@ function populateSIMDropdown() {
   });
 }
 
-// Filter the SIM dropdown based on search input
-function filterSIMDropdown() {
-  const searchInput = document
-    .getElementById("simSearch")
-    .value.trim()
-    .toLowerCase();
-  const simDropdown = document.getElementById("simDropdown");
-
-  simDropdown.style.display = "block"; // Show dropdown while filtering
-  simDropdownVisible = true; // Track visibility
-
-  Array.from(simDropdown.options).forEach((option) => {
-    if (!option.value) return; // Skip placeholder option
-    if (option.value.toLowerCase().includes(searchInput)) {
-      option.style.display = "block";
-    } else {
-      option.style.display = "none";
-    }
-  });
-}
-
-// Handle selection from the SIM dropdown
-function selectSIMFromDropdown() {
-  const simDropdown = document.getElementById("simDropdown");
-  const simSearch = document.getElementById("simSearch");
-
-  simSearch.value = simDropdown.value; // Update input field with selected value
-
-  document.getElementById("SIM").value = simDropdown.value;
-
-  simDropdown.style.display = "none"; // Hide dropdown after selection
-  simDropdownVisible = false; // Update visibility
-}
-
 // Initialize SIM data fetching
 document.addEventListener("DOMContentLoaded", fetchSIMData);
 
@@ -322,12 +288,6 @@ document
   .getElementById("manualForm")
   .addEventListener("submit", async function (event) {
     event.preventDefault(); // Prevent form from submitting immediately
-
-    const licensePlateNumber = document
-      .getElementById("LicensePlateNumber")
-      .value.trim();
-    const imeiNumber = document.getElementById("imeiSearch").value.trim();
-    const simNumber = document.getElementById("simSearch").value.trim();
 
     this.submit();
   });
