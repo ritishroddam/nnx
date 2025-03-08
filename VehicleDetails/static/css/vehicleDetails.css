@@ -217,7 +217,7 @@ tr:hover {
   max-height: 150px;
   overflow-y: auto;
   z-index: 1000;
-  display: none;
+  /* display: none; */
 }
 
 .search-dropdown {
