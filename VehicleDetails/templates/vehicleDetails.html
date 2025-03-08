@@ -169,8 +169,8 @@ if messages %} {% for category, message in messages %}
       <td data-editable data-key="OdometerReading">{{ vehicle['OdometerReading'] }}</td>
       <td data-editable data-key="ServiceDueDate">{{ vehicle['ServiceDueDate'] }}</td>
       <td data-actions>
-        <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
-        <button class="icon-btn delete-icon" onclick="deleteSim('{{ sim._id }}')">🗑️</button>
+        <button class="icon-btn edit-icon" onclick="editSim('{{ vehicle._id }}')">✏️</button>
+        <button class="icon-btn delete-icon" onclick="deleteSim('{{ vehicle._id  }}')">🗑️</button>
       </td>
     </tr>
     {% endfor %}
