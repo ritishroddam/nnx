@@ -163,6 +163,11 @@ function deleteVehicle(vehicleID) {
   }
 }
 
+// document.addEventListener("DOMContentLoaded", () => {
+//   console.log("Document loaded, fetching SIM data...");
+//   fetchSIMData();
+// });
+
 // let simData = []; // To store SIM data from the database
 
 // // Fetch SIM data from the database
@@ -172,6 +177,7 @@ function deleteVehicle(vehicleID) {
 //     if (!response.ok) throw new Error("Failed to fetch SIM data");
 
 //     simData = await response.json();
+//     console.log("SIM data fetched:", simData);
 //     populateSIMDropdown(); // Populate dropdown on page load
 //   } catch (error) {
 //     console.error("Error fetching SIM data:", error);
@@ -181,6 +187,11 @@ function deleteVehicle(vehicleID) {
 
 // function populateSIMDropdown() {
 //   const simDropdown = document.getElementById("sim-Dropdown");
+//   if (!simDropdown) {
+//     console.error("SIM dropdown element not found");
+//     return;
+//   }
+
 //   simDropdown.innerHTML =
 //     '<option value="Select SIM" disabled>Select SIM</option>';
 
@@ -190,10 +201,9 @@ function deleteVehicle(vehicleID) {
 //     option.textContent = sim.sim_number;
 //     simDropdown.appendChild(option);
 //   });
-// }
 
-// Initialize SIM data fetching
-// document.addEventListener("DOMContentLoaded", fetchSIMData);
+//   console.log("SIM dropdown populated");
+// }
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Document loaded, fetching SIM data...");
@@ -235,6 +245,9 @@ function populateSIMDropdown() {
   });
 
   console.log("SIM dropdown populated");
+
+  // Log the innerHTML of the dropdown to verify options are added
+  console.log("SIM dropdown innerHTML:", simDropdown.innerHTML);
 }
 
 function editVehicle(vehicleID) {

@@ -240,17 +240,13 @@ tr:hover {
   z-index: 1;
 }
 
-#simDropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  background: #fff;
-  display: inline-block;
-  z-index: 10;
+#sim-Dropdown {
+  display: block;
+  width: 100%;
+}
+
+#sim-Dropdown option {
+  display: block;
 }
 
 .table-input {
