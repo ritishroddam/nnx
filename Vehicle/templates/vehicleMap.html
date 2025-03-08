@@ -78,21 +78,38 @@ Vehicle Map
 
 <!-- Table to display vehicle data -->
 <div id="vehicle-table-container" class="vehicle-table-container" style="display: none;">
-  <table id="vehicle-table">
+  <table id="vehicle-table" class="vehicle-table">
     <thead>
       <tr>
         <th>IMEI</th>
-        <th>Speed</th>
-        <th>Latitude</th>
-        <th>Longitude</th>
-        <th>Last Update</th>
+        <th>Vehicle Type</th>
+        <th>Last Updated</th>
         <th>Location</th>
-        <th>Data</th>
+        <th>Speed</th>
+        <th>Distance Traveled Today</th>
+        <th>Odometer Reading</th>
+
+        <th>Iginition</th>
+        <th>SOS</th>
+
       </tr>
     </thead>
-    <tbody>
-      <!-- Rows will be populated by JavaScript -->
+    <tbody id="simTable">
+      {% for sim in sims %}
+      <tr data-id="{{ sim._id }}">
+        <td>{{ sim.MobileNumber }}</td>
+        <td>{{ sim.SimNumber }}</td>
+        <td>{{ sim.DateIn }}</td>
+        <td>{{ sim.DateOut }}</td>
+        <td>{{ sim.Vendor }}</td>
+        <td>
+          <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
+          <button class="icon-btn delete-icon" onclick="deleteSim('{{ sim._id }}')">🗑️</button>
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
+
 </div>
 {% endblock %}

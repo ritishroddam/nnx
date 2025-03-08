@@ -152,7 +152,7 @@ function cancelEdit(vehicleID) {
   cells.forEach((cell) => {
     const originalValue = cell.getAttribute("data-original-value");
     cell.textContent = originalValue;
-  });
+  }); 
 
   // Restore action buttons
   const actionCell = row.querySelector("td[data-actions]");

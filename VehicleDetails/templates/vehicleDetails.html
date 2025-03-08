@@ -6,6 +6,14 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
 <script defer src="{{ url_for('VehicleDetails.static', filename='js/vehicleDetails.js') }}"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
+  integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
+  integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
 {% endblock %}
 
 {% block h1 %}
@@ -44,7 +52,7 @@ Vehicle Details
 
     <div class="mb-4">
       <label for="simSearch">SIM</label>
-      <div class="search-dropdown">
+      <!-- <div class="search-dropdown">
         <input type="text" id="simSearch" placeholder="Search or select SIM" oninput="filterSIMDropdown()"
           autocomplete="off" />
         <input type="hidden" name="SIM" id="SIM" />
@@ -54,10 +62,13 @@ Vehicle Details
         <select id="simDropdown" size="5" onclick="selectSIMFromDropdown()">
         </select>
       </div>
-      <div id="simError" class="error hidden">SIM is required.</div>
+      <div id="simError" class="error hidden">SIM is required.</div> -->
+
+      <select id="simDropdown" placeholder="Pick a SIM">
+
+      </select>
+
     </div>
-
-
 
     <div class="mb-4">
       <label for="VehicleModel">Vehicle Model</label>
