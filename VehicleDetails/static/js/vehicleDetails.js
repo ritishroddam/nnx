@@ -228,29 +228,23 @@ async function fetchSIMData() {
 }
 
 function populateSIMDropdown() {
-  const simDropdown = document.getElementById("sim-Dropdown");
-  if (!simDropdown) {
-    console.error("SIM dropdown element not found");
-    return;
-  }
+  let select = document.getElementById("sim-Dropdown");
 
-  simDropdown.innerHTML =
-    '<option value="Select SIM" disabled>Select SIM</option>';
+  // Create and append a default option
+  let defaultOption = document.createElement("option");
+  defaultOption.textContent = "Select SIM";
+  defaultOption.value = "";
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  select.appendChild(defaultOption);
 
+  // Loop through options and create elements
   simData.forEach((sim) => {
-    const option = document.createElement("option");
+    let option = document.createElement("option");
     option.value = sim.sim_number;
     option.textContent = sim.sim_number;
-    console.log("SIM option created:", sim.sim_number);
-    console.log("Option value:", option.value);
-    console.log("Option textContent:", option.textContent);
-    simDropdown.appendChild(option);
+    select.appendChild(option);
   });
-
-  console.log("SIM dropdown populated");
-
-  // Log the innerHTML of the dropdown to verify options are added
-  console.log("SIM dropdown innerHTML:", simDropdown.innerHTML);
 }
 
 function editVehicle(vehicleID) {
