@@ -30,58 +30,31 @@ function populateDropdown() {
     const option = document.createElement("div");
     option.textContent = device.imei;
     option.className = "dropdown-option"; // Style for dropdown items
-    option.onclick = () => selectIMEIFromDropdown(device.imei); // Handle selection
+    // option.onclick = () => selectIMEIFromDropdown(device.imei); // Handle selection
     imeiDropdown.appendChild(option);
   });
 }
 
 // Filter the dropdown based on search input
-function filterIMEIDropdown() {
-  const searchInput = document
-    .getElementById("imeiSearch")
-    .value.trim()
-    .toLowerCase();
-  const imeiDropdown = document.getElementById("imeiDropdown");
+// function filterIMEIDropdown() {
+//   const searchInput = document
+//     .getElementById("imeiSearch")
+//     .value.trim()
+//     .toLowerCase();
+//   const imeiDropdown = document.getElementById("imeiDropdown");
 
-  imeiDropdown.style.display = "block"; // Show dropdown while filtering
-  dropdownVisible = true; // Track visibility
+//   imeiDropdown.style.display = "block"; // Show dropdown while filtering
+//   dropdownVisible = true; // Track visibility
 
-  const options = imeiDropdown.querySelectorAll(".dropdown-option");
-  options.forEach((option) => {
-    if (option.textContent.toLowerCase().includes(searchInput)) {
-      option.style.display = "block";
-    } else {
-      option.style.display = "none";
-    }
-  });
-}
-
-// Handle selection from the dropdown
-function selectIMEIFromDropdown(imei) {
-  const imeiSearch = document.getElementById("imeiSearch");
-
-  imeiSearch.value = imei; // Update input field with selected value
-  document.getElementById("IMEI").value = imei; // Set the hidden input value
-
-  const imeiDropdown = document.getElementById("imeiDropdown");
-  imeiDropdown.style.display = "none"; // Hide dropdown after selection
-  dropdownVisible = false; // Update visibility
-}
-
-// Toggle dropdown visibility with the arrow button
-function toggleDropdown() {
-  const imeiDropdown = document.getElementById("imeiDropdown");
-  dropdownVisible = !dropdownVisible;
-  imeiDropdown.style.display = dropdownVisible ? "block" : "none";
-}
-// Hide dropdown when clicking outside
-document.addEventListener("click", (event) => {
-  const dropdown = document.querySelector(".search-dropdown");
-  if (!dropdown.contains(event.target)) {
-    document.getElementById("imeiDropdown").style.display = "none";
-    dropdownVisible = false;
-  }
-});
+//   const options = imeiDropdown.querySelectorAll(".dropdown-option");
+//   options.forEach((option) => {
+//     if (option.textContent.toLowerCase().includes(searchInput)) {
+//       option.style.display = "block";
+//     } else {
+//       option.style.display = "none";
+//     }
+//   });
+// }
 
 // Initialize IMEI fetching
 document.addEventListener("DOMContentLoaded", fetchIMEIData);
