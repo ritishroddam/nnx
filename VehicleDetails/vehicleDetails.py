@@ -157,8 +157,19 @@ def upload_vehicle_file():
     try:
         df = pd.read_excel(file)
 
-        records = []
+        required_columns = [
+            'LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 'VehicleMake',
+            'YearOfManufacture', 'DateOfPurchase', 'InsuranceNumber', 'DriverName',
+            'CurrentStatus', 'Location', 'OdometerReading', 'ServiceDueDate'
+        ]
 
+        # Check if all required columns are present
+        for column in required_columns:
+            if column not in df.columns:
+                flash(f"Missing required column: {column}", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+
+        records = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip()
             imei = str(row['IMEI']).strip()
