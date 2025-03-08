@@ -142,14 +142,37 @@ tr:hover {
 
 .action-btn {
   padding: 5px 10px;
+  color: white;
+  background-color: #007bff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-right: 5px;
 }
 
+.action-btn.edit {
+  background-color: #28a745;
+}
+
+.action-btn.delete {
+  background-color: #dc3545;
+}
+
 .action-btn:hover {
   opacity: 0.8;
+}
+
+.icon-btn {
+  background: 0 0;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+.edit-icon {
+  color: #007bff;
+}
+.delete-icon {
+  color: #dc3545;
 }
 
 .search-dropdown {
