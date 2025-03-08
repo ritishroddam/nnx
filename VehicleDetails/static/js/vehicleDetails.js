@@ -33,28 +33,8 @@ function populateDropdown() {
     // option.onclick = () => selectIMEIFromDropdown(device.imei); // Handle selection
     imeiDropdown.appendChild(option);
   });
+  $("imeiDropdown").selectize();
 }
-
-// Filter the dropdown based on search input
-// function filterIMEIDropdown() {
-//   const searchInput = document
-//     .getElementById("imeiSearch")
-//     .value.trim()
-//     .toLowerCase();
-//   const imeiDropdown = document.getElementById("imeiDropdown");
-
-//   imeiDropdown.style.display = "block"; // Show dropdown while filtering
-//   dropdownVisible = true; // Track visibility
-
-//   const options = imeiDropdown.querySelectorAll(".dropdown-option");
-//   options.forEach((option) => {
-//     if (option.textContent.toLowerCase().includes(searchInput)) {
-//       option.style.display = "block";
-//     } else {
-//       option.style.display = "none";
-//     }
-//   });
-// }
 
 // Initialize IMEI fetching
 document.addEventListener("DOMContentLoaded", fetchIMEIData);
@@ -162,48 +142,6 @@ function deleteVehicle(vehicleID) {
       });
   }
 }
-
-// document.addEventListener("DOMContentLoaded", () => {
-//   console.log("Document loaded, fetching SIM data...");
-//   fetchSIMData();
-// });
-
-// let simData = []; // To store SIM data from the database
-
-// // Fetch SIM data from the database
-// async function fetchSIMData() {
-//   try {
-//     const response = await fetch("/vehicleDetails/get_sim_inventory");
-//     if (!response.ok) throw new Error("Failed to fetch SIM data");
-
-//     simData = await response.json();
-//     console.log("SIM data fetched:", simData);
-//     populateSIMDropdown(); // Populate dropdown on page load
-//   } catch (error) {
-//     console.error("Error fetching SIM data:", error);
-//     alert("Unable to load SIM data. Please try again later.");
-//   }
-// }
-
-// function populateSIMDropdown() {
-//   const simDropdown = document.getElementById("sim-Dropdown");
-//   if (!simDropdown) {
-//     console.error("SIM dropdown element not found");
-//     return;
-//   }
-
-//   simDropdown.innerHTML =
-//     '<option value="Select SIM" disabled>Select SIM</option>';
-
-//   simData.forEach((sim) => {
-//     const option = document.createElement("option");
-//     option.value = sim.sim_number;
-//     option.textContent = sim.sim_number;
-//     simDropdown.appendChild(option);
-//   });
-
-//   console.log("SIM dropdown populated");
-// }
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Document loaded, fetching SIM data...");
