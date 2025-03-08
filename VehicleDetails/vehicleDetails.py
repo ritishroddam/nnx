@@ -85,7 +85,6 @@ def manual_entry():
     
     if vehicle_collection.find_one({"SIM": data['SIM']}):
         flash("Sim Number has already been allocated to another License Plate Number", "danger")
-
         return redirect(url_for('SimInvy.page'))
         
     # Insert record into MongoDB
@@ -220,6 +219,29 @@ def upload_vehicle_file():
             if len(imei) != 15:
                 flash(f"IMEI {imei} must be 15 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
+            
+            if vehicle_collection.find_one({"LicensePlateNumber": license_plate_number}):
+                flash("Liscense Plate Number {license_plate_number} already exists", "danger")
+
+            if vehicle_collection.find_one({"IMEI": imei}):
+                flash("IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
+
+                if vehicle_collection.find_one({"SIM": sim}):
+                    flash("Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                    return redirect(url_for('VehicleDetails.page'))
+
+            if vehicle_collection.find_one({"IMEI": imei}):
+                flash("IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
+
+                if vehicle_collection.find_one({"SIM": sim}):
+                    flash("Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+
+                return redirect(url_for('VehicleDetails.page'))
+    
+            if vehicle_collection.find_one({"SIM": sim}):
+                flash("Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                return redirect(url_for('SimInvy.page'))
+        
 
             record = {
                 "LicensePlateNumber": license_plate_number,
