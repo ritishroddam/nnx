@@ -203,7 +203,7 @@ async function fetchSIMData() {
 
 // Populate the SIM dropdown
 function populateSIMDropdown() {
-  const simDropdown = document.getElementById("simDropdown");
+  const simDropdown = document.getElementById("sim-Dropdown");
   simDropdown.innerHTML = '<option value="" disabled>Select SIM</option>';
 
   simData.forEach((sim) => {
