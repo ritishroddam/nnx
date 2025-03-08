@@ -5,7 +5,6 @@
 // });
 
 let imeiData = []; // To store IMEI numbers from the database
-let dropdownVisible = false; // Track dropdown visibility
 
 // Fetch IMEI data from the backend
 async function fetchIMEIData() {
@@ -23,16 +22,24 @@ async function fetchIMEIData() {
 
 // Populate the dropdown with all IMEI numbers
 function populateDropdown() {
-  const imeiDropdown = document.getElementById("imeiDropdown");
-  imeiDropdown.innerHTML = ""; // Clear previous options
+  let select = document.getElementById("imeiDropdown");
 
+  // Create and append a default option
+  let defaultOption = document.createElement("option");
+  defaultOption.textContent = "Select IMEI";
+  defaultOption.value = "";
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  select.appendChild(defaultOption);
+
+  // Loop through options and create elements
   imeiData.forEach((device) => {
-    const option = document.createElement("div");
+    let option = document.createElement("option");
+    option.value = device.imei;
     option.textContent = device.imei;
-    option.className = "dropdown-option"; // Style for dropdown items
-    // option.onclick = () => selectIMEIFromDropdown(device.imei); // Handle selection
-    imeiDropdown.appendChild(option);
+    select.appendChild(option);
   });
+
   $("imeiDropdown").selectize();
 }
 
