@@ -1,8 +1,8 @@
-$(document).ready(function () {
-  $("select").selectize({
-    sortField: "text",
-  });
-});
+// $(document).ready(function () {
+//   $("select").selectize({
+//     sortField: "text",
+//   });
+// });
 
 let imeiData = []; // To store IMEI numbers from the database
 let dropdownVisible = false; // Track dropdown visibility
@@ -245,6 +245,8 @@ function populateSIMDropdown() {
     option.textContent = sim.sim_number;
     select.appendChild(option);
   });
+
+  $("#sim-Dropdown").selectize();
 }
 
 function editVehicle(vehicleID) {
