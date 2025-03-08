@@ -250,7 +250,7 @@ tr:hover {
   overflow-y: auto;
   border: 1px solid #ccc;
   background: #fff;
-  display: none;
+  display: inline-block;
   z-index: 10;
 }
 

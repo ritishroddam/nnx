@@ -214,6 +214,12 @@ function populateSIMDropdown() {
   });
 }
 
+$(document).ready(function () {
+  $("select").selectize({
+    sortField: "text",
+  });
+});
+
 // Initialize SIM data fetching
 document.addEventListener("DOMContentLoaded", fetchSIMData);
 
