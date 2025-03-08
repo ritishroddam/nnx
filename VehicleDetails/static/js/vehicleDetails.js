@@ -248,13 +248,6 @@ function selectSIMFromDropdown() {
   simDropdownVisible = false; // Update visibility
 }
 
-// Toggle SIM dropdown visibility with the arrow button
-function toggleSIMDropdown() {
-  const simDropdown = document.getElementById("simDropdown");
-  simDropdownVisible = !simDropdownVisible;
-  simDropdown.style.display = simDropdownVisible ? "block" : "none";
-}
-
 // Hide SIM dropdown when clicking outside
 document.addEventListener("click", (event) => {
   const dropdown = document.querySelector("#simDropdown").parentElement;
