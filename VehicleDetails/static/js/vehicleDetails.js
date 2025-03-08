@@ -241,6 +241,7 @@ function populateSIMDropdown() {
     const option = document.createElement("option");
     option.value = sim.sim_number;
     option.textContent = sim.sim_number;
+    console.log("SIM option created:", sim.sim_number);
     simDropdown.appendChild(option);
   });
 
