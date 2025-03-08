@@ -249,6 +249,15 @@ tr:hover {
   display: block;
 }
 
+.imeiDropdown {
+  display: block;
+  width: 100%;
+}
+
+.imeiDropdown option {
+  display: block;
+}
+
 .table-input {
   width: 100%;
   padding: 5px;
