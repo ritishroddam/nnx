@@ -221,25 +221,25 @@ def upload_vehicle_file():
                 return redirect(url_for('VehicleDetails.page'))
             
             if vehicle_collection.find_one({"LicensePlateNumber": license_plate_number}):
-                flash("Liscense Plate Number {license_plate_number} already exists", "danger")
+                flash(f"Liscense Plate Number {license_plate_number} already exists", "danger")
 
             if vehicle_collection.find_one({"IMEI": imei}):
-                flash("IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
+                flash(f"IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
 
                 if vehicle_collection.find_one({"SIM": sim}):
-                    flash("Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                    flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                     return redirect(url_for('VehicleDetails.page'))
 
             if vehicle_collection.find_one({"IMEI": imei}):
-                flash("IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
+                flash(f"IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
 
                 if vehicle_collection.find_one({"SIM": sim}):
-                    flash("Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                    flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
 
                 return redirect(url_for('VehicleDetails.page'))
     
             if vehicle_collection.find_one({"SIM": sim}):
-                flash("Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                 return redirect(url_for('SimInvy.page'))
         
 
