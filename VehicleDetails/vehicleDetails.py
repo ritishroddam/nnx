@@ -2,6 +2,7 @@ from flask import Flask, Blueprint, render_template, request, redirect, url_for,
 from pymongo import MongoClient
 import pandas as pd
 import os
+import re
 import sys
 from bson.objectid import ObjectId  # For ObjectId generation
 from io import BytesIO
@@ -56,6 +57,12 @@ def manual_entry():
         if not data.get(field):
             flash(f"{field} is required.", "danger")
             return redirect(url_for('VehicleDetails.page'))
+            
+    pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
+    pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
+    if not (pattern1.match(data['LicensePlateNumber']) or pattern2.match(data['LicensePlateNumber'])):
+        flash(f"License Plate Number {data['LicensePlateNumber']} is invalid.", "danger")
+        return redirect(url_for('VehicleDetails.page'))
         
     if vehicle_collection.find_one({"LicensePlateNumber": data['LicensePlateNumber']}):
         flash("Liscense Plate Number already exists", "danger")
@@ -185,7 +192,34 @@ def upload_vehicle_file():
             odometer_reading = str(row['OdometerReading']).strip()
             service_due_date = str(row['ServiceDueDate']).strip()
 
+            vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
+            vehicle_make = vehicle_make if vehicle_make != 'nan' else ""
+            year_of_manufacture = year_of_manufacture if year_of_manufacture != 'nan' else ""
+            date_of_purchase = date_of_purchase if date_of_purchase != 'nan' else ""
+            insurance_number = insurance_number if insurance_number != 'nan' else ""
+            driver_name = driver_name if driver_name != 'nan' else ""
+            current_status = current_status if current_status != 'nan' else ""
+            odometer_reading = odometer_reading if odometer_reading != 'nan' else ""
+            service_due_date = service_due_date if service_due_date != 'nan' else ""
 
+            if not license_plate_number or not imei or not sim or not location:
+                flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
+            pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
+            if not (pattern1.match(license_plate_number) or pattern2.match(license_plate_number)):
+                flash(f"License Plate Number {license_plate_number} is invalid.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+
+            # Validate length of SIM and IMEI
+            if len(sim) != 20:
+                flash(f"SIM {sim} must be 20 characters long.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+
+            if len(imei) != 15:
+                flash(f"IMEI {imei} must be 15 characters long.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
 
             record = {
                 "LicensePlateNumber": license_plate_number,
