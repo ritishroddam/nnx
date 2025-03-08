@@ -339,18 +339,6 @@ document
   .addEventListener("submit", async function (event) {
     event.preventDefault(); // Prevent form from submitting immediately
 
-    const licensePlateInput = document.getElementById("LicensePlateNumber");
-    const licensePlateError = document.getElementById(
-      "licensePlateNumberError"
-    );
-
-    if (!licensePlateInput.checkValidity()) {
-      licensePlateError.classList.remove("hidden");
-      return; // Stop form submission
-    } else {
-      licensePlateError.classList.add("hidden");
-    }
-
     const licensePlateNumber = document
       .getElementById("LicensePlateNumber")
       .value.trim();
