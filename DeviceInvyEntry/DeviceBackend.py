@@ -12,14 +12,14 @@ client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-277
 db = client['nnx']
 collection = db['device_inventory']
 
-deviceentry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', template_folder='templates')
+deviceEntry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', template_folder='templates')
 
-@deviceentry_bp.route('/page')
+@deviceEntry_bp.route('/page')
 def page():
     devices = list(collection.find({}))
     return render_template('device.html', devices=devices)
 
-@deviceentry_bp.route('/manual_entry', methods=['POST'])
+@deviceEntry_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
     data = request.form.to_dict()
     data['IMEI'] = data['IMEI'].strip()
@@ -55,13 +55,13 @@ def manual_entry():
     flash("Device added successfully!", "success")
     return redirect(url_for('DeviceInvyEntry.page'))
 
-@deviceentry_bp.route('/download_template')
+@deviceEntry_bp.route('/download_template')
 def download_template():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(base_dir, 'templates', 'device_inventory_template.xlsx')
     return send_file(path, as_attachment=True)
 
-@deviceentry_bp.route('/upload_file', methods=['POST'])
+@deviceEntry_bp.route('/upload_file', methods=['POST'])
 def upload_file():
     if 'file' not in request.files or request.files['file'].filename == '':
         flash("No file selected", "danger")
@@ -113,7 +113,7 @@ def upload_file():
         flash("Unsupported file format", "danger")
         return redirect(url_for('DeviceInvyEntry.page'))
 
-@deviceentry_bp.route('/download_excel')
+@deviceEntry_bp.route('/download_excel')
 def download_excel():
     devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
     
@@ -135,7 +135,7 @@ def download_excel():
         headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
     )
 
-@deviceentry_bp.route('/edit_device/<device_id>', methods=['POST'])
+@deviceEntry_bp.route('/edit_device/<device_id>', methods=['POST'])
 def edit_device(device_id):
     try:
         print(f"\n=== DEBUG: Updating device with ID: {device_id} ===")  # Debug log
@@ -188,7 +188,7 @@ def edit_device(device_id):
         print(f"ERROR: {e}", file=sys.stderr)
         return jsonify({'success': False, 'message': 'Error updating device.'}), 500
 
-@deviceentry_bp.route('/delete_device/<device_id>', methods=['DELETE'])
+@deviceEntry_bp.route('/delete_device/<device_id>', methods=['DELETE'])
 def delete_device(device_id):
     try:
         result = collection.delete_one({"_id": ObjectId(device_id)})
