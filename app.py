@@ -40,7 +40,7 @@ def vehicleDetailsEntry():
 
 @app.route('/SimInvyEntry')
 def simInvyEntry():
-    return render_template('sim.html')
+    return render_template('simEntry.html')
 
 @app.route("/default") 
 def default(): 
