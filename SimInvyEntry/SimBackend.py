@@ -16,7 +16,7 @@ collection = db['sim_inventory']
 @simEntry_bp.route('/page')
 def page():
     sims = list(collection.find({}))
-    return render_template('sim.html', sims=sims)
+    return render_template('simEntry.html', sims=sims)
 
 @simEntry_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
