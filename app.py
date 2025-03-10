@@ -32,7 +32,7 @@ def index():
 
 @app.route('/VehicleDetailsEntry')
 def vehicleDetailsEntry():
-    return render_template('vehicleDetails.entry')
+    return render_template('vehicleDetailsEntry.html')
 
 @app.route("/default") 
 def default(): 
