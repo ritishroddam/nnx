@@ -101,61 +101,61 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     #             print("Error decoding data.", e)
 
     def handle(self):
-    receive_data = self.request.recv(4096)
-    try:
+        receive_data = self.request.recv(4096)
         try:
-            data = receive_data.decode('utf-8').strip()
-        except UnicodeDecodeError:
-            data = receive_data.decode('latin-1').strip()
-        # print("Received raw data:", data)
-
-        json_data = self.parse_json_data(data)
-        if json_data:
-            # print("Valid JSON data:", json_data)
-
-            sos_state = json_data.get('sos', '0')
-            # print(f"SOS state received: {sos_state}")
-
-            with MyTCPHandler.lock:
-                if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
-                    MyTCPHandler.sos_active = True
-                    MyTCPHandler.sos_alert_triggered = True
-                    # print("SOS alert triggered!")
-
-                    # Log SOS to MongoDB
-                    self.log_sos_to_mongodb(json_data)
-
-                    # Emit SOS alert to connected clients
+            try:
+                data = receive_data.decode('utf-8').strip()
+            except UnicodeDecodeError:
+                data = receive_data.decode('latin-1').strip()
+            # print("Received raw data:", data)
+    
+            json_data = self.parse_json_data(data)
+            if json_data:
+                # print("Valid JSON data:", json_data)
+    
+                sos_state = json_data.get('sos', '0')
+                # print(f"SOS state received: {sos_state}")
+    
+                with MyTCPHandler.lock:
+                    if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
+                        MyTCPHandler.sos_active = True
+                        MyTCPHandler.sos_alert_triggered = True
+                        # print("SOS alert triggered!")
+    
+                        # Log SOS to MongoDB
+                        self.log_sos_to_mongodb(json_data)
+    
+                        # Emit SOS alert to connected clients
+                        json_data['_id'] = str(json_data['_id'])
+                        sio.emit('sos_alert', json_data)
+    
+                    elif sos_state == '0' and MyTCPHandler.sos_active:
+                        MyTCPHandler.sos_active = False
+                        MyTCPHandler.sos_alert_triggered = False
+                        # print("SOS alert reset.")
+    
+                if json_data.get('gps') == 'A':
+                    self.store_data_in_mongodb(json_data)
+    
+                    # Emit vehicle update to connected clients
                     json_data['_id'] = str(json_data['_id'])
-                    sio.emit('sos_alert', json_data)
-
-                elif sos_state == '0' and MyTCPHandler.sos_active:
-                    MyTCPHandler.sos_active = False
-                    MyTCPHandler.sos_alert_triggered = False
-                    # print("SOS alert reset.")
-
-            if json_data.get('gps') == 'A':
-                self.store_data_in_mongodb(json_data)
-
-                # Emit vehicle update to connected clients
-                json_data['_id'] = str(json_data['_id'])
-                sio.emit('vehicle_update', json_data)
-
-            if 'latitude' in json_data and 'longitude' in json_data:
-                latitude = json_data['latitude']
-                longitude = json_data['longitude']
-                # print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
-
-        else:
-            print("Invalid JSON format")
-
-    except Exception as e:
-        print("Error handling request:", e)
-        try:
-            error_data = receive_data.decode('utf-8', errors='replace').strip()
-            print("Error data:", error_data)
+                    sio.emit('vehicle_update', json_data)
+    
+                if 'latitude' in json_data and 'longitude' in json_data:
+                    latitude = json_data['latitude']
+                    longitude = json_data['longitude']
+                    # print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
+    
+            else:
+                print("Invalid JSON format")
+    
         except Exception as e:
-            print("Error decoding data.", e)
+            print("Error handling request:", e)
+            try:
+                error_data = receive_data.decode('utf-8', errors='replace').strip()
+                print("Error data:", error_data)
+            except Exception as e:
+                print("Error decoding data.", e)
 
     def parse_json_data(self, data):
         try:
