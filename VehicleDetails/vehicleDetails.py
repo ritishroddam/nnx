@@ -48,9 +48,19 @@ def get_device_inventory():
 @vehicleDetails_bp.route('/get_sim_inventory', methods=['GET'])
 def get_sim_inventory():
     try:
-        sims = sim_collection.find({}, {"SimNumber": 1, "_id": 0})  # Fetch SimNumber field
+        # sims = sim_collection.find({}, {"SimNumber": 1, "_id": 0})  # Fetch SimNumber field
+        # sim_list = [{"sim_number": sim["SimNumber"]} for sim in sims]
+        # return jsonify(sim_list), 200
+
+        sims = sim_collection.find({}, {"SimNumber": 1, "_id": 0})
         sim_list = [{"sim_number": sim["SimNumber"]} for sim in sims]
+
+        used_sims = set(vehicle["SIM"] for vehicle in vehicle_collection.find({}, {"SIM": 1, "_id": 0}))
+
+        sim_list = [sim for sim in sim_list if sim["sim_number"] not in used_sims]
+
         return jsonify(sim_list), 200
+
     except Exception as e:
         print(f"Error fetching SIM data: {e}")
         return jsonify({"error": "Failed to fetch SIM data"}), 500
