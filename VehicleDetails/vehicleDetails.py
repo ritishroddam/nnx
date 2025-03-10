@@ -28,8 +28,18 @@ def page():
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
 def get_device_inventory():
     try:
+        # devices = device_collection.find({}, {"IMEI": 1, "_id": 0})
+        # imei_list = [{"imei": device["IMEI"]} for device in devices]
+        # return jsonify(imei_list), 200
         devices = device_collection.find({}, {"IMEI": 1, "_id": 0})
         imei_list = [{"imei": device["IMEI"]} for device in devices]
+
+
+        used_imeis = set(vehicle["IMEI"] for vehicle in vehicle_collection.find({}, {"IMEI": 1, "_id": 0}))
+
+
+        imei_list = [imei for imei in imei_list if imei["imei"] not in used_imeis]
+
         return jsonify(imei_list), 200
     except Exception as e:
         print(f"Error fetching IMEI data: {e}")
