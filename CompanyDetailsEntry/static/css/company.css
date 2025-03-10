@@ -1,0 +1,137 @@
+input[type="date"],
+input[type="file"],
+input[type="text"] {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+}
+
+td,
+th {
+  padding: 12px;
+  color: #000;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+th {
+  background-color: #e2e8f0;
+  color: #333;
+}
+
+tr:nth-child(even) {
+  background-color: #f4f4f4;
+}
+
+tr:hover {
+  background-color: #e2e8f0;
+}
+
+.btn {
+  padding: 10px 15px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.hidden {
+  display: none;
+}
+
+.error {
+  color: red;
+  font-size: 0.9em;
+  margin-top: -15px;
+  margin-bottom: 15px;
+}
+
+.success {
+  background-color: #28a745;
+}
+
+.danger {
+  background-color: #dc3545;
+}
+
+#manualEntryForm {
+  background-color: #fff;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #333;
+}
+
+.status-btn {
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: #fff;
+  cursor: default;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.action-btn {
+  padding: 5px 10px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.action-btn.edit {
+  background-color: #28a745;
+}
+
+.action-btn.delete {
+  background-color: #dc3545;
+}
+
+.action-btn:hover {
+  opacity: 0.8;
+}
+
+.icon-btn {
+  background: 0 0;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.edit-icon {
+  color: #007bff;
+}
+
+.delete-icon {
+  color: #dc3545;
+}
