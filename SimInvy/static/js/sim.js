@@ -1,7 +1,7 @@
 document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.remove("hidden");
+    document.getElementById("manualEntryForm").classList.toggle("hidden");
     document.getElementById("MobileNumber").focus();
   });
 

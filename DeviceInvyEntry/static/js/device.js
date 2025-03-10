@@ -17,7 +17,7 @@ document.getElementById("DateIn").addEventListener("change", function () {
 document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.remove("hidden");
+    document.getElementById("manualEntryForm").classList.toggle("hidden");
     // Focus on the IMEI input field
     document.getElementById("IMEI").focus();
   });

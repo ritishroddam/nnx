@@ -33,7 +33,7 @@ document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
     fetchNextCompanyID();
-    document.getElementById("manualEntryForm").classList.remove("hidden");
+    document.getElementById("manualEntryForm").classList.toggle("hidden");
   });
 
 // Add form validation logic if necessary
