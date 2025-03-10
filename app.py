@@ -13,6 +13,7 @@ from DeviceInvy.DeviceBackend import device_bp
 from RouteHistory.routeBackend import route_bp
 from CompanyDetails.companyBackend import company_bp
 from SimInvy.SimBackend import sim_bp
+from SimInvyEntry.SimBackend import simEntry_bp
 from VehicleDetails.vehicleDetails import vehicleDetails_bp
 from VehicleDetailsEntry.vehicleDetailsEntry import vehicleDetailsEntry_bp
 
@@ -25,6 +26,7 @@ app.register_blueprint(device_bp, url_prefix='/deviceInvy')
 app.register_blueprint(route_bp, url_prefix='/routeHistory')
 app.register_blueprint(company_bp, url_prefix='/companyDetails')
 app.register_blueprint(sim_bp, url_prefix='/simInvy')
+app.register_blueprint(simEntry_bp, url_prefix='/simInvyEntry')
 app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
 app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry')
 
@@ -35,6 +37,10 @@ def index():
 @app.route('/VehicleDetailsEntry')
 def vehicleDetailsEntry():
     return render_template('vehicleDetailsEntry.html')
+
+@app.route('/SimInvyEntry')
+def vehicleDetailsEntry():
+    return render_template('simInvyEntry/sim.html')
 
 @app.route("/default") 
 def default(): 
