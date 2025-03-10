@@ -1,9 +1,3 @@
-// $(document).ready(function () {
-//   $("select").selectize({
-//     sortField: "text",
-//   });
-// });
-
 let imeiData = []; // To store IMEI numbers from the database
 
 // Fetch IMEI data from the backend
@@ -40,7 +34,7 @@ function populateDropdown() {
     select.appendChild(option);
   });
 
-  $("imeiDropdown").selectize();
+  $("#imeiDropdown").selectize();
 }
 
 // Initialize IMEI fetching
