@@ -39,7 +39,7 @@ def vehicleDetailsEntry():
     return render_template('vehicleDetailsEntry.html')
 
 @app.route('/SimInvyEntry')
-def vehicleDetailsEntry():
+def simInvyEntry():
     return render_template('simInvyEntry/sim.html')
 
 @app.route("/default") 
