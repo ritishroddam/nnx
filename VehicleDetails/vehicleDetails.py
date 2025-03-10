@@ -98,7 +98,7 @@ def manual_entry():
     
     if vehicle_collection.find_one({"SIM": data['SIM']}):
         flash("Sim Number has already been allocated to another License Plate Number", "danger")
-        return redirect(url_for('SimInvy.page'))
+        return redirect(url_for('VehicleDetails.page'))
         
     # Insert record into MongoDB
     try:
@@ -253,7 +253,7 @@ def upload_vehicle_file():
     
             if vehicle_collection.find_one({"SIM": sim}):
                 flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
-                return redirect(url_for('SimInvy.page'))
+                return redirect(url_for('VehicleDetails.page'))
         
 
             record = {

@@ -7,7 +7,7 @@ import sys
 from bson.objectid import ObjectId  # For ObjectId generation
 from io import BytesIO
 
-vehicleDetailsEntry_bp = Blueprint('VehicleDetailsEntryEntry', __name__, static_folder='static', template_folder='templates')
+vehicleDetailsEntry_bp = Blueprint('VehicleDetailsEntry', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
@@ -80,13 +80,13 @@ def manual_entry():
     for field in required_fields:
         if not data.get(field):
             flash(f"{field} is required.", "danger")
-            return redirect(url_for('VehicleDetailsEntryEntry.page'))
+            return redirect(url_for('VehicleDetailsEntry.page'))
             
     pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
     pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
     if not (pattern1.match(data['LicensePlateNumber']) or pattern2.match(data['LicensePlateNumber'])):
         flash(f"License Plate Number {data['LicensePlateNumber']} is invalid.", "danger")
-        return redirect(url_for('VehicleDetailsEntryEntry.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
         
     if vehicle_collection.find_one({"LicensePlateNumber": data['LicensePlateNumber']}):
         flash("Liscense Plate Number already exists", "danger")
@@ -97,7 +97,7 @@ def manual_entry():
             if vehicle_collection.find_one({"SIM": data['SIM']}):
                 flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
-        return redirect(url_for('VehicleDetailsEntryEntry.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
 
     if vehicle_collection.find_one({"IMEI": data['IMEI']}):
         flash("IMEI Number has already been allocated to another License Plate Number", "danger")
@@ -105,11 +105,11 @@ def manual_entry():
         if vehicle_collection.find_one({"SIM": data['SIM']}):
             flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
-        return redirect(url_for('VehicleDetailsEntryEntry.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
     
     if vehicle_collection.find_one({"SIM": data['SIM']}):
         flash("Sim Number has already been allocated to another License Plate Number", "danger")
-        return redirect(url_for('SimInvy.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
         
     # Insert record into MongoDB
     try:
@@ -264,7 +264,7 @@ def upload_vehicle_file():
     
             if vehicle_collection.find_one({"SIM": sim}):
                 flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
-                return redirect(url_for('SimInvy.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
         
 
             record = {
