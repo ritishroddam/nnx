@@ -1,3 +1,9 @@
+$(document).ready(function () {
+  $("select").selectize({
+    sortField: "text",
+  });
+});
+
 // Automatically set warranty to 1 year from Date In
 document.getElementById("DateIn").addEventListener("change", function () {
   var dateIn = new Date(this.value);
