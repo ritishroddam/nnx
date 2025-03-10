@@ -26,9 +26,30 @@ def page():
 
 @vehicleDetails_bp.route('/entry')
 def entry():
-    vehicles = list(vehicle_collection.find({}))
-    for vehicle in vehicles:
-        vehicle["_id"] = str(vehicle["_id"])  # Convert ObjectId to string for the frontend
+    # vehicles = list(vehicle_collection.find({}))
+    # for vehicle in vehicles:
+    #     vehicle["_id"] = str(vehicle["_id"])  # Convert ObjectId to string for the frontend
+
+    vehicles = [
+        {
+            '_id': '1',
+            'Vehicle ID': 'V001',
+            'LicensePlateNumber': 'ABC1234',
+            'IMEI': '123456789012345',
+            'SIM': '9876543210',
+            'VehicleModel': 'Model X',
+            'VehicleMake': 'Make Y',
+            'YearOfManufacture': '2020',
+            'DateOfPurchase': '2021-01-01',
+            'InsuranceNumber': 'INS123456',
+            'DriverName': 'John Doe',
+            'CurrentStatus': 'Active',
+            'Location': 'Location A',
+            'OdometerReading': '10000',
+            'ServiceDueDate': '2022-01-01'
+        },
+        # Add more vehicle data as needed
+    ]
     return render_template('vehicleDetailsENtry.html', vehicles=vehicles)
 
 # API to fetch IMEI Numbers
