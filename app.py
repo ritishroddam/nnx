@@ -10,6 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from Vehicle.VehicleBackend import vehicle_bp
 from Dashboard.DashboardBackend import dashboard_bp
 from DeviceInvy.DeviceBackend import device_bp
+from DeviceInvyEntry.DeviceBackend import deviceEntry_bp
 from RouteHistory.routeBackend import route_bp
 from CompanyDetails.companyBackend import company_bp
 from CompanyDetailsEntry.companyBackend import companyEntry_bp
@@ -24,6 +25,7 @@ app.secret_key = os.urandom(24)
 app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 app.register_blueprint(device_bp, url_prefix='/deviceInvy')
+app.register_blueprint(deviceEntry_bp, url_prefix='/deviceInvyEntry')
 app.register_blueprint(route_bp, url_prefix='/routeHistory')
 app.register_blueprint(company_bp, url_prefix='/companyDetails')
 app.register_blueprint(companyEntry_bp, url_prefix='/companyDetailsEntry')
