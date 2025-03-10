@@ -17,7 +17,7 @@ deviceEntry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', 
 @deviceEntry_bp.route('/page')
 def page():
     devices = list(collection.find({}))
-    return render_template('device.html', devices=devices)
+    return render_template('deviceEntry.html', devices=devices)
 
 @deviceEntry_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
