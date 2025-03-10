@@ -46,6 +46,10 @@ def vehicleDetailsEntry():
 def simInvyEntry():
     return render_template('simEntry.html')
 
+@app.route('/DeviceInvyEntry')
+def deviceInvyEntry():
+    return render_template('deviceEntry.html')
+
 @app.route('/CompanyDetailsEntry')
 def companyDetailsEntry():
     return render_template('companyEntry.html')
