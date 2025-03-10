@@ -30,6 +30,10 @@ app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
 def index():
     return render_template('vehicleMap.html')
 
+@app.route('/VehicleDetailsEntry')
+def vehicleDetailsEntry():
+    return render_template('vehicleDetails.entry')
+
 @app.route("/default") 
 def default(): 
     return render_template("base.html") 

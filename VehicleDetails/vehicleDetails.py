@@ -24,6 +24,13 @@ def page():
         vehicle["_id"] = str(vehicle["_id"])  # Convert ObjectId to string for the frontend
     return render_template('vehicleDetails.html', vehicles=vehicles)
 
+@vehicleDetails_bp.route('/entry')
+def entry():
+    vehicles = list(vehicle_collection.find({}))
+    for vehicle in vehicles:
+        vehicle["_id"] = str(vehicle["_id"])  # Convert ObjectId to string for the frontend
+    return render_template('vehicleDetailsENtry.html', vehicles=vehicles)
+
 # API to fetch IMEI Numbers
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
 def get_device_inventory():
