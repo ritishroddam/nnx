@@ -6,7 +6,7 @@ import os
 import sys
 import re
 
-companyEntry_bp = Blueprint('CompanyDetailsEntry', __name__, static_folder='static', template_folder='templates')
+companyEntry_bp = Blueprint('CompanyDetailsEntryEntry', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient('mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin')
@@ -59,19 +59,19 @@ def manual_entry():
 
     customers_collection.insert_one(customer)
     flash('Customer added successfully!', 'success')
-    return redirect(url_for('CompanyDetails.page'))
+    return redirect(url_for('CompanyDetailsEntry.page'))
 
 # Route to upload multiple customers from an Excel file
 @companyEntry_bp.route('/upload_customers', methods=['POST'])
 def upload_customers():
     if 'file' not in request.files:
         flash('No file part', 'danger')
-        return redirect(url_for('CompanyDetails.page'))
+        return redirect(url_for('CompanyDetailsEntry.page'))
 
     file = request.files['file']
     if file.filename == '':
         flash('No selected file', 'danger')
-        return redirect(url_for('CompanyDetails.page'))
+        return redirect(url_for('CompanyDetailsEntry.page'))
 
     try:
         df = pd.read_excel(file)
@@ -86,7 +86,7 @@ def upload_customers():
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
 
-    return redirect(url_for('CompanyDetails.page'))
+    return redirect(url_for('CompanyDetailsEntry.page'))
 
 # Route to download the customer template
 @companyEntry_bp.route('/download_template')
