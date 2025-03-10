@@ -7,7 +7,7 @@ import sys
 from bson.objectid import ObjectId  # For ObjectId generation
 from io import BytesIO
 
-vehicleDetails_bp = Blueprint('VehicleDetails', __name__, static_folder='static', template_folder='templates')
+vehicleDetailsEntry_bp = Blueprint('VehicleDetailsEntryEntry', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
@@ -17,15 +17,22 @@ sim_collection = db['sim_inventory']
 device_collection = db['device_inventory']
 
 # Home route
-@vehicleDetails_bp.route('/page')
+@vehicleDetailsEntry_bp.route('/page')
 def page():
     vehicles = list(vehicle_collection.find({}))
     for vehicle in vehicles:
         vehicle["_id"] = str(vehicle["_id"])  # Convert ObjectId to string for the frontend
-    return render_template('vehicleDetails.html', vehicles=vehicles)
+    return render_template('vehicleDetailsEntry.html', vehicles=vehicles)
+
+@vehicleDetailsEntry_bp.route('/entry')
+def entry():
+    vehicles = list(vehicle_collection.find({}))
+    for vehicle in vehicles:
+        vehicle["_id"] = str(vehicle["_id"])  # Convert ObjectId to string for the frontend
+
 
 # API to fetch IMEI Numbers
-@vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
+@vehicleDetailsEntry_bp.route('/get_device_inventory', methods=['GET'])
 def get_device_inventory():
     try:
         devices = device_collection.find({}, {"IMEI": 1, "_id": 0})
@@ -42,9 +49,13 @@ def get_device_inventory():
         print(f"Error fetching IMEI data: {e}")
         return jsonify({"error": "Failed to fetch IMEI data"}), 500
 
-@vehicleDetails_bp.route('/get_sim_inventory', methods=['GET'])
+@vehicleDetailsEntry_bp.route('/get_sim_inventory', methods=['GET'])
 def get_sim_inventory():
     try:
+        # sims = sim_collection.find({}, {"SimNumber": 1, "_id": 0})  # Fetch SimNumber field
+        # sim_list = [{"sim_number": sim["SimNumber"]} for sim in sims]
+        # return jsonify(sim_list), 200
+
         sims = sim_collection.find({}, {"SimNumber": 1, "_id": 0})
         sim_list = [{"sim_number": sim["SimNumber"]} for sim in sims]
 
@@ -59,7 +70,7 @@ def get_sim_inventory():
         return jsonify({"error": "Failed to fetch SIM data"}), 500
 
 # Manual entry route
-@vehicleDetails_bp.route('/manual_entry', methods=['POST'])
+@vehicleDetailsEntry_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
     data = request.form.to_dict()
     data = {key.strip(): value.strip() for key, value in data.items()}  # Clean input
@@ -69,13 +80,13 @@ def manual_entry():
     for field in required_fields:
         if not data.get(field):
             flash(f"{field} is required.", "danger")
-            return redirect(url_for('VehicleDetails.page'))
+            return redirect(url_for('VehicleDetailsEntryEntry.page'))
             
     pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
     pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
     if not (pattern1.match(data['LicensePlateNumber']) or pattern2.match(data['LicensePlateNumber'])):
         flash(f"License Plate Number {data['LicensePlateNumber']} is invalid.", "danger")
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntryEntry.page'))
         
     if vehicle_collection.find_one({"LicensePlateNumber": data['LicensePlateNumber']}):
         flash("Liscense Plate Number already exists", "danger")
@@ -86,7 +97,7 @@ def manual_entry():
             if vehicle_collection.find_one({"SIM": data['SIM']}):
                 flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntryEntry.page'))
 
     if vehicle_collection.find_one({"IMEI": data['IMEI']}):
         flash("IMEI Number has already been allocated to another License Plate Number", "danger")
@@ -94,7 +105,7 @@ def manual_entry():
         if vehicle_collection.find_one({"SIM": data['SIM']}):
             flash("Sim Number has already been allocated to another License Plate Number", "danger")
 
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntryEntry.page'))
     
     if vehicle_collection.find_one({"SIM": data['SIM']}):
         flash("Sim Number has already been allocated to another License Plate Number", "danger")
@@ -107,9 +118,9 @@ def manual_entry():
     except Exception as e:
         flash(f"Error adding vehicle: {str(e)}", "danger")
 
-    return redirect(url_for('VehicleDetails.page'))
+    return redirect(url_for('VehicleDetailsEntry.page'))
 
-@vehicleDetails_bp.route('/edit_vehicle/<vehicle_id>', methods=['PATCH'])
+@vehicleDetailsEntry_bp.route('/edit_vehicle/<vehicle_id>', methods=['PATCH'])
 def edit_vehicle(vehicle_id):
     try:
         updated_data = request.json
@@ -150,7 +161,7 @@ def edit_vehicle(vehicle_id):
 
 
 # Delete vehicle route
-@vehicleDetails_bp.route('/delete_vehicle/<vehicle_id>', methods=['DELETE'])
+@vehicleDetailsEntry_bp.route('/delete_vehicle/<vehicle_id>', methods=['DELETE'])
 def delete_vehicle(vehicle_id):
     try:
         result = vehicle_collection.delete_one({"_id": ObjectId(vehicle_id)})
@@ -162,16 +173,16 @@ def delete_vehicle(vehicle_id):
         return jsonify({"success": False, "message": f"Failed to delete vehicle: {str(e)}"}), 500
 
 # File upload route
-@vehicleDetails_bp.route('/upload_vehicle_file', methods=['POST'])
+@vehicleDetailsEntry_bp.route('/upload_vehicle_file', methods=['POST'])
 def upload_vehicle_file():
     if 'file' not in request.files:
         flash("No file part", "danger")
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
 
     file = request.files['file']
     if file.filename == '':
         flash("No selected file", "danger")
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
 
     try:
         df = pd.read_excel(file)
@@ -186,7 +197,7 @@ def upload_vehicle_file():
         for column in required_columns:
             if column not in df.columns:
                 flash(f"Missing required column: {column}", "danger")
-                return redirect(url_for('VehicleDetails.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
 
         records = []
         for index, row in df.iterrows():
@@ -216,22 +227,22 @@ def upload_vehicle_file():
 
             if not license_plate_number or not imei or not sim or not location:
                 flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
             
             pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
             pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
             if not (pattern1.match(license_plate_number) or pattern2.match(license_plate_number)):
                 flash(f"License Plate Number {license_plate_number} is invalid.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
 
             # Validate length of SIM and IMEI
             if len(sim) != 20:
                 flash(f"SIM {sim} must be 20 characters long.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
 
             if len(imei) != 15:
                 flash(f"IMEI {imei} must be 15 characters long.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
             
             if vehicle_collection.find_one({"LicensePlateNumber": license_plate_number}):
                 flash(f"Liscense Plate Number {license_plate_number} already exists", "danger")
@@ -241,7 +252,7 @@ def upload_vehicle_file():
 
                 if vehicle_collection.find_one({"SIM": sim}):
                     flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
-                    return redirect(url_for('VehicleDetails.page'))
+                    return redirect(url_for('VehicleDetailsEntry.page'))
 
             if vehicle_collection.find_one({"IMEI": imei}):
                 flash(f"IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
@@ -249,7 +260,7 @@ def upload_vehicle_file():
                 if vehicle_collection.find_one({"SIM": sim}):
                     flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
 
-                return redirect(url_for('VehicleDetails.page'))
+                return redirect(url_for('VehicleDetailsEntry.page'))
     
             if vehicle_collection.find_one({"SIM": sim}):
                 flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
@@ -280,21 +291,21 @@ def upload_vehicle_file():
         else:
             flash("No records found in the file", "danger")
 
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
 
     except Exception as e:
         flash(f"Error uploading file: {str(e)}", "danger")
         print(e)
-        return redirect(url_for('VehicleDetails.page'))
+        return redirect(url_for('VehicleDetailsEntry.page'))
 
 # Download template route
-@vehicleDetails_bp.route('/download_vehicle_template')
+@vehicleDetailsEntry_bp.route('/download_vehicle_template')
 def download_vehicle_template():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(base_dir, 'templates', 'vehicle_upload_template.xlsx')
     return send_file(path, as_attachment=True)
 
-@vehicleDetails_bp.route('/download_excel')
+@vehicleDetailsEntry_bp.route('/download_excel')
 def download_excel():
     sims = list(vehicle_collection.find({}, {"_id": 0}))  # Fetch all SIMs (excluding _id)
     

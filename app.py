@@ -14,6 +14,7 @@ from RouteHistory.routeBackend import route_bp
 from CompanyDetails.companyBackend import company_bp
 from SimInvy.SimBackend import sim_bp
 from VehicleDetails.vehicleDetails import vehicleDetails_bp
+from VehicleDetails.vehicleDetailsEntry import vehicleDetailsEntry_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
@@ -25,6 +26,7 @@ app.register_blueprint(route_bp, url_prefix='/routeHistory')
 app.register_blueprint(company_bp, url_prefix='/companyDetails')
 app.register_blueprint(sim_bp, url_prefix='/simInvy')
 app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
+app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry')
 
 @app.route('/')
 def index():
