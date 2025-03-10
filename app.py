@@ -14,7 +14,7 @@ from RouteHistory.routeBackend import route_bp
 from CompanyDetails.companyBackend import company_bp
 from SimInvy.SimBackend import sim_bp
 from VehicleDetails.vehicleDetails import vehicleDetails_bp
-from VehicleDetails.vehicleDetailsEntry import vehicleDetailsEntry_bp
+from VehicleDetailsEntry.vehicleDetailsEntry import vehicleDetailsEntry_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
