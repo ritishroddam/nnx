@@ -84,3 +84,38 @@ def atlanta_pie_data():
         print(f"🚨 Error fetching pie chart data: {e}")
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
  
+@dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
+def atlanta_distance_data():
+    try:
+        # Fetch all documents from the distinctAtlanta collection
+        results = list(collection.find())
+
+        # If results are empty, return a default response
+        if not results:
+            return jsonify({
+                "labels": [],
+                "distances": []
+            }), 200
+
+        # Prepare data for the chart
+        distance_data = {}
+        for record in results:
+            date_str = record['date']
+            distance = float(record.get('distance', 0))
+            if date_str in distance_data:
+                distance_data[date_str] += distance
+            else:
+                distance_data[date_str] = distance
+
+        # Sort the data by date
+        sorted_dates = sorted(distance_data.keys(), key=lambda x: datetime.strptime(x, '%d%m%y'))
+        labels = [datetime.strptime(date, '%d%m%y').strftime('%d %b') for date in sorted_dates]
+        distances = [distance_data[date] for date in sorted_dates]
+
+        return jsonify({
+            "labels": labels,
+            "distances": distances
+        }), 200
+    except Exception as e:
+        print(f"Error fetching distance data: {e}")
+        return jsonify({"error": "Failed to fetch distance data"}), 500
