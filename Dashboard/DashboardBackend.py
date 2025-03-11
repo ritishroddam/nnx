@@ -6,8 +6,6 @@ import bcrypt
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd
-from geopy.distance import geodesic
-
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
 
@@ -85,55 +83,42 @@ def atlanta_pie_data():
         print(f"🚨 Error fetching pie chart data: {e}")
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
  
-
-def convert_to_decimal(coordinate, direction):
-    """
-    Convert GPS coordinates from degrees, minutes format to decimal degrees.
-    """
-    degrees = int(coordinate[:2])
-    minutes = float(coordinate[2:])
-    decimal = degrees + minutes / 60
-    if direction in ['S', 'W']:
-        decimal = -decimal
-    return decimal
-
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 def atlanta_distance_data():
     try:
         # Fetch all documents from the atlanta collection
         results = list(collection.find())
 
-        # Dictionary to store total distance per day
-        distance_per_day = {}
+        # Dictionary to store odometer readings per day per vehicle
+        odometer_per_day = {}
 
         for record in results:
             date_str = record['date']
             imei = record['imei']
-            latitude = record['latitude']
-            longitude = record['longitude']
-
-            # Convert latitude and longitude to decimal format
-            lat = convert_to_decimal(latitude, record['dir1'])
-            lon = convert_to_decimal(longitude, record['dir2'])
+            odometer = float(record['odometer'])
 
             # Initialize the dictionary for the date if not already present
-            if date_str not in distance_per_day:
-                distance_per_day[date_str] = {}
+            if date_str not in odometer_per_day:
+                odometer_per_day[date_str] = {}
 
             # Initialize the list for the IMEI if not already present
-            if imei not in distance_per_day[date_str]:
-                distance_per_day[date_str][imei] = []
+            if imei not in odometer_per_day[date_str]:
+                odometer_per_day[date_str][imei] = []
 
-            # Append the coordinates to the list
-            distance_per_day[date_str][imei].append((lat, lon))
+            # Append the odometer reading to the list
+            odometer_per_day[date_str][imei].append(odometer)
 
         # Calculate total distance per day
         total_distance_per_day = {}
-        for date_str, imei_data in distance_per_day.items():
+        for date_str, imei_data in odometer_per_day.items():
             total_distance = 0
-            for imei, coordinates in imei_data.items():
-                for i in range(1, len(coordinates)):
-                    total_distance += geodesic(coordinates[i - 1], coordinates[i]).meters
+            for imei, odometer_readings in imei_data.items():
+                if len(odometer_readings) >= 2:
+                    # Calculate the distance traveled by subtracting the earliest reading from the latest reading
+                    distance = max(odometer_readings) - min(odometer_readings)
+                    total_distance += distance
+                    # Debugging logs
+                    print(f"Distance for IMEI {imei} on {date_str}: {distance} meters")
             total_distance_per_day[date_str] = total_distance
 
         # Prepare the response data
@@ -150,4 +135,4 @@ def atlanta_distance_data():
 
     except Exception as e:
         print(f"🚨 Error fetching distance data: {e}")
-        return jsonify({"error": "Failed to fetch distance data"}), 500
+        return jsonify({"error": "Failed to fetch distance data"}), 
