@@ -104,7 +104,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             print("Error handling request:", e)
             try:
                 error_data = receive_data.decode('utf-8', errors='replace').strip()
-                print("Error data:", error_data)
+                print("Error data:", error_data, e)
             except Exception as e:
                 print("Error decoding data.", e)
 
