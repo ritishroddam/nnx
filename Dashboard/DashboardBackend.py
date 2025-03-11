@@ -124,25 +124,14 @@ def atlanta_distance_data():
                     distance_data[date_str][vehicle_id]['last_odometer'] = odometer
                     distance_data[date_str][vehicle_id]['last_datetime'] = record_datetime
 
-        # Calculate the distance travelled for each day
-        daily_distances = {}
-        for date_str, vehicles in distance_data.items():
-            total_distance = 0
-            for vehicle_id, odometer_data in vehicles.items():
-                distance = odometer_data['last_odometer'] - odometer_data['first_odometer']
-                total_distance += distance
-            daily_distances[date_str] = total_distance
-
-        # Sort the data by date
-        sorted_dates = sorted(daily_distances.keys(), key=lambda x: datetime.strptime(x, '%d%m%y'))
-        labels = [datetime.strptime(date, '%d%m%y').strftime('%d %b') for date in sorted_dates]
-        distances = [daily_distances[date] for date in sorted_dates]
-
-        # Debugging logs
-        print("Distance Data:", distance_data)
-        print("Daily Distances:", daily_distances)
-        print("Labels:", labels)
-        print("Distances:", distances)
+        labels = sorted(distance_data.keys())
+        distances = [
+            sum(
+                vehicle_data['last_odometer'] - vehicle_data['first_odometer']
+                for vehicle_data in distance_data[date].values()
+            )
+            for date in labels
+        ]
 
         return jsonify({
             "labels": labels,
