@@ -86,6 +86,16 @@ def atlanta_pie_data():
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
  
 
+def convert_to_decimal(coordinate, direction):
+    """
+    Convert GPS coordinates from degrees, minutes format to decimal degrees.
+    """
+    degrees = int(coordinate[:2])
+    minutes = float(coordinate[2:])
+    decimal = degrees + minutes / 60
+    if direction in ['S', 'W']:
+        decimal = -decimal
+    return decimal
 
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 def atlanta_distance_data():
