@@ -101,16 +101,42 @@ def atlanta_distance_data():
         distance_data = {}
         for record in results:
             date_str = record['date']
-            distance = float(record.get('distance', 0))
-            if date_str in distance_data:
-                distance_data[date_str] += distance
+            vehicle_id = record['vehicle_id']
+            odometer = float(record.get('odometer', 0))
+            datetime_str = record['date'] + record['time']
+            record_datetime = datetime.strptime(datetime_str, '%d%m%y%H%M%S')
+
+            if date_str not in distance_data:
+                distance_data[date_str] = {}
+
+            if vehicle_id not in distance_data[date_str]:
+                distance_data[date_str][vehicle_id] = {
+                    'first_odometer': odometer,
+                    'last_odometer': odometer,
+                    'first_datetime': record_datetime,
+                    'last_datetime': record_datetime
+                }
             else:
-                distance_data[date_str] = distance
+                if record_datetime < distance_data[date_str][vehicle_id]['first_datetime']:
+                    distance_data[date_str][vehicle_id]['first_odometer'] = odometer
+                    distance_data[date_str][vehicle_id]['first_datetime'] = record_datetime
+                if record_datetime > distance_data[date_str][vehicle_id]['last_datetime']:
+                    distance_data[date_str][vehicle_id]['last_odometer'] = odometer
+                    distance_data[date_str][vehicle_id]['last_datetime'] = record_datetime
+
+        # Calculate the distance travelled for each day
+        daily_distances = {}
+        for date_str, vehicles in distance_data.items():
+            total_distance = 0
+            for vehicle_id, odometer_data in vehicles.items():
+                distance = odometer_data['last_odometer'] - odometer_data['first_odometer']
+                total_distance += distance
+            daily_distances[date_str] = total_distance
 
         # Sort the data by date
-        sorted_dates = sorted(distance_data.keys(), key=lambda x: datetime.strptime(x, '%d%m%y'))
+        sorted_dates = sorted(daily_distances.keys(), key=lambda x: datetime.strptime(x, '%d%m%y'))
         labels = [datetime.strptime(date, '%d%m%y').strftime('%d %b') for date in sorted_dates]
-        distances = [distance_data[date] for date in sorted_dates]
+        distances = [daily_distances[date] for date in sorted_dates]
 
         return jsonify({
             "labels": labels,
