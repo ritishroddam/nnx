@@ -380,3 +380,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+////////////////////////////////////////////////////////////////////////
+
+document.addEventListener('DOMContentLoaded', function() {
+  var ctx = document.getElementById('devicesChart').getContext('2d');
+  var devicesChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['04 Mar', '05 Mar', '06 Mar', '07 Mar', '08 Mar', '09 Mar', '10 Mar'],
+      datasets: [{
+        label: 'Distance Travelled (km)',
+        data: [6000, 5500, 5000, 4500, 4000, 3500, 8000],
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+        fill: true
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+});
