@@ -18,32 +18,10 @@ def page():
     customers = list(customers_collection.find())
     return render_template('company.html', customers=customers)
 
-def get_next_company_id():
-    """
-    Fetch the last Company ID stored in customers_list and increment it.
-    """
-    last_customer = customers_collection.find_one({}, sort=[("Company ID", -1)])
-    
-    if last_customer and "Company ID" in last_customer:
-        last_id = int(last_customer["Company ID"].replace("CMP", ""))  # Extract numeric part
-        return f"CMP{last_id + 1}"
-    
-    return "CMP1001"  # Start from CMP1001 if no companies exist
-
-# API: Fetch next Company ID
-@company_bp.route('/next_company_id', methods=['GET'])
-def next_company_id():
-    try:
-        new_company_id = get_next_company_id()
-        return jsonify({"success": True, "company_id": new_company_id})
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
 # Route to add a new customer manually
 @company_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
     customer = {
-        'Company ID': get_next_company_id(),  # Auto-generate Company ID
         'Company Name': request.form.get('CompanyName'),
         'Contact Person': request.form.get('ContactPerson'),
         'Email Address': request.form.get('EmailAddress'),
@@ -78,8 +56,6 @@ def upload_customers():
 
         # Assign unique Company IDs for each record
         records = df.to_dict(orient="records")
-        for record in records:
-            record["Company ID"] = get_next_company_id()  # Assign unique ID
 
         customers_collection.insert_many(records)
         flash('Customers uploaded successfully!', 'success')

@@ -25,10 +25,6 @@ Company Details
 <div id="manualEntryForm" class="hidden">
   <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post">
     <div class="mb-4">
-      <label for="CompanyID">Company ID</label>
-      <input type="hidden" name="CompanyID" id="CompanyID" />
-    </div>
-    <div class="mb-4">
       <label for="CompanyName">Company Name</label>
       <input type="text" name="CompanyName" id="CompanyName" required />
       <div id="companyNameError" class="error hidden">
@@ -110,7 +106,6 @@ Company Details
 <table>
   <thead>
     <tr>
-      <th>Company ID</th>
       <th>Company Name</th>
       <th>Contact Person</th>
       <th>Email Address</th>
@@ -128,7 +123,6 @@ Company Details
   <tbody id="customerTable">
     {% for customer in customers %}
     <tr data-id="{{ customer._id }}">
-      <td>{{ customer['Company ID'] }}</td>
       <td>{{ customer['Company Name'] }}</td>
       <td>{{ customer['Contact Person'] }}</td>
       <td>{{ customer['Email Address'] }}</td>

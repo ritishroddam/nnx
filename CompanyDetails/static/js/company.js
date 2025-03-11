@@ -6,23 +6,6 @@ document.getElementById("cancelBtn").addEventListener("click", function () {
   document.getElementById("manualEntryForm").classList.add("hidden");
 });
 
-// Fetch the next available Company ID from the backend and set it in the form
-async function fetchNextCompanyID() {
-  try {
-    const response = await fetch("/companyDetails/next_company_id");
-    const data = await response.json();
-
-    if (data.success) {
-      document.getElementById("CompanyID").value = data.company_id;
-    } else {
-      console.error("Error fetching Company ID:", data.message);
-    }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
-
-// Ensure the Company ID is generated when the form is opened
 document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
@@ -34,8 +17,6 @@ document
 
 function editCustomer(customerId) {
   const row = document.querySelector(`tr[data-id='${customerId}']`);
-
-  const companyID = row.cells[0].innerText;
 
   const companyName = row.cells[1].innerText;
   const contactPerson = row.cells[2].innerText;
@@ -63,7 +44,6 @@ function editCustomer(customerId) {
   row.cells[11].innerHTML = `<input type="text" value="${remarks}" />`;
 
   // Keep Company ID as non-editable text
-  row.cells[0].innerHTML = `<span>${companyID}</span>`;
 
   row.cells[12].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveCustomer('${customerId}')">💾</button>
