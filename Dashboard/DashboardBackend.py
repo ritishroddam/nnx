@@ -96,6 +96,7 @@ def atlanta_distance_data():
             date_str = record['date']
             imei = record['imei']
             odometer = float(record['odometer'])
+            timestamp = datetime.strptime(record['date'] + record['time'], '%d%m%y%H%M%S')
 
             # Initialize the dictionary for the date if not already present
             if date_str not in odometer_per_day:
@@ -105,17 +106,19 @@ def atlanta_distance_data():
             if imei not in odometer_per_day[date_str]:
                 odometer_per_day[date_str][imei] = []
 
-            # Append the odometer reading to the list
-            odometer_per_day[date_str][imei].append(odometer)
+            # Append the odometer reading and timestamp to the list
+            odometer_per_day[date_str][imei].append((timestamp, odometer))
 
         # Calculate total distance per day
         total_distance_per_day = {}
         for date_str, imei_data in odometer_per_day.items():
             total_distance = 0
-            for imei, odometer_readings in imei_data.items():
-                if len(odometer_readings) >= 2:
+            for imei, readings in imei_data.items():
+                # Sort readings by timestamp
+                readings.sort()
+                if len(readings) >= 2:
                     # Calculate the distance traveled by subtracting the earliest reading from the latest reading
-                    distance = max(odometer_readings) - min(odometer_readings)
+                    distance = readings[-1][1] - readings[0][1]
                     total_distance += distance
                     # Debugging logs
                     print(f"Distance for IMEI {imei} on {date_str}: {distance} meters")
@@ -135,4 +138,4 @@ def atlanta_distance_data():
 
     except Exception as e:
         print(f"🚨 Error fetching distance data: {e}")
-        return jsonify({"error": "Failed to fetch distance data"}), 
+        return jsonify({"error": "Failed to fetch distance data"}), 500
