@@ -383,15 +383,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 ////////////////////////////////////////////////////////////////////////
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   var ctx = document.getElementById('devicesChart').getContext('2d');
   var devicesChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: ['04 Mar', '05 Mar', '06 Mar', '07 Mar', '08 Mar', '09 Mar', '10 Mar'],
+      labels: [], // Empty initially, will be updated dynamically
       datasets: [{
         label: 'Distance Travelled (km)',
-        data: [6000, 5500, 5000, 4500, 4000, 3500, 8000],
+        data: [], // Empty initially, will be updated dynamically
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
@@ -406,4 +406,28 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
+
+  async function fetchDistanceTravelledData() {
+    try {
+      const response = await fetch('/dashboard/atlanta_distance_data');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unknown error fetching distance data');
+      }
+
+      // Update chart data
+      devicesChart.data.labels = data.labels;
+      devicesChart.data.datasets[0].data = data.distances;
+      devicesChart.update();
+    } catch (error) {
+      console.error('Error fetching distance data:', error);
+    }
+  }
+
+  // Fetch and update the chart data initially
+  await fetchDistanceTravelledData();
+
+  // Optionally, you can set an interval to update the chart data periodically
+  setInterval(fetchDistanceTravelledData, 60000); // Update every 60 seconds
 });
