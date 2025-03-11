@@ -6,6 +6,7 @@ import bcrypt
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd
+from geopy.distance import geodesic
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -84,59 +85,59 @@ def atlanta_pie_data():
         print(f"🚨 Error fetching pie chart data: {e}")
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
  
+
+
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 def atlanta_distance_data():
     try:
-        # Fetch all documents from the distinctAtlanta collection
+        # Fetch all documents from the atlanta collection
         results = list(collection.find())
 
-        # If results are empty, return a default response
-        if not results:
-            return jsonify({
-                "labels": [],
-                "distances": []
-            }), 200
+        # Dictionary to store total distance per day
+        distance_per_day = {}
 
-        # Prepare data for the chart
-        distance_data = {}
         for record in results:
             date_str = record['date']
-            vehicle_id = record['vehicle_id']
-            odometer = float(record.get('odometer', 0))
-            datetime_str = record['date'] + record['time']
-            record_datetime = datetime.strptime(datetime_str, '%d%m%y%H%M%S')
+            imei = record['imei']
+            latitude = record['latitude']
+            longitude = record['longitude']
 
-            if date_str not in distance_data:
-                distance_data[date_str] = {}
+            # Convert latitude and longitude to decimal format
+            lat = convert_to_decimal(latitude, record['dir1'])
+            lon = convert_to_decimal(longitude, record['dir2'])
 
-            if vehicle_id not in distance_data[date_str]:
-                distance_data[date_str][vehicle_id] = {
-                    'first_odometer': odometer,
-                    'last_odometer': odometer,
-                    'first_datetime': record_datetime,
-                    'last_datetime': record_datetime
-                }
-            else:
-                if record_datetime < distance_data[date_str][vehicle_id]['first_datetime']:
-                    distance_data[date_str][vehicle_id]['first_odometer'] = odometer
-                    distance_data[date_str][vehicle_id]['first_datetime'] = record_datetime
-                if record_datetime > distance_data[date_str][vehicle_id]['last_datetime']:
-                    distance_data[date_str][vehicle_id]['last_odometer'] = odometer
-                    distance_data[date_str][vehicle_id]['last_datetime'] = record_datetime
+            # Initialize the dictionary for the date if not already present
+            if date_str not in distance_per_day:
+                distance_per_day[date_str] = {}
 
-        labels = sorted(distance_data.keys())
-        distances = [
-            sum(
-                vehicle_data['last_odometer'] - vehicle_data['first_odometer']
-                for vehicle_data in distance_data[date].values()
-            )
-            for date in labels
-        ]
+            # Initialize the list for the IMEI if not already present
+            if imei not in distance_per_day[date_str]:
+                distance_per_day[date_str][imei] = []
+
+            # Append the coordinates to the list
+            distance_per_day[date_str][imei].append((lat, lon))
+
+        # Calculate total distance per day
+        total_distance_per_day = {}
+        for date_str, imei_data in distance_per_day.items():
+            total_distance = 0
+            for imei, coordinates in imei_data.items():
+                for i in range(1, len(coordinates)):
+                    total_distance += geodesic(coordinates[i - 1], coordinates[i]).meters
+            total_distance_per_day[date_str] = total_distance
+
+        # Prepare the response data
+        labels = sorted(total_distance_per_day.keys())
+        distances = [total_distance_per_day[date_str] for date_str in labels]
+
+        # Format labels to "DD MMM"
+        formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
 
         return jsonify({
-            "labels": labels,
+            "labels": formatted_labels,
             "distances": distances
         }), 200
+
     except Exception as e:
-        print(f"Error fetching distance data: {e}")
+        print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
