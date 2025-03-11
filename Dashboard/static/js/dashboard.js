@@ -416,6 +416,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         throw new Error(data.error || 'Unknown error fetching distance data');
       }
 
+      // Debugging logs
+      console.log('Fetched Distance Data:', data);
+
       // Update chart data
       devicesChart.data.labels = data.labels;
       devicesChart.data.datasets[0].data = data.distances;
