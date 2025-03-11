@@ -138,6 +138,12 @@ def atlanta_distance_data():
         labels = [datetime.strptime(date, '%d%m%y').strftime('%d %b') for date in sorted_dates]
         distances = [daily_distances[date] for date in sorted_dates]
 
+        # Debugging logs
+        print("Distance Data:", distance_data)
+        print("Daily Distances:", daily_distances)
+        print("Labels:", labels)
+        print("Distances:", distances)
+
         return jsonify({
             "labels": labels,
             "distances": distances
