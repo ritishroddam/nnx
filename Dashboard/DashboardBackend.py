@@ -106,8 +106,10 @@ def atlanta_distance_data():
             print(f"Record - Date: {date_str}, IMEI: {imei}, Odometer: {odometer}, Timestamp: {timestamp}")
 
             # Initialize the dictionary for the date if not already present
-            if date_str not in odometer_per_day:
-                odometer_per_day[date_str] = {}
+            now = datetime.now()
+            if timestamp < now - timedelta(days=7):
+                if date_str not in odometer_per_day:
+                    odometer_per_day[date_str] = {}
 
             # Initialize the list for the IMEI if not already present
             if imei not in odometer_per_day[date_str]:
