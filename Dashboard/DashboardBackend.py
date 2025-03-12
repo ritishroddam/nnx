@@ -16,6 +16,7 @@ def page():
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = client['nnx']
 collection = db['distinctAtlanta']
+collection_full = db['atlanta']
 
 
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
@@ -87,7 +88,7 @@ def atlanta_pie_data():
 def atlanta_distance_data():
     try:
         # Fetch all documents from the atlanta collection
-        results = list(collection.find())
+        results = list(collection_full.find())
 
         # Debugging log to check the fetched results
         print("Fetched Results:", results)
