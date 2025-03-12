@@ -176,11 +176,9 @@ def get_vehicle_distances():
 
         # Fetch vehicle IMEI mappings
         vehicle_map = {
-            vehicle_inventory.find({}, {"LicensePlateNumber": 1,"imei": 1, "_id": 0})
+            v.get("imei", "UNKNOWN"): v.get("LicensePlateNumber", "UNKNOWN") 
+            for v in vehicle_inventory.find({}, {"LicensePlateNumber": 1, "imei": 1, "_id": 0})
         }
-
-        for vehicle in vehicle_map:
-            print("\n \n",vehicle)
 
         print("Vehicle Map:", vehicle_map)  # Debugging log
 
