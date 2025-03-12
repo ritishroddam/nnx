@@ -122,6 +122,9 @@ def atlanta_distance_data():
                     total_distance += distance
                     # Debugging logs
                     print(f"Distance for IMEI {imei} on {date_str}: {distance} meters")
+                else:
+                    # Debugging logs for insufficient readings
+                    print(f"Insufficient readings for IMEI {imei} on {date_str}")
             total_distance_per_day[date_str] = total_distance
 
         # Prepare the response data
