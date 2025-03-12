@@ -191,6 +191,9 @@ def get_vehicle_distances():
             for v in vehicle_inventory.find({}, {"imei": 1, "LicensePlateNumber": 1, "_id": 0})
         }
 
+        for vehicle in vehicle_map:
+            print("/n/n",vehicle)
+
         # Fetch today's odometer readings with type conversion
         pipeline = [
             {"$match": {"date": today_str}},  # Filter today's data
