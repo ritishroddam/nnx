@@ -58,8 +58,15 @@
 .weather-section,
 .vehicleSetion {
   flex: 1;
-  margin: 0 10px;
+  margin: 0 20px;
 }
+
+#info,
+#hrInfo {
+  display: flex;
+  justify-content: space-between;
+}
+
 .traffic {
   width: 90%;
 }
