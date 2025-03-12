@@ -133,39 +133,52 @@ def atlanta_distance_data():
     except Exception as e:
         print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
-    
+
 # @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
 # def get_vehicle_distances():
-#     today_str = datetime.utcnow().strftime('%d%m%y')  # Assuming date is stored in 'DDMMYY' format
+#     try:
+#         today_str = datetime.utcnow().strftime('%d%m%y')  # Format: DDMMYY
 
-#     # Fetch vehicle registration and IMEI mappings
-#     vehicle_map = {v["imei"]: v["registration_number"] for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1})}
+#         # Fetch vehicle IMEI mappings
+#         vehicle_map = {
+#             v.get("imei", "UNKNOWN"): v.get("registration_number", "UNKNOWN") 
+#             for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1, "_id": 0})
+#         }
+#         print("Vehicle Map:", vehicle_map)  # Debugging log
 
-#     # Fetch today's odometer readings
-#     pipeline = [
-#         {"$match": {"date": today_str}},
-#         {"$group": {
-#             "_id": "$imei",
-#             "start_odometer": {"$min": "$odometer"},
-#             "end_odometer": {"$max": "$odometer"}
-#         }},
-#         {"$project": {
-#             "imei": "$_id",
-#             "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
-#         }}
-#     ]
+#         # Fetch today's odometer readings
+#         pipeline = [
+#             {"$match": {"date": today_str}},  # Filter today's data
+#             {"$group": {
+#                 "_id": "$imei",
+#                 "start_odometer": {"$min": "$odometer"},
+#                 "end_odometer": {"$max": "$odometer"}
+#             }},
+#             {"$project": {
+#                 "imei": "$_id",
+#                 "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+#             }}
+#         ]
 
-#     results = list(atlanta_collection.aggregate(pipeline))
+#         results = list(atlanta_collection.aggregate(pipeline))
+#         print("Odometer Results:", results)  # Debugging log
 
-#     # Convert IMEI to Vehicle Registration
-#     vehicle_data = [
-#         {"registration": vehicle_map.get(record["imei"], "Unknown"), "distance": record["distance_traveled"]}
-#         for record in results
-#     ]
+#         # Convert IMEI to Vehicle Registration
+#         vehicle_data = [
+#             {
+#                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
+#                 "distance": record.get("distance_traveled", 0)
+#             }
+#             for record in results
+#         ]
 
-#     print("\nVehicle Data:", vehicle_data)
+#         print("Final Vehicle Data:", vehicle_data)  # Debugging log
 
-#     return jsonify(vehicle_data)
+#         return jsonify(vehicle_data), 200
+
+#     except Exception as e:
+#         print(f"🚨 Error fetching vehicle distances: {e}")
+#         return jsonify({"error": str(e)}), 500
 
 @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
 def get_vehicle_distances():
@@ -177,11 +190,14 @@ def get_vehicle_distances():
             v.get("imei", "UNKNOWN"): v.get("registration_number", "UNKNOWN") 
             for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1, "_id": 0})
         }
-        print("Vehicle Map:", vehicle_map)  # Debugging log
 
-        # Fetch today's odometer readings
+        # Fetch today's odometer readings with type conversion
         pipeline = [
             {"$match": {"date": today_str}},  # Filter today's data
+            {"$project": {  
+                "imei": 1,
+                "odometer": {"$toDouble": "$odometer"}  # Convert string to number
+            }},
             {"$group": {
                 "_id": "$imei",
                 "start_odometer": {"$min": "$odometer"},
@@ -194,18 +210,15 @@ def get_vehicle_distances():
         ]
 
         results = list(atlanta_collection.aggregate(pipeline))
-        print("Odometer Results:", results)  # Debugging log
 
         # Convert IMEI to Vehicle Registration
         vehicle_data = [
             {
                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
-                "distance": record.get("distance_traveled", 0)
+                "distance": round(record.get("distance_traveled", 0), 2)
             }
             for record in results
         ]
-
-        print("Final Vehicle Data:", vehicle_data)  # Debugging log
 
         return jsonify(vehicle_data), 200
 
