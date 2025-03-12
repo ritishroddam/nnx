@@ -383,54 +383,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
 ////////////////////////////////////////////////////////////////////////
 
-document.addEventListener('DOMContentLoaded', async function() {
-  var ctx = document.getElementById('devicesChart').getContext('2d');
+document.addEventListener("DOMContentLoaded", async function () {
+  var ctx = document.getElementById("devicesChart").getContext("2d");
   var devicesChart = new Chart(ctx, {
-    type: 'line',
+    type: "line",
     data: {
       labels: [], // Empty initially, will be updated dynamically
-      datasets: [{
-        label: 'Distance Travelled (km)',
-        data: [], // Empty initially, will be updated dynamically
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-        fill: true
-      }]
+      datasets: [
+        {
+          label: "Distance Travelled (km)",
+          data: [], // Empty initially, will be updated dynamically
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 1,
+          fill: true,
+        },
+      ],
     },
     options: {
       scales: {
         y: {
-          beginAtZero: true
-        }
-      }
-    }
+          beginAtZero: true,
+        },
+      },
+    },
   });
 
   async function fetchDistanceTravelledData() {
     try {
-      const response = await fetch('/dashboard/atlanta_distance_data');
+      const response = await fetch("/dashboard/atlanta_distance_data");
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Unknown error fetching distance data');
+        throw new Error(data.error || "Unknown error fetching distance data");
       }
 
       // Debugging logs
-      console.log('Fetched Distance Data:', data);
+      console.log("Fetched Distance Data:", data);
 
       // Update chart data
       devicesChart.data.labels = data.labels;
       devicesChart.data.datasets[0].data = data.distances;
       devicesChart.update();
     } catch (error) {
-      console.error('Error fetching distance data:', error);
+      console.error("Error fetching distance data:", error);
     }
   }
 
   // Fetch and update the chart data initially
   await fetchDistanceTravelledData();
-
-  // Optionally, you can set an interval to update the chart data periodically
-  setInterval(fetchDistanceTravelledData, 60000); // Update every 60 seconds
 });
