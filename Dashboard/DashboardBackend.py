@@ -42,9 +42,6 @@ def dashboard_data():
 def atlanta_pie_data():
     try:
         results = list(collection.find())
-        
-        # Debugging logs
-        print("Processed Results:", results)
 
         # If results are empty, return a default response
         if not results:
@@ -72,8 +69,6 @@ def atlanta_pie_data():
             1 for record in results 
             if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
         )
-
-        # print(f"Total Devices: {total_devices}, Moving: {moving_vehicles}, Idle: {idle_vehicles}")
         
         return jsonify({
             "total_devices": total_devices,
@@ -91,9 +86,6 @@ def atlanta_distance_data():
 
         results = list(distance_travelled_collection.find())
 
-        # Debugging log to check the fetched results
-        print("Fetched Results:", results)
-
         # Dictionary to store total distance per day
         total_distance_per_day = {}
 
@@ -109,13 +101,10 @@ def atlanta_distance_data():
 
             # Filter records for the past seven days
             if date_obj >= seven_days_ago:
-                # Debugging log to check each record's data
-                print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
+
 
                 total_distance_per_day[date_str] = total_distance
 
-        # Debugging log to check the total distance per day
-        print("Total Distance Per Day:", total_distance_per_day)
 
         # Prepare the response data
         labels = sorted(total_distance_per_day.keys())
