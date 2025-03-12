@@ -175,11 +175,11 @@ def get_vehicle_distances():
         today_str = datetime.now().strftime('%d%m%y')  # Format: DDMMYY
 
         # Fetch vehicle IMEI mappings
-        vehicle_map = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
-        
+        # vehicle_map = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
+        vehicle_map_cursor = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
+        vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
-        for vehicle in vehicle_map:
-            print("\n \n",vehicle.get("IMEI"), vehicle.get("LicensePlateNumber"))
+        print("Vehicle Map:", vehicle_map)  # Debugging log
 
         # Fetch today's odometer readings with type conversion
         pipeline = [
