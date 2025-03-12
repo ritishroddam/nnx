@@ -247,3 +247,11 @@ p {
   height: 1px;
   background-color: #2f2f2f; /* Adjust the color as needed */
 }
+
+.dark-mode .title-with-line hr {
+  background-color: #ccc;
+}
+
+.dark-mode {
+  color: #ccc;
+}
