@@ -71,7 +71,7 @@ def atlanta_pie_data():
             if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
         )
 
-        print(f"Total Devices: {total_devices}, Moving: {moving_vehicles}, Idle: {idle_vehicles}")
+        # print(f"Total Devices: {total_devices}, Moving: {moving_vehicles}, Idle: {idle_vehicles}")
         
         return jsonify({
             "total_devices": total_devices,
