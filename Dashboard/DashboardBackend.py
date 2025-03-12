@@ -37,104 +37,75 @@ def dashboard_data():
         print(f"Error fetching dashboard data: {e}")
         return jsonify({"error": "Failed to fetch dashboard data"}), 500
 
-# @dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
-# def atlanta_pie_data():
-#     try:
-#         results = list(collection.find())
+@dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
+def atlanta_pie_data():
+    try:
+        results = list(collection.find())
         
-#         # Debugging logs
-#         print("Processed Results:", results)
+        # Debugging logs
+        print("Processed Results:", results)
 
-#         # If results are empty, return a default response
-#         if not results:
-#             return jsonify({
-#                 "total_devices": 0,
-#                 "moving_vehicles": 0,
-#                 "offline_vehicles": 0,
-#                 "idle_vehicles": 0
-#             }), 200
+        # If results are empty, return a default response
+        if not results:
+            return jsonify({
+                "total_devices": 0,
+                "moving_vehicles": 0,
+                "offline_vehicles": 0,
+                "idle_vehicles": 0
+            }), 200
 
-#         # Calculate counts
-#         total_devices = len(results)
-#         now = datetime.now()
-#         moving_vehicles = sum(
-#             1 for record in results 
-#             if float(record["speed"] or 0) > 0 and
-#             datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
-#         )
-#         idle_vehicles = sum(
-#             1 for record in results 
-#             if float(record["speed"] or 0) == 0 and
-#             datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
-#         )
-#         offline_vehicles = sum(
-#             1 for record in results 
-#             if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
-#         )
+        # Calculate counts
+        total_devices = len(results)
+        now = datetime.now()
+        moving_vehicles = sum(
+            1 for record in results 
+            if float(record["speed"] or 0) > 0 and
+            datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
+        )
+        idle_vehicles = sum(
+            1 for record in results 
+            if float(record["speed"] or 0) == 0 and
+            datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
+        )
+        offline_vehicles = sum(
+            1 for record in results 
+            if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
+        )
 
-#         # print(f"Total Devices: {total_devices}, Moving: {moving_vehicles}, Idle: {idle_vehicles}")
+        # print(f"Total Devices: {total_devices}, Moving: {moving_vehicles}, Idle: {idle_vehicles}")
         
-#         return jsonify({
-#             "total_devices": total_devices,
-#             "moving_vehicles": moving_vehicles,
-#             "offline_vehicles": offline_vehicles,
-#             "idle_vehicles": idle_vehicles   
-#         }), 200
-#     except Exception as e:
-#         print(f"🚨 Error fetching pie chart data: {e}")
-#         return jsonify({"error": "Failed to fetch pie chart data"}), 500
- 
+        return jsonify({
+            "total_devices": total_devices,
+            "moving_vehicles": moving_vehicles,
+            "offline_vehicles": offline_vehicles,
+            "idle_vehicles": idle_vehicles   
+        }), 200
+    except Exception as e:
+        print(f"🚨 Error fetching pie chart data: {e}")
+        return jsonify({"error": "Failed to fetch pie chart data"}), 500
+
 # @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 # def atlanta_distance_data():
 #     try:
-#         seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%m%d%y")
+#         seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%d%m%y")
 
 #         query = { "date": { "$gte": seven_days_ago } }
 
-#         results = list(collection_full.find(query))
+#         results = list(distance_travelled_collection.find(query))
 
 #         # Debugging log to check the fetched results
 #         print("Fetched Results:", results)
 
-#         # Dictionary to store odometer readings per day per vehicle
-#         odometer_per_day = {}
+#         # Dictionary to store total distance per day
+#         total_distance_per_day = {}
 
 #         for record in results:
 #             date_str = record['date']
-#             imei = record['imei']
-#             odometer = float(record['odometer'])
-#             timestamp = datetime.strptime(record['date'] + record['time'], '%d%m%y%H%M%S')
+#             total_distance = record.get('totalDistance', 0)
 
 #             # Debugging log to check each record's data
-#             print(f"Record - Date: {date_str}, IMEI: {imei}, Odometer: {odometer}, Timestamp: {timestamp}")
+#             print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
 
-#             # Initialize the dictionary for the date if not already present
-#             if date_str not in odometer_per_day:
-#                 odometer_per_day[date_str] = {}
-
-#             # Initialize the list for the IMEI if not already present
-#             if imei not in odometer_per_day[date_str]:
-#                 odometer_per_day[date_str][imei] = []
-
-#             # Append the odometer reading and timestamp to the list
-#             odometer_per_day[date_str][imei].append((timestamp, odometer))
-
-#         # Calculate total distance per day
-#         total_distance_per_day = {}
-#         for date_str, imei_data in odometer_per_day.items():
-#             total_distance = 0
-#             for imei, readings in imei_data.items():
-#                 # Sort readings by timestamp
-#                 readings.sort()
-#                 if len(readings) >= 2:
-#                     # Calculate the distance traveled by subtracting the earliest reading from the latest reading
-#                     distance = readings[-1][1] - readings[0][1]
-#                     total_distance += distance
-#                     # Debugging logs
-#                     print(f"Distance for IMEI {imei} on {date_str}: {distance} meters")
-#                 else:
-#                     # Debugging logs for insufficient readings
-#                     print(f"Insufficient readings for IMEI {imei} on {date_str}")
 #             total_distance_per_day[date_str] = total_distance
 
 #         # Debugging log to check the total distance per day
@@ -159,11 +130,8 @@ def dashboard_data():
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 def atlanta_distance_data():
     try:
-        seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%d%m%y")
 
-        query = { "date": { "$gte": seven_days_ago } }
-
-        results = list(distance_travelled_collection.find(query))
+        results = list(distance_travelled_collection.find())
 
         # Debugging log to check the fetched results
         print("Fetched Results:", results)
@@ -171,14 +139,22 @@ def atlanta_distance_data():
         # Dictionary to store total distance per day
         total_distance_per_day = {}
 
+        now = datetime.now()
+        seven_days_ago = now - timedelta(days=7)
+
         for record in results:
             date_str = record['date']
             total_distance = record.get('totalDistance', 0)
 
-            # Debugging log to check each record's data
-            print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
+            # Convert date_str to datetime object
+            date_obj = datetime.strptime(date_str, '%d%m%y')
 
-            total_distance_per_day[date_str] = total_distance
+            # Filter records for the past seven days
+            if date_obj >= seven_days_ago:
+                # Debugging log to check each record's data
+                print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
+
+                total_distance_per_day[date_str] = total_distance
 
         # Debugging log to check the total distance per day
         print("Total Distance Per Day:", total_distance_per_day)
@@ -188,6 +164,7 @@ def atlanta_distance_data():
         distances = [total_distance_per_day[date_str] for date_str in labels]
 
         # Format labels to "DD MMM"
+        
         formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
 
         return jsonify({
