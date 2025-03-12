@@ -169,7 +169,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 20px auto;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
@@ -239,6 +238,7 @@ p {
   display: flex;
   align-items: center; /* Align text and line in the center */
   gap: 10px; /* Space between text and line */
+  padding: 15px;
 }
 
 .title-with-line hr {
