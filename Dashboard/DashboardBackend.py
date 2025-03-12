@@ -183,12 +183,12 @@ def atlanta_distance_data():
 @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
 def get_vehicle_distances():
     try:
-        today_str = datetime.utcnow().strftime('%d%m%y')  # Format: DDMMYY
+        today_str = datetime.now().strftime('%d%m%y')  # Format: DDMMYY
 
         # Fetch vehicle IMEI mappings
         vehicle_map = {
-            v.get("imei", "UNKNOWN"): v.get("registration_number", "UNKNOWN") 
-            for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1, "_id": 0})
+            v.get("imei", "UNKNOWN"): v.get("LicensePlateNumber", "UNKNOWN") 
+            for v in vehicle_inventory.find({}, {"imei": 1, "LicensePlateNumber": 1, "_id": 0})
         }
 
         # Fetch today's odometer readings with type conversion
