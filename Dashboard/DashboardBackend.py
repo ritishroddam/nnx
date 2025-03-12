@@ -89,6 +89,9 @@ def atlanta_distance_data():
         # Fetch all documents from the atlanta collection
         results = list(collection.find())
 
+        # Debugging log to check the fetched results
+        print("Fetched Results:", results)
+
         # Dictionary to store odometer readings per day per vehicle
         odometer_per_day = {}
 
@@ -97,6 +100,9 @@ def atlanta_distance_data():
             imei = record['imei']
             odometer = float(record['odometer'])
             timestamp = datetime.strptime(record['date'] + record['time'], '%d%m%y%H%M%S')
+
+            # Debugging log to check each record's data
+            print(f"Record - Date: {date_str}, IMEI: {imei}, Odometer: {odometer}, Timestamp: {timestamp}")
 
             # Initialize the dictionary for the date if not already present
             if date_str not in odometer_per_day:
@@ -126,6 +132,9 @@ def atlanta_distance_data():
                     # Debugging logs for insufficient readings
                     print(f"Insufficient readings for IMEI {imei} on {date_str}")
             total_distance_per_day[date_str] = total_distance
+
+        # Debugging log to check the total distance per day
+        print("Total Distance Per Day:", total_distance_per_day)
 
         # Prepare the response data
         labels = sorted(total_distance_per_day.keys())
