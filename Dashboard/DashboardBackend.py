@@ -87,8 +87,11 @@ def atlanta_pie_data():
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 def atlanta_distance_data():
     try:
-        # Fetch all documents from the atlanta collection
-        results = list(collection_full.find())
+        seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%m%d%y")
+
+        query = { "date": { "$gte": seven_days_ago } }
+
+        results = list(collection_full.find(query))
 
         # Debugging log to check the fetched results
         print("Fetched Results:", results)
@@ -106,10 +109,8 @@ def atlanta_distance_data():
             print(f"Record - Date: {date_str}, IMEI: {imei}, Odometer: {odometer}, Timestamp: {timestamp}")
 
             # Initialize the dictionary for the date if not already present
-            now = datetime.now()
-            if timestamp < now - timedelta(days=7):
-                if date_str not in odometer_per_day:
-                    odometer_per_day[date_str] = {}
+            if date_str not in odometer_per_day:
+                odometer_per_day[date_str] = {}
 
             # Initialize the list for the IMEI if not already present
             if imei not in odometer_per_day[date_str]:
