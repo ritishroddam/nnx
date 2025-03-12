@@ -163,6 +163,6 @@ def get_vehicle_distances():
         for record in results
     ]
 
-    print("Vehicle Data:", vehicle_data)
+    print("\nVehicle Data:", vehicle_data)
 
     return jsonify(vehicle_data)
