@@ -194,41 +194,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         try:
             json_data['imei'] = self.clean_imei(json_data['imei'])
             collection.insert_one(json_data)
-            self.update_distance_travelled_today(json_data)
             # print("Data stored in MongoDB.")
         except Exception as e:
             print("Error storing data in MongoDB:", e)
-
-    def update_distance_travelled_today(self, json_data):
-        try:
-            imei = json_data['imei']
-            date_str = datetime.now().strftime('%d%m%y')
-            odometer = float(json_data.get('odometer', 0))
-
-            # Fetch the existing record for today
-            record = distance_travelled_collection.find_one({"date": date_str})
-
-            if record:
-                # Calculate the new total distance
-                total_distance = record.get('totalDistance', 0)
-                previous_odometer = record.get('odometer', 0)
-                distance = odometer - previous_odometer
-                total_distance += distance
-
-                # Update the total distance and odometer
-                distance_travelled_collection.update_one(
-                    {"date": date_str},
-                    {"$set": {"totalDistance": total_distance, "odometer": odometer}}
-                )
-            else:
-                # Insert a new record
-                distance_travelled_collection.insert_one({
-                    "date": date_str,
-                    "totalDistance": 0,
-                    "odometer": odometer
-                })
-        except Exception as e:
-            print("Error updating distance travelled:", e)
 
     def log_sos_to_mongodb(self, json_data):
         try:

@@ -84,49 +84,6 @@ def atlanta_pie_data():
         print(f"🚨 Error fetching pie chart data: {e}")
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
 
-# @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
-# def atlanta_distance_data():
-#     try:
-#         seven_days_ago = (datetime.now() - timedelta(days=7)).strftime("%d%m%y")
-
-#         query = { "date": { "$gte": seven_days_ago } }
-
-#         results = list(distance_travelled_collection.find(query))
-
-#         # Debugging log to check the fetched results
-#         print("Fetched Results:", results)
-
-#         # Dictionary to store total distance per day
-#         total_distance_per_day = {}
-
-#         for record in results:
-#             date_str = record['date']
-#             total_distance = record.get('totalDistance', 0)
-
-#             # Debugging log to check each record's data
-#             print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
-
-#             total_distance_per_day[date_str] = total_distance
-
-#         # Debugging log to check the total distance per day
-#         print("Total Distance Per Day:", total_distance_per_day)
-
-#         # Prepare the response data
-#         labels = sorted(total_distance_per_day.keys())
-#         distances = [total_distance_per_day[date_str] for date_str in labels]
-
-#         # Format labels to "DD MMM"
-#         formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
-
-#         return jsonify({
-#             "labels": formatted_labels,
-#             "distances": distances
-#         }), 200
-
-#     except Exception as e:
-#         print(f"🚨 Error fetching distance data: {e}")
-#         return jsonify({"error": "Failed to fetch distance data"}), 500
-
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 def atlanta_distance_data():
     try:
