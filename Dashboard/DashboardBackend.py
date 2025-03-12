@@ -15,9 +15,10 @@ def page():
 
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = client['nnx']
+atlanta_collection = db["atlanta"]
 collection = db['distinctAtlanta']
-collection_full = db['atlanta']
 distance_travelled_collection = db['distanceTravelled']
+vehicle_inventory = db["vehicle_inventory"]
 
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
 def dashboard_data():
@@ -132,3 +133,34 @@ def atlanta_distance_data():
     except Exception as e:
         print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
+    
+@dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
+def get_vehicle_distances():
+    today_str = datetime.utcnow().strftime('%d%m%y')  # Assuming date is stored in 'DDMMYY' format
+
+    # Fetch vehicle registration and IMEI mappings
+    vehicle_map = {v["imei"]: v["registration_number"] for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1})}
+
+    # Fetch today's odometer readings
+    pipeline = [
+        {"$match": {"date": today_str}},
+        {"$group": {
+            "_id": "$imei",
+            "start_odometer": {"$min": "$odometer"},
+            "end_odometer": {"$max": "$odometer"}
+        }},
+        {"$project": {
+            "imei": "$_id",
+            "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+        }}
+    ]
+
+    results = list(atlanta_collection.aggregate(pipeline))
+
+    # Convert IMEI to Vehicle Registration
+    vehicle_data = [
+        {"registration": vehicle_map.get(record["imei"], "Unknown"), "distance": record["distance_traveled"]}
+        for record in results
+    ]
+
+    return jsonify(vehicle_data)
