@@ -179,6 +179,9 @@ def get_vehicle_distances():
             vehicle_inventory.find({}, {"LicensePlateNumber": 1,"imei": 1, "_id": 0})
         }
 
+        for vehicle in vehicle_map:
+            print("\n \n",vehicle)
+
         print("Vehicle Map:", vehicle_map)  # Debugging log
 
         # Fetch today's odometer readings with type conversion
