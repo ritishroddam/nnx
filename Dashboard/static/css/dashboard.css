@@ -58,22 +58,8 @@
 .weather-section,
 .vehicleSetion {
   flex: 1;
-  margin: 0 20px;
+  margin: 0 10px;
 }
-
-.divInfo {
-  display: flex;
-  justify-content: space-between;
-}
-
-.info {
-  flex-direction: column;
-}
-
-.hrInfo {
-  flex-direction: column;
-}
-
 .traffic {
   width: 90%;
 }
@@ -84,17 +70,19 @@
   flex-direction: column;
   align-items: center;
   display: flex;
+  flex-direction: column;
   gap: 0;
 }
 
 #vehicleSetion {
   border-radius: 10px;
   overflow: hidden;
-  width: 100%;
+  width: 50%;
   display: flex;
   flex-direction: column;
   gap: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  padding: 20px;
 }
 
 .card-chart {
@@ -105,7 +93,6 @@
   flex-direction: column;
   gap: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  padding: 10px;
 }
 
 .datetime-container,
