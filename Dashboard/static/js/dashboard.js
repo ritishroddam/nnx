@@ -432,56 +432,56 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Fetch and update the chart data initially
   await fetchDistanceTravelledData();
-});
 
-async function fetchVehicleDistances() {
-  try {
-    const response = await fetch("/dashboard/get_vehicle_distances");
-    const data = await response.json();
+  async function fetchVehicleDistances() {
+    try {
+      const response = await fetch("/dashboard/get_vehicle_distances");
+      const data = await response.json();
 
-    let tableBody = document.getElementById("vehicleTable");
-    tableBody.innerHTML = ""; // Clear existing table data
+      let tableBody = document.getElementById("vehicleTable");
+      tableBody.innerHTML = ""; // Clear existing table data
 
-    data.forEach((vehicle) => {
-      let row = `<tr>
-                <td>${vehicle.registration}</td>
-                <td>${vehicle.distance.toFixed(2)}</td>
-            </tr>`;
-      tableBody.innerHTML += row;
-    });
-  } catch (error) {
-    console.error("Error fetching vehicle distances:", error);
+      data.forEach((vehicle) => {
+        let row = `<tr>
+                  <td>${vehicle.registration}</td>
+                  <td>${vehicle.distance.toFixed(2)}</td>
+              </tr>`;
+        tableBody.innerHTML += row;
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle distances:", error);
+    }
   }
-}
 
-// Sorting functionality
-document.getElementById("sortBtn").addEventListener("click", function () {
-  let table, rows, switching, i, x, y, shouldSwitch;
-  table = document.querySelector("#vehicleTable");
-  switching = true;
+  // Sorting functionality
+  document.getElementById("sortBtn").addEventListener("click", function () {
+    let table, rows, switching, i, x, y, shouldSwitch;
+    table = document.querySelector("#vehicleTable");
+    switching = true;
 
-  while (switching) {
-    switching = false;
-    rows = table.rows;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
 
-    for (i = 0; i < rows.length - 1; i++) {
-      shouldSwitch = false;
-      x = parseFloat(rows[i].cells[1].innerText);
-      y = parseFloat(rows[i + 1].cells[1].innerText);
+      for (i = 0; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = parseFloat(rows[i].cells[1].innerText);
+        y = parseFloat(rows[i + 1].cells[1].innerText);
 
-      if (x < y) {
-        // Sort in descending order
-        shouldSwitch = true;
-        break;
+        if (x < y) {
+          // Sort in descending order
+          shouldSwitch = true;
+          break;
+        }
+      }
+
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
       }
     }
+  });
 
-    if (shouldSwitch) {
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-    }
-  }
+  // Load the data when the page loads
+  await fetchVehicleDistances();
 });
-
-// Load the data when the page loads
-document.addEventListener("DOMContentLoaded", fetchVehicleDistances);
