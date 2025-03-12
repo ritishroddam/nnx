@@ -234,3 +234,16 @@ p {
   display: block;
   margin: auto;
 }
+
+.title-with-line {
+  display: flex;
+  align-items: center; /* Align text and line in the center */
+  gap: 10px; /* Space between text and line */
+}
+
+.title-with-line hr {
+  flex-grow: 1; /* Makes the line take up remaining space */
+  border: none;
+  height: 1px;
+  background-color: #2f2f2f; /* Adjust the color as needed */
+}
