@@ -85,84 +85,130 @@ def atlanta_pie_data():
         print(f"🚨 Error fetching pie chart data: {e}")
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
 
-@dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
-def atlanta_distance_data():
-    try:
+# @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
+# def atlanta_distance_data():
+#     try:
 
-        results = list(distance_travelled_collection.find())
+#         results = list(distance_travelled_collection.find())
 
-        # Debugging log to check the fetched results
-        print("Fetched Results:", results)
+#         # Debugging log to check the fetched results
+#         print("Fetched Results:", results)
 
-        # Dictionary to store total distance per day
-        total_distance_per_day = {}
+#         # Dictionary to store total distance per day
+#         total_distance_per_day = {}
 
-        now = datetime.now()
-        seven_days_ago = now - timedelta(days=7)
+#         now = datetime.now()
+#         seven_days_ago = now - timedelta(days=7)
 
-        for record in results:
-            date_str = record['date']
-            total_distance = record.get('totalDistance', 0)
+#         for record in results:
+#             date_str = record['date']
+#             total_distance = record.get('totalDistance', 0)
 
-            # Convert date_str to datetime object
-            date_obj = datetime.strptime(date_str, '%d%m%y')
+#             # Convert date_str to datetime object
+#             date_obj = datetime.strptime(date_str, '%d%m%y')
 
-            # Filter records for the past seven days
-            if date_obj >= seven_days_ago:
-                # Debugging log to check each record's data
-                print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
+#             # Filter records for the past seven days
+#             if date_obj >= seven_days_ago:
+#                 # Debugging log to check each record's data
+#                 print(f"Record - Date: {date_str}, Total Distance: {total_distance} km")
 
-                total_distance_per_day[date_str] = total_distance
+#                 total_distance_per_day[date_str] = total_distance
 
-        # Debugging log to check the total distance per day
-        print("Total Distance Per Day:", total_distance_per_day)
+#         # Debugging log to check the total distance per day
+#         print("Total Distance Per Day:", total_distance_per_day)
 
-        # Prepare the response data
-        labels = sorted(total_distance_per_day.keys())
-        distances = [total_distance_per_day[date_str] for date_str in labels]
+#         # Prepare the response data
+#         labels = sorted(total_distance_per_day.keys())
+#         distances = [total_distance_per_day[date_str] for date_str in labels]
 
-        # Format labels to "DD MMM"
+#         # Format labels to "DD MMM"
         
-        formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
+#         formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
 
-        return jsonify({
-            "labels": formatted_labels,
-            "distances": distances
-        }), 200
+#         return jsonify({
+#             "labels": formatted_labels,
+#             "distances": distances
+#         }), 200
 
-    except Exception as e:
-        print(f"🚨 Error fetching distance data: {e}")
-        return jsonify({"error": "Failed to fetch distance data"}), 500
+#     except Exception as e:
+#         print(f"🚨 Error fetching distance data: {e}")
+#         return jsonify({"error": "Failed to fetch distance data"}), 500
     
+# @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
+# def get_vehicle_distances():
+#     today_str = datetime.utcnow().strftime('%d%m%y')  # Assuming date is stored in 'DDMMYY' format
+
+#     # Fetch vehicle registration and IMEI mappings
+#     vehicle_map = {v["imei"]: v["registration_number"] for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1})}
+
+#     # Fetch today's odometer readings
+#     pipeline = [
+#         {"$match": {"date": today_str}},
+#         {"$group": {
+#             "_id": "$imei",
+#             "start_odometer": {"$min": "$odometer"},
+#             "end_odometer": {"$max": "$odometer"}
+#         }},
+#         {"$project": {
+#             "imei": "$_id",
+#             "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+#         }}
+#     ]
+
+#     results = list(atlanta_collection.aggregate(pipeline))
+
+#     # Convert IMEI to Vehicle Registration
+#     vehicle_data = [
+#         {"registration": vehicle_map.get(record["imei"], "Unknown"), "distance": record["distance_traveled"]}
+#         for record in results
+#     ]
+
+#     print("\nVehicle Data:", vehicle_data)
+
+#     return jsonify(vehicle_data)
+
 @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
 def get_vehicle_distances():
-    today_str = datetime.utcnow().strftime('%d%m%y')  # Assuming date is stored in 'DDMMYY' format
+    try:
+        today_str = datetime.utcnow().strftime('%d%m%y')  # Format: DDMMYY
 
-    # Fetch vehicle registration and IMEI mappings
-    vehicle_map = {v["imei"]: v["registration_number"] for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1})}
+        # Fetch vehicle IMEI mappings
+        vehicle_map = {
+            v.get("imei", "UNKNOWN"): v.get("registration_number", "UNKNOWN") 
+            for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1, "_id": 0})
+        }
+        print("Vehicle Map:", vehicle_map)  # Debugging log
 
-    # Fetch today's odometer readings
-    pipeline = [
-        {"$match": {"date": today_str}},
-        {"$group": {
-            "_id": "$imei",
-            "start_odometer": {"$min": "$odometer"},
-            "end_odometer": {"$max": "$odometer"}
-        }},
-        {"$project": {
-            "imei": "$_id",
-            "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
-        }}
-    ]
+        # Fetch today's odometer readings
+        pipeline = [
+            {"$match": {"date": today_str}},  # Filter today's data
+            {"$group": {
+                "_id": "$imei",
+                "start_odometer": {"$min": "$odometer"},
+                "end_odometer": {"$max": "$odometer"}
+            }},
+            {"$project": {
+                "imei": "$_id",
+                "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+            }}
+        ]
 
-    results = list(atlanta_collection.aggregate(pipeline))
+        results = list(atlanta_collection.aggregate(pipeline))
+        print("Odometer Results:", results)  # Debugging log
 
-    # Convert IMEI to Vehicle Registration
-    vehicle_data = [
-        {"registration": vehicle_map.get(record["imei"], "Unknown"), "distance": record["distance_traveled"]}
-        for record in results
-    ]
+        # Convert IMEI to Vehicle Registration
+        vehicle_data = [
+            {
+                "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
+                "distance": record.get("distance_traveled", 0)
+            }
+            for record in results
+        ]
 
-    print("\nVehicle Data:", vehicle_data)
+        print("Final Vehicle Data:", vehicle_data)  # Debugging log
 
-    return jsonify(vehicle_data)
+        return jsonify(vehicle_data), 200
+
+    except Exception as e:
+        print(f"🚨 Error fetching vehicle distances: {e}")
+        return jsonify({"error": str(e)}), 500
