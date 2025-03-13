@@ -1,15 +1,29 @@
 $(document).ready(function () {
-    function fetchData(query = '') {
-        $.ajax({
-            url: "/ignitionReport/search",
-            method: "GET",
-            data: { search_query: query },
-            success: function (response) {
-                $('#data-table').html('');
-                response.data.forEach(entry => {
-                    $('#data-table').append(`
+  $("#searchBtn").on("click", function () {
+    const licensePlateNumber = $("#vehicleSelect").val();
+    const fromDate = $("#fromDate").val();
+    const toDate = $("#toDate").val();
+
+    if (!licensePlateNumber || !fromDate || !toDate) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    $.ajax({
+      url: "/ignitionReport/fetch_ignition_report",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        license_plate_number: licensePlateNumber,
+        from_date: fromDate,
+        to_date: toDate,
+      }),
+      success: function (response) {
+        $("#data-table").html("");
+        response.forEach((entry) => {
+          $("#data-table").append(`
                         <tr>
-                            <td>${entry.vehicle_number}</td>
+                            <td>${licensePlateNumber}</td>
                             <td>${entry.date}</td>
                             <td>${entry.time}</td>
                             <td>${entry.latitude}</td>
@@ -17,27 +31,48 @@ $(document).ready(function () {
                             <td>${entry.ignition}</td>
                         </tr>
                     `);
-                });
-            },
-            error: function () {
-                console.error('Error fetching data');
-            }
         });
+      },
+      error: function (xhr) {
+        alert(xhr.responseJSON.error);
+      },
+    });
+  });
+
+  $("#downloadBtn").on("click", function () {
+    const licensePlateNumber = $("#vehicleSelect").val();
+    const fromDate = $("#fromDate").val();
+    const toDate = $("#toDate").val();
+
+    if (!licensePlateNumber || !fromDate || !toDate) {
+      alert("Please fill all fields");
+      return;
     }
 
-    // Fetch all data initially
-    fetchData();
-
-    // Fetch data on input change
-    $('#search').on('input', function () {
-        const query = $(this).val().trim();
-        fetchData(query);
+    $.ajax({
+      url: "/ignitionReport/download_ignition_report",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        license_plate_number: licensePlateNumber,
+        from_date: fromDate,
+        to_date: toDate,
+      }),
+      xhrFields: {
+        responseType: "blob",
+      },
+      success: function (blob) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Ignition_Report.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      },
+      error: function (xhr) {
+        alert(xhr.responseJSON.error);
+      },
     });
-
-    // Handle download button click
-    $('#download').on('click', function () {
-        const searchQuery = $('#search').val().trim();
-        const url = `/ignitionReport/download?search_query=${encodeURIComponent(searchQuery)}`;
-        window.location.href = url; // Trigger file download
-    });
+  });
 });

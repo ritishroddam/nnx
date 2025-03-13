@@ -1,15 +1,20 @@
-from flask import Flask, render_template, request, jsonify, send_file, Blueprint
+from flask import Blueprint, render_template, request, jsonify, send_file
 from pymongo import MongoClient
 import pandas as pd
-import logging
+from datetime import datetime, timedelta
+from io import BytesIO
 
-ignition_bp = Blueprint('IgnitionReport', __name__, static_folder='static', template_folder='templates')
+ignition_report_bp = Blueprint('IgnitionReport', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = client["nnx"]
-atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
+atlanta_collection = db['atlanta']
+
+@ignition_report_bp.route('/page')
+def page():
+    return render_template('ignition.html')
 
 def format_date(date_str):
     return f"{date_str[0:2]}-{date_str[2:4]}-20{date_str[4:6]}" if date_str else "N/A"
@@ -27,135 +32,81 @@ def convert_to_decimal(coord, direction):
         decimal_degrees = -decimal_degrees
     return round(decimal_degrees, 6)
 
-@ignition_bp.route('/page')
-def page():
-    return render_template("ignition.html")
+@ignition_report_bp.route('/ignition_report')
+def ignition_report_page():
+    vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    return render_template('ignition_report.html', vehicles=vehicles)
 
-# @ignition_bp.route('/search', methods=['GET'])
-# def search_data():
-#     search_query = request.args.get('search_query', '').strip()
-#     query = {}
+@ignition_report_bp.route('/fetch_ignition_report', methods=['POST'])
+def fetch_ignition_report():
+    data = request.json
+    license_plate_number = data.get('license_plate_number')
+    from_date = data.get('from_date')
+    to_date = data.get('to_date')
 
-#     if search_query:
-#         query = {
-#             "$or": [
-#                 {"LicensePlateNumber": {"$regex": f".*{search_query}.*", "$options": "i"}},
-#                 {"LicensePlateNumber": {"$regex": f".*{search_query[-4:]}.*", "$options": "i"}}
-#             ]
-#         }
+    vehicle = vehicle_inventory_collection.find_one({"LicensePlateNumber": license_plate_number}, {"IMEI": 1, "_id": 0})
+    if not vehicle:
+        return jsonify({"error": "Vehicle not found"}), 404
 
-#     vehicle_data = list(vehicle_inventory_collection.find(query, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}))
-#     imei_to_plate = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_data}
+    imei = vehicle["IMEI"]
+    from_datetime = datetime.strptime(from_date, '%Y-%m-%dT%H:%M')
+    to_datetime = datetime.strptime(to_date, '%Y-%m-%dT%H:%M')
 
-#     atlanta_data = list(atlanta_collection.find({"imei": {"$in": list(imei_to_plate.keys())}}, {"_id": 0}))
+    if (to_datetime - from_datetime).days > 30:
+        return jsonify({"error": "Date range cannot exceed 30 days"}), 400
 
-#     data_to_display = []
-#     for entry in atlanta_data:
-#         vehicle_number = imei_to_plate.get(entry.get("imei"), "N/A")
-#         date = format_date(entry.get("date", ""))
-#         time = format_time(entry.get("time", ""))
-#         latitude = convert_to_decimal(entry.get("latitude", ""), entry.get("dir1", "N"))
-#         longitude = convert_to_decimal(entry.get("longitude", ""), entry.get("dir2", "E"))
-#         ignition = entry.get("ignition", "N/A")
+    query = {
+        "imei": imei,
+        "date": {"$gte": from_datetime.strftime('%d%m%y'), "$lte": to_datetime.strftime('%d%m%y')},
+        "time": {"$gte": from_datetime.strftime('%H%M%S'), "$lte": to_datetime.strftime('%H%M%S')}
+    }
 
-#         data_to_display.append({
-#             "vehicle_number": vehicle_number,
-#             "date": date,
-#             "time": time,
-#             "latitude": latitude,
-#             "longitude": longitude,
-#             "ignition": ignition
-#         })
+    records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
+    for record in records:
+        record["date"] = format_date(record["date"])
+        record["time"] = format_time(record["time"])
+        record["latitude"] = convert_to_decimal(record["latitude"], record["dir1"])
+        record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
+        record["ignition"] = "On" if record["ignition"] == "1" else "Off"
 
-#     return jsonify({"data": data_to_display})
+    return jsonify(records)
 
-logging.basicConfig(level=logging.DEBUG)
+@ignition_report_bp.route('/download_ignition_report', methods=['POST'])
+def download_ignition_report():
+    data = request.json
+    license_plate_number = data.get('license_plate_number')
+    from_date = data.get('from_date')
+    to_date = data.get('to_date')
 
-@ignition_bp.route('/search', methods=['GET'])
-def search_data():
-    logging.debug("Received search request")
-    search_query = request.args.get('search_query', '').strip()
-    logging.debug(f"Search query: {search_query}")
-    query = {}
+    vehicle = vehicle_inventory_collection.find_one({"LicensePlateNumber": license_plate_number}, {"IMEI": 1, "_id": 0})
+    if not vehicle:
+        return jsonify({"error": "Vehicle not found"}), 404
 
-    if search_query:
-        query = {
-            "$or": [
-                {"LicensePlateNumber": {"$regex": f".*{search_query}.*", "$options": "i"}},
-                {"LicensePlateNumber": {"$regex": f".*{search_query[-4:]}.*", "$options": "i"}}
-            ]
-        }
+    imei = vehicle["IMEI"]
+    from_datetime = datetime.strptime(from_date, '%Y-%m-%dT%H:%M')
+    to_datetime = datetime.strptime(to_date, '%Y-%m-%dT%H:%M')
 
-    vehicle_data = list(vehicle_inventory_collection.find(query, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}))
-    logging.debug(f"Vehicle data: {vehicle_data}")
-    imei_to_plate = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_data}
+    if (to_datetime - from_datetime).days > 30:
+        return jsonify({"error": "Date range cannot exceed 30 days"}), 400
 
-    atlanta_data = list(atlanta_collection.find({"imei": {"$in": list(imei_to_plate.keys())}}, {"_id": 0}))
-    logging.debug(f"Atlanta data: {atlanta_data}")
+    query = {
+        "imei": imei,
+        "date": {"$gte": from_datetime.strftime('%d%m%y'), "$lte": to_datetime.strftime('%d%m%y')},
+        "time": {"$gte": from_datetime.strftime('%H%M%S'), "$lte": to_datetime.strftime('%H%M%S')}
+    }
 
-    data_to_display = []
-    for entry in atlanta_data:
-        vehicle_number = imei_to_plate.get(entry.get("imei"), "N/A")
-        date = format_date(entry.get("date", ""))
-        time = format_time(entry.get("time", ""))
-        latitude = convert_to_decimal(entry.get("latitude", ""), entry.get("dir1", "N"))
-        longitude = convert_to_decimal(entry.get("longitude", ""), entry.get("dir2", "E"))
-        ignition = entry.get("ignition", "N/A")
+    records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
+    for record in records:
+        record["date"] = format_date(record["date"])
+        record["time"] = format_time(record["time"])
+        record["latitude"] = convert_to_decimal(record["latitude"], record["dir1"])
+        record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
+        record["ignition"] = "On" if record["ignition"] == "1" else "Off"
 
-        data_to_display.append({
-            "vehicle_number": vehicle_number,
-            "date": date,
-            "time": time,
-            "latitude": latitude,
-            "longitude": longitude,
-            "ignition": ignition
-        })
+    df = pd.DataFrame(records)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Ignition Report")
 
-    logging.debug(f"Data to display: {data_to_display}")
-    return jsonify({"data": data_to_display})
-
-@ignition_bp.route('/download', methods=['GET'])
-def download_data():
-    search_query = request.args.get('search_query', '').strip()
-    query = {}
-
-    if search_query:
-        query = {
-            "$or": [
-                {"LicensePlateNumber": {"$regex": f".*{search_query}.*", "$options": "i"}},
-                {"LicensePlateNumber": {"$regex": f".*{search_query[-4:]}.*", "$options": "i"}}
-            ]
-        }
-
-    vehicle_data = list(vehicle_inventory_collection.find(query, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}))
-    imei_to_plate = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_data}
-
-    atlanta_data = list(atlanta_collection.find({"imei": {"$in": list(imei_to_plate.keys())}}, {"_id": 0}))
-
-    data_to_export = []
-    for entry in atlanta_data:
-        vehicle_number = imei_to_plate.get(entry.get("imei"), "N/A")
-        date = format_date(entry.get("date", ""))
-        time = format_time(entry.get("time", ""))
-        latitude = convert_to_decimal(entry.get("latitude", ""), entry.get("dir1", "N"))
-        longitude = convert_to_decimal(entry.get("longitude", ""), entry.get("dir2", "E"))
-        ignition = entry.get("ignition", "N/A")
-
-        data_to_export.append({
-            "Vehicle Number": vehicle_number,
-            "Date": date,
-            "Time": time,
-            "Latitude": latitude,
-            "Longitude": longitude,
-            "Ignition": ignition
-        })
-
-    # Convert the data to a pandas DataFrame
-    df = pd.DataFrame(data_to_export)
-
-    # Save the data to an Excel file
-    file_path = 'vehicle_data.xlsx'
-    df.to_excel(file_path, index=False)
-
-    # Send the file to the client
-    return send_file(file_path, as_attachment=True)
+    output.seek(0)
+    return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, attachment_filename="Ignition_Report.xlsx")

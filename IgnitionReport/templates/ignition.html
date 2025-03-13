@@ -1,45 +1,53 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <title>Vehicle Data</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('IgnitionReport.static', filename='css/ignition.css') }}">
-    <script defer src="{{ url_for('IgnitionReport.static', filename='js/ignition.js') }}" defer></script>
-    {% endblock %}
+<title>Ignition Report</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script defer src="{{ url_for('IgnitionReport.static', filename='js/ignition_report.js') }}"></script>
+{% endblock %}
 
-    {% block h1 %}
-    Ignition Report
-    {% endblock %}
-    
-    {% block block_container %}
-    <div class="container mt-5">
-        <div class="form-group">
-            <label for="search">Search by Vehicle Number (Full or Last 4 Digits):</label>
-            <input type="text" id="search" class="form-control" placeholder="Enter Vehicle Number">
-        </div>
-        
-        <div class="d-flex justify-content-between align-items-center">
-            <button class="btn btn-primary" id="download">Download Excel</button>
-        </div>        
+{% block h1 %}
+Ignition Report
+{% endblock %}
 
-        <br>
-
-        <table class="table table-bordered table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Vehicle Number</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Ignition</th>
-                </tr>
-            </thead>
-            <tbody id="data-table">
-                <!-- Table rows will be dynamically inserted here -->
-            </tbody>
-        </table>
+{% block block_container %}
+<div class="container mt-5">
+    <div class="form-group">
+        <label for="vehicleSelect">Select Vehicle:</label>
+        <select id="vehicleSelect" class="form-control">
+            {% for vehicle in vehicles %}
+            <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+            {% endfor %}
+        </select>
     </div>
-    {% endblock %}
+    <div class="form-group">
+        <label for="fromDate">From Date and Time:</label>
+        <input type="datetime-local" id="fromDate" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="toDate">To Date and Time:</label>
+        <input type="datetime-local" id="toDate" class="form-control">
+    </div>
+    <button id="searchBtn" class="btn btn-primary">Search</button>
+    <button id="downloadBtn" class="btn btn-secondary">Download</button>
 
+    <br><br>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Vehicle License Plate Number</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Ignition</th>
+            </tr>
+        </thead>
+        <tbody id="data-table">
+            <!-- Table rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}
