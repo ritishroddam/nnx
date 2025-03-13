@@ -74,27 +74,6 @@
   gap: 0;
 }
 
-#vehicleSetion {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  padding: 20px;
-}
-
-.card-chart {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
 .datetime-container,
 .weather-container {
   margin-right: 10px;
@@ -256,4 +235,49 @@ p {
 
 .dark-mode {
   color: #ccc;
+}
+
+#vehicleSetion {
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+}
+
+.card-chart {
+  border-radius: 10px;
+  overflow: hidden;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.col-md-6 {
+  border-radius: 10px;
+  overflow: hidden;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.table-container {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+}
+
+#sortBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
 }
