@@ -31,7 +31,7 @@ def convert_to_decimal(coord, direction):
 @ignition_report_bp.route('/ignition_report_page')
 def ignition_report_page():
     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
-    return render_template('ignition_report.html', vehicles=vehicles)
+    return render_template('ignition.html', vehicles=vehicles)
 
 @ignition_report_bp.route('/fetch_ignition_report', methods=['POST'])
 def fetch_ignition_report():
