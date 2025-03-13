@@ -34,7 +34,7 @@ app.register_blueprint(sim_bp, url_prefix='/simInvy')
 app.register_blueprint(simEntry_bp, url_prefix='/simInvyEntry')
 app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
 app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry')
-app.register_blueprint(ignition_report_bp, url_prefix='/ignition_report')
+app.register_blueprint(ignition_report_bp, url_prefix='/ignitionReport')
 
 @app.route('/')
 def index():
