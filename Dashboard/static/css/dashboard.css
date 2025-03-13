@@ -239,8 +239,8 @@ p {
   align-items: center; /* Align text and line in the center */
   gap: 10px; /* Space between text and line */
   padding: 15px;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 .title-with-line hr {
