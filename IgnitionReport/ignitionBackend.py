@@ -102,7 +102,7 @@ def fetch_ignition_report():
         record["latitude"] = convert_to_decimal(record["latitude"], record["dir1"])
         record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
         record["ignition"] = "On" if record["ignition"] == "1" else "Off"
- 
+
     return jsonify(records)
 
 @ignition_report_bp.route('/download_ignition_report', methods=['POST'])
