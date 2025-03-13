@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime, timedelta
 from io import BytesIO
+import re
 
 ignition_report_bp = Blueprint('IgnitionReport', __name__, static_folder='static', template_folder='templates')
 
@@ -68,6 +69,52 @@ def fetch_ignition_report():
 
     return jsonify(records)
 
+# @ignition_report_bp.route('/download_ignition_report', methods=['POST'])
+# def download_ignition_report():
+#     data = request.json
+#     license_plate_number = data.get('license_plate_number')
+#     from_date = data.get('from_date')
+#     to_date = data.get('to_date')
+
+#     vehicle = vehicle_inventory_collection.find_one({"LicensePlateNumber": license_plate_number}, {"IMEI": 1, "_id": 0})
+#     if not vehicle:
+#         return jsonify({"error": "Vehicle not found"}), 404
+
+#     imei = vehicle["IMEI"]
+#     from_datetime = datetime.strptime(from_date, '%Y-%m-%dT%H:%M')
+#     to_datetime = datetime.strptime(to_date, '%Y-%m-%dT%H:%M')
+
+#     if (to_datetime - from_datetime).days > 30:
+#         return jsonify({"error": "Date range cannot exceed 30 days"}), 400
+
+#     query = {
+#         "imei": imei,
+#         "date": {"$gte": from_datetime.strftime('%d%m%y'), "$lte": to_datetime.strftime('%d%m%y')},
+#         "time": {"$gte": from_datetime.strftime('%H%M%S'), "$lte": to_datetime.strftime('%H%M%S')}
+#     }
+
+#     records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
+#     for record in records:
+#         record["date"] = format_date(record["date"])
+#         record["time"] = format_time(record["time"])
+#         record["latitude"] = convert_to_decimal(record["latitude"], record["dir1"])
+#         record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
+#         record["ignition"] = "On" if record["ignition"] == "1" else "Off"
+
+#     df = pd.DataFrame(records)
+#     output = BytesIO()
+#     with pd.ExcelWriter(output, engine="openpyxl") as writer:
+#         df.to_excel(writer, index=False, sheet_name="Ignition Report")
+
+#     output.seek(0)
+#     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, attachment_filename="Ignition_Report.xlsx")
+
+def sanitize_for_excel(value):
+    if isinstance(value, str):
+        # Remove non-printable characters
+        return re.sub(r'[\x00-\x1F\x7F-\x9F]', '', value)
+    return value
+
 @ignition_report_bp.route('/download_ignition_report', methods=['POST'])
 def download_ignition_report():
     data = request.json
@@ -100,7 +147,10 @@ def download_ignition_report():
         record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
         record["ignition"] = "On" if record["ignition"] == "1" else "Off"
 
-    df = pd.DataFrame(records)
+    # Sanitize records for Excel
+    sanitized_records = [{k: sanitize_for_excel(v) for k, v in record.items()} for record in records]
+
+    df = pd.DataFrame(sanitized_records)
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Ignition Report")
