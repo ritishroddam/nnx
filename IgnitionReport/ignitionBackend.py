@@ -12,10 +12,6 @@ db = client["nnx"]
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
 
-@ignition_report_bp.route('/page')
-def page():
-    return render_template('ignition.html')
-
 def format_date(date_str):
     return f"{date_str[0:2]}-{date_str[2:4]}-20{date_str[4:6]}" if date_str else "N/A"
 
