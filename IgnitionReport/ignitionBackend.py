@@ -33,6 +33,40 @@ def ignition_report_page():
     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return render_template('ignition.html', vehicles=vehicles)
 
+# @ignition_report_bp.route('/fetch_ignition_report', methods=['POST'])
+# def fetch_ignition_report():
+#     data = request.json
+#     license_plate_number = data.get('license_plate_number')
+#     from_date = data.get('from_date')
+#     to_date = data.get('to_date')
+
+#     vehicle = vehicle_inventory_collection.find_one({"LicensePlateNumber": license_plate_number}, {"IMEI": 1, "_id": 0})
+#     if not vehicle:
+#         return jsonify({"error": "Vehicle not found"}), 404
+
+#     imei = vehicle["IMEI"]
+#     from_datetime = datetime.strptime(from_date, '%Y-%m-%dT%H:%M')
+#     to_datetime = datetime.strptime(to_date, '%Y-%m-%dT%H:%M')
+
+#     if (to_datetime - from_datetime).days > 30:
+#         return jsonify({"error": "Date range cannot exceed 30 days"}), 400
+
+#     query = {
+#         "imei": imei,
+#         "date": {"$gte": from_datetime.strftime('%d%m%y'), "$lte": to_datetime.strftime('%d%m%y')},
+#         "time": {"$gte": from_datetime.strftime('%H%M%S'), "$lte": to_datetime.strftime('%H%M%S')}
+#     }
+
+#     records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
+#     for record in records:
+#         record["date"] = format_date(record["date"])
+#         record["time"] = format_time(record["time"])
+#         record["latitude"] = convert_to_decimal(record["latitude"], record["dir1"])
+#         record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
+#         record["ignition"] = "On" if record["ignition"] == "1" else "Off"
+
+#     return jsonify(records)
+
 @ignition_report_bp.route('/fetch_ignition_report', methods=['POST'])
 def fetch_ignition_report():
     data = request.json
@@ -57,7 +91,11 @@ def fetch_ignition_report():
         "time": {"$gte": from_datetime.strftime('%H%M%S'), "$lte": to_datetime.strftime('%H%M%S')}
     }
 
+    print("Constructed Query:", query)  # Debug print
+
     records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
+    print("Fetched Records:", records)  # Debug print
+
     for record in records:
         record["date"] = format_date(record["date"])
         record["time"] = format_time(record["time"])
