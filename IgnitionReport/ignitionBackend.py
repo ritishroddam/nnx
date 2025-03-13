@@ -156,4 +156,4 @@ def download_ignition_report():
         df.to_excel(writer, index=False, sheet_name="Ignition Report")
 
     output.seek(0)
-    return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, attachment_filename="Ignition_Report.xlsx")
+    return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="Ignition_Report.xlsx")
