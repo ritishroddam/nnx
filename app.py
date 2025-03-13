@@ -18,6 +18,7 @@ from SimInvy.SimBackend import sim_bp
 from SimInvyEntry.SimBackend import simEntry_bp
 from VehicleDetails.vehicleDetails import vehicleDetails_bp
 from VehicleDetailsEntry.vehicleDetailsEntry import vehicleDetailsEntry_bp
+from IgnitionReport.ignitionBackend import ignition_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
@@ -33,6 +34,7 @@ app.register_blueprint(sim_bp, url_prefix='/simInvy')
 app.register_blueprint(simEntry_bp, url_prefix='/simInvyEntry')
 app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
 app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry')
+app.register_blueprint(ignition_bp, url_prefix='/ignitionReport')
 
 @app.route('/')
 def index():
