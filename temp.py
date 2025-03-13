@@ -2,7 +2,7 @@ import requests
 
 url = "http://64.227.137.175:8888/ignitionReport/fetch_ignition_report"
 payload = {
-    "license_plate_number": "KA25BB2393",
+    "license_plate_number": "KA21AA9424",
     "from_date": "2025-03-12T00:00",
     "to_date": "2025-03-12T23:59"
 }
