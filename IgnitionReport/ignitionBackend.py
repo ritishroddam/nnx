@@ -69,6 +69,12 @@ def fetch_ignition_report():
 
     return jsonify(records)
 
+def sanitize_for_excel(value):
+    if isinstance(value, str):
+        # Remove non-printable characters
+        return re.sub(r'[\x00-\x1F\x7F-\x9F]', '', value)
+    return value
+
 # @ignition_report_bp.route('/download_ignition_report', methods=['POST'])
 # def download_ignition_report():
 #     data = request.json
@@ -101,19 +107,16 @@ def fetch_ignition_report():
 #         record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
 #         record["ignition"] = "On" if record["ignition"] == "1" else "Off"
 
-#     df = pd.DataFrame(records)
+#     # Sanitize records for Excel
+#     sanitized_records = [{k: sanitize_for_excel(v) for k, v in record.items()} for record in records]
+
+#     df = pd.DataFrame(sanitized_records)
 #     output = BytesIO()
 #     with pd.ExcelWriter(output, engine="openpyxl") as writer:
 #         df.to_excel(writer, index=False, sheet_name="Ignition Report")
 
 #     output.seek(0)
-#     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, attachment_filename="Ignition_Report.xlsx")
-
-def sanitize_for_excel(value):
-    if isinstance(value, str):
-        # Remove non-printable characters
-        return re.sub(r'[\x00-\x1F\x7F-\x9F]', '', value)
-    return value
+#     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="Ignition_Report.xlsx")
 
 @ignition_report_bp.route('/download_ignition_report', methods=['POST'])
 def download_ignition_report():
@@ -150,7 +153,16 @@ def download_ignition_report():
     # Sanitize records for Excel
     sanitized_records = [{k: sanitize_for_excel(v) for k, v in record.items()} for record in records]
 
-    df = pd.DataFrame(sanitized_records)
+    # Add the vehicle license plate number to each record
+    for record in sanitized_records:
+        record["Vehicle License Plate Number"] = license_plate_number
+
+    # Create DataFrame with specified columns
+    df = pd.DataFrame(sanitized_records, columns=[
+        "Vehicle License Plate Number", "date", "time", "latitude", "longitude", "ignition"
+    ])
+    df.columns = ["Vehicle License Plate Number", "Date", "Time", "Latitude", "Longitude", "Ignition"]
+
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Ignition Report")
