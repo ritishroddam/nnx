@@ -152,7 +152,7 @@ def convert_to_decimal(coord, direction):
     return round(decimal_degrees, 6)
 
 @ignition_bp.route('/page')
-def index():
+def page():
     return render_template("ignition.html")
 
 @ignition_bp.route('/search', methods=['GET'])
