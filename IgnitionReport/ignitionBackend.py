@@ -156,7 +156,7 @@ def page():
     return render_template("ignition.html")
 
 @ignition_bp.route('/search', methods=['GET'])
-def search_data(): 
+def search_data():
     search_query = request.args.get('search_query', '').strip()
     query = {}
 
