@@ -52,6 +52,8 @@
 .dashboard-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap; 
 }
 .graph-container,
 .traffic-container,
@@ -242,8 +244,9 @@ p {
   overflow: hidden;
   width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   padding: 20px;
 }
@@ -258,7 +261,7 @@ p {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.col-md-6 {
+.vehicleLiveTable {
   border-radius: 10px;
   overflow: hidden;
   width: 50%;
@@ -280,4 +283,9 @@ p {
   border: none;
   cursor: pointer;
   font-size: 16px;
+}
+
+.card-chart, .vehicleLiveTable {
+  flex: 1; /* Allows both divs to take equal space */
+  min-width: 45%; /* Ensures responsiveness */
 }
