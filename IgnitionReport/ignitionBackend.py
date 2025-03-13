@@ -28,7 +28,7 @@ def convert_to_decimal(coord, direction):
         decimal_degrees = -decimal_degrees
     return round(decimal_degrees, 6)
 
-@ignition_report_bp.route('/ignition_report')
+@ignition_report_bp.route('/ignition_report_page')
 def ignition_report_page():
     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return render_template('ignition_report.html', vehicles=vehicles)
