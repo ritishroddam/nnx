@@ -2,7 +2,6 @@
 
 {% block head %}
 <title>Ignition Report</title>
-<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css"> -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script defer src="{{ url_for('IgnitionReport.static', filename='js/ignition.js') }}"></script>
 {% endblock %}
@@ -12,6 +11,8 @@ Ignition Report
 {% endblock %}
 
 {% block block_container %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+
 <div class="container mt-5">
     <div class="form-group">
         <label for="vehicleSelect">Select Vehicle:</label>
