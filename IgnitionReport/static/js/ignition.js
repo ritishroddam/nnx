@@ -27,11 +27,11 @@ $(document).ready(function () {
           $("#data-table").append(`
                         <tr>
                             <td>${licensePlateNumber}</td>
-                            <td>${entry.date}</td>
-                            <td>${entry.time}</td>
-                            <td>${entry.latitude}</td>
-                            <td>${entry.longitude}</td>
-                            <td>${entry.ignition}</td>
+                            <td>${entry.Date}</td>
+                            <td>${entry.Time}</td>
+                            <td>${entry.Latitude}</td>
+                            <td>${entry.Longitude}</td>
+                            <td>${entry.Ignition}</td>
                         </tr>
                     `);
         });
