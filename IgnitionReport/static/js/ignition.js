@@ -1,70 +1,88 @@
-$(document).ready(function () {
-  $("#searchBtn").on("click", function () {
-    const licensePlateNumber = $("#vehicleSelect").val();
-    const fromDate = $("#fromDate").val();
-    const toDate = $("#toDate").val();
+document.addEventListener("DOMContentLoaded", function () {
+  const searchBtn = document.getElementById("searchBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+
+  searchBtn.addEventListener("click", function () {
+    const licensePlateNumber = document.getElementById("vehicleSelect").value;
+    const fromDate = document.getElementById("fromDate").value;
+    const toDate = document.getElementById("toDate").value;
 
     if (!licensePlateNumber || !fromDate || !toDate) {
       alert("Please fill all fields");
       return;
     }
 
-    $.ajax({
-      url: "/ignitionReport/fetch_ignition_report",
+    fetch("/ignitionReport/fetch_ignition_report", {
       method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         license_plate_number: licensePlateNumber,
         from_date: fromDate,
         to_date: toDate,
       }),
-      success: function (response) {
-        $("#data-table").html("");
-        response.forEach((entry) => {
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((err) => {
+            throw new Error(err.error);
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const dataTable = document.getElementById("data-table");
+        dataTable.innerHTML = "";
+        data.forEach((entry) => {
           console.log(entry);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${licensePlateNumber}</td>
+            <td>${entry.Date}</td>
+            <td>${entry.Time}</td>
+            <td>${entry.Latitude}</td>
+            <td>${entry.Longitude}</td>
+            <td>${entry.Ignition}</td>
+          `;
+          dataTable.appendChild(row);
         });
-        response.forEach((entry) => {
-          $("#data-table").append(`
-                        <tr>
-                            <td>${licensePlateNumber}</td>
-                            <td>${entry.Date}</td>
-                            <td>${entry.Time}</td>
-                            <td>${entry.Latitude}</td>
-                            <td>${entry.Longitude}</td>
-                            <td>${entry.Ignition}</td>
-                        </tr>
-                    `);
-        });
-      },
-      error: function (xhr) {
-        alert(xhr.responseJSON.error);
-      },
-    });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   });
 
-  $("#downloadBtn").on("click", function () {
-    const licensePlateNumber = $("#vehicleSelect").val();
-    const fromDate = $("#fromDate").val();
-    const toDate = $("#toDate").val();
+  downloadBtn.addEventListener("click", function () {
+    const licensePlateNumber = document.getElementById("vehicleSelect").value;
+    const fromDate = document.getElementById("fromDate").value;
+    const toDate = document.getElementById("toDate").value;
 
     if (!licensePlateNumber || !fromDate || !toDate) {
       alert("Please fill all fields");
       return;
     }
 
-    $.ajax({
-      url: "/ignitionReport/download_ignition_report",
+    fetch("/ignitionReport/download_ignition_report", {
       method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         license_plate_number: licensePlateNumber,
         from_date: fromDate,
         to_date: toDate,
       }),
-      xhrFields: {
-        responseType: "blob",
-      },
-      success: function (blob) {
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((err) => {
+            throw new Error(err.error);
+          });
+        }
+        return response.blob();
+      })
+      .then((blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -72,10 +90,9 @@ $(document).ready(function () {
         document.body.appendChild(a);
         a.click();
         a.remove();
-      },
-      error: function (xhr) {
-        alert(xhr.responseJSON.error);
-      },
-    });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   });
 });
