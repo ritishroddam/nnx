@@ -1,15 +1,14 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, Blueprint
 from pymongo import MongoClient
 import sys
 
-app = Flask(__name__)
+sos_report_bp = Blueprint('SOSreport', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = client["nnx"]
 sos_logs_collection = db["sos_logs"]
 
-# Convert latitude and longitude to decimal degrees
 def convert_coordinates(lat, lon):
     try:
         lat_deg = int(lat[:2])
@@ -23,11 +22,11 @@ def convert_coordinates(lat, lon):
         print(f"Error converting coordinates: {e}")
         return 0.0, 0.0
 
-@app.route('/')
-def index():
+@sos_report_bp.route('/page')
+def page():
     return render_template('sos_report.html')
 
-@app.route('/api/sos-logs')
+@sos_report_bp.route('/sos-logs')
 def get_sos_logs():
     logs = []
     for log in sos_logs_collection.find():
