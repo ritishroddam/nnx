@@ -15,7 +15,7 @@ atlanta_collection = db['atlanta']
 @speed_report_bp.route('/speed_report_page')
 def speed_report_page():
     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
-    return render_template('speed_report.html', vehicles=vehicles)
+    return render_template('Speed.html', vehicles=vehicles)
 
 @speed_report_bp.route('/fetch_speed_report', methods=['POST'])
 def fetch_speed_report():
