@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         if (data.length === 0) {
+          const emptyRow = document.createElement("tr");
           emptyRow.innerHTML = `<td colspan="6" style="text-align: center;">No data available for the selected criteria.</td>`;
           dataTable.appendChild(emptyRow);
           return;
