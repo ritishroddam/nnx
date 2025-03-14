@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.length === 0) {
           const dataTable = document.getElementById("data-table");
           const emptyRow = document.createElement("tr");
-          emptyRow.innerHTML = `<td colspan="6" style="text-align: center;">No data available for the selected criteria.</td>`;
+          emptyRow.innerHTML = `<td colspan="6" style="text-align: center;">No data available for the selected date range.</td>`;
           dataTable.appendChild(emptyRow);
           return;
         }
