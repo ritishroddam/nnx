@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, render_template, request, jsonify, send_file, flash, redirect, url_for
 from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime, timedelta
@@ -70,6 +70,11 @@ def fetch_ignition_report():
             "Longitude": convert_to_decimal(record["longitude"], record["dir2"]),
             "Ignition": "On" if record["ignition"] == "1" else "Off"
         })
+
+    if not data:
+        flash("No records found for the specified date range", "warning")
+        vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
+        return redirect(url_for('IgnitionReport.ignition_report_page', vehicles=vehicles))
 
     return jsonify(data)
 
