@@ -59,23 +59,16 @@ def fetch_ignition_report():
     }
 
     records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
-
-    for record in records:
-        record["date"] = format_date(record["date"])
-        record["time"] = format_time(record["time"])
-        record["latitude"] = convert_to_decimal(record["latitude"], record["dir1"])
-        record["longitude"] = convert_to_decimal(record["longitude"], record["dir2"])
-        record["ignition"] = "On" if record["ignition"] == "1" else "Off"
-
+    
     data = []
 
     for record in records:
         data.append({
-            "Date": record["date"],
-            "Time": record["time"],
-            "Latitude": record["latitude"],
-            "Longitude": record["longitude"],
-            "Ignition": record["ignition"]
+            "Date": format_date(record["date"]),
+            "Time": format_time(record["time"]),
+            "Latitude": convert_to_decimal(record["latitude"], record["dir1"]),
+            "Longitude": convert_to_decimal(record["longitude"], record["dir2"]),
+            "Ignition": "On" if record["ignition"] == "1" else "Off"
         })
 
     return jsonify(data)

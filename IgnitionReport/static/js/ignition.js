@@ -35,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const dataTable = document.getElementById("data-table");
         dataTable.innerHTML = "";
         data.forEach((entry) => {
-          console.log(entry);
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${licensePlateNumber}</td>
