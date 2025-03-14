@@ -1,88 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Speed Report</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center">Vehicle Speed Report</h1>
+{% extends "base.html" %}
 
-        <div class="form-group">
-            <label for="search">Search by Vehicle Number (Full or Last 4 Digits):</label>
-            <input type="text" id="search" class="form-control" placeholder="Enter Vehicle Number">
-        </div>
+{% block head %}
+<title>Vehicle Speed Report</title>
+<link rel="stylesheet" href="{{ url_for('SpeedReport.static', filename='css/Speed.css') }}" />
+<script defer src="{{ url_for('SpeedReport.static', filename='js/speed.js') }}"></script>;
+{% endblock %}
 
-        <div class="d-flex justify-content-between align-items-center">
-            <button class="btn btn-primary" id="download">Download Excel</button>
-        </div>        
+{% block h1 %}
+Vehicle Speed Report
+{% endblock %}
 
-        <br>
+{% block block_container %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        <table class="table table-bordered table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Vehicle Number</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Speed</th>
-                </tr>
-            </thead>
-            <tbody id="data-table">
-                <!-- Table rows will be dynamically inserted here -->
-            </tbody>
-        </table>
+<div class="container mt-5">
+    <div class="form-group">
+        <label for="search">Search by Vehicle Number (Full or Last 4 Digits):</label>
+        <input type="text" id="search" class="form-control" placeholder="Enter Vehicle Number">
     </div>
 
-    <script>
-        $(document).ready(function () {
-            function fetchData(query = '') {
-                $.ajax({
-                    url: "/search",
-                    method: "GET",
-                    data: { search_query: query },
-                    success: function (response) {
-                        $('#data-table').html('');
-                        response.data.forEach(entry => {
-                            $('#data-table').append(`
-                                <tr>
-                                    <td>${entry.vehicle_number}</td>
-                                    <td>${entry.date}</td>
-                                    <td>${entry.time}</td>
-                                    <td>${entry.latitude}</td>
-                                    <td>${entry.longitude}</td>
-                                    <td>${entry.speed}</td>
-                                </tr>
-                            `);
-                        });
-                    },
-                    error: function () {
-                        console.error('Error fetching data');
-                    }
-                });
-            }
+    <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-primary" id="download">Download Excel</button>
+    </div>
 
-            // Fetch all data initially
-            fetchData();
+    <br>
 
-            // Fetch data on input change
-            $('#search').on('input', function () {
-                const query = $(this).val().trim();
-                fetchData(query);
-            });
-
-            // Handle download button click
-            $('#download').on('click', function () {
-                const searchQuery = $('#search').val().trim();
-                const url = `/download?search_query=${encodeURIComponent(searchQuery)}`;
-                window.location.href = url; // Trigger file download
-            });
-        });
-    </script>
-</body>
-</html>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Vehicle Number</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Speed</th>
+            </tr>
+        </thead>
+        <tbody id="data-table">
+            <!-- Table rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}
