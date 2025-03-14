@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then((data) => {
+        console.log("API Response:", data);
         const dataTable = document.getElementById("data-table");
         dataTable.innerHTML = "";
         data.forEach((entry) => {
@@ -49,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       })
       .catch((error) => {
+        console.error("Error:", error);
         alert(error.message);
       });
   });
