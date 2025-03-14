@@ -1,4 +1,4 @@
-from flask import Blueprint,get_flashed_messages, render_template, request, jsonify, send_file, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, send_file
 from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime, timedelta
@@ -43,16 +43,14 @@ def fetch_ignition_report():
 
     vehicle = vehicle_inventory_collection.find_one({"LicensePlateNumber": license_plate_number}, {"IMEI": 1, "_id": 0})
     if not vehicle:
-        flash("Vehicle not found", "danger")
-        return jsonify({"flashed_messages": get_flashed_messages(with_categories=True)}), 404
+        return jsonify({"error": "Vehicle not found"}), 404
 
     imei = vehicle["IMEI"]
     from_datetime = datetime.strptime(from_date, '%Y-%m-%dT%H:%M')
     to_datetime = datetime.strptime(to_date, '%Y-%m-%dT%H:%M')
 
     if (to_datetime - from_datetime).days > 30:
-        flash("Date range cannot exceed 30 days", "danger")
-        return jsonify({"flashed_messages": get_flashed_messages(with_categories=True)}), 400
+        return jsonify({"error": "Date range cannot exceed 30 days"}), 400
 
     query = {
         "imei": imei,
@@ -72,10 +70,6 @@ def fetch_ignition_report():
             "Longitude": convert_to_decimal(record["longitude"], record["dir2"]),
             "Ignition": "On" if record["ignition"] == "1" else "Off"
         })
-
-    if not data:
-        flash("No records found for the specified date range", "danger")
-        return jsonify({"flashed_messages": get_flashed_messages(with_categories=True)}), 400
 
     return jsonify(data)
 
