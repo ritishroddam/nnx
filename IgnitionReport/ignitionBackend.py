@@ -72,7 +72,7 @@ def fetch_ignition_report():
         })
 
     if not data:
-        flash("No records found for the specified date range", "warning")
+        flash("No records found for the specified date range", "danger")
         vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
         return redirect(url_for('IgnitionReport.ignition_report_page', vehicles=vehicles))
 
