@@ -1,122 +1,79 @@
-from flask import Flask, render_template, request, jsonify, Blueprint
+from flask import Blueprint, render_template, request, jsonify, send_file
 from pymongo import MongoClient
+from datetime import datetime, timedelta
 import pandas as pd
-from flask import send_file
-import sys
+from io import BytesIO
 
 speed_report_bp = Blueprint('SpeedReport', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client["CordonEV"]
-collection = db['data']  
+db = client["nnx"]
+vehicle_inventory_collection = db['vehicle_inventory']
+atlanta_collection = db['atlanta']
 
-def format_date(date_str):
-    return f"{date_str[0:2]}-{date_str[2:4]}-20{date_str[4:6]}" if date_str else "N/A"
+@speed_report_bp.route('/speed_report_page')
+def speed_report_page():
+    vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    return render_template('speed_report.html', vehicles=vehicles)
 
-def format_time(time_str):
-    return f"{time_str[0:2]}:{time_str[2:4]}:{time_str[4:6]}" if time_str else "N/A"
+@speed_report_bp.route('/fetch_speed_report', methods=['POST'])
+def fetch_speed_report():
+    data = request.json
+    license_plate_number = data.get('license_plate_number')
+    from_date = data.get('from_date')
+    to_date = data.get('to_date')
 
-def convert_to_decimal(coord, direction):
-    if not coord:
-        return "N/A"
-    degrees = int(float(coord) / 100)
-    minutes = float(coord) % 100
-    decimal_degrees = degrees + (minutes / 60)
-    if direction in ["S", "W"]:
-        decimal_degrees = -decimal_degrees
-    return round(decimal_degrees, 6)
+    vehicle = vehicle_inventory_collection.find_one({"LicensePlateNumber": license_plate_number}, {"IMEI": 1, "_id": 0})
+    if not vehicle:
+        return jsonify({"error": "Vehicle not found"}), 404
 
-@speed_report_bp.route('/page')
-def page():
-    return render_template("Speed.html")
+    imei = vehicle["IMEI"]
+    from_datetime = datetime.strptime(from_date, '%Y-%m-%dT%H:%M')
+    to_datetime = datetime.strptime(to_date, '%Y-%m-%dT%H:%M')
 
-@speed_report_bp.route('/search', methods=['GET'])
-def search_data():
-    search_query = request.args.get('search_query', '').strip()
-    query = {}
+    if (to_datetime - from_datetime).days > 30:
+        return jsonify({"error": "Date range cannot exceed 30 days"}), 400
 
-    if search_query:
-        query = {
-            "$or": [
-                {"Vehicle Data.License Plate Number": {"$regex": f".*{search_query}.*", "$options": "i"}},
-                {"Vehicle Data.License Plate Number": {"$regex": f".*{search_query[-4:]}.*", "$options": "i"}}
-            ]
-        }
+    query = {
+        "imei": imei,
+        "date": {"$gte": from_datetime.strftime('%d%m%y'), "$lte": to_datetime.strftime('%d%m%y')},
+        "time": {"$gte": from_datetime.strftime('%H%M%S'), "$lte": to_datetime.strftime('%H%M%S')}
+    }
 
-    results = collection.find(query, {
-        "Atlanta Data": 1,
-        "Vehicle Data.License Plate Number": 1
-    })
+    records = list(atlanta_collection.find(query, {"_id": 0, "imei": 0}))
+    data = []
 
-    data_to_display = []
-    for record in results:
-        vehicle_number = record.get("Vehicle Data", {}).get("License Plate Number", "N/A")
-        atlanta_data = record.get("Atlanta Data", [])
+    for record in records:
+        data.append({
+            "LicensePlateNumber": license_plate_number,
+            "Date": record["date"],
+            "Time": record["time"],
+            "Latitude": record["latitude"],
+            "Longitude": record["longitude"],
+            "Speed": round(float(record["speed"]) * 1.60934, 2)  # Convert mph to km/h
+        })
 
-        for entry in atlanta_data:
-            date = format_date(entry.get("date", ""))
-            time = format_time(entry.get("time", ""))
-            latitude = convert_to_decimal(entry.get("latitude", ""), entry.get("dir1", "N"))
-            longitude = convert_to_decimal(entry.get("longitude", ""), entry.get("dir2", "E"))
-            speed = entry.get("speed", "0.0")  # Fetch speed instead of ignition
+    return jsonify(data)
 
-            data_to_display.append({
-                "vehicle_number": vehicle_number,
-                "date": date,
-                "time": time,
-                "latitude": latitude,
-                "longitude": longitude,
-                "speed": speed
-            })
+@speed_report_bp.route('/download_speed_report', methods=['POST'])
+def download_speed_report():
+    data = request.json
+    records = data.get('records', [])
 
-    return jsonify({"data": data_to_display})
+    if not records:
+        return jsonify({"error": "No data to download"}), 400
 
-@speed_report_bp.route('/download', methods=['GET'])
-def download_data():
-    search_query = request.args.get('search_query', '').strip()
-    query = {}
+    df = pd.DataFrame(records)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Speed Report")
 
-    if search_query:
-        query = {
-            "$or": [
-                {"Vehicle Data.License Plate Number": {"$regex": f".*{search_query}.*", "$options": "i"}},
-                {"Vehicle Data.License Plate Number": {"$regex": f".*{search_query[-4:]}.*", "$options": "i"}}
-            ]
-        }
+    output.seek(0)
 
-    results = collection.find(query, {
-        "Atlanta Data": 1,
-        "Vehicle Data.License Plate Number": 1
-    })
-
-    data_to_export = []
-    for record in results:
-        vehicle_number = record.get("Vehicle Data", {}).get("License Plate Number", "N/A")
-        atlanta_data = record.get("Atlanta Data", [])
-
-        for entry in atlanta_data:
-            date = format_date(entry.get("date", ""))
-            time = format_time(entry.get("time", ""))
-            latitude = convert_to_decimal(entry.get("latitude", ""), entry.get("dir1", "N"))
-            longitude = convert_to_decimal(entry.get("longitude", ""), entry.get("dir2", "E"))
-            speed = entry.get("speed", "0.0")  # Fetch speed instead of ignition
-
-            data_to_export.append({
-                "Vehicle Number": vehicle_number,
-                "Date": date,
-                "Time": time,
-                "Latitude": latitude,
-                "Longitude": longitude,
-                "Speed": speed
-            })
-
-    # Convert the data to a pandas DataFrame
-    df = pd.DataFrame(data_to_export)
-
-    # Save the data to an Excel file
-    file_path = 'vehicle_speed_data.xlsx'
-    df.to_excel(file_path, index=False)
-
-    # Send the file to the client
-    return send_file(file_path, as_attachment=True)
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="Speed_Report.xlsx"
+    )

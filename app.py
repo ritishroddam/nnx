@@ -40,6 +40,7 @@ app.register_blueprint(ignition_report_bp, url_prefix='/ignitionReport')
 app.register_blueprint(sos_report_bp, url_prefix='/sosReport')
 app.register_blueprint(speed_report_bp, url_prefix='/speedReport')
 
+
 @app.route('/')
 def index():
     return render_template('vehicleMap.html')
