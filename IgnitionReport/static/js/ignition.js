@@ -21,6 +21,9 @@ $(document).ready(function () {
       success: function (response) {
         $("#data-table").html("");
         response.forEach((entry) => {
+          console.log(entry);
+        });
+        response.forEach((entry) => {
           $("#data-table").append(`
                         <tr>
                             <td>${licensePlateNumber}</td>
