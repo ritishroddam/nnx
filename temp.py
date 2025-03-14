@@ -2,9 +2,9 @@ import requests
 
 url = "http://64.227.137.175:8888/ignitionReport/fetch_ignition_report"
 payload = {
-    "license_plate_number": "KA29BB9424",
-    "from_date": "2025-03-12T00:00",
-    "to_date": "2025-03-12T23:59"
+    "license_plate_number": "KA88CC8527",
+    "from_date": "2025-03-11T13:12",
+    "to_date": "2025-03-14T15:12"
 }
 headers = {
     "Content-Type": "application/json"

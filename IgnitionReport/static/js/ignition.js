@@ -33,7 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((data) => {
         if (data.length === 0) {
-          alert("No data found for the specified date range");
+          emptyRow.innerHTML = `<td colspan="6" style="text-align: center;">No data available for the selected criteria.</td>`;
+          dataTable.appendChild(emptyRow);
           return;
         }
         const dataTable = document.getElementById("data-table");
