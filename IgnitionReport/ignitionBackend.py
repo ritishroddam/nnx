@@ -78,7 +78,7 @@ def fetch_ignition_report():
             "Ignition": record["ignition"]
         })
 
-    return jsonify(records)
+    return jsonify(data)
 
 def sanitize_for_excel(value):
     if isinstance(value, str):
