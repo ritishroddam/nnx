@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    fetch("/fetch_ignition_report", {
+    fetch("/ignitionReport/fetch_ignition_report", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
