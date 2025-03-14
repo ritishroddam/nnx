@@ -35,10 +35,7 @@ Ignition Report
 
     <br><br>
 
-    {% with messages = get_flashed_messages(with_categories=true) %} {%
-    if messages %} {% for category, message in messages %}
-    <div class="flash-box flash-{{ category }}">{{ message }}</div>
-    {% endfor %} {% endif %} {% endwith %}
+    <div id="flash-container"></div>
 
     <br><br>
 
