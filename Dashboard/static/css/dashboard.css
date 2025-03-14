@@ -109,7 +109,7 @@
 }
 #map {
   width: 100%;
-  height: 100%;
+  height: 360px;
   transition: filter 0.3s ease-in-out;
 }
 #traffic-info {
@@ -168,6 +168,23 @@ canvas {
 p {
   color: #fff;
 }
+
+.traffic-status {
+  color: #2f2f2f;
+}
+
+.weather p {
+  color: #2f2f2f;
+}
+
+.dark-mode .traffic-status {
+  color: #ccc;
+}
+
+.dark-mode .weather p {
+  color: #ccc;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
