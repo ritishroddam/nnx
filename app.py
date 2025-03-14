@@ -20,6 +20,7 @@ from VehicleDetails.vehicleDetails import vehicleDetails_bp
 from VehicleDetailsEntry.vehicleDetailsEntry import vehicleDetailsEntry_bp
 from IgnitionReport.ignitionBackend import ignition_report_bp
 from SOSreport.sos_report import sos_report_bp
+from SpeedReport.speed import speed_report_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
@@ -37,6 +38,7 @@ app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
 app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry')
 app.register_blueprint(ignition_report_bp, url_prefix='/ignitionReport')
 app.register_blueprint(sos_report_bp, url_prefix='/sosReport')
+app.register_blueprint(speed_report_bp, url_prefix='/speedReport')
 
 @app.route('/')
 def index():
@@ -77,5 +79,5 @@ if __name__ == '__main__':
     subprocess.Popen(['python', run_distinct_vehicle_data_store_path])
     run_calculate_past_distances_path = os.path.join(os.path.dirname(__file__), 'calculate_past_distances.py')
     subprocess.Popen(['python', run_calculate_past_distances_path])
-    
+
     app.run(host='64.227.137.175', port=8888, debug=True)

@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Blueprint
 from pymongo import MongoClient
 import pandas as pd
 from flask import send_file
 import sys
 
-app = Flask(__name__)
+speed_report_bp = Blueprint('SpeedReport', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
@@ -27,11 +27,11 @@ def convert_to_decimal(coord, direction):
         decimal_degrees = -decimal_degrees
     return round(decimal_degrees, 6)
 
-@app.route('/')
-def index():
+@speed_report_bp.route('/page')
+def page():
     return render_template("Speed.html")
 
-@app.route('/search', methods=['GET'])
+@speed_report_bp.route('/search', methods=['GET'])
 def search_data():
     search_query = request.args.get('search_query', '').strip()
     query = {}
@@ -72,7 +72,7 @@ def search_data():
 
     return jsonify({"data": data_to_display})
 
-@app.route('/download', methods=['GET'])
+@speed_report_bp.route('/download', methods=['GET'])
 def download_data():
     search_query = request.args.get('search_query', '').strip()
     query = {}
@@ -120,7 +120,3 @@ def download_data():
 
     # Send the file to the client
     return send_file(file_path, as_attachment=True)
-
-if __name__ == '__main__':
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8013
-    app.run(host='64.227.137.175', port=8013, debug=True)
