@@ -103,4 +103,9 @@ document.addEventListener("DOMContentLoaded", function () {
         alert(error.message);
       });
   });
+
+  $("#vehicleSelect").selectize({
+    create: false,
+    sortField: "text",
+  });
 });
