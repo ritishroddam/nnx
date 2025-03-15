@@ -1,13 +1,4 @@
-.selectize-control.form-control.single {
-  display: flex;
-  flex-direction: column;
-}
 
-.selectize-input.items.required.has-options.invalid.not-full {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
 
 .container {
   :root {
