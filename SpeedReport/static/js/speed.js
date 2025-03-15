@@ -93,4 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Failed to download data");
       });
   });
+
+  const vehicleSelect = document.getElementById("vehicleSelect");
+  Selectize(vehicleSelect, {
+    create: false,
+    sortField: "text",
+  });
 });
