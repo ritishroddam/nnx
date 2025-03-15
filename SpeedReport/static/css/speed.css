@@ -1,4 +1,7 @@
-
+.vehicleSelect {
+  display: block;
+  width: 100%;
+}
 
 .container {
   :root {
