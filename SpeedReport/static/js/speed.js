@@ -94,8 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  const vehicleSelect = document.getElementById("vehicleSelect");
-  Selectize(vehicleSelect, {
+  $("#vehicleSelect").selectize({
     create: false,
     sortField: "text",
   });
