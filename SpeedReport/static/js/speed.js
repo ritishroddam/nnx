@@ -94,3 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
+
+window.onload = function () {
+  $("#vehicleSelect").selectize();
+};
