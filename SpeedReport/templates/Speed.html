@@ -18,7 +18,7 @@ Speed Report
 
     <div class="form-group">
         <label for="vehicleSelect">Select Vehicle:</label>
-        <select id="vehicleSelect" class="form-control" required>
+        <select id="vehicleSelect" required>
             {% for vehicle in vehicles %}
             <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
             {% endfor %}
