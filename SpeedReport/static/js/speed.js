@@ -94,9 +94,3 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
-
-document.addEventListener("DOMContentLoaded", function () {
-  $("#vehicleSelect").selectize({
-    placeholder: "Select a vehicle",
-  });
-});

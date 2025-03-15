@@ -2,11 +2,7 @@
 
 {% block head %}
 <title>Speed Report</title>
-<link rel="stylesheet" href="{{ url_for('SpeedReport.static', filename='css/speed.css') }}">
 <script defer src="{{ url_for('SpeedReport.static', filename='js/speed.js') }}"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
-    integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block h1 %}
@@ -14,50 +10,47 @@ Speed Report
 {% endblock %}
 
 {% block block_container %}
-<div class="cont-ainer">
-    <div>
-        <form action="none">
-            <label for="vehicleSelect">Select Vehicle:</label>
-            <select id="vehicleSelect" placeholder="Pick a Vehicle" required>
-                {% for vehicle in vehicles %}
-                <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
-                {% endfor %}
-            </select>
-        </form>
+<div class="container">
+    <link rel="stylesheet" href="{{ url_for('SpeedReport.static', filename='css/speed.css') }}">
+    <div class="form-group">
+        <label for="vehicleSelect">Select Vehicle:</label>
+        <select id="vehicleSelect" class="form-control" required>
+            {% for vehicle in vehicles %}
+            <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="container">
-        <div class="form-group">
-            <label for="fromDate">From Date and Time:</label>
-            <input type="datetime-local" id="fromDate" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="toDate">To Date and Time:</label>
-            <input type="datetime-local" id="toDate" class="form-control" required>
-        </div>
-        <button id="searchBtn" class="btn btn-primary">Search</button>
-        <button id="downloadBtn" class="btn btn-secondary">Download</button>
-
-        <br><br>
-
-        <div id="flash-container"></div>
-
-        <br><br>
-
-        <table class="table table-bordered table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Vehicle License Plate Number</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Speed (km/h)</th>
-                </tr>
-            </thead>
-            <tbody id="data-table">
-                <!-- Table rows will be dynamically inserted here -->
-            </tbody>
-        </table>
+    <div class="form-group">
+        <label for="fromDate">From Date and Time:</label>
+        <input type="datetime-local" id="fromDate" class="form-control" required>
     </div>
+    <div class="form-group">
+        <label for="toDate">To Date and Time:</label>
+        <input type="datetime-local" id="toDate" class="form-control" required>
+    </div>
+    <button id="searchBtn" class="btn btn-primary">Search</button>
+    <button id="downloadBtn" class="btn btn-secondary">Download</button>
+
+    <br><br>
+
+    <div id="flash-container"></div>
+
+    <br><br>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Vehicle License Plate Number</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Speed (km/h)</th>
+            </tr>
+        </thead>
+        <tbody id="data-table">
+            <!-- Table rows will be dynamically inserted here -->
+        </tbody>
+    </table>
 </div>
 {% endblock %}
