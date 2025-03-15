@@ -95,6 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-window.onload = function () {
-  $("#vehicleSelect").selectize();
-};
+document.addEventListener("DOMContentLoaded", function () {
+  $("#vehicleSelect").selectize({
+    placeholder: "Select a vehicle",
+  });
+});
