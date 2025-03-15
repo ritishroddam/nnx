@@ -18,7 +18,7 @@ Speed Report
 
     <div>
         <label for="vehicleSelect">Select Vehicle:</label>
-        <select id="vehicleSelect" required>
+        <select id="vehicleSelect" class="no-bootstrap" required>
             {% for vehicle in vehicles %}
             <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
             {% endfor %}
