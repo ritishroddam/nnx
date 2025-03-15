@@ -16,12 +16,14 @@ Speed Report
 {% block block_container %}
 <div class="cont-ainer">
     <div>
-        <label for="vehicleSelect">Select Vehicle:</label>
-        <select id="vehicleSelect" required>
-            {% for vehicle in vehicles %}
-            <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
-            {% endfor %}
-        </select>
+        <form action="none">
+            <label for="vehicleSelect">Select Vehicle:</label>
+            <select id="vehicleSelect" required>
+                {% for vehicle in vehicles %}
+                <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+                {% endfor %}
+            </select>
+        </form>
     </div>
     <div class="container">
         <div class="form-group">
