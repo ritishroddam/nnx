@@ -145,8 +145,8 @@ async function renderVehicles() {
         map.setZoom(20);
         map.panTo(marker.latLng);
         updateInfoWindow(marker, marker.latLng, marker.device, {
-          lat: marker.latLng.lat(),
-          lon: marker.latLng.lng(),
+          lat: marker.latLng.lat().toFixed(6),
+          lon: marker.latLng.lng().toFixed(6),
         });
       }
     });
@@ -1120,8 +1120,8 @@ async function populateVehicleTable() {
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.imei;
     row.insertCell(1).innerText = speed;
-    row.insertCell(2).innerText = latitude.toFixed(6);
-    row.insertCell(3).innerText = longitude.toFixed(6);
+    row.insertCell(2).innerText = latitude.toFixed(8);
+    row.insertCell(3).innerText = longitude.toFixed(8);
     row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
     row.insertCell(5).innerText = address;
     row.insertCell(
