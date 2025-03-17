@@ -18,40 +18,40 @@ socket.on("sos_alert", function (data) {
   }
 });
 
-function updateVehicleData(vehicle) {
-  const imei = sanitizeIMEI(vehicle.imei);
-  const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
-  const latLng = new google.maps.LatLng(
-    coords.lat.toFixed(6),
-    coords.lon.toFixed(6)
-  );
-  const iconUrl = getCarIconBySpeed(
-    vehicle.speed,
-    imei,
-    vehicle.date,
-    vehicle.time
-  );
-  const rotation = vehicle.course;
+// function updateVehicleData(vehicle) {
+//   const imei = sanitizeIMEI(vehicle.imei);
+//   const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
+//   const latLng = new google.maps.LatLng(
+//     coords.lat.toFixed(6),
+//     coords.lon.toFixed(6)
+//   );
+//   const iconUrl = getCarIconBySpeed(
+//     vehicle.speed,
+//     imei,
+//     vehicle.date,
+//     vehicle.time
+//   );
+//   const rotation = vehicle.course;
 
-  if (markers[imei]) {
-    animateMarker(markers[imei], latLng);
-    updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
-    markers[imei].device = vehicle;
-    updateInfoWindow(markers[imei], latLng, vehicle, coords);
-  } else {
-    markers[imei] = createCustomMarker(latLng, iconUrl, rotation, vehicle);
-    addMarkerClickListener(markers[imei], latLng, vehicle, coords);
-  }
+//   if (markers[imei]) {
+//     animateMarker(markers[imei], latLng);
+//     updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+//     markers[imei].device = vehicle;
+//     updateInfoWindow(markers[imei], latLng, vehicle, coords);
+//   } else {
+//     markers[imei] = createCustomMarker(latLng, iconUrl, rotation, vehicle);
+//     addMarkerClickListener(markers[imei], latLng, vehicle, coords);
+//   }
 
-  if (vehicle.sos === "1") {
-    triggerSOS(imei, markers[imei]);
-  } else {
-    removeSOS(imei);
-  }
+//   if (vehicle.sos === "1") {
+//     triggerSOS(imei, markers[imei]);
+//   } else {
+//     removeSOS(imei);
+//   }
 
-  lastDataReceivedTime[imei] = new Date();
-  renderVehicles(Object.values(markers).map((marker) => marker.device));
-}
+//   lastDataReceivedTime[imei] = new Date();
+//   renderVehicles(Object.values(markers).map((marker) => marker.device));
+// }
 
 function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
