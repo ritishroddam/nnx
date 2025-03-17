@@ -1196,18 +1196,13 @@
 async function initMap() {
   try {
     console.log("Initializing map...");
-
-    // Ensure the map element exists
     const mapElement = document.getElementById("map");
     if (!mapElement) {
       console.error("Map element not found!");
       return;
     }
 
-    // Default map center coordinates
     const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-
-    // Initialize the map
     map = new google.maps.Map(mapElement, {
       center: defaultCenter,
       zoom: 5,
@@ -1217,14 +1212,10 @@ async function initMap() {
       clickableIcons: false,
     });
 
-    // Initialize geocoder and info window
     geocoder = new google.maps.Geocoder();
     infoWindow = new google.maps.InfoWindow();
 
-    // Restore markers if needed
     await restoreMarkers();
-
-    // Render vehicles on the map
     await renderVehicles();
 
     console.log("Map initialized successfully");
@@ -1233,5 +1224,5 @@ async function initMap() {
   }
 }
 
-// Ensure the initMap function is globally accessible
+// Make initMap globally accessible
 window.initMap = initMap;

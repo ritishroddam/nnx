@@ -3,10 +3,14 @@
 {% block head %}
 <title>Home</title>
 <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
-<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
 <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
+<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
 <script src="{{ url_for('Vehicle.static', filename='js/config.js') }}"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.motion/dist/leaflet.motion.min.js"></script>
+
 <script async defer
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap"></script>
 {% endblock %}
