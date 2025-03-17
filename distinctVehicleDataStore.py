@@ -23,6 +23,8 @@ def update_distinct_atlanta():
         print("Sucessfully running distinct Vehcile")
         all_documents = list(atlanta_collection.find())
 
+        print(f"Fetched {len(all_documents)} documents from the atlanta collection")
+
         # Group documents by IMEI and find the most recent document for each IMEI
         distinct_documents = {}
         for doc in all_documents:
