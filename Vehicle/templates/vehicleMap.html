@@ -3,23 +3,8 @@
 <head>
   <title>Add Map</title>
 
-  <style>
-    #map {
-      height: 100%;
-    }
-
-    /* 
-       * Optional: Makes the sample page fill the window. 
-       */
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-
-  <script src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
+  <script type="module" src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
 </head>
 
 <body>
