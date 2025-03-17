@@ -1282,13 +1282,25 @@ async function initMap() {
 }
 
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
+  // Create a DOM element for the marker content
+  const markerContent = document.createElement("div");
+  markerContent.className = "custom-marker";
+  markerContent.style.transform = `rotate(${rotation}deg)`;
+
+  const markerImage = document.createElement("img");
+  markerImage.src = iconUrl;
+  markerImage.alt = "Vehicle Icon";
+  markerImage.style.width = "50px";
+  markerImage.style.height = "50px";
+
+  markerContent.appendChild(markerImage);
+
+  // Create the AdvancedMarkerElement
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng,
     map: map,
     title: `IMEI: ${device.imei}`,
-    content: `<div class="custom-marker" style="transform: rotate(${rotation}deg);">
-                <img src="${iconUrl}" alt="Vehicle Icon" style="width: 50px; height: 50px;">
-              </div>`,
+    content: markerContent, // Pass the DOM element here
   });
 
   marker.device = device;
