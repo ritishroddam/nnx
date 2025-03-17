@@ -237,9 +237,13 @@ def run_servers():
     server_thread.daemon = True
     server_thread.start()
 
-    flask_thread = threading.Thread(target=start_flask_server)
-    flask_thread.daemon = True
-    flask_thread.start()
+    # flask_thread = threading.Thread(target=start_flask_server)
+    # flask_thread.daemon = True
+    # flask_thread.start()
+    
+    print("Starting Flask server...")
+    app.run(host="0.0.0.0", port=8555, debug=False, use_reloader=False)  # Flask runs normally
+
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
