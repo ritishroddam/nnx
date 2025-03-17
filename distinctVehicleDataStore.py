@@ -35,7 +35,7 @@ def update_distinct_atlanta():
             }
         ]
         print("Sucessfully running distinct Vehcile")
-        all_documents = list(atlanta_collection.find(pipeline))
+        all_documents = list(atlanta_collection.find())
 
         print(f"Fetched {len(all_documents)} documents from the atlanta collection")
 
