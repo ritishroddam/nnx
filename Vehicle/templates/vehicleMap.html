@@ -1,119 +1,21 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block head %}
-<title>Home</title>
-<link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
-<script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
-<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-<script src="{{ url_for('Vehicle.static', filename='js/config.js') }}"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet.motion/dist/leaflet.motion.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
+  <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
 
-<script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap"></script>
-{% endblock %}
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap"></script>
 
-{% block h1 %}
-Vehicle Map
-{% endblock %}
+</head>
 
-{% block topbar_icons %}
-<div class="filter-container">
-  <label for="speed-filter">Filter by Speed:</label>
-  <select id="speed-filter" class="speed-filter" onchange="filterVehicles()">
-    <option value="all">All</option>
-    <option value="0">0 km/h</option>
-    <option value="0-40">0-40 km/h</option>
-    <option value="40-60">40-60 km/h</option>
-    <option value="60+">Above 60 km/h</option>
-    <option value="offline">Offline</option>
-    <option value="sos">SOS alert</option>
-  </select>
-</div>
-<div class="toggle-container">
-  <div class="toggle-slider">
-    <div class="toggle-option map-option"> <i class="fa-solid fa-map"></i></div>
-    <div class="toggle-option list-option"> <i class="fa-solid fa-list"></i></div>
-    <div class="slider-button"></div>
-  </div>
-</div>
-<span id="countee"></span>
-{% endblock %}
+<body>
+  <div id="map" class="map"></div>
+</body>
 
-{% block content %}
-<div class="icon-legend">
-  <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_yellow.png') }}" alt="Yellow Car" />
-    Stationary (0 km/h)
-  </div>
-  <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_green.png') }}" alt="Green Car" />
-    Slow Speed (0-40 km/h)
-  </div>
-  <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_blue.png') }}" alt="Blue Car" />
-    Moderate Speed (40-60 km/h)
-  </div>
-  <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_red.png') }}" alt="Red Car" />
-    High Speed (Above 60 km/h)
-  </div>
-  <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_black.png') }}" alt="Black Car" />
-    Stationary for more than 24 hours
-  </div>
-</div>
-
-<div id="map" class="map"></div>
-
-<div class="floating-card" style="z-index: 1;">
-  <div id="floating-card-header">
-    <h3 id="vehicle-counter">All Vehicles: <span id="vehicle-count"></span></h3>
-    <label class="switch">
-      <input type="checkbox" id="toggle-card-switch" checked>
-      <span class="slider round"></span>
-    </label>
-  </div>
-  <div id="vehicle-list"></div>
-
-</div>
-
-<!-- Table to display vehicle data -->
-<div id="vehicle-table-container" class="vehicle-table-container" style="display: none;">
-  <table id="vehicle-table" class="vehicle-table">
-    <thead>
-      <tr>
-        <th>IMEI(Registration Number)</th>
-        <th>Vehicle Type</th>
-        <th>Last Updated</th>
-        <th>Location</th>
-        <th>Speed</th>
-        <th>Distance Traveled Today</th>
-        <th>Odometer Reading</th>
-
-        <th>Iginition</th>
-        <th>SOS</th>
-
-      </tr>
-    </thead>
-    <tbody id="simTable">
-      {% for sim in sims %}
-      <tr data-id="{{ sim._id }}">
-        <td>{{ sim.MobileNumber }}</td>
-        <td>{{ sim.SimNumber }}</td>
-        <td>{{ sim.DateIn }}</td>
-        <td>{{ sim.DateOut }}</td>
-        <td>{{ sim.Vendor }}</td>
-        <td>
-          <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteSim('{{ sim._id }}')">🗑️</button>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-</div>
-{% endblock %}
+</html>
