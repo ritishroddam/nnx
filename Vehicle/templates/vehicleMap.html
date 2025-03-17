@@ -9,14 +9,12 @@
   <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
   <script defer src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
 
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap"></script>
-
 </head>
 
 <body>
   <div id="map" class="map"></div>
 </body>
+
 
 <script>
   async function initMap() {
@@ -52,7 +50,9 @@
 
   // Make initMap globally accessible
   window.initMap = initMap;
-
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap"
+  async></script>
 
 </html>
