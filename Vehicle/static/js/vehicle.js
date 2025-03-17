@@ -1193,19 +1193,45 @@
 //   document.querySelector(".block-container").style.display = "none";
 // };
 
-window.initMap = function () {
-  console.log("Initializing map...");
-  const mapElement = document.getElementById("map");
-  if (!mapElement) {
-    console.error("Map element not found!");
-    return;
+async function initMap() {
+  try {
+    console.log("Initializing map...");
+
+    // Ensure the map element exists
+    const mapElement = document.getElementById("map");
+    if (!mapElement) {
+      console.error("Map element not found!");
+      return;
+    }
+
+    // Default map center coordinates
+    const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+
+    // Initialize the map
+    map = new google.maps.Map(mapElement, {
+      center: defaultCenter,
+      zoom: 5,
+      gestureHandling: "greedy",
+      zoomControl: true,
+      mapTypeControl: false,
+      clickableIcons: false,
+    });
+
+    // Initialize geocoder and info window
+    geocoder = new google.maps.Geocoder();
+    infoWindow = new google.maps.InfoWindow();
+
+    // Restore markers if needed
+    await restoreMarkers();
+
+    // Render vehicles on the map
+    await renderVehicles();
+
+    console.log("Map initialized successfully");
+  } catch (error) {
+    console.error("Error initializing map:", error);
   }
+}
 
-  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-  map = new google.maps.Map(mapElement, {
-    center: defaultCenter,
-    zoom: 5,
-  });
-
-  console.log("Map initialized successfully");
-};
+// Ensure the initMap function is globally accessible
+window.initMap = initMap;
