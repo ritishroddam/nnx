@@ -881,7 +881,7 @@ function updateFloatingCard(vehicles, filterValue) {
         </div>`;
 
       vehicleElement.addEventListener("mouseover", () => {
-        const marker = markers[imei];
+        const marker = markers[vehicle.imei]; // Ensure imei is defined in this scope
         if (marker && marker.latLng) {
           const latLng = marker.latLng;
 
