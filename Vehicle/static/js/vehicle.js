@@ -1369,10 +1369,22 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 }
 
 function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
+  // Create a DOM element for the marker content
+  const markerContent = document.createElement("div");
+  markerContent.className = "custom-marker";
+  markerContent.style.transform = `rotate(${rotation}deg)`;
+
+  const markerImage = document.createElement("img");
+  markerImage.src = iconUrl;
+  markerImage.alt = "Vehicle Icon";
+  markerImage.style.width = "50px";
+  markerImage.style.height = "50px";
+
+  markerContent.appendChild(markerImage);
+
+  // Update marker properties
   marker.position = latLng;
-  marker.content = `<div class="custom-marker" style="transform: rotate(${rotation}deg);">
-                      <img src="${iconUrl}" alt="Vehicle Icon" style="width: 50px; height: 50px;">
-                    </div>`;
+  marker.content = markerContent; // Pass the DOM element here
 }
 
 window.onload = function () {
