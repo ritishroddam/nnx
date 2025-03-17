@@ -1161,6 +1161,8 @@ let lastDataReceivedTime = {};
 let openMarker = null;
 let manualClose = false;
 let firstFit = true;
+var refreshInterval = 5000; // 1min for page reload
+var countdownTimer = refreshInterval / 1000;
 
 async function initMap() {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
