@@ -695,6 +695,57 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
+// function filterVehicles() {
+//   const filterValue = document.getElementById("speed-filter").value;
+//   let filteredVehicles = [];
+//   const now = new Date();
+
+//   Object.keys(markers).forEach((imei) => {
+//     const marker = markers[imei];
+//     const speedKmh = marker.device.speed
+//       ? convertSpeedToKmh(marker.device.speed)
+//       : 0; // Speed in km/h
+//     const hasSOS = marker.device.sos === "1"; // Check if SOS is active
+//     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
+//     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
+
+//     let isVisible = false;
+
+//     switch (filterValue) {
+//       case "0":
+//         isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
+//         break;
+//       case "0-40":
+//         isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
+//         break;
+//       case "40-60":
+//         isVisible =
+//           speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
+//         break;
+//       case "60+":
+//         isVisible = speedKmh > 60 && hoursSinceLastUpdate < 24;
+//         break;
+//       case "sos":
+//         isVisible = hasSOS && hoursSinceLastUpdate < 24;
+//         break;
+//       case "offline":
+//         isVisible = hoursSinceLastUpdate > 24;
+//         break;
+//       default: // "all"
+//         isVisible = true;
+//         break;
+//     }
+
+//     // Set marker visibility
+//     marker.setVisible(isVisible);
+
+//     if (isVisible) {
+//       filteredVehicles.push(marker.device);
+//     }
+//   });
+//   updateFloatingCard(filteredVehicles, filterValue);
+// }
+
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
   let filteredVehicles = [];
@@ -737,7 +788,7 @@ function filterVehicles() {
     }
 
     // Set marker visibility
-    marker.setVisible(isVisible);
+    marker.map = isVisible ? map : null;
 
     if (isVisible) {
       filteredVehicles.push(marker.device);
