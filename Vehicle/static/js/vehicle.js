@@ -526,7 +526,7 @@ function updateVehicleData(vehicle) {
     markers[imei].device = vehicle;
     updateInfoWindow(markers[imei], latLng, vehicle, coords);
   } else {
-    markers[imei] = createNativeMarker(latLng, iconUrl, rotation, vehicle);
+    markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
   }
 
   if (vehicle.sos === "1") {
@@ -574,7 +574,7 @@ function updateMap() {
             markers[imei].device = device;
             updateInfoWindow(markers[imei], latLng, device, coords);
           } else {
-            markers[imei] = createNativeMarker(
+            markers[imei] = createAdvancedMarker(
               latLng,
               iconUrl,
               rotation,
