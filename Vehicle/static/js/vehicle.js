@@ -1298,7 +1298,6 @@ async function initMap() {
     openMarker = null;
   });
 
-  restoreMarkers();
   renderVehicles();
 
   // Theme toggle functionality
