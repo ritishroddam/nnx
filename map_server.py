@@ -28,7 +28,9 @@ MONGO_URI = os.getenv(
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['nnx']
 collection = db['atlanta']
+distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  
+distance_travelled_collection = db['distanceTravelled']
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
@@ -237,13 +239,9 @@ def run_servers():
     server_thread.daemon = True
     server_thread.start()
 
-    # flask_thread = threading.Thread(target=start_flask_server)
-    # flask_thread.daemon = True
-    # flask_thread.start()
-    
-    print("Starting Flask server...")
-    app.run(host="0.0.0.0", port=8555, debug=False, use_reloader=False)  # Flask runs normally
-
+    flask_thread = threading.Thread(target=start_flask_server)
+    flask_thread.daemon = True
+    flask_thread.start()
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
