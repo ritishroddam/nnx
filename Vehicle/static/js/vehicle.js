@@ -885,8 +885,6 @@ function updateFloatingCard(vehicles, filterValue) {
 
       vehicleElement.addEventListener("mouseover", () => {
         const marker = markers[vehicle.imei];
-        print(marker.latLng.lat());
-        print(marker.latLng.lng());
         if (marker) {
           map.setZoom(20);
           map.panTo(marker.latLng);
