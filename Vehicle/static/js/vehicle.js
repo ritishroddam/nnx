@@ -881,20 +881,23 @@ function updateFloatingCard(vehicles, filterValue) {
         </div>`;
 
       vehicleElement.addEventListener("mouseover", () => {
-        const marker = markers[vehicle.imei];
-        if (marker && marker.position) {
-          const latLng = marker.position;
-          // Validate latLng before calling panTo
-          if (latLng && isFinite(latLng.lat()) && isFinite(latLng.lng())) {
+        const marker = markers[imei];
+        if (marker && marker.latLng) {
+          const latLng = marker.latLng;
+
+          // Check if latLng is a google.maps.LatLng object
+          if (latLng instanceof google.maps.LatLng) {
             map.setZoom(20);
             map.panTo(latLng);
             updateInfoWindow(marker, latLng, marker.device, {
-              lat: latLng.lat(),
-              lon: latLng.lng(),
+              lat: latLng.lat().toFixed(6),
+              lon: latLng.lng().toFixed(6),
             });
           } else {
-            console.error("Invalid LatLng for marker:", latLng);
+            console.error("Invalid LatLng object:", latLng);
           }
+        } else {
+          console.error("Marker or LatLng is undefined for IMEI:", imei);
         }
       });
 
@@ -1120,8 +1123,8 @@ async function populateVehicleTable() {
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.imei;
     row.insertCell(1).innerText = speed;
-    row.insertCell(2).innerText = latitude.toFixed(8);
-    row.insertCell(3).innerText = longitude.toFixed(8);
+    row.insertCell(2).innerText = latitude.toFixed(6);
+    row.insertCell(3).innerText = longitude.toFixed(6);
     row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
     row.insertCell(5).innerText = address;
     row.insertCell(
