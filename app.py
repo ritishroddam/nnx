@@ -65,14 +65,6 @@ def companyDetailsEntry():
 def default(): 
     return render_template("base.html") 
 
-@app.route('/api/data', methods=['GET', 'POST'])
-def proxy_api_data():
-    if request.method == 'POST':
-        response = requests.post('http://64.227.137.175:8555/api/data', json=request.get_json())
-    else:
-        response = requests.get('http://64.227.137.175:8555/api/data', params=request.args)
-    return jsonify(response.json())
-
 if __name__ == '__main__':
     map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
     subprocess.Popen(['python', map_server_path])
