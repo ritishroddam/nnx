@@ -71,16 +71,16 @@ function triggerSOS(imei, marker) {
   }
 }
 
-function removeSOS(imei) {
-  if (sosActiveMarkers[imei]) {
-    sosActiveMarkers[imei].remove();
-    delete sosActiveMarkers[imei];
-  }
-  // Remove the blinking effect from the vehicle icon
-  if (markers[imei]) {
-    markers[imei].div.classList.remove("vehicle-blink");
-  }
-}
+// function removeSOS(imei) {
+//   if (sosActiveMarkers[imei]) {
+//     sosActiveMarkers[imei].remove();
+//     delete sosActiveMarkers[imei];
+//   }
+//   // Remove the blinking effect from the vehicle icon
+//   if (markers[imei]) {
+//     markers[imei].div.classList.remove("vehicle-blink");
+//   }
+// }
 
 async function fetchVehicleData() {
   try {
