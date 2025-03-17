@@ -615,9 +615,10 @@ function removeSOS(imei) {
     sosActiveMarkers[imei].remove();
     delete sosActiveMarkers[imei];
   }
-  // Remove the blinking effect from the vehicle icon
-  if (markers[imei]) {
-    markers[imei].div.classList.remove("vehicle-blink");
+
+  const marker = markers[imei];
+  if (marker && marker.content) {
+    marker.content.classList.remove("vehicle-blink");
   }
 }
 
@@ -1333,8 +1334,42 @@ async function initMap() {
   }, 1000);
 }
 
+// function createAdvancedMarker(latLng, iconUrl, rotation, device) {
+//   // Create a DOM element for the marker content
+//   const markerContent = document.createElement("div");
+//   markerContent.className = "custom-marker";
+//   markerContent.style.transform = `rotate(${rotation}deg)`;
+
+//   const markerImage = document.createElement("img");
+//   markerImage.src = iconUrl;
+//   markerImage.alt = "Vehicle Icon";
+//   markerImage.style.width = "50px";
+//   markerImage.style.height = "50px";
+
+//   markerContent.appendChild(markerImage);
+
+//   // Create the AdvancedMarkerElement
+//   const marker = new google.maps.marker.AdvancedMarkerElement({
+//     position: latLng,
+//     map: map,
+//     title: `IMEI: ${device.imei}`,
+//     content: markerContent, // Pass the DOM element here
+//   });
+
+//   marker.device = device;
+
+//   marker.addEventListener("click", () => {
+//     const coords = {
+//       lat: marker.position.lat(),
+//       lon: marker.position.lng(),
+//     };
+//     updateInfoWindow(marker, marker.position, device, coords);
+//   });
+
+//   return marker;
+// }
+
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
-  // Create a DOM element for the marker content
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
   markerContent.style.transform = `rotate(${rotation}deg)`;
@@ -1347,17 +1382,17 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
-  // Create the AdvancedMarkerElement
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng,
     map: map,
     title: `IMEI: ${device.imei}`,
-    content: markerContent, // Pass the DOM element here
+    content: markerContent,
   });
 
   marker.device = device;
 
-  marker.addEventListener("click", () => {
+  // Use 'gmp-click' instead of 'click'
+  marker.addEventListener("gmp-click", () => {
     const coords = {
       lat: marker.position.lat(),
       lon: marker.position.lng(),
