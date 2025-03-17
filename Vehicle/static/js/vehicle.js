@@ -522,7 +522,7 @@ function updateVehicleData(vehicle) {
   const rotation = vehicle.course;
 
   if (markers[imei]) {
-    updateNativeMarker(markers[imei], latLng, iconUrl, rotation);
+    updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
     markers[imei].device = vehicle;
     updateInfoWindow(markers[imei], latLng, vehicle, coords);
   } else {
@@ -570,7 +570,7 @@ function updateMap() {
           const rotation = device.course;
 
           if (markers[imei]) {
-            updateNativeMarker(markers[imei], latLng, iconUrl, rotation);
+            updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
             updateInfoWindow(markers[imei], latLng, device, coords);
           } else {
@@ -1232,6 +1232,7 @@ async function initMap() {
   // Initialize Map
   map = new Map(document.getElementById("map"), {
     center: newCenter,
+    mapId: "DEMO_MAP_ID",
     zoom: 5,
     gestureHandling: "greedy",
     zoomControl: true,
