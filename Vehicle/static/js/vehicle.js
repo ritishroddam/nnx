@@ -509,42 +509,6 @@ function sanitizeIMEI(imei) {
   return imei.replace(/[^\w]/g, "").trim(); // Removes all non-alphanumeric characters
 }
 
-function createNativeMarker(latLng, iconUrl, rotation, device) {
-  const marker = new google.maps.Marker({
-    position: latLng,
-    map: map,
-    icon: {
-      url: iconUrl,
-      scaledSize: new google.maps.Size(50, 50), // Adjust size as needed
-      anchor: new google.maps.Point(25, 25), // Center the icon
-      rotation: rotation, // Rotation for direction
-    },
-    title: `IMEI: ${device.imei}`,
-  });
-
-  marker.device = device;
-
-  marker.addListener("click", () => {
-    const coords = {
-      lat: marker.getPosition().lat(),
-      lon: marker.getPosition().lng(),
-    };
-    updateInfoWindow(marker, marker.getPosition(), device, coords);
-  });
-
-  return marker;
-}
-
-function updateNativeMarker(marker, latLng, iconUrl, rotation) {
-  marker.setPosition(latLng);
-  marker.setIcon({
-    url: iconUrl,
-    scaledSize: new google.maps.Size(50, 50),
-    anchor: new google.maps.Point(25, 25),
-    rotation: rotation,
-  });
-}
-
 function updateVehicleData(vehicle) {
   const imei = sanitizeIMEI(vehicle.imei);
   const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
