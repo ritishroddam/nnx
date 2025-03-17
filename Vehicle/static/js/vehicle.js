@@ -897,7 +897,10 @@ function updateFloatingCard(vehicles, filterValue) {
             console.error("Invalid LatLng object:", latLng);
           }
         } else {
-          console.error("Marker or LatLng is undefined for IMEI:", imei);
+          console.error(
+            "Marker or LatLng is undefined for IMEI:",
+            vehicle.imei
+          );
         }
       });
 
