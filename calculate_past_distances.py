@@ -20,7 +20,7 @@ def calculate_distance_for_past_days():
         for date_str in past_days:
             # Check if the date already exists in the distanceTravelled collection
             if distance_travelled_collection.find_one({"date": date_str}):
-                print(f'Skipping calculation for {date_str} as it already exists in the distanceTravelled collection.')
+                # print(f'Skipping calculation for {date_str} as it already exists in the distanceTravelled collection.')
                 continue
 
             imei_data = atlanta_collection.find({'date': date_str}).distinct('imei')
