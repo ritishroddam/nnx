@@ -220,180 +220,197 @@ var lastDataReceivedTime = {};
 //   }
 // }
 
-function initMap() {
+// function initMap() {
+//   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+//   const offset = -5;
+
+//   const newCenter = {
+//     lat: defaultCenter.lat,
+//     lng: defaultCenter.lng + offset,
+//   };
+
+//   // Dark Mode Styles
+//   const darkModeStyle = [
+//     { elementType: "geometry", stylers: [{ color: "#212121" }] },
+//     { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+//     { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+//     {
+//       featureType: "road",
+//       elementType: "geometry",
+//       stylers: [{ color: "#373737" }],
+//     },
+//     {
+//       featureType: "water",
+//       elementType: "geometry",
+//       stylers: [{ color: "#0e1626" }],
+//     },
+//     {
+//       featureType: "landscape",
+//       elementType: "geometry",
+//       stylers: [{ color: "#2c2c2c" }],
+//     },
+//     { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+//   ];
+
+//   const lightModeStyle = [
+//     { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+//     { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+//     { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+//     { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+//     {
+//       featureType: "administrative.land_parcel",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#bdbdbd" }],
+//     },
+//     {
+//       featureType: "poi",
+//       elementType: "geometry",
+//       stylers: [{ color: "#eeeeee" }],
+//     },
+//     {
+//       featureType: "poi",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#757575" }],
+//     },
+//     {
+//       featureType: "poi.park",
+//       elementType: "geometry",
+//       stylers: [{ color: "#defff0" }],
+//     },
+//     {
+//       featureType: "poi.park",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#9e9e9e" }],
+//     },
+//     {
+//       featureType: "road",
+//       elementType: "geometry",
+//       stylers: [{ color: "#ffffff" }],
+//     },
+//     {
+//       featureType: "road.arterial",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#757575" }],
+//     },
+//     {
+//       featureType: "road.highway",
+//       elementType: "geometry",
+//       stylers: [{ color: "#dadada" }],
+//     },
+//     {
+//       featureType: "road.highway",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#616161" }],
+//     },
+//     {
+//       featureType: "road.local",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#9e9e9e" }],
+//     },
+//     {
+//       featureType: "transit.line",
+//       elementType: "geometry",
+//       stylers: [{ color: "#e5e5e5" }],
+//     },
+//     {
+//       featureType: "transit.station",
+//       elementType: "geometry",
+//       stylers: [{ color: "#eeeeee" }],
+//     },
+//     {
+//       featureType: "water",
+//       elementType: "geometry",
+//       stylers: [{ color: "#def2ff" }],
+//     },
+//     {
+//       featureType: "water",
+//       elementType: "labels.text.fill",
+//       stylers: [{ color: "#9e9e9e" }],
+//     },
+//   ];
+
+//   // Initialize Map
+//   map = new google.maps.Map(document.getElementById("map"), {
+//     center: newCenter,
+//     zoom: 5,
+//     gestureHandling: "greedy",
+//     zoomControl: true,
+//     mapTypeControl: false, // Disable default map type buttons
+//     clickableIcons: false, // Disable POI icons
+//     styles: lightModeStyle, // Default to dark mode
+//     zoomControlOptions: {
+//       position: google.maps.ControlPosition.RIGHT_BOTTOM,
+//     },
+//   });
+
+//   geocoder = new google.maps.Geocoder();
+//   infoWindow = new google.maps.InfoWindow();
+
+//   google.maps.event.addListener(infoWindow, "closeclick", function () {
+//     const infoWindowDiv = document.querySelector(".info-window");
+
+//     if (infoWindowDiv) {
+//       infoWindowDiv.classList.remove("show");
+//       infoWindowDiv.classList.add("hide");
+
+//       setTimeout(function () {
+//         infoWindow.close();
+//       }, 300);
+//     }
+
+//     manualClose = true;
+//     openMarker = null;
+//   });
+
+//   restoreMarkers();
+//   renderVehicles();
+
+//   // setupWebSocket();
+
+//   let darkMode = true;
+//   const themeToggle = document.getElementById("theme-toggle");
+
+//   themeToggle.addEventListener("click", function () {
+//     if (darkMode) {
+//       map.setOptions({ styles: darkModeStyle });
+//       document.body.classList.add("dark-mode");
+//     } else {
+//       map.setOptions({ styles: lightModeStyle });
+//       document.body.classList.remove("dark-mode");
+//     }
+//     darkMode = !darkMode; // Toggle the state
+//   });
+
+//   setInterval(function () {
+//     if (countdownTimer > 0) {
+//       countdownTimer--;
+//       // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
+//     } else {
+//       updateMap();
+//       if (document.getElementById("toggle-card-switch").checked === true) {
+//         renderVehicles();
+//       }
+//       countdownTimer = refreshInterval / 1000; // Reset countdown
+//     }
+//   }, 1000);
+// }
+
+window.initMap = function () {
+  console.log("Initializing map...");
+  const mapElement = document.getElementById("map");
+  if (!mapElement) {
+    console.error("Map element not found!");
+    return;
+  }
+
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-  const offset = -5;
-
-  const newCenter = {
-    lat: defaultCenter.lat,
-    lng: defaultCenter.lng + offset,
-  };
-
-  // Dark Mode Styles
-  const darkModeStyle = [
-    { elementType: "geometry", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#373737" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#0e1626" }],
-    },
-    {
-      featureType: "landscape",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  ];
-
-  const lightModeStyle = [
-    { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
-    {
-      featureType: "administrative.land_parcel",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#bdbdbd" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "geometry",
-      stylers: [{ color: "#eeeeee" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [{ color: "#defff0" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#ffffff" }],
-    },
-    {
-      featureType: "road.arterial",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry",
-      stylers: [{ color: "#dadada" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#616161" }],
-    },
-    {
-      featureType: "road.local",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-    {
-      featureType: "transit.line",
-      elementType: "geometry",
-      stylers: [{ color: "#e5e5e5" }],
-    },
-    {
-      featureType: "transit.station",
-      elementType: "geometry",
-      stylers: [{ color: "#eeeeee" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#def2ff" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-  ];
-
-  // Initialize Map
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: newCenter,
+  map = new google.maps.Map(mapElement, {
+    center: defaultCenter,
     zoom: 5,
-    gestureHandling: "greedy",
-    zoomControl: true,
-    mapTypeControl: false, // Disable default map type buttons
-    clickableIcons: false, // Disable POI icons
-    styles: lightModeStyle, // Default to dark mode
-    zoomControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_BOTTOM,
-    },
   });
 
-  geocoder = new google.maps.Geocoder();
-  infoWindow = new google.maps.InfoWindow();
-
-  google.maps.event.addListener(infoWindow, "closeclick", function () {
-    const infoWindowDiv = document.querySelector(".info-window");
-
-    if (infoWindowDiv) {
-      infoWindowDiv.classList.remove("show");
-      infoWindowDiv.classList.add("hide");
-
-      setTimeout(function () {
-        infoWindow.close();
-      }, 300);
-    }
-
-    manualClose = true;
-    openMarker = null;
-  });
-
-  restoreMarkers();
-  renderVehicles();
-
-  // setupWebSocket();
-
-  let darkMode = true;
-  const themeToggle = document.getElementById("theme-toggle");
-
-  themeToggle.addEventListener("click", function () {
-    if (darkMode) {
-      map.setOptions({ styles: darkModeStyle });
-      document.body.classList.add("dark-mode");
-    } else {
-      map.setOptions({ styles: lightModeStyle });
-      document.body.classList.remove("dark-mode");
-    }
-    darkMode = !darkMode; // Toggle the state
-  });
-
-  setInterval(function () {
-    if (countdownTimer > 0) {
-      countdownTimer--;
-      // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-    } else {
-      updateMap();
-      if (document.getElementById("toggle-card-switch").checked === true) {
-        renderVehicles();
-      }
-      countdownTimer = refreshInterval / 1000; // Reset countdown
-    }
-  }, 1000);
-}
+  console.log("Map initialized successfully");
+};
 
 function parseCoordinates(lat, lon) {
   const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
