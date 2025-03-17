@@ -1104,8 +1104,10 @@ function hideCard() {
   }
 }
 
+window.initMap = initMap;
+
 window.onload = function () {
-  initMap();
+  // initMap();
   renderVehicles();
   document.querySelector(".block-container").style.display = "none";
 };
