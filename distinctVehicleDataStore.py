@@ -20,8 +20,22 @@ def clean_imei(imei):
 def update_distinct_atlanta():
     try:
         # Fetch all documents from the atlanta collection
+        pipeline = [
+            {
+                "$sort": {"imei": 1, "date": -1, "time": -1}  # Sort by imei, latest date, and latest time
+            },
+            {
+                "$group": {
+                    "_id": "$imei",
+                    "latest_record": {"$first": "$$ROOT"}  # Pick the first (latest) record per imei
+                }
+            },
+            {
+                "$replaceRoot": {"newRoot": "$latest_record"}  # Flatten the document structure
+            }
+        ]
         print("Sucessfully running distinct Vehcile")
-        all_documents = list(atlanta_collection.find())
+        all_documents = list(atlanta_collection.find(pipeline))
 
         print(f"Fetched {len(all_documents)} documents from the atlanta collection")
 
@@ -31,7 +45,7 @@ def update_distinct_atlanta():
             imei = clean_imei(doc['imei'])
             date_time_str = f"{doc['date']} {doc['time']}"
             date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
-            
+
             if imei not in distinct_documents or date_time > distinct_documents[imei]['date_time']:
                 distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
 

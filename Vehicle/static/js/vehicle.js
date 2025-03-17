@@ -205,20 +205,20 @@ var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 
 // Restore markers from session storage if available
-function restoreMarkers() {
-  const storedMarkers = sessionStorage.getItem("vehicleMarkers");
-  if (storedMarkers) {
-    const markerData = JSON.parse(storedMarkers);
-    markerData.forEach((device) => {
-      const latLng = new google.maps.LatLng(device.lat, device.lon);
-      const imei = device.imei;
-      const iconUrl = device.iconUrl;
-      const rotation = device.rotation;
-      markers[imei] = createCustomMarker(latLng, iconUrl, rotation);
-      addMarkerClickListener(markers[imei], latLng, device);
-    });
-  }
-}
+// function restoreMarkers() {
+//   const storedMarkers = sessionStorage.getItem("vehicleMarkers");
+//   if (storedMarkers) {
+//     const markerData = JSON.parse(storedMarkers);
+//     markerData.forEach((device) => {
+//       const latLng = new google.maps.LatLng(device.lat, device.lon);
+//       const imei = device.imei;
+//       const iconUrl = device.iconUrl;
+//       const rotation = device.rotation;
+//       markers[imei] = createCustomMarker(latLng, iconUrl, rotation);
+//       addMarkerClickListener(markers[imei], latLng, device);
+//     });
+//   }
+// }
 
 function initMap() {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
@@ -526,6 +526,72 @@ function sanitizeIMEI(imei) {
   return imei.replace(/[^\w]/g, "").trim(); // Removes all non-alphanumeric characters
 }
 
+function createNativeMarker(latLng, iconUrl, rotation, device) {
+  const marker = new google.maps.Marker({
+    position: latLng,
+    map: map,
+    icon: {
+      url: iconUrl,
+      scaledSize: new google.maps.Size(50, 50), // Adjust size as needed
+      anchor: new google.maps.Point(25, 25), // Center the icon
+      rotation: rotation, // Rotation for direction
+    },
+    title: `IMEI: ${device.imei}`,
+  });
+
+  marker.device = device;
+
+  marker.addListener("click", () => {
+    const coords = {
+      lat: marker.getPosition().lat(),
+      lon: marker.getPosition().lng(),
+    };
+    updateInfoWindow(marker, marker.getPosition(), device, coords);
+  });
+
+  return marker;
+}
+
+function updateNativeMarker(marker, latLng, iconUrl, rotation) {
+  marker.setPosition(latLng);
+  marker.setIcon({
+    url: iconUrl,
+    scaledSize: new google.maps.Size(50, 50),
+    anchor: new google.maps.Point(25, 25),
+    rotation: rotation,
+  });
+}
+
+function updateVehicleData(vehicle) {
+  const imei = sanitizeIMEI(vehicle.imei);
+  const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
+  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
+  const iconUrl = getCarIconBySpeed(
+    vehicle.speed,
+    imei,
+    vehicle.date,
+    vehicle.time
+  );
+  const rotation = vehicle.course;
+
+  if (markers[imei]) {
+    updateNativeMarker(markers[imei], latLng, iconUrl, rotation);
+    markers[imei].device = vehicle;
+    updateInfoWindow(markers[imei], latLng, vehicle, coords);
+  } else {
+    markers[imei] = createNativeMarker(latLng, iconUrl, rotation, vehicle);
+  }
+
+  if (vehicle.sos === "1") {
+    triggerSOS(imei, markers[imei]);
+  } else {
+    removeSOS(imei);
+  }
+
+  lastDataReceivedTime[imei] = new Date();
+  renderVehicles(Object.values(markers).map((marker) => marker.device));
+}
+
 function updateMap() {
   fetch("/vehicle/api/vehicles")
     .then((response) => response.json())
@@ -557,18 +623,16 @@ function updateMap() {
           const rotation = device.course;
 
           if (markers[imei]) {
-            animateMarker(markers[imei], latLng);
-            updateCustomMarker(markers[imei], latLng, iconUrl, rotation);
+            updateNativeMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
             updateInfoWindow(markers[imei], latLng, device, coords);
           } else {
-            markers[imei] = createCustomMarker(
+            markers[imei] = createNativeMarker(
               latLng,
               iconUrl,
               rotation,
               device
             );
-            addMarkerClickListener(markers[imei], latLng, device, coords);
           }
 
           if (device.sos === "1") {
@@ -834,133 +898,133 @@ function updateFloatingCard(vehicles, filterValue) {
   }
 }
 
-function createCustomMarker(latLng, iconUrl, rotation, device) {
-  const div = document.createElement("div");
-  div.className = "custom-marker";
-  div.style.backgroundImage = `url(${iconUrl})`;
-  div.style.transform = `rotate(${rotation}deg)`;
+// function createCustomMarker(latLng, iconUrl, rotation, device) {
+//   const div = document.createElement("div");
+//   div.className = "custom-marker";
+//   div.style.backgroundImage = `url(${iconUrl})`;
+//   div.style.transform = `rotate(${rotation}deg)`;
 
-  const marker = new google.maps.OverlayView();
-  marker.div = div;
-  marker.latLng = latLng;
-  marker.device = device;
+//   const marker = new google.maps.OverlayView();
+//   marker.div = div;
+//   marker.latLng = latLng;
+//   marker.device = device;
 
-  marker.onAdd = function () {
-    const panes = this.getPanes();
-    panes.overlayMouseTarget.appendChild(div);
-  };
+//   marker.onAdd = function () {
+//     const panes = this.getPanes();
+//     panes.overlayMouseTarget.appendChild(div);
+//   };
 
-  marker.draw = function () {
-    const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
-    if (point) {
-      div.style.left = point.x - div.offsetWidth / 2 + "px";
-      div.style.top = point.y - div.offsetHeight / 2 + "px";
-    }
-  };
+//   marker.draw = function () {
+//     const point = this.getProjection().fromLatLngToDivPixel(this.latLng);
+//     if (point) {
+//       div.style.left = point.x - div.offsetWidth / 2 + "px";
+//       div.style.top = point.y - div.offsetHeight / 2 + "px";
+//     }
+//   };
 
-  marker.onRemove = function () {
-    div.parentNode.removeChild(div);
-  };
+//   marker.onRemove = function () {
+//     div.parentNode.removeChild(div);
+//   };
 
-  marker.setVisible = function (visible) {
-    div.style.display = visible ? "block" : "none";
-  };
+//   marker.setVisible = function (visible) {
+//     div.style.display = visible ? "block" : "none";
+//   };
 
-  marker.setMap(map);
+//   marker.setMap(map);
 
-  div.addEventListener("mouseover", () => {
-    const vehicleElement = document.querySelector(
-      `.vehicle-card[data-imei="${device.imei}"]`
-    );
-    if (vehicleElement) {
-      vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
+//   div.addEventListener("mouseover", () => {
+//     const vehicleElement = document.querySelector(
+//       `.vehicle-card[data-imei="${device.imei}"]`
+//     );
+//     if (vehicleElement) {
+//       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
 
-      // Check if dark mode is active
-      const isDarkMode = document.body.classList.contains("dark-mode");
+//       // Check if dark mode is active
+//       const isDarkMode = document.body.classList.contains("dark-mode");
 
-      if (isDarkMode) {
-        vehicleElement.style.backgroundColor = "#ccc"; // Dark background for dark mode
-        const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
-        if (vehicleHeader) {
-          vehicleHeader.style.color = "#000000d0"; // Light font color for dark mode
-        }
-        const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
-        if (vehicleInfo) {
-          vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
+//       if (isDarkMode) {
+//         vehicleElement.style.backgroundColor = "#ccc"; // Dark background for dark mode
+//         const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
+//         if (vehicleHeader) {
+//           vehicleHeader.style.color = "#000000d0"; // Light font color for dark mode
+//         }
+//         const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
+//         if (vehicleInfo) {
+//           vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
 
-          const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
-          vehicleInfoStrong.forEach((tag) => {
-            tag.style.color = "#000000d0"; // Light font color for dark mode
-          });
-          const vehicleInfoA = vehicleElement.querySelector("a");
-          if (vehicleInfoA) {
-            vehicleInfoA.style.color = "#000000d0"; // Light font color for dark mode
-          }
-        }
-      } else {
-        vehicleElement.style.backgroundColor = "#000000d0"; // Dark background for light mode
-        const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
-        if (vehicleHeader) {
-          vehicleHeader.style.color = "#ccc"; // Light font color for light mode
-        }
-        const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
-        if (vehicleInfo) {
-          vehicleInfo.style.color = "#ccc"; // Light font color for light mode
+//           const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
+//           vehicleInfoStrong.forEach((tag) => {
+//             tag.style.color = "#000000d0"; // Light font color for dark mode
+//           });
+//           const vehicleInfoA = vehicleElement.querySelector("a");
+//           if (vehicleInfoA) {
+//             vehicleInfoA.style.color = "#000000d0"; // Light font color for dark mode
+//           }
+//         }
+//       } else {
+//         vehicleElement.style.backgroundColor = "#000000d0"; // Dark background for light mode
+//         const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
+//         if (vehicleHeader) {
+//           vehicleHeader.style.color = "#ccc"; // Light font color for light mode
+//         }
+//         const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
+//         if (vehicleInfo) {
+//           vehicleInfo.style.color = "#ccc"; // Light font color for light mode
 
-          const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
-          vehicleInfoStrong.forEach((tag) => {
-            tag.style.color = "#ccc"; // Light font color for dark mode
-          });
-          const vehicleInfoA = vehicleElement.querySelector("a");
-          if (vehicleInfoA) {
-            vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
-          }
-        }
-      }
-    }
-  });
+//           const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
+//           vehicleInfoStrong.forEach((tag) => {
+//             tag.style.color = "#ccc"; // Light font color for dark mode
+//           });
+//           const vehicleInfoA = vehicleElement.querySelector("a");
+//           if (vehicleInfoA) {
+//             vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
+//           }
+//         }
+//       }
+//     }
+//   });
 
-  div.addEventListener("mouseout", () => {
-    const vehicleElement = document.querySelector(
-      `.vehicle-card[data-imei="${device.imei}"]`
-    );
-    if (vehicleElement) {
-      vehicleElement.style.transition =
-        "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-      vehicleElement.style.backgroundColor = ""; // Reset background color
-      const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
-      if (vehicleHeader) {
-        vehicleHeader.style.color = ""; // Reset font color
-      }
-      const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
-      if (vehicleInfo) {
-        vehicleInfo.style.color = ""; // Reset font color
+//   div.addEventListener("mouseout", () => {
+//     const vehicleElement = document.querySelector(
+//       `.vehicle-card[data-imei="${device.imei}"]`
+//     );
+//     if (vehicleElement) {
+//       vehicleElement.style.transition =
+//         "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
+//       vehicleElement.style.backgroundColor = ""; // Reset background color
+//       const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
+//       if (vehicleHeader) {
+//         vehicleHeader.style.color = ""; // Reset font color
+//       }
+//       const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
+//       if (vehicleInfo) {
+//         vehicleInfo.style.color = ""; // Reset font color
 
-        const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
-        vehicleInfoStrong.forEach((tag) => {
-          tag.style.color = ""; // Light font color for dark mode
-        });
-        const vehicleInfoA = vehicleElement.querySelector("a");
-        if (vehicleInfoA) {
-          vehicleInfoA.style.color = ""; // Light font color for dark mode
-        }
-      }
-    }
-  });
+//         const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
+//         vehicleInfoStrong.forEach((tag) => {
+//           tag.style.color = ""; // Light font color for dark mode
+//         });
+//         const vehicleInfoA = vehicleElement.querySelector("a");
+//         if (vehicleInfoA) {
+//           vehicleInfoA.style.color = ""; // Light font color for dark mode
+//         }
+//       }
+//     }
+//   });
 
-  addMarkerClickListener(marker, latLng, device, {});
-  return marker;
-}
+//   addMarkerClickListener(marker, latLng, device, {});
+//   return marker;
+// }
 
-//////////////////////
-function updateCustomMarker(marker, latLng, iconUrl, rotation) {
-  marker.latLng = latLng;
-  marker.div.style.backgroundImage = `url(${iconUrl})`;
-  marker.div.style.transform = `rotate(${rotation}deg)`;
-  marker.draw();
+// //////////////////////
+// function updateCustomMarker(marker, latLng, iconUrl, rotation) {
+//   marker.latLng = latLng;
+//   marker.div.style.backgroundImage = `url(${iconUrl})`;
+//   marker.div.style.transform = `rotate(${rotation}deg)`;
+//   marker.draw();
 
-  addMarkerClickListener(marker, latLng, {}, {});
-}
+//   addMarkerClickListener(marker, latLng, {}, {});
+// }
 
 //////////////////////
 function geocodeLatLng(latLng, callback) {

@@ -28,9 +28,7 @@ MONGO_URI = os.getenv(
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['nnx']
 collection = db['atlanta']
-distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  
-distance_travelled_collection = db['distanceTravelled']
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
