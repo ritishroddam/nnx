@@ -882,13 +882,19 @@ function updateFloatingCard(vehicles, filterValue) {
 
       vehicleElement.addEventListener("mouseover", () => {
         const marker = markers[vehicle.imei];
-        if (marker) {
-          map.setZoom(20);
-          map.panTo(marker.latLng);
-          updateInfoWindow(marker, marker.latLng, marker.device, {
-            lat: marker.latLng.lat(),
-            lon: marker.latLng.lng(),
-          });
+        if (marker && marker.position) {
+          const latLng = marker.position;
+          // Validate latLng before calling panTo
+          if (latLng && isFinite(latLng.lat()) && isFinite(latLng.lng())) {
+            map.setZoom(20);
+            map.panTo(latLng);
+            updateInfoWindow(marker, latLng, marker.device, {
+              lat: latLng.lat(),
+              lon: latLng.lng(),
+            });
+          } else {
+            console.error("Invalid LatLng for marker:", latLng);
+          }
         }
       });
 
