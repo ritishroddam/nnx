@@ -189,19 +189,19 @@ function updateInfoWindow(marker, latLng, device, coords) {
 }
 
 // Car appears on the map
-// var map;
-// var markers = {};
-// var geocoder;
-// var addressCache = {};
-// var refreshInterval = 5000; // 1min for page reload
-// var infoWindow;
-// var countdownTimer = refreshInterval / 1000;
-// var openMarker = null;
-// var firstFit = true;
-// var manualClose = false;
-// var dataAvailable = true;
-// var sosActiveMarkers = {};
-// var lastDataReceivedTime = {};
+var map;
+var markers = {};
+var geocoder;
+var addressCache = {};
+var refreshInterval = 5000; // 1min for page reload
+var infoWindow;
+var countdownTimer = refreshInterval / 1000;
+var openMarker = null;
+var firstFit = true;
+var manualClose = false;
+var dataAvailable = true;
+var sosActiveMarkers = {};
+var lastDataReceivedTime = {};
 
 // function initMap() {
 //   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
@@ -1150,19 +1150,6 @@ function hideCard() {
     sliderButton.classList.add("active");
   }
 }
-
-let map;
-let markers = {};
-let geocoder;
-let infoWindow;
-let addressCache = {};
-let sosActiveMarkers = {};
-let lastDataReceivedTime = {};
-let openMarker = null;
-let manualClose = false;
-let firstFit = true;
-var refreshInterval = 5000; // 1min for page reload
-var countdownTimer = refreshInterval / 1000;
 
 async function initMap() {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
