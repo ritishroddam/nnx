@@ -20,6 +20,7 @@ def clean_imei(imei):
 def update_distinct_atlanta():
     try:
         # Fetch all documents from the atlanta collection
+        print("Sucessfully running distinct Vehcile")
         all_documents = list(atlanta_collection.find())
 
         # Group documents by IMEI and find the most recent document for each IMEI
