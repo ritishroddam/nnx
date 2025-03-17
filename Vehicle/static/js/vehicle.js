@@ -881,26 +881,14 @@ function updateFloatingCard(vehicles, filterValue) {
         </div>`;
 
       vehicleElement.addEventListener("mouseover", () => {
-        const marker = markers[vehicle.imei]; // Ensure imei is defined in this scope
-        if (marker && marker.latLng) {
-          const latLng = marker.latLng;
-
-          // Check if latLng is a google.maps.LatLng object
-          if (latLng instanceof google.maps.LatLng) {
-            map.setZoom(20);
-            map.panTo(latLng);
-            updateInfoWindow(marker, latLng, marker.device, {
-              lat: latLng.lat().toFixed(6),
-              lon: latLng.lng().toFixed(6),
-            });
-          } else {
-            console.error("Invalid LatLng object:", latLng);
-          }
-        } else {
-          console.error(
-            "Marker or LatLng is undefined for IMEI:",
-            vehicle.imei
-          );
+        const marker = markers[vehicle.imei];
+        if (marker) {
+          map.setZoom(20);
+          map.panTo(marker.latLng);
+          updateInfoWindow(marker, marker.latLng, marker.device, {
+            lat: marker.latLng.lat(),
+            lon: marker.latLng.lng(),
+          });
         }
       });
 
