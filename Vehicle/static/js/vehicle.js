@@ -955,6 +955,9 @@ function updateFloatingCard(vehicles, filterValue) {
 
 //////////////////////
 function geocodeLatLng(latLng, callback) {
+  console.log("geocodeLatLng", latLng);
+  console.log("geocodeLatitude", latLng.lat());
+
   const lat = parseFloat(latLng.lat());
   const lon = parseFloat(latLng.lng());
   const key = `${lat},${lon}`;
@@ -1228,7 +1231,6 @@ function addHoverListenersToCardsAndMarkers() {
         map.panTo(marker.position);
         map.setZoom(12);
 
-        console.log(marker.position);
         // Open the info window for the marker
         const coords = {
           lat: marker.position.lat,
