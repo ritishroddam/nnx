@@ -908,10 +908,16 @@ function updateFloatingCard(vehicles, filterValue) {
         const marker = markers[vehicle.imei];
         if (marker) {
           map.setZoom(20);
-          map.panTo(marker.latLng);
-          updateInfoWindow(marker, marker.latLng, marker.device, {
-            lat: marker.latLng.lat(),
-            lon: marker.latLng.lng(),
+
+          const latLngg = new google.maps.LatLng(
+            marker.latLng.lat(),
+            marker.latLng.lng()
+          );
+
+          map.panTo(latLngg);
+          updateInfoWindow(marker, latLngg, marker.device, {
+            lat: latLngg.lat(),
+            lon: latLngg.lng(),
           });
         }
       });
