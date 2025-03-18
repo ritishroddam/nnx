@@ -171,8 +171,8 @@ function updateInfoWindow(marker, latLng, device, coords) {
                     <p><strong>Speed:</strong> ${convertSpeedToKmh(
                       device.speed
                     ).toFixed(2)} km/h</p>
-                    <p><strong>Lat:</strong> ${coords.lat.toFixed(6)}</p>
-                    <p><strong>Lon:</strong> ${coords.lon.toFixed(6)}</p>
+                    <p><strong>Lat:</strong> ${coords.lat}</p>
+                    <p><strong>Lon:</strong> ${coords.lon}</p>
                     <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
                     <p class="address"><strong>Location:</strong> ${address}</p>
                     <p><strong>Data:</strong> <a href="device-details.html?imei=${
@@ -511,10 +511,7 @@ function sanitizeIMEI(imei) {
 function updateVehicleData(vehicle) {
   const imei = sanitizeIMEI(vehicle.imei);
   const coords = parseCoordinates(vehicle.latitude, vehicle.longitude);
-  const latLng = new google.maps.LatLng(
-    coords.lat.toFixed(6),
-    coords.lon.toFixed(6)
-  );
+  const latLng = new google.maps.LatLng(coords.lat, coords.lon);
   const iconUrl = getCarIconBySpeed(
     vehicle.speed,
     imei,
@@ -673,11 +670,11 @@ function addMarkerClickListener(marker, latLng, device, coords) {
             : '<span class="missing-data">Unknown</span>';
         const lat =
           coords.lat !== null && coords.lat !== undefined
-            ? coords.lat.toFixed(6)
+            ? coords.lat
             : '<span class="missing-data">Unknown</span>';
         const lon =
           coords.lon !== null && coords.lon !== undefined
-            ? coords.lon.toFixed(6)
+            ? coords.lon
             : '<span class="missing-data">Unknown</span>';
         const date = device.date || "N/A";
         const time = device.time || "N/A";
@@ -958,8 +955,8 @@ function updateFloatingCard(vehicles, filterValue) {
 
 //////////////////////
 function geocodeLatLng(latLng, callback) {
-  const lat = latLng.lat.toFixed(6);
-  const lon = latLng.lng.toFixed(6);
+  const lat = latLng.lat;
+  const lon = latLng.lng;
   const key = `${lat},${lon}`;
 
   if (addressCache[key]) {
