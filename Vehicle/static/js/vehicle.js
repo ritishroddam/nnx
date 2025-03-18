@@ -1313,9 +1313,12 @@ async function initMap() {
     gestureHandling: "greedy",
     zoomControl: true,
     mapTypeControl: false, // Disable default map type buttons
-    clickableIcons: false, // Disable POI icons
-    styles: lightModeStyle, // Default to light mode
+    clickableIcons: false, // Disable POI icons // Default to light mode
     zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
+    fullscreenControl: true,
+    fullscreenControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
     },
   });
