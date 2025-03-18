@@ -138,6 +138,18 @@ async function renderVehicles() {
       </div>
     `;
 
+    vehicleElement.addEventListener("mouseover", () => {
+      const marker = markers[imei];
+      if (marker) {
+        map.setZoom(20);
+        map.panTo(marker.latLng);
+        updateInfoWindow(marker, marker.latLng, marker.device, {
+          lat: marker.latLng.lat(),
+          lon: marker.latLng.lng(),
+        });
+      }
+    });
+
     listContainer.appendChild(vehicleElement);
   });
 
@@ -1087,78 +1099,6 @@ function hideCard() {
   }
 }
 
-// async function initMap() {
-//   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-//   const offset = -5;
-
-//   const newCenter = {
-//     lat: defaultCenter.lat,
-//     lng: defaultCenter.lng + offset,
-//   };
-
-//   // Request needed libraries
-//   //@ts-ignore
-//   const { Map } = await google.maps.importLibrary("maps");
-//   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
-//   // Initialize Map
-//   map = new Map(document.getElementById("map"), {
-//     center: newCenter,
-//     mapId: "44775ccfe2c0bd88",
-//     zoom: 5,
-//     gestureHandling: "greedy",
-//     zoomControl: true,
-//     mapTypeControl: false, // Disable default map type buttons
-//     clickableIcons: false, // Disable POI icons // Default to light mode
-//     zoomControlOptions: {
-//       position: google.maps.ControlPosition.RIGHT_BOTTOM,
-//     },
-//     fullscreenControl: true,
-//     fullscreenControlOptions: {
-//       position: google.maps.ControlPosition.RIGHT_BOTTOM,
-//     },
-//   });
-
-//   geocoder = new google.maps.Geocoder();
-//   infoWindow = new google.maps.InfoWindow();
-
-//   google.maps.event.addListener(infoWindow, "closeclick", function () {
-//     manualClose = true;
-//     openMarker = null;
-//   });
-
-//   renderVehicles();
-
-//   // Theme toggle functionality
-//   const themeToggle = document.getElementById("theme-toggle");
-//   let darkMode = true;
-//   themeToggle.addEventListener("click", function () {
-//     if (darkMode) {
-//       map.setOptions({ mapId: "8faa2d4ac644c8a2" });
-//       document.body.classList.add("dark-mode");
-//     } else {
-//       map.setOptions({ mapId: "44775ccfe2c0bd88" });
-//       document.body.classList.remove("dark-mode");
-//     }
-//     darkMode = !darkMode; // Toggle the state
-//   });
-
-//   // Periodic updates
-//   setInterval(function () {
-//     if (countdownTimer > 0) {
-//       countdownTimer--;
-//     } else {
-//       updateMap();
-//       if (document.getElementById("toggle-card-switch").checked === true) {
-//         renderVehicles();
-//       }
-//       countdownTimer = refreshInterval / 1000; // Reset countdown
-//     }
-//   }, 1000);
-// }
-
-// ...existing code...
-
 async function initMap(darkMode = true) {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
   const offset = -5;
@@ -1280,131 +1220,6 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   marker.content = markerContent; // Pass the DOM element here
 }
 
-// function addHoverListenersToCardsAndMarkers() {
-//   // Add hover event to vehicle cards
-//   const vehicleCards = document.querySelectorAll(".vehicle-card");
-//   vehicleCards.forEach((card) => {
-//     card.addEventListener("mouseover", () => {
-//       const imei = card.getAttribute("data-imei");
-//       const marker = markers[imei];
-//       if (marker) {
-//         // Pan and zoom the map to the marker
-//         map.panTo(marker.position);
-//         map.setZoom(12);
-
-//         // Open the info window for the marker
-//         const coords = {
-//           lat: marker.position.lat(),
-//           lon: marker.position.lng(),
-//         };
-//         updateInfoWindow(marker, marker.position, marker.device, coords);
-//       }
-//     });
-
-//     card.addEventListener("mouseout", () => {
-//       // Optionally, you can close the info window or reset the zoom level
-//     });
-//   });
-
-//   // Add hover event to map markers
-//   Object.keys(markers).forEach((imei) => {
-//     const marker = markers[imei];
-//     if (marker) {
-//       marker.addEventListener("mouseover", () => {
-//         const vehicleCard = document.querySelector(
-//           `.vehicle-card[data-imei="${imei}"]`
-//         );
-//         if (vehicleCard) {
-//           // Scroll the floating card to the corresponding vehicle card
-//           vehicleCard.scrollIntoView({ behavior: "smooth", block: "center" });
-
-//           // Highlight the vehicle card
-//           vehicleCard.classList.add("highlight");
-
-//           // Check if dark mode is active
-//           const isDarkMode = document.body.classList.contains("dark-mode");
-
-//           if (isDarkMode) {
-//             vehicleCard.style.backgroundColor = "#ccc"; // Light background for dark mode
-//             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-//             if (vehicleHeader) {
-//               vehicleHeader.style.color = "#000000d0"; // Dark font color for dark mode
-//             }
-//             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-//             if (vehicleInfo) {
-//               vehicleInfo.style.color = "#000000d0"; // Dark font color for dark mode
-
-//               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-//               vehicleInfoStrong.forEach((tag) => {
-//                 tag.style.color = "#000000d0"; // Dark font color for dark mode
-//               });
-//               const vehicleInfoA = vehicleCard.querySelector("a");
-//               if (vehicleInfoA) {
-//                 vehicleInfoA.style.color = "#000000d0"; // Dark font color for dark mode
-//               }
-//             }
-//           } else {
-//             vehicleCard.style.backgroundColor = "#000000d0"; // Dark background for light mode
-//             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-//             if (vehicleHeader) {
-//               vehicleHeader.style.color = "#ccc"; // Light font color for light mode
-//             }
-//             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-//             if (vehicleInfo) {
-//               vehicleInfo.style.color = "#ccc"; // Light font color for light mode
-
-//               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-//               vehicleInfoStrong.forEach((tag) => {
-//                 tag.style.color = "#ccc"; // Light font color for light mode
-//               });
-//               const vehicleInfoA = vehicleCard.querySelector("a");
-//               if (vehicleInfoA) {
-//                 vehicleInfoA.style.color = "#ccc"; // Light font color for light mode
-//               }
-//             }
-//           }
-//         }
-//       });
-
-//       marker.addEventListener("mouseout", () => {
-//         const vehicleCard = document.querySelector(
-//           `.vehicle-card[data-imei="${imei}"]`
-//         );
-//         if (vehicleCard) {
-//           // Remove the highlight from the vehicle card
-//           vehicleCard.classList.remove("highlight");
-
-//           vehicleCard.style.transition =
-//             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-//           vehicleCard.style.backgroundColor = ""; // Reset background color
-//           const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-//           if (vehicleHeader) {
-//             vehicleHeader.style.color = ""; // Reset font color
-//           }
-//           const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-//           if (vehicleInfo) {
-//             vehicleInfo.style.color = ""; // Reset font color
-
-//             const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-//             vehicleInfoStrong.forEach((tag) => {
-//               tag.style.color = ""; // Reset font color
-//             });
-//             const vehicleInfoA = vehicleCard.querySelector("a");
-//             if (vehicleInfoA) {
-//               vehicleInfoA.style.color = ""; // Reset font color
-//             }
-//           }
-//         }
-//       });
-//     }
-//   });
-// }
-
-// window.onload = function () {
-//   initMap();
-//   renderVehicles();
-//   document.querySelector(".block-container").style.display = "none";
-// };
 function addHoverListenersToCardsAndMarkers() {
   // Add hover event to vehicle cards
   const vehicleCards = document.querySelectorAll(".vehicle-card");
