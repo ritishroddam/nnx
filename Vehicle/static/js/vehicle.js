@@ -610,7 +610,7 @@ function updateMap() {
           function () {
             if (map.getZoom() > 15) {
               // Adjust the zoom level as needed
-              map.setZoom(8);
+              map.setZoom(7);
             }
             google.maps.event.removeListener(listener);
           }
