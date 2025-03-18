@@ -253,6 +253,8 @@ function initMap() {
           center: userLocation,
         });
 
+        infoWindow = new google.maps.InfoWindow();
+
         // Add traffic layer
         trafficLayer = new google.maps.TrafficLayer();
         trafficLayer.setMap(map);
