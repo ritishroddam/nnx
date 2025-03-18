@@ -605,7 +605,7 @@ function updateMap() {
         firstFit = false;
 
         const boundsCenter = bounds.getCenter();
-        const offset = 5; // Adjust the offset value as needed
+        const offset = -5; // Adjust the offset value as needed
         const newCenter = {
           lat: boundsCenter.lat(),
           lng: boundsCenter.lng() + offset,
@@ -617,9 +617,9 @@ function updateMap() {
           map,
           "idle",
           function () {
-            if (map.getZoom() < 4) {
+            if (map.getZoom() < 6) {
               // Adjust the zoom level as needed
-              map.setZoom(4);
+              map.setZoom(6);
             }
             google.maps.event.removeListener(listener);
           }
