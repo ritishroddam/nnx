@@ -140,6 +140,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                 latitude = parts[4] if parts[4] != '-' else ''
                 longitude = parts[6] if parts[6] != '-' else ''
+
+                num_lat = float(latitude) / 100
+                num_lon = float(longitude) / 100
+
+                latitude = str(num_lat)
+                longitude = str(num_lon)
                 
                 # Capture address (assuming address is passed after cellid field)
                 address = parts[25] if len(parts) > 25 else ''  # Adjust index based on the data format
@@ -149,9 +155,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'header': parts[1],
                     'time': parts[2],
                     'gps': parts[3],
-                    'latitude': latitude / 100,
+                    'latitude': latitude,
                     'dir1': parts[5],
-                    'longitude': longitude / 100,
+                    'longitude': longitude,
                     'dir2': parts[7],
                     'speed': parts[8],
                     'course': parts[9],
