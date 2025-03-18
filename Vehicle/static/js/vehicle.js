@@ -1366,8 +1366,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
   markerImage.alt = "Vehicle Icon";
-  markerImage.style.width = "50px";
-  markerImage.style.height = "50px";
+  markerImage.style.width = "18px";
+  markerImage.style.height = "32px";
 
   markerContent.appendChild(markerImage);
 
