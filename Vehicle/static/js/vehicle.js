@@ -145,8 +145,8 @@ async function renderVehicles() {
         map.setZoom(20);
         map.panTo(marker.latLng);
         updateInfoWindow(marker, marker.latLng, marker.device, {
-          lat: marker.latLng.lat().toFixed(6),
-          lon: marker.latLng.lng().toFixed(6),
+          lat: marker.latLng.lat(),
+          lon: marker.latLng.lng(),
         });
       }
     });
