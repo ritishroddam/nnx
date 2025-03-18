@@ -1425,11 +1425,18 @@ function addHoverListenersToCardsAndMarkers() {
           `.vehicle-card[data-imei="${imei}"]`
         );
         if (vehicleCard) {
-          // Scroll the floating card to the corresponding vehicle card
-          vehicleCard.scrollIntoView({ behavior: "smooth", block: "center" });
-
-          // Highlight the vehicle card
+          // Highlight the vehicle card without scrolling
           vehicleCard.classList.add("highlight");
+        }
+      });
+
+      marker.addEventListener("mouseout", () => {
+        const vehicleCard = document.querySelector(
+          `.vehicle-card[data-imei="${imei}"]`
+        );
+        if (vehicleCard) {
+          // Remove the highlight from the vehicle card
+          vehicleCard.classList.remove("highlight");
         }
       });
     }
