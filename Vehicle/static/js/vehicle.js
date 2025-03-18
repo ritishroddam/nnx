@@ -1425,7 +1425,10 @@ function addHoverListenersToCardsAndMarkers() {
           `.vehicle-card[data-imei="${imei}"]`
         );
         if (vehicleCard) {
-          // Highlight the vehicle card without scrolling
+          // Scroll the floating card to the corresponding vehicle card
+          vehicleCard.scrollIntoView({ behavior: "smooth", inline: "center" });
+
+          // Highlight the vehicle card
           vehicleCard.classList.add("highlight");
         }
       });
