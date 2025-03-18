@@ -605,7 +605,7 @@ function updateMap() {
         firstFit = false;
 
         const boundsCenter = bounds.getCenter();
-        const offset = -5; // Adjust the offset value as needed
+        const offset = -2; // Adjust the offset value as needed
         const newCenter = {
           lat: boundsCenter.lat(),
           lng: boundsCenter.lng() + offset,
