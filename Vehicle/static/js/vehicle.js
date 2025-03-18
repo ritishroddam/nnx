@@ -1222,29 +1222,29 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
 function addHoverListenersToCardsAndMarkers() {
   // Add hover event to vehicle cards
-  const vehicleCards = document.querySelectorAll(".vehicle-card");
-  vehicleCards.forEach((card) => {
-    card.addEventListener("mouseover", () => {
-      const imei = card.getAttribute("data-imei");
-      const marker = markers[imei];
-      if (marker) {
-        // Pan and zoom the map to the marker
-        map.panTo(marker.position);
-        map.setZoom(12);
+  // const vehicleCards = document.querySelectorAll(".vehicle-card");
+  // vehicleCards.forEach((card) => {
+  //   card.addEventListener("mouseover", () => {
+  //     const imei = card.getAttribute("data-imei");
+  //     const marker = markers[imei];
+  //     if (marker) {
+  //       // Pan and zoom the map to the marker
+  //       map.panTo(marker.position);
+  //       map.setZoom(12);
 
-        // Open the info window for the marker
-        const coords = {
-          lat: marker.LatLng.lat(),
-          lon: marker.LatLng.lng(),
-        };
-        updateInfoWindow(marker, marker.LatLng, marker.device, coords);
-      }
-    });
+  //       // Open the info window for the marker
+  //       const coords = {
+  //         lat: marker.LatLng.lat(),
+  //         lon: marker.LatLng.lng(),
+  //       };
+  //       updateInfoWindow(marker, marker.LatLng, marker.device, coords);
+  //     }
+  //   });
 
-    card.addEventListener("mouseout", () => {
-      // Optionally, you can close the info window or reset the zoom level
-    });
-  });
+  //   card.addEventListener("mouseout", () => {
+  //     // Optionally, you can close the info window or reset the zoom level
+  //   });
+  // });
 
   // Add hover event to map markers
   Object.keys(markers).forEach((imei) => {
