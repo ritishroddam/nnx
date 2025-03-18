@@ -603,8 +603,8 @@ function updateMap() {
         const boundsCenter = bounds.getCenter();
         const offset = -2; // Adjust the offset value as needed
         const newCenter = {
-          lat: boundsCenter.lat,
-          lng: boundsCenter.lng + offset,
+          lat: boundsCenter.lat(),
+          lng: boundsCenter.lng() + offset,
         };
 
         map.setCenter(newCenter);
@@ -955,8 +955,8 @@ function updateFloatingCard(vehicles, filterValue) {
 
 //////////////////////
 function geocodeLatLng(latLng, callback) {
-  const lat = latLng.lat;
-  const lon = latLng.lng;
+  const lat = latLng.lat();
+  const lon = latLng.lng();
   const key = `${lat},${lon}`;
 
   if (addressCache[key]) {
