@@ -1337,41 +1337,6 @@ async function initMap() {
   }, 1000);
 }
 
-// function createAdvancedMarker(latLng, iconUrl, rotation, device) {
-//   // Create a DOM element for the marker content
-//   const markerContent = document.createElement("div");
-//   markerContent.className = "custom-marker";
-//   markerContent.style.transform = `rotate(${rotation}deg)`;
-
-//   const markerImage = document.createElement("img");
-//   markerImage.src = iconUrl;
-//   markerImage.alt = "Vehicle Icon";
-//   markerImage.style.width = "50px";
-//   markerImage.style.height = "50px";
-
-//   markerContent.appendChild(markerImage);
-
-//   // Create the AdvancedMarkerElement
-//   const marker = new google.maps.marker.AdvancedMarkerElement({
-//     position: latLng,
-//     map: map,
-//     title: `IMEI: ${device.imei}`,
-//     content: markerContent, // Pass the DOM element here
-//   });
-
-//   marker.device = device;
-
-//   marker.addEventListener("click", () => {
-//     const coords = {
-//       lat: marker.position.lat(),
-//       lon: marker.position.lng(),
-//     };
-//     updateInfoWindow(marker, marker.position, device, coords);
-//   });
-
-//   return marker;
-// }
-
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
