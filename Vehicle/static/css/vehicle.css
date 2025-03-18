@@ -326,17 +326,3 @@ input:checked + .slider:before {
   left: 14.5%;
 }
 
-.dark-mode .vehicle-table-container {
-  background-color: black;
-}
-
-.vehicle-card.highlight {
-  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-  background-color: #000000d0;
-  color: #ccc;
-}
-
-body.dark-mode .vehicle-card.highlight {
-  background-color: #ccc;
-  color: #000000d0;
-}
