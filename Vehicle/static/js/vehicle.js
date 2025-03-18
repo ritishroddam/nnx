@@ -955,10 +955,8 @@ function updateFloatingCard(vehicles, filterValue) {
 
 //////////////////////
 function geocodeLatLng(latLng, callback) {
-  console.log("geocodeLatLng", latLng);
-  console.log("geocodeLatLng", latLng.lat());
-  const lat = typeof latLng.lat === "function" ? latLng.lat() : latLng.lat;
-  const lon = typeof latLng.lng === "function" ? latLng.lng() : latLng.lng;
+  const lat = float(latLng.lat());
+  const lon = float(latLng.lng());
   const key = `${lat},${lon}`;
 
   if (addressCache[key]) {
