@@ -604,13 +604,20 @@ function updateMap() {
         map.fitBounds(bounds);
         firstFit = false;
 
+        const boundsCenter = bounds.getCenter();
+        const offset = 5; // Adjust the offset value as needed
+        const newCenter = {
+          lat: boundsCenter.lat(),
+          lng: boundsCenter.lng() + offset,
+        };
+
         const listener = google.maps.event.addListener(
           map,
           "idle",
           function () {
-            if (map.getZoom() < 5) {
+            if (map.getZoom() < 4) {
               // Adjust the zoom level as needed
-              map.setZoom(5);
+              map.setZoom(4);
             }
             google.maps.event.removeListener(listener);
           }
