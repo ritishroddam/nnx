@@ -955,8 +955,17 @@ function updateFloatingCard(vehicles, filterValue) {
 
 //////////////////////
 function geocodeLatLng(latLng, callback) {
-  console.log("geocodeLatLng", latLng);
-  console.log("geocodeLatitude", latLng.lat());
+  console.log("🔍 geocodeLatLng called with:", latLng);
+
+  if (
+    !latLng ||
+    typeof latLng.lat !== "function" ||
+    typeof latLng.lng !== "function"
+  ) {
+    console.error("❌ Invalid latLng object:", latLng);
+    callback("Invalid coordinates");
+    return;
+  }
 
   const lat = parseFloat(latLng.lat());
   const lon = parseFloat(latLng.lng());
