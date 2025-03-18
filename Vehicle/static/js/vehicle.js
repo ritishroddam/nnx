@@ -617,9 +617,9 @@ function updateMap() {
           map,
           "idle",
           function () {
-            if (map.getZoom() < 6) {
+            if (map.getZoom() < 7) {
               // Adjust the zoom level as needed
-              map.setZoom(6);
+              map.setZoom(7);
             }
             google.maps.event.removeListener(listener);
           }
