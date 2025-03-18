@@ -1308,7 +1308,7 @@ async function initMap() {
   // Initialize Map
   map = new Map(document.getElementById("map"), {
     center: newCenter,
-    mapId: "DEMO_MAP_ID",
+    mapId: "44775ccfe2c0bd88",
     zoom: 5,
     gestureHandling: "greedy",
     zoomControl: true,
@@ -1335,10 +1335,10 @@ async function initMap() {
   let darkMode = true;
   themeToggle.addEventListener("click", function () {
     if (darkMode) {
-      map.setOptions({ styles: darkModeStyle });
+      map.setOptions({ mapId: "8faa2d4ac644c8a2" });
       document.body.classList.add("dark-mode");
     } else {
-      map.setOptions({ styles: lightModeStyle });
+      map.setOptions({ mapId: "44775ccfe2c0bd88" });
       document.body.classList.remove("dark-mode");
     }
     darkMode = !darkMode; // Toggle the state
