@@ -3,7 +3,7 @@
   width: 100%;
   z-index: -1;
   position: static !important;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 .floating-card {
@@ -325,4 +325,3 @@ input:checked + .slider:before {
 .sidebar:hover ~ .vehicle-table-container {
   left: 14.5%;
 }
-
