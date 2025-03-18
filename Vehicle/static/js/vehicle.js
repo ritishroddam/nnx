@@ -907,18 +907,22 @@ function updateFloatingCard(vehicles, filterValue) {
       vehicleElement.addEventListener("mouseover", () => {
         const marker = markers[vehicle.imei];
         if (marker) {
-          map.setZoom(20);
-
           const latLngg = new google.maps.LatLng(
             marker.latLng.lat(),
             marker.latLng.lng()
           );
-
-          map.panTo(latLngg);
-          updateInfoWindow(marker, latLngg, marker.device, {
-            lat: latLngg.lat(),
-            lon: latLngg.lng(),
-          });
+          if (latLngg.lat && latLngg.lng) {
+            map.setZoom(20);
+            map.panTo(latLngg);
+            updateInfoWindow(marker, latLngg, marker.device, {
+              lat: latLngg.lat(),
+              lon: latLngg.lng(),
+            });
+          } else {
+            console.error("Invalid Latlng object for marker:", marker);
+          }
+        } else {
+          console.error("Marker or LatLng is undefined for imei", vehicle.imei);
         }
       });
 
