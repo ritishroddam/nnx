@@ -611,6 +611,8 @@ function updateMap() {
           lng: boundsCenter.lng() + offset,
         };
 
+        map.setCenter(newCenter);
+
         const listener = google.maps.event.addListener(
           map,
           "idle",
