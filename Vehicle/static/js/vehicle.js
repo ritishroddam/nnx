@@ -379,8 +379,8 @@ var lastDataReceivedTime = {};
 // }
 
 function parseCoordinates(lat, lon) {
-  const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
-  const parsedLon = parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
+  const parsedLat = parseFloat(lat);
+  const parsedLon = parseFloat(lon);
 
   if (isNaN(parsedLat) || isNaN(parsedLon)) {
     console.error("Invalid coordinates:", lat, lon);
