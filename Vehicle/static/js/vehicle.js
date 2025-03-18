@@ -1235,11 +1235,10 @@ function addHoverListenersToCardsAndMarkers() {
         console.log(marker.position);
         // Open the info window for the marker
         const coords = {
-          lat: marker.position.lat(),
-          lon: marker.position.lng(),
+          lat: marker.position.lat,
+          lon: marker.position.lng,
         };
 
-        
         updateInfoWindow(marker, marker.position, marker.device, coords);
       }
     });
