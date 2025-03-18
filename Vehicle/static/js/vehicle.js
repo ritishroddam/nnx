@@ -158,30 +158,71 @@ async function renderVehicles() {
   showHidecar();
 }
 
+// function updateInfoWindow(marker, latLng, device, coords) {
+//   geocodeLatLng(latLng, function (address) {
+//     if (openMarker === marker && !manualClose) {
+//       const { formattedDate, formattedTime } = formatDateTime(
+//         device.date,
+//         device.time
+//       );
+//       const content = `<div class="info-window show">
+//                     <strong>IMEI:</strong> ${device.imei}<br>
+//                     <hr>
+//                     <p><strong>Speed:</strong> ${convertSpeedToKmh(
+//                       device.speed
+//                     ).toFixed(2)} km/h</p>
+//                     <p><strong>Lat:</strong> ${coords.lat}</p>
+//                     <p><strong>Lon:</strong> ${coords.lon}</p>
+//                     <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
+//                     <p class="address"><strong>Location:</strong> ${address}</p>
+//                     <p><strong>Data:</strong> <a href="device-details.html?imei=${
+//                       device.imei
+//                     }" target="_blank">View Data</a></p>
+//                 </div>`;
+//       infoWindow.setContent(content);
+//       infoWindow.setPosition(latLng);
+//       infoWindow.open(map, marker);
+//       openMarker = marker;
+//       manualClose = false;
+//     }
+//   });
+// }
+
 function updateInfoWindow(marker, latLng, device, coords) {
+  // Use geocodeLatLng to fetch the address for the given latLng
   geocodeLatLng(latLng, function (address) {
     if (openMarker === marker && !manualClose) {
       const { formattedDate, formattedTime } = formatDateTime(
         device.date,
         device.time
       );
+
+      // Create the content for the infoWindow
       const content = `<div class="info-window show">
-                    <strong>IMEI:</strong> ${device.imei}<br>
-                    <hr>
-                    <p><strong>Speed:</strong> ${convertSpeedToKmh(
-                      device.speed
-                    ).toFixed(2)} km/h</p>
-                    <p><strong>Lat:</strong> ${coords.lat}</p>
-                    <p><strong>Lon:</strong> ${coords.lon}</p>
-                    <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
-                    <p class="address"><strong>Location:</strong> ${address}</p>
-                    <p><strong>Data:</strong> <a href="device-details.html?imei=${
-                      device.imei
-                    }" target="_blank">View Data</a></p>
-                </div>`;
+                        <strong>IMEI:</strong> ${device.imei}<br>
+                        <hr>
+                        <p><strong>Speed:</strong> ${convertSpeedToKmh(
+                          device.speed
+                        ).toFixed(2)} km/h</p>
+                        <p><strong>Lat:</strong> ${coords.lat}</p>
+                        <p><strong>Lon:</strong> ${coords.lon}</p>
+                        <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
+                        <p class="address"><strong>Location:</strong> ${
+                          address || "Location unknown"
+                        }</p>
+                        <p><strong>Data:</strong> <a href="device-details.html?imei=${
+                          device.imei || "N/A"
+                        }" target="_blank">View Data</a></p>
+                    </div>`;
+
+      // Update the infoWindow content and position
       infoWindow.setContent(content);
       infoWindow.setPosition(latLng);
-      infoWindow.open(map, marker);
+
+      // Open the infoWindow on the map
+      infoWindow.open(map);
+
+      // Track the currently open marker
       openMarker = marker;
       manualClose = false;
     }
@@ -202,181 +243,6 @@ var manualClose = false;
 var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
-
-// function initMap() {
-//   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-//   const offset = -5;
-
-//   const newCenter = {
-//     lat: defaultCenter.lat,
-//     lng: defaultCenter.lng + offset,
-//   };
-
-//   // Dark Mode Styles
-//   const darkModeStyle = [
-//     { elementType: "geometry", stylers: [{ color: "#212121" }] },
-//     { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-//     { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-//     {
-//       featureType: "road",
-//       elementType: "geometry",
-//       stylers: [{ color: "#373737" }],
-//     },
-//     {
-//       featureType: "water",
-//       elementType: "geometry",
-//       stylers: [{ color: "#0e1626" }],
-//     },
-//     {
-//       featureType: "landscape",
-//       elementType: "geometry",
-//       stylers: [{ color: "#2c2c2c" }],
-//     },
-//     { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-//   ];
-
-//   const lightModeStyle = [
-//     { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-//     { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-//     { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
-//     { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
-//     {
-//       featureType: "administrative.land_parcel",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#bdbdbd" }],
-//     },
-//     {
-//       featureType: "poi",
-//       elementType: "geometry",
-//       stylers: [{ color: "#eeeeee" }],
-//     },
-//     {
-//       featureType: "poi",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#757575" }],
-//     },
-//     {
-//       featureType: "poi.park",
-//       elementType: "geometry",
-//       stylers: [{ color: "#defff0" }],
-//     },
-//     {
-//       featureType: "poi.park",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#9e9e9e" }],
-//     },
-//     {
-//       featureType: "road",
-//       elementType: "geometry",
-//       stylers: [{ color: "#ffffff" }],
-//     },
-//     {
-//       featureType: "road.arterial",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#757575" }],
-//     },
-//     {
-//       featureType: "road.highway",
-//       elementType: "geometry",
-//       stylers: [{ color: "#dadada" }],
-//     },
-//     {
-//       featureType: "road.highway",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#616161" }],
-//     },
-//     {
-//       featureType: "road.local",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#9e9e9e" }],
-//     },
-//     {
-//       featureType: "transit.line",
-//       elementType: "geometry",
-//       stylers: [{ color: "#e5e5e5" }],
-//     },
-//     {
-//       featureType: "transit.station",
-//       elementType: "geometry",
-//       stylers: [{ color: "#eeeeee" }],
-//     },
-//     {
-//       featureType: "water",
-//       elementType: "geometry",
-//       stylers: [{ color: "#def2ff" }],
-//     },
-//     {
-//       featureType: "water",
-//       elementType: "labels.text.fill",
-//       stylers: [{ color: "#9e9e9e" }],
-//     },
-//   ];
-
-//   // Initialize Map
-//   map = new google.maps.Map(document.getElementById("map"), {
-//     center: newCenter,
-//     zoom: 5,
-//     gestureHandling: "greedy",
-//     zoomControl: true,
-//     mapTypeControl: false, // Disable default map type buttons
-//     clickableIcons: false, // Disable POI icons
-//     styles: lightModeStyle, // Default to dark mode
-//     zoomControlOptions: {
-//       position: google.maps.ControlPosition.RIGHT_BOTTOM,
-//     },
-//   });
-
-//   geocoder = new google.maps.Geocoder();
-//   infoWindow = new google.maps.InfoWindow();
-
-//   google.maps.event.addListener(infoWindow, "closeclick", function () {
-//     const infoWindowDiv = document.querySelector(".info-window");
-
-//     if (infoWindowDiv) {
-//       infoWindowDiv.classList.remove("show");
-//       infoWindowDiv.classList.add("hide");
-
-//       setTimeout(function () {
-//         infoWindow.close();
-//       }, 300);
-//     }
-
-//     manualClose = true;
-//     openMarker = null;
-//   });
-
-//   restoreMarkers();
-//   renderVehicles();
-
-//   // setupWebSocket();
-
-//   let darkMode = true;
-//   const themeToggle = document.getElementById("theme-toggle");
-
-//   themeToggle.addEventListener("click", function () {
-//     if (darkMode) {
-//       map.setOptions({ styles: darkModeStyle });
-//       document.body.classList.add("dark-mode");
-//     } else {
-//       map.setOptions({ styles: lightModeStyle });
-//       document.body.classList.remove("dark-mode");
-//     }
-//     darkMode = !darkMode; // Toggle the state
-//   });
-
-//   setInterval(function () {
-//     if (countdownTimer > 0) {
-//       countdownTimer--;
-//       // document.getElementById("countdown").innerText = "Refresh in: " + countdownTimer + "s";
-//     } else {
-//       updateMap();
-//       if (document.getElementById("toggle-card-switch").checked === true) {
-//         renderVehicles();
-//       }
-//       countdownTimer = refreshInterval / 1000; // Reset countdown
-//     }
-//   }, 1000);
-// }
 
 function parseCoordinates(lat, lon) {
   const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
@@ -523,6 +389,7 @@ function updateVehicleData(vehicle) {
   if (markers[imei]) {
     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
     markers[imei].device = vehicle;
+    addHoverListenersToCardsAndMarkers(markers[imei], latLng, vehicle, coords);
     updateInfoWindow(markers[imei], latLng, vehicle, coords);
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
@@ -571,6 +438,7 @@ function updateMap() {
           if (markers[imei]) {
             updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
+            addMarkerClickListener(markers[imei], latLng, device, coords);
             updateInfoWindow(markers[imei], latLng, device, coords);
           } else {
             markers[imei] = createAdvancedMarker(
@@ -657,64 +525,64 @@ function formatDateTime(dateString, timeString) {
   return { formattedDate, formattedTime };
 }
 
-function addMarkerClickListener(marker, latLng, device, coords) {
-  geocodeLatLng(latLng, function (address) {
-    marker.div.addEventListener("click", function () {
-      if (openMarker !== marker) {
-        const imei = device.imei
-          ? device.imei
-          : '<span class="missing-data">N/A</span>';
-        const speed =
-          device.speed !== null && device.speed !== undefined
-            ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-            : '<span class="missing-data">Unknown</span>';
-        const lat =
-          coords.lat !== null && coords.lat !== undefined
-            ? coords.lat
-            : '<span class="missing-data">Unknown</span>';
-        const lon =
-          coords.lon !== null && coords.lon !== undefined
-            ? coords.lon
-            : '<span class="missing-data">Unknown</span>';
-        const date = device.date || "N/A";
-        const time = device.time || "N/A";
-        const addressText = address
-          ? address
-          : '<span class="missing-data">Location unknown</span>';
+// function addMarkerClickListener(marker, latLng, device, coords) {
+//   geocodeLatLng(latLng, function (address) {
+//     marker.div.addEventListener("click", function () {
+//       if (openMarker !== marker) {
+//         const imei = device.imei
+//           ? device.imei
+//           : '<span class="missing-data">N/A</span>';
+//         const speed =
+//           device.speed !== null && device.speed !== undefined
+//             ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+//             : '<span class="missing-data">Unknown</span>';
+//         const lat =
+//           coords.lat !== null && coords.lat !== undefined
+//             ? coords.lat
+//             : '<span class="missing-data">Unknown</span>';
+//         const lon =
+//           coords.lon !== null && coords.lon !== undefined
+//             ? coords.lon
+//             : '<span class="missing-data">Unknown</span>';
+//         const date = device.date || "N/A";
+//         const time = device.time || "N/A";
+//         const addressText = address
+//           ? address
+//           : '<span class="missing-data">Location unknown</span>';
 
-        const { formattedDate, formattedTime } = formatDateTime(date, time);
-        const content = `<div class="info-window show">
-                      <strong>IMEI:</strong> ${imei}<br>
-                      <hr>
-                      <p><strong>Speed:</strong> ${speed}</p>
-                      <p><strong>Lat:</strong> ${lat}</p>
-                      <p><strong>Lon:</strong> ${lon}</p>
-                      <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
-                      <p class="address"><strong>Location:</strong> ${addressText}</p>
-                      <p><strong>Data:</strong> <a href="device-details.html?imei=${
-                        device.imei || "N/A"
-                      }" target="_blank">View Data</a></p>
-                  </div>`;
+//         const { formattedDate, formattedTime } = formatDateTime(date, time);
+//         const content = `<div class="info-window show">
+//                       <strong>IMEI:</strong> ${imei}<br>
+//                       <hr>
+//                       <p><strong>Speed:</strong> ${speed}</p>
+//                       <p><strong>Lat:</strong> ${lat}</p>
+//                       <p><strong>Lon:</strong> ${lon}</p>
+//                       <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
+//                       <p class="address"><strong>Location:</strong> ${addressText}</p>
+//                       <p><strong>Data:</strong> <a href="device-details.html?imei=${
+//                         device.imei || "N/A"
+//                       }" target="_blank">View Data</a></p>
+//                   </div>`;
 
-        if (openMarker !== marker) {
-          infoWindow.setContent(content);
-          infoWindow.setPosition(latLng);
+//         if (openMarker !== marker) {
+//           infoWindow.setContent(content);
+//           infoWindow.setPosition(latLng);
 
-          const infoWindowDiv = document.querySelector(".info-window");
+//           const infoWindowDiv = document.querySelector(".info-window");
 
-          if (infoWindowDiv) {
-            infoWindowDiv.classList.remove("hide");
-            infoWindowDiv.classList.add("show");
-          }
+//           if (infoWindowDiv) {
+//             infoWindowDiv.classList.remove("hide");
+//             infoWindowDiv.classList.add("show");
+//           }
 
-          infoWindow.open(map, marker);
-          openMarker = marker;
-          manualClose = false;
-        }
-      }
-    });
-  });
-}
+//           infoWindow.open(map, marker);
+//           openMarker = marker;
+//           manualClose = false;
+//         }
+//       }
+//     });
+//   });
+// }
 
 // function filterVehicles() {
 //   const filterValue = document.getElementById("speed-filter").value;
@@ -766,6 +634,49 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 //   });
 //   updateFloatingCard(filteredVehicles, filterValue);
 // }
+
+function addMarkerClickListener(marker, latLng, device, coords) {
+  geocodeLatLng(latLng, function (address) {
+    // Use 'gmp-click' for AdvancedMarkerElement
+    marker.addEventListener("gmp-click", function () {
+      if (openMarker !== marker) {
+        const imei = device.imei || '<span class="missing-data">N/A</span>';
+        const speed =
+          device.speed !== null && device.speed !== undefined
+            ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+            : '<span class="missing-data">Unknown</span>';
+        const lat = coords.lat || '<span class="missing-data">Unknown</span>';
+        const lon = coords.lon || '<span class="missing-data">Unknown</span>';
+        const date = device.date || "N/A";
+        const time = device.time || "N/A";
+        const addressText =
+          address || '<span class="missing-data">Location unknown</span>';
+
+        const { formattedDate, formattedTime } = formatDateTime(date, time);
+        const content = `<div class="info-window show">
+                          <strong>IMEI:</strong> ${imei}<br>
+                          <hr>
+                          <p><strong>Speed:</strong> ${speed}</p>
+                          <p><strong>Lat:</strong> ${lat}</p>
+                          <p><strong>Lon:</strong> ${lon}</p>
+                          <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
+                          <p class="address"><strong>Location:</strong> ${addressText}</p>
+                          <p><strong>Data:</strong> <a href="device-details.html?imei=${
+                            device.imei || "N/A"
+                          }" target="_blank">View Data</a></p>
+                      </div>`;
+
+        // Update and open the infoWindow
+        infoWindow.setContent(content);
+        infoWindow.setPosition(latLng);
+        infoWindow.open(map, marker);
+
+        openMarker = marker;
+        manualClose = false;
+      }
+    });
+  });
+}
 
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
@@ -1198,13 +1109,12 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   marker.device = device;
 
   // Use 'gmp-click' instead of 'click'
-  marker.addEventListener("gmp-click", () => {
-    const coords = {
-      lat: marker.position.lat,
-      lon: marker.position.lng,
-    };
-    updateInfoWindow(marker, marker.position, device, coords);
-  });
+
+  const coords = {
+    lat: marker.position.lat,
+    lon: marker.position.lng,
+  };
+  addMarkerClickListener(marker, latLng, device, coords);
 
   return marker;
 }
@@ -1226,6 +1136,12 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   // Update marker properties
   marker.position = latLng;
   marker.content = markerContent; // Pass the DOM element here
+
+  const coords = {
+    lat: latLng.lat(),
+    lon: latLng.lng(),
+  };
+  addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
 function addHoverListenersToCardsAndMarkers() {
