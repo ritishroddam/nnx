@@ -1087,7 +1087,79 @@ function hideCard() {
   }
 }
 
-async function initMap() {
+// async function initMap() {
+//   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+//   const offset = -5;
+
+//   const newCenter = {
+//     lat: defaultCenter.lat,
+//     lng: defaultCenter.lng + offset,
+//   };
+
+//   // Request needed libraries
+//   //@ts-ignore
+//   const { Map } = await google.maps.importLibrary("maps");
+//   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+//   // Initialize Map
+//   map = new Map(document.getElementById("map"), {
+//     center: newCenter,
+//     mapId: "44775ccfe2c0bd88",
+//     zoom: 5,
+//     gestureHandling: "greedy",
+//     zoomControl: true,
+//     mapTypeControl: false, // Disable default map type buttons
+//     clickableIcons: false, // Disable POI icons // Default to light mode
+//     zoomControlOptions: {
+//       position: google.maps.ControlPosition.RIGHT_BOTTOM,
+//     },
+//     fullscreenControl: true,
+//     fullscreenControlOptions: {
+//       position: google.maps.ControlPosition.RIGHT_BOTTOM,
+//     },
+//   });
+
+//   geocoder = new google.maps.Geocoder();
+//   infoWindow = new google.maps.InfoWindow();
+
+//   google.maps.event.addListener(infoWindow, "closeclick", function () {
+//     manualClose = true;
+//     openMarker = null;
+//   });
+
+//   renderVehicles();
+
+//   // Theme toggle functionality
+//   const themeToggle = document.getElementById("theme-toggle");
+//   let darkMode = true;
+//   themeToggle.addEventListener("click", function () {
+//     if (darkMode) {
+//       map.setOptions({ mapId: "8faa2d4ac644c8a2" });
+//       document.body.classList.add("dark-mode");
+//     } else {
+//       map.setOptions({ mapId: "44775ccfe2c0bd88" });
+//       document.body.classList.remove("dark-mode");
+//     }
+//     darkMode = !darkMode; // Toggle the state
+//   });
+
+//   // Periodic updates
+//   setInterval(function () {
+//     if (countdownTimer > 0) {
+//       countdownTimer--;
+//     } else {
+//       updateMap();
+//       if (document.getElementById("toggle-card-switch").checked === true) {
+//         renderVehicles();
+//       }
+//       countdownTimer = refreshInterval / 1000; // Reset countdown
+//     }
+//   }, 1000);
+// }
+
+// ...existing code...
+
+async function initMap(darkMode = true) {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
   const offset = -5;
 
@@ -1096,105 +1168,7 @@ async function initMap() {
     lng: defaultCenter.lng + offset,
   };
 
-  // Dark Mode Styles
-  const darkModeStyle = [
-    { elementType: "geometry", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#373737" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#0e1626" }],
-    },
-    {
-      featureType: "landscape",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  ];
-
-  const lightModeStyle = [
-    { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
-    {
-      featureType: "administrative.land_parcel",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#bdbdbd" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "geometry",
-      stylers: [{ color: "#eeeeee" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [{ color: "#defff0" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#ffffff" }],
-    },
-    {
-      featureType: "road.arterial",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry",
-      stylers: [{ color: "#dadada" }],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#616161" }],
-    },
-    {
-      featureType: "road.local",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-    {
-      featureType: "transit.line",
-      elementType: "geometry",
-      stylers: [{ color: "#e5e5e5" }],
-    },
-    {
-      featureType: "transit.station",
-      elementType: "geometry",
-      stylers: [{ color: "#eeeeee" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#def2ff" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-  ];
+  const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
 
   // Request needed libraries
   //@ts-ignore
@@ -1204,12 +1178,12 @@ async function initMap() {
   // Initialize Map
   map = new Map(document.getElementById("map"), {
     center: newCenter,
-    mapId: "44775ccfe2c0bd88",
+    mapId: mapId,
     zoom: 5,
     gestureHandling: "greedy",
     zoomControl: true,
     mapTypeControl: false, // Disable default map type buttons
-    clickableIcons: false, // Disable POI icons // Default to light mode
+    clickableIcons: false, // Disable POI icons
     zoomControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
     },
@@ -1228,34 +1202,30 @@ async function initMap() {
   });
 
   renderVehicles();
-
-  // Theme toggle functionality
-  const themeToggle = document.getElementById("theme-toggle");
-  let darkMode = true;
-  themeToggle.addEventListener("click", function () {
-    if (darkMode) {
-      map.setOptions({ mapId: "8faa2d4ac644c8a2" });
-      document.body.classList.add("dark-mode");
-    } else {
-      map.setOptions({ mapId: "44775ccfe2c0bd88" });
-      document.body.classList.remove("dark-mode");
-    }
-    darkMode = !darkMode; // Toggle the state
-  });
-
-  // Periodic updates
-  setInterval(function () {
-    if (countdownTimer > 0) {
-      countdownTimer--;
-    } else {
-      updateMap();
-      if (document.getElementById("toggle-card-switch").checked === true) {
-        renderVehicles();
-      }
-      countdownTimer = refreshInterval / 1000; // Reset countdown
-    }
-  }, 1000);
 }
+
+// Theme toggle functionality
+const themeToggle = document.getElementById("theme-toggle");
+let darkMode = true;
+themeToggle.addEventListener("click", function () {
+  darkMode = !darkMode; // Toggle the state
+  initMap(darkMode); // Reinitialize the map with the new mapId
+});
+
+// Periodic updates
+setInterval(function () {
+  if (countdownTimer > 0) {
+    countdownTimer--;
+  } else {
+    updateMap();
+    if (document.getElementById("toggle-card-switch").checked === true) {
+      renderVehicles();
+    }
+    countdownTimer = refreshInterval / 1000; // Reset countdown
+  }
+}, 1000);
+
+// ...existing code...
 
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   const markerContent = document.createElement("div");
