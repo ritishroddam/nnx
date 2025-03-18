@@ -957,14 +957,14 @@ function updateFloatingCard(vehicles, filterValue) {
 function geocodeLatLng(latLng, callback) {
   console.log("geocodeLatLng", latLng);
   console.log("geocodeLatLng", latLng.lat());
-  const lat = latLng.lat();
-  const lon = latLng.lng();
+  const lat = typeof latLng.lat === "function" ? latLng.lat() : latLng.lat;
+  const lon = typeof latLng.lng === "function" ? latLng.lng() : latLng.lng;
   const key = `${lat},${lon}`;
 
   if (addressCache[key]) {
     callback(addressCache[key]);
   } else {
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0`;
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAX0`;
 
     fetch(geocodeUrl)
       .then((response) => response.json())
