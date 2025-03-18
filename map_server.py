@@ -138,14 +138,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 else:
                     ignition = door = sos = r1 = r2 = ac = r3 = main_power = harsh_speed = arm = sleep = '0'
 
-                latitude = parts[4] if parts[4] != '-' else ''
-                longitude = parts[6] if parts[6] != '-' else ''
-
-                num_lat = float(latitude) / 100
-                num_lon = float(longitude) / 100
-
-                latitude = str(num_lat)
-                longitude = str(num_lon)
+                latitude = str(float(parts[4])/100) if parts[4] != '-' else ''
+                longitude = str(float(parts[6])/100) if parts[6] != '-' else ''
                 
                 # Capture address (assuming address is passed after cellid field)
                 address = parts[25] if len(parts) > 25 else ''  # Adjust index based on the data format
