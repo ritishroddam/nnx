@@ -1449,10 +1449,10 @@ function addHoverListenersToCardsAndMarkers() {
 
         // Open the info window for the marker
         const coords = {
-          lat: marker.position.lat(),
-          lon: marker.position.lng(),
+          lat: marker.LatLng.lat(),
+          lon: marker.LatLng.lng(),
         };
-        updateInfoWindow(marker, marker.position, marker.device, coords);
+        updateInfoWindow(marker, marker.LatLng, marker.device, coords);
       }
     });
 
