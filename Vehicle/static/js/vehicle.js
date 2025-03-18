@@ -603,6 +603,18 @@ function updateMap() {
       if (!bounds.isEmpty() && firstFit) {
         map.fitBounds(bounds);
         firstFit = false;
+
+        const listener = google.maps.event.addListener(
+          map,
+          "idle",
+          function () {
+            if (map.getZoom() > 15) {
+              // Adjust the zoom level as needed
+              map.setZoom(15);
+            }
+            google.maps.event.removeListener(listener);
+          }
+        );
       }
 
       filterVehicles();
