@@ -931,86 +931,6 @@ function updateFloatingCard(vehicles, filterValue) {
 
 //   marker.setMap(map);
 
-//   div.addEventListener("mouseover", () => {
-//     const vehicleElement = document.querySelector(
-//       `.vehicle-card[data-imei="${device.imei}"]`
-//     );
-//     if (vehicleElement) {
-//       vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
-
-//       // Check if dark mode is active
-//       const isDarkMode = document.body.classList.contains("dark-mode");
-
-//       if (isDarkMode) {
-//         vehicleElement.style.backgroundColor = "#ccc"; // Dark background for dark mode
-//         const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
-//         if (vehicleHeader) {
-//           vehicleHeader.style.color = "#000000d0"; // Light font color for dark mode
-//         }
-//         const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
-//         if (vehicleInfo) {
-//           vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
-
-//           const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
-//           vehicleInfoStrong.forEach((tag) => {
-//             tag.style.color = "#000000d0"; // Light font color for dark mode
-//           });
-//           const vehicleInfoA = vehicleElement.querySelector("a");
-//           if (vehicleInfoA) {
-//             vehicleInfoA.style.color = "#000000d0"; // Light font color for dark mode
-//           }
-//         }
-//       } else {
-//         vehicleElement.style.backgroundColor = "#000000d0"; // Dark background for light mode
-//         const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
-//         if (vehicleHeader) {
-//           vehicleHeader.style.color = "#ccc"; // Light font color for light mode
-//         }
-//         const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
-//         if (vehicleInfo) {
-//           vehicleInfo.style.color = "#ccc"; // Light font color for light mode
-
-//           const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
-//           vehicleInfoStrong.forEach((tag) => {
-//             tag.style.color = "#ccc"; // Light font color for dark mode
-//           });
-//           const vehicleInfoA = vehicleElement.querySelector("a");
-//           if (vehicleInfoA) {
-//             vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
-//           }
-//         }
-//       }
-//     }
-//   });
-
-//   div.addEventListener("mouseout", () => {
-//     const vehicleElement = document.querySelector(
-//       `.vehicle-card[data-imei="${device.imei}"]`
-//     );
-//     if (vehicleElement) {
-//       vehicleElement.style.transition =
-//         "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-//       vehicleElement.style.backgroundColor = ""; // Reset background color
-//       const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
-//       if (vehicleHeader) {
-//         vehicleHeader.style.color = ""; // Reset font color
-//       }
-//       const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
-//       if (vehicleInfo) {
-//         vehicleInfo.style.color = ""; // Reset font color
-
-//         const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
-//         vehicleInfoStrong.forEach((tag) => {
-//           tag.style.color = ""; // Light font color for dark mode
-//         });
-//         const vehicleInfoA = vehicleElement.querySelector("a");
-//         if (vehicleInfoA) {
-//           vehicleInfoA.style.color = ""; // Light font color for dark mode
-//         }
-//       }
-//     }
-//   });
-
 //   addMarkerClickListener(marker, latLng, device, {});
 //   return marker;
 // }
@@ -1394,25 +1314,84 @@ function addHoverListenersToCardsAndMarkers() {
   // Add hover event to vehicle cards
   const vehicleCards = document.querySelectorAll(".vehicle-card");
   vehicleCards.forEach((card) => {
-    card.addEventListener("mouseover", () => {
-      const imei = card.getAttribute("data-imei");
-      const marker = markers[imei];
-      if (marker) {
-        // Pan and zoom the map to the marker
-        map.panTo(marker.position);
-        map.setZoom(12);
+    div.addEventListener("mouseover", () => {
+      const vehicleElement = document.querySelector(
+        `.vehicle-card[data-imei="${device.imei}"]`
+      );
+      if (vehicleElement) {
+        vehicleElement.scrollIntoView({ behavior: "smooth", block: "center" });
 
-        // Open the info window for the marker
-        const coords = {
-          lat: marker.LatLng.lat(),
-          lon: marker.LatLng.lng(),
-        };
-        updateInfoWindow(marker, marker.LatLng, marker.device, coords);
+        // Check if dark mode is active
+        const isDarkMode = document.body.classList.contains("dark-mode");
+
+        if (isDarkMode) {
+          vehicleElement.style.backgroundColor = "#ccc"; // Dark background for dark mode
+          const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
+          if (vehicleHeader) {
+            vehicleHeader.style.color = "#000000d0"; // Light font color for dark mode
+          }
+          const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
+          if (vehicleInfo) {
+            vehicleInfo.style.color = "#000000d0"; // Light font color for dark mode
+
+            const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
+            vehicleInfoStrong.forEach((tag) => {
+              tag.style.color = "#000000d0"; // Light font color for dark mode
+            });
+            const vehicleInfoA = vehicleElement.querySelector("a");
+            if (vehicleInfoA) {
+              vehicleInfoA.style.color = "#000000d0"; // Light font color for dark mode
+            }
+          }
+        } else {
+          vehicleElement.style.backgroundColor = "#000000d0"; // Dark background for light mode
+          const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
+          if (vehicleHeader) {
+            vehicleHeader.style.color = "#ccc"; // Light font color for light mode
+          }
+          const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
+          if (vehicleInfo) {
+            vehicleInfo.style.color = "#ccc"; // Light font color for light mode
+
+            const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
+            vehicleInfoStrong.forEach((tag) => {
+              tag.style.color = "#ccc"; // Light font color for dark mode
+            });
+            const vehicleInfoA = vehicleElement.querySelector("a");
+            if (vehicleInfoA) {
+              vehicleInfoA.style.color = "#ccc"; // Light font color for dark mode
+            }
+          }
+        }
       }
     });
 
-    card.addEventListener("mouseout", () => {
-      // Optionally, you can close the info window or reset the zoom level
+    div.addEventListener("mouseout", () => {
+      const vehicleElement = document.querySelector(
+        `.vehicle-card[data-imei="${device.imei}"]`
+      );
+      if (vehicleElement) {
+        vehicleElement.style.transition =
+          "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
+        vehicleElement.style.backgroundColor = ""; // Reset background color
+        const vehicleHeader = vehicleElement.querySelector(".vehicle-header");
+        if (vehicleHeader) {
+          vehicleHeader.style.color = ""; // Reset font color
+        }
+        const vehicleInfo = vehicleElement.querySelector(".vehicle-info");
+        if (vehicleInfo) {
+          vehicleInfo.style.color = ""; // Reset font color
+
+          const vehicleInfoStrong = vehicleElement.querySelectorAll("strong");
+          vehicleInfoStrong.forEach((tag) => {
+            tag.style.color = ""; // Light font color for dark mode
+          });
+          const vehicleInfoA = vehicleElement.querySelector("a");
+          if (vehicleInfoA) {
+            vehicleInfoA.style.color = ""; // Light font color for dark mode
+          }
+        }
+      }
     });
   });
 
