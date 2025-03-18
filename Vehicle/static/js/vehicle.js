@@ -1232,14 +1232,15 @@ function addHoverListenersToCardsAndMarkers() {
         map.panTo(marker.position);
         map.setZoom(12);
 
-        console.log(marker);
+        console.log(marker.position);
         // Open the info window for the marker
         const coords = {
-          lat: marker.LatLng.lat(),
-          lon: marker.LatLng.lng(),
+          lat: marker.position.lat(),
+          lon: marker.position.lng(),
         };
 
-        updateInfoWindow(marker, marker.LatLng, marker.device, coords);
+        
+        updateInfoWindow(marker, marker.position, marker.device, coords);
       }
     });
 
