@@ -1232,7 +1232,7 @@ function addHoverListenersToCardsAndMarkers() {
         map.panTo(marker.position);
         map.setZoom(12);
 
-        console.log(marker.LatLng.lat());
+        console.log(marker);
         // Open the info window for the marker
         const coords = {
           lat: marker.LatLng.lat(),
