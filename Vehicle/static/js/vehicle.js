@@ -138,23 +138,11 @@ async function renderVehicles() {
       </div>
     `;
 
-    // Add hover event listener to zoom in on the map and show the info window
-    vehicleElement.addEventListener("mouseover", () => {
-      const marker = markers[imei];
-      if (marker) {
-        map.setZoom(20);
-        map.panTo(marker.latLng);
-        updateInfoWindow(marker, marker.latLng, marker.device, {
-          lat: marker.latLng.lat(),
-          lon: marker.latLng.lng(),
-        });
-      }
-    });
-
     listContainer.appendChild(vehicleElement);
   });
 
   filterVehicles();
+  addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
 
@@ -904,28 +892,6 @@ function updateFloatingCard(vehicles, filterValue) {
           }" target="_blank">View Data</a>
         </div>`;
 
-      vehicleElement.addEventListener("mouseover", () => {
-        const marker = markers[vehicle.imei];
-        if (marker) {
-          const latLngg = new google.maps.LatLng(
-            marker.latLng.lat(),
-            marker.latLng.lng()
-          );
-          if (latLngg.lat && latLngg.lng) {
-            map.setZoom(20);
-            map.panTo(latLngg);
-            updateInfoWindow(marker, latLngg, marker.device, {
-              lat: latLngg.lat(),
-              lon: latLngg.lng(),
-            });
-          } else {
-            console.error("Invalid Latlng object for marker:", marker);
-          }
-        } else {
-          console.error("Marker or LatLng is undefined for imei", vehicle.imei);
-        }
-      });
-
       vehicleList.appendChild(vehicleElement);
     });
   }
@@ -1422,6 +1388,52 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   // Update marker properties
   marker.position = latLng;
   marker.content = markerContent; // Pass the DOM element here
+}
+
+function addHoverListenersToCardsAndMarkers() {
+  // Add hover event to vehicle cards
+  const vehicleCards = document.querySelectorAll(".vehicle-card");
+  vehicleCards.forEach((card) => {
+    card.addEventListener("mouseover", () => {
+      const imei = card.getAttribute("data-imei");
+      const marker = markers[imei];
+      if (marker) {
+        // Pan and zoom the map to the marker
+        map.panTo(marker.position);
+        map.setZoom(12);
+
+        // Open the info window for the marker
+        const coords = {
+          lat: marker.position.lat(),
+          lon: marker.position.lng(),
+        };
+        updateInfoWindow(marker, marker.position, marker.device, coords);
+      }
+    });
+
+    card.addEventListener("mouseout", () => {
+      // Optionally, you can close the info window or reset the zoom level
+    });
+  });
+
+  // Add hover event to map markers
+  Object.keys(markers).forEach((imei) => {
+    const marker = markers[imei];
+    if (marker) {
+      marker.addEventListener("mouseover", () => {
+        const vehicleCard = document.querySelector(
+          `.vehicle-card[data-imei="${imei}"]`
+        );
+        if (vehicleCard) {
+          // Scroll the floating card to the corresponding vehicle card
+          vehicleCard.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // Highlight the vehicle card
+          vehicleCard.classList.add("highlight");
+        }
+      });
+    }
+  });
 }
 
 window.onload = function () {
