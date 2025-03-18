@@ -144,8 +144,8 @@ async function renderVehicles() {
         map.setZoom(20);
         map.panTo(marker.latLng);
         updateInfoWindow(marker, marker.latLng, marker.device, {
-          lat: marker.latLng.lat(),
-          lon: marker.latLng.lng(),
+          lat: marker.latLng.lat,
+          lon: marker.latLng.lng,
         });
       }
     });
@@ -491,8 +491,7 @@ function animateMarker(marker, newPosition, duration = 6000) {
       startPosition.lat() +
       (newPosition.lat() - startPosition.lat()) * progress;
     const lng =
-      startPosition.lng() +
-      (newPosition.lng() - startPosition.lng()) * progress;
+      startPosition.lng + (newPosition.lng - startPosition.lng) * progress;
 
     marker.latLng = new google.maps.LatLng(lat, lng);
     marker.draw();
@@ -607,8 +606,8 @@ function updateMap() {
         const boundsCenter = bounds.getCenter();
         const offset = -2; // Adjust the offset value as needed
         const newCenter = {
-          lat: boundsCenter.lat(),
-          lng: boundsCenter.lng() + offset,
+          lat: boundsCenter.lat,
+          lng: boundsCenter.lng + offset,
         };
 
         map.setCenter(newCenter);
@@ -1192,8 +1191,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   // Use 'gmp-click' instead of 'click'
   marker.addEventListener("gmp-click", () => {
     const coords = {
-      lat: marker.position.lat(),
-      lon: marker.position.lng(),
+      lat: marker.position.lat,
+      lon: marker.position.lng,
     };
     updateInfoWindow(marker, marker.position, device, coords);
   });
