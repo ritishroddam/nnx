@@ -1074,7 +1074,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
-  latlng = new google.maps.LatLng(latLng.lat, latLng.lon);
+  latLng = new google.maps.LatLng(latLng.lat, latLng.lon);
 
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng,
