@@ -199,10 +199,6 @@ function updateMap() {
           if (markers[imei]) {
             updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
-            addMarkerClickListener(markers[imei], latLng, device, {
-              lat: latLng.lat(),
-              lon: latLng.lng(),
-            });
           } else {
             markers[imei] = createAdvancedMarker(
               latLng,
