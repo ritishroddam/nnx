@@ -158,36 +158,6 @@ async function renderVehicles() {
   showHidecar();
 }
 
-// function updateInfoWindow(marker, latLng, device, coords) {
-//   geocodeLatLng(latLng, function (address) {
-//     if (openMarker === marker && !manualClose) {
-//       const { formattedDate, formattedTime } = formatDateTime(
-//         device.date,
-//         device.time
-//       );
-//       const content = `<div class="info-window show">
-//                     <strong>IMEI:</strong> ${device.imei}<br>
-//                     <hr>
-//                     <p><strong>Speed:</strong> ${convertSpeedToKmh(
-//                       device.speed
-//                     ).toFixed(2)} km/h</p>
-//                     <p><strong>Lat:</strong> ${coords.lat}</p>
-//                     <p><strong>Lon:</strong> ${coords.lon}</p>
-//                     <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
-//                     <p class="address"><strong>Location:</strong> ${address}</p>
-//                     <p><strong>Data:</strong> <a href="device-details.html?imei=${
-//                       device.imei
-//                     }" target="_blank">View Data</a></p>
-//                 </div>`;
-//       infoWindow.setContent(content);
-//       infoWindow.setPosition(latLng);
-//       infoWindow.open(map, marker);
-//       openMarker = marker;
-//       manualClose = false;
-//     }
-//   });
-// }
-
 function updateInfoWindow(marker, latLng, device, coords) {
   // Use geocodeLatLng to fetch the address for the given latLng
   geocodeLatLng(latLng, function (address) {
@@ -390,7 +360,6 @@ function updateVehicleData(vehicle) {
     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
     markers[imei].device = vehicle;
     addHoverListenersToCardsAndMarkers(markers[imei], latLng, vehicle, coords);
-    updateInfoWindow(markers[imei], latLng, vehicle, coords);
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
   }
@@ -439,7 +408,6 @@ function updateMap() {
             updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
             addMarkerClickListener(markers[imei], latLng, device, coords);
-            updateInfoWindow(markers[imei], latLng, device, coords);
           } else {
             markers[imei] = createAdvancedMarker(
               latLng,
