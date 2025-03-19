@@ -18,6 +18,79 @@ socket.on("sos_alert", function (data) {
   }
 });
 
+socket.on("vehicle_update", function (data) {
+  console.log("Vehicle update received:", data);
+  updateVehicleData(data);
+
+  // Update the vehicle card
+  const imei = sanitizeIMEI(data.imei);
+  const vehicleCard = document.querySelector(
+    `.vehicle-card[data-imei="${imei}"]`
+  );
+
+  if (vehicleCard) {
+    const latitude = data.latitude ? parseFloat(data.latitude) : null;
+    const longitude = data.longitude ? parseFloat(data.longitude) : null;
+    const { formattedDate, formattedTime } = formatDateTime(
+      data.date,
+      data.time
+    );
+
+    vehicleCard.querySelector(".vehicle-info").innerHTML = `
+      <strong>Speed:</strong> ${
+        data.speed
+          ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
+          : "Unknown"
+      } <br>
+      <strong>Lat:</strong> ${latitude} <br>
+      <strong>Lon:</strong> ${longitude} <br>
+      <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
+      formattedDate || "N/A"
+    } <br>
+      <strong>Location:</strong> ${data.address || "Location unknown"} <br>
+      <strong>Data:</strong> <a href="device-details.html?imei=${
+        data.imei
+      }" target="_blank">View Data</a>
+    `;
+  } else {
+    // If the vehicle card doesn't exist, create a new one
+    const listContainer = document.getElementById("vehicle-list");
+    const vehicleElement = document.createElement("div");
+    vehicleElement.classList.add("vehicle-card");
+    vehicleElement.setAttribute("data-imei", data.imei);
+
+    const latitude = data.latitude ? parseFloat(data.latitude) : null;
+    const longitude = data.longitude ? parseFloat(data.longitude) : null;
+    const { formattedDate, formattedTime } = formatDateTime(
+      data.date,
+      data.time
+    );
+
+    vehicleElement.innerHTML = `
+      <div class="vehicle-header">${data.imei} - ${
+      data.status || "Unknown"
+    }</div>
+      <div class="vehicle-info">
+        <strong>Speed:</strong> ${
+          data.speed
+            ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
+            : "Unknown"
+        } <br>
+        <strong>Lat:</strong> ${latitude} <br>
+        <strong>Lon:</strong> ${longitude} <br>
+        <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
+      formattedDate || "N/A"
+    } <br>
+        <strong>Location:</strong> ${data.address || "Location unknown"} <br>
+        <strong>Data:</strong> <a href="device-details.html?imei=${
+          data.imei
+        }" target="_blank">View Data</a>
+      </div>
+    `;
+    listContainer.appendChild(vehicleElement);
+  }
+});
+
 function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
     const sosDiv = document.createElement("div");
@@ -761,19 +834,6 @@ themeToggle.addEventListener("click", function () {
   darkMode = !darkMode; // Toggle the state
   initMap(darkMode); // Reinitialize the map with the new mapId
 });
-
-// Periodic updates
-setInterval(function () {
-  if (countdownTimer > 0) {
-    countdownTimer--;
-  } else {
-    updateMap();
-    if (document.getElementById("toggle-card-switch").checked === true) {
-      renderVehicles();
-    }
-    countdownTimer = refreshInterval / 1000; // Reset countdown
-  }
-}, 1000);
 
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   // Ensure latLng is a google.maps.LatLng instance
