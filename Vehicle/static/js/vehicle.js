@@ -926,8 +926,8 @@ function addHoverListenersToCardsAndMarkers() {
           lat: marker.position.lat,
           lon: marker.position.lng,
         };
-        const latLn = marker.position;
-        console.log(latLn.lat, latLn.lng);
+
+        console.log(latLng);
 
         updateInfoWindow(marker, marker.position, marker.device, coords);
         // infoWindow.open(map, marker);
