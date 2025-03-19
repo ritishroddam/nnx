@@ -883,7 +883,13 @@ function addHoverListenersToCardsAndMarkers() {
         };
 
         geocodeLatLng(latLng, function (address) {
-          setInfoWindowContent(infoWindow, marker, latLng, device, address);
+          setInfoWindowContent(
+            infoWindow,
+            marker,
+            latLng,
+            marker.device,
+            address
+          );
           infoWindow.open(map, marker);
         });
       }
