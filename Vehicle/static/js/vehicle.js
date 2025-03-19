@@ -890,7 +890,7 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
 
-        // infoWindow.open(map, marker);
+        infoWindow.open(map, marker);
       }
     });
 
