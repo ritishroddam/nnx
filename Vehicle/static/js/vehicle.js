@@ -938,7 +938,7 @@ function addHoverListenersToCardsAndMarkers() {
         );
 
         map.setZoom(20);
-        map.panTo(panToWithOffset(latLng, -50, 0));
+        map.panTo(panToWithOffset(latLng, -100, 0));
 
         // Open the info window for the marker
         const coords = {
