@@ -190,7 +190,7 @@ function updateInfoWindow(marker, latLng, device, coords) {
       infoWindow.setPosition(latLng);
 
       // Open the infoWindow on the map
-      infoWindow.open(map, content);
+      infoWindow.open(map, marker);
 
       // Track the currently open marker
       openMarker = marker;
