@@ -919,7 +919,7 @@ function addHoverListenersToCardsAndMarkers() {
         );
 
         map.panTo(latLng);
-        map.setZoom(12);
+        map.setZoom(20);
 
         // Open the info window for the marker
         const coords = {
