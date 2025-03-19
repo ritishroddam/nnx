@@ -903,7 +903,7 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
-function panToWithOffset(latLng, offsetX = 50, offsetY = 0) {
+function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
   // Get the current map projection
   const scale = Math.pow(2, map.getZoom()); // Scale based on zoom level
   const worldCoordinateCenter = map.getProjection().fromLatLngToPoint(latLng);
@@ -938,7 +938,7 @@ function addHoverListenersToCardsAndMarkers() {
         );
 
         map.setZoom(20);
-        map.panTo(panToWithOffset(latLng, 50, 0));
+        map.panTo(panToWithOffset(latLng, -50, 0));
 
         // Open the info window for the marker
         const coords = {
