@@ -927,9 +927,7 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
 
-        console.log(latLng);
-
-        updateInfoWindow(marker, marker.position, marker.device, coords);
+        updateInfoWindow(marker, latLng, marker.device, coords);
         // infoWindow.open(map, marker);
       }
     });
