@@ -285,7 +285,7 @@ p {
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  height: 333px; 
+  height: 332px; 
   overflow-y: auto;
 }
 
@@ -301,10 +301,11 @@ p {
   border-bottom: .5px #ddd;
   font-weight: 200;
   letter-spacing: 1px;
+  row-gap: 10px;
 }
 
 .vehicleLiveTable th {
-  background-color: #E0F7FA;
+  background-color: #85c1e9;
   color: #333;
   text-transform: uppercase;
   padding-bottom: 5px;
