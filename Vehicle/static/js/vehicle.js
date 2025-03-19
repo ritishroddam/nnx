@@ -316,6 +316,7 @@ function updateMap() {
         );
       }
 
+      renderVehicles();
       filterVehicles();
     })
     .catch((error) => {
@@ -1049,6 +1050,7 @@ function addHoverListenersToCardsAndMarkers() {
 
 window.onload = function () {
   initMap();
-  renderVehicles();
+  updateMap();
+  // renderVehicles();
   document.querySelector(".block-container").style.display = "none";
 };
