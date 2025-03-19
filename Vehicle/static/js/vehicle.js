@@ -8,6 +8,7 @@ socket.on("connect", function () {
 socket.on("vehicle_update", function (data) {
   console.log("Vehicle update received:", data);
   updateVehicleData(data);
+  updateVehicleCard(data);
 });
 
 socket.on("sos_alert", function (data) {
@@ -18,24 +19,18 @@ socket.on("sos_alert", function (data) {
   }
 });
 
-socket.on("vehicle_update", function (data) {
-  console.log("Vehicle update received:", data);
-  updateVehicleData(data);
-
-  // Update the vehicle card
+function updateVehicleCard(data) {
   const imei = sanitizeIMEI(data.imei);
   const vehicleCard = document.querySelector(
     `.vehicle-card[data-imei="${imei}"]`
   );
 
-  if (vehicleCard) {
-    const latitude = data.latitude ? parseFloat(data.latitude) : null;
-    const longitude = data.longitude ? parseFloat(data.longitude) : null;
-    const { formattedDate, formattedTime } = formatDateTime(
-      data.date,
-      data.time
-    );
+  const latitude = data.latitude ? parseFloat(data.latitude) : null;
+  const longitude = data.longitude ? parseFloat(data.longitude) : null;
+  const { formattedDate, formattedTime } = formatDateTime(data.date, data.time);
 
+  if (vehicleCard) {
+    // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <strong>Speed:</strong> ${
         data.speed
@@ -53,18 +48,11 @@ socket.on("vehicle_update", function (data) {
       }" target="_blank">View Data</a>
     `;
   } else {
-    // If the vehicle card doesn't exist, create a new one
+    // Create a new vehicle card
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
-
-    const latitude = data.latitude ? parseFloat(data.latitude) : null;
-    const longitude = data.longitude ? parseFloat(data.longitude) : null;
-    const { formattedDate, formattedTime } = formatDateTime(
-      data.date,
-      data.time
-    );
 
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${data.imei} - ${
@@ -89,7 +77,7 @@ socket.on("vehicle_update", function (data) {
     `;
     listContainer.appendChild(vehicleElement);
   }
-});
+}
 
 function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
