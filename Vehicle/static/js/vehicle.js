@@ -1059,9 +1059,12 @@ setInterval(function () {
   }
 }, 1000);
 
-// ...existing code...
-
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
+  // Ensure latLng is a google.maps.LatLng instance
+  if (!(latLng instanceof google.maps.LatLng)) {
+    latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
+  }
+
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
   markerContent.style.transform = `rotate(${rotation}deg)`;
@@ -1074,10 +1077,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
-  latLng = new google.maps.LatLng(latLng.lat, latLng.lon);
-
   const marker = new google.maps.marker.AdvancedMarkerElement({
-    position: latLng,
+    position: latLng, // Save as google.maps.LatLng
     map: map,
     title: `IMEI: ${device.imei}`,
     content: markerContent,
@@ -1085,11 +1086,9 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   marker.device = device;
 
-  // Use 'gmp-click' instead of 'click'
-
   const coords = {
-    lat: marker.position.lat,
-    lon: marker.position.lng,
+    lat: latLng.lat(),
+    lon: latLng.lng(),
   };
   addMarkerClickListener(marker, latLng, device, coords);
 
