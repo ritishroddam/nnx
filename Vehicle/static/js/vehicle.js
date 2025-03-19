@@ -88,19 +88,6 @@ async function renderVehicles() {
         }" target="_blank">View Data</a>
       </div>
     `;
-
-    vehicleElement.addEventListener("mouseover", () => {
-      const marker = markers[imei];
-      if (marker) {
-        map.setZoom(20);
-        map.panTo(marker.latLng);
-        updateInfoWindow(marker, marker.latLng, marker.device, {
-          lat: marker.latLng.lat(),
-          lon: marker.latLng.lng(),
-        });
-      }
-    });
-
     listContainer.appendChild(vehicleElement);
   });
 
@@ -109,54 +96,7 @@ async function renderVehicles() {
   showHidecar();
 }
 
-function updateInfoWindow(marker, latLng, device, coords) {
-  geocodeLatLng(latLng, function (address) {
-    if (openMarker === marker && !manualClose) {
-      const { formattedDate, formattedTime } = formatDateTime(
-        device.date,
-        device.time
-      );
-
-      const content = `<div class="info-window show">
-                        <strong>IMEI:</strong> ${device.imei}<br>
-                        <hr>
-                        <p><strong>Speed:</strong> ${
-                          device.speed
-                            ? `${convertSpeedToKmh(device.speed).toFixed(
-                                2
-                              )} km/h`
-                            : "Unknown"
-                        }</p>
-                        <p><strong>Lat:</strong> ${coords.lat}</p>
-                        <p><strong>Lon:</strong> ${coords.lon}</p>
-                        <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
-                        <p class="address"><strong>Location:</strong> ${
-                          address || "Location unknown"
-                        }</p>
-                        <p><strong>Data:</strong> <a href="device-details.html?imei=${
-                          device.imei || "N/A"
-                        }" target="_blank">View Data</a></p>
-                    </div>`;
-
-      infoWindow.setContent(content);
-      infoWindow.setPosition(latLng);
-      infoWindow.open(map, marker);
-
-      openMarker = marker;
-      manualClose = false;
-    }
-  });
-}
-
 function geocodeLatLng(latLng, callback) {
-  // console.log("🔍 geocodeLatLng called with:", latLng);
-
-  // if (!(latLng instanceof google.maps.LatLng)) {
-  //   console.error("❌ Invalid latLng object:", latLng);
-  //   callback("Invalid coordinates");
-  //   return;
-  // }
-
   const lat = latLng.lat();
   const lon = latLng.lng();
   const key = `${lat},${lon}`;
@@ -221,9 +161,7 @@ function addMarkerClickListener(marker, latLng, device, coords) {
         infoWindow.setContent(content);
         infoWindow.setPosition(latLng);
         infoWindow.open(map, marker);
-
         openMarker = marker;
-        manualClose = false;
       }
     });
   });
@@ -810,11 +748,6 @@ async function initMap(darkMode = true) {
   geocoder = new google.maps.Geocoder();
   infoWindow = new google.maps.InfoWindow();
 
-  google.maps.event.addListener(infoWindow, "closeclick", function () {
-    manualClose = true;
-    openMarker = null;
-  });
-
   renderVehicles();
 }
 
@@ -870,6 +803,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
     lat: latLng.lat(),
     lon: latLng.lng(),
   };
+
   addMarkerClickListener(marker, latLng, device, coords);
 
   return marker;
@@ -946,7 +880,6 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
 
-        updateInfoWindow(marker, latLng, marker.device, coords);
         // infoWindow.open(map, marker);
       }
     });
