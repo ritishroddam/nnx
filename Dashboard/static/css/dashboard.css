@@ -300,11 +300,6 @@ p {
   overflow-y: auto; /* Add vertical scroll */
 }
 
-.vehicleLiveTable h5 {
-  margin: 0;
-  padding-bottom: 15px;
-}
-
 .vehicleLiveTable table {
   width: 100%;
   border-collapse: collapse;
@@ -312,9 +307,9 @@ p {
 
 .vehicleLiveTable th,
 .vehicleLiveTable td {
-  padding: 12px 15px;
+  /* padding: 12px 15px; */
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #ccc;
 }
 
 .vehicleLiveTable th {
@@ -330,8 +325,8 @@ p {
 }
 
 .table-container {
-  margin-top: 20px;
-  padding: 15px;
+  /* margin-top: 20px;
+  padding: 15px; */
   background: white;
   border-radius: 8px;
 }
