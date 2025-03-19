@@ -874,9 +874,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   };
   addMarkerClickListener(marker, latLng, device, coords);
 
-  console.log("🚗 Created marker:", device.imei, marker);
-  console.log("🚗 Created marker mouseover:", device.imei, marker.position);
-
   return marker;
 }
 
@@ -932,7 +929,7 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
         console.log("🚗 Vehicle card marker:", imei, marker);
-        console.log("🚗 Vehicle card mouseover:", imei, marker.position);
+        console.log("🚗 Vehicle card mouseover:", imei, marker.getPosition());
 
         updateInfoWindow(marker, marker.position, marker.device, coords);
         // infoWindow.open(map, marker);
