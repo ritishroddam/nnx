@@ -294,30 +294,30 @@ p {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* padding: 20px; */
   overflow: hidden;
-  height: 330px; /* Adjust height as needed */
+  height: 333px; /* Adjust height as needed */
   overflow-y: auto; /* Add vertical scroll */
 }
 
 .vehicleLiveTable table {
   width: 100%;
   border-collapse: collapse;
+  color: #555;
 }
 
 .vehicleLiveTable th,
 .vehicleLiveTable td {
-  /* padding: 12px 15px; */
   text-align: center;
-  border-bottom: 1px solid #ddd;
-  font-weight: lighter;
+  border-bottom: .5px #ddd;
+  font-weight: 200;
+  letter-spacing: 1px;
 }
 
 .vehicleLiveTable th {
   background-color: #f8f9fa;
   color: #333;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  padding-bottom: 5px;
 }
 
 .vehicleLiveTable tbody tr:hover {
@@ -326,8 +326,6 @@ p {
 }
 
 .table-container {
-  /* margin-top: 20px;
-  padding: 15px; */
   background: white;
   border-radius: 8px;
 }
