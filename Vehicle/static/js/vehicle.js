@@ -598,6 +598,18 @@ var lastDataReceivedTime = {};
 //   return { lat: parsedLat, lon: parsedLon };
 // }
 
+// function parseCoordinates(lat, lon) {
+//   const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
+//   const parsedLon = parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
+
+//   if (isNaN(parsedLat) || isNaN(parsedLon)) {
+//     console.error("Invalid coordinates:", lat, lon);
+//     return new google.maps.LatLng(0, 0); // Return a default LatLng object
+//   }
+
+//   return new google.maps.LatLng(parsedLat, parsedLon);
+// }
+
 function parseCoordinates(lat, lon) {
   const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
   const parsedLon = parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
@@ -734,6 +746,38 @@ function sanitizeIMEI(imei) {
 //   renderVehicles(Object.values(markers).map((marker) => marker.device));
 // }
 
+// function updateVehicleData(vehicle) {
+//   const imei = sanitizeIMEI(vehicle.imei);
+//   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); // Already returns google.maps.LatLng
+//   const iconUrl = getCarIconBySpeed(
+//     vehicle.speed,
+//     imei,
+//     vehicle.date,
+//     vehicle.time
+//   );
+//   const rotation = vehicle.course;
+
+//   if (markers[imei]) {
+//     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
+//     markers[imei].device = vehicle;
+//     addHoverListenersToCardsAndMarkers(markers[imei], latLng, vehicle, {
+//       lat: latLng.lat(),
+//       lon: latLng.lng(),
+//     });
+//   } else {
+//     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
+//   }
+
+//   if (vehicle.sos === "1") {
+//     triggerSOS(imei, markers[imei]);
+//   } else {
+//     removeSOS(imei);
+//   }
+
+//   lastDataReceivedTime[imei] = new Date();
+//   renderVehicles(Object.values(markers).map((marker) => marker.device));
+// }
+
 function updateVehicleData(vehicle) {
   const imei = sanitizeIMEI(vehicle.imei);
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); // Already returns google.maps.LatLng
@@ -748,10 +792,6 @@ function updateVehicleData(vehicle) {
   if (markers[imei]) {
     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
     markers[imei].device = vehicle;
-    addHoverListenersToCardsAndMarkers(markers[imei], latLng, vehicle, {
-      lat: latLng.lat(),
-      lon: latLng.lng(),
-    });
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
   }
@@ -763,7 +803,6 @@ function updateVehicleData(vehicle) {
   }
 
   lastDataReceivedTime[imei] = new Date();
-  renderVehicles(Object.values(markers).map((marker) => marker.device));
 }
 
 function removeSOS(imei) {
@@ -1095,8 +1134,37 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   return marker;
 }
 
+// function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
+//   // Create a DOM element for the marker content
+//   const markerContent = document.createElement("div");
+//   markerContent.className = "custom-marker";
+//   markerContent.style.transform = `rotate(${rotation}deg)`;
+
+//   const markerImage = document.createElement("img");
+//   markerImage.src = iconUrl;
+//   markerImage.alt = "Vehicle Icon";
+//   markerImage.style.width = "18px";
+//   markerImage.style.height = "32px";
+
+//   markerContent.appendChild(markerImage);
+
+//   // Update marker properties
+//   marker.position = latLng;
+//   marker.content = markerContent; // Pass the DOM element here
+
+//   const coords = {
+//     lat: latLng.lat(),
+//     lon: latLng.lng(),
+//   };
+//   addMarkerClickListener(marker, latLng, marker.device, coords);
+// }
+
 function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
-  // Create a DOM element for the marker content
+  // Ensure latLng is a google.maps.LatLng instance
+  if (!(latLng instanceof google.maps.LatLng)) {
+    latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
+  }
+
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
   markerContent.style.transform = `rotate(${rotation}deg)`;
@@ -1110,8 +1178,8 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   markerContent.appendChild(markerImage);
 
   // Update marker properties
-  marker.position = latLng;
-  marker.content = markerContent; // Pass the DOM element here
+  marker.position = latLng; // Save as google.maps.LatLng
+  marker.content = markerContent;
 
   const coords = {
     lat: latLng.lat(),
