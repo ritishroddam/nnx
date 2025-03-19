@@ -875,6 +875,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   addMarkerClickListener(marker, latLng, device, coords);
 
   console.log("🚗 Created marker:", device.imei, marker);
+  console.log("🚗 Created marker mouseover:", device.imei, marker.position);
 
   return marker;
 }
