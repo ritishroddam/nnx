@@ -278,7 +278,7 @@ p {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.vehicleLiveTable {
+/* .vehicleLiveTable {
   border-radius: 10px;
   overflow: hidden;
   width: 50%;
@@ -286,6 +286,47 @@ p {
   flex-direction: column;
   gap: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+} */
+
+.vehicleLiveTable {
+  flex: 1;
+  min-width: 45%;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  overflow: hidden;
+  height: 400px; /* Adjust height as needed */
+  overflow-y: auto; /* Add vertical scroll */
+}
+
+.vehicleLiveTable h5 {
+  margin: 0;
+  padding-bottom: 15px;
+}
+
+.vehicleLiveTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vehicleLiveTable th,
+.vehicleLiveTable td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.vehicleLiveTable th {
+  background-color: #f8f9fa;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.vehicleLiveTable tbody tr:hover {
+  background-color: #f1f1f1;
+  transition: all 0.2s ease;
 }
 
 .table-container {
