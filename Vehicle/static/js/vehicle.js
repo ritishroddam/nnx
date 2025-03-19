@@ -1125,17 +1125,23 @@ function addHoverListenersToCardsAndMarkers() {
         map.setZoom(12);
 
         // Open the info window for the marker
-        const coords = {
-          lat: marker.position.lat,
-          lon: marker.position.lng,
-        };
+        // const coords = {
+        //   lat: marker.position.lat,
+        //   lon: marker.position.lng,
+        // };
 
-        updateInfoWindow(marker, marker.position, marker.device, coords);
+        infoWindow.open(map, marker);
       }
     });
 
     card.addEventListener("mouseout", () => {
       // Optionally, you can close the info window or reset the zoom level
+      const vehicleCards = document.querySelectorAll(".vehicle-card");
+      vehicleCards.forEach((card) => {
+        const imei = card.getAttribute("data-imei");
+        const marker = markers[imei];
+        infoWindow.close(map, marker);
+      });
     });
   });
 
