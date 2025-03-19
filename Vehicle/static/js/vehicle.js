@@ -190,7 +190,7 @@ function updateInfoWindow(marker, latLng, device, coords) {
       infoWindow.setPosition(latLng);
 
       // Open the infoWindow on the map
-      infoWindow.open(map);
+      infoWindow.open(map, content);
 
       // Track the currently open marker
       openMarker = marker;
@@ -1131,7 +1131,7 @@ function addHoverListenersToCardsAndMarkers() {
         };
 
         updateInfoWindow(marker, marker.position, marker.device, coords);
-        infoWindow.open(map, marker);
+        // infoWindow.open(map, marker);
       }
     });
 
