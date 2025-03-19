@@ -293,10 +293,10 @@ p {
   min-width: 45%;
   background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* padding: 20px; */
   overflow: hidden;
-  height: 400px; /* Adjust height as needed */
+  height: 300px; /* Adjust height as needed */
   overflow-y: auto; /* Add vertical scroll */
 }
 
@@ -308,13 +308,14 @@ p {
 .vehicleLiveTable th,
 .vehicleLiveTable td {
   /* padding: 12px 15px; */
-  text-align: left;
-  border-bottom: 1px solid #ccc;
+  text-align: center;
+  border-bottom: 1px solid #2f2f2f;
 }
 
 .vehicleLiveTable th {
   background-color: #f8f9fa;
   color: #333;
+  font-weight: lighter;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
