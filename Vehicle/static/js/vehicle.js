@@ -326,8 +326,11 @@ function updateMap() {
 }
 
 function animateMarker(marker, newPosition, duration = 6000) {
-  const startPosition = marker.latLng;
+  const startPosition = marker.position;
   const startTime = performance.now();
+
+  console.log("Animating marker:", marker, "from", startPosition);
+  console.log("Animating marker:", marker, "to", newPosition);
 
   function moveMarker(currentTime) {
     const elapsedTime = currentTime - startTime;
@@ -1051,6 +1054,5 @@ function addHoverListenersToCardsAndMarkers() {
 window.onload = function () {
   initMap();
   updateMap();
-  // renderVehicles();
   document.querySelector(".block-container").style.display = "none";
 };
