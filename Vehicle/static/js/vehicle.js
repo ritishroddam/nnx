@@ -124,63 +124,6 @@ function geocodeLatLng(latLng, callback) {
   }
 }
 
-// function addMarkerClickListener(marker, latLng, device, coords) {
-//   if (!(latLng instanceof google.maps.LatLng)) {
-//     latLng = new google.maps.LatLng(coords.lat, coords.lon);
-//   }
-
-//   console.log("Adding click listener to marker:", marker);
-
-//   geocodeLatLng(latLng, function (address) {
-//     console.log("Geocoded address:", address);
-
-//     marker.addListener("gmp-click", function () {
-//       console.log("Marker clicked:", marker);
-
-//       if (openMarker !== marker) {
-//         console.log("Opening infoWindow for marker:", marker);
-
-//         const imei = device.imei || '<span class="missing-data">N/A</span>';
-//         const speed =
-//           device.speed !== null && device.speed !== undefined
-//             ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-//             : '<span class="missing-data">Unknown</span>';
-//         const lat = coords.lat || '<span class="missing-data">Unknown</span>';
-//         const lon = coords.lon || '<span class="missing-data">Unknown</span>';
-//         const date = device.date || "N/A";
-//         const time = device.time || "N/A";
-//         const addressText =
-//           address || '<span class="missing-data">Location unknown</span>';
-
-//         const { formattedDate, formattedTime } = formatDateTime(date, time);
-//         const content = `<div class="info-window show">
-//                           <strong>IMEI:</strong> ${imei}<br>
-//                           <hr>
-//                           <p><strong>Speed:</strong> ${speed}</p>
-//                           <p><strong>Lat:</strong> ${lat}</p>
-//                           <p><strong>Lon:</strong> ${lon}</p>
-//                           <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
-//                           <p class="address"><strong>Location:</strong> ${addressText}</p>
-//                           <p><strong>Data:</strong> <a href="device-details.html?imei=${
-//                             device.imei || "N/A"
-//                           }" target="_blank">View Data</a></p>
-//                       </div>`;
-
-//         console.log("InfoWindow content:", content);
-
-//         infoWindow.setContent(content);
-//         infoWindow.setPosition(latLng);
-//         infoWindow.open(map, marker);
-//         openMarker = marker;
-
-//         console.log("InfoWindow opened at position:", latLng);
-//       } else {
-//         console.log("InfoWindow already open for this marker.");
-//       }
-//     });
-//   });
-// }
-
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
   const speed =
@@ -217,22 +160,12 @@ function addMarkerClickListener(marker, latLng, device, coords) {
     latLng = new google.maps.LatLng(coords.lat, coords.lon);
   }
 
-  console.log("Adding click listener to marker:", marker);
-
   geocodeLatLng(latLng, function (address) {
-    console.log("Geocoded address:", address);
-
     marker.addListener("gmp-click", function () {
-      console.log("Marker clicked:", marker);
-
       if (openMarker !== marker) {
-        console.log("Opening infoWindow for marker:", marker);
-
         setInfoWindowContent(infoWindow, marker, latLng, device, address);
         infoWindow.open(map, marker);
         openMarker = marker;
-
-        console.log("InfoWindow opened at position:", latLng);
       } else {
         console.log("InfoWindow already open for this marker.");
       }
