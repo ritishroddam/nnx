@@ -1074,6 +1074,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
+  latlng = new google.maps.LatLng(latLng.lat, latLng.lon);
+
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng,
     map: map,
@@ -1128,7 +1130,13 @@ function addHoverListenersToCardsAndMarkers() {
       const marker = markers[imei];
       if (marker) {
         // Pan and zoom the map to the marker
-        map.panTo(marker.position);
+
+        let latLng = new google.maps.LatLng(
+          marker.position.lat,
+          marker.position.lng
+        );
+
+        map.panTo(latLng);
         map.setZoom(12);
 
         // Open the info window for the marker
