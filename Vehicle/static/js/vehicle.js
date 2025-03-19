@@ -857,7 +857,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
-  console.log("🚗 Creating marker:", device.imei, latLng);
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng, // Save as google.maps.LatLng
     map: map,
@@ -895,6 +894,7 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   markerContent.appendChild(markerImage);
 
   // Update marker properties
+  console.log("🚗 Updating marker:", marker.device.imei, latLng);
   marker.position = latLng; // Save as google.maps.LatLng
   marker.content = markerContent;
 
@@ -928,7 +928,7 @@ function addHoverListenersToCardsAndMarkers() {
           lat: marker.position.lat,
           lon: marker.position.lng,
         };
-
+        console.log("🚗 Vehicle card mouseover:", imei, marker);
         console.log("🚗 Vehicle card mouseover:", imei, marker.position);
 
         updateInfoWindow(marker, marker.position, marker.device, coords);
