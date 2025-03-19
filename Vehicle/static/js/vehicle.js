@@ -325,15 +325,43 @@ function updateMap() {
     });
 }
 
-function animateMarker(marker, newPosition, duration = 6000) {
-  let startPosition = new google.maps.LatLng(
-    marker.position.lat,
-    marker.position.lng
-  );
-  const startTime = performance.now();
+// function animateMarker(marker, newPosition, duration = 6000) {
+//   let startPosition = new google.maps.LatLng(
+//     marker.position.lat,
+//     marker.position.lng
+//   );
+//   const startTime = performance.now();
 
-  console.log("Animating marker:", marker, "from", startPosition);
-  console.log("Animating marker:", marker, "to", newPosition);
+//   console.log("Animating marker:", marker, "from", startPosition);
+//   console.log("Animating marker:", marker, "to", newPosition);
+
+//   function moveMarker(currentTime) {
+//     const elapsedTime = currentTime - startTime;
+//     const progress = Math.min(elapsedTime / duration, 1);
+//     const lat =
+//       startPosition.lat + (newPosition.lat() - startPosition.lat()) * progress;
+//     const lng =
+//       startPosition.lng + (newPosition.lng() - startPosition.lng()) * progress;
+
+//     marker.latLng = new google.maps.LatLng(lat, lng);
+//     marker.draw();
+
+//     if (progress < 1) {
+//       requestAnimationFrame(moveMarker);
+//     }
+//   }
+
+//   requestAnimationFrame(moveMarker);
+// }
+
+function animateMarker(marker, newPosition, duration = 6000) {
+  const startPosition = marker.position;
+  if (!startPosition) {
+    console.error("Marker's start position is not defined.");
+    return;
+  }
+
+  const startTime = performance.now();
 
   function moveMarker(currentTime) {
     const elapsedTime = currentTime - startTime;
@@ -343,8 +371,7 @@ function animateMarker(marker, newPosition, duration = 6000) {
     const lng =
       startPosition.lng + (newPosition.lng() - startPosition.lng()) * progress;
 
-    marker.latLng = new google.maps.LatLng(lat, lng);
-    marker.draw();
+    marker.position = new google.maps.LatLng(lat, lng);
 
     if (progress < 1) {
       requestAnimationFrame(moveMarker);
