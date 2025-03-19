@@ -326,7 +326,10 @@ function updateMap() {
 }
 
 function animateMarker(marker, newPosition, duration = 6000) {
-  const startPosition = marker.position;
+  let startPosition = new google.maps.LatLng(
+    marker.position.lat,
+    marker.position.lng
+  );
   const startTime = performance.now();
 
   console.log("Animating marker:", marker, "from", startPosition);
