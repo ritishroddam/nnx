@@ -857,6 +857,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
+  console.log("🚗 Creating marker:", device.imei, latLng);
+
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng, // Save as google.maps.LatLng
     map: map,
@@ -871,6 +873,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
     lon: latLng.lng(),
   };
   addMarkerClickListener(marker, latLng, device, coords);
+
+  console.log("🚗 Created marker:", device.imei, marker);
 
   return marker;
 }
