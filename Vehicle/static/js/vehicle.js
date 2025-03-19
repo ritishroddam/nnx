@@ -149,13 +149,13 @@ function updateInfoWindow(marker, latLng, device, coords) {
 }
 
 function geocodeLatLng(latLng, callback) {
-  console.log("🔍 geocodeLatLng called with:", latLng);
+  // console.log("🔍 geocodeLatLng called with:", latLng);
 
-  if (!(latLng instanceof google.maps.LatLng)) {
-    console.error("❌ Invalid latLng object:", latLng);
-    callback("Invalid coordinates");
-    return;
-  }
+  // if (!(latLng instanceof google.maps.LatLng)) {
+  //   console.error("❌ Invalid latLng object:", latLng);
+  //   callback("Invalid coordinates");
+  //   return;
+  // }
 
   const lat = latLng.lat();
   const lon = latLng.lng();
@@ -875,31 +875,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   return marker;
 }
 
-// function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
-//   // Create a DOM element for the marker content
-//   const markerContent = document.createElement("div");
-//   markerContent.className = "custom-marker";
-//   markerContent.style.transform = `rotate(${rotation}deg)`;
-
-//   const markerImage = document.createElement("img");
-//   markerImage.src = iconUrl;
-//   markerImage.alt = "Vehicle Icon";
-//   markerImage.style.width = "18px";
-//   markerImage.style.height = "32px";
-
-//   markerContent.appendChild(markerImage);
-
-//   // Update marker properties
-//   marker.position = latLng;
-//   marker.content = markerContent; // Pass the DOM element here
-
-//   const coords = {
-//     lat: latLng.lat(),
-//     lon: latLng.lng(),
-//   };
-//   addMarkerClickListener(marker, latLng, marker.device, coords);
-// }
-
 function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   // Ensure latLng is a google.maps.LatLng instance
   if (!(latLng instanceof google.maps.LatLng)) {
@@ -952,6 +927,8 @@ function addHoverListenersToCardsAndMarkers() {
           lat: marker.position.lat,
           lon: marker.position.lng,
         };
+
+        console.log("🚗 Vehicle card mouseover:", imei, marker.position);
 
         updateInfoWindow(marker, marker.position, marker.device, coords);
         // infoWindow.open(map, marker);
