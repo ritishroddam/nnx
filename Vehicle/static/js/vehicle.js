@@ -129,9 +129,17 @@ function addMarkerClickListener(marker, latLng, device, coords) {
     latLng = new google.maps.LatLng(coords.lat, coords.lon);
   }
 
+  console.log("Adding click listener to marker:", marker);
+
   geocodeLatLng(latLng, function (address) {
-    marker.addEventListener("gmp-click", function () {
+    console.log("Geocoded address:", address);
+
+    marker.addListener("gmp-click", function () {
+      console.log("Marker clicked:", marker);
+
       if (openMarker !== marker) {
+        console.log("Opening infoWindow for marker:", marker);
+
         const imei = device.imei || '<span class="missing-data">N/A</span>';
         const speed =
           device.speed !== null && device.speed !== undefined
@@ -158,10 +166,16 @@ function addMarkerClickListener(marker, latLng, device, coords) {
                           }" target="_blank">View Data</a></p>
                       </div>`;
 
+        console.log("InfoWindow content:", content);
+
         infoWindow.setContent(content);
         infoWindow.setPosition(latLng);
         infoWindow.open(map, marker);
         openMarker = marker;
+
+        console.log("InfoWindow opened at position:", latLng);
+      } else {
+        console.log("InfoWindow already open for this marker.");
       }
     });
   });
