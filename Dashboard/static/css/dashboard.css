@@ -293,15 +293,16 @@ p {
   width: 100%;
   border-collapse: collapse;
   color: #555;
+  gap: 10px;
 }
 
 .vehicleLiveTable th,
 .vehicleLiveTable td {
   text-align: center;
   border-bottom: .5px #ddd;
-  font-weight: 200;
+  font-weight: 100;
   letter-spacing: 1px;
-  row-gap: 10px;
+  color: #555;
 }
 
 .vehicleLiveTable th {
