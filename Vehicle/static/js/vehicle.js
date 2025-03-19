@@ -471,6 +471,7 @@ function updateVehicleData(vehicle) {
   const rotation = vehicle.course;
 
   if (markers[imei]) {
+    animateMarker(markers[imei], latLng);
     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
     markers[imei].device = vehicle;
   } else {
