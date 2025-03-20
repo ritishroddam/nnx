@@ -307,7 +307,7 @@ p {
 }
 
 .vehicleLiveTable th {
-  background-color: #9bcff2;
+  background-color: #999;
   color: #333;
   text-transform: uppercase;
   padding: 10px; /* Adjust padding for better alignment */
