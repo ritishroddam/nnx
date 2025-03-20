@@ -268,7 +268,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 let map, trafficLayer;
 
-function initMap() {
+const themeToggle = document.getElementById("theme-toggle");
+let darkMode = true;
+themeToggle.addEventListener("click", function () {
+  darkMode = !darkMode; // Toggle the state
+  initMap(darkMode); // Reinitialize the map with the new mapId
+});
+
+function initMap(darkMode = true) {
   const mapOptions = {
     zoom: 12,
     disableDefaultUI: true,
@@ -282,10 +289,15 @@ function initMap() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
+
+        const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+
         // Initialize the map with user's location
         map = new google.maps.Map(document.getElementById("map"), {
           ...mapOptions,
           center: userLocation,
+          zoomControl: true,
+          mapId: mapId,
         });
 
         infoWindow = new google.maps.InfoWindow();
