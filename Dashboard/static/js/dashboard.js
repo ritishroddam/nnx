@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
-
+  const centerColor = "#2f2f2f";
+  Chart.defaults.color = "#2f2f2f";
   const isDarkMode = document.body.classList.contains("dark-mode");
-
   if (isDarkMode) {
     Chart.defaults.color = "#ccc";
-  } else {
-    Chart.defaults.color = "#2f2f2f";
+    centerColor = "#ccc";
   }
   const themeToggle = document.getElementById("theme-toggle");
   themeToggle.addEventListener("click", function () {
@@ -243,6 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               ctx.font = "bold 18px Arial";
               ctx.textAlign = "center";
               ctx.fillText(text, width / 2, centerY);
+              ctx.fillStyle = centerColor;
               ctx.restore();
             },
           },
