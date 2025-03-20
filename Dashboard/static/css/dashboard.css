@@ -182,11 +182,15 @@ p {
   color: #ccc;
 }
 
+.dark-mode #traffic-info {
+  color: #ccc;
+}
+
 .dark-mode #traffic-container h2{
   color: #ccc;
 }
 
-.dark-mode #vehiclesChart{
+.dark-mode #canvas{
   color: #ccc;
 }
 
