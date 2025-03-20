@@ -156,6 +156,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                   size: 14,
                   weight: "bold",
                 },
+                color: "var(--label-color)", // Use the CSS variable for color
+                generateLabels: (chart) => {
+                  const original =
+                    Chart.overrides.doughnut.plugins.legend.labels
+                      .generateLabels;
+                  const labels = original.call(this, chart);
+                  labels.forEach((label) => {
+                    label.text = label.text;
+                    label.className = "chart-label"; // Add the chart-label class
+                  });
+                  return labels;
+                },
               },
             },
             tooltip: {
@@ -209,6 +221,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               ctx.save();
               ctx.font = "bold 18px Arial";
               ctx.textAlign = "center";
+              ctx.fillStyle = getComputedStyle(
+                document.documentElement
+              ).getPropertyValue("--center-text-color");
               ctx.fillText(text, width / 2, centerY);
               ctx.restore();
             },

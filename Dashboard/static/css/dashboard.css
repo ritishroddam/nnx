@@ -193,7 +193,20 @@ canvas {
   color: #ccc;
 }
 
+:root {
+  --label-color: #000000;
+  --center-text-color: #000000;
+}
 
+/* Define colors for dark mode */
+.dark-mode {
+  --label-color: #ffffff;
+  --center-text-color: #ffffff;
+}
+
+.chart-label {
+  color: var(--label-color);
+}
 
 p {
   color: #fff;
