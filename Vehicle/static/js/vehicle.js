@@ -363,7 +363,8 @@ function animateMarker(marker, newPosition, duration = 6000) {
     console.error("Marker's start position is not defined.");
     return;
   }
-
+  console.log("Animating marker:", marker, "from", startPosition);
+  console.log("Animating marker:", marker, "to", newPosition);
   const startTime = performance.now();
 
   function moveMarker(currentTime) {
