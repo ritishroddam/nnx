@@ -202,7 +202,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   const { formattedDate, formattedTime } = formatDateTime(date, time);
   const content = `<div class="info-window show">
-                    <strong>Vehicle Registration Number:</strong> ${LicensePlateNumber}<br>
+                    <strong>${LicensePlateNumber}:</strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
