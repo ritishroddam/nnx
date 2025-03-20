@@ -194,17 +194,19 @@ p {
   background-color: #2f2f2f;
 }
 
-.dark-mode #traffic-container {
+.dark-mode .traffic-container {
   color: #ccc;
   background-color: #2f2f2f;
 }
 
 .dark-mode #traffic-info {
   color: #ccc;
+  background-color: #2f2f2f;
 }
 
 .dark-mode #weather p {
   color: #ccc;
+  background-color: #2f2f2f;
 }
 
 @keyframes fadeIn {
