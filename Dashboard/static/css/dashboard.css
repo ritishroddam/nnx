@@ -169,11 +169,11 @@ p {
   color: #fff;
 }
 
-.dark-mode .dashboard-row .graph-container {
+.dark-mode .dashboard .dashboard-row .graph-container {
   color: #ccc;
 }
 
-.dark-mode .dashboard-row #traffic-container {
+.dark-mode .dashboard .dashboard-row #traffic-container {
  color: #ccc;
 }
 
