@@ -291,25 +291,32 @@ p {
 
 .vehicleLiveTable table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate; /* Change from collapse to separate */
+  border-spacing: 0 5px; /* Adds space between rows */
   color: #555;
-  gap: 10px;
 }
 
 .vehicleLiveTable th,
 .vehicleLiveTable td {
   text-align: center;
-  border-bottom: .5px #ddd;
+  padding: 10px; /* Adds more padding for better readability */
+  border-bottom: 0.5px solid #ddd;
   font-weight: 100;
   letter-spacing: 1px;
   color: #555;
 }
 
 .vehicleLiveTable th {
-  background-color: #85c1e9;
+  background-color: #9bcff2;
   color: #333;
   text-transform: uppercase;
-  padding-bottom: 5px;
+  padding: 10px; /* Adjust padding for better alignment */
+  vertical-align: middle; /* Centers text vertically */
+}
+
+.vehicleLiveTable tbody tr {
+  background-color: white;
+  border-radius: 5px; /* Optional rounded corners for neat look */
 }
 
 .vehicleLiveTable tbody tr:nth-child(even) {
@@ -324,6 +331,7 @@ p {
 .table-container {
   background: white;
   border-radius: 8px;
+  padding: 10px;
 }
 
 #sortBtn {
