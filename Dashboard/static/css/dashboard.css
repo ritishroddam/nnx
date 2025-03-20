@@ -178,22 +178,6 @@ p {
   color: #2f2f2f;
 }
 
-.dark-mode #traffic-status {
-  color: #ccc;
-}
-
-.dark-mode #traffic-info {
-  color: #ccc;
-}
-
-.dark-mode #traffic-container h2{
-  color: #ccc;
-}
-
-.dark-mode .graph-container{
-  color: #ccc;
-}
-
 .dark-mode #weather p {
   color: #ccc;
 }
