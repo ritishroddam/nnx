@@ -97,12 +97,11 @@
   flex-direction: column;
   gap: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  background: transparent;
 }
 #traffic-container h2 {
   margin: 0;
   padding: 10px;
-  background: transparent;
+  background: #2a303d;
   text-align: center;
   font-size: 1.5em;
   color: #fff;
@@ -119,7 +118,7 @@
   position: relative;
   height: 40px;
   overflow: hidden;
-  background: transparent;
+  background: #fff;
   border-top: 2px solid #ddd;
   font-family: Arial, sans-serif;
   transition: background-color 0.3s ease-in-out;
@@ -170,19 +169,19 @@ p {
   color: #fff;
 }
 
-#traffic-status {
+.traffic-status {
   color: #2f2f2f;
 }
 
-#weather p {
+.weather p {
   color: #2f2f2f;
 }
 
-.dark-mode #traffic-status {
+.dark-mode .traffic-status {
   color: #ccc;
 }
 
-.dark-mode #weather p {
+.dark-mode .weather p {
   color: #ccc;
 }
 
