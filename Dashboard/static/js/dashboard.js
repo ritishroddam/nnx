@@ -11,12 +11,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   themeToggle.addEventListener("click", function () {
     const isDarkMode = document.body.classList.contains("dark-mode");
 
-    if (!isDarkMode) {
-      Chart.defaults.color = "#2f2f2f";
-      centerColor = "#2f2f2f";
-    } else {
+    if (isDarkMode) {
       Chart.defaults.color = "#ccc";
       centerColor = "#ccc";
+    } else {
+      Chart.defaults.color = "#2f2f2f";
+      centerColor = "#2f2f2f";
     }
 
     if (window.pieChart) {
