@@ -28,7 +28,7 @@
 .traffic {
   margin-top: 40px;
 }
-.traffic h2 {
+.traffic h3 {
   margin: 0;
 }
 .graph {
@@ -103,7 +103,7 @@
   background: #2f2f2f;
 }
 
-#traffic-container h2 {
+#traffic-container h3 {
   margin: 0;
   padding: 10px;
   background: white;
@@ -113,7 +113,7 @@
   transition: background-color 0.3s ease-in-out;
 }
 
-.dark-mode #traffic-container h2 {
+.dark-mode #traffic-container h3 {
   color: #ccc;
 }
 
