@@ -30,6 +30,7 @@ def get_vehicles():
             
             # Match IMEI with vehicle_inventory collection
             inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('IMEI')})
+            print(inventory_data.get('LicensePlateNumber'))
             if inventory_data:
                 vehicle['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
             else:
