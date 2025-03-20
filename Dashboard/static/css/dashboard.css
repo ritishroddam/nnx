@@ -151,7 +151,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: transparent;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   width: 100%;
@@ -178,14 +178,13 @@ p {
   color: #2f2f2f;
 }
 
-.dark-mode #traffic-status {
+.dark-mode #traffic-status #traffic-container{
   color: #ccc;
   background: #2f2f2f;
 }
 
 .dark-mode #weather p {
   color: #ccc;
-  background: #2f2f2f;
 }
 
 @keyframes fadeIn {
