@@ -339,6 +339,7 @@ p {
   border: none;
   cursor: pointer;
   font-size: 16px;
+  color: #fff;
 }
 
 .card-chart,

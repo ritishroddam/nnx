@@ -395,17 +395,38 @@ document.addEventListener("DOMContentLoaded", async function () {
         {
           label: "Distance Travelled (km)",
           data: [], // Empty initially, will be updated dynamically
-          backgroundColor: "rgba(54, 162, 235, 0.2)",
-          borderColor: "rgba(54, 162, 235, 1)",
-          borderWidth: 1,
+          backgroundColor: "rgba(47, 47, 47, 0.2)", // Subtle fill color
+          borderColor: "#2f2f2f", // Dark gray line
+          pointBackgroundColor: "#2f2f2f", // Data point color
+          pointBorderColor: "#fff", // White outline for contrast
+          pointRadius: 5, // Increase point size
+          borderWidth: 2, // Slightly thicker line
           fill: true,
+          tension: 0.3, // Smooth curve effect
         },
       ],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: "#2f2f2f", // Legend text color
+          },
+        },
+      },
       scales: {
+        x: {
+          ticks: {
+            color: "#2f2f2f", // X-axis labels color
+          },
+        },
         y: {
           beginAtZero: true,
+          ticks: {
+            color: "#2f2f2f", // Y-axis labels color
+          },
         },
       },
     },
