@@ -81,7 +81,6 @@
   margin-right: 10px;
   width: 60%;
   text-align: center;
-  background: rgba(255, 255, 255, 0.1);
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -97,14 +96,15 @@
   flex-direction: column;
   gap: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background: white;
 }
 #traffic-container h2 {
   margin: 0;
   padding: 10px;
-  background: #2a303d;
+  background: white;
   text-align: center;
   font-size: 1.5em;
-  color: #fff;
+  color: #ccc;
   transition: background-color 0.3s ease-in-out;
 }
 #map {
@@ -118,7 +118,7 @@
   position: relative;
   height: 40px;
   overflow: hidden;
-  background: #fff;
+  background: white;
   border-top: 2px solid #ddd;
   font-family: Arial, sans-serif;
   transition: background-color 0.3s ease-in-out;
@@ -139,7 +139,7 @@
   }
 }
 .graph-title {
-  font-size: 1.5em;
+  font-size: 1.2em;
   font-weight: 700;
   margin-bottom: 10px;
   position: relative;
@@ -150,7 +150,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   width: 100%;
@@ -169,19 +169,7 @@ p {
   color: #fff;
 }
 
-.traffic-status {
-  color: #2f2f2f;
-}
-
-.weather p {
-  color: #2f2f2f;
-}
-
-.dark-mode .traffic-status {
-  color: #ccc;
-}
-
-.dark-mode .weather p {
+.dark-mode #weather p {
   color: #ccc;
 }
 
