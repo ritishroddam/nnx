@@ -190,7 +190,7 @@ p {
   color: #ccc;
 }
 
-.dark-mode #canvas{
+.dark-mode .graph-container{
   color: #ccc;
 }
 
