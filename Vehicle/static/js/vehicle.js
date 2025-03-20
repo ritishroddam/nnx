@@ -371,9 +371,11 @@ function animateMarker(marker, newPosition, duration = 6000) {
     const elapsedTime = currentTime - startTime;
     const progress = Math.min(elapsedTime / duration, 1);
     const lat =
-      startPosition.lat + (newPosition.lat() - startPosition.lat()) * progress;
+      startPosition.lat() +
+      (newPosition.lat() - startPosition.lat()) * progress;
     const lng =
-      startPosition.lng + (newPosition.lng() - startPosition.lng()) * progress;
+      startPosition.lng() +
+      (newPosition.lng() - startPosition.lng()) * progress;
 
     marker.position = new google.maps.LatLng(lat, lng);
 
