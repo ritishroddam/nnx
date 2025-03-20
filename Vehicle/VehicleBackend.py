@@ -29,13 +29,11 @@ def get_vehicles():
             vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
             
             # Match IMEI with vehicle_inventory collection
-            inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('IMEI')})
-            print(inventory_data.get('LicensePlateNumber'))
+            inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('imei')})
             if inventory_data:
                 vehicle['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
             else:
                 vehicle['LicensePlateNumber'] = 'Unknown'  # Default if no match is found
-            print(vehicle['LicensePlateNumber'])
         
         return jsonify(vehicles), 200
     except Exception as e:
