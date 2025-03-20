@@ -169,6 +169,18 @@ p {
   color: #fff;
 }
 
+.dark-mode .graph-container {
+  color: #ccc;
+}
+
+.dark-mode #traffic-container {
+ color: #ccc;
+}
+
+.dark-mode #traffic-info {
+  color: #ccc;
+ }
+
 .dark-mode #weather p {
   color: #ccc;
 }
