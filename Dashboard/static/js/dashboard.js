@@ -1,16 +1,18 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
 
-  const themeToggle = document.getElementById("theme-toggle");
-  themeToggle.addEventListener("click", function () {
-    const isDarkMode = document.body.classList.contains("dark-mode");
+  // const themeToggle = document.getElementById("theme-toggle");
+  // themeToggle.addEventListener("click", function () {
+  //   const isDarkMode = document.body.classList.contains("dark-mode");
 
-    if (isDarkMode) {
-      Chart.defaults.color = "#2f2f2f";
-    } else {
-      Chart.defaults.color = "#ccc";
-    }
-  });
+  //   if (isDarkMode) {
+  //     Chart.defaults.color = "#2f2f2f";
+  //   } else {
+  //     Chart.defaults.color = "#ccc";
+  //   }
+  // });
+
+  Chart.defaults.color = "#ff0000";
 
   function getWeather(lat, lon) {
     // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
