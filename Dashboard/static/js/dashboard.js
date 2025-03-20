@@ -275,6 +275,52 @@ themeToggle.addEventListener("click", function () {
   initMap(darkMode); // Reinitialize the map with the new mapId
 });
 
+// async function initMap(darkMode = true) {
+//   const mapOptions = {
+//     zoom: 12,
+//     disableDefaultUI: true,
+//   };
+
+//   // Try to fetch user's current location
+//   if (navigator.geolocation) {
+//     navigator.geolocation.getCurrentPosition(
+//       (position) => {
+//         const userLocation = {
+//           lat: position.coords.latitude,
+//           lng: position.coords.longitude,
+//         };
+
+//         const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+
+//         // Initialize the map with user's location
+//         map = new google.maps.Map(document.getElementById("map"), {
+//           ...mapOptions,
+//           center: userLocation,
+//           zoomControl: true,
+//           mapId: mapId,
+//         });
+
+//         infoWindow = new google.maps.InfoWindow();
+
+//         // Add traffic layer
+//         trafficLayer = new google.maps.TrafficLayer();
+//         trafficLayer.setMap(map);
+
+//         // Update traffic status
+//         updateTrafficStatus();
+//         setInterval(updateTrafficStatus, 60000);
+//       },
+//       () => {
+//         // If geolocation fails, fallback to default location (Bangalore)
+//         fallbackToDefaultLocation();
+//       }
+//     );
+//   } else {
+//     // If browser doesn't support geolocation, fallback to default location (Bangalore)
+//     fallbackToDefaultLocation();
+//   }
+// }
+
 async function initMap(darkMode = true) {
   const mapOptions = {
     zoom: 12,
@@ -292,7 +338,6 @@ async function initMap(darkMode = true) {
 
         const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
 
-        // Initialize the map with user's location
         map = new google.maps.Map(document.getElementById("map"), {
           ...mapOptions,
           center: userLocation,
@@ -321,21 +366,54 @@ async function initMap(darkMode = true) {
   }
 }
 
+// async function fallbackToDefaultLocation() {
+//   const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+//   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+//   map = new google.maps.Map(document.getElementById("map"), {
+//     center: defaultLocation,
+//     zoom: 12,
+//     disableDefaultUI: true,
+//     mapId: mapId,
+//   });
+
+//   trafficLayer = new google.maps.TrafficLayer();
+//   trafficLayer.setMap(map);
+
+//   updateTrafficStatus();
+//   setInterval(updateTrafficStatus, 60000);
+// }
+
 async function fallbackToDefaultLocation() {
-  const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
-  const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: defaultLocation,
-    zoom: 12,
-    disableDefaultUI: true,
-    mapId: mapId,
-  });
+  try {
+    console.log("Using fallback location: Bangalore");
+    const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+    const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: defaultLocation,
+      zoom: 12,
+      disableDefaultUI: true,
+      mapId: mapId,
+    });
 
-  trafficLayer = new google.maps.TrafficLayer();
-  trafficLayer.setMap(map);
+    // Add a marker for the fallback location
+    new google.maps.Marker({
+      position: defaultLocation,
+      map: map,
+      title: "Fallback Location: Bangalore",
+    });
 
-  updateTrafficStatus();
-  setInterval(updateTrafficStatus, 60000);
+    trafficLayer = new google.maps.TrafficLayer();
+    trafficLayer.setMap(map);
+
+    updateTrafficStatus();
+    setInterval(updateTrafficStatus, 60000);
+
+    // Notify the user
+    document.getElementById("map-status").textContent =
+      "Unable to retrieve your location. Showing fallback location: Bangalore.";
+  } catch (error) {
+    console.error("Error initializing fallback location:", error);
+  }
 }
 
 function updateTrafficStatus() {
