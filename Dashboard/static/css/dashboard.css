@@ -194,13 +194,13 @@ canvas {
 }
 
 :root {
-  --label-color: #000000;
-  --center-text-color: #000000;
+  --label-color: #000000; 
+  --center-text-color: #000000; 
 }
 
-/* Define colors for dark mode */
+
 .dark-mode {
-  --label-color: #ffffff;
+  --label-color: #ffffff; 
   --center-text-color: #ffffff;
 }
 

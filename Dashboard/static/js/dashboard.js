@@ -129,6 +129,111 @@ document.addEventListener("DOMContentLoaded", async () => {
       gradient3.addColorStop(1, "#3d84e6");
 
       // Configure the chart
+      // const chartConfig = {
+      //   type: "doughnut",
+      //   data: {
+      //     labels: ["Moving Vehicles", "Idle Vehicles", "Offline Vehicles"],
+      //     datasets: [
+      //       {
+      //         data: [
+      //           data.moving_vehicles,
+      //           data.idle_vehicles,
+      //           data.offline_vehicles,
+      //         ],
+      //         backgroundColor: [gradient1, gradient2, gradient3],
+      //         hoverBackgroundColor: ["#2ecc71", "#e67e22", "#2980b9"],
+      //         borderWidth: 0,
+      //       },
+      //     ],
+      //   },
+      //   options: {
+      //     responsive: true,
+      //     plugins: {
+      //       legend: {
+      //         position: "top",
+      //         labels: {
+      //           font: {
+      //             size: 14,
+      //             weight: "bold",
+      //           },
+      //           color: "var(--label-color)", // Use the CSS variable for color
+      //           generateLabels: (chart) => {
+      //             const original =
+      //               Chart.overrides.doughnut.plugins.legend.labels
+      //                 .generateLabels;
+      //             const labels = original.call(this, chart);
+      //             labels.forEach((label) => {
+      //               label.text = label.text;
+      //               label.className = "chart-label"; // Add the chart-label class
+      //             });
+      //             return labels;
+      //           },
+      //         },
+      //       },
+      //       tooltip: {
+      //         callbacks: {
+      //           label: function (tooltipItem) {
+      //             const value = tooltipItem.raw;
+      //             const percentage = (
+      //               (value / data.total_devices) *
+      //               100
+      //             ).toFixed(2);
+      //             return `${tooltipItem.label}: ${value} (${percentage}%)`;
+      //           },
+      //         },
+      //       },
+      //       centerText: {
+      //         display: true,
+      //         text: "Total Vehicles: " + data.total_devices,
+      //       },
+      //     },
+      //     animation: {
+      //       animateRotate: true,
+      //       animateScale: true,
+      //       duration: 2000,
+      //       easing: "easeOutBounce",
+      //     },
+      //     cutout: "70%",
+      //     layout: {
+      //       padding: 30,
+      //     },
+      //     hover: {
+      //       onHover: function (event, chartElement) {
+      //         const canvas = document.getElementById("vehiclesChart");
+      //         if (chartElement.length) {
+      //           canvas.style.cursor = "pointer";
+      //         } else {
+      //           canvas.style.cursor = "default";
+      //         }
+      //       },
+      //     },
+      //   },
+      //   plugins: [
+      //     {
+      //       id: "centerText",
+      //       beforeDraw(chart) {
+      //         const { width } = chart;
+      //         const { top, bottom } = chart.chartArea;
+      //         const ctx = chart.ctx;
+      //         const centerY = (top + bottom) / 2;
+      //         const text = chart.config.options.plugins.centerText.text;
+
+      //         ctx.save();
+      //         ctx.font = "bold 18px Arial";
+      //         ctx.textAlign = "center";
+      //         ctx.fillStyle = getComputedStyle(
+      //           document.documentElement
+      //         ).getPropertyValue("--center-text-color");
+      //         ctx.fillText(text, width / 2, centerY);
+      //         ctx.restore();
+      //       },
+      //     },
+      //   ],
+      // };
+
+      // Render the chart
+      // window.pieChart = new Chart(ctx, chartConfig);
+
       const chartConfig = {
         type: "doughnut",
         data: {
@@ -223,7 +328,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               ctx.textAlign = "center";
               ctx.fillStyle = getComputedStyle(
                 document.documentElement
-              ).getPropertyValue("--center-text-color");
+              ).getPropertyValue("--center-text-color"); // Use the CSS variable for color
               ctx.fillText(text, width / 2, centerY);
               ctx.restore();
             },
