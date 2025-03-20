@@ -16,9 +16,32 @@ MONGO_URI = os.getenv(
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['nnx']
 collection = db['distinctAtlanta']
+vehicle_inventory_collection = db['vehicle_inventory']
 
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
+@vehicle_bp.route('/api/vehicles', methods=['GET'])
 def get_vehicles():
+    try:
+        # Fetch data from the distinctAtlanta collection
+        vehicles = list(collection.find())
+        
+        # Iterate through vehicles and fetch the LicensePlateNumber from vehicle_inventory
+        for vehicle in vehicles:
+            vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
+            
+            # Match IMEI with vehicle_inventory collection
+            inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('IMEI')})
+            if inventory_data:
+                vehicle['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+            else:
+                vehicle['LicensePlateNumber'] = 'Unknown'  # Default if no match is found
+        
+        return jsonify(vehicles), 200
+    except Exception as e:
+        print("Error fetching vehicle data:", e)
+        return jsonify({'error': str(e)}), 500
+
+# def get_vehicles():
     try:
         vehicles = list(collection.find())
         for vehicle in vehicles:

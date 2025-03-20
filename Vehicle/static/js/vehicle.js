@@ -55,7 +55,7 @@ function updateVehicleCard(data) {
     vehicleElement.setAttribute("data-imei", data.imei);
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.imei} - ${
+      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
       data.status || "Unknown"
     }</div>
       <div class="vehicle-info">
@@ -70,8 +70,8 @@ function updateVehicleCard(data) {
       formattedDate || "N/A"
     } <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Data:</strong> <a href="device-details.html?imei=${
-          data.imei
+        <strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
+          data.LicensePlateNumber
         }" target="_blank">View Data</a>
       </div>
     `;
@@ -129,7 +129,7 @@ async function renderVehicles() {
     );
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${vehicle.imei} - ${
+      <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
       vehicle.status || "Unknown"
     }</div>
       <div class="vehicle-info">
@@ -145,7 +145,7 @@ async function renderVehicles() {
     } <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?imei=${
-          vehicle.imei
+          vehicle.LicensePlateNumber
         }" target="_blank">View Data</a>
       </div>
     `;
@@ -187,6 +187,8 @@ function geocodeLatLng(latLng, callback) {
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
+  const LicensePlateNumber =
+    device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
   const speed =
     device.speed !== null && device.speed !== undefined
       ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
@@ -200,15 +202,15 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   const { formattedDate, formattedTime } = formatDateTime(date, time);
   const content = `<div class="info-window show">
-                    <strong>IMEI:</strong> ${imei}<br>
+                    <strong>Vehicle Registration Number:</strong> ${LicensePlateNumber}<br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
                     <p><strong>Lon:</strong> ${lon}</p>
                     <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><strong>Data:</strong> <a href="device-details.html?imei=${
-                      device.imei || "N/A"
+                    <p><strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
+                      device.LicensePlateNumber || "N/A"
                     }" target="_blank">View Data</a></p>
                 </div>`;
 
@@ -324,35 +326,6 @@ function updateMap() {
       dataAvailable = false;
     });
 }
-
-// function animateMarker(marker, newPosition, duration = 6000) {
-//   let startPosition = new google.maps.LatLng(
-//     marker.position.lat,
-//     marker.position.lng
-//   );
-//   const startTime = performance.now();
-
-//   console.log("Animating marker:", marker, "from", startPosition);
-//   console.log("Animating marker:", marker, "to", newPosition);
-
-//   function moveMarker(currentTime) {
-//     const elapsedTime = currentTime - startTime;
-//     const progress = Math.min(elapsedTime / duration, 1);
-//     const lat =
-//       startPosition.lat + (newPosition.lat() - startPosition.lat()) * progress;
-//     const lng =
-//       startPosition.lng + (newPosition.lng() - startPosition.lng()) * progress;
-
-//     marker.latLng = new google.maps.LatLng(lat, lng);
-//     marker.draw();
-
-//     if (progress < 1) {
-//       requestAnimationFrame(moveMarker);
-//     }
-//   }
-
-//   requestAnimationFrame(moveMarker);
-// }
 
 function animateMarker(marker, newPosition, duration = 6000) {
   let startPosition = new google.maps.LatLng(
@@ -681,7 +654,7 @@ function updateFloatingCard(vehicles, filterValue) {
       );
 
       vehicleElement.innerHTML = `
-        <div class="vehicle-header">${vehicle.imei} - ${
+        <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
         vehicle.status || "Unknown"
       }</div>
         <div class="vehicle-info">
@@ -698,8 +671,8 @@ function updateFloatingCard(vehicles, filterValue) {
           <strong>Location:</strong> ${
             vehicle.address || "Location unknown"
           } <br>
-          <strong>Data:</strong> <a href="device-details.html?imei=${
-            vehicle.imei
+          <strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
+            vehicle.LicensePlateNumber
           }" target="_blank">View Data</a>
         </div>`;
 
@@ -766,7 +739,7 @@ async function populateVehicleTable() {
     );
 
     const row = tableBody.insertRow();
-    row.insertCell(0).innerText = vehicle.imei;
+    row.insertCell(0).innerText = vehicle.LicensePlateNumber;
     row.insertCell(1).innerText = speed;
     row.insertCell(2).innerText = latitude.toFixed(6);
     row.insertCell(3).innerText = longitude.toFixed(6);
@@ -774,7 +747,7 @@ async function populateVehicleTable() {
     row.insertCell(5).innerText = address;
     row.insertCell(
       6
-    ).innerHTML = `<a href="device-details.html?imei=${vehicle.imei}" target="_blank">View Data</a>`;
+    ).innerHTML = `<a href="device-details.html?LicensePlateNumber=${vehicle.LicensePlateNumber}" target="_blank">View Data</a>`;
   });
   showHidecar();
 }

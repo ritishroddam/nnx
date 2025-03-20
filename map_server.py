@@ -31,6 +31,7 @@ collection = db['atlanta']
 distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  
 distance_travelled_collection = db['distanceTravelled']
+vehicle_inventory_collection = db['vehicle_inventory']
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
@@ -90,14 +91,14 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 if json_data.get('gps') == 'A':
                     self.store_data_in_mongodb(json_data)
 
-                    # Emit vehicle update to connected clients
+                    vehicle_inventory_collection = db['vehicle_inventory']
+                    inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+                    if inventory_data:
+                        json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                    else:
+                        json_data['LicensePlateNumber'] = 'Unknown'
                     json_data['_id'] = str(json_data['_id'])
                     sio.emit('vehicle_update', json_data)
-
-                if 'latitude' in json_data and 'longitude' in json_data:
-                    latitude = json_data['latitude']
-                    longitude = json_data['longitude']
-                    # print(f"Vehicle location - Latitude: {latitude}, Longitude: {longitude}")
 
             else:
                 print("Invalid JSON format")
