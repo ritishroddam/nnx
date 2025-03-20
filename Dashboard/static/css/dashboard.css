@@ -19,6 +19,20 @@
 .cards #card4{
   background-color: #5d6d7e;
 }
+
+.dark-mode .cards #card1{
+  background-color: #5d6d7e;
+}
+.dark-mode .cards #card2{
+  background-color: #85929e;
+}
+.dark-mode .cards #card3{
+  background-color: #aeb6bf;
+}
+.dark-mode .cards #card4{
+  background-color: #d6dbdf;
+}
+
 .card {
   background-color: #2a2d37;
   padding: 20px;
