@@ -178,7 +178,7 @@ p {
   color: #2f2f2f;
 }
 
-.dark-mode #traffic-status #traffic-container{
+.dark-mode #traffic-status #traffic-container h2 #vehiclesChart {
   color: #ccc;
   background: #2f2f2f;
 }
