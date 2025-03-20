@@ -303,10 +303,6 @@ async function initMap(darkMode = true) {
         // Add traffic layer
         trafficLayer = new google.maps.TrafficLayer();
         trafficLayer.setMap(map);
-
-        // Update traffic status
-        updateTrafficStatus();
-        setInterval(updateTrafficStatus, 60000);
       },
       () => {
         // If geolocation fails, fallback to default location (Bangalore)
@@ -333,31 +329,9 @@ async function fallbackToDefaultLocation() {
 
     trafficLayer = new google.maps.TrafficLayer();
     trafficLayer.setMap(map);
-
-    updateTrafficStatus();
-    setInterval(updateTrafficStatus, 60000);
-
-    alert(
-      "Unable to retrieve your location. Showing fallback location: Bangalore."
-    );
   } catch (error) {
     console.error("Error initializing fallback location:", error);
   }
-}
-
-function updateTrafficStatus() {
-  // Simulate traffic status updates
-  const trafficConditions = [
-    "Heavy Traffic",
-    "Moderate Traffic",
-    "Light Traffic",
-    "No Traffic",
-  ];
-  const randomStatus =
-    trafficConditions[Math.floor(Math.random() * trafficConditions.length)];
-  document.getElementById(
-    "traffic-status"
-  ).textContent = `Current Traffic Status: ${randomStatus}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {

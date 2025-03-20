@@ -7,29 +7,29 @@
   gap: 20px;
   margin-top: 20px;
 }
-.cards #card1{
+.cards #card1 {
   background-color: #283747;
 }
-.cards #card2{
+.cards #card2 {
   background-color: #2e4053;
 }
-.cards #card3{
+.cards #card3 {
   background-color: #34495e;
 }
-.cards #card4{
+.cards #card4 {
   background-color: #5d6d7e;
 }
 
-.dark-mode .cards #card1{
+.dark-mode .cards #card1 {
   background-color: #5d6d7e;
 }
-.dark-mode .cards #card2{
+.dark-mode .cards #card2 {
   background-color: #85929e;
 }
-.dark-mode .cards #card3{
+.dark-mode .cards #card3 {
   background-color: #aeb6bf;
 }
-.dark-mode .cards #card4{
+.dark-mode .cards #card4 {
   background-color: #d6dbdf;
 }
 
@@ -155,18 +155,8 @@
 
 #map {
   width: 100%;
-  height: 360px;
+  height: 400px;
   transition: filter 0.3s ease-in-out;
-}
-#traffic-info {
-  padding: 20px;
-  text-align: center;
-  position: relative;
-  height: 40px;
-  overflow: hidden;
-  background: white;
-  border-top: 2px solid #ddd;
-  font-family: Arial, sans-serif;
 }
 
 #scrolling-text {
