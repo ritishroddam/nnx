@@ -4,18 +4,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isDarkMode = document.body.classList.contains("dark-mode");
 
   if (isDarkMode) {
-    Chart.defaults.color = "#2f2f2f";
-  } else {
     Chart.defaults.color = "#ccc";
+  } else {
+    Chart.defaults.color = "#2f2f2f";
   }
   const themeToggle = document.getElementById("theme-toggle");
   themeToggle.addEventListener("click", function () {
     const isDarkMode = document.body.classList.contains("dark-mode");
 
     if (!isDarkMode) {
-      Chart.defaults.color = "#ccc"; // Light mode text color
-    } else {
       Chart.defaults.color = "#2f2f2f"; // Dark mode text color
+    } else {
+      Chart.defaults.color = "#ccc"; // Light mode text color
     }
 
     // Update the pie chart to apply the new text color
