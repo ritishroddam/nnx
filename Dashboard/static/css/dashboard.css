@@ -81,7 +81,7 @@
   margin-right: 10px;
   width: 60%;
   text-align: center;
-  background: #2f2f2f;
+  /* background: #2f2f2f; */
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -178,7 +178,15 @@ p {
   color: #2f2f2f;
 }
 
-.dark-mode #traffic-status, #traffic-container h2, #vehiclesChart {
+.dark-mode #traffic-status {
+  color: #ccc;
+}
+
+.dark-mode #traffic-container h2{
+  color: #ccc;
+}
+
+.dark-mode #vehiclesChart{
   color: #ccc;
 }
 
