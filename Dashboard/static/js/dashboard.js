@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
-  const centerColor = "#2f2f2f";
+  let centerColor = "#2f2f2f";
   Chart.defaults.color = "#2f2f2f";
   const isDarkMode = document.body.classList.contains("dark-mode");
   if (isDarkMode) {
