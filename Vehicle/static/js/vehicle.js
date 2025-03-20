@@ -385,6 +385,7 @@ function animateMarker(marker, newPosition, duration = 6000) {
   }
 
   requestAnimationFrame(moveMarker);
+  console.log("animation done");
 }
 
 function filterVehicles() {
