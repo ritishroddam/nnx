@@ -20,17 +20,17 @@
   background-color: #5d6d7e;
 }
 
-.dark-mode .cards #card1 {
-  background-color: #5d6d7e;
-}
-.dark-mode .cards #card2 {
+.dark-mode .cards #card1{
   background-color: #85929e;
 }
-.dark-mode .cards #card3 {
-  background-color: #aeb6bf;
+.dark-mode .cards #card2{
+  background-color: #5d6d7e;
 }
-.dark-mode .cards #card4 {
-  background-color: #d6dbdf;
+.dark-mode .cards #card3{
+  background-color: #34495e;
+}
+.dark-mode .cards #card4{
+  background-color: #2e4053;
 }
 
 .card {
