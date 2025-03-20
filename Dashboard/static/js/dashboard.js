@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   themeToggle.addEventListener("click", function () {
     const isDarkMode = document.body.classList.contains("dark-mode");
 
-    if (isDarkMode) {
-      Chart.defaults.color = "#2f2f2f"; // Dark mode text color
-    } else {
+    if (!isDarkMode) {
       Chart.defaults.color = "#ccc"; // Light mode text color
+    } else {
+      Chart.defaults.color = "#2f2f2f"; // Dark mode text color
     }
 
     // Update the pie chart to apply the new text color
