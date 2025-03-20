@@ -81,7 +81,7 @@
   margin-right: 10px;
   width: 60%;
   text-align: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: #2f2f2f;
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -105,7 +105,7 @@
   background: transparent;
   text-align: center;
   font-size: 1.5em;
-  color: #fff;
+  color: #ccc;
   transition: background-color 0.3s ease-in-out;
 }
 #map {
@@ -180,10 +180,12 @@ p {
 
 .dark-mode #traffic-status {
   color: #ccc;
+  background: #2f2f2f;
 }
 
 .dark-mode #weather p {
   color: #ccc;
+  background: #2f2f2f;
 }
 
 @keyframes fadeIn {
