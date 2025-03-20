@@ -88,7 +88,7 @@
   backdrop-filter: blur(10px);
   transition: background 0.5s ease;
 }
-#traffic-container {
+.traffic-container {
   border-radius: 10px;
   overflow: hidden;
   width: 100%;
@@ -99,7 +99,7 @@
   background: #ccc;
 }
 
-.dark-mode #traffic-container {
+.dark-mode .traffic-container {
   background: #2f2f2f;
 }
 
