@@ -275,7 +275,7 @@ themeToggle.addEventListener("click", function () {
   initMap(darkMode); // Reinitialize the map with the new mapId
 });
 
-function initMap(darkMode = true) {
+async function initMap(darkMode = true) {
   const mapOptions = {
     zoom: 12,
     disableDefaultUI: true,
@@ -321,12 +321,14 @@ function initMap(darkMode = true) {
   }
 }
 
-function fallbackToDefaultLocation() {
+async function fallbackToDefaultLocation() {
   const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+  const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
   map = new google.maps.Map(document.getElementById("map"), {
     center: defaultLocation,
     zoom: 12,
     disableDefaultUI: true,
+    mapId: mapId,
   });
 
   trafficLayer = new google.maps.TrafficLayer();
