@@ -19,7 +19,6 @@ collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
-@vehicle_bp.route('/api/vehicles', methods=['GET'])
 def get_vehicles():
     try:
         # Fetch data from the distinctAtlanta collection
@@ -35,6 +34,7 @@ def get_vehicles():
                 vehicle['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
             else:
                 vehicle['LicensePlateNumber'] = 'Unknown'  # Default if no match is found
+            print(vehicle['LicensePlateNumber'])
         
         return jsonify(vehicles), 200
     except Exception as e:
@@ -42,11 +42,11 @@ def get_vehicles():
         return jsonify({'error': str(e)}), 500
 
 # def get_vehicles():
-    try:
-        vehicles = list(collection.find())
-        for vehicle in vehicles:
-            vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
-        return jsonify(vehicles), 200
-    except Exception as e:
-        print("Error fetching vehicle data:", e)
-        return jsonify({'error': str(e)}), 500
+    # try:
+    #     vehicles = list(collection.find())
+    #     for vehicle in vehicles:
+    #         vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
+    #     return jsonify(vehicles), 200
+    # except Exception as e:
+    #     print("Error fetching vehicle data:", e)
+    #     return jsonify({'error': str(e)}), 500
