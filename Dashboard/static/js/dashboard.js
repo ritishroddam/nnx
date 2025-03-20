@@ -12,14 +12,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const isDarkMode = document.body.classList.contains("dark-mode");
 
     if (!isDarkMode) {
-      Chart.defaults.color = "#2f2f2f"; // Dark mode text color
+      Chart.defaults.color = "#2f2f2f";
+      centerColor = "#2f2f2f";
     } else {
-      Chart.defaults.color = "#ccc"; // Light mode text color
+      Chart.defaults.color = "#ccc";
+      centerColor = "#ccc";
     }
 
-    // Update the pie chart to apply the new text color
     if (window.pieChart) {
-      window.pieChart.update(); // Re-render the chart with the new defaults
+      window.pieChart.destroy();
+      renderPieChart();
     }
   });
 
@@ -241,8 +243,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               ctx.save();
               ctx.font = "bold 18px Arial";
               ctx.textAlign = "center";
-              ctx.fillText(text, width / 2, centerY);
               ctx.fillStyle = centerColor;
+              ctx.fillText(text, width / 2, centerY);
               ctx.restore();
             },
           },
