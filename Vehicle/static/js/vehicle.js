@@ -574,6 +574,13 @@ function updateVehicleData(vehicle) {
     animateMarker(markers[imei], latLng);
     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
     markers[imei].device = vehicle;
+
+    const markerContent = markers[imei].content;
+    const markerImage = markerContent.querySelector("img");
+    if (markerImage) {
+      markerImage.src = iconUrl; // Update the icon URL
+      markerContent.style.transform = `rotate(${rotation}deg)`; // Update rotation
+    }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
   }
