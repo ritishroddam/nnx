@@ -81,7 +81,6 @@
   margin-right: 10px;
   width: 60%;
   text-align: center;
-  /* background: #2f2f2f; */
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -168,14 +167,6 @@ canvas {
 }
 p {
   color: #fff;
-}
-
-#traffic-status {
-  color: #2f2f2f;
-}
-
-#weather p {
-  color: #2f2f2f;
 }
 
 .dark-mode #weather p {
