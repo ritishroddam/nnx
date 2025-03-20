@@ -169,19 +169,19 @@ p {
   color: #fff;
 }
 
-.traffic-status {
+#traffic-status {
   color: #2f2f2f;
 }
 
-.weather p {
+#weather p {
   color: #2f2f2f;
 }
 
-.dark-mode .traffic-status {
+.dark-mode #traffic-status {
   color: #ccc;
 }
 
-.dark-mode .weather p {
+.dark-mode #weather p {
   color: #ccc;
 }
 
