@@ -165,26 +165,6 @@ tr:hover {
   top: 20px;
 }
 
-#status-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 30%;
-  margin-top: 15px;
-  right: 30px;
-}
-
-#status-container label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-#status-container input {
-  position: relative;
-  font-weight: bold;
-  margin-bottom: 5px;
-  top: 20px;
-}
-
 .button-container {
   display: flex;
   justify-content: center;
@@ -199,12 +179,15 @@ tr:hover {
   color: #fff;
   cursor: default;
 }
+
 .status-active {
   background-color: #28a745;
 }
+
 .status-inactive {
   background-color: #dc3545;
 }
+
 .error-box {
   padding: 10px;
   background-color: #dc3545;
@@ -212,6 +195,7 @@ tr:hover {
   border-radius: 5px;
   margin-bottom: 10px;
 }
+
 .preloader {
   display: none;
   border: 6px solid #f3f3f3;
@@ -222,6 +206,7 @@ tr:hover {
   animation: spin 2s linear infinite;
   margin: 10px auto;
 }
+
 @keyframes spin {
   0% {
     transform: rotate(0);
@@ -230,6 +215,7 @@ tr:hover {
     transform: rotate(360deg);
   }
 }
+
 .action-btn {
   padding: 5px 10px;
   color: #fff;
@@ -239,24 +225,30 @@ tr:hover {
   cursor: pointer;
   margin-right: 5px;
 }
+
 .action-btn.edit {
   background-color: #28a745;
 }
+
 .action-btn.delete {
   background-color: #dc3545;
 }
+
 .action-btn:hover {
   opacity: 0.8;
 }
+
 .icon-btn {
   background: 0 0;
   border: none;
   cursor: pointer;
   font-size: 16px;
 }
+
 .edit-icon {
   color: #007bff;
 }
+
 .delete-icon {
   color: #dc3545;
 }

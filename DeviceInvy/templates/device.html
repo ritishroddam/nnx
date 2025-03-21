@@ -73,11 +73,18 @@ Device Inventory
           <label for="Tenure">Tenure</label>
           <input type="text" name="Tenure" id="Tenure" />
         </div>
-        <div id="status-container" class="form-group">
-          <label>Status</label>
+        <div class="form-group">
+          <!-- <label>Status</label>
           <input type="radio"  name="Status" value="Active" /> Active
           <input type="radio"  name="Status" value="Inactive" checked />
-          Inactive
+          Inactive -->
+
+          <label for="Package">Status</label>
+          <select name="Status" required>
+            <option value="">Select Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
         </div>
         <button type="submit" id="submitBtn" class="btn success">Submit</button>
         <button type="button" id="cancelBtn" class="btn danger">
