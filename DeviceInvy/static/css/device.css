@@ -58,6 +58,7 @@ tr:nth-child(even) {
 tr:hover {
   background-color: #e2e8f0;
 }
+
 .btn {
   padding: 10px 15px;
   color: #fff;
@@ -67,25 +68,45 @@ tr:hover {
   cursor: pointer;
   text-decoration: none;
 }
+
 .btn:hover {
   background-color: #0056b3;
 }
+
 .hidden {
   display: none;
 }
+
 .error {
   color: red;
   font-size: 0.9em;
   margin-top: -15px;
   margin-bottom: 15px;
 }
+
 .success {
   background-color: #28a745;
   height: 40px;
 }
+
 .danger {
   background-color: #dc3545;
   height: 40px;
+}
+
+#submitBtn{
+  background-color: #28a745;
+  height: 40px;
+  position: relative;
+  top: 50px;
+  left: 110px;
+}
+
+#cancelBtn{
+  background-color: #dc3545;
+  height: 40px;
+  position: relative;
+  top: 50px;
 }
 /* #manualEntryForm,
 #uploadBox {
@@ -102,14 +123,11 @@ tr:hover {
 #manualEntryForm,
 #uploadBox {
   background-color: #fff;
-  padding: 20px;
-  border: 2px solid #ccc;
   border-radius: 10px;
   max-width: 1500px; 
   margin: 0 auto;
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
   color: #333;
-  padding-top: 10px;
+  padding-top: 20px;
 }
 
 .form-container {
@@ -136,6 +154,15 @@ tr:hover {
   border: 1px solid #ccc;
   border-radius: 5px;
   width: 100%;
+}
+
+#option{
+  position: relative;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  top: 20px;
 }
 
 /* Align Status options inline */
