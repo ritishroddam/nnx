@@ -76,7 +76,16 @@
                     <i class="fa-solid fa-file-alt"></i> <span class="sidebar-text">Reports</span>
                     <span class="arrow">&#x25BC;</span>
                 </a>
+                
                 <ul class="submenu">
+                    <li>   
+                        <a href="{{url_for('AllReports.index')}}">
+                            <i class="fa-solid fa-book" style='white-space:pre'></i>
+                            All Reports
+                        </a>
+                    </li>
+                </ul>
+             <!--     <ul class="submenu">
                     <li>
                         <a href="{{url_for('CompanyDetails.page')}}">
                             <i class="fa-solid fa-wave-square" style='white-space:pre'></i>
@@ -94,16 +103,7 @@
                     </li>
                 </ul>
 
-                <ul class="submenu">
-                    <li>   
-                        <a href="#">
-                            <i class="fa-solid fa-book" style='white-space:pre'></i>
-                            All Reports
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- <ul class="submenu">
+               <ul class="submenu">
                     <li>
                         <a href="{{url_for('SpeedReport.speed_report_page')}}">
                             <i class="fa-solid fa-gauge-high" style='white-space:pre'></i>
