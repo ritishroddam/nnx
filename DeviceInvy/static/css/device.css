@@ -103,7 +103,7 @@ tr:hover {
   padding: 20px;
   border: 2px solid #ccc;
   border-radius: 10px;
-  max-width: 800px; /* Increased width for horizontal layout */
+  max-width: 1200px; /* Increased width for horizontal layout */
   margin: 0 auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   color: #333;
@@ -120,7 +120,7 @@ tr:hover {
 .form-group {
   display: flex;
   flex-direction: column;
-  width: 48%; /* Two columns */
+  width: 30%; /* Three columns */
 }
 
 .form-group label {
