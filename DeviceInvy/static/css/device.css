@@ -165,16 +165,17 @@ tr:hover {
   top: 20px;
 }
 
-.status-container {
+#status-container {
   display: flex;
   flex-direction: column;
   width: 30%;
   margin-top: 15px;
 }
 
-.status-container label {
+#status-container label {
   font-weight: bold;
   margin-bottom: 5px;
+  top: 20px;
 }
 
 .button-container {
