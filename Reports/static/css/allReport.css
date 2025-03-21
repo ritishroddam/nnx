@@ -4,10 +4,15 @@ header {
 }
 
 .report-section {
-    background-color: #fff;
+    background-color: #ccc;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .report-section {
+    background-color: #2f2f2f;
+    box-shadow: 0px 0px 20px #cccccc90;
 }
 
 .report-header {
