@@ -166,10 +166,12 @@ tr:hover {
 }
 
 #status-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 30%;
   margin-top: 15px;
+  right: 30px;
 }
 
 #status-container label {
@@ -177,6 +179,7 @@ tr:hover {
   margin-bottom: 5px;
 }
 #status-container input {
+  position: relative;
   font-weight: bold;
   margin-bottom: 5px;
   top: 20px;
