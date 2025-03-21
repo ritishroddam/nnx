@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
+
+  initMap();
+
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
   let centerColor = "#2f2f2f";
   Chart.defaults.color = "#2f2f2f";
