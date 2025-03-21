@@ -21,7 +21,7 @@ from VehicleDetailsEntry.vehicleDetailsEntry import vehicleDetailsEntry_bp
 # from IgnitionReport.ignitionBackend import ignition_report_bp
 # from SOSreport.sos_report import sos_report_bp
 # from SpeedReport.speed import speed_report_bp
-from Reports.allReports import Reports_bp
+from Reports.allReports import reports_bp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
@@ -40,7 +40,7 @@ app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry'
 # app.register_blueprint(ignition_report_bp, url_prefix='/ignitionReport')
 # app.register_blueprint(sos_report_bp, url_prefix='/sosReport')
 # app.register_blueprint(speed_report_bp, url_prefix='/speedReport')
-app.register_blueprint(Reports_bp, url_prefix='/reports')
+app.register_blueprint(reports_bp, url_prefix='/reports')
 
 
 @app.route('/')
