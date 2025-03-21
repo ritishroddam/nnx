@@ -22,8 +22,9 @@ Device Inventory
     <button id="downloadExcel" class="btn">Download Table</button>
 
     <div id="manualEntryForm" class="hidden">
-      <div class="form-container">
+      
       <form id="manualForm" action="{{ url_for('DeviceInvy.manual_entry')}}" method="post">
+        <div class="form-container">
         <div class="form-group">
           <label for="IMEI">IMEI</label>
           <input type="text" name="IMEI" id="IMEI" required />
@@ -82,6 +83,7 @@ Device Inventory
         <button type="button" id="cancelBtn" class="btn danger">
           Cancel
         </button>
+      </div>
       </form>
     </div>
     <div id="uploadBox" class="hidden">
@@ -156,7 +158,7 @@ Device Inventory
         {% endfor %}
       </tbody>
     </table>
-    </div>
+    
   </div>
 
 </section>
