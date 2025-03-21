@@ -175,6 +175,10 @@ tr:hover {
 #status-container label {
   font-weight: bold;
   margin-bottom: 5px;
+}
+#status-container input {
+  font-weight: bold;
+  margin-bottom: 5px;
   top: 20px;
 }
 
