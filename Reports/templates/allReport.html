@@ -11,10 +11,9 @@
     {% endblock %}
 
     {% block block_container %}
-
-        <section class="report-section">
             <div class="report-header">
                 <h2>Generate a New Report</h2>
+                <br/>
                 <div class="report-filters">
                     <button class="filter-btn active">All: 41</button>
                     <button class="filter-btn">Alerts: 1</button>
@@ -26,6 +25,7 @@
                     <button class="filter-btn">Geofence: 4</button>
                     <button class="filter-btn">GPS device</button>
                 </div>
+                <br/>
                 <div class="report-actions">
                     <input type="text" placeholder="Search">
                     <button class="create-report-btn">Create A Custom Report</button>
@@ -33,35 +33,22 @@
             </div>
             <div class="report-cards">
                 <a href="/report/daily-distance" class="report-card">
-                    <h3>Daily Distance Travelled by Vehicle Report</h3>
-                    <p>Distance Travelled by Vehicle Report tells you the total daily distance covered by the vehicles for the selected date range.</p>
-                    <p>Last Generated on: <strong>12 Sep 2024</strong></p>
+                    <h3>Travel Path Report</h3>
                 </a>
                 <a href="/report/vehicle-movement" class="report-card">
-                    <h3>Vehicle Movement Report</h3>
-                    <p>Vehicle Movement Report tells you the list of all individual movements done by the vehicles selected.</p>
-                    <p>Last Generated on: <strong>04 May 2024</strong></p>
+                    <h3>SOS/Panic Report</h3>
                 </a>
                 <a href="/report/distance-time-period" class="report-card">
-                    <h3>Distance Travelled During Time Period Report</h3>
-                    <p>Distance Travelled During Time Interval Report tells you the distance travelled by the vehicle during the selected time period of the day.</p>
-                    <p>Last Generated on: <strong>04 May 2024</strong></p>
+                    <h3>Ignition Report</h3>
                 </a>
                 <a href="/report/distance-speed-range" class="report-card">
-                    <h3>Distance Travelled in different speed range</h3>
-                    <p>Once you have set the speed range, Distance Travelled by Defined Speed Report tells you the distance travelled by the vehicles selected by you within that speed bracket for a date range...</p>
-                    <p>Last Generated on: <strong>04 May 2024</strong></p>
+                    <h3>Speed Report</h3>
                 </a>
                 <a href="/report/odometer-daily-distance" class="report-card">
-                    <h3>Odometer Based Daily Distance Travelled Report</h3>
-                    <p>Odometer Based Daily Distance Travelled Report provides you with the daily distance that the vehicle has travelled using the system computed odometer data.</p>
-                    <p>Last Generated on: <strong>29 Apr 2024</strong></p>
+                    <h3>Distance Report</h3>
                 </a>
                 <a href="/report/vehicle-movement-ignition" class="report-card">
-                    <h3>Vehicle Movement by Ignition Instances Report</h3>
-                    <p>Vehicle Movement by Ignition Instances Report tells you the duration of movement, distance covered and the speed of the vehicle selected by you for a single trip, i.e., from ignition on to...</p>
-                    <p>Last Generated on: <strong>22 Dec 2023</strong></p>
+                    <h3>Daily Report</h3>
                 </a>
             </div>
-        </section>
 {% endblock %}
