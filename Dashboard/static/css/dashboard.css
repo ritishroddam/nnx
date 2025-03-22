@@ -375,6 +375,12 @@ p {
   color: #555;
 }
 
+.dark-mode .vehicleLiveTable td {
+  color: #ccc;
+  background-color: black;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .vehicleLiveTable th {
   background-color: #2f2f2f;
   color: #ccc;
