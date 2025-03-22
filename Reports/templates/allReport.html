@@ -24,38 +24,84 @@ All Reports
     <h2>Generate a New Report</h2>
 </div>
 <div class="report-cards">
+
+    <a href="#" class="report-card" data-report="custom">
+        <h3>Custom Report</h3>
+        <i class="fa-solid fa-cogs"></i>
+    </a>
+
     <a href="#" class="report-card" data-report="daily-distance">
         <h3>Travel Path Report</h3>
         <i class="fa-solid fa-route"></i>
     </a>
+
     <a href="#" class="report-card" data-report="odometer-daily-distance">
         <h3>Distance Report</h3>
         <i class="fa-solid fa-road"></i>
     </a>
+
     <a href="#" class="report-card" data-report="distance-speed-range">
         <h3>Speed Report</h3>
         <i class="fa-solid fa-gauge-high"></i>
     </a>
+
     <a href="#" class="report-card" data-report="stoppage">
         <h3>Stoppage Report</h3>
         <i class="fa-solid fa-traffic-light"></i>
     </a>
+
     <a href="#" class="report-card" data-report="idle">
         <h3>Idle Report</h3>
         <i class="fa-solid fa-hourglass-half"></i>
     </a>
+
     <a href="#" class="report-card" data-report="ignition">
         <h3>Ignition Report</h3>
         <i class="fa-solid fa-key"></i>
     </a>
+
     <a href="#" class="report-card" data-report="daily">
         <h3>Daily Report</h3>
         <i class="fa-solid fa-calendar-day"></i>
     </a>
+
     <a href="#" class="report-card" data-report="sos">
         <h3>SOS/Panic Report</h3>
         <i class="fa-solid fa-triangle-exclamation"></i>
     </a>
+</div>
+
+<div id="customReportModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Create Custom Report</h2>
+        <form id="customReportForm">
+            <div class="form-group">
+                <label for="reportName">Report Name*</label>
+                <input type="text" id="reportName" name="reportName" required />
+            </div>
+            <div class="form-group">
+                <label for="iconValue">Font Awesome Icon (Solid)*</label>
+                <input type="text" id="iconValue" name="iconValue" placeholder="e.g., fa-cogs" required />
+            </div>
+            <div class="form-group">
+                <label for="fieldSelection">Select Fields*</label>
+                <div id="fieldSelection" class="field-selection">
+                    <!-- Dynamically populated fields -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="selectedFields">Selected Fields</label>
+                <ul id="selectedFields" class="selected-fields">
+                    <!-- Dynamically updated selected fields -->
+                </ul>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" id="saveCustomReport">Save Report</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- The Modal -->
