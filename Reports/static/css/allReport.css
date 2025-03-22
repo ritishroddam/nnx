@@ -76,3 +76,8 @@
 .report-card p {
     margin: 10px 0;
 }
+
+.report-card i{
+    width: 100%;
+    height: 100%;
+}
