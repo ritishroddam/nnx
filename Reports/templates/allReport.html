@@ -1,107 +1,107 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <title>Reports</title>
-    <link rel="stylesheet" href="{{ url_for('Reports.static', filename='css/allReport.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- <script defer src="{{ url_for('Reports.static', filename='js/allReport.js') }}" defer></script> -->
-    {% endblock %}
+<title>Reports</title>
+<link rel="stylesheet" href="{{ url_for('Reports.static', filename='css/allReport.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- <script defer src="{{ url_for('Reports.static', filename='js/allReport.js') }}" defer></script> -->
+{% endblock %}
 
-    {% block h1 %}
-    All Reports
-    {% endblock %}
+{% block h1 %}
+All Reports
+{% endblock %}
 
-    {% block block_container %}
-    <div class="report-header">
-        <h2>Generate a New Report</h2>
+{% block block_container %}
+<div class="report-header">
+    <h2>Generate a New Report</h2>
+</div>
+<div class="report-cards">
+    <a href="#" class="report-card" data-report="daily-distance">
+        <h3>Travel Path Report</h3>
+        <i class="fa-solid fa-route"></i>
+    </a>
+    <a href="#" class="report-card" data-report="odometer-daily-distance">
+        <h3>Distance Report</h3>
+        <i class="fa-solid fa-road"></i>
+    </a>
+    <a href="#" class="report-card" data-report="distance-speed-range">
+        <h3>Speed Report</h3>
+        <i class="fa-solid fa-gauge-high"></i>
+    </a>
+    <a href="#" class="report-card" data-report="stoppage">
+        <h3>Stoppage Report</h3>
+        <i class="fa-solid fa-traffic-light"></i>
+    </a>
+    <a href="#" class="report-card" data-report="idle">
+        <h3>Idle Report</h3>
+        <i class="fa-solid fa-hourglass-half"></i>
+    </a>
+    <a href="#" class="report-card" data-report="ignition">
+        <h3>Ignition Report</h3>
+        <i class="fa-solid fa-key"></i>
+    </a>
+    <a href="#" class="report-card" data-report="daily">
+        <h3>Daily Report</h3>
+        <i class="fa-solid fa-calendar-day"></i>
+    </a>
+    <a href="#" class="report-card" data-report="sos">
+        <h3>SOS/Panic Report</h3>
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </a>
+</div>
+
+<!-- The Modal -->
+<div id="reportModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>New Daily Distance Travelled by Vehicle Report</h2>
+        <form>
+            <div class="form-group">
+                <label for="dateRange">Date Range*</label>
+                <select id="dateRange" name="dateRange">
+                    <option value="last24hours">Last 24 Hours</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days">Last 7 Days</option>
+                    <option value="last30days">Last 30 Days</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subUserName">Sub User Name*</label>
+                <select id="subUserName" name="subUserName">
+                    <option value="all">All sub users</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="vehicleGroupName">Vehicle Group Name*</label>
+                <select id="vehicleGroupName" name="vehicleGroupName">
+                    <option value="all">All vehicle groups</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="deviceType">Device Type</label>
+                <select id="deviceType" name="deviceType">
+                    <option value="all">All Device Type</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="vehicleNumber">Vehicle Number</label>
+                <select id="vehicleNumber" name="vehicleNumber">
+                    <option value="all">Select Vehicle Number</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" id="generateReport">Generate Report</button>
+            </div>
+        </form>
     </div>
-    <div class="report-cards">
-        <a href="#" class="report-card" data-report="daily-distance">
-            <h3>Travel Path Report</h3>
-            <i class="fa-solid fa-route"></i>
-        </a>
-        <a href="#" class="report-card" data-report="odometer-daily-distance">
-            <h3>Distance Report</h3>
-            <i class="fa-solid fa-road"></i>
-        </a>
-        <a href="#" class="report-card" data-report="distance-speed-range">
-            <h3>Speed Report</h3>
-            <i class="fa-solid fa-gauge-high"></i>
-        </a>
-        <a href="#" class="report-card" data-report="stoppage">
-            <h3>Stoppage Report</h3>
-            <i class="fa-solid fa-traffic-light"></i>
-        </a>
-        <a href="#" class="report-card" data-report="idle">
-            <h3>Idle Report</h3>
-            <i class="fa-solid fa-hourglass-half"></i>
-        </a>
-        <a href="#" class="report-card" data-report="ignition">
-            <h3>Ignition Report</h3>
-            <i class="fa-solid fa-key"></i>
-        </a>
-        <a href="#" class="report-card" data-report="daily">
-            <h3>Daily Report</h3>
-            <i class="fa-solid fa-calendar-day"></i>
-        </a>
-        <a href="#" class="report-card" data-report="sos">
-            <h3>SOS/Panic Report</h3>
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </a>
-    </div>
+</div>
 
-    <!-- The Modal -->
-    <div id="reportModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>New Daily Distance Travelled by Vehicle Report</h2>
-            <form>
-                <div class="form-group">
-                    <label for="dateRange">Date Range*</label>
-                    <select id="dateRange" name="dateRange">
-                        <option value="last24hours">Last 24 Hours</option>
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                        <option value="last7days">Last 7 Days</option>
-                        <option value="last30days">Last 30 Days</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="subUserName">Sub User Name*</label>
-                    <select id="subUserName" name="subUserName">
-                        <option value="all">All sub users</option>
-                        <!-- Add more options as needed -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="vehicleGroupName">Vehicle Group Name*</label>
-                    <select id="vehicleGroupName" name="vehicleGroupName">
-                        <option value="all">All vehicle groups</option>
-                        <!-- Add more options as needed -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="deviceType">Device Type</label>
-                    <select id="deviceType" name="deviceType">
-                        <option value="all">All Device Type</option>
-                        <!-- Add more options as needed -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="vehicleNumber">Vehicle Number</label>
-                    <select id="vehicleNumber" name="vehicleNumber">
-                        <option value="all">Select Vehicle Number</option>
-                        <!-- Add more options as needed -->
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="cancel-btn">Cancel</button>
-                    <button type="button" id="generateReport">Generate Report</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="{{ url_for('Reports.static', filename='js/allReport.js') }}"></script>
+<script src="{{ url_for('Reports.static', filename='js/allReport.js') }}"></script>
 {% endblock %}

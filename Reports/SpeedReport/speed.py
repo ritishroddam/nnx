@@ -54,7 +54,22 @@ def fetch_speed_report():
             "Speed": round(float(record["speed"]) * 1.60934, 2)  # Convert mph to km/h
         })
 
-    return jsonify(data)
+    if not data:
+        return jsonify({"error": "No data found"}),
+
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Speed Report")
+
+    output.seek(0)
+
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="Speed_Report.xlsx"
+    )
 
 @speed_bp.route('/download_speed_report', methods=['POST'])
 def download_speed_report():
