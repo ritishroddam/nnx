@@ -31,6 +31,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       devicesChart.options.scales.y.ticks.color = isDarkMode
         ? "#ccc"
         : "#2f2f2f";
+      devicesChart.options.scales.x.grid.color = isDarkMode
+        ? "#ccc"
+        : "#2f2f2f";
+      devicesChart.options.scales.y.grid.color = isDarkMode
+        ? "#ccc"
+        : "#2f2f2f";
       devicesChart.data.datasets[0].backgroundColor = isDarkMode
         ? "rgba(204, 204, 204, 0.2)"
         : "rgba(47, 47, 47, 0.2)";
