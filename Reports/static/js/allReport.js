@@ -54,15 +54,11 @@ document.getElementById("generateReport").onclick = function () {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-  $("select").selectize({
-    create: false,
-    sortField: "text",
-  });
-
   const customReportModal = document.getElementById("customReportModal");
   const customReportForm = document.getElementById("customReportForm");
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
+  const reportCardsContainer = document.querySelector(".report-cards");
 
   // Open modal for custom report
   document.querySelector('[data-report="custom"]').onclick = function () {
@@ -75,6 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
     customReportModal.style.display = "none";
   };
 
+  // Load fields dynamically from backend
   function loadFields() {
     fetch("/reports/get_fields")
       .then((response) => response.json())
@@ -100,6 +97,21 @@ document.addEventListener("DOMContentLoaded", function () {
       listItem.textContent = field;
       listItem.dataset.field = field;
       listItem.draggable = true;
+
+      // Add drag-and-drop functionality
+      listItem.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", e.target.dataset.field);
+      });
+      listItem.addEventListener("dragover", (e) => e.preventDefault());
+      listItem.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const draggedField = e.dataTransfer.getData("text/plain");
+        const draggedItem = selectedFields.querySelector(
+          `[data-field="${draggedField}"]`
+        );
+        selectedFields.insertBefore(draggedItem, e.target);
+      });
+
       selectedFields.appendChild(listItem);
     } else {
       const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
@@ -107,6 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Save custom report
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
     const reportName = document.getElementById("reportName").value;
@@ -124,6 +137,54 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         alert(data.message);
         customReportModal.style.display = "none";
+        createReportCard(reportName, iconValue);
       });
   };
+
+  // Create a new report card dynamically
+  function createReportCard(reportName, iconValue) {
+    const reportCard = document.createElement("a");
+    reportCard.href = "#";
+    reportCard.className = "report-card";
+    reportCard.dataset.report = reportName;
+    reportCard.innerHTML = `
+            <h3>${reportName}</h3>
+            <i class="fa-solid ${iconValue}"></i>
+        `;
+    reportCard.onclick = function () {
+      openReportModal(reportName);
+    };
+    reportCardsContainer.appendChild(reportCard);
+  }
+
+  // Open report modal for custom report
+  function openReportModal(reportName) {
+    const reportModal = document.getElementById("reportModal");
+    reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
+    reportModal.style.display = "block";
+
+    document.getElementById("generateReport").onclick = function () {
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      fetch("/reports/download_custom_report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportName, vehicleNumber }),
+      })
+        .then((response) => response.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${reportName}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+    };
+  }
+
+  $("select").selectize({
+    create: false,
+    sortField: "text",
+  });
 });

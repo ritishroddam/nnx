@@ -31,7 +31,6 @@ def save_custom_report():
     icon_value = data.get("iconValue")
     fields = data.get("fields")
 
-    # Save custom report configuration (e.g., in a MongoDB collection)
     db['custom_reports'].insert_one({
         "report_name": report_name,
         "icon_value": icon_value,
@@ -42,24 +41,29 @@ def save_custom_report():
 @reports_bp.route('/download_custom_report', methods=['POST'])
 def download_custom_report():
     data = request.json
-    fields = data.get("fields")
-    query = data.get("query", {})
+    report_name = data.get("reportName")
+    vehicle_number = data.get("vehicleNumber")
+
+    # Fetch report configuration
+    report_config = db['custom_reports'].find_one({"report_name": report_name})
+    fields = report_config["fields"]
 
     # Fetch data from MongoDB
+    query = {"LicensePlateNumber": vehicle_number}
     results = list(db['atlanta'].find(query, {field: 1 for field in fields}))
 
     # Convert to Excel
     df = pd.DataFrame(results)
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Custom Report")
+        df.to_excel(writer, index=False, sheet_name=report_name)
     output.seek(0)
 
     return send_file(
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
-        download_name="Custom_Report.xlsx"
+        download_name=f"{report_name}.xlsx"
     )
 
 @reports_bp.route('/')
