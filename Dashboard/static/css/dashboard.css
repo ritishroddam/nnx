@@ -229,7 +229,6 @@ p {
 .dark-mode .graph-container #vehiclesChart {
   color: #ccc;
   background-color: black;
-  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .dark-mode #traffic-container {
