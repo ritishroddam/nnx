@@ -74,25 +74,19 @@ All Reports
                     <!-- Add more options as needed -->
                 </select>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="vehicleGroupName">Vehicle Group Name*</label>
                 <select id="vehicleGroupName" name="vehicleGroupName">
                     <option value="all">All vehicle groups</option>
-                    <!-- Add more options as needed -->
                 </select>
-            </div>
-            <div class="form-group">
-                <label for="deviceType">Device Type</label>
-                <select id="deviceType" name="deviceType">
-                    <option value="all">All Device Type</option>
-                    <!-- Add more options as needed -->
-                </select>
-            </div>
+            </div> -->
             <div class="form-group">
                 <label for="vehicleNumber">Vehicle Number</label>
                 <select id="vehicleNumber" name="vehicleNumber">
-                    <option value="all">Select Vehicle Number</option>
-                    <!-- Add more options as needed -->
+                    <option value="">Select Vehicle Number</option>
+                    {% for vehicle in vehicles %}
+                    <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="form-actions">
