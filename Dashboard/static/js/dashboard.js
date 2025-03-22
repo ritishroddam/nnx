@@ -40,6 +40,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode
         ? "#ccc"
         : "#2f2f2f";
+      devicesChart.options.plugins.legend.labels.fillStyle = isDarkMode
+        ? "#e0e0e0"
+        : "#2f2f2f";
 
       // Update the chart to reflect the changes
       devicesChart.update();
@@ -311,6 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         legend: {
           labels: {
             color: "#2f2f2f",
+            pointStyle: "rectRounded",
           },
         },
       },
