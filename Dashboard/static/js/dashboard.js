@@ -288,19 +288,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   var devicesChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: [], // Empty initially, will be updated dynamically
+      labels: [], 
       datasets: [
         {
           label: "Distance Travelled (km)",
-          data: [], // Empty initially, will be updated dynamically
-          backgroundColor: "rgba(47, 47, 47, 0.2)", // Subtle fill color
-          borderColor: "#2f2f2f", // Dark gray line
-          pointBackgroundColor: "#2f2f2f", // Data point color
-          pointBorderColor: "#fff", // White outline for contrast
-          pointRadius: 5, // Increase point size
-          borderWidth: 2, // Slightly thicker line
+          data: [], 
+          backgroundColor: "rgba(47, 47, 47, 0.2)", 
+          borderColor: "#2f2f2f", 
+          pointBackgroundColor: "#2f2f2f", 
+          pointBorderColor: "#fff", 
+          pointRadius: 5, 
+          borderWidth: 2, 
           fill: true,
-          tension: 0.3, // Smooth curve effect
+          tension: 0.3, 
         },
       ],
     },
@@ -310,20 +310,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       plugins: {
         legend: {
           labels: {
-            color: "#2f2f2f", // Legend text color
+            color: "#2f2f2f",
           },
         },
       },
       scales: {
         x: {
           ticks: {
-            color: "#2f2f2f", // X-axis labels color
+            color: "#2f2f2f", 
           },
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: "#2f2f2f", // Y-axis labels color
+            color: "#2f2f2f", 
           },
         },
       },
