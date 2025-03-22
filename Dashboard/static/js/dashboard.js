@@ -288,19 +288,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   var devicesChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: [], 
+      labels: [],
       datasets: [
         {
           label: "Distance Travelled (km)",
-          data: [], 
-          backgroundColor: "rgba(47, 47, 47, 0.2)", 
-          borderColor: "#2f2f2f", 
-          pointBackgroundColor: "#2f2f2f", 
-          pointBorderColor: "#fff", 
-          pointRadius: 5, 
-          borderWidth: 2, 
+          data: [],
+          backgroundColor: "rgba(47, 47, 47, 0.2)",
+          borderColor: "#2f2f2f",
+          pointBackgroundColor: "#2f2f2f",
+          pointBorderColor: "#fff",
+          pointRadius: 5,
+          borderWidth: 2,
           fill: true,
-          tension: 0.3, 
+          tension: 0.3,
         },
       ],
     },
@@ -317,13 +317,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       scales: {
         x: {
           ticks: {
-            color: "#2f2f2f", 
+            color: "#2f2f2f",
           },
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: "#2f2f2f", 
+            color: "#2f2f2f",
           },
         },
       },
@@ -481,86 +481,3 @@ async function fallbackToDefaultLocation() {
     console.error("Error initializing fallback location:", error);
   }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  const festivalDates = {
-    "01-14": {
-      name: "Makar Sankranti",
-      image: "http://64.227.135.38/sankranti.jpg",
-    },
-    "01-26": {
-      name: "Republic Day",
-      image: "http://64.227.135.38/republicDay.jpg",
-    },
-    "02-26": {
-      name: "Maha Shivaratri",
-      image: "http://64.227.135.38/shivaRatri.jpg",
-    },
-    "03-14": { name: "Holi", image: "http://64.227.135.38/holi.jpg" },
-    "03-30": { name: "Ugadi", image: "http://64.227.135.38/ugadi.jpg" },
-    "04-06": { name: "Rama Navami", image: "http://64.227.135.38/rama.jpg" },
-    "04-18": {
-      name: "Good Friday",
-      image: "http://64.227.135.38/goodFriday.jpg",
-    },
-    "05-01": {
-      name: "International Worker's Day",
-      image: "http://64.227.135.38/labour.jpg",
-    },
-    "07-10": { name: "Guru Purnima", image: "http://64.227.135.38/guru.jpg" },
-    "08-15": {
-      name: "Independence Day",
-      image: "http://64.227.135.38/independenceDay.jpg",
-    },
-    "08-27": {
-      name: "Ganesh Chaturthi",
-      image: "http://64.227.135.38/ganesha.jpg",
-    },
-    "09-05": { name: "Onam", image: "http://64.227.135.38/onam.png" },
-    "10-02": {
-      name: "Mahatma Gandhi Jayanti",
-      image: "http://64.227.135.38/gandhi.jpg",
-    },
-    "10-20": { name: "Diwali", image: "http://64.227.135.38/diwali.jpg" },
-    "12-25": { name: "Christmas", image: "http://64.227.135.38/christmas.jpg" },
-  };
-
-  const today = new Date();
-  const formattedDate = `${String(today.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(today.getDate()).padStart(2, "0")}`;
-  const banner = document.getElementById("festival-banner");
-  const minimizedBanner = document.getElementById("minimized-banner");
-  const closeBannerBtn = document.getElementById("close-banner-btn");
-
-  // Check if today is a festival
-  if (festivalDates[formattedDate]) {
-    const { name: festivalName, image: festivalImage } =
-      festivalDates[formattedDate];
-    document.querySelector(
-      ".banner-title"
-    ).textContent = `Happy ${festivalName}!`;
-    document.querySelector(
-      ".banner-message"
-    ).textContent = `Celebrate the joy of ${festivalName}!`;
-    document.querySelector(".banner-image").src = festivalImage;
-    banner.classList.remove("hidden");
-
-    // Event Listener for Close Button
-    closeBannerBtn.addEventListener("click", () => {
-      banner.classList.add("hidden");
-      minimizedBanner.classList.remove("hidden");
-    });
-
-    // Event Listener for Minimized Banner
-    minimizedBanner.addEventListener("click", () => {
-      banner.classList.remove("hidden");
-      minimizedBanner.classList.add("hidden");
-    });
-  }
-});
-
-////////////////////////////////////////////////////////////////////////
-
-document.addEventListener("DOMContentLoaded", async function () {});
