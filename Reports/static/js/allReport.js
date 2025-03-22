@@ -76,10 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  document.querySelectorAll("select").forEach((selectElement) => {
-    $("#vehicleSelect").selectize({
-      create: false,
-      sortField: "text",
-    });
+  $("select").selectize({
+    create: false,
+    sortField: "text",
   });
 });
