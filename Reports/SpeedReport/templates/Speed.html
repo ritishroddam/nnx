@@ -2,7 +2,7 @@
 
 {% block head %}
 <title>Speed Report</title>
-<script defer src="{{ url_for('SpeedReport.static', filename='js/speed.js') }}"></script>
+<script defer src="{{ url_for('Reports.SpeedReport.static', filename='js/speed.js') }}"></script>
 <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
     integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
@@ -17,7 +17,7 @@ Speed Report
 
 {% block block_container %}
 <div class="container">
-    <link rel="stylesheet" href="{{ url_for('SpeedReport.static', filename='css/speed.css') }}">
+    <link rel="stylesheet" href="{{ url_for('Reports.SpeedReport.static', filename='css/speed.css') }}">
     <div class="form-group">
         <label for="vehicleSelect">Select Vehicle:</label>
         <select id="vehicleSelect" class="form-group" placeholder="Pick a Vehicle" required>

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    fetch("/speedReport/fetch_speed_report", {
+    fetch("/allReport/speedReport/fetch_speed_report", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
       };
     });
 
-    fetch("/speedReport/download_speed_report", {
+    fetch("/allReport/speedReport/download_speed_report", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
