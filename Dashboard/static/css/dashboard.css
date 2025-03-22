@@ -421,6 +421,10 @@ p {
   color: #fff;
 }
 
+.dark-mode #sortBtn {
+  color: black;
+}
+
 .card-chart,
 .vehicleLiveTable {
   flex: 1;
