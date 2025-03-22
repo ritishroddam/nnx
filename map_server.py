@@ -80,7 +80,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         self.log_sos_to_mongodb(json_data)
 
                         # Emit SOS alert to connected clients
-                        json_data['_id'] = str(json_data['_id'])
+                        # json_data['_id'] = str(json_data['_id'])
+                        # sio.emit('sos_alert', json_data)
+                        json_data['_id'] = str(json_data.get('_id', ''))
                         sio.emit('sos_alert', json_data)
 
                     elif sos_state == '0' and MyTCPHandler.sos_active:
@@ -191,13 +193,24 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             print("Error parsing JSON data:", e)
             return None
 
+    # def store_data_in_mongodb(self, json_data):
+    #     try:
+    #         json_data['imei'] = self.clean_imei(json_data['imei'])
+    #         collection.insert_one(json_data)
+    #         # print("Data stored in MongoDB.")
+    #     except Exception as e:
+    #         print("Error storing data in MongoDB:", e)
+    
     def store_data_in_mongodb(self, json_data):
         try:
             json_data['imei'] = self.clean_imei(json_data['imei'])
-            collection.insert_one(json_data)
-            # print("Data stored in MongoDB.")
+            result = collection.insert_one(json_data)  # Insert into MongoDB
+            json_data['_id'] = str(result.inserted_id)  # Assign MongoDB generated _id
+            
+            sio.emit('vehicle_update', json_data)  # Emit only after storing
         except Exception as e:
             print("Error storing data in MongoDB:", e)
+
 
     def log_sos_to_mongodb(self, json_data):
         try:
