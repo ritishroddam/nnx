@@ -20,16 +20,16 @@
   background-color: #5d6d7e;
 }
 
-.dark-mode .cards #card1{
+.dark-mode .cards #card1 {
   background-color: #85929e;
 }
-.dark-mode .cards #card2{
+.dark-mode .cards #card2 {
   background-color: #5d6d7e;
 }
-.dark-mode .cards #card3{
+.dark-mode .cards #card3 {
   background-color: #34495e;
 }
-.dark-mode .cards #card4{
+.dark-mode .cards #card4 {
   background-color: #2e4053;
 }
 
@@ -333,6 +333,10 @@ p {
   flex-direction: column;
   gap: 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .card-chart {
+  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .vehicleLiveTable {
