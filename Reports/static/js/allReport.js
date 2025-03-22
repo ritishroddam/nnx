@@ -32,50 +32,6 @@ document.querySelector(".cancel-btn").onclick = function () {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-  const downloadBtn = document.getElementById("generateReport");
-
-  downloadBtn.addEventListener("click", function () {
-    const rows = Array.from(document.querySelectorAll("#data-table tr"));
-    if (rows.length === 0) {
-      alert("No data to download");
-      return;
-    }
-
-    const records = rows.map((row) => {
-      const cells = row.querySelectorAll("td");
-      return {
-        LicensePlateNumber: cells[0].innerText,
-        Date: cells[1].innerText,
-        Time: cells[2].innerText,
-        Latitude: cells[3].innerText,
-        Longitude: cells[4].innerText,
-        Speed: cells[5].innerText,
-      };
-    });
-
-    fetch("/allReport/speedReport/download_speed_report", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ records }),
-    })
-      .then((response) => response.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "Speed_Report.xlsx";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert("Failed to download data");
-      });
-  });
-
   $("select").selectize({
     create: false,
     sortField: "text",
