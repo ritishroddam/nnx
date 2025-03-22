@@ -12,8 +12,8 @@ db = client["nnx"]
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
 
-@speed_bp.route('/speed_report_page')
-def speed_report_page():
+@speed_bp.route('/')
+def index():
     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return render_template('Speed.html', vehicles=vehicles)
 
