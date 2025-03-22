@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from io import BytesIO
 
-speed_report_bp = Blueprint('SpeedReport', __name__, static_folder='static', template_folder='templates')
+speed_bp = Blueprint('SpeedReport', __name__, static_folder='static', template_folder='templates')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
@@ -12,12 +12,12 @@ db = client["nnx"]
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
 
-@speed_report_bp.route('/speed_report_page')
+@speed_bp.route('/speed_report_page')
 def speed_report_page():
     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return render_template('Speed.html', vehicles=vehicles)
 
-@speed_report_bp.route('/fetch_speed_report', methods=['POST'])
+@speed_bp.route('/fetch_speed_report', methods=['POST'])
 def fetch_speed_report():
     data = request.json
     license_plate_number = data.get('license_plate_number')
@@ -56,7 +56,7 @@ def fetch_speed_report():
 
     return jsonify(data)
 
-@speed_report_bp.route('/download_speed_report', methods=['POST'])
+@speed_bp.route('/download_speed_report', methods=['POST'])
 def download_speed_report():
     data = request.json
     records = data.get('records', [])
