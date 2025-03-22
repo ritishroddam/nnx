@@ -394,32 +394,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Sorting functionality
+  // document.getElementById("sortBtn").addEventListener("click", function () {
+  //   let table, rows, switching, i, x, y, shouldSwitch;
+  //   table = document.querySelector("#vehicleTable");
+  //   switching = true;
+
+  //   while (switching) {
+  //     switching = false;
+  //     rows = table.rows;
+
+  //     for (i = 0; i < rows.length - 1; i++) {
+  //       shouldSwitch = false;
+  //       x = parseFloat(rows[i].cells[1].innerText);
+  //       y = parseFloat(rows[i + 1].cells[1].innerText);
+
+  //       if (x < y) {
+  //         // Sort in descending order
+  //         shouldSwitch = true;
+  //         break;
+  //       }
+  //     }
+
+  //     if (shouldSwitch) {
+  //       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+  //       switching = true;
+  //     }
+  //   }
+  // });
+
   document.getElementById("sortBtn").addEventListener("click", function () {
-    let table, rows, switching, i, x, y, shouldSwitch;
-    table = document.querySelector("#vehicleTable");
-    switching = true;
+    const table = document.querySelector("#vehicleTable");
+    const rows = Array.from(table.rows); // Convert rows to an array
+    const headerRow = rows.shift(); // Remove the header row
 
-    while (switching) {
-      switching = false;
-      rows = table.rows;
+    // Sort rows based on the second column (distance)
+    rows.sort((a, b) => {
+      const x = parseFloat(a.cells[1].innerText);
+      const y = parseFloat(b.cells[1].innerText);
+      return y - x; // Sort in descending order
+    });
 
-      for (i = 0; i < rows.length - 1; i++) {
-        shouldSwitch = false;
-        x = parseFloat(rows[i].cells[1].innerText);
-        y = parseFloat(rows[i + 1].cells[1].innerText);
-
-        if (x < y) {
-          // Sort in descending order
-          shouldSwitch = true;
-          break;
-        }
-      }
-
-      if (shouldSwitch) {
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-      }
-    }
+    // Clear the table and re-append the sorted rows
+    table.innerHTML = ""; // Clear the table
+    table.appendChild(headerRow); // Add the header row back
+    rows.forEach((row) => table.appendChild(row)); // Add sorted rows
   });
 
   // Load the data when the page loads
