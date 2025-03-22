@@ -47,7 +47,6 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    
 }
 
 .report-card {
@@ -77,13 +76,13 @@
     margin: 10px 0;
 }
 
-.report-card i{
+.report-card i {
     font-size: 60px;
-    margin-left:350px;
+    margin-left: 350px;
 }
 
- /* Add some basic styling for the modal */
- .modal {
+/* Add some basic styling for the modal */
+.modal {
     display: none;
     position: fixed;
     z-index: 1;
@@ -133,7 +132,8 @@
     margin-top: 10px;
 }
 
-.modal-content form input {
+.modal-content form input,
+.modal-content form select {
     padding: 8px;
     margin-top: 5px;
     border: 1px solid #ccc;
@@ -154,9 +154,43 @@
     background-color: #0056b3;
 }
 
-.modal-content form select {
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.modal-content form .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-content form .form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-content form .form-group select {
+    width: 100%;
+}
+
+.modal-content form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-content form .form-actions button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-content form .form-actions button:hover {
+    background-color: #0056b3;
+}
+
+.modal-content form .form-actions .cancel-btn {
+    background-color: #e0e0e0;
+    color: #000;
+}
+
+.modal-content form .form-actions .cancel-btn:hover {
+    background-color: #ccc;
 }
