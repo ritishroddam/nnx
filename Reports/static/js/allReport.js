@@ -75,4 +75,11 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Failed to download data");
       });
   });
+
+  document.querySelectorAll("select").forEach((selectElement) => {
+    $("#vehicleSelect").selectize({
+      create: false,
+      sortField: "text",
+    });
+  });
 });
