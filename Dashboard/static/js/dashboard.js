@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", async () => {
-
   initMap();
 
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
@@ -13,6 +12,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const themeToggle = document.getElementById("theme-toggle");
   themeToggle.addEventListener("click", function () {
     const isDarkMode = document.body.classList.contains("dark-mode");
+
+    updateChartColors();
 
     if (isDarkMode) {
       Chart.defaults.color = "#ccc";
@@ -267,6 +268,160 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await fetchDashboardData(); // Cards
   await renderPieChart(); // Pie Chart
+
+  function getChartColors(isDarkMode) {
+    return isDarkMode
+      ? {
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          borderColor: "#ffffff",
+          pointBackgroundColor: "#ffffff",
+          pointBorderColor: "#2f2f2f",
+          legendColor: "#ffffff",
+          axisColor: "#ffffff",
+        }
+      : {
+          backgroundColor: "rgba(47, 47, 47, 0.2)",
+          borderColor: "#2f2f2f",
+          pointBackgroundColor: "#2f2f2f",
+          pointBorderColor: "#fff",
+          legendColor: "#2f2f2f",
+          axisColor: "#2f2f2f",
+        };
+  }
+
+  function isDarkMode() {
+    return document.body.classList.contains("dark-mode");
+  }
+
+  let chartColors = getChartColors(isDarkMode());
+
+  var ctx = document.getElementById("devicesChart").getContext("2d");
+  var devicesChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Distance Travelled (km)",
+          data: [],
+          backgroundColor: chartColors.backgroundColor,
+          borderColor: chartColors.borderColor,
+          pointBackgroundColor: chartColors.pointBackgroundColor,
+          pointBorderColor: chartColors.pointBorderColor,
+          pointRadius: 5,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: chartColors.legendColor,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: chartColors.axisColor,
+          },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: chartColors.axisColor,
+          },
+        },
+      },
+    },
+  });
+
+  async function fetchDistanceTravelledData() {
+    try {
+      const response = await fetch("/dashboard/atlanta_distance_data");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unknown error fetching distance data");
+      }
+
+      devicesChart.data.labels = data.labels;
+      devicesChart.data.datasets[0].data = data.distances;
+      devicesChart.update();
+    } catch (error) {
+      console.error("Error fetching distance data:", error);
+    }
+  }
+
+  await fetchDistanceTravelledData();
+
+  async function fetchVehicleDistances() {
+    try {
+      const response = await fetch("/dashboard/get_vehicle_distances");
+      const data = await response.json();
+
+      let tableBody = document.getElementById("vehicleTable");
+      tableBody.innerHTML = "";
+
+      data.forEach((vehicle) => {
+        let row = `<tr>
+                  <td>${vehicle.registration}</td>
+                  <td>${vehicle.distance.toFixed(2)}</td>
+              </tr>`;
+        tableBody.innerHTML += row;
+      });
+    } catch (error) {
+      console.error("Error fetching vehicle distances:", error);
+    }
+  }
+
+  document.getElementById("sortBtn").addEventListener("click", function () {
+    let table, rows, switching, i, x, y, shouldSwitch;
+    table = document.querySelector("#vehicleTable");
+    switching = true;
+
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+
+      for (i = 0; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = parseFloat(rows[i].cells[1].innerText);
+        y = parseFloat(rows[i + 1].cells[1].innerText);
+
+        if (x < y) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+      }
+    }
+  });
+
+  await fetchVehicleDistances();
+
+  function updateChartColors() {
+    chartColors = getChartColors(isDarkMode());
+    devicesChart.data.datasets[0].backgroundColor = chartColors.backgroundColor;
+    devicesChart.data.datasets[0].borderColor = chartColors.borderColor;
+    devicesChart.data.datasets[0].pointBackgroundColor =
+      chartColors.pointBackgroundColor;
+    devicesChart.data.datasets[0].pointBorderColor =
+      chartColors.pointBorderColor;
+    devicesChart.options.plugins.legend.labels.color = chartColors.legendColor;
+    devicesChart.options.scales.x.ticks.color = chartColors.axisColor;
+    devicesChart.options.scales.y.ticks.color = chartColors.axisColor;
+    devicesChart.update();
+  }
 });
 
 let map, trafficLayer;
@@ -418,126 +573,126 @@ document.addEventListener("DOMContentLoaded", () => {
 
 ////////////////////////////////////////////////////////////////////////
 
-document.addEventListener("DOMContentLoaded", async function () {
-  var ctx = document.getElementById("devicesChart").getContext("2d");
-  var devicesChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: [], // Empty initially, will be updated dynamically
-      datasets: [
-        {
-          label: "Distance Travelled (km)",
-          data: [], // Empty initially, will be updated dynamically
-          backgroundColor: "rgba(47, 47, 47, 0.2)", // Subtle fill color
-          borderColor: "#2f2f2f", // Dark gray line
-          pointBackgroundColor: "#2f2f2f", // Data point color
-          pointBorderColor: "#fff", // White outline for contrast
-          pointRadius: 5, // Increase point size
-          borderWidth: 2, // Slightly thicker line
-          fill: true,
-          tension: 0.3, // Smooth curve effect
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: {
-            color: "#2f2f2f", // Legend text color
-          },
-        },
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: "#2f2f2f", // X-axis labels color
-          },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: "#2f2f2f", // Y-axis labels color
-          },
-        },
-      },
-    },
-  });
+// document.addEventListener("DOMContentLoaded", async function () {
+//   var ctx = document.getElementById("devicesChart").getContext("2d");
+//   var devicesChart = new Chart(ctx, {
+//     type: "line",
+//     data: {
+//       labels: [], // Empty initially, will be updated dynamically
+//       datasets: [
+//         {
+//           label: "Distance Travelled (km)",
+//           data: [], // Empty initially, will be updated dynamically
+//           backgroundColor: "rgba(47, 47, 47, 0.2)", // Subtle fill color
+//           borderColor: "#2f2f2f", // Dark gray line
+//           pointBackgroundColor: "#2f2f2f", // Data point color
+//           pointBorderColor: "#fff", // White outline for contrast
+//           pointRadius: 5, // Increase point size
+//           borderWidth: 2, // Slightly thicker line
+//           fill: true,
+//           tension: 0.3, // Smooth curve effect
+//         },
+//       ],
+//     },
+//     options: {
+//       responsive: true,
+//       maintainAspectRatio: false,
+//       plugins: {
+//         legend: {
+//           labels: {
+//             color: "#2f2f2f", // Legend text color
+//           },
+//         },
+//       },
+//       scales: {
+//         x: {
+//           ticks: {
+//             color: "#2f2f2f", // X-axis labels color
+//           },
+//         },
+//         y: {
+//           beginAtZero: true,
+//           ticks: {
+//             color: "#2f2f2f", // Y-axis labels color
+//           },
+//         },
+//       },
+//     },
+//   });
 
-  async function fetchDistanceTravelledData() {
-    try {
-      const response = await fetch("/dashboard/atlanta_distance_data");
-      const data = await response.json();
+//   async function fetchDistanceTravelledData() {
+//     try {
+//       const response = await fetch("/dashboard/atlanta_distance_data");
+//       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Unknown error fetching distance data");
-      }
+//       if (!response.ok) {
+//         throw new Error(data.error || "Unknown error fetching distance data");
+//       }
 
-      // Debugging logs
-      console.log("Fetched Distance Data:", data);
+//       // Debugging logs
+//       console.log("Fetched Distance Data:", data);
 
-      // Update chart data
-      devicesChart.data.labels = data.labels;
-      devicesChart.data.datasets[0].data = data.distances;
-      devicesChart.update();
-    } catch (error) {
-      console.error("Error fetching distance data:", error);
-    }
-  }
+//       // Update chart data
+//       devicesChart.data.labels = data.labels;
+//       devicesChart.data.datasets[0].data = data.distances;
+//       devicesChart.update();
+//     } catch (error) {
+//       console.error("Error fetching distance data:", error);
+//     }
+//   }
 
-  // Fetch and update the chart data initially
-  await fetchDistanceTravelledData();
+//   // Fetch and update the chart data initially
+//   await fetchDistanceTravelledData();
 
-  async function fetchVehicleDistances() {
-    try {
-      const response = await fetch("/dashboard/get_vehicle_distances");
-      const data = await response.json();
+//   async function fetchVehicleDistances() {
+//     try {
+//       const response = await fetch("/dashboard/get_vehicle_distances");
+//       const data = await response.json();
 
-      let tableBody = document.getElementById("vehicleTable");
-      tableBody.innerHTML = ""; // Clear existing table data
+//       let tableBody = document.getElementById("vehicleTable");
+//       tableBody.innerHTML = ""; // Clear existing table data
 
-      data.forEach((vehicle) => {
-        let row = `<tr>
-                  <td>${vehicle.registration}</td>
-                  <td>${vehicle.distance.toFixed(2)}</td>
-              </tr>`;
-        tableBody.innerHTML += row;
-      });
-    } catch (error) {
-      console.error("Error fetching vehicle distances:", error);
-    }
-  }
+//       data.forEach((vehicle) => {
+//         let row = `<tr>
+//                   <td>${vehicle.registration}</td>
+//                   <td>${vehicle.distance.toFixed(2)}</td>
+//               </tr>`;
+//         tableBody.innerHTML += row;
+//       });
+//     } catch (error) {
+//       console.error("Error fetching vehicle distances:", error);
+//     }
+//   }
 
-  // Sorting functionality
-  document.getElementById("sortBtn").addEventListener("click", function () {
-    let table, rows, switching, i, x, y, shouldSwitch;
-    table = document.querySelector("#vehicleTable");
-    switching = true;
+//   // Sorting functionality
+//   document.getElementById("sortBtn").addEventListener("click", function () {
+//     let table, rows, switching, i, x, y, shouldSwitch;
+//     table = document.querySelector("#vehicleTable");
+//     switching = true;
 
-    while (switching) {
-      switching = false;
-      rows = table.rows;
+//     while (switching) {
+//       switching = false;
+//       rows = table.rows;
 
-      for (i = 0; i < rows.length - 1; i++) {
-        shouldSwitch = false;
-        x = parseFloat(rows[i].cells[1].innerText);
-        y = parseFloat(rows[i + 1].cells[1].innerText);
+//       for (i = 0; i < rows.length - 1; i++) {
+//         shouldSwitch = false;
+//         x = parseFloat(rows[i].cells[1].innerText);
+//         y = parseFloat(rows[i + 1].cells[1].innerText);
 
-        if (x < y) {
-          // Sort in descending order
-          shouldSwitch = true;
-          break;
-        }
-      }
+//         if (x < y) {
+//           // Sort in descending order
+//           shouldSwitch = true;
+//           break;
+//         }
+//       }
 
-      if (shouldSwitch) {
-        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-        switching = true;
-      }
-    }
-  });
+//       if (shouldSwitch) {
+//         rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+//         switching = true;
+//       }
+//     }
+//   });
 
-  // Load the data when the page loads
-  await fetchVehicleDistances();
-});
+//   // Load the data when the page loads
+//   await fetchVehicleDistances();
+// });
