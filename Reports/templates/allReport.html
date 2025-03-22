@@ -49,4 +49,25 @@
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </a>
             </div>
+
+            <!-- The Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>New Report</h2>
+            <form>
+                <label for="dateRange">Date Range:</label>
+                <input type="text" id="dateRange" name="dateRange"><br><br>
+                <label for="subUserName">Sub User Name:</label>
+                <input type="text" id="subUserName" name="subUserName"><br><br>
+                <label for="vehicleGroupName">Vehicle Group Name:</label>
+                <input type="text" id="vehicleGroupName" name="vehicleGroupName"><br><br>
+                <label for="deviceType">Device Type:</label>
+                <input type="text" id="deviceType" name="deviceType"><br><br>
+                <label for="vehicleNumber">Vehicle Number:</label>
+                <input type="text" id="vehicleNumber" name="vehicleNumber"><br><br>
+                <button type="button" id="generateReport">Generate Report</button>
+            </form>
+        </div>
+    </div>
 {% endblock %}
