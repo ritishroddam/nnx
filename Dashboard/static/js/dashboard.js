@@ -46,6 +46,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode
         ? "#ccc"
         : "#2f2f2f";
+      devicesChart.data.datasets[0].pointBorderColor = isDarkMode
+        ? "black"
+        : "white";
 
       // Update the chart to reflect the changes
       devicesChart.update();
@@ -305,7 +308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             : "rgba(47, 47, 47, 0.2)",
           borderColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBackgroundColor: isDarkMode ? "#ccc" : "#2f2f2f",
-          pointBorderColor: "#fff",
+          pointBorderColor: isDarkMode ? "black" : "#fff",
           pointRadius: 5,
           borderWidth: 2,
           fill: true,
