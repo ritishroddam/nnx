@@ -32,11 +32,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? "#ccc"
         : "#2f2f2f";
       devicesChart.options.scales.x.grid.color = isDarkMode
-        ? "#ccc"
-        : "#2f2f2f";
+        ? "#787878"
+        : "#d8d8d8";
       devicesChart.options.scales.y.grid.color = isDarkMode
-        ? "#ccc"
-        : "#2f2f2f";
+        ? "#787878"
+        : "#d8d8d8";
       devicesChart.data.datasets[0].backgroundColor = isDarkMode
         ? "rgba(204, 204, 204, 0.2)"
         : "rgba(47, 47, 47, 0.2)";
@@ -45,9 +45,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         : "#2f2f2f";
       devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode
         ? "#ccc"
-        : "#2f2f2f";
-      devicesChart.options.plugins.legend.labels.fillStyle = isDarkMode
-        ? "#e0e0e0"
         : "#2f2f2f";
 
       // Update the chart to reflect the changes
@@ -213,6 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 font: {
                   size: 14,
                   weight: "bold",
+                  color: isDarkMode ? "#e0e0e0" : "#2f2f2f",
                 },
                 generateLabels: (chart) => {
                   const original =
@@ -302,9 +300,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         {
           label: "Distance Travelled (km)",
           data: [],
-          backgroundColor: "rgba(47, 47, 47, 0.2)",
-          borderColor: "#2f2f2f",
-          pointBackgroundColor: "#2f2f2f",
+          backgroundColor: isDarkMode
+            ? "rgba(204, 204, 204, 0.2)"
+            : "rgba(47, 47, 47, 0.2)",
+          borderColor: isDarkMode ? "#ccc" : "#2f2f2f",
+          pointBackgroundColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBorderColor: "#fff",
           pointRadius: 5,
           borderWidth: 2,
@@ -327,13 +327,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       scales: {
         x: {
           ticks: {
-            color: "#2f2f2f",
+            color: isDarkMode ? "#ccc" : "#2f2f2f",
+          },
+          grid: {
+            color: isDarkMode ? "#787878" : "#d8d8d8",
           },
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: "#2f2f2f",
+            color: isDarkMode ? "#ccc" : "#2f2f2f",
+          },
+          grid: {
+            color: isDarkMode ? "#787878" : "#d8d8d8",
           },
         },
       },
