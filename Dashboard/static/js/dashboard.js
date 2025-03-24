@@ -396,16 +396,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("sortBtn").addEventListener("click", function () {
     const table = document.querySelector("#vehicleTable");
     const rows = Array.from(table.rows);
-    const headerRow = rows.shift(); 
+    const headerRow = rows.shift();
 
     rows.sort((a, b) => {
       const x = parseFloat(a.cells[1].innerText);
       const y = parseFloat(b.cells[1].innerText);
-      return y - x; 
+      return y - x;
     });
 
-    table.innerHTML = ""; 
-    table.appendChild(headerRow); 
+    table.innerHTML = "";
+    table.appendChild(headerRow);
     rows.forEach((row) => table.appendChild(row));
   });
 
@@ -415,8 +415,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(updateClockAndDate, 1000);
   updateClockAndDate();
 
-  await fetchDashboardData(); 
-  await renderPieChart(); 
+  await fetchDashboardData();
+  await renderPieChart();
 });
 
 let map, trafficLayer;
@@ -484,21 +484,35 @@ async function fallbackToDefaultLocation() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
   fetchStatusData();
 });
 
 function fetchStatusData() {
-  fetch('/api/status-data')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('running-vehicles-count').textContent = `${data.runningVehicles} / ${data.totalVehicles}`;
-      document.getElementById('idle-vehicles-count').textContent = `${data.idleVehicles} / ${data.totalVehicles}`;
-      document.getElementById('parked-vehicles-count').textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
-      document.getElementById('speed-vehicles-count').textContent = `${data.speedVehicles} / ${data.totalVehicles}`;
-      document.getElementById('overspeed-vehicles-count').textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
-      document.getElementById('disconnected-vehicles-count').textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
-      document.getElementById('no-gps-vehicles-count').textContent = `${data.noGpsVehicles} / ${data.totalVehicles}`;
+  fetch("/dashboard/get_status_data")
+    .then((response) => response.json())
+    .then((data) => {
+      document.getElementById(
+        "running-vehicles-count"
+      ).textContent = `${data.runningVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "idle-vehicles-count"
+      ).textContent = `${data.idleVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "parked-vehicles-count"
+      ).textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "speed-vehicles-count"
+      ).textContent = `${data.speedVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "overspeed-vehicles-count"
+      ).textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "disconnected-vehicles-count"
+      ).textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "no-gps-vehicles-count"
+      ).textContent = `${data.noGpsVehicles} / ${data.totalVehicles}`;
     })
-    .catch(error => console.error('Error fetching status data:', error));
+    .catch((error) => console.error("Error fetching status data:", error));
 }

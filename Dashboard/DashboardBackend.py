@@ -171,7 +171,7 @@ def get_vehicle_distances():
         return jsonify({"error": str(e)}), 500
 
 
-@dashboard_bp.route('/api/status-data', methods=['GET'])
+@dashboard_bp.route('/get_status_data', methods=['GET'])
 def get_status_data():
     try:
         now = datetime.now()
