@@ -453,6 +453,12 @@ p {
   text-align: center;
 }
 
+.dark-mode .status-card {
+  background-color: black;
+  box-shadow: 0px 0px 10px #cccccc90;
+  color: #ccc;
+}
+
 .status-card i {
   font-size: 24px;
   margin-bottom: 10px;
