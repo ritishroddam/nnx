@@ -433,3 +433,38 @@ p {
   flex: 1;
   min-width: 45%;
 }
+
+/* //////////////////////////////////// */
+
+.status-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.status-card {
+  flex: 1;
+  min-width: 150px;
+  margin: 10px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.status-card i {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.status-card span {
+  display: block;
+  font-size: 16px;
+}
+
+.status-count {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}

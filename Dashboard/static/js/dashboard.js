@@ -393,62 +393,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Sorting functionality
-  // document.getElementById("sortBtn").addEventListener("click", function () {
-  //   let table, rows, switching, i, x, y, shouldSwitch;
-  //   table = document.querySelector("#vehicleTable");
-  //   switching = true;
-
-  //   while (switching) {
-  //     switching = false;
-  //     rows = table.rows;
-
-  //     for (i = 0; i < rows.length - 1; i++) {
-  //       shouldSwitch = false;
-  //       x = parseFloat(rows[i].cells[1].innerText);
-  //       y = parseFloat(rows[i + 1].cells[1].innerText);
-
-  //       if (x < y) {
-  //         // Sort in descending order
-  //         shouldSwitch = true;
-  //         break;
-  //       }
-  //     }
-
-  //     if (shouldSwitch) {
-  //       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-  //       switching = true;
-  //     }
-  //   }
-  // });
-
   document.getElementById("sortBtn").addEventListener("click", function () {
     const table = document.querySelector("#vehicleTable");
-    const rows = Array.from(table.rows); // Convert rows to an array
-    const headerRow = rows.shift(); // Remove the header row
+    const rows = Array.from(table.rows);
+    const headerRow = rows.shift(); 
 
-    // Sort rows based on the second column (distance)
     rows.sort((a, b) => {
       const x = parseFloat(a.cells[1].innerText);
       const y = parseFloat(b.cells[1].innerText);
-      return y - x; // Sort in descending order
+      return y - x; 
     });
 
-    // Clear the table and re-append the sorted rows
-    table.innerHTML = ""; // Clear the table
-    table.appendChild(headerRow); // Add the header row back
-    rows.forEach((row) => table.appendChild(row)); // Add sorted rows
+    table.innerHTML = ""; 
+    table.appendChild(headerRow); 
+    rows.forEach((row) => table.appendChild(row));
   });
 
-  // Load the data when the page loads
   await fetchVehicleDistances();
 
   getLocation();
   setInterval(updateClockAndDate, 1000);
   updateClockAndDate();
 
-  await fetchDashboardData(); // Cards
-  await renderPieChart(); // Pie Chart
+  await fetchDashboardData(); 
+  await renderPieChart(); 
 });
 
 let map, trafficLayer;
@@ -485,17 +453,14 @@ async function initMap(darkMode = true) {
 
         infoWindow = new google.maps.InfoWindow();
 
-        // Add traffic layer
         trafficLayer = new google.maps.TrafficLayer();
         trafficLayer.setMap(map);
       },
       () => {
-        // If geolocation fails, fallback to default location (Bangalore)
         fallbackToDefaultLocation();
       }
     );
   } else {
-    // If browser doesn't support geolocation, fallback to default location (Bangalore)
     fallbackToDefaultLocation();
   }
 }
@@ -517,4 +482,20 @@ async function fallbackToDefaultLocation() {
   } catch (error) {
     console.error("Error initializing fallback location:", error);
   }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  fetchStatusData();
+});
+
+function fetchStatusData() {
+  fetch('/api/status-data')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('running-vehicles-count').textContent = `${data.runningVehicles} / ${data.totalVehicles}`;
+      document.getElementById('idle-vehicles-count').textContent = `${data.idleVehicles} / ${data.totalVehicles}`;
+      document.getElementById('parked-vehicles-count').textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
+      // Update more status cards as needed
+    })
+    .catch(error => console.error('Error fetching status data:', error));
 }
