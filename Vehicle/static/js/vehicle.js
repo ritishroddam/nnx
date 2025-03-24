@@ -33,7 +33,9 @@ function updateVehicleCard(data) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <strong>Speed:</strong> ${
-        data.speed ? data.speed + " km/h" : "Unknown"
+        data.speed
+          ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
+          : "Unknown"
       } <br>
       <strong>Lat:</strong> ${latitude} <br>
       <strong>Lon:</strong> ${longitude} <br>
@@ -58,7 +60,9 @@ function updateVehicleCard(data) {
     }</div>
       <div class="vehicle-info">
         <strong>Speed:</strong> ${
-          data.speed ? data.speed + " km/h" : "Unknown"
+          data.speed
+            ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
+            : "Unknown"
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
@@ -130,7 +134,9 @@ async function renderVehicles() {
     }</div>
       <div class="vehicle-info">
         <strong>Speed:</strong> ${
-          vehicle.speed ? vehicle.speed + " km/h" : "Unknown"
+          vehicle.speed
+            ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
+            : "Unknown"
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
@@ -185,7 +191,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
   const speed =
     device.speed !== null && device.speed !== undefined
-      ? `${device.speed} km/h`
+      ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
       : '<span class="missing-data">Unknown</span>';
   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
@@ -362,7 +368,9 @@ function filterVehicles() {
 
   Object.keys(markers).forEach((imei) => {
     const marker = markers[imei];
-    const speedKmh = marker.device.speed ? marker.device.speed : 0; // Speed in km/h
+    const speedKmh = marker.device.speed
+      ? convertSpeedToKmh(marker.device.speed)
+      : 0; // Speed in km/h
     const hasSOS = marker.device.sos === "1"; // Check if SOS is active
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
@@ -430,6 +438,10 @@ function parseCoordinates(lat, lon) {
   return new google.maps.LatLng(parsedLat, parsedLon);
 }
 
+function convertSpeedToKmh(speedkmh) {
+  return parseFloat(speedkmh);
+}
+
 function getCarIconUrlBySpeed(speedInKmh) {
   if (speedInKmh === 0) {
     return "/vehicle/static/images/car_yellow.png";
@@ -462,7 +474,8 @@ function convertToDate(ddmmyyyy, hhmmss) {
 }
 
 function getCarIconBySpeed(speed, imei, date, time) {
-  let iconUrl = getCarIconUrlBySpeed(speed);
+  const speedInKmh = convertSpeedToKmh(speed);
+  let iconUrl = getCarIconUrlBySpeed(speedInKmh);
 
   const now = new Date();
   const lastUpdateTime = convertToDate(date, time);
@@ -646,7 +659,9 @@ function updateFloatingCard(vehicles, filterValue) {
       }</div>
         <div class="vehicle-info">
           <strong>Speed:</strong> ${
-            vehicle.speed ? vehicle.speed + " km/h" : "Unknown"
+            vehicle.speed
+              ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
+              : "Unknown"
           } <br>
           <strong>Lat:</strong> ${latitude} <br>
           <strong>Lon:</strong> ${longitude} <br>
@@ -715,7 +730,7 @@ async function populateVehicleTable() {
 
     const speed =
       vehicle.speed !== null && vehicle.speed !== undefined
-        ? `${vehicle.speed} km/h`
+        ? `${convertSpeedToKmh(vehicle.speed).toFixed(2)} km/h`
         : "Unknown";
     const address = vehicle.address || "Location unknown";
 
