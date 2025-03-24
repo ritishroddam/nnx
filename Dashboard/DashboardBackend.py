@@ -186,11 +186,18 @@ def get_status_data():
         })
 
         speed_vehicles = vehicle_inventory.count_documents({
-            "speed": {"$gte": "60", "$lt": "80"}
+            "$expr": {
+        "$and": [
+            {"$gte": [{"$toDouble": "$speed"}, 60]},
+            {"$lt": [{"$toDouble": "$speed"}, 80]}
+        ]
+    }
         })
 
         overspeed_vehicles = vehicle_inventory.count_documents({
-            "speed": {"$gt": "80"}
+            "$expr": {
+        "$gt": [{"$toDouble": "$speed"}, 80]
+    }
         })
 
         disconnected_vehicles = vehicle_inventory.count_documents({
