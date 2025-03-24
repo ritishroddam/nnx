@@ -22,6 +22,9 @@ def update_distinct_atlanta():
         # Fetch all documents from the atlanta collection
         pipeline = [
             {
+                "$match": {"gps": {"$ne": "V"}}  # Exclude documents where gps == 'V'
+            },
+            {
                 "$sort": {"imei": 1, "date": -1, "time": -1}  # Sort by imei, latest date, and latest time
             },
             {
