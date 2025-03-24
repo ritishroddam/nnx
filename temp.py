@@ -48,6 +48,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     lock = threading.Lock()
     sos_active = False
     sos_alert_triggered = False
+    status_prefix = ""
 
     @staticmethod
     def clean_imei(imei):
@@ -57,7 +58,16 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         receive_data = self.request.recv(4096)
         try:
-            data = jsonify(receive_data)
+            try:
+                parts = receive_data.split(',')
+                status = parts[0]
+                self.status_prefix = status[:-15] if len(status) > 15 else ''
+                print(self.status_prefix)
+                data = receive_data.decode('utf-8').strip()
+            except UnicodeDecodeError:
+                data = receive_data.decode('latin-1').strip()
+                # print("Received raw data:", data)
+
             json_data = self.parse_json_data(data)
             if json_data:
                 # print("Valid JSON data:", json_data)
