@@ -177,7 +177,7 @@ def get_status_data():
 
         response_data, statusCode = atlanta_pie_data()
         if statusCode != 200:
-            return response_data
+            return jsonify({"error": "Failed to fetch vehicle data"}), 500
         
         response = json.loads(response_data.get_data(as_text=True))
 
