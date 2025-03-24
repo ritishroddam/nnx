@@ -147,7 +147,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 # Capture address (assuming address is passed after cellid field)
                 address = parts[25] if len(parts) > 25 else ''
 
-                speed_mph = float(parts[8]) 
+                speed_mph = float(parts[8]) if parts[8].replace('.', '', 1).isdigit() else 0.0
                 speed_kmph = round(speed_mph * 1.60934, 2)
 
                 json_data = {
