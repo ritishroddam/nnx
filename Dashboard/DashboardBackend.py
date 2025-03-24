@@ -179,10 +179,7 @@ def get_status_data():
         if statusCode != 200:
             return jsonify({"error": "Failed to fetch vehicle data"}), 500
         
-        response = json.loads(response_data.get_data(as_text=True))
-
-
-        data = response.json()
+        data = json.loads(response_data.get_data(as_text=True))
  
         running_vehicles = data.get('moving_vehicles', 0)
  
