@@ -128,17 +128,19 @@ def get_vehicle_distances():
     try:
         today_str = datetime.now().strftime('%d%m%y')  # Format: DDMMYY
 
+        # Fetch vehicle IMEI mappings
         # vehicle_map = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map_cursor = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
-        print("Vehicle Map:", vehicle_map)  
+        print("Vehicle Map:", vehicle_map)  # Debugging log
 
+        # Fetch today's odometer readings with type conversion
         pipeline = [
-            {"$match": {"date": today_str}},  
+            {"$match": {"date": today_str}},  # Filter today's data
             {"$project": {  
                 "imei": 1,
-                "odometer": {"$toDouble": "$odometer"}  
+                "odometer": {"$toDouble": "$odometer"}  # Convert string to number
             }},
             {"$group": {
                 "_id": "$imei",
@@ -153,6 +155,7 @@ def get_vehicle_distances():
 
         results = list(atlanta_collection.aggregate(pipeline))
 
+        # Convert IMEI to Vehicle Registration
         vehicle_data = [
             {
                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
@@ -166,73 +169,52 @@ def get_vehicle_distances():
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
         return jsonify({"error": str(e)}), 500
-    
+
+
 @dashboard_bp.route('/api/status-data', methods=['GET'])
 def get_status_data():
-    try:
-
-        now = datetime.now()
-        total_vehicles = collection.count_documents({})
-
-        running_vehicles = collection.count_documents({
-            "status": "running"
-        })
-
-        idle_vehicles = collection.count_documents({
-            "status": "idle"
-        })
-
-        parked_vehicles = collection.count_documents({
-            "status": "parked"
-        })
-
-        speed_vehicles = collection.count_documents({
-            "$expr": {
-                "$and": [
-                    {"$gte": [{"$toDouble": "$speed"}, 40]},
-                    {"$lt": [{"$toDouble": "$speed"}, 60]}
-                ]
-            }
-        })
-
-        print("Speed Vehicles:")
-        # for vehicle in speed_vehicles:
-        #     print(vehicle)
-
-        speed_vehicles_count = 5
-
-        overspeed_vehicles = vehicle_inventory({
-            "$expr": {
-                "$and": [
-                    {"$gte": [{"$toDouble": "$speed"}, 60]}
-                ]
-            }
-        })
-
-        print("Overspeed Vehicles:")
-        # for vehicle in overspeed_vehicles:
-        #     print(vehicle)
-
-        overspeed_vehicles_count = 5
-
-        disconnected_vehicles = collection.count_documents({
-            "status": "disconnected"
-        })
-
-        no_gps_vehicles = collection.count_documents({
-            "gps": False
-        })
-
-        return jsonify({
-            'runningVehicles': running_vehicles,
-            'idleVehicles': idle_vehicles,
-            'parkedVehicles': parked_vehicles,
-            'speedVehicles': speed_vehicles_count,
-            'overspeedVehicles': overspeed_vehicles_count,
-            'disconnectedVehicles': disconnected_vehicles,
-            'noGpsVehicles': no_gps_vehicles,
-            'totalVehicles': total_vehicles
-        }), 200
-    except Exception as e:
-        print(f"Error fetching status data: {e}")
-        return jsonify({"error": "Failed to fetch status data"}), 500
+     try:
+         now = datetime.now()
+         total_vehicles = collection.count_documents({})
+ 
+         running_vehicles = collection.count_documents({
+             "status": "running"
+         })
+ 
+         idle_vehicles = collection.count_documents({
+             "status": "idle"
+         })
+ 
+         parked_vehicles = collection.count_documents({
+             "status": "parked"
+         })
+ 
+         speed_vehicles = collection.count_documents({
+             "speed": {"$gt": 60}
+         })
+ 
+         overspeed_vehicles = collection.count_documents({
+             "speed": {"$gt": 80}
+         })
+ 
+         disconnected_vehicles = collection.count_documents({
+             "status": "disconnected"
+         })
+ 
+         no_gps_vehicles = collection.count_documents({
+             "gps": False
+         })
+ 
+         return jsonify({
+             'runningVehicles': running_vehicles,
+             'idleVehicles': idle_vehicles,
+             'parkedVehicles': parked_vehicles,
+             'speedVehicles': speed_vehicles,
+             'overspeedVehicles': overspeed_vehicles,
+             'disconnectedVehicles': disconnected_vehicles,
+             'noGpsVehicles': no_gps_vehicles,
+             'totalVehicles': total_vehicles
+         }), 200
+     except Exception as e:
+         print(f"Error fetching status data: {e}")
+         return jsonify({"error": "Failed to fetch status data"}), 500
