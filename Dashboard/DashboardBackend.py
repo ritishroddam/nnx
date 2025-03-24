@@ -186,9 +186,7 @@ def get_status_data():
             "status": "parked"
         })
 
-        pipeline = [
-            {
-                "$match": {
+        pipeline = {
                     "$expr": {
                         "$and": [
                             {"$gte": [{"$toDouble": "$speed"}, 40]},
@@ -196,26 +194,25 @@ def get_status_data():
                         ]
                     }
                 }
-            }
-        ]
 
-        speed_vehicles = vehicle_inventory.aggregate(pipeline)
+        speed_vehicles = vehicle_inventory(pipeline)
+
+        for vehicle in speed_vehicles:
+            print(vehicle)
 
         speed_vehicles_count = len(list(speed_vehicles))
 
         pipeline = [
             {
-                "$match": {
                     "$expr": {
                         "$and": [
                             {"$gte": [{"$toDouble": "$speed"}, 60]}
                         ]
                     }
                 }
-            }
         ]
 
-        overspeed_vehicles = vehicle_inventory.aggregate(pipeline)
+        overspeed_vehicles = vehicle_inventory(pipeline)
         for vehicle in overspeed_vehicles:
             print(vehicle)
         overspeed_vehicles_count = len(list(overspeed_vehicles))
