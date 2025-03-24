@@ -150,8 +150,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 speed_mph = float(parts[8]) if parts[8].replace('.', '', 1).isdigit() else 0.0
                 speed_kmph = round(speed_mph * 1.60934, 2)
 
+                status = parts[0]
+                status_prefix = status[:-15] if len(status) > 15 else ''
+
                 json_data = {
-                    'imei': parts[0],
+                    'status': status_prefix,
+                    'imei': self.clean_imei(parts[0]),
                     'header': parts[1],
                     'time': parts[2],
                     'gps': parts[3],
@@ -206,7 +210,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     
     def store_data_in_mongodb(self, json_data):
         try:
-            json_data['imei'] = self.clean_imei(json_data['imei'])
             result = collection.insert_one(json_data)  # Insert into MongoDB
             json_data['_id'] = str(result.inserted_id)  # Assign MongoDB generated _id
             
