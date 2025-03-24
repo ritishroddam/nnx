@@ -195,10 +195,11 @@ def get_status_data():
             }
         })
 
-        # for vehicle in speed_vehicles:
-        #     print(vehicle)
+        print("Speed Vehicles:")
+        for vehicle in speed_vehicles:
+            print(vehicle)
 
-        speed_vehicles_count = len(list(speed_vehicles))
+        speed_vehicles_count = 5
 
         overspeed_vehicles = vehicle_inventory({
             "$expr": {
@@ -208,10 +209,11 @@ def get_status_data():
             }
         })
 
-        # for vehicle in overspeed_vehicles:
-        #     print(vehicle)
-        
-        overspeed_vehicles_count = len(list(overspeed_vehicles))
+        print("Overspeed Vehicles:")
+        for vehicle in overspeed_vehicles:
+            print(vehicle)
+
+        overspeed_vehicles_count = 5
 
         disconnected_vehicles = vehicle_inventory.count_documents({
             "status": "disconnected"
