@@ -48,6 +48,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     lock = threading.Lock()
     sos_active = False
     sos_alert_triggered = False
+    status_prefix = ""
 
     @staticmethod
     def clean_imei(imei):
@@ -58,6 +59,17 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         receive_data = self.request.recv(4096)
         try:
             try:
+                index_03 = receive_data.find(b'\x03')  # Finds first occurrence of \x03
+                index_01 = receive_data.find(b'\x01')  # Finds first occurrence of \x01
+
+                # Get the first occurring special character
+                first_special_index = min(i for i in [index_03, index_01] if i != -1)
+                first_special_char = receive_data[first_special_index:first_special_index+1]
+
+                self.status_prefix = first_special_char.hex()
+
+                print(f"Status prefix: {self.status_prefix}")
+
                 data = receive_data.decode('utf-8').strip()
             except UnicodeDecodeError:
                 data = receive_data.decode('latin-1').strip()
@@ -154,7 +166,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 status_prefix = status[:-15] if len(status) > 15 else ''
 
                 json_data = {
-                    'status': status_prefix,
+                    'status': self.status_prefix,
                     'imei': self.clean_imei(parts[0]),
                     'header': parts[1],
                     'time': parts[2],

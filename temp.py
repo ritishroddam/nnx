@@ -64,7 +64,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                 # Get the first occurring special character
                 first_special_index = min(i for i in [index_03, index_01] if i != -1)
-                first_special_char = data[first_special_index:first_special_index+1]
+                first_special_char = receive_data[first_special_index:first_special_index+1]
 
                 self.status_prefix = first_special_char.hex()
 
