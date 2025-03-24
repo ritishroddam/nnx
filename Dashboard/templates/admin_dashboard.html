@@ -14,7 +14,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <!-- <script src="{{ url_for('Dashboard.static', filename='js/preloader.js') }}" defer></script> -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0&callback=initMap" async
+  defer></script>
 
 {% endblock %}
 
@@ -52,43 +53,43 @@ Dashboard
   </div>
 
   <!-- ...existing code... -->
-<div class="status-container">
-  <div class="status-card" id="running-vehicles">
-    <i class="fa fa-car"></i>
-    <span>Running Vehicles</span>
-    <span class="status-count" id="running-vehicles-count">0 / 0</span>
+  <div class="status-container">
+    <div class="status-card" id="running-vehicles">
+      <i class="fa fa-car"></i>
+      <span>Running Vehicles</span>
+      <span class="status-count" id="running-vehicles-count">0 / 0</span>
+    </div>
+    <div class="status-card" id="idle-vehicles">
+      <i class="fa fa-bed"></i>
+      <span>Idle Vehicles</span>
+      <span class="status-count" id="idle-vehicles-count">0 / 0</span>
+    </div>
+    <div class="status-card" id="parked-vehicles">
+      <i class="fa fa-parking"></i>
+      <span>Parked Vehicles</span>
+      <span class="status-count" id="parked-vehicles-count">0 / 0</span>
+    </div>
+    <div class="status-card" id="speed-vehicles">
+      <i class="fa-solid fa-gauge"></i>
+      <span>Speed Vehicles (40+)</span>
+      <span class="status-count" id="speed-vehicles-count">0 / 0</span>
+    </div>
+    <div class="status-card" id="overspeed-vehicles">
+      <i class="fa-solid fa-gauge-high"></i>
+      <span>Over Speed Vehicles (60+)</span>
+      <span class="status-count" id="Overspeed-vehicles-count">0 / 0</span>
+    </div>
+    <div class="status-card" id="disconnected-vehicles">
+      <i class="fa-solid fa-plug-circle-xmark"></i>
+      <span>Disconnected Vehicles</span>
+      <span class="status-count" id="disconnected-vehicles-count">0 / 0</span>
+    </div>
+    <div class="status-card" id="gpd-vehicles">
+      <i class="fa-solid fa-exclamation"></i>
+      <span>No GPS Vehicles</span>
+      <span class="status-count" id="gps-vehicles-count">0 / 0</span>
+    </div>
   </div>
-  <div class="status-card" id="idle-vehicles">
-    <i class="fa fa-bed"></i>
-    <span>Idle Vehicles</span>
-    <span class="status-count" id="idle-vehicles-count">0 / 0</span>
-  </div>
-  <div class="status-card" id="parked-vehicles">
-    <i class="fa fa-parking"></i>
-    <span>Parked Vehicles</span>
-    <span class="status-count" id="parked-vehicles-count">0 / 0</span>
-  </div>
-  <div class="status-card" id="speed-vehicles">
-    <i class="fa-solid fa-gauge"></i>
-    <span>Speed Vehicles (60+)</span>
-    <span class="status-count" id="speed-vehicles-count">0 / 0</span>
-  </div>
-  <div class="status-card" id="overspeed-vehicles">
-    <i class="fa-solid fa-gauge-high"></i>
-    <span>Over Speed Vehicles (80+)</span>
-    <span class="status-count" id="Overspeed-vehicles-count">0 / 0</span>
-  </div>
-  <div class="status-card" id="disconnected-vehicles">
-    <i class="fa-solid fa-plug-circle-xmark"></i>
-    <span>Disconnected Vehicles</span>
-    <span class="status-count" id="disconnected-vehicles-count">0 / 0</span>
-  </div>
-  <div class="status-card" id="gpd-vehicles">
-    <i class="fa-solid fa-exclamation"></i>
-    <span>No GPS Vehicles</span>
-    <span class="status-count" id="gps-vehicles-count">0 / 0</span>
-  </div>
-</div>
 
   <div class="title-with-line">
     <span>Information</span>
