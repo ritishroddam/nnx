@@ -196,8 +196,8 @@ def get_status_data():
         })
 
         print("Speed Vehicles:")
-        for vehicle in speed_vehicles:
-            print(vehicle)
+        # for vehicle in speed_vehicles:
+        #     print(vehicle)
 
         speed_vehicles_count = 5
 
@@ -210,8 +210,8 @@ def get_status_data():
         })
 
         print("Overspeed Vehicles:")
-        for vehicle in overspeed_vehicles:
-            print(vehicle)
+        # for vehicle in overspeed_vehicles:
+        #     print(vehicle)
 
         overspeed_vehicles_count = 5
 
