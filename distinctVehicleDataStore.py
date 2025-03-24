@@ -50,7 +50,8 @@ def update_distinct_atlanta():
             date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
 
             if imei not in distinct_documents or date_time > distinct_documents[imei]['date_time']:
-                distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
+                if doc['gps'] != 'V':
+                    distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
 
         # Prepare documents for insertion
         documents_to_insert = [doc for doc in distinct_documents.values()]
