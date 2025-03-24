@@ -175,7 +175,8 @@ def get_status_data():
         now = datetime.now()
         total_vehicles = collection.count_documents({})
 
-        response = atlanta_pie_data()
+        response_data = atlanta_pie_data()
+        response = json.loads(response.get_data(as_text=True))
 
 
         data = json.loads(response.get_data(as_text=True))
