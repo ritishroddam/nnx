@@ -50,7 +50,7 @@ def fetch_speed_report():
             "Time": record["time"],
             "Latitude": record["latitude"],
             "Longitude": record["longitude"],
-            "Speed": round(float(record["speed"]) * 1.60934, 2)  # Convert mph to km/h
+            "Speed": record["speed"] # Convert mph to km/h
         })
 
     if not data:
