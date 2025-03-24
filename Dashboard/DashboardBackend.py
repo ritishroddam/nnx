@@ -170,6 +170,7 @@ def get_vehicle_distances():
 @dashboard_bp.route('/api/status-data', methods=['GET'])
 def get_status_data():
     try:
+
         now = datetime.now()
         total_vehicles = vehicle_inventory.count_documents({})
 
@@ -185,20 +186,37 @@ def get_status_data():
             "status": "parked"
         })
 
-        speed_vehicles = vehicle_inventory.count_documents({
-            "$expr": {
-        "$and": [
-            {"$gte": [{"$toDouble": "$speed"}, 60]},
-            {"$lt": [{"$toDouble": "$speed"}, 80]}
+        pipeline = [
+            {
+                "$match": {
+                    "$expr": {
+                        "$and": [
+                            {"$gte": [{"$toDouble": "$speed"}, 40]},
+                            {"$lt": [{"$toDouble": "$speed"}, 60]}
+                        ]
+                    }
+                }
+            }
         ]
-    }
-        })
 
-        overspeed_vehicles = vehicle_inventory.count_documents({
-            "$expr": {
-        "$gt": [{"$toDouble": "$speed"}, 80]
-    }
-        })
+        speed_vehicles = vehicle_inventory.aggregate(pipeline)
+
+        speed_vehicles_count = len(list(speed_vehicles))
+
+        pipeline = [
+            {
+                "$match": {
+                    "$expr": {
+                        "$and": [
+                            {"$gte": [{"$toDouble": "$speed"}, 60]}
+                        ]
+                    }
+                }
+            }
+        ]
+
+        overspeed_vehicles = vehicle_inventory.aggregate(pipeline)
+        overspeed_vehicles_count = len(list(overspeed_vehicles))
 
         disconnected_vehicles = vehicle_inventory.count_documents({
             "status": "disconnected"
@@ -212,8 +230,8 @@ def get_status_data():
             'runningVehicles': running_vehicles,
             'idleVehicles': idle_vehicles,
             'parkedVehicles': parked_vehicles,
-            'speedVehicles': speed_vehicles,
-            'overspeedVehicles': overspeed_vehicles,
+            'speedVehicles': speed_vehicles_count,
+            'overspeedVehicles': overspeed_vehicles_count,
             'disconnectedVehicles': disconnected_vehicles,
             'noGpsVehicles': no_gps_vehicles,
             'totalVehicles': total_vehicles
