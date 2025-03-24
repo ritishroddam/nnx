@@ -57,13 +57,49 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         receive_data = self.request.recv(4096)
         try:
-            try:
-                data = receive_data.decode('utf-8').strip()
-            except UnicodeDecodeError:
-                data = receive_data.decode('latin-1').strip()
-                # print("Received raw data:", data)
+            data = receive_data
+            json_data = self.parse_json_data(data)
+            if json_data:
+                # print("Valid JSON data:", json_data)
 
-            print("Received data:", data)
+                sos_state = json_data.get('sos', '0')
+                # print(f"SOS state received: {sos_state}")
+
+                with MyTCPHandler.lock:
+                    if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
+                        MyTCPHandler.sos_active = True
+                        MyTCPHandler.sos_alert_triggered = True
+                        # print("SOS alert triggered!")
+
+                        # Log SOS to MongoDB
+                        self.log_sos_to_mongodb(json_data)
+
+                        # Emit SOS alert to connected clients
+                        # json_data['_id'] = str(json_data['_id'])
+                        # sio.emit('sos_alert', json_data)
+                        json_data['_id'] = str(json_data.get('_id', ''))
+                        sio.emit('sos_alert', json_data)
+
+                    elif sos_state == '0' and MyTCPHandler.sos_active:
+                        MyTCPHandler.sos_active = False
+                        MyTCPHandler.sos_alert_triggered = False
+                        # print("SOS alert reset.")
+
+                if json_data.get('gps') == 'A':
+                    self.store_data_in_mongodb(json_data)
+
+                    vehicle_inventory_collection = db['vehicle_inventory']
+                    inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+                    if inventory_data:
+                        json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                    else:
+                        json_data['LicensePlateNumber'] = 'Unknown'
+                    json_data['_id'] = str(json_data['_id'])
+                    sio.emit('vehicle_update', json_data)
+
+            else:
+                print("Invalid JSON format")
+
         except Exception as e:
             print("Error handling request:", e)
             try:
