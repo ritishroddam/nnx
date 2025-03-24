@@ -495,7 +495,10 @@ function fetchStatusData() {
       document.getElementById('running-vehicles-count').textContent = `${data.runningVehicles} / ${data.totalVehicles}`;
       document.getElementById('idle-vehicles-count').textContent = `${data.idleVehicles} / ${data.totalVehicles}`;
       document.getElementById('parked-vehicles-count').textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
-      // Update more status cards as needed
+      document.getElementById('speed-vehicles-count').textContent = `${data.speedVehicles} / ${data.totalVehicles}`;
+      document.getElementById('overspeed-vehicles-count').textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
+      document.getElementById('disconnected-vehicles-count').textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
+      document.getElementById('no-gps-vehicles-count').textContent = `${data.noGpsVehicles} / ${data.totalVehicles}`;
     })
     .catch(error => console.error('Error fetching status data:', error));
 }
