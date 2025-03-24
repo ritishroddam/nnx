@@ -173,48 +173,57 @@ def get_vehicle_distances():
 
 @dashboard_bp.route('/api/status-data', methods=['GET'])
 def get_status_data():
-     try:
-         now = datetime.now()
-         total_vehicles = collection.count_documents({})
+    try:
+        now = datetime.now()
+        total_vehicles = collection.count_documents({})
  
-         running_vehicles = collection.count_documents({
-             "status": "running"
-         })
+        running_vehicles = collection.count_documents({
+            "status": "running"
+        })
  
-         idle_vehicles = collection.count_documents({
-             "status": "idle"
-         })
+        idle_vehicles = collection.count_documents({
+            "status": "idle"
+        })
  
-         parked_vehicles = collection.count_documents({
-             "status": "parked"
-         })
+        parked_vehicles = collection.count_documents({
+            "status": "parked"
+        })
  
-         speed_vehicles = collection.count_documents({
-             "speed": {"$gt": 60}
-         })
+        speed_vehicles = len(collection.count_documents({
+            "$expr": {
+                "$and": [
+                    {"$gte": [{"$toDouble": "$speed"}, 40]},
+                    {"$lt": [{"$toDouble": "$speed"}, 60]}
+                ]
+            }
+        }))
  
-         overspeed_vehicles = collection.count_documents({
-             "speed": {"$gt": 80}
-         })
+        overspeed_vehicles = len(collection.count_documents({
+            "$expr": {
+                "$and": [
+                    {"$gte": [{"$toDouble": "$speed"}, 60]}
+                ]
+            }
+        }))
  
-         disconnected_vehicles = collection.count_documents({
-             "status": "disconnected"
-         })
+        disconnected_vehicles = collection.count_documents({
+            "status": "disconnected"
+        })
  
-         no_gps_vehicles = collection.count_documents({
-             "gps": False
-         })
+        no_gps_vehicles = collection.count_documents({
+            "gps": False
+        })
  
-         return jsonify({
-             'runningVehicles': running_vehicles,
-             'idleVehicles': idle_vehicles,
-             'parkedVehicles': parked_vehicles,
-             'speedVehicles': speed_vehicles,
-             'overspeedVehicles': overspeed_vehicles,
-             'disconnectedVehicles': disconnected_vehicles,
-             'noGpsVehicles': no_gps_vehicles,
-             'totalVehicles': total_vehicles
-         }), 200
-     except Exception as e:
-         print(f"Error fetching status data: {e}")
-         return jsonify({"error": "Failed to fetch status data"}), 500
+        return jsonify({
+            'runningVehicles': running_vehicles,
+            'idleVehicles': idle_vehicles,
+            'parkedVehicles': parked_vehicles,
+            'speedVehicles': speed_vehicles,
+            'overspeedVehicles': overspeed_vehicles,
+            'disconnectedVehicles': disconnected_vehicles,
+            'noGpsVehicles': no_gps_vehicles,
+            'totalVehicles': total_vehicles
+        }), 200
+    except Exception as e:
+        print(f"Error fetching status data: {e}")
+        return jsonify({"error": "Failed to fetch status data"}), 500
