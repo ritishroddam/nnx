@@ -172,21 +172,21 @@ def get_status_data():
     try:
 
         now = datetime.now()
-        total_vehicles = vehicle_inventory.count_documents({})
+        total_vehicles = collection.count_documents({})
 
-        running_vehicles = vehicle_inventory.count_documents({
+        running_vehicles = collection.count_documents({
             "status": "running"
         })
 
-        idle_vehicles = vehicle_inventory.count_documents({
+        idle_vehicles = collection.count_documents({
             "status": "idle"
         })
 
-        parked_vehicles = vehicle_inventory.count_documents({
+        parked_vehicles = collection.count_documents({
             "status": "parked"
         })
 
-        speed_vehicles = vehicle_inventory.count_documents({
+        speed_vehicles = collection.count_documents({
             "$expr": {
                 "$and": [
                     {"$gte": [{"$toDouble": "$speed"}, 40]},
@@ -215,11 +215,11 @@ def get_status_data():
 
         overspeed_vehicles_count = 5
 
-        disconnected_vehicles = vehicle_inventory.count_documents({
+        disconnected_vehicles = collection.count_documents({
             "status": "disconnected"
         })
 
-        no_gps_vehicles = vehicle_inventory.count_documents({
+        no_gps_vehicles = collection.count_documents({
             "gps": False
         })
 
