@@ -194,21 +194,22 @@ def get_status_data():
                 ]
             }
         })
-
-        for vehicle in speed_vehicles:
-            print(vehicle)
+        print(speed_vehicles)
+        # for vehicle in speed_vehicles:
+        #     print(vehicle)
 
         speed_vehicles_count = len(list(speed_vehicles))
 
-        overspeed_vehicles = vehicle_inventory(({
+        overspeed_vehicles = vehicle_inventory({
             "$expr": {
                 "$and": [
                     {"$gte": [{"$toDouble": "$speed"}, 60]}
                 ]
             }
-        }))
-        for vehicle in overspeed_vehicles:
-            print(vehicle)
+        })
+        print(overspeed_vehicles)
+        # for vehicle in overspeed_vehicles:
+        #     print(vehicle)
         overspeed_vehicles_count = len(list(overspeed_vehicles))
 
         disconnected_vehicles = vehicle_inventory.count_documents({
