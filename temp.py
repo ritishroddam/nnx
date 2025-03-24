@@ -57,7 +57,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         receive_data = self.request.recv(4096)
         try:
-            data = receive_data
+            data = jsonify(receive_data)
             json_data = self.parse_json_data(data)
             if json_data:
                 # print("Valid JSON data:", json_data)
