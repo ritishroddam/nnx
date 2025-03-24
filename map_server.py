@@ -145,7 +145,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 longitude = parts[6] if parts[6] != '-' else ''
                 
                 # Capture address (assuming address is passed after cellid field)
-                address = parts[25] if len(parts) > 25 else ''  # Adjust index based on the data format
+                address = parts[25] if len(parts) > 25 else ''
+
+                speed_mph = float(parts[8]) 
+                speed_kmph = round(speed_mph * 1.60934, 2)
 
                 json_data = {
                     'imei': parts[0],
@@ -156,7 +159,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'dir1': parts[5],
                     'longitude': longitude,
                     'dir2': parts[7],
-                    'speed': parts[8],
+                    'speed': str(speed_kmph),
                     'course': parts[9],
                     'date': parts[10],
                     'checksum': parts[13] if len(parts) > 13 else '0',
