@@ -501,12 +501,12 @@ function fetchStatusData() {
       document.getElementById(
         "parked-vehicles-count"
       ).textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
-      document.getElementById("speed-vehicles-count").textContent = `${
-        data.speedVehicles ? data.speedVehicles : 0
-      } / ${data.totalVehicles}`;
-      document.getElementById("overspeed-vehicles-count").textContent = `${
-        data.overspeedVehicles ? data.overspeedVehicles : 0
-      } / ${data.totalVehicles}`;
+      document.getElementById(
+        "speed-vehicles-count"
+      ).textContent = `${data.speedVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
+        "overspeed-vehicles-count"
+      ).textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
       document.getElementById(
         "disconnected-vehicles-count"
       ).textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
