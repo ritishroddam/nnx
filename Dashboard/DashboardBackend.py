@@ -123,70 +123,22 @@ def atlanta_distance_data():
         print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
 
-# @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
-# def get_vehicle_distances():
-#     try:
-#         today_str = datetime.utcnow().strftime('%d%m%y')  # Format: DDMMYY
-
-#         # Fetch vehicle IMEI mappings
-#         vehicle_map = {
-#             v.get("imei", "UNKNOWN"): v.get("registration_number", "UNKNOWN") 
-#             for v in vehicle_inventory.find({}, {"imei": 1, "registration_number": 1, "_id": 0})
-#         }
-#         print("Vehicle Map:", vehicle_map)  # Debugging log
-
-#         # Fetch today's odometer readings
-#         pipeline = [
-#             {"$match": {"date": today_str}},  # Filter today's data
-#             {"$group": {
-#                 "_id": "$imei",
-#                 "start_odometer": {"$min": "$odometer"},
-#                 "end_odometer": {"$max": "$odometer"}
-#             }},
-#             {"$project": {
-#                 "imei": "$_id",
-#                 "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
-#             }}
-#         ]
-
-#         results = list(atlanta_collection.aggregate(pipeline))
-#         print("Odometer Results:", results)  # Debugging log
-
-#         # Convert IMEI to Vehicle Registration
-#         vehicle_data = [
-#             {
-#                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
-#                 "distance": record.get("distance_traveled", 0)
-#             }
-#             for record in results
-#         ]
-
-#         print("Final Vehicle Data:", vehicle_data)  # Debugging log
-
-#         return jsonify(vehicle_data), 200
-
-#     except Exception as e:
-#         print(f"🚨 Error fetching vehicle distances: {e}")
-#         return jsonify({"error": str(e)}), 500
-
 @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
 def get_vehicle_distances():
     try:
         today_str = datetime.now().strftime('%d%m%y')  # Format: DDMMYY
 
-        # Fetch vehicle IMEI mappings
         # vehicle_map = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map_cursor = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
-        print("Vehicle Map:", vehicle_map)  # Debugging log
+        print("Vehicle Map:", vehicle_map)  
 
-        # Fetch today's odometer readings with type conversion
         pipeline = [
-            {"$match": {"date": today_str}},  # Filter today's data
+            {"$match": {"date": today_str}},  
             {"$project": {  
                 "imei": 1,
-                "odometer": {"$toDouble": "$odometer"}  # Convert string to number
+                "odometer": {"$toDouble": "$odometer"}  
             }},
             {"$group": {
                 "_id": "$imei",
@@ -201,7 +153,6 @@ def get_vehicle_distances():
 
         results = list(atlanta_collection.aggregate(pipeline))
 
-        # Convert IMEI to Vehicle Registration
         vehicle_data = [
             {
                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
@@ -215,3 +166,51 @@ def get_vehicle_distances():
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
         return jsonify({"error": str(e)}), 500
+    
+@dashboard_bp.route('/api/status-data', methods=['GET'])
+def get_status_data():
+    try:
+        now = datetime.now()
+        total_vehicles = vehicle_inventory.count_documents({})
+
+        running_vehicles = vehicle_inventory.count_documents({
+            "status": "running"
+        })
+
+        idle_vehicles = vehicle_inventory.count_documents({
+            "status": "idle"
+        })
+
+        parked_vehicles = vehicle_inventory.count_documents({
+            "status": "parked"
+        })
+
+        speed_vehicles = vehicle_inventory.count_documents({
+            "speed": {"$gt": 60}
+        })
+
+        overspeed_vehicles = vehicle_inventory.count_documents({
+            "speed": {"$gt": 80}
+        })
+
+        disconnected_vehicles = vehicle_inventory.count_documents({
+            "status": "disconnected"
+        })
+
+        no_gps_vehicles = vehicle_inventory.count_documents({
+            "gps": False
+        })
+
+        return jsonify({
+            'runningVehicles': running_vehicles,
+            'idleVehicles': idle_vehicles,
+            'parkedVehicles': parked_vehicles,
+            'speedVehicles': speed_vehicles,
+            'overspeedVehicles': overspeed_vehicles,
+            'disconnectedVehicles': disconnected_vehicles,
+            'noGpsVehicles': no_gps_vehicles,
+            'totalVehicles': total_vehicles
+        }), 200
+    except Exception as e:
+        print(f"Error fetching status data: {e}")
+        return jsonify({"error": "Failed to fetch status data"}), 500
