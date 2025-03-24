@@ -1067,7 +1067,7 @@ function addHoverListenersToCardsAndMarkers() {
   });
 }
 
-// window.filterVehicles = filterVehicles;
+window.filterVehicles = filterVehicles;
 
 window.onload = function () {
   console.log("vehicle.js loaded");
