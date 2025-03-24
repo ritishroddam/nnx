@@ -179,7 +179,7 @@ def get_status_data():
         response = json.loads(response_data.get_data(as_text=True))
 
 
-        data = json.loads(response.get_data(as_text=True))
+        data = response.json()
  
         running_vehicles = data.get('moving_vehicles', 0)
  
