@@ -216,6 +216,7 @@ def get_status_data():
         ]
 
         overspeed_vehicles = vehicle_inventory.aggregate(pipeline)
+        print(overspeed_vehicles)
         overspeed_vehicles_count = len(list(overspeed_vehicles))
 
         disconnected_vehicles = vehicle_inventory.count_documents({
