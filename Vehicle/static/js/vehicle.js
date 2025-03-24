@@ -1070,8 +1070,6 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = function () {
-  console.log("vehicle.js loaded");
-  console.log("filterVehicles function:", typeof filterVehicles);
   initMap();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
