@@ -186,33 +186,27 @@ def get_status_data():
             "status": "parked"
         })
 
-        pipeline = {
-                    "$expr": {
-                        "$and": [
-                            {"$gte": [{"$toDouble": "$speed"}, 40]},
-                            {"$lt": [{"$toDouble": "$speed"}, 60]}
-                        ]
-                    }
-                }
-
-        speed_vehicles = vehicle_inventory(pipeline)
+        speed_vehicles = vehicle_inventory.count_documents({
+            "$expr": {
+                "$and": [
+                    {"$gte": [{"$toDouble": "$speed"}, 40]},
+                    {"$lt": [{"$toDouble": "$speed"}, 60]}
+                ]
+            }
+        })
 
         for vehicle in speed_vehicles:
             print(vehicle)
 
         speed_vehicles_count = len(list(speed_vehicles))
 
-        pipeline = [
-            {
-                    "$expr": {
-                        "$and": [
-                            {"$gte": [{"$toDouble": "$speed"}, 60]}
-                        ]
-                    }
-                }
-        ]
-
-        overspeed_vehicles = vehicle_inventory(pipeline)
+        overspeed_vehicles = vehicle_inventory(({
+            "$expr": {
+                "$and": [
+                    {"$gte": [{"$toDouble": "$speed"}, 60]}
+                ]
+            }
+        }))
         for vehicle in overspeed_vehicles:
             print(vehicle)
         overspeed_vehicles_count = len(list(overspeed_vehicles))
