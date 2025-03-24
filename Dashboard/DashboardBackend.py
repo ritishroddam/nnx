@@ -189,22 +189,26 @@ def get_status_data():
             "status": "parked"
         })
  
-        speed_vehicles = len(collection.find({
+        speed_vehicles = collection.count_documents({
             "$expr": {
                 "$and": [
                     {"$gte": [{"$toDouble": "$speed"}, 40]},
                     {"$lt": [{"$toDouble": "$speed"}, 60]}
                 ]
             }
-        }))
- 
-        overspeed_vehicles = len(collection.find({
+        })
+        
+
+
+        overspeed_vehicles = collection.count_documents({
             "$expr": {
                 "$and": [
                     {"$gte": [{"$toDouble": "$speed"}, 60]}
                 ]
             }
-        }))
+        })
+
+
  
         disconnected_vehicles = collection.count_documents({
             "status": "disconnected"
