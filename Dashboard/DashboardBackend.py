@@ -1,4 +1,4 @@
-from flask import Blueprint, app, jsonify, render_template, Flask, request, redirect, url_for, session, flash, send_file
+from flask import Blueprint, json, app, jsonify, render_template, Flask, request, redirect, url_for, session, flash, send_file
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 from bson.objectid import ObjectId
@@ -128,8 +128,6 @@ def get_vehicle_distances():
     try:
         today_str = datetime.now().strftime('%d%m%y')  # Format: DDMMYY
 
-        # Fetch vehicle IMEI mappings
-        # vehicle_map = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map_cursor = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
@@ -176,14 +174,15 @@ def get_status_data():
     try:
         now = datetime.now()
         total_vehicles = collection.count_documents({})
+
+        response = atlanta_pie_data()
+
+
+        data = json.loads(response.get_data(as_text=True))
  
-        running_vehicles = collection.count_documents({
-            "status": "running"
-        })
+        running_vehicles = data.get('moving_vehicles', 0)
  
-        idle_vehicles = collection.count_documents({
-            "status": "idle"
-        })
+        idle_vehicles = data.get('idle_vehicles', 0)
  
         parked_vehicles = collection.count_documents({
             "status": "parked"
@@ -210,9 +209,10 @@ def get_status_data():
 
 
  
-        disconnected_vehicles = collection.count_documents({
-           "gsm_sig": "0"
-        })
+        disconnected_vehicles = data.get('offline_vehicles', 0)
+        # collection.count_documents({
+        #    "gsm_sig": "0"
+        # })
  
         no_gps_vehicles = collection.count_documents({
             "gps": False
