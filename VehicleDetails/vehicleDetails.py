@@ -47,8 +47,8 @@ def get_device_inventory():
 @vehicleDetails_bp.route('/get_companies', methods=['GET'])
 def get_companies():
     try:
-        companies = list(companies_collection .find({}, {"_id": 1, "CompanyName": 1}))
-        company_list = [{"id": str(company["_id"]), "name": company["CompanyName"]} for company in companies]
+        companies = list(companies_collection .find({}, {"_id": 1, "Company Name": 1}))
+        company_list = [{"id": str(company["_id"]), "name": company["Company Name"]} for company in companies]
         return jsonify(company_list), 200
     except Exception as e:
         print(f"Error fetching companies: {e}")
