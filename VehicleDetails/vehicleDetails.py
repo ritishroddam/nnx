@@ -48,6 +48,7 @@ def get_device_inventory():
 def get_companies():
     try:
         companies = list(companies_collection.find({}, {"_id": 1, "Company Name": 1}))
+        print(f"Companies fetched: {companies}")  # Debug print
         company_list = [{"id": str(company["_id"]), "name": company["Company Name"]} for company in companies]
         return jsonify(company_list), 200
     except Exception as e:
