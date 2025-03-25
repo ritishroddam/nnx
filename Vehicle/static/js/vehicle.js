@@ -835,7 +835,7 @@ const distanceMap = fetchedData.reduce((map, data) => {
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
   
     const row = tableBody.insertRow();
-    row.insertCell(0).innerText = vehicle.LicensePlateNumber;
+    row.insertCell(0).innerText = vehicle.LicensePlateNumber? vehicle.LicensePlateNumber : vehicle.imei;
     row.insertCell(1).innerText = vehicle.VehicleType;
     row.insertCell(2).innerText = formatLastUpdatedText(vehicle.date, vehicle.time);
     row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
