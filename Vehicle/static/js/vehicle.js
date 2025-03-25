@@ -751,7 +751,7 @@ function formatLastUpdatedText(date, time) {
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     lastUpdatedText = `Last update received ${days} day ${hours} hours ago`;
   } else {
-    const { formattedDate, formattedTime } = formatDateTime(data.date, data.time);
+    const { formattedDate, formattedTime } = formatDateTime(date, time);
     lastUpdatedText = formattedTime + " " + formattedDate;
   }
 
