@@ -778,7 +778,7 @@ async function populateVehicleTable() {
     } else {
       lastUpdatedText = lastUpdated.toLocaleString();
     }
-    console.log(lastUpdatedText);
+    console.log(vehicle.LicensePlateNumber);
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.LicensePlateNumber;
     row.insertCell(1).innerText = vehicle.VehicleType;
