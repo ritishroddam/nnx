@@ -726,6 +726,32 @@ function showListView() {
   populateVehicleTable();
 }
 
+function formatLastUpdatedText(lastUpdated) {
+  const now = new Date();
+  const timeDiff = Math.abs(now - lastUpdated);
+  let lastUpdatedText = '';
+
+  if (timeDiff < 60 * 1000) {
+    const seconds = Math.floor(timeDiff / 1000);
+    lastUpdatedText = `Last update received ${seconds} seconds ago`;
+  } else if (timeDiff < 60 * 60 * 1000) {
+    const minutes = Math.floor(timeDiff / (1000 * 60));
+    lastUpdatedText = `Last update received ${minutes} minutes ago`;
+  } else if (timeDiff < 24 * 60 * 60 * 1000) {
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    lastUpdatedText = `Last update received ${hours} hours ${minutes} minutes ago`;
+  } else if (timeDiff < 48 * 60 * 60 * 1000) {
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    lastUpdatedText = `Last update received ${days} day ${hours} hours ago`;
+  } else {
+    lastUpdatedText = lastUpdated.toLocaleString();
+  }
+
+  return lastUpdatedText;
+}
+
 async function populateVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
@@ -744,6 +770,7 @@ const distanceMap = fetchedData.reduce((map, data) => {
   map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
   return map;
 }, {});
+
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
@@ -768,32 +795,11 @@ const distanceMap = fetchedData.reduce((map, data) => {
       vehicle.date,
       vehicle.time
     );
-    const now = new Date();
-    const timeDiff = Math.abs(now - lastUpdated);
-    let lastUpdatedText = '';
 
-    if (timeDiff < 60 * 1000) {
-      const seconds = Math.floor(timeDiff / 1000);
-      lastUpdatedText = `Last update received ${seconds} seconds ago`;
-    } else if (timeDiff < 60 * 60 * 1000) {
-      const minutes = Math.floor(timeDiff / (1000 * 60));
-      lastUpdatedText = `Last update received ${minutes} minutes ago`;
-    } else if (timeDiff < 24 * 60 * 60 * 1000) {
-      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-      lastUpdatedText = `Last update received ${hours} hours ${minutes} minutes ago`;
-    } else if (timeDiff < 48 * 60 * 60 * 1000) {
-      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      lastUpdatedText = `Last update received ${days} day ${hours} hours ago`;
-    } else {
-      lastUpdatedText = lastUpdated.toLocaleString();
-    }
-    console.log(vehicle.LicensePlateNumber);
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.LicensePlateNumber;
     row.insertCell(1).innerText = vehicle.VehicleType;
-    row.insertCell(2).innerText = lastUpdatedText;
+    row.insertCell(2).innerText = formatLastUpdatedText;
     row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
     row.insertCell(4).innerText = speed;
     row.insertCell(5).innerText = distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
