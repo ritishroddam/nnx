@@ -733,6 +733,17 @@ async function populateVehicleTable() {
   tableBody.innerHTML = ""; // Clear existing rows
 
   const vehicles = await fetchVehicleData();
+  const fetchedData = await fetch("/dashboard/get_vehicle_distances")
+  .then((response) => response.json())
+  .catch((error) => {
+    console.error("Error fetching vehicle distances:", error);
+    return [];
+  });
+
+const distanceMap = fetchedData.reduce((map, data) => {
+  map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
+  return map;
+}, {});
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
@@ -785,7 +796,7 @@ async function populateVehicleTable() {
     row.insertCell(2).innerText = lastUpdatedText;
     row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
     row.insertCell(4).innerText = speed;
-    row.insertCell(5).innerText = vehicle.odometer; // Assuming odometer is the distance traveled today
+    row.insertCell(5).innerText = distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
     row.insertCell(6).innerText = vehicle.odometer; // Assuming odometer reading
     row.insertCell(7).innerText = vehicle.ignition;
     row.insertCell(8).innerText = vehicle.gsm;
