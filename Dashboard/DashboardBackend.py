@@ -186,7 +186,13 @@ def get_status_data():
         idle_vehicles = data.get('idle_vehicles', 0)
  
         parked_vehicles = collection.count_documents({
-            "status": "parked"
+            "$expr": {
+                "$and": [
+                    {"$eq": [{"$toDouble": "$speed"}, 0.0]},
+                    {"$eq": ["$ignition", "0"]},
+                    {"$lte": [{"$subtract": [now, {"$dateFromString": {"dateString": {"$concat": ["$date", "$time"]}, "format": "%d%m%y%H%M%S"}}]}, 5 * 60 * 1000]}
+                ]
+            }
         })
  
         speed_vehicles = collection.count_documents({
