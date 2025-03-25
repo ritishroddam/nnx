@@ -47,7 +47,7 @@ def get_device_inventory():
 @vehicleDetails_bp.route('/get_companies', methods=['GET'])
 def get_companies():
     try:
-        companies = list(companies_collection .find({}, {"_id": 1, "Company Name": 1}))
+        companies = list(companies_collection.find({}, {"_id": 1, "Company Name": 1}))
         company_list = [{"id": str(company["_id"]), "name": company["Company Name"]} for company in companies]
         return jsonify(company_list), 200
     except Exception as e:
@@ -57,7 +57,7 @@ def get_companies():
 @vehicleDetails_bp.route('/get_cities', methods=['GET'])
 def get_cities():
     try:
-        cities = list(cities_collection .find({}, {"_id": 0, "name": 1, "state_name": 1}))
+        cities = list(cities_collection.find({}, {"_id": 0, "name": 1, "state_name": 1}))
         city_list = [{"city": city["name"], "state": city["state_name"]} for city in cities]
         return jsonify(city_list), 200
     except Exception as e:
