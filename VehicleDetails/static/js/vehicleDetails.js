@@ -151,6 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchCompanies();
   fetchCities();
 
+  $("#VehicleType").selectize({
+    create: false,
+    sortField: "text",
+    searchField: ["text"]
+  });
+
   document.getElementById("VehicleType").addEventListener("change", function () {
     const numberOfSeatsContainer = document.getElementById("NumberOfSeatsContainer");
     if (this.value === "bus" || this.value === "car") {
