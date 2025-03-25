@@ -57,7 +57,7 @@ def get_companies():
 @vehicleDetails_bp.route('/get_cities', methods=['GET'])
 def get_cities():
     try:
-        cities = list(cities_collection .find({}, {"_id": 0, "city": 1, "state": 1}))
+        cities = list(cities_collection .find({}, {"_id": 0, "name": 1, "state_name": 1}))
         city_list = [{"city": city["name"], "state": city["state_name"]} for city in cities]
         return jsonify(city_list), 200
     except Exception as e:
