@@ -783,39 +783,6 @@ const distanceMap = fetchedData.reduce((map, data) => {
   listContainer.innerHTML = "";
   countContainer.innerText = vehicles.length;
 
-  // vehicles.forEach((vehicle) => {
-  //   const vehicleElement = document.createElement("div");
-  //   vehicleElement.classList.add("vehicle-card");
-  //   vehicleElement.setAttribute("data-imei", vehicle.imei);
-
-  //   const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-  //   const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
-  //   const speed =
-  //     vehicle.speed !== null && vehicle.speed !== undefined
-  //       ? `${convertSpeedToKmh(vehicle.speed).toFixed(2)} km/h`
-  //       : "Unknown";
-  //   const address = vehicle.address || "Location unknown";
-
-  //   const lastUpdated= convertToDate(
-  //     vehicle.date,
-  //     vehicle.time
-  //   );
-
-  //   const row = tableBody.insertRow();
-  //   row.insertCell(0).innerText = vehicle.LicensePlateNumber;
-  //   row.insertCell(1).innerText = vehicle.VehicleType;
-  //   row.insertCell(2).innerText = formatLastUpdatedText(vehicle.date, vehicle.time);
-  //   row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-  //   row.insertCell(4).innerText = speed;
-  //   row.insertCell(5).innerText = distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
-  //   row.insertCell(6).innerText = vehicle.odometer; // Assuming odometer reading
-  //   row.insertCell(7).innerText = vehicle.ignition;
-  //   row.insertCell(8).innerText = vehicle.gsm;
-  //   row.insertCell(9).innerText = vehicle.sos;
-  //   row.insertCell(10).innerHTML = `<a href="device-details.html?LicensePlateNumber=${vehicle.LicensePlateNumber}" target="_blank">View Data</a>`;
-  // });
-
   vehicles.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
@@ -831,8 +798,8 @@ const distanceMap = fetchedData.reduce((map, data) => {
   
     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
     const address = vehicle.address || "Location unknown";
-  
-    const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+
+    console.log(vehicle.imei);
   
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.LicensePlateNumber? vehicle.LicensePlateNumber : vehicle.imei;
