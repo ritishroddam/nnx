@@ -726,7 +726,11 @@ function showListView() {
   populateVehicleTable();
 }
 
-function formatLastUpdatedText(lastUpdated) {
+function formatLastUpdatedText(date, time) {
+  const lastUpdated= convertToDate(
+    date,
+    time
+  );
   const now = new Date();
   const timeDiff = Math.abs(now - lastUpdated);
   let lastUpdatedText = '';
@@ -746,7 +750,8 @@ function formatLastUpdatedText(lastUpdated) {
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     lastUpdatedText = `Last update received ${days} day ${hours} hours ago`;
   } else {
-    lastUpdatedText = lastUpdated.toLocaleString();
+    const { formattedDate, formattedTime } = formatDateTime(data.date, data.time);
+    lastUpdatedText = formattedTime + " " + formattedDate;
   }
 
   return lastUpdatedText;
@@ -799,7 +804,7 @@ const distanceMap = fetchedData.reduce((map, data) => {
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.LicensePlateNumber;
     row.insertCell(1).innerText = vehicle.VehicleType;
-    row.insertCell(2).innerText = formatLastUpdatedText;
+    row.insertCell(2).innerText = formatLastUpdatedText(vehicle.date, vehicle.time);
     row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
     row.insertCell(4).innerText = speed;
     row.insertCell(5).innerText = distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
