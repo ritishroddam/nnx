@@ -15,7 +15,7 @@ db = client['nnx']
 vehicle_collection = db['vehicle_inventory']
 sim_collection = db['sim_inventory']
 device_collection = db['device_inventory']
-companies_collection = db['companies_list']
+companies_collection = db['customers_list']
 cities_collection = db['cities']
 
 # Home route
