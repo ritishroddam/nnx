@@ -185,24 +185,21 @@ def get_status_data():
  
         idle_vehicles = data.get('idle_vehicles', 0)
  
-        parked_vehicles = collection.count_documents({
-            "$expr": {
-                "$and": [
-                    {"$eq": [{"$toDouble": "$speed"}, 0.0]},
-                    {"$eq": ["$ignition", "0"]},
-                    {"$lte": [
-                        {"$subtract": [
-                            now, 
-                            {"$dateFromString": {
-                                "dateString": {"$concat": ["$date", "$time"]}, 
-                                "format": "%d%m%y%H%M%S"
-                            }}
-                        ]}, 
-                        5 * 60 * 1000
-                    ]}
-                ]
-            }
-        })
+        parked_vehicles = 0
+        results = list(collection.find({
+            "$and": [
+                {"speed": "0.0"},
+                {"ignition": "0"}
+            ]
+        }))
+
+        for record in results:
+            date_str = record["date"]
+            time_str = record["time"]
+            datetime_str = date_str + time_str
+            record_datetime = datetime.strptime(datetime_str, '%d%m%y%H%M%S')
+            if (now - record_datetime).total_seconds() > 5 * 60:
+                parked_vehicles += 1
 
         speed_vehicles = collection.count_documents({
             "$expr": {
