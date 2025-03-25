@@ -208,10 +208,8 @@ def get_status_data():
             }
         })
 
-
- 
         disconnected_vehicles = collection.count_documents({
-           "main_power": "1"
+           "main_power": "0"
         })
  
         no_gps_vehicles = collection.count_documents({
