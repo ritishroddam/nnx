@@ -105,6 +105,7 @@ async function fetchVehicleData() {
 
     return data.map(vehicle => ({
       LicensePlateNumber: vehicle.LicensePlateNumber,
+      VehicleType: vehicle.VehicleType,
       speed: vehicle.speed,
       latitude: parseFloat(vehicle.latitude),
       longitude: parseFloat(vehicle.longitude),
