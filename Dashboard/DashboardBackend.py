@@ -190,7 +190,16 @@ def get_status_data():
                 "$and": [
                     {"$eq": [{"$toDouble": "$speed"}, 0.0]},
                     {"$eq": ["$ignition", "0"]},
-                    {"$lte": [{"$subtract": [now, {"$dateFromString": {"dateString": {"$concat": ["$date", "$time"]}, "format": "%dd%mm%yy%HH%MM%SS"}}]}, 5 * 60 * 1000]}
+                    {"$lte": [
+                        {"$subtract": [
+                            now, 
+                            {"$dateFromString": {
+                                "dateString": {"$concat": ["$date", "$time"]}, 
+                                "format": "%d%m%y%H%M%S"
+                            }}
+                        ]}, 
+                        5 * 60 * 1000
+                    ]}
                 ]
             }
         })
