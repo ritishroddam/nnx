@@ -98,7 +98,26 @@ async function fetchVehicleData() {
   try {
     const response = await fetch("/vehicle/api/vehicles");
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
-    return await response.json();
+    // return await response.json();
+
+
+    const data = await response.json();
+
+    return data.map(vehicle => ({
+      LicensePlateNumber: vehicle.imei, // Assuming IMEI is used as LicensePlateNumber
+      speed: vehicle.speed,
+      latitude: parseFloat(vehicle.latitude),
+      longitude: parseFloat(vehicle.longitude),
+      date: vehicle.date,
+      time: vehicle.time,
+      address: vehicle.address || "Location unknown",
+      status: vehicle.status,
+      imei: vehicle.imei,
+      ignition: vehicle.ignition,
+      gsm: vehicle.gsm_sig,
+      sos: vehicle.sos,
+      odometer: vehicle.odometer
+    }));
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     return [];
@@ -739,16 +758,30 @@ async function populateVehicleTable() {
       vehicle.time
     );
 
+    const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
+    const now = new Date();
+    const timeDiff = Math.abs(now - lastUpdated);
+    let lastUpdatedText = '';
+
+    if (timeDiff < 24 * 60 * 60 * 1000) {
+      const minutes = Math.floor(timeDiff / (1000 * 60));
+      lastUpdatedText = `Last update received ${minutes} mins ago`;
+    } else {
+      lastUpdatedText = lastUpdated.toLocaleString();
+    }
+
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.LicensePlateNumber;
-    row.insertCell(1).innerText = speed;
-    row.insertCell(2).innerText = latitude.toFixed(6);
-    row.insertCell(3).innerText = longitude.toFixed(6);
-    row.insertCell(4).innerText = `${formattedDate} ${formattedTime}`;
-    row.insertCell(5).innerText = address;
-    row.insertCell(
-      6
-    ).innerHTML = `<a href="device-details.html?LicensePlateNumber=${vehicle.LicensePlateNumber}" target="_blank">View Data</a>`;
+    row.insertCell(1).innerText = vehicle.status;
+    row.insertCell(2).innerText = lastUpdatedText;
+    row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+    row.insertCell(4).innerText = speed;
+    row.insertCell(5).innerText = vehicle.odometer; // Assuming odometer is the distance traveled today
+    row.insertCell(6).innerText = vehicle.odometer; // Assuming odometer reading
+    row.insertCell(7).innerText = vehicle.ignition;
+    row.insertCell(8).innerText = vehicle.gsm;
+    row.insertCell(9).innerText = vehicle.sos;
+    row.insertCell(10).innerHTML = `<a href="device-details.html?LicensePlateNumber=${vehicle.LicensePlateNumber}" target="_blank">View Data</a>`;
   });
   showHidecar();
 }
