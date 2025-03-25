@@ -758,14 +758,25 @@ async function populateVehicleTable() {
       vehicle.time
     );
 
-    const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
+    const lastUpdated = new Date(`${formattedDate}T${formattedTime}`);
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
     let lastUpdatedText = '';
 
-    if (timeDiff < 24 * 60 * 60 * 1000) {
+    if (timeDiff < 60 * 1000) {
+      const seconds = Math.floor(timeDiff / 1000);
+      lastUpdatedText = `Last update received ${seconds} seconds ago`;
+    } else if (timeDiff < 60 * 60 * 1000) {
       const minutes = Math.floor(timeDiff / (1000 * 60));
-      lastUpdatedText = `Last update received ${minutes} mins ago`;
+      lastUpdatedText = `Last update received ${minutes} minutes ago`;
+    } else if (timeDiff < 24 * 60 * 60 * 1000) {
+      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      lastUpdatedText = `Last update received ${hours} hours ${minutes} minutes ago`;
+    } else if (timeDiff < 48 * 60 * 60 * 1000) {
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      lastUpdatedText = `Last update received ${days} day ${hours} hours ago`;
     } else {
       lastUpdatedText = lastUpdated.toLocaleString();
     }
