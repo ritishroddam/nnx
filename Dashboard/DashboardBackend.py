@@ -210,10 +210,9 @@ def get_status_data():
 
 
  
-        disconnected_vehicles = data.get('offline_vehicles', 0)
-        # collection.count_documents({
-        #    "gsm_sig": "0"
-        # })
+        disconnected_vehicles = collection.count_documents({
+           "main_power": "1"
+        })
  
         no_gps_vehicles = collection.count_documents({
             "gps": False

@@ -147,6 +147,19 @@ function deleteVehicle(vehicleID) {
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Document loaded, fetching SIM data...");
   fetchSIMData();
+
+  fetchCompanies();
+  fetchCities();
+
+  document.getElementById("VehicleType").addEventListener("change", function () {
+    const numberOfSeatsContainer = document.getElementById("NumberOfSeatsContainer");
+    if (this.value === "bus" || this.value === "car") {
+      numberOfSeatsContainer.classList.remove("hidden");
+    } else {
+      numberOfSeatsContainer.classList.add("hidden");
+    }
+  });
+
 });
 
 let simData = []; // To store SIM data from the database
@@ -186,6 +199,56 @@ function populateSIMDropdown() {
   });
 
   $("#sim-Dropdown").selectize();
+}
+
+async function fetchCompanies() {
+  try {
+    const response = await fetch("/vehicleDetails/get_companies");
+    if (!response.ok) throw new Error("Failed to fetch companies");
+
+    const companies = await response.json();
+    const companySelect = document.getElementById("CompanyID");
+    companies.forEach(company => {
+      const option = document.createElement("option");
+      option.value = company.id;
+      option.textContent = company.name;
+      companySelect.appendChild(option);
+    });
+
+    $("#CompanyID").selectize({
+      create: false,
+      sortField: "text",
+      searchField: ["text"]
+    });
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    alert("Unable to load companies. Please try again later.");
+  }
+}
+
+async function fetchCities() {
+  try {
+    const response = await fetch("/vehicleDetails/get_cities");
+    if (!response.ok) throw new Error("Failed to fetch cities");
+
+    const cities = await response.json();
+    const citySelect = document.getElementById("Location");
+    cities.forEach(city => {
+      const option = document.createElement("option");
+      option.value = `${city.city}, ${city.state}`;
+      option.textContent = `${city.city}, ${city.state}`;
+      citySelect.appendChild(option);
+    });
+
+    $("#Location").selectize({
+      create: false,
+      sortField: "text",
+      searchField: ["text"]
+    });
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+    alert("Unable to load cities. Please try again later.");
+  }
 }
 
 function editVehicle(vehicleID) {

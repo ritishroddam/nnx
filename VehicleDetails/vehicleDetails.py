@@ -15,6 +15,8 @@ db = client['nnx']
 vehicle_collection = db['vehicle_inventory']
 sim_collection = db['sim_inventory']
 device_collection = db['device_inventory']
+companies_collection = db['companies_list']
+cities_collection = db['cities']
 
 # Home route
 @vehicleDetails_bp.route('/page')
@@ -41,6 +43,26 @@ def get_device_inventory():
     except Exception as e:
         print(f"Error fetching IMEI data: {e}")
         return jsonify({"error": "Failed to fetch IMEI data"}), 500
+    
+@vehicleDetails_bp.route('/get_companies', methods=['GET'])
+def get_companies():
+    try:
+        companies = list(companies_collection .find({}, {"_id": 1, "CompanyName": 1}))
+        company_list = [{"id": str(company["_id"]), "name": company["CompanyName"]} for company in companies]
+        return jsonify(company_list), 200
+    except Exception as e:
+        print(f"Error fetching companies: {e}")
+        return jsonify({"error": "Failed to fetch companies"}), 500
+    
+@vehicleDetails_bp.route('/get_cities', methods=['GET'])
+def get_cities():
+    try:
+        cities = list(cities_collection .find({}, {"_id": 0, "city": 1, "state": 1}))
+        city_list = [{"city": city["name"], "state": city["state_name"]} for city in cities]
+        return jsonify(city_list), 200
+    except Exception as e:
+        print(f"Error fetching cities: {e}")
+        return jsonify({"error": "Failed to fetch cities"}), 500
 
 @vehicleDetails_bp.route('/get_sim_inventory', methods=['GET'])
 def get_sim_inventory():
@@ -59,48 +81,79 @@ def get_sim_inventory():
         return jsonify({"error": "Failed to fetch SIM data"}), 500
 
 # Manual entry route
+# @vehicleDetails_bp.route('/manual_entry', methods=['POST'])
+# def manual_entry():
+#     data = request.form.to_dict()
+#     data = {key.strip(): value.strip() for key, value in data.items()}  # Clean input
+
+#     # Validate required fields
+#     required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location']
+#     for field in required_fields:
+#         if not data.get(field):
+#             flash(f"{field} is required.", "danger")
+#             return redirect(url_for('VehicleDetails.page'))
+            
+#     pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
+#     pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
+#     if not (pattern1.match(data['LicensePlateNumber']) or pattern2.match(data['LicensePlateNumber'])):
+#         flash(f"License Plate Number {data['LicensePlateNumber']} is invalid.", "danger")
+#         return redirect(url_for('VehicleDetails.page'))
+        
+#     if vehicle_collection.find_one({"LicensePlateNumber": data['LicensePlateNumber']}):
+#         flash("Liscense Plate Number already exists", "danger")
+
+#         if vehicle_collection.find_one({"IMEI": data['IMEI']}):
+#             flash("IMEI Number has already been allocated to another License Plate Number", "danger")
+
+#             if vehicle_collection.find_one({"SIM": data['SIM']}):
+#                 flash("Sim Number has already been allocated to another License Plate Number", "danger")
+
+#         return redirect(url_for('VehicleDetails.page'))
+
+#     if vehicle_collection.find_one({"IMEI": data['IMEI']}):
+#         flash("IMEI Number has already been allocated to another License Plate Number", "danger")
+
+#         if vehicle_collection.find_one({"SIM": data['SIM']}):
+#             flash("Sim Number has already been allocated to another License Plate Number", "danger")
+
+#         return redirect(url_for('VehicleDetails.page'))
+    
+#     if vehicle_collection.find_one({"SIM": data['SIM']}):
+#         flash("Sim Number has already been allocated to another License Plate Number", "danger")
+#         return redirect(url_for('VehicleDetails.page'))
+        
+#     # Insert record into MongoDB
+#     try:
+#         vehicle_collection.insert_one(data)
+#         flash("Vehicle added successfully!", "success")
+#     except Exception as e:
+#         flash(f"Error adding vehicle: {str(e)}", "danger")
+
+#     return redirect(url_for('VehicleDetails.page'))
+
 @vehicleDetails_bp.route('/manual_entry', methods=['POST'])
 def manual_entry():
     data = request.form.to_dict()
     data = {key.strip(): value.strip() for key, value in data.items()}  # Clean input
 
     # Validate required fields
-    required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location']
+    required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyID', 'VehicleType']
     for field in required_fields:
         if not data.get(field):
             flash(f"{field} is required.", "danger")
             return redirect(url_for('VehicleDetails.page'))
-            
-    pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
-    pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
-    if not (pattern1.match(data['LicensePlateNumber']) or pattern2.match(data['LicensePlateNumber'])):
-        flash(f"License Plate Number {data['LicensePlateNumber']} is invalid.", "danger")
-        return redirect(url_for('VehicleDetails.page'))
-        
-    if vehicle_collection.find_one({"LicensePlateNumber": data['LicensePlateNumber']}):
-        flash("Liscense Plate Number already exists", "danger")
 
-        if vehicle_collection.find_one({"IMEI": data['IMEI']}):
-            flash("IMEI Number has already been allocated to another License Plate Number", "danger")
-
-            if vehicle_collection.find_one({"SIM": data['SIM']}):
-                flash("Sim Number has already been allocated to another License Plate Number", "danger")
-
+    # Additional validation for number of seats
+    if data['VehicleType'] in ['bus', 'car'] and not data.get('NumberOfSeats'):
+        flash("Number of seats is required for bus and car.", "danger")
         return redirect(url_for('VehicleDetails.page'))
 
-    if vehicle_collection.find_one({"IMEI": data['IMEI']}):
-        flash("IMEI Number has already been allocated to another License Plate Number", "danger")
+    # ...existing validation code...
 
-        if vehicle_collection.find_one({"SIM": data['SIM']}):
-            flash("Sim Number has already been allocated to another License Plate Number", "danger")
-
-        return redirect(url_for('VehicleDetails.page'))
+    # Save city and state in the same column
+    location = data['Location'].split(',')
+    data['Location'] = f"{location[0].strip()}, {location[1].strip()}"
     
-    if vehicle_collection.find_one({"SIM": data['SIM']}):
-        flash("Sim Number has already been allocated to another License Plate Number", "danger")
-        return redirect(url_for('VehicleDetails.page'))
-        
-    # Insert record into MongoDB
     try:
         vehicle_collection.insert_one(data)
         flash("Vehicle added successfully!", "success")

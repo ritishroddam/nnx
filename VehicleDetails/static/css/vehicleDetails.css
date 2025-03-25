@@ -17,6 +17,10 @@
   color: #ffffff;
 }
 
+.hidden {
+  display: none;
+}
+
 input[type="text"],
 input[type="date"],
 input[type="file"] {
