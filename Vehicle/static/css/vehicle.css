@@ -333,3 +333,47 @@ input:checked + .slider:before {
 .sidebar:hover ~ .vehicle-table-container {
   left: 14.5%;
 }
+
+
+.vehicle-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 18px;
+  text-align: left;
+}
+
+.vehicle-table th, .vehicle-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+}
+
+.vehicle-table th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+.vehicle-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.vehicle-table tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.vehicle-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.vehicle-table-container {
+  overflow-x: auto;
+}
+
+.vehicle-table a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.vehicle-table a:hover {
+  text-decoration: underline;
+}
