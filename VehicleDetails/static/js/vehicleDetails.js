@@ -154,7 +154,15 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#VehicleType").selectize({
     create: false,
     sortField: "text",
-    searchField: ["text"]
+    searchField: ["text"],
+    onChange: function(value) {
+      const numberOfSeatsContainer = document.getElementById("NumberOfSeatsContainer");
+      if (value === "bus" || value === "car") {
+        numberOfSeatsContainer.classList.remove("hidden");
+      } else {
+        numberOfSeatsContainer.classList.add("hidden");
+      }
+    }
   });
 
   document.getElementById("VehicleType").addEventListener("change", function () {
