@@ -104,7 +104,7 @@ async function fetchVehicleData() {
     const data = await response.json();
 
     return data.map(vehicle => ({
-      LicensePlateNumber: vehicle.imei, // Assuming IMEI is used as LicensePlateNumber
+      LicensePlateNumber: vehicle.LicensePlateNumber,
       speed: vehicle.speed,
       latitude: parseFloat(vehicle.latitude),
       longitude: parseFloat(vehicle.longitude),
