@@ -32,8 +32,10 @@ def get_vehicles():
             inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('imei')})
             if inventory_data:
                 vehicle['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                vehicle['VehicleType'] = inventory_data.get('VehicleType', 'Unknown')   
             else:
                 vehicle['LicensePlateNumber'] = 'Unknown'  # Default if no match is found
+                vehicle['VehicleType'] = 'Unknown'
         
         return jsonify(vehicles), 200
     except Exception as e:

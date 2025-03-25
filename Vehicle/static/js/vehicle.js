@@ -753,12 +753,10 @@ async function populateVehicleTable() {
         : "Unknown";
     const address = vehicle.address || "Location unknown";
 
-    const { formattedDate, formattedTime } = formatDateTime(
+    const lastUpdated= convertToDate(
       vehicle.date,
       vehicle.time
     );
-
-    const lastUpdated = new Date(`${formattedDate}T${formattedTime}`);
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
     let lastUpdatedText = '';
@@ -783,7 +781,7 @@ async function populateVehicleTable() {
     console.log(lastUpdatedText);
     const row = tableBody.insertRow();
     row.insertCell(0).innerText = vehicle.LicensePlateNumber;
-    row.insertCell(1).innerText = vehicle.status;
+    row.insertCell(1).innerText = vehicle.VehicleType;
     row.insertCell(2).innerText = lastUpdatedText;
     row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
     row.insertCell(4).innerText = speed;
