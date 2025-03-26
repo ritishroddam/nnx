@@ -88,6 +88,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         self.log_sos_to_mongodb(json_data)
 
                         json_data['_id'] = str(json_data.get('_id', ''))
+                        sio.emit('test_event', {'message': 'Hello from server'})
                         sio.emit('sos_alert', json_data)
 
                     elif sos_state == '0' and MyTCPHandler.sos_active:
@@ -105,6 +106,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 json_data['_id'] = str(json_data['_id'])
 
                 if json_data.get('status') == '01' and json_data.get('gps') == 'A':
+                    sio.emit('test_event', {'message': 'Hello from server'})
                     sio.emit('vehicle_update', json_data)
 
             else:
