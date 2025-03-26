@@ -31,6 +31,11 @@ def connect(sid, environ):
 def disconnect(sid):
     print(f"Client disconnected: {sid}")
 
+@sio.event
+def vehicle_update(sid, data):
+    print(f"Received vehicle_update event: {data}")
+    sio.emit('vehicle_update', data)
+
 MONGO_URI = os.getenv(
     'MONGO_URI',
     'mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin'
