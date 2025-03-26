@@ -23,6 +23,14 @@ last_emit_time = {}
 sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20, transports=['websocket'])
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
+@sio.event
+def connect(sid, environ):
+    print(f"Client connected: {sid}")
+
+@sio.event
+def disconnect(sid):
+    print(f"Client disconnected: {sid}")
+
 MONGO_URI = os.getenv(
     'MONGO_URI',
     'mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin'
