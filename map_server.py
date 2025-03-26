@@ -13,9 +13,12 @@ from math import radians, sin, cos, sqrt, atan2
 import socketio
 import eventlet
 import eventlet.wsgi
+import time
 
 app = Flask(__name__)
 CORS(app)
+
+last_emit_time = {}
 
 sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20)
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
@@ -53,6 +56,13 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def clean_imei(imei):
     # Extract the last 15 characters of the IMEI
         return imei[-15:]
+    
+    def should_emit(imei):
+        now = time.time()
+        if imei not in last_emit_time or now - last_emit_time[imei] > 1:
+            last_emit_time[imei] = now
+            return True
+        return False
 
     def handle(self):
         receive_data = self.request.recv(4096)
@@ -104,17 +114,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     json_data['LicensePlateNumber'] = 'Unknown'
                 json_data['_id'] = str(json_data['_id'])
 
-                if json_data.get('status') == '01' and json_data.get('gps') == 'A':
+                if json_data.get('status') == '01' and json_data.get('gps') == 'A' and self.should_emit(json_data.get('imei')):
                     sio.emit('test_event', {'message': 'Hello from server'})
                     try:
                         sio.emit('vehicle_update', json_data)
                         print("Vehicle update emitted.", json_data)
-                        try:
-                            @sio.on('vehicle_update')
-                            def on_vehicle_update(data):
-                                print("Received vehicle_update:", data)
-                        except Exception as e:
-                            print("Error handling vehicle update:", e)
                     except Exception as e:
                         print("Error emitting vehicle update:", e)
 
