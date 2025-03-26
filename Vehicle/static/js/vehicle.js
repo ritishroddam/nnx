@@ -139,7 +139,7 @@ async function renderVehicles() {
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
+      <div class="vehicle-header" style="color: #336699;">${vehicle.LicensePlateNumber} - ${
       vehicle.status || "Unknown"
     }</div>
       <div class="vehicle-info">
