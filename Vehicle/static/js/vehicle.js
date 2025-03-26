@@ -38,7 +38,7 @@ function updateVehicleCard(data) {
       } <br>
       <strong>Lat:</strong> ${latitude} <br>
       <strong>Lon:</strong> ${longitude} <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
+      <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="device-details.html?imei=${
         data.imei
@@ -63,7 +63,7 @@ function updateVehicleCard(data) {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
           data.LicensePlateNumber
@@ -305,7 +305,7 @@ function updateMap() {
         firstFit = false;
 
         const boundsCenter = bounds.getCenter();
-        const offset = -2; // Adjust the offset value as needed
+        const offset = -2;
         const newCenter = {
           lat: boundsCenter.lat(),
           lng: boundsCenter.lng() + offset,
