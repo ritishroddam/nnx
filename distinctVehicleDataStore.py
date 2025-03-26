@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from datetime import datetime
 import os
 import time
+import socketio
+import json
 
 # Initialize MongoDB client
 MONGO_URI = os.getenv(
@@ -12,6 +14,16 @@ client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client['nnx']
 atlanta_collection = db['atlanta']
 distinct_atlanta_collection = db['distinctAtlanta']
+vehicle_inventory_collection = db['vehicle_inventory']
+
+# Initialize Socket.IO client
+sio = socketio.Client()
+
+try:
+    sio.connect('http://0.0.0.0:8555')
+    print("Socket.IO connected successfully")
+except Exception as e:
+    print(f"Error connecting to Socket.IO server: {str(e)}")
 
 def clean_imei(imei):
     # Extract the last 15 characters of the IMEI
@@ -19,10 +31,14 @@ def clean_imei(imei):
 
 def update_distinct_atlanta():
     try:
-        print("Sucessfully running distinct Vehcile")
+        print("Successfully running distinct Vehicle")
         all_documents = list(atlanta_collection.find())
-
         print(f"Fetched {len(all_documents)} documents from the atlanta collection")
+
+        # Fetch existing data from distinctAtlanta collection
+        existing_documents = {
+            doc['imei']: doc for doc in distinct_atlanta_collection.find()
+        }
 
         # Group documents by IMEI and find the most recent document for each IMEI
         distinct_documents = {}
@@ -35,18 +51,43 @@ def update_distinct_atlanta():
                 if doc['gps'] != 'V':
                     distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
 
-        # Prepare documents for insertion
-        documents_to_insert = [doc for doc in distinct_documents.values()]
+        # Send data one by one and compare with existing data
+        for imei, doc in distinct_documents.items():
+            if imei in existing_documents:
+                # Compare with existing data
+                if doc != existing_documents[imei]:
+                    # Data has changed, emit the updated data
+                    emit_data(doc)
+            else:
+                # New data, emit it
+                emit_data(doc)
 
         # Clear the distinctAtlanta collection
         distinct_atlanta_collection.delete_many({})
 
         # Insert the distinct documents into the distinctAtlanta collection
-        distinct_atlanta_collection.insert_many(documents_to_insert)
+        for doc in distinct_documents.values():
+            distinct_atlanta_collection.insert_one(doc)
 
         print('Distinct documents updated successfully')
     except Exception as e:
         print(f'Error updating distinct documents: {str(e)}')
+
+def emit_data(json_data):
+    try:
+        # Add additional data from vehicle_inventory_collection
+        inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+        if inventory_data:
+            json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+        else:
+            json_data['LicensePlateNumber'] = 'Unknown'
+        json_data['_id'] = str(json_data['_id'])
+
+        # Emit the data using Socket.IO
+        sio.emit('vehicle_update', json_data)
+        print(f"Emitted data for IMEI {json_data['imei']}")
+    except Exception as e:
+        print(f"Error emitting data: {str(e)}")
 
 if __name__ == '__main__':
     while True:
