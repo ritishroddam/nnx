@@ -114,7 +114,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     json_data['LicensePlateNumber'] = 'Unknown'
                 json_data['_id'] = str(json_data['_id'])
 
-                if json_data.get('status') == '01' and json_data.get('gps') == 'A' and self.should_emit(json_data.get('imei')):
+                if json_data.get('status') == '01' and json_data.get('gps') == 'A' and self.should_emit(json_data['imei']):
                     sio.emit('test_event', {'message': 'Hello from server'})
                     try:
                         sio.emit('vehicle_update', json_data)
