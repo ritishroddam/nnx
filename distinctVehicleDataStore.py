@@ -60,15 +60,20 @@ def update_distinct_atlanta():
         print('Distinct documents updated successfully')
         
         # Send data one by one and compare with existing data
+        count = 0
         for imei, doc in distinct_documents.items():
             if imei in existing_documents:
                 # Compare with existing data
                 if doc != existing_documents[imei]:
                     # Data has changed, emit the updated data
                     emit_data(doc)
+                    count += 1
             else:
                 # New data, emit it
                 emit_data(doc)
+                count += 1
+                
+        print(f"Emitted {count} updated documents")
 
     except Exception as e:
         print(f'Error updating distinct documents: {str(e)}')
