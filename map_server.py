@@ -106,20 +106,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         # print("SOS alert reset.")
 
                 self.store_data_in_mongodb(json_data)
-                vehicle_inventory_collection = db['vehicle_inventory']
-                inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
-                if inventory_data:
-                    json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
-                else:
-                    json_data['LicensePlateNumber'] = 'Unknown'
-                json_data['_id'] = str(json_data['_id'])
-
-
-                if json_data.get('status') == '01' and json_data.get('gps') == 'A' and MyTCPHandler.should_emit(json_data['imei']):
-                    sio.emit('test_event', {'message': 'Hello from server'})
-                    sio.emit('vehicle_update', json_data)
-
-
             else:
                 print("Invalid JSON format")
 
