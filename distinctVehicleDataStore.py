@@ -17,10 +17,10 @@ distinct_atlanta_collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
 # Initialize Socket.IO client
-sio = socketio.Client(transports=['websocket'])
+sio = socketio.Client()
 
 try:
-    sio.connect('http://0.0.0.0:8555')
+    sio.connect('http://0.0.0.0:8555', transports=['websocket'])
     print("Socket.IO connected successfully")
 except Exception as e:
     print(f"Error connecting to Socket.IO server: {str(e)}")
