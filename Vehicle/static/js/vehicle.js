@@ -719,18 +719,18 @@ function formatLastUpdatedText(date, time) {
 
   if (timeDiff < 60 * 1000) {
     const seconds = Math.floor(timeDiff / 1000);
-    lastUpdatedText = `Last update received ${seconds} seconds ago`;
+    lastUpdatedText = ` ${seconds} seconds ago`;
   } else if (timeDiff < 60 * 60 * 1000) {
     const minutes = Math.floor(timeDiff / (1000 * 60));
-    lastUpdatedText = `Last update received ${minutes} minutes ago`;
+    lastUpdatedText = ` ${minutes} minutes ago`;
   } else if (timeDiff < 24 * 60 * 60 * 1000) {
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-    lastUpdatedText = `Last update received ${hours} hours ${minutes} minutes ago`;
+    lastUpdatedText = ` ${hours} hours ${minutes} minutes ago`;
   } else if (timeDiff < 48 * 60 * 60 * 1000) {
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    lastUpdatedText = `Last update received ${days} day ${hours} hours ago`;
+    lastUpdatedText = ` ${days} day ${hours} hours ago`;
   } else {
     const { formattedDate, formattedTime } = formatDateTime(date, time);
     lastUpdatedText = formattedTime + " " + formattedDate;
