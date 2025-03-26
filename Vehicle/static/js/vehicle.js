@@ -148,8 +148,6 @@ async function renderVehicles() {
       vehicle.time
     );
 
-    const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
-
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
       vehicle.status || "Unknown"
@@ -162,10 +160,7 @@ async function renderVehicles() {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
-        <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
-      formattedDate || "N/A"
-    } <br>
-     <strong>Last Updated Text:</strong> ${lastUpdatedText} <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?imei=${
           vehicle.LicensePlateNumber
@@ -223,17 +218,14 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const addressText =
     address || '<span class="missing-data">Location unknown</span>';
 
-  const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
 
-  const { formattedDate, formattedTime } = formatDateTime(date, time);
   const content = `<div class="info-window show">
                     <strong>${LicensePlateNumber}:</strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
                     <p><strong>Lon:</strong> ${lon}</p>
-                    <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
-                    <p><strong>Last Updated Text:</strong> ${lastUpdatedText}</p>
+                    <p><strong>Last Update:</strong> ${formatLastUpdatedText(device.date, device.time)}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
                     <p><strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
                       device.LicensePlateNumber || "N/A"
