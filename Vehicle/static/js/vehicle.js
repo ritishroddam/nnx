@@ -288,6 +288,9 @@ function updateMap() {
           if (markers[imei]) {
             updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
+
+            const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
+            markers[imei].content.querySelector(".last-update").innerText = lastUpdatedText;
           } else {
             markers[imei] = createAdvancedMarker(
               latLng,
@@ -295,6 +298,11 @@ function updateMap() {
               rotation,
               device
             );
+            const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
+            const lastUpdateDiv = document.createElement("div");
+            lastUpdateDiv.className = "last-update";
+            lastUpdateDiv.innerText = lastUpdatedText;
+            markers[imei].content.appendChild(lastUpdateDiv);
           }
 
           if (device.sos === "1") {
