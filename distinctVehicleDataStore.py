@@ -51,6 +51,14 @@ def update_distinct_atlanta():
                 if doc['gps'] != 'V':
                     distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
 
+        distinct_atlanta_collection.delete_many({})
+
+        # Insert the distinct documents into the distinctAtlanta collection
+        for doc in distinct_documents.values():
+            distinct_atlanta_collection.insert_one(doc)
+
+        print('Distinct documents updated successfully')
+        
         # Send data one by one and compare with existing data
         for imei, doc in distinct_documents.items():
             if imei in existing_documents:
@@ -62,14 +70,6 @@ def update_distinct_atlanta():
                 # New data, emit it
                 emit_data(doc)
 
-        # Clear the distinctAtlanta collection
-        distinct_atlanta_collection.delete_many({})
-
-        # Insert the distinct documents into the distinctAtlanta collection
-        for doc in distinct_documents.values():
-            distinct_atlanta_collection.insert_one(doc)
-
-        print('Distinct documents updated successfully')
     except Exception as e:
         print(f'Error updating distinct documents: {str(e)}')
 
