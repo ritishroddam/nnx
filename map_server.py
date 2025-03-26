@@ -106,8 +106,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                 if json_data.get('status') == '01' and json_data.get('gps') == 'A':
                     sio.emit('test_event', {'message': 'Hello from server'})
-                    sio.emit('vehicle_update', json_data)
-                    print("Vehicle update emitted.")
+                    try:
+                        sio.emit('vehicle_update', json_data)
+                        print("Vehicle update emitted.")
+                    except Exception as e:
+                        print("Error emitting vehicle update:", e)
 
             else:
                 print("Invalid JSON format")
