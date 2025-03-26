@@ -6,9 +6,9 @@ PORT = 8555
 # Connect to the server
 sio = socketio.Client(logger=True, engineio_logger=True)  # Enable logging for debugging
 
-# @sio.on('vehicle_update')
-# def on_vehicle_update(data):
-#     print("Received vehicle_update:", data)
+@sio.on('vehicle_update')
+def on_vehicle_update(data):
+    print("Received vehicle_update:", data)
 
 @sio.event
 def connect():
