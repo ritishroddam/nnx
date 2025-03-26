@@ -19,12 +19,25 @@ vehicle_inventory_collection = db['vehicle_inventory']
 # Initialize Socket.IO client
 sio = socketio.Client()
 
+try:
+    sio.connect('http://0.0.0.0:8555', transports=['websocket'])
+    print("Socket.IO connected successfully")
+except Exception as e:
+    print(f"Error connecting to Socket.IO server: {str(e)}")
+
 def clean_imei(imei):
     # Extract the last 15 characters of the IMEI
     return imei[-15:]
 
 def update_distinct_atlanta():
     try:
+        if not sio.connected:
+            try:
+                sio.connect('http://0.0.0.0:8555', transports=['websocket'])
+                print("Socket.IO connected successfully")
+            except Exception as e:
+                print(f"Error connecting to Socket.IO server: {str(e)}")
+
         print("Successfully running distinct Vehicle")
         all_documents = list(atlanta_collection.find())
         print(f"Fetched {len(all_documents)} documents from the atlanta collection")
@@ -69,12 +82,7 @@ def update_distinct_atlanta():
 
 def emit_data(json_data):
     try:
-        try:
-            sio.connect('http://0.0.0.0:8555', transports=['websocket'])
-            print("Socket.IO connected successfully")
-        except Exception as e:
-            print(f"Error connecting to Socket.IO server: {str(e)}")
-            
+
         # Add additional data from vehicle_inventory_collection
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
         json_data['date_time'] = str(json_data['date_time'])
