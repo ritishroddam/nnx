@@ -52,7 +52,7 @@ function updateVehicleCard(data) {
     vehicleElement.setAttribute("data-imei", data.imei);
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
+      <div class="vehicle-header" style="color: #336699;">${data.LicensePlateNumber || "Unknown"} - ${
       data.status || "Unknown"
     }</div>
       <div class="vehicle-info">
@@ -210,7 +210,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
 
   const content = `<div class="info-window show">
-                    <strong>${LicensePlateNumber}:</strong> <br>
+                    <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
