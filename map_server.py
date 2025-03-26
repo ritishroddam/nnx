@@ -115,7 +115,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                                 print("Received vehicle_update:", data)
                         except Exception as e:
                             print("Error handling vehicle update:", e)
-                        on_vehicle_update(json_data)
                     except Exception as e:
                         print("Error emitting vehicle update:", e)
 
