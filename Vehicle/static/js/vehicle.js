@@ -27,7 +27,6 @@ function updateVehicleCard(data) {
 
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
-  const { formattedDate, formattedTime } = formatDateTime(data.date, data.time);
 
   if (vehicleCard) {
     // Update existing vehicle card
@@ -39,9 +38,7 @@ function updateVehicleCard(data) {
       } <br>
       <strong>Lat:</strong> ${latitude} <br>
       <strong>Lon:</strong> ${longitude} <br>
-      <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
-      formattedDate || "N/A"
-    } <br>
+      <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="device-details.html?imei=${
         data.imei
@@ -66,9 +63,7 @@ function updateVehicleCard(data) {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
-        <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
-      formattedDate || "N/A"
-    } <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
           data.LicensePlateNumber
@@ -142,11 +137,6 @@ async function renderVehicles() {
 
     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
-    const { formattedDate, formattedTime } = formatDateTime(
-      vehicle.date,
-      vehicle.time
-    );
 
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
@@ -666,11 +656,6 @@ function updateFloatingCard(vehicles, filterValue) {
         ? parseFloat(vehicle.longitude)
         : null;
 
-      const { formattedDate, formattedTime } = formatDateTime(
-        vehicle.date,
-        vehicle.time
-      );
-
       vehicleElement.innerHTML = `
         <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
         vehicle.status || "Unknown"
@@ -683,9 +668,7 @@ function updateFloatingCard(vehicles, filterValue) {
           } <br>
           <strong>Lat:</strong> ${latitude} <br>
           <strong>Lon:</strong> ${longitude} <br>
-          <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
-        formattedDate || "N/A"
-      } <br>
+          <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
           <strong>Location:</strong> ${
             vehicle.address || "Location unknown"
           } <br>
