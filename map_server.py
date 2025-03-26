@@ -18,7 +18,7 @@ from collections.abc import MutableMapping
 app = Flask(__name__)
 CORS(app)
 
-sio = socketio.Server(cors_allowed_origins="*")
+sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20)
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
 MONGO_URI = os.getenv(
