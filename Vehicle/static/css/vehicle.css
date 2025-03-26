@@ -59,7 +59,7 @@ body {
 }
 .vehicle-header {
   font-weight: bold;
-  color: #336699;
+  color: #333;
 }
 
 .vehicle-info {
@@ -235,7 +235,7 @@ body {
 
 .dark-mode .floating-card .vehicle-header {
   font-weight: bold;
-  color: #538cc6;
+  color: #ccc;
 }
 
 .dark-mode ::-webkit-scrollbar-thumb {
