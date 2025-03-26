@@ -20,7 +20,7 @@ CORS(app)
 
 last_emit_time = {}
 
-sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20)
+sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20, transports=['websocket'])
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
 MONGO_URI = os.getenv(

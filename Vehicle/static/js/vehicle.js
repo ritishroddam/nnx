@@ -1,4 +1,4 @@
-const socket = io(CONFIG.SOCKET_SERVER_URL);
+const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
 
 socket.on("connect", function () {
   console.log("Connected to WebSocket server");

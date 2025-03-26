@@ -17,7 +17,7 @@ distinct_atlanta_collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
 # Initialize Socket.IO client
-sio = socketio.Client()
+sio = socketio.Client(transports=['websocket'])
 
 try:
     sio.connect('http://0.0.0.0:8555')
