@@ -77,6 +77,7 @@ def emit_data(json_data):
     try:
         # Add additional data from vehicle_inventory_collection
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+        json_data['date_time'] = str(json_data['date_time'])
         if inventory_data:
             json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
         else:
