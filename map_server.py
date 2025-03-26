@@ -13,7 +13,6 @@ from math import radians, sin, cos, sqrt, atan2
 import socketio
 import eventlet
 import eventlet.wsgi
-from collections.abc import MutableMapping
 
 app = Flask(__name__)
 CORS(app)
@@ -108,6 +107,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 if json_data.get('status') == '01' and json_data.get('gps') == 'A':
                     sio.emit('test_event', {'message': 'Hello from server'})
                     sio.emit('vehicle_update', json_data)
+                    print("Vehicle update emitted.")
 
             else:
                 print("Invalid JSON format")

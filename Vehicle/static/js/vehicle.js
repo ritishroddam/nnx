@@ -13,7 +13,6 @@ socket.on("vehicle_update", function (data) {
 
 socket.on("sos_alert", function (data) {
   console.log("SOS alert received:", data);
-  const imei = sanitizeIMEI(data.imei);
   if (markers[imei]) {
     triggerSOS(imei, markers[imei]);
   }
@@ -38,7 +37,10 @@ function updateVehicleCard(data) {
       } <br>
       <strong>Lat:</strong> ${latitude} <br>
       <strong>Lon:</strong> ${longitude} <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
+      <strong>Last Update:</strong> ${formatLastUpdatedText(
+        data.date,
+        data.time
+      )} <br>
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="device-details.html?imei=${
         data.imei
@@ -63,7 +65,10 @@ function updateVehicleCard(data) {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          data.date,
+          data.time
+        )} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
           data.LicensePlateNumber
@@ -95,10 +100,9 @@ async function fetchVehicleData() {
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
     // return await response.json();
 
-
     const data = await response.json();
 
-    return data.map(vehicle => ({
+    return data.map((vehicle) => ({
       LicensePlateNumber: vehicle.LicensePlateNumber,
       VehicleType: vehicle.VehicleType,
       speed: vehicle.speed,
@@ -112,7 +116,7 @@ async function fetchVehicleData() {
       ignition: vehicle.ignition,
       gsm: vehicle.gsm_sig,
       sos: vehicle.sos,
-      odometer: vehicle.odometer
+      odometer: vehicle.odometer,
     }));
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
@@ -150,7 +154,10 @@ async function renderVehicles() {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          vehicle.date,
+          vehicle.time
+        )} <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?imei=${
           vehicle.LicensePlateNumber
@@ -208,14 +215,16 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const addressText =
     address || '<span class="missing-data">Location unknown</span>';
 
-
   const content = `<div class="info-window show">
                     <strong>${LicensePlateNumber}:</strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
                     <p><strong>Lon:</strong> ${lon}</p>
-                    <p><strong>Last Update:</strong> ${formatLastUpdatedText(device.date, device.time)}</p>
+                    <p><strong>Last Update:</strong> ${formatLastUpdatedText(
+                      device.date,
+                      device.time
+                    )}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
                     <p><strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
                       device.LicensePlateNumber || "N/A"
@@ -668,7 +677,10 @@ function updateFloatingCard(vehicles, filterValue) {
           } <br>
           <strong>Lat:</strong> ${latitude} <br>
           <strong>Lon:</strong> ${longitude} <br>
-          <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
+          <strong>Last Update:</strong> ${formatLastUpdatedText(
+            vehicle.date,
+            vehicle.time
+          )} <br>
           <strong>Location:</strong> ${
             vehicle.address || "Location unknown"
           } <br>
@@ -709,13 +721,10 @@ function showListView() {
 }
 
 function formatLastUpdatedText(date, time) {
-  const lastUpdated= convertToDate(
-    date,
-    time
-  );
+  const lastUpdated = convertToDate(date, time);
   const now = new Date();
   const timeDiff = Math.abs(now - lastUpdated);
-  let lastUpdatedText = '';
+  let lastUpdatedText = "";
 
   if (timeDiff < 60 * 1000) {
     const seconds = Math.floor(timeDiff / 1000);
@@ -729,7 +738,9 @@ function formatLastUpdatedText(date, time) {
     lastUpdatedText = ` ${hours} hours ${minutes} minutes ago`;
   } else if (timeDiff < 48 * 60 * 60 * 1000) {
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     lastUpdatedText = ` ${days} day ${hours} hours ago`;
   } else {
     const { formattedDate, formattedTime } = formatDateTime(date, time);
@@ -747,16 +758,16 @@ async function populateVehicleTable() {
 
   const vehicles = await fetchVehicleData();
   const fetchedData = await fetch("/dashboard/get_vehicle_distances")
-  .then((response) => response.json())
-  .catch((error) => {
-    console.error("Error fetching vehicle distances:", error);
-    return [];
-  });
+    .then((response) => response.json())
+    .catch((error) => {
+      console.error("Error fetching vehicle distances:", error);
+      return [];
+    });
 
-const distanceMap = fetchedData.reduce((map, data) => {
-  map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
-  return map;
-}, {});
+  const distanceMap = fetchedData.reduce((map, data) => {
+    map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
+    return map;
+  }, {});
 
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
@@ -768,40 +779,50 @@ const distanceMap = fetchedData.reduce((map, data) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", vehicle.imei);
-  
+
     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-  
+
     const speedValue =
       vehicle.speed !== null && vehicle.speed !== undefined
         ? convertSpeedToKmh(vehicle.speed).toFixed(2)
         : null;
-  
+
     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
     const address = vehicle.address || "Location unknown";
 
     console.log(vehicle.imei);
-  
+
     const row = tableBody.insertRow();
-    row.insertCell(0).innerText = vehicle.LicensePlateNumber? vehicle.LicensePlateNumber : vehicle.imei;
+    row.insertCell(0).innerText = vehicle.LicensePlateNumber
+      ? vehicle.LicensePlateNumber
+      : vehicle.imei;
     row.insertCell(1).innerText = vehicle.VehicleType;
-    row.insertCell(2).innerText = formatLastUpdatedText(vehicle.date, vehicle.time);
-    row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-  
+    row.insertCell(2).innerText = formatLastUpdatedText(
+      vehicle.date,
+      vehicle.time
+    );
+    row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(
+      6
+    )}`;
+
     const speedCell = row.insertCell(4);
     speedCell.innerText = speed;
     if (speedValue !== null && parseFloat(speedValue) > 60) {
       speedCell.style.border = "2px solid red";
     }
-  
-    row.insertCell(5).innerText = distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
+
+    row.insertCell(5).innerText =
+      distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
     row.insertCell(6).innerText = vehicle.odometer; // Assuming odometer reading
     row.insertCell(7).innerText = vehicle.ignition;
     row.insertCell(8).innerText = vehicle.gsm;
     row.insertCell(9).innerText = vehicle.sos;
-    row.insertCell(10).innerHTML = `<a href="device-details.html?LicensePlateNumber=${vehicle.LicensePlateNumber}" target="_blank">View Data</a>`;
+    row.insertCell(
+      10
+    ).innerHTML = `<a href="device-details.html?LicensePlateNumber=${vehicle.LicensePlateNumber}" target="_blank">View Data</a>`;
   });
-  
+
   showHidecar();
 }
 
