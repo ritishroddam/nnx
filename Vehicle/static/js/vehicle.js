@@ -148,6 +148,8 @@ async function renderVehicles() {
       vehicle.time
     );
 
+    const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
+
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
       vehicle.status || "Unknown"
@@ -163,6 +165,7 @@ async function renderVehicles() {
         <strong>Last Update:</strong> ${formattedTime || "N/A"} ${
       formattedDate || "N/A"
     } <br>
+     <strong>Last Updated Text:</strong> ${lastUpdatedText} <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="device-details.html?imei=${
           vehicle.LicensePlateNumber
@@ -220,6 +223,8 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const addressText =
     address || '<span class="missing-data">Location unknown</span>';
 
+  const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
+
   const { formattedDate, formattedTime } = formatDateTime(date, time);
   const content = `<div class="info-window show">
                     <strong>${LicensePlateNumber}:</strong> <br>
@@ -228,6 +233,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                     <p><strong>Lat:</strong> ${lat}</p>
                     <p><strong>Lon:</strong> ${lon}</p>
                     <p><strong>Last Update:</strong> ${formattedDate} ${formattedTime}</p>
+                    <p><strong>Last Updated Text:</strong> ${lastUpdatedText}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
                     <p><strong>Data:</strong> <a href="device-details.html?LicensePlateNumber=${
                       device.LicensePlateNumber || "N/A"
@@ -288,9 +294,6 @@ function updateMap() {
           if (markers[imei]) {
             updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
             markers[imei].device = device;
-
-            const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
-            markers[imei].content.querySelector(".last-update").innerText = lastUpdatedText;
           } else {
             markers[imei] = createAdvancedMarker(
               latLng,
@@ -298,11 +301,6 @@ function updateMap() {
               rotation,
               device
             );
-            const lastUpdatedText = formatLastUpdatedText(device.date, device.time);
-            const lastUpdateDiv = document.createElement("div");
-            lastUpdateDiv.className = "last-update";
-            lastUpdateDiv.innerText = lastUpdatedText;
-            markers[imei].content.appendChild(lastUpdateDiv);
           }
 
           if (device.sos === "1") {
