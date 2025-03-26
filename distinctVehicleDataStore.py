@@ -92,11 +92,17 @@ def emit_data(json_data):
             json_data['LicensePlateNumber'] = 'Unknown'
         json_data['_id'] = str(json_data['_id'])
 
-        if sio.connected:
-            sio.emit('vehicle_update', json_data)
-            print(f"Emitted data for IMEI {json_data['imei']}")
-        else:
-            print("Socket.IO client is not connected")
+        if not sio.connected:
+            try:
+                sio.connect('http://0.0.0.0:8555', transports=['websocket'])
+                print("Socket.IO connected successfully")
+            except Exception as e:
+                print(f"Error connecting to Socket.IO server: {str(e)}")
+        
+        sio.emit('vehicle_update', json_data)
+        print(f"Emitted data for IMEI {json_data['imei']}")
+
+            
 
     except Exception as e:
         print(f"Error emitting data: {str(e)}")
