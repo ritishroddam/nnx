@@ -52,9 +52,9 @@ function updateVehicleCard(data) {
     vehicleElement.setAttribute("data-imei", data.imei);
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-header"><span style="color: #336699;">${data.LicensePlateNumber || "Unknown"} - ${
+      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
       data.status || "Unknown"
-    }</span></div>
+    }</div>
       <div class="vehicle-info">
         <strong>Speed:</strong> ${
           data.speed
@@ -139,9 +139,9 @@ async function renderVehicles() {
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-header"><span style="color: #336699;">${vehicle.LicensePlateNumber} - ${
+      <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
       vehicle.status || "Unknown"
-    }</span></div>
+    }</div>
       <div class="vehicle-info">
         <strong>Speed:</strong> ${
           vehicle.speed
