@@ -108,7 +108,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     sio.emit('test_event', {'message': 'Hello from server'})
                     try:
                         sio.emit('vehicle_update', json_data)
-                        print("Vehicle update emitted.")
+                        print("Vehicle update emitted.", json_data)
                         try:
                             @sio.on('vehicle_update')
                             def on_vehicle_update(data):
