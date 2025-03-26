@@ -31,13 +31,6 @@ def clean_imei(imei):
 
 def update_distinct_atlanta():
     try:
-        if not sio.connected:
-            try:
-                sio.connect('http://0.0.0.0:8555', transports=['websocket'])
-                print("Socket.IO connected successfully")
-            except Exception as e:
-                print(f"Error connecting to Socket.IO server: {str(e)}")
-
         print("Successfully running distinct Vehicle")
         all_documents = list(atlanta_collection.find())
         print(f"Fetched {len(all_documents)} documents from the atlanta collection")
