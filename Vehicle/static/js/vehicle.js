@@ -216,7 +216,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     address || '<span class="missing-data">Location unknown</span>';
 
   const content = `<div class="info-window show">
-                    <strong>${LicensePlateNumber}:</strong> <br>
+                    <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
