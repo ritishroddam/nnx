@@ -236,7 +236,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 'latitude': json_data['latitude'],
                 'longitude': json_data['longitude'],
                 'location': json_data['address'],
-                'timestamp': datetime.now()
+                'timestamp': str(datetime.now())
             }
             sos_logs_collection.insert_one(sos_log)
             # print("SOS alert logged in MongoDB:", sos_log)
