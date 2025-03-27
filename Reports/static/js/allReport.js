@@ -197,25 +197,69 @@ fieldSelection.addEventListener("change", function (e) {
   // Save custom report
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
-    const reportNameInput = document.getElementById("reportName").value;
-    // const iconValue = document.getElementById("iconValue").value;
-    const reportName = reportNameInput.value;
-    const fields = Array.from(selectedFields.children).map(
-      (li) => li.dataset.field
-    );
 
-    fetch("/reports/save_custom_report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reportName, fields }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    // const reportNameInput = document.getElementById("reportName").value;
+    // const reportName = reportNameInput.value;
+    // const fields = Array.from(selectedFields.children).map(
+    //   (li) => li.dataset.field
+    // );
+
+     // Retrieve the report name input
+  const reportNameInput = document.getElementById("reportName");
+  if (!reportNameInput) {
+    alert("Report Name input is missing!");
+    return;
+  }
+
+  const reportName = reportNameInput.value.trim();
+  if (!reportName) {
+    alert("Please provide a valid report name.");
+    return;
+  }
+
+  // Retrieve the selected fields
+  const fields = Array.from(selectedFields.children).map(
+    (li) => li.dataset.field
+  );
+
+  if (fields.length === 0) {
+    alert("Please select at least one field.");
+    return;
+  }
+
+  //   fetch("/reports/save_custom_report", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ reportName, fields }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       alert(data.message);
+  //       customReportModal.style.display = "none";
+  //       createReportCard(reportName);
+  //     });
+  // };
+
+  fetch("/reports/save_custom_report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reportName, fields }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
         alert(data.message);
         customReportModal.style.display = "none";
         createReportCard(reportName);
-      });
-  };
+      } else {
+        alert("Failed to save the report. Please try again.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving the report:", error);
+      alert("An error occurred while saving the report.");
+    });
+};
 
   // Handle field selection
 fieldSelection.addEventListener("change", function (e) {
@@ -251,9 +295,7 @@ fieldSelection.addEventListener("change", function (e) {
     `;
     removeButton.onclick = function () {
       selectedFields.removeChild(listItem);
-      const checkbox = fieldSelection.querySelector(
-        `input[value="${field}"]`
-      );
+      const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
       if (checkbox) {
         checkbox.checked = false;
         checkbox.parentElement.style.display = "block"; // Show the field back in the selection list
