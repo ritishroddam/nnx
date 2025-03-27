@@ -155,17 +155,17 @@ function loadFields() {
 }
 
 // Handle field selection
-// Handle field selection
 fieldSelection.addEventListener("change", function (e) {
   const field = e.target.value;
 
   // Check if the field is already in the selected list
   if (e.target.checked) {
     // Prevent duplicate entries
-    if (selectedFields.querySelector(`[data-field="${field}"]`)) {
+    const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
+    if (existingField) {
       alert("This field is already selected.");
       e.target.checked = false; // Uncheck the checkbox
-      return;
+      return; // Stop further execution
     }
 
     // Create a new list item for the selected field
