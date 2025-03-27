@@ -208,7 +208,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'mcc': parts[22],
                     'mnc': parts[23],
                     'cellid': parts[24],
-                    'address': address  # Store address data
+                    'address': address,  # Store address data
+                    'timestamp': str(datetime.now())
                 }
                 return json_data
             else:
