@@ -71,53 +71,128 @@ document.addEventListener("DOMContentLoaded", function () {
     customReportModal.style.display = "none";
   };
 
-  // Load fields dynamically from backend
-  function loadFields() {
-    fetch("/reports/get_fields")
-      .then((response) => response.json())
-      .then((fields) => {
-        fieldSelection.innerHTML = "";
-        fields.forEach((field) => {
-          const fieldItem = document.createElement("div");
-          fieldItem.className = "field-item";
-          fieldItem.innerHTML = `
-                        <input type="checkbox" id="${field}" value="${field}" />
-                        <label for="${field}">${field}</label>
-                    `;
-          fieldSelection.appendChild(fieldItem);
-        });
+  // // Load fields dynamically from backend
+  // function loadFields() {
+  //   fetch("/reports/get_fields")
+  //     .then((response) => response.json())
+  //     .then((fields) => {
+  //       fieldSelection.innerHTML = "";
+  //       fields.forEach((field) => {
+  //         const fieldItem = document.createElement("div");
+  //         fieldItem.className = "field-item";
+  //         fieldItem.innerHTML = `
+  //                       <input type="checkbox" id="${field}" value="${field}" />
+  //                       <label for="${field}">${field}</label>
+  //                   `;
+  //         fieldSelection.appendChild(fieldItem);
+  //       });
+  //     });
+  // }
+
+  // // Handle field selection
+  // fieldSelection.addEventListener("change", function (e) {
+  //   const field = e.target.value;
+  //   if (e.target.checked) {
+  //     const listItem = document.createElement("li");
+  //     listItem.textContent = field;
+  //     listItem.dataset.field = field;
+  //     listItem.draggable = true;
+
+  //     // Add drag-and-drop functionality
+  //     listItem.addEventListener("dragstart", (e) => {
+  //       e.dataTransfer.setData("text/plain", e.target.dataset.field);
+  //     });
+  //     listItem.addEventListener("dragover", (e) => e.preventDefault());
+  //     listItem.addEventListener("drop", (e) => {
+  //       e.preventDefault();
+  //       const draggedField = e.dataTransfer.getData("text/plain");
+  //       const draggedItem = selectedFields.querySelector(
+  //         `[data-field="${draggedField}"]`
+  //       );
+  //       selectedFields.insertBefore(draggedItem, e.target);
+  //     });
+
+  //     selectedFields.appendChild(listItem);
+  //   } else {
+  //     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
+  //     if (listItem) selectedFields.removeChild(listItem);
+  //   }
+  // });
+
+  // Define the allowed fields
+const allowedFields = [
+  "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps", "gsm_sig", "arm", "date", "time", "sos", 
+  "harsh_speed", "odometer", "cellid", "internal_bat", "Package", "DateOfPurchase", "mnc", "r1", "r2", 
+  "r3", "YearOfManufacture", "DriverName", "InsuranceNumber", "sleep", "dir1", "SIM", "LicensePlateNumber", 
+  "ac", "longitude", "latitude", "speed", "door", "temp", "address", "Status", "MobileNumber"
+];
+
+// Load fields dynamically from backend
+function loadFields() {
+  fetch("/reports/get_fields")
+    .then((response) => response.json())
+    .then((fields) => {
+      fieldSelection.innerHTML = "";
+      const filteredFields = fields.filter((field) => allowedFields.includes(field));
+      filteredFields.forEach((field) => {
+        const fieldItem = document.createElement("div");
+        fieldItem.className = "field-item";
+        fieldItem.style.cssText = `
+          padding: 10px;
+          margin: 5px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          background-color: #f9f9f9;
+          cursor: pointer;
+        `;
+        fieldItem.innerHTML = `
+          <input type="checkbox" id="${field}" value="${field}" />
+          <label for="${field}" style="margin-left: 5px;">${field}</label>
+        `;
+        fieldSelection.appendChild(fieldItem);
       });
+    });
+}
+
+// Handle field selection
+fieldSelection.addEventListener("change", function (e) {
+  const field = e.target.value;
+  if (e.target.checked) {
+    const listItem = document.createElement("li");
+    listItem.textContent = field;
+    listItem.dataset.field = field;
+    listItem.draggable = true;
+    listItem.style.cssText = `
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #007bff;
+      border-radius: 5px;
+      background-color: #e7f3ff;
+      cursor: grab;
+    `;
+
+    // Add drag-and-drop functionality
+    listItem.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", e.target.dataset.field);
+    });
+    listItem.addEventListener("dragover", (e) => e.preventDefault());
+    listItem.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const draggedField = e.dataTransfer.getData("text/plain");
+      const draggedItem = selectedFields.querySelector(
+        `[data-field="${draggedField}"]`
+      );
+      selectedFields.insertBefore(draggedItem, e.target);
+    });
+
+    selectedFields.appendChild(listItem);
+    e.target.parentElement.style.display = "none"; // Hide the field from the selection list
+  } else {
+    const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
+    if (listItem) selectedFields.removeChild(listItem);
+    e.target.parentElement.style.display = "block"; // Show the field back in the selection list
   }
-
-  // Handle field selection
-  fieldSelection.addEventListener("change", function (e) {
-    const field = e.target.value;
-    if (e.target.checked) {
-      const listItem = document.createElement("li");
-      listItem.textContent = field;
-      listItem.dataset.field = field;
-      listItem.draggable = true;
-
-      // Add drag-and-drop functionality
-      listItem.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", e.target.dataset.field);
-      });
-      listItem.addEventListener("dragover", (e) => e.preventDefault());
-      listItem.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const draggedField = e.dataTransfer.getData("text/plain");
-        const draggedItem = selectedFields.querySelector(
-          `[data-field="${draggedField}"]`
-        );
-        selectedFields.insertBefore(draggedItem, e.target);
-      });
-
-      selectedFields.appendChild(listItem);
-    } else {
-      const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-      if (listItem) selectedFields.removeChild(listItem);
-    }
-  });
+});
 
   // Save custom report
   customReportForm.onsubmit = function (e) {
