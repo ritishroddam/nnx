@@ -89,9 +89,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const filteredFields = fields.filter((field) =>
           allowedFields.includes(field)
         );
-        
+
         fieldSelection.innerHTML = "";
-        fields.forEach((field) => {
+        filteredFields.forEach((field) => {
           const fieldItem = document.createElement("div");
           fieldItem.className = "field-item";
           fieldItem.innerHTML = `
