@@ -36,6 +36,11 @@ def vehicle_update(sid, data):
     print(f"Received vehicle_update event: {data}")
     sio.emit('vehicle_update', data)
 
+@sio.event
+def vehicle_update(sid, data):
+    print(f"Received sos alert: {data}")
+    sio.emit('sos_alert', data)
+
 MONGO_URI = os.getenv(
     'MONGO_URI',
     'mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin'
@@ -76,6 +81,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             last_emit_time[imei] = now
             return True
         return False
+    
+    def convert_to_datetime(date_str: str, time_str: str) -> datetime:
+    # Parse the date and time components
+        dt_str = date_str + time_str  # Combine both
+        dt_obj = datetime.strptime(dt_str, "%d%m%y%H%M%S")  # Convert to datetime object
+        return dt_obj
 
     def handle(self):
         receive_data = self.request.recv(4096)
@@ -103,20 +114,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 # print(f"SOS state received: {sos_state}")
 
                 with MyTCPHandler.lock:
-                    if sos_state == '1' and not MyTCPHandler.sos_alert_triggered:
-                        MyTCPHandler.sos_active = True
-                        MyTCPHandler.sos_alert_triggered = True
-
+                    if sos_state == '1':
                         self.log_sos_to_mongodb(json_data)
 
-                        json_data['_id'] = str(json_data.get('_id', ''))
-                        sio.emit('test_event', {'message': 'Hello from server'})
-                        sio.emit('sos_alert', json_data)
-
-                    elif sos_state == '0' and MyTCPHandler.sos_active:
-                        MyTCPHandler.sos_active = False
-                        MyTCPHandler.sos_alert_triggered = False
-                        # print("SOS alert reset.")
+                        if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) < datetime.now() - timedelta(minutes = 5):
+                            sio.emit('sos_alert', json_data)
 
                 self.store_data_in_mongodb(json_data)
             else:
@@ -220,7 +222,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def store_data_in_mongodb(self, json_data):
         try:
             result = collection.insert_one(json_data)  # Insert into MongoDB
-            json_data['_id'] = str(result.inserted_id)  # Assign MongoDB generated _id
         except Exception as e:
             print("Error storing data in MongoDB:", e)
 
@@ -229,6 +230,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         try:
             sos_log = {
                 'imei': json_data['imei'],
+                'date': json_data['date'],
+                'time': json_data['time'],
                 'latitude': json_data['latitude'],
                 'longitude': json_data['longitude'],
                 'location': json_data['address'],
