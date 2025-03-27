@@ -76,6 +76,20 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/reports/get_fields")
       .then((response) => response.json())
       .then((fields) => {
+        const allowedFields = [
+          "TravelPath",
+          "Distance",
+          "Speed",
+          "Stoppage",
+          "Idle",
+          "Ignition",
+          "Panic",
+          "Daily",
+        ];
+        const filteredFields = fields.filter((field) =>
+          allowedFields.includes(field)
+        );
+        
         fieldSelection.innerHTML = "";
         fields.forEach((field) => {
           const fieldItem = document.createElement("div");
