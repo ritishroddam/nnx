@@ -46,6 +46,7 @@ def update_distinct_atlanta():
             imei = clean_imei(doc['imei'])
             date_time_str = f"{doc['date']} {doc['time']}"
             date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
+            doc.pop('_id', None)
 
             if imei not in distinct_documents or date_time > distinct_documents[imei]['date_time']:
                 if doc['gps'] != 'V':
