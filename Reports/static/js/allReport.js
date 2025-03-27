@@ -76,34 +76,14 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/reports/get_fields")
       .then((response) => response.json())
       .then((fields) => {
-        // Fields directly available in the table
-        const tableFields = ["Speed", "Ignition", "Panic"];
-  
-        // Fields that need to be calculated
-        const calculatedFields = [
-          "TravelPath",
-          "Distance",
-          "Stoppage",
-          "Idle",
-          "Daily",
-        ];
-  
-        // Combine both sets of fields
-        const allowedFields = [...tableFields, ...calculatedFields];
-  
-        // Filter only the allowed fields
-        const filteredFields = allowedFields.filter((field) =>
-          tableFields.includes(field) || calculatedFields.includes(field)
-        );
-  
         fieldSelection.innerHTML = "";
-        filteredFields.forEach((field) => {
+        fields.forEach((field) => {
           const fieldItem = document.createElement("div");
           fieldItem.className = "field-item";
           fieldItem.innerHTML = `
-            <input type="checkbox" id="${field}" value="${field}" />
-            <label for="${field}">${field}</label>
-          `;
+                        <input type="checkbox" id="${field}" value="${field}" />
+                        <label for="${field}">${field}</label>
+                    `;
           fieldSelection.appendChild(fieldItem);
         });
       });

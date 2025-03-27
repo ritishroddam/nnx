@@ -28,12 +28,12 @@ def get_fields():
 def save_custom_report():
     data = request.json
     report_name = data.get("reportName")
-    icon_value = data.get("iconValue")
+    # icon_value = data.get("iconValue")
     fields = data.get("fields")
 
     db['custom_reports'].insert_one({
         "report_name": report_name,
-        "icon_value": icon_value,
+        # "icon_value": icon_value,
         "fields": fields
     })
     return jsonify({"message": "Custom report saved successfully!"})
