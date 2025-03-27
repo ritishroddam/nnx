@@ -157,7 +157,15 @@ function loadFields() {
 // Handle field selection
 fieldSelection.addEventListener("change", function (e) {
   const field = e.target.value;
+
+  // Check if the field is already in the selected list
   if (e.target.checked) {
+    if (selectedFields.querySelector(`[data-field="${field}"]`)) {
+      alert("This field is already selected.");
+      e.target.checked = false; // Uncheck the checkbox
+      return;
+    }
+
     const listItem = document.createElement("li");
     listItem.textContent = field;
     listItem.dataset.field = field;
@@ -169,7 +177,33 @@ fieldSelection.addEventListener("change", function (e) {
       border-radius: 5px;
       background-color: #e7f3ff;
       cursor: grab;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     `;
+
+    // Add a "Remove" button
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Remove";
+    removeButton.style.cssText = `
+      margin-left: 10px;
+      padding: 5px 10px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    `;
+    removeButton.onclick = function () {
+      selectedFields.removeChild(listItem);
+      const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
+      if (checkbox) {
+        checkbox.checked = false;
+        checkbox.parentElement.style.display = "block"; // Show the field back in the selection list
+      }
+    };
+
+    listItem.appendChild(removeButton);
 
     // Add drag-and-drop functionality
     listItem.addEventListener("dragstart", (e) => {
@@ -205,27 +239,28 @@ fieldSelection.addEventListener("change", function (e) {
     // );
 
      // Retrieve the report name input
-  const reportNameInput = document.getElementById("reportName");
-  if (!reportNameInput) {
-    alert("Report Name input is missing!");
-    return;
-  }
-
-  const reportName = reportNameInput.value.trim();
-  if (!reportName) {
-    alert("Please provide a valid report name.");
-    return;
-  }
-
-  // Retrieve the selected fields
-  const fields = Array.from(selectedFields.children).map(
-    (li) => li.dataset.field
-  );
-
-  if (fields.length === 0) {
-    alert("Please select at least one field.");
-    return;
-  }
+     const reportNameInput = document.getElementById("reportName");
+     if (!reportNameInput) {
+       alert("Report Name input is missing!");
+       return;
+     }
+   
+     const reportName = reportNameInput.value.trim();
+     if (!reportName) {
+       alert("Please provide a valid report name.");
+       return;
+     }
+   
+     const fields = Array.from(selectedFields.children).map(
+       (li) => li.dataset.field
+     );
+   
+     if (fields.length === 0) {
+       alert("Please select at least one field.");
+       return;
+     }
+   
+     console.log("Saving report with the following data:", { reportName, fields });
 
   //   fetch("/reports/save_custom_report", {
   //     method: "POST",
