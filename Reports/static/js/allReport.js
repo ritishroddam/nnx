@@ -292,7 +292,7 @@ fieldSelection.addEventListener("change", function (e) {
       if (selectedFields.querySelector(`[data-field="${field}"]`)) {
         alert("This field is already selected.");
         e.target.checked = false; // Uncheck the checkbox
-        return;
+        return; // Stop further execution
       }
   
       // Create a new list item for the selected field
