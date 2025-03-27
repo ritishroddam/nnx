@@ -155,6 +155,7 @@ function loadFields() {
 }
 
 // Handle field selection
+// Handle field selection
 fieldSelection.addEventListener("change", function (e) {
   const field = e.target.value;
 
@@ -167,6 +168,7 @@ fieldSelection.addEventListener("change", function (e) {
       return;
     }
 
+    // Create a new list item for the selected field
     const listItem = document.createElement("li");
     listItem.textContent = field;
     listItem.dataset.field = field;
@@ -223,6 +225,7 @@ fieldSelection.addEventListener("change", function (e) {
     selectedFields.appendChild(listItem);
     e.target.parentElement.style.display = "none"; // Hide the field from the selection list
   } else {
+    // Remove the field from the selected list
     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
     if (listItem) selectedFields.removeChild(listItem);
     e.target.parentElement.style.display = "block"; // Show the field back in the selection list
