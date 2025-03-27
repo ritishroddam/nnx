@@ -235,136 +235,129 @@ fieldSelection.addEventListener("change", function (e) {
   // Save custom report
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
-
-    // const reportNameInput = document.getElementById("reportName").value;
-    // const reportName = reportNameInput.value;
-    // const fields = Array.from(selectedFields.children).map(
-    //   (li) => li.dataset.field
-    // );
-
-     // Retrieve the report name input
-     const reportNameInput = document.getElementById("reportName");
-     if (!reportNameInput) {
-       alert("Report Name input is missing!");
-       return;
-     }
-   
-     const reportName = reportNameInput.value.trim();
-     if (!reportName) {
-       alert("Please provide a valid report name.");
-       return;
-     }
-   
-     const fields = Array.from(selectedFields.children).map(
-       (li) => li.dataset.field
-     );
-   
-     if (fields.length === 0) {
-       alert("Please select at least one field.");
-       return;
-     }
-   
-     console.log("Saving report with the following data:", { reportName, fields });
-
-  //   fetch("/reports/save_custom_report", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ reportName, fields }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       alert(data.message);
-  //       customReportModal.style.display = "none";
-  //       createReportCard(reportName);
-  //     });
-  // };
-
-  fetch("/reports/save_custom_report", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ reportName, fields }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        alert(data.message);
-        customReportModal.style.display = "none";
-        createReportCard(reportName);
-      } else {
-        alert("Failed to save the report. Please try again.");
-      }
+  
+    // Retrieve the report name input
+    const reportNameInput = document.getElementById("reportName");
+    if (!reportNameInput) {
+      alert("Report Name input is missing!");
+      return;
+    }
+  
+    const reportName = reportNameInput.value.trim();
+    if (!reportName) {
+      alert("Please provide a valid report name.");
+      return;
+    }
+  
+    // Retrieve the selected fields and remove duplicates
+    const fields = Array.from(new Set(Array.from(selectedFields.children).map(
+      (li) => li.dataset.field
+    )));
+  
+    if (fields.length === 0) {
+      alert("Please select at least one field.");
+      return;
+    }
+  
+    console.log("Saving report with the following data:", { reportName, fields });
+  
+    fetch("/reports/save_custom_report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reportName, fields }),
     })
-    .catch((error) => {
-      console.error("Error saving the report:", error);
-      alert("An error occurred while saving the report.");
-    });
-};
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          customReportModal.style.display = "none";
+          createReportCard(reportName);
+        } else {
+          alert("Failed to save the report. Please try again.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error saving the report:", error);
+        alert("An error occurred while saving the report.");
+      });
+  };
 
   // Handle field selection
-fieldSelection.addEventListener("change", function (e) {
-  const field = e.target.value;
-  if (e.target.checked) {
-    const listItem = document.createElement("li");
-    listItem.textContent = field;
-    listItem.dataset.field = field;
-    listItem.draggable = true;
-    listItem.style.cssText = `
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid #007bff;
-      border-radius: 5px;
-      background-color: #e7f3ff;
-      cursor: grab;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    `;
-
-    // Add a "Remove" button
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Remove";
-    removeButton.style.cssText = `
-      margin-left: 10px;
-      padding: 5px 10px;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    `;
-    removeButton.onclick = function () {
-      selectedFields.removeChild(listItem);
-      const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
-      if (checkbox) {
-        checkbox.checked = false;
-        checkbox.parentElement.style.display = "block"; // Show the field back in the selection list
+  fieldSelection.addEventListener("change", function (e) {
+    const field = e.target.value;
+  
+    // Check if the field is already in the selected list
+    if (e.target.checked) {
+      // Prevent duplicate entries
+      if (selectedFields.querySelector(`[data-field="${field}"]`)) {
+        alert("This field is already selected.");
+        e.target.checked = false; // Uncheck the checkbox
+        return;
       }
-    };
-
-    listItem.appendChild(removeButton);
-
-    // Add drag-and-drop functionality
-    listItem.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", e.target.dataset.field);
-    });
-    listItem.addEventListener("dragover", (e) => e.preventDefault());
-    listItem.addEventListener("drop", (e) => {
-      e.preventDefault();
-      const draggedField = e.dataTransfer.getData("text/plain");
-      const draggedItem = selectedFields.querySelector(
-        `[data-field="${draggedField}"]`
-      );
-      selectedFields.insertBefore(draggedItem, e.target);
-    });
-
-    selectedFields.appendChild(listItem);
-    e.target.parentElement.style.display = "none"; // Hide the field from the selection list
-  } else {
-    const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-    if (listItem) selectedFields.removeChild(listItem);
-    e.target.parentElement.style.display = "block"; // Show the field back in the selection list
-  }
-});
+  
+      // Create a new list item for the selected field
+      const listItem = document.createElement("li");
+      listItem.textContent = field;
+      listItem.dataset.field = field;
+      listItem.draggable = true;
+      listItem.style.cssText = `
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #007bff;
+        border-radius: 5px;
+        background-color: #e7f3ff;
+        cursor: grab;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      `;
+  
+      // Add a "Remove" button
+      const removeButton = document.createElement("button");
+      removeButton.textContent = "Remove";
+      removeButton.style.cssText = `
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      `;
+      removeButton.onclick = function () {
+        selectedFields.removeChild(listItem);
+        const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
+        if (checkbox) {
+          checkbox.checked = false;
+          checkbox.parentElement.style.display = "block"; // Show the field back in the selection list
+        }
+      };
+  
+      listItem.appendChild(removeButton);
+  
+      // Add drag-and-drop functionality
+      listItem.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", e.target.dataset.field);
+      });
+      listItem.addEventListener("dragover", (e) => e.preventDefault());
+      listItem.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const draggedField = e.dataTransfer.getData("text/plain");
+        const draggedItem = selectedFields.querySelector(
+          `[data-field="${draggedField}"]`
+        );
+        selectedFields.insertBefore(draggedItem, e.target);
+      });
+  
+      selectedFields.appendChild(listItem);
+      e.target.parentElement.style.display = "none"; // Hide the field from the selection list
+    } else {
+      // Remove the field from the selected list
+      const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
+      if (listItem) selectedFields.removeChild(listItem);
+      e.target.parentElement.style.display = "block"; // Show the field back in the selection list
+    }
+  });
 
   // Create a new report card dynamically
   function createReportCard(reportName) {
