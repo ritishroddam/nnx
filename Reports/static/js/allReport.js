@@ -279,7 +279,12 @@ fieldSelection.addEventListener("change", function (e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reportName, fields }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to save the report.");
+        }
+        return response.json();
+      })
       .then((data) => {
         if (data.success) {
           alert(data.message);

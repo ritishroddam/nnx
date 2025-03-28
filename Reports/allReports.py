@@ -69,8 +69,8 @@ def save_custom_report():
             "fields": fields
         })
 
-        # Redirect to the allReport.html page
-        return redirect(url_for('Reports.index'))  # Redirect to the index route
+        # Return a success response with a redirect URL
+        return jsonify({"success": True, "message": "Custom report saved successfully!", "redirect_url": url_for('Reports.index')}), 200
     except Exception as e:
         # Log the error and return a failure response
         print(f"Error saving custom report: {e}")
