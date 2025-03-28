@@ -292,9 +292,9 @@ fieldSelection.addEventListener("change", function (e) {
   
     // Check if the field is already in the selected list
     if (e.target.checked) {
-      // Prevent duplicate entries
-      if (selectedFields.querySelector(`[data-field="${field}"]`)) {
-        alert("This field is already selected.");
+      const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
+      if (existingField) {
+        console.log("Duplicate field detected:", field); // Debugging
         e.target.checked = false; // Uncheck the checkbox
         return; // Stop further execution
       }
