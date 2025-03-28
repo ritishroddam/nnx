@@ -62,14 +62,19 @@ def save_custom_report():
     if not report_name or not fields:
         return jsonify({"success": False, "message": "Invalid data provided."}), 400
 
-    # Save the custom report to the database
-    db['custom_reports'].insert_one({
-        "report_name": report_name,
-        "fields": fields
-    })
+    try:
+        # Save the custom report to the database
+        db['custom_reports'].insert_one({
+            "report_name": report_name,
+            "fields": fields
+        })
 
-    # Redirect to the allReports.html page
-    return redirect(url_for('Reports.index'))
+        # Return a success response
+        return jsonify({"success": True, "message": "Custom report saved successfully!"}), 200
+    except Exception as e:
+        # Log the error and return a failure response
+        print(f"Error saving custom report: {e}")
+        return jsonify({"success": False, "message": "An error occurred while saving the report."}), 500
 
 @reports_bp.route('/get_custom_reports', methods=['GET'])
 def get_custom_reports():
