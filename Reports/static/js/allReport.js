@@ -62,8 +62,6 @@ document.addEventListener("DOMContentLoaded", function () {
     customReportModal.style.display = "none";
   };
 
-    loadReports();
-
     document.querySelector('[data-report="custom"]').onclick = function () {
       customReportModal.style.display = "block";
       loadFields();
@@ -97,38 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  function loadReports() {
-    fetch("/reports/get_custom_reports")
-      .then((response) => response.json())
-      .then((reports) => {
-        console.log("Fetched Reports:", reports); // Debugging
   
-        const reportCardsContainer = document.getElementById("report-cards-container");
-        if (!reportCardsContainer) {
-          console.error("Error: Element with id 'report-cards-container' not found.");
-          return;
-        }
-  
-        reportCardsContainer.innerHTML = ""; // Clear previous reports
-  
-        reports.forEach((report) => {
-          const reportCard = document.createElement("div");
-          reportCard.classList.add("report-card");
-  
-          reportCard.innerHTML = `
-            <h3>${report.report_name}</h3>
-            <i class="fa-solid fa-file-alt"></i>
-          `;
-  
-          reportCardsContainer.appendChild(reportCard);
-        });
-  
-        console.log("Reports displayed successfully.");
-      })
-      .catch((error) => {
-        console.error("Error fetching custom reports:", error);
-      });
-  }
 
 const allowedFields = [
   "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps", "gsm_sig", "arm", "date", "time", "sos", 
