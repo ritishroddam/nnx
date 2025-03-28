@@ -71,6 +71,19 @@ document.addEventListener("DOMContentLoaded", function () {
     customReportModal.style.display = "none";
   };
 
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/reports/get_custom_reports")
+      .then((response) => response.json())
+      .then((reports) => {
+        reports.forEach((report) => {
+          createReportCard(report.report_name);
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching custom reports:", error);
+      });
+  });
+
   // // Load fields dynamically from backend
   // function loadFields() {
   //   fetch("/reports/get_fields")
@@ -240,7 +253,6 @@ fieldSelection.addEventListener("change", function (e) {
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
   
-    // Retrieve the report name input
     const reportNameInput = document.getElementById("reportName");
     if (!reportNameInput) {
       alert("Report Name input is missing!");
@@ -253,7 +265,6 @@ fieldSelection.addEventListener("change", function (e) {
       return;
     }
   
-    // Retrieve the selected fields and remove duplicates
     const fields = Array.from(new Set(Array.from(selectedFields.children).map(
       (li) => li.dataset.field
     )));
@@ -263,32 +274,31 @@ fieldSelection.addEventListener("change", function (e) {
       return;
     }
   
-    console.log("Saving report with the following data:", { reportName, fields });
+    fetch("/reports/save_custom_report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reportName, fields }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
   
-fetch("/reports/save_custom_report", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ reportName, fields }),
-})
-  .then((response) => response.json())
-  .then((data) => {
-    if (data.success) {
-      alert(data.message);
-      customReportModal.style.display = "none";
-      createReportCard(reportName);
-
-      // Redirect to allReport.html after successful save
-      window.location.href = "/allReport.html";
-    } else {
-      console.error("Failed to save the report:", data);
-      alert(data.message || "Failed to save the report. Please try again.");
-    }
-  })
-  .catch((error) => {
-    console.error("Error saving the report:", error);
-    alert("An error occurred while saving the report.");
-  });
-};
+          // Dynamically create the report card
+          createReportCard(reportName);
+  
+          // Redirect to allReport.html
+          window.location.href = "/allReport.html";
+        } else {
+          console.error("Failed to save the report:", data);
+          alert(data.message || "Failed to save the report. Please try again.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error saving the report:", error);
+        alert("An error occurred while saving the report.");
+      });
+  };
 
   // Handle field selection
   fieldSelection.addEventListener("change", function (e) {
@@ -374,9 +384,9 @@ fetch("/reports/save_custom_report", {
     reportCard.className = "report-card";
     reportCard.dataset.report = reportName;
     reportCard.innerHTML = `
-            <h3>${reportName}</h3>
-            <i class="fa-solid ${iconValue}"></i>
-        `;
+      <h3>${reportName}</h3>
+      <i class="fa-solid fa-file-alt"></i>
+    `;
     reportCard.onclick = function () {
       openReportModal(reportName);
     };

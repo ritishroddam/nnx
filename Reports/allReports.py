@@ -24,19 +24,39 @@ def get_fields():
     all_fields = set(atlanta_fields) | set(inventory_fields) | set(sim_fields) | set(device_fields)
     return jsonify(list(all_fields))
 
+# @reports_bp.route('/save_custom_report', methods=['POST'])
+# def save_custom_report():
+#     data = request.json
+#     report_name = data.get("reportName")
+#     # icon_value = data.get("iconValue")
+#     fields = data.get("fields")
+
+#     db['custom_reports'].insert_one({
+#         "report_name": report_name,
+#         # "icon_value": icon_value,
+#         "fields": fields
+#     })
+#     return jsonify({"message": "Custom report saved successfully!"})
+
 @reports_bp.route('/save_custom_report', methods=['POST'])
 def save_custom_report():
     data = request.json
     report_name = data.get("reportName")
-    # icon_value = data.get("iconValue")
     fields = data.get("fields")
+
+    if not report_name or not fields:
+        return jsonify({"success": False, "message": "Invalid data provided."})
 
     db['custom_reports'].insert_one({
         "report_name": report_name,
-        # "icon_value": icon_value,
         "fields": fields
     })
-    return jsonify({"message": "Custom report saved successfully!"})
+    return jsonify({"success": True, "message": "Custom report saved successfully!"})
+
+@reports_bp.route('/get_custom_reports', methods=['GET'])
+def get_custom_reports():
+    reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
+    return jsonify(reports)
 
 @reports_bp.route('/download_custom_report', methods=['POST'])
 def download_custom_report():
