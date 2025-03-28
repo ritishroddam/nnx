@@ -21,8 +21,14 @@ window.onclick = function (event) {
 };
 
 document.querySelector(".cancel-btn").onclick = function () {
-  modal.style.display = "none";
+  const modal = document.getElementById("customReportModal"); // Make sure to select the modal
+  if (modal) {
+    modal.style.display = "none";
+  } else {
+    console.error("Modal not found!");
+  }
 };
+
 
 document.getElementById("generateReport").onclick = function () {
   const fields = Array.from(selectedFields.children).map(
