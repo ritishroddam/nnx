@@ -277,7 +277,8 @@ fieldSelection.addEventListener("change", function (e) {
           customReportModal.style.display = "none";
           createReportCard(reportName);
         } else {
-          alert("Failed to save the report. Please try again.");
+          console.error("Failed to save the report:", data);
+          alert(data.message || "Failed to save the report. Please try again.");
         }
       })
       .catch((error) => {
