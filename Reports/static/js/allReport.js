@@ -424,6 +424,11 @@ fieldSelection.addEventListener("change", function (e) {
 document.addEventListener("DOMContentLoaded", function () {
   const customReportsContainer = document.getElementById("custom-reports-container");
 
+  if (!customReportsContainer) {
+    console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
+    return;
+  }
+
   // Fetch custom reports from the backend
   fetch("/reports/get_custom_reports")
     .then((response) => response.json())
