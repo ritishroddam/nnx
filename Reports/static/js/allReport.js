@@ -53,16 +53,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const selectedFields = document.getElementById("selectedFields");
   const reportCardsContainer = document.querySelector(".report-cards");
   const customReportsContainer = document.getElementById("custom-reports-container");
+
+  document.querySelector('[data-report="custom"]').onclick = function () {
+    customReportModal.style.display = "block";
+    loadFields();
+  };
   
   if (!customReportsContainer) {
     console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
     return;
   }
 
-  document.querySelector('[data-report="custom"]').onclick = function () {
-    customReportModal.style.display = "block";
-    loadFields();
-  };
+
 
   // document.querySelector(".close").onclick = function () {
   //   customReportModal.style.display = "none";
