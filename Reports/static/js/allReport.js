@@ -286,9 +286,6 @@ fieldSelection.addEventListener("change", function (e) {
   
           // Dynamically create the report card
           createReportCard(reportName);
-  
-          // Redirect to allReport.html
-          window.location.href = "/allReport.html";
         } else {
           console.error("Failed to save the report:", data);
           alert(data.message || "Failed to save the report. Please try again.");
@@ -318,30 +315,10 @@ fieldSelection.addEventListener("change", function (e) {
       listItem.textContent = field;
       listItem.dataset.field = field;
       listItem.draggable = true;
-      listItem.style.cssText = `
-        padding: 10px;
-        margin: 5px;
-        border: 1px solid #007bff;
-        border-radius: 5px;
-        background-color: #e7f3ff;
-        cursor: grab;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      `;
   
       // Add a "Remove" button
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
-      removeButton.style.cssText = `
-        margin-left: 10px;
-        padding: 5px 10px;
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-      `;
       removeButton.onclick = function () {
         selectedFields.removeChild(listItem);
         const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
