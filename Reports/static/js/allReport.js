@@ -340,8 +340,7 @@ fieldSelection.addEventListener("change", function (e) {
     create: false,
     sortField: "text",
   });
-
-  document.addEventListener("DOMContentLoaded", function () {
+  
     const customReportsContainer = document.getElementById("custom-reports-container");
   
     if (!customReportsContainer) {
@@ -375,8 +374,6 @@ fieldSelection.addEventListener("change", function (e) {
         console.error("Error fetching custom reports:", error);
         customReportsContainer.innerHTML = "<p>Error loading custom reports.</p>";
       });
-  });
-  
 });
 
 
