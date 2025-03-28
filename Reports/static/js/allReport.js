@@ -265,27 +265,30 @@ fieldSelection.addEventListener("change", function (e) {
   
     console.log("Saving report with the following data:", { reportName, fields });
   
-    fetch("/reports/save_custom_report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reportName, fields }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          alert(data.message);
-          customReportModal.style.display = "none";
-          createReportCard(reportName);
-        } else {
-          console.error("Failed to save the report:", data);
-          alert(data.message || "Failed to save the report. Please try again.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving the report:", error);
-        alert("An error occurred while saving the report.");
-      });
-  };
+fetch("/reports/save_custom_report", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ reportName, fields }),
+})
+  .then((response) => response.json())
+  .then((data) => {
+    if (data.success) {
+      alert(data.message);
+      customReportModal.style.display = "none";
+      createReportCard(reportName);
+
+      // Redirect to allReport.html after successful save
+      window.location.href = "/allReport.html";
+    } else {
+      console.error("Failed to save the report:", data);
+      alert(data.message || "Failed to save the report. Please try again.");
+    }
+  })
+  .catch((error) => {
+    console.error("Error saving the report:", error);
+    alert("An error occurred while saving the report.");
+  });
+};
 
   // Handle field selection
   fieldSelection.addEventListener("change", function (e) {
