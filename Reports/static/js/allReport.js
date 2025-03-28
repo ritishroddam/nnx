@@ -165,12 +165,12 @@ fieldSelection.addEventListener("change", function (e) {
   // Check if the field is already in the selected list
   if (e.target.checked) {
     const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
-    if (existingField) {
-      console.log("Duplicate field detected:", field); // Debugging
-      alert("This field is already selected.");
-      e.target.checked = false; // Uncheck the checkbox
-      return; // Stop further execution
-    }
+    // if (existingField) {
+    //   console.log("Duplicate field detected:", field); // Debugging
+    //   alert("This field is already selected.");
+    //   e.target.checked = false; // Uncheck the checkbox
+    //   return; // Stop further execution
+    // }
 
     // Create a new list item for the selected field
     const listItem = document.createElement("li");
