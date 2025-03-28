@@ -165,12 +165,12 @@ fieldSelection.addEventListener("change", function (e) {
   // Check if the field is already in the selected list
   if (e.target.checked) {
     const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
-    // if (existingField) {
-    //   console.log("Duplicate field detected:", field); // Debugging
-    //   alert("This field is already selected.");
-    //   e.target.checked = false; // Uncheck the checkbox
-    //   return; // Stop further execution
-    // }
+    if (existingField) {
+      console.log("Duplicate field detected:", field); // Debugging
+      alert("This field is already selected.");
+      e.target.checked = false; // Uncheck the checkbox
+      return; // Stop further execution
+    }
 
     // Create a new list item for the selected field
     const listItem = document.createElement("li");
@@ -228,8 +228,7 @@ fieldSelection.addEventListener("change", function (e) {
 
     selectedFields.appendChild(listItem);
     e.target.parentElement.style.display = "none"; // Hide the field from the selection list
-  } 
-  else {
+  } else {
     // Remove the field from the selected list
     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
     if (listItem) selectedFields.removeChild(listItem);
@@ -294,11 +293,11 @@ fieldSelection.addEventListener("change", function (e) {
     // Check if the field is already in the selected list
     if (e.target.checked) {
       // Prevent duplicate entries
-      // if (selectedFields.querySelector(`[data-field="${field}"]`)) {
-      //   alert("This field is already selected.");
-      //   e.target.checked = false; // Uncheck the checkbox
-      //   return; // Stop further execution
-      // }
+      if (selectedFields.querySelector(`[data-field="${field}"]`)) {
+        alert("This field is already selected.");
+        e.target.checked = false; // Uncheck the checkbox
+        return; // Stop further execution
+      }
   
       // Create a new list item for the selected field
       const listItem = document.createElement("li");
