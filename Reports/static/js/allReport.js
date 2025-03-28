@@ -431,6 +431,8 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  console.log("custom-reports-container found:", customReportsContainer);
+
   // Fetch custom reports from the backend
   fetch("/reports/get_custom_reports")
     .then((response) => response.json())
