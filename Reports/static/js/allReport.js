@@ -279,21 +279,13 @@ fieldSelection.addEventListener("change", function (e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reportName, fields }),
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to save the report.");
-        }
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           alert(data.message);
   
-          // Dynamically create the report card
-          createReportCard(reportName);
-  
-          // Redirect to allReport.html
-          window.location.href = "/allReport.html";
+          // Redirect to the provided URL
+          window.location.href = data.redirect_url;
         } else {
           console.error("Failed to save the report:", data);
           alert(data.message || "Failed to save the report. Please try again.");
