@@ -230,6 +230,8 @@ fieldSelection.addEventListener("change", function (e) {
       .then((data) => {
         if (data.success) {
           alert(data.message);
+
+          createReportCard(reportName, fields); 
   
           window.location.href = data.redirect_url;
         } else {
