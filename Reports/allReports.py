@@ -52,6 +52,7 @@ def get_custom_reports():
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
     return jsonify(reports)
 
+
 @reports_bp.route('/download_custom_report', methods=['POST'])
 def download_custom_report():
     data = request.json

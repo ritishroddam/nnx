@@ -97,6 +97,40 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
+  async function fetchCustomReports() {
+    try {
+        let response = await fetch('/api/get-custom-reports');
+        if (!response.ok) {
+            throw new Error('Failed to fetch custom reports');
+        }
+        let reports = await response.json();
+        displayCustomReports(reports);
+    } catch (error) {
+        console.error('Error fetching custom reports:', error);
+    }
+}
+
+function displayCustomReports(reports) {
+    let container = document.getElementById("report-cards-container");
+    container.innerHTML = "";  // Clear existing reports
+
+    reports.forEach(report => {
+        let reportCard = document.createElement("a");
+        reportCard.classList.add("report-card");
+        reportCard.dataset.report = report.name;
+
+        reportCard.innerHTML = `
+            <h3>${report.name}</h3>
+            <i class="fa-solid ${report.icon}"></i>
+        `;
+        container.appendChild(reportCard);
+    });
+}
+
+// Call function when page loads
+document.addEventListener("DOMContentLoaded", fetchCustomReports);
+
+
   document.addEventListener("DOMContentLoaded", function () {
     const customReportsContainer = document.getElementById("custom-reports-container");
   
