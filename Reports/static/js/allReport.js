@@ -96,47 +96,8 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Error fetching custom reports:", error);
       });
   });
-  
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const customReportsContainer = document.getElementById("custom-reports-container");
   
-    if (!customReportsContainer) {
-      console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
-      return;
-    }
-  
-    console.log("custom-reports-container found:", customReportsContainer);
-  
-    // Fetch custom reports from the backend
-    fetch("/reports/get_custom_reports")
-      .then((response) => response.json())
-      .then((reports) => {
-        // Clear the container
-        customReportsContainer.innerHTML = "";
-  
-        // Check if there are any reports
-        if (reports.length === 0) {
-          customReportsContainer.innerHTML = "<p>No custom reports available.</p>";
-          return;
-        }
-  
-        // Dynamically create report cards for each custom report
-        reports.forEach((report) => {
-          const reportCard = document.createElement("div");
-          reportCard.className = "report-card";
-          reportCard.innerHTML = `
-            <h3>${report.report_name}</h3>
-            <i class="fa-solid fa-file-alt"></i>
-          `;
-          customReportsContainer.appendChild(reportCard);
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching custom reports:", error);
-        customReportsContainer.innerHTML = "<p>Error loading custom reports.</p>";
-      });
-  });
 
   // // Load fields dynamically from backend
   // function loadFields() {
@@ -462,4 +423,40 @@ fieldSelection.addEventListener("change", function (e) {
 });
 
 
+document.addEventListener("DOMContentLoaded", function () {
+  const customReportsContainer = document.getElementById("custom-reports-container");
 
+  if (!customReportsContainer) {
+    console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
+    return;
+  }
+
+  // Fetch custom reports from the backend
+  fetch("/reports/get_custom_reports")
+    .then((response) => response.json())
+    .then((reports) => {
+      // Clear the container
+      customReportsContainer.innerHTML = "";
+
+      // Check if there are any reports
+      if (reports.length === 0) {
+        customReportsContainer.innerHTML = "<p>No custom reports available.</p>";
+        return;
+      }
+
+      // Dynamically create report cards for each custom report
+      reports.forEach((report) => {
+        const reportCard = document.createElement("div");
+        reportCard.className = "report-card";
+        reportCard.innerHTML = `
+          <h3>${report.report_name}</h3>
+          <i class="fa-solid fa-file-alt"></i>
+        `;
+        customReportsContainer.appendChild(reportCard);
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching custom reports:", error);
+      customReportsContainer.innerHTML = "<p>Error loading custom reports.</p>";
+    });
+});
