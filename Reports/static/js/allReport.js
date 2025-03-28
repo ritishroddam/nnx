@@ -65,44 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("DOMContentLoaded", function () {
     const reportCardsContainer = document.getElementById("report-cards-container");
 
-    // fetch("/reports/get_custom_reports")
-    //   .then((response) => response.json())
-    //   .then((reports) => {
-    //     reportCardsContainer.innerHTML = "";
-
-    //     reports.forEach((report) => {
-    //       const reportCard = document.createElement("div");
-    //       reportCard.className = "report-card";
-    //       reportCard.innerHTML = `
-    //         <h3>${report.report_name}</h3>
-    //         <i class="fa-solid fa-file-alt"></i>
-    //       `;
-    //       reportCardsContainer.appendChild(reportCard);
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching custom reports:", error);
-    //   });
-
-    //   const customReportsContainer = document.getElementById("custom-reports-container");
-  
-    // if (!customReportsContainer) {
-    //   console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
-    //   return;
-    // }
-  
-    console.log("custom-reports-container found:", customReportsContainer);
-  
     fetch("/reports/get_custom_reports")
       .then((response) => response.json())
       .then((reports) => {
-        customReportsContainer.innerHTML = "";
-  
-        if (reports.length === 0) {
-          customReportsContainer.innerHTML = "<p>No custom reports available.</p>";
-          return;
-        }
-  
+        reportCardsContainer.innerHTML = "";
+
         reports.forEach((report) => {
           const reportCard = document.createElement("div");
           reportCard.className = "report-card";
@@ -110,13 +77,19 @@ document.addEventListener("DOMContentLoaded", function () {
             <h3>${report.report_name}</h3>
             <i class="fa-solid fa-file-alt"></i>
           `;
-          customReportsContainer.appendChild(reportCard);
+          reportCardsContainer.appendChild(reportCard);
         });
       })
       .catch((error) => {
         console.error("Error fetching custom reports:", error);
-        customReportsContainer.innerHTML = "<p>Error loading custom reports.</p>";
       });
+
+      const customReportsContainer = document.getElementById("custom-reports-container");
+  
+    if (!customReportsContainer) {
+      console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
+      return;
+    }
   });
 
 const allowedFields = [
