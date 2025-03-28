@@ -58,9 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
     loadFields();
   };
 
-  document.querySelector(".close").onclick = function () {
-    customReportModal.style.display = "none";
-  };
+  // document.querySelector(".close").onclick = function () {
+  //   customReportModal.style.display = "none";
+  // };
     
 
     fetch("/reports/get_custom_reports")
@@ -343,6 +343,8 @@ fieldSelection.addEventListener("change", function (e) {
     create: false,
     sortField: "text",
   });
+
+  createReportCard();
   
 });
 
