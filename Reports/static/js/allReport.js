@@ -1,32 +1,25 @@
-// Get the modal
 var modal = document.getElementById("reportModal");
 
-// Get the button that opens the modal
 var reportCards = document.querySelectorAll(".report-card");
 
-// Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
 
-// When the user clicks on the button, open the modal
 reportCards.forEach(function (card) {
   card.onclick = function () {
     modal.style.display = "block";
   };
 });
 
-// When the user clicks on <span> (x), close the modal
 span.onclick = function () {
   modal.style.display = "none";
 };
 
-// When the user clicks anywhere outside of the modal, close it
 window.onclick = function (event) {
   if (event.target == modal) {
     modal.style.display = "none";
   }
 };
 
-// Handle cancel button click
 document.querySelector(".cancel-btn").onclick = function () {
   modal.style.display = "none";
 };
@@ -60,28 +53,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const selectedFields = document.getElementById("selectedFields");
   const reportCardsContainer = document.querySelector(".report-cards");
 
-  // Open modal for custom report
   document.querySelector('[data-report="custom"]').onclick = function () {
     customReportModal.style.display = "block";
-    loadFields(); // Load fields dynamically
+    loadFields();
   };
 
-  // Close modal
   document.querySelector(".close").onclick = function () {
     customReportModal.style.display = "none";
   };
 
   document.addEventListener("DOMContentLoaded", function () {
     const reportCardsContainer = document.getElementById("report-cards-container");
-  
-    // Fetch custom reports from the backend
+
     fetch("/reports/get_custom_reports")
       .then((response) => response.json())
       .then((reports) => {
-        // Clear the container
         reportCardsContainer.innerHTML = "";
-  
-        // Dynamically create report cards for each custom report
+
         reports.forEach((report) => {
           const reportCard = document.createElement("div");
           reportCard.className = "report-card";
@@ -97,57 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  
-
-  // // Load fields dynamically from backend
-  // function loadFields() {
-  //   fetch("/reports/get_fields")
-  //     .then((response) => response.json())
-  //     .then((fields) => {
-  //       fieldSelection.innerHTML = "";
-  //       fields.forEach((field) => {
-  //         const fieldItem = document.createElement("div");
-  //         fieldItem.className = "field-item";
-  //         fieldItem.innerHTML = `
-  //                       <input type="checkbox" id="${field}" value="${field}" />
-  //                       <label for="${field}">${field}</label>
-  //                   `;
-  //         fieldSelection.appendChild(fieldItem);
-  //       });
-  //     });
-  // }
-
-  // // Handle field selection
-  // fieldSelection.addEventListener("change", function (e) {
-  //   const field = e.target.value;
-  //   if (e.target.checked) {
-  //     const listItem = document.createElement("li");
-  //     listItem.textContent = field;
-  //     listItem.dataset.field = field;
-  //     listItem.draggable = true;
-
-  //     // Add drag-and-drop functionality
-  //     listItem.addEventListener("dragstart", (e) => {
-  //       e.dataTransfer.setData("text/plain", e.target.dataset.field);
-  //     });
-  //     listItem.addEventListener("dragover", (e) => e.preventDefault());
-  //     listItem.addEventListener("drop", (e) => {
-  //       e.preventDefault();
-  //       const draggedField = e.dataTransfer.getData("text/plain");
-  //       const draggedItem = selectedFields.querySelector(
-  //         `[data-field="${draggedField}"]`
-  //       );
-  //       selectedFields.insertBefore(draggedItem, e.target);
-  //     });
-
-  //     selectedFields.appendChild(listItem);
-  //   } else {
-  //     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-  //     if (listItem) selectedFields.removeChild(listItem);
-  //   }
-  // });
-
-  // Define the allowed fields
 const allowedFields = [
   "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps", "gsm_sig", "arm", "date", "time", "sos", 
   "harsh_speed", "odometer", "cellid", "internal_bat", "Package", "DateOfPurchase", "mnc", "r1", "r2", 
@@ -155,7 +92,6 @@ const allowedFields = [
   "ac", "longitude", "latitude", "speed", "door", "temp", "address", "Status", "MobileNumber"
 ];
 
-// Load fields dynamically from backend
 function loadFields() {
   fetch("/reports/get_fields")
     .then((response) => response.json())
@@ -182,25 +118,20 @@ function loadFields() {
     });
 }
 
-// Handle field selection
-// Handle field selection
 fieldSelection.addEventListener("change", function (e) {
   const field = e.target.value;
 
-  // Debugging: Log the field and its state
   console.log("Field changed:", field, "Checked:", e.target.checked);
 
-  // Check if the field is already in the selected list
   if (e.target.checked) {
     const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
     if (existingField) {
-      console.log("Duplicate field detected:", field); // Debugging
+      console.log("Duplicate field detected:", field); 
       alert("This field is already selected.");
-      e.target.checked = false; // Uncheck the checkbox
-      return; // Stop further execution
+      e.target.checked = false; 
+      return; 
     }
 
-    // Create a new list item for the selected field
     const listItem = document.createElement("li");
     listItem.textContent = field;
     listItem.dataset.field = field;
@@ -217,7 +148,6 @@ fieldSelection.addEventListener("change", function (e) {
       align-items: center;
     `;
 
-    // Add a "Remove" button
     const removeButton = document.createElement("button");
     removeButton.textContent = "Remove";
     removeButton.style.cssText = `
@@ -234,13 +164,12 @@ fieldSelection.addEventListener("change", function (e) {
       const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
       if (checkbox) {
         checkbox.checked = false;
-        checkbox.parentElement.style.display = "block"; // Show the field back in the selection list
+        checkbox.parentElement.style.display = "block"; 
       }
     };
 
     listItem.appendChild(removeButton);
 
-    // Add drag-and-drop functionality
     listItem.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", e.target.dataset.field);
     });
@@ -255,16 +184,14 @@ fieldSelection.addEventListener("change", function (e) {
     });
 
     selectedFields.appendChild(listItem);
-    e.target.parentElement.style.display = "none"; // Hide the field from the selection list
+    e.target.parentElement.style.display = "none"; 
   } else {
-    // Remove the field from the selected list
     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
     if (listItem) selectedFields.removeChild(listItem);
-    e.target.parentElement.style.display = "block"; // Show the field back in the selection list
+    e.target.parentElement.style.display = "block"; 
   }
 });
 
-  // Save custom report
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
   
@@ -304,7 +231,6 @@ fieldSelection.addEventListener("change", function (e) {
         if (data.success) {
           alert(data.message);
   
-          // Redirect to the provided URL
           window.location.href = data.redirect_url;
         } else {
           console.error("Failed to save the report:", data);
@@ -317,26 +243,22 @@ fieldSelection.addEventListener("change", function (e) {
       });
   };
 
-  // Handle field selection
   fieldSelection.addEventListener("change", function (e) {
     const field = e.target.value;
   
-    // Check if the field is already in the selected list
     if (e.target.checked) {
       const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
       if (existingField) {
-        console.log("Duplicate field detected:", field); // Debugging
-        e.target.checked = false; // Uncheck the checkbox
-        return; // Stop further execution
+        console.log("Duplicate field detected:", field);
+        e.target.checked = false;
+        return; 
       }
-  
-      // Create a new list item for the selected field
+
       const listItem = document.createElement("li");
       listItem.textContent = field;
       listItem.dataset.field = field;
       listItem.draggable = true;
-  
-      // Add a "Remove" button
+
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
       removeButton.onclick = function () {
@@ -344,13 +266,12 @@ fieldSelection.addEventListener("change", function (e) {
         const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
         if (checkbox) {
           checkbox.checked = false;
-          checkbox.parentElement.style.display = "block"; // Show the field back in the selection list
+          checkbox.parentElement.style.display = "block"; 
         }
       };
   
       listItem.appendChild(removeButton);
-  
-      // Add drag-and-drop functionality
+
       listItem.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", e.target.dataset.field);
       });
@@ -365,16 +286,14 @@ fieldSelection.addEventListener("change", function (e) {
       });
   
       selectedFields.appendChild(listItem);
-      e.target.parentElement.style.display = "none"; // Hide the field from the selection list
+      e.target.parentElement.style.display = "none"; 
     } else {
-      // Remove the field from the selected list
       const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
       if (listItem) selectedFields.removeChild(listItem);
-      e.target.parentElement.style.display = "block"; // Show the field back in the selection list
+      e.target.parentElement.style.display = "block"; 
     }
   });
 
-  // Create a new report card dynamically
   function createReportCard(reportName) {
     const reportCard = document.createElement("a");
     reportCard.href = "#";
@@ -390,7 +309,6 @@ fieldSelection.addEventListener("change", function (e) {
     reportCardsContainer.appendChild(reportCard);
   }
 
-  // Open report modal for custom report
   function openReportModal(reportName) {
     const reportModal = document.getElementById("reportModal");
     reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
@@ -433,20 +351,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   console.log("custom-reports-container found:", customReportsContainer);
 
-  // Fetch custom reports from the backend
   fetch("/reports/get_custom_reports")
     .then((response) => response.json())
     .then((reports) => {
-      // Clear the container
       customReportsContainer.innerHTML = "";
 
-      // Check if there are any reports
       if (reports.length === 0) {
         customReportsContainer.innerHTML = "<p>No custom reports available.</p>";
         return;
       }
 
-      // Dynamically create report cards for each custom report
       reports.forEach((report) => {
         const reportCard = document.createElement("div");
         reportCard.className = "report-card";
