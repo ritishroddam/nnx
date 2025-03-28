@@ -72,11 +72,24 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   document.addEventListener("DOMContentLoaded", function () {
+    const reportCardsContainer = document.getElementById("report-cards-container");
+  
+    // Fetch custom reports from the backend
     fetch("/reports/get_custom_reports")
       .then((response) => response.json())
       .then((reports) => {
+        // Clear the container
+        reportCardsContainer.innerHTML = "";
+  
+        // Dynamically create report cards for each custom report
         reports.forEach((report) => {
-          createReportCard(report.report_name);
+          const reportCard = document.createElement("div");
+          reportCard.className = "report-card";
+          reportCard.innerHTML = `
+            <h3>${report.report_name}</h3>
+            <i class="fa-solid fa-file-alt"></i>
+          `;
+          reportCardsContainer.appendChild(reportCard);
         });
       })
       .catch((error) => {
