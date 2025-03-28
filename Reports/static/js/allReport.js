@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/reports/get_custom_reports")
       .then((response) => response.json())
       .then((reports) => {
-        reportCardsContainer.innerHTML = "";
+        // reportCardsContainer.innerHTML = "";
 
         reports.forEach((report) => {
           const reportCard = document.createElement("div");
