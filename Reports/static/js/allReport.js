@@ -61,11 +61,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelector(".close").onclick = function () {
     customReportModal.style.display = "none";
   };
-
-    document.querySelector('[data-report="custom"]').onclick = function () {
-      customReportModal.style.display = "block";
-      loadFields();
-    };
     
 
     fetch("/reports/get_custom_reports")
