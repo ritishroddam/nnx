@@ -194,24 +194,3 @@
   background-color: #ccc;
 }
 
-li{
-  padding: 10px;
-  margin: 5px;
-  border: 1px solid #007bff;
-  border-radius: 5px;
-  background-color: #e7f3ff;
-  cursor: grab;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-button{
-  margin-left: 10px;
-  padding: 5px 10px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
