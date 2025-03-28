@@ -93,8 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
       return;
     }
-  });
-
   
 
 const allowedFields = [
@@ -351,6 +349,6 @@ fieldSelection.addEventListener("change", function (e) {
     sortField: "text",
   });
   
-// });
+});
 
 
