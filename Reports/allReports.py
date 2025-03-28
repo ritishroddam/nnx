@@ -47,6 +47,12 @@ def save_custom_report():
         print(f"Error saving custom report: {e}")
         return jsonify({"success": False, "message": "An error occurred while saving the report."}), 500
 
+# Place the get_custom_reports function here
+@reports_bp.route('/get_custom_reports', methods=['GET'])
+def get_custom_reports():
+    reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
+    return jsonify(reports)
+
 @reports_bp.route('/get_custom_reports', methods=['GET'])
 def get_custom_reports():
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
