@@ -7,9 +7,8 @@ import sys
 from io import BytesIO
 from flask import Blueprint, render_template
 
-# MongoDB connection
-client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client['nnx']
+from app import db
+
 collection = db['device_inventory']
 
 deviceEntry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', template_folder='templates')

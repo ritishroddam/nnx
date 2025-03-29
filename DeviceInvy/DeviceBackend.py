@@ -7,12 +7,14 @@ import sys
 from io import BytesIO
 from flask import Blueprint, render_template
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Needed to use flash
+from app import db
+from config import config
 
-# MongoDB connection
-client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client['nnx']
+app = Flask(__name__)
+app.config.from_object(config['default'])
+config['default'].init_app(app)
+app.secret_key = app.config['SECRET_KEY']
+
 collection = db['device_inventory']
 
 device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')

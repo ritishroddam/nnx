@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client["CordonEV"]
+from app import db
+
 data_collection = db["data"]
 atlanta_collection = db["atlanta"]
 

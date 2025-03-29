@@ -15,6 +15,8 @@ import eventlet
 import eventlet.wsgi
 import time
 
+from app import db
+
 app = Flask(__name__)
 CORS(app)
 
@@ -41,12 +43,7 @@ def vehicle_update(sid, data):
     print(f"Received sos alert: {data}")
     sio.emit('sos_alert', data)
 
-MONGO_URI = os.getenv(
-    'MONGO_URI',
-    'mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin'
-)
-client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-db = client['nnx']
+
 collection = db['atlanta']
 distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  

@@ -2,13 +2,8 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 import os
 
-# Initialize MongoDB client
-MONGO_URI = os.getenv(
-    'MONGO_URI',
-    'mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin'
-)
-client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-db = client['nnx']
+from app import db
+
 atlanta_collection = db['atlanta']
 distance_travelled_collection = db['distanceTravelled']
 

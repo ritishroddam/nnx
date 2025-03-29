@@ -7,14 +7,14 @@ import os
 from werkzeug.utils import secure_filename
 import pandas as pd
 
+from app import db
+
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
 
 @dashboard_bp.route('/page')
 def page():
     return render_template('admin_dashboard.html')
 
-client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client['nnx']
 atlanta_collection = db["atlanta"]
 collection = db['distinctAtlanta']
 distance_travelled_collection = db['distanceTravelled']

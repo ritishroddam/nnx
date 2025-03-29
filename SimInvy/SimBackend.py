@@ -6,11 +6,10 @@ import os
 import sys
 from io import BytesIO
 
+from app import db
+
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
 
-# MongoDB connection
-client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
-db = client['nnx']
 collection = db['sim_inventory']
 
 @sim_bp.route('/page')
