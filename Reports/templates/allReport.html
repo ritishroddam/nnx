@@ -3,6 +3,10 @@
 {% block head %}
 <title>Reports</title>
 <link rel="stylesheet" href="{{ url_for('Reports.static', filename='css/allReport.css') }}">
+
+<!-- <script>
+    const reports = {{ reports | tojson }};
+</script> -->
 <script defer src="{{ url_for('Reports.static', filename='js/allReport.js') }}" defer></script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -65,13 +69,13 @@ All Reports
         <i class="fa-solid fa-calendar-day"></i>
     </a>
 
-    
+
 
     {% for report in reports %}
-        <a href="#" class="report-card" data-report="sos">
-            <h3>{{ report.report_name }}</h3>
-            <i class = "fa-solid fa-file-alt"></i>
-        </a>
+    <a href="#" class="report-card" data-report="sos">
+        <h3>{{ report.report_name }}</h3>
+        <i class="fa-solid fa-file-alt"></i>
+    </a>
     {% endfor %}
 
     <!-- <div id="custom-reports-container"></div> -->
