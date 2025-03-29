@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // reportCardsContainer.innerHTML = "";
 
         reports.forEach((report) => {
+          console.log("Report:", report); // Debugging line
           const reportCard = document.createElement("div");
           reportCard.className = "report-card";
           reportCard.innerHTML = `
