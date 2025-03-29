@@ -28,7 +28,6 @@ body {
   border-radius: 15px;
   transition: width 0.3s ease-in-out;
   z-index: 1;
-  display: flex;
 }
 
 .sidebar::after {
@@ -46,6 +45,7 @@ body {
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+  justify-content: center;
 }
 
 .logo img {
@@ -67,8 +67,6 @@ body {
 .menu {
   list-style: none;
   padding: 0;
-  overflow-y: auto;
-  display: flex;
 }
 
 .menu-item {
