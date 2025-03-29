@@ -59,29 +59,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const selectedFields = document.getElementById("selectedFields");
   const reportCardsContainer = document.querySelector(".report-cards");
   const customReportsContainer = document.getElementById("custom-reports-container");
-
-  document.querySelector('[data-report="custom"]').onclick = function () {
-    customReportModal.style.display = "block";
-    loadFields();
-  };
-  
-  if (!customReportsContainer) {
-    console.error("Error: Element with id 'custom-reports-container' not found in the DOM.");
-    return;
-  }
-
-
-
-  document.querySelector(".close").onclick = function () {
-    customReportModal.style.display = "none";
-  };
-  
+    
 const allowedFields = [
   "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps", "gsm_sig", "arm", "date", "time", "sos", 
   "harsh_speed", "odometer", "cellid", "internal_bat", "Package", "DateOfPurchase", "mnc", "r1", "r2", 
   "r3", "YearOfManufacture", "DriverName", "InsuranceNumber", "sleep", "dir1", "SIM", "LicensePlateNumber", 
   "ac", "longitude", "latitude", "speed", "door", "temp", "address", "Status", "MobileNumber"
 ];
+
+  document.querySelector('[data-report="custom"]').onclick = function () {
+    customReportModal.style.display = "block";
+    loadFields();
+  };
+
+
+  document.querySelector(".close").onclick = function () {
+    customReportModal.style.display = "none";
+  };
 
 function loadFields() {
   fetch("/reports/get_fields")
@@ -285,20 +279,20 @@ fieldSelection.addEventListener("change", function (e) {
     }
   });
 
-  // function createReportCard(reportName) {
-  //   const reportCard = document.createElement("a");
-  //   reportCard.href = "#";
-  //   reportCard.className = "report-card";
-  //   reportCard.dataset.report = reportName;
-  //   reportCard.innerHTML = `
-  //     <h3>${reportName}</h3>
-  //     <i class="fa-solid fa-file-alt"></i>
-  //   `;
-  //   reportCard.onclick = function () {
-  //     openReportModal(reportName);
-  //   };
-  //   reportCardsContainer.appendChild(reportCard);
-  // }
+  function createReportCard(reportName) {
+    const reportCard = document.createElement("a");
+    reportCard.href = "#";
+    reportCard.className = "report-card";
+    reportCard.dataset.report = reportName;
+    reportCard.innerHTML = `
+      <h3>${reportName}</h3>
+      <i class="fa-solid fa-file-alt"></i>
+    `;
+    reportCard.onclick = function () {
+      openReportModal(reportName);
+    };
+    reportCardsContainer.appendChild(reportCard);
+  }
 
 
   function openReportModal(reportName) {
