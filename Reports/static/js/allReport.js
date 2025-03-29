@@ -285,20 +285,21 @@ fieldSelection.addEventListener("change", function (e) {
     }
   });
 
-  function createReportCard(reportName) {
-    const reportCard = document.createElement("a");
-    reportCard.href = "#";
-    reportCard.className = "report-card";
-    reportCard.dataset.report = reportName;
-    reportCard.innerHTML = `
-      <h3>${reportName}</h3>
-      <i class="fa-solid fa-file-alt"></i>
-    `;
-    reportCard.onclick = function () {
-      openReportModal(reportName);
-    };
-    reportCardsContainer.appendChild(reportCard);
-  }
+  // function createReportCard(reportName) {
+  //   const reportCard = document.createElement("a");
+  //   reportCard.href = "#";
+  //   reportCard.className = "report-card";
+  //   reportCard.dataset.report = reportName;
+  //   reportCard.innerHTML = `
+  //     <h3>${reportName}</h3>
+  //     <i class="fa-solid fa-file-alt"></i>
+  //   `;
+  //   reportCard.onclick = function () {
+  //     openReportModal(reportName);
+  //   };
+  //   reportCardsContainer.appendChild(reportCard);
+  // }
+
 
   function openReportModal(reportName) {
     const reportModal = document.getElementById("reportModal");
