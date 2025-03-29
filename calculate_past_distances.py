@@ -2,8 +2,8 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 import os
 
-from app import db
 
+from app import db
 atlanta_collection = db['atlanta']
 distance_travelled_collection = db['distanceTravelled']
 

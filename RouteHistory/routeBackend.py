@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-from app import db
+route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
+from app import db
 data_collection = db["data"]
 atlanta_collection = db["atlanta"]
 
@@ -19,7 +20,6 @@ def convert_to_decimal(degrees_minutes, direction):
         decimal = -decimal
     return decimal
 
-route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
 @route_bp.route('/page')
 def page():

@@ -6,10 +6,10 @@ import os
 import sys
 import re
 
-from app import db
 
 companyEntry_bp = Blueprint('CompanyDetailsEntry', __name__, static_folder='static', template_folder='templates')
 
+from app import db
 customers_collection = db['customers_list']
 
 @companyEntry_bp.route('/page')

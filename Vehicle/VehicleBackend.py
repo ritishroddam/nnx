@@ -2,7 +2,6 @@ from flask import Flask, Blueprint, render_template, request, jsonify
 from pymongo import MongoClient
 import os
 
-from app import db
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
@@ -10,6 +9,7 @@ vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_fol
 def map():
     return render_template('vehicleMap.html')
 
+from app import db
 collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 

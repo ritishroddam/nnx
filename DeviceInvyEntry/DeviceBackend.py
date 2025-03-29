@@ -7,11 +7,11 @@ import sys
 from io import BytesIO
 from flask import Blueprint, render_template
 
-from app import db
+deviceEntry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', template_folder='templates')
 
+from app import db
 collection = db['device_inventory']
 
-deviceEntry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', template_folder='templates')
 
 @deviceEntry_bp.route('/page')
 def page():

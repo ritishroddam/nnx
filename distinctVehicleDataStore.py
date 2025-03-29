@@ -5,8 +5,8 @@ import time
 import socketio
 import json
 
-from app import db
 
+from app import db
 atlanta_collection = db['atlanta']
 distinct_atlanta_collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']

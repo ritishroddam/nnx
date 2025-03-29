@@ -3,7 +3,6 @@ from pymongo import MongoClient
 import pandas as pd
 from io import BytesIO
 
-from app import db
 from Reports.SpeedReport.speed import speed_bp
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
@@ -11,6 +10,7 @@ reports_bp = Blueprint('Reports', __name__, static_folder='static', template_fol
 reports_bp.register_blueprint(speed_bp, url_prefix='/speed')
 
 
+from app import db
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
 

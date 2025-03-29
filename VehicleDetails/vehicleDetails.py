@@ -9,8 +9,8 @@ from io import BytesIO
 
 vehicleDetails_bp = Blueprint('VehicleDetails', __name__, static_folder='static', template_folder='templates')
 
-from app import db
 
+from app import db
 vehicle_collection = db['vehicle_inventory']
 sim_collection = db['sim_inventory']
 device_collection = db['device_inventory']

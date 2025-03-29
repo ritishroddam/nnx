@@ -7,17 +7,18 @@ import sys
 from io import BytesIO
 from flask import Blueprint, render_template
 
-from app import db
 from config import config
+
+device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')
 
 app = Flask(__name__)
 app.config.from_object(config['default'])
 config['default'].init_app(app)
 app.secret_key = app.config['SECRET_KEY']
 
+from app import db
 collection = db['device_inventory']
 
-device_bp = Blueprint('DeviceInvy', __name__, static_folder='static', template_folder='templates')
 
 @device_bp.route('/page')
 def page():

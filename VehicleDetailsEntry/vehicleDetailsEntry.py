@@ -7,11 +7,11 @@ import sys
 from bson.objectid import ObjectId  # For ObjectId generation
 from io import BytesIO
 
-from app import db
 
 vehicleDetailsEntry_bp = Blueprint('VehicleDetailsEntry', __name__, static_folder='static', template_folder='templates')
 
 
+from app import db
 vehicle_collection = db['vehicle_inventory']
 sim_collection = db['sim_inventory']
 device_collection = db['device_inventory']

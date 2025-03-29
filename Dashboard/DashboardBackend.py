@@ -7,7 +7,6 @@ import os
 from werkzeug.utils import secure_filename
 import pandas as pd
 
-from app import db
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
 
@@ -15,6 +14,7 @@ dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template
 def page():
     return render_template('admin_dashboard.html')
 
+from app import db
 atlanta_collection = db["atlanta"]
 collection = db['distinctAtlanta']
 distance_travelled_collection = db['distanceTravelled']
