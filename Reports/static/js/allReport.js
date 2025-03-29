@@ -371,5 +371,5 @@ document.addEventListener("DOMContentLoaded", function () {
     sortField: "text",
   });
 
-  createReportCard();
+  // createReportCard();
 });
