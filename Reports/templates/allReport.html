@@ -65,10 +65,14 @@ All Reports
         <i class="fa-solid fa-calendar-day"></i>
     </a>
 
-    <a href="#" class="report-card" data-report="sos">
-        <h3>SOS/Panic Report</h3>
-        <i class="fa-solid fa-triangle-exclamation"></i>
-    </a>
+    
+
+    {% for report in reports %}
+        <a href="#" class="report-card" data-report="sos">
+            <h3>{{ report.report_name }}</h3>
+            <i class = "fa-solid fa-file-alt"></i>
+        </a>
+    {% endfor %}
 
     <div id="custom-reports-container"></div>
 

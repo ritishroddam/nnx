@@ -14,6 +14,12 @@ db = client["nnx"]
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
 
+@reports_bp.route('/')
+def index():
+    vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
+    return render_template('allReport.html', vehicles=vehicles, reports=reports)
+
 @reports_bp.route('/get_fields', methods=['GET'])
 def get_fields():
     # Combine fields from all collections
@@ -82,7 +88,3 @@ def download_custom_report():
         download_name=f"{report_name}.xlsx"
     )
 
-@reports_bp.route('/')
-def index():
-    vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
-    return render_template('allReport.html', vehicles=vehicles)
