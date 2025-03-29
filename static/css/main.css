@@ -73,7 +73,6 @@ body {
   overflow-y: auto;
   flex-direction: column;
   display: flex;
-  justify-content: space-between;
 }
 
 .menu-item {
