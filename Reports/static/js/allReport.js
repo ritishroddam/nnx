@@ -72,9 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-  // document.querySelector(".close").onclick = function () {
-  //   customReportModal.style.display = "none";
-  // };
+  document.querySelector(".close").onclick = function () {
+    customReportModal.style.display = "none";
+  };
     
 
     fetch("/reports/get_custom_reports")

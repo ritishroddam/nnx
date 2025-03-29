@@ -17,9 +17,9 @@ body {
 .sidebar {
   position: fixed;
   left: 1%;
-  top: 427px;
-  height: 88%;
-  transform: translateY(-50%);
+  top: 0;
+  height: 100vh;
+  transform: none;
   width: 60px;
   background: black;
   color: #ccc;
@@ -28,6 +28,9 @@ body {
   border-radius: 15px;
   transition: width 0.3s ease-in-out;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Spread items evenly */
 }
 
 .sidebar::after {
@@ -44,7 +47,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   justify-content: center;
 }
 
@@ -65,15 +68,17 @@ body {
 }
 
 .menu {
-  list-style: none;
-  padding: 0;
+  flex-grow: 1; /* Allow menu items to take up available space */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Enable scrolling if items exceed screen height */
+  max-height: 85vh; /* Prevent it from going out of the screen */
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding-top: 15px;
-  padding-bottom: 15px;
+  padding: 10px 15px;
   color: white;
   text-decoration: none;
   font-size: 16px;
@@ -124,7 +129,6 @@ body {
 .submenu li:hover {
   background-color: black;
   border-radius: 5px;
-  padding-left: 10%;
 }
 
 .arrow {
