@@ -322,49 +322,49 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  function createReportCard(reportName) {
-    const reportCard = document.createElement("a");
-    reportCard.href = "#";
-    reportCard.className = "report-card";
-    reportCard.dataset.report = reportName;
-    reportCard.innerHTML = `
-      <h3>${reportName}</h3>
-      <i class="fa-solid fa-file-alt"></i>
-    `;
-    reportCard.onclick = function () {
-      if (reportName) {
-        openReportModal(reportName);
-      }
-    };
-    reportCardsContainer.appendChild(reportCard);
-  }
+  // function createReportCard(reportName) {
+  //   const reportCard = document.createElement("a");
+  //   reportCard.href = "#";
+  //   reportCard.className = "report-card";
+  //   reportCard.dataset.report = reportName;
+  //   reportCard.innerHTML = `
+  //     <h3>${reportName}</h3>
+  //     <i class="fa-solid fa-file-alt"></i>
+  //   `;
+  //   reportCard.onclick = function () {
+  //     if (reportName) {
+  //       openReportModal(reportName);
+  //     }
+  //   };
+  //   reportCardsContainer.appendChild(reportCard);
+  // }
 
-  function openReportModal(reportName) {
-    if (reportName) {
-      const reportModal = document.getElementById("reportModal");
-      reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
-      reportModal.style.display = "block";
+  // function openReportModal(reportName) {
+  //   if (reportName) {
+  //     const reportModal = document.getElementById("reportModal");
+  //     reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
+  //     reportModal.style.display = "block";
 
-      document.getElementById("generateReport").onclick = function () {
-        const vehicleNumber = document.getElementById("vehicleNumber").value;
-        fetch("/reports/download_custom_report", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportName, vehicleNumber }),
-        })
-          .then((response) => response.blob())
-          .then((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${reportName}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-          });
-      };
-    }
-  }
+  //     document.getElementById("generateReport").onclick = function () {
+  //       const vehicleNumber = document.getElementById("vehicleNumber").value;
+  //       fetch("/reports/download_custom_report", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ reportName, vehicleNumber }),
+  //       })
+  //         .then((response) => response.blob())
+  //         .then((blob) => {
+  //           const url = window.URL.createObjectURL(blob);
+  //           const a = document.createElement("a");
+  //           a.href = url;
+  //           a.download = `${reportName}.xlsx`;
+  //           document.body.appendChild(a);
+  //           a.click();
+  //           a.remove();
+  //         });
+  //     };
+  //   }
+  // }
 
   $("select").selectize({
     create: false,
