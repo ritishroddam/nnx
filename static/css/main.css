@@ -29,7 +29,6 @@ body {
   transition: width 0.3s ease-in-out;
   z-index: 1;
   display: flex;
-  flex-direction: column;
 }
 
 .sidebar::after {
@@ -69,7 +68,6 @@ body {
   list-style: none;
   padding: 0;
   overflow-y: auto;
-  flex-direction: column;
   display: flex;
 }
 
