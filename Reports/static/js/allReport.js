@@ -332,7 +332,9 @@ document.addEventListener("DOMContentLoaded", function () {
       <i class="fa-solid fa-file-alt"></i>
     `;
     reportCard.onclick = function () {
-      openReportModal(reportName);
+      if (reportName) {
+        openReportModal(reportName);
+      }
     };
     reportCardsContainer.appendChild(reportCard);
   }
