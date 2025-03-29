@@ -10,7 +10,7 @@ reports_bp = Blueprint('Reports', __name__, static_folder='static', template_fol
 reports_bp.register_blueprint(speed_bp, url_prefix='/speed')
 
 
-from app import db
+from database import db
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
 

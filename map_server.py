@@ -43,7 +43,7 @@ def vehicle_update(sid, data):
     sio.emit('sos_alert', data)
 
 
-from app import db
+from database import db
 collection = db['atlanta']
 distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  

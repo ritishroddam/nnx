@@ -14,7 +14,7 @@ dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template
 def page():
     return render_template('admin_dashboard.html')
 
-from app import db
+from database import db
 atlanta_collection = db["atlanta"]
 collection = db['distinctAtlanta']
 distance_travelled_collection = db['distanceTravelled']

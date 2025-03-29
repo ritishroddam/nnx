@@ -9,7 +9,7 @@ from flask import Blueprint, render_template
 
 deviceEntry_bp = Blueprint('DeviceInvyEntry', __name__, static_folder='static', template_folder='templates')
 
-from app import db
+from database import db
 collection = db['device_inventory']
 
 

@@ -9,7 +9,7 @@ from io import BytesIO
 
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
 
-from app import db
+from database import db
 collection = db['sim_inventory']
 
 @sim_bp.route('/page')

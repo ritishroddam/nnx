@@ -16,7 +16,7 @@ app.config.from_object(config['default'])
 config['default'].init_app(app)
 app.secret_key = app.config['SECRET_KEY']
 
-from app import db
+from database import db
 collection = db['device_inventory']
 
 

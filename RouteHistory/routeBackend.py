@@ -7,7 +7,7 @@ import os
 
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
-from app import db
+from database import db
 data_collection = db["data"]
 atlanta_collection = db["atlanta"]
 

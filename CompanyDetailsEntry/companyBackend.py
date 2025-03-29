@@ -9,7 +9,7 @@ import re
 
 companyEntry_bp = Blueprint('CompanyDetailsEntry', __name__, static_folder='static', template_folder='templates')
 
-from app import db
+from database import db
 customers_collection = db['customers_list']
 
 @companyEntry_bp.route('/page')

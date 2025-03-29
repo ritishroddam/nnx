@@ -46,10 +46,6 @@ app.register_blueprint(vehicleDetailsEntry_bp, url_prefix='/vehicleDetailsEntry'
 # app.register_blueprint(speed_report_bp, url_prefix='/speedReport')
 app.register_blueprint(reports_bp, url_prefix='/reports')
 
-global mongo_client, db
-mongo_client = MongoClient(app.config['MONGO_URI'])
-db = mongo_client["nnx"]
-
 @app.route('/')
 def index():
     return render_template('vehicleMap.html')
