@@ -38,11 +38,12 @@ function createReportCard(report) {
   reportCard.dataset.report = report.report_name;
   console.log("Creating report card for:", report.report_name); // Debug print statement
   reportCard.innerHTML = `
-    <h3>${report.report_name}</h3>
-    <i class="fa-solid fa-file-alt"></i>
+  <h3>${report.report_name}</h3>
+  <i class="fa-solid fa-file-alt"></i>
   `;
   reportCard.onclick = function () {
     openReportModal(report.report_name);
+    console.log("Creating report card for:", report.report_name); // Debug print statement
   };
   document.querySelector(".report-cards").appendChild(reportCard);
 }
