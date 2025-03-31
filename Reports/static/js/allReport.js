@@ -48,7 +48,7 @@ function createReportCard(report) {
 
 function openReportModal(reportName) {
   const reportModal = document.getElementById("reportModal");
-  reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
+  reportModal.querySelector("h2").textContent = `${reportName}`;
   reportModal.style.display = "block";
 }  
 
