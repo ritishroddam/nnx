@@ -30,6 +30,8 @@ document.querySelector(".cancel-btn").onclick = function () {
 };
 
 function createReportCard(report) {
+  const existingCard = document.querySelector(`.report-card[data-report="${report.report_name}"]`);
+  if (existingCard) return; // Avoid duplicates
   const reportCard = document.createElement("a");
   reportCard.href = "#";
   reportCard.className = "report-card";
@@ -54,15 +56,12 @@ document.getElementById("generateReport").onclick = function () {
   const fields = Array.from(selectedFields.children).map((li) => li.dataset.field);
   const vehicleNumber = document.getElementById("vehicleNumber").value;
   const dateRange = document.getElementById("dateRange").value;
-
+  const reportName = document.querySelector("#reportModal h2").textContent.replace("Generate ", "").trim();
 
   if (!vehicleNumber) {
     alert("Please select a vehicle number");
     return;
   }
-
-  // Get the report name from the modal title or data attribute
-  const reportName = document.querySelector("#reportModal h2").textContent.replace("Generate ", "").trim();
 
   fetch("/reports/download_custom_report", {
     method: "POST",
@@ -70,12 +69,14 @@ document.getElementById("generateReport").onclick = function () {
     body: JSON.stringify({ 
       reportName, 
       vehicleNumber,
-      dateRange 
+      dateRange,
+      fields  
     }),
   })
 
-    .then((response) => { if (!response.ok) {
-      throw new Error('Network response was not ok');
+    .then((response) => { 
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
   }
   return response.blob();
 })
@@ -189,12 +190,10 @@ document.addEventListener("DOMContentLoaded", function () {
   fieldSelection.addEventListener("change", function (e) {
     const field = e.target.value;
 
-    console.log("Field changed:", field, "Checked:", e.target.checked);
+    // console.log("Field changed:", field, "Checked:", e.target.checked);
 
     if (e.target.checked) {
-      const existingField = selectedFields.querySelector(
-        `[data-field="${field}"]`
-      );
+      const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
       if (existingField) {
         console.log("Duplicate field detected:", field);
         alert("This field is already selected.");
@@ -206,6 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
       listItem.textContent = field;
       listItem.dataset.field = field;
       listItem.draggable = true;
+
       listItem.style.cssText = `
       padding: 10px;
       margin: 5px;
@@ -220,6 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
+
       removeButton.style.cssText = `
       margin-left: 10px;
       padding: 5px 10px;
@@ -231,9 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
       removeButton.onclick = function () {
         selectedFields.removeChild(listItem);
-        const checkbox = fieldSelection.querySelector(
-          `input[value="${field}"]`
-        );
+        const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
         if (checkbox) {
           checkbox.checked = false;
           checkbox.parentElement.style.display = "block";
@@ -245,13 +244,12 @@ document.addEventListener("DOMContentLoaded", function () {
       listItem.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", e.target.dataset.field);
       });
+
       listItem.addEventListener("dragover", (e) => e.preventDefault());
       listItem.addEventListener("drop", (e) => {
         e.preventDefault();
         const draggedField = e.dataTransfer.getData("text/plain");
-        const draggedItem = selectedFields.querySelector(
-          `[data-field="${draggedField}"]`
-        );
+        const draggedItem = selectedFields.querySelector(`[data-field="${draggedField}"]`);
         selectedFields.insertBefore(draggedItem, e.target);
       });
 
@@ -324,56 +322,6 @@ document.addEventListener("DOMContentLoaded", function () {
         createReportCard(report);
       });
     });
-
-  fieldSelection.addEventListener("change", function (e) {
-    const field = e.target.value;
-
-    if (e.target.checked) {
-      const existingField = selectedFields.querySelector(
-        `[data-field="${field}"]`
-      );
-      if (existingField) {
-        console.log("Duplicate field detected:", field);
-        e.target.checked = false;
-        return;
-      }
-
-      const listItem = document.createElement("li");
-      listItem.textContent = field;
-      listItem.dataset.field = field;
-      listItem.draggable = true;
-
-      const removeButton = document.createElement("button");
-      removeButton.textContent = "Remove";
-      removeButton.onclick = function () {
-        selectedFields.removeChild(listItem);
-        const checkbox = fieldSelection.querySelector(
-          `input[value="${field}"]`
-        );
-        if (checkbox) {
-          checkbox.checked = false;
-          checkbox.parentElement.style.display = "block";
-        }
-      };
-
-      listItem.appendChild(removeButton);
-
-      listItem.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", e.target.dataset.field);
-        const draggedItem = selectedFields.querySelector(
-          `[data-field="${draggedField}"]`
-        );
-        selectedFields.insertBefore(draggedItem, e.target);
-      });
-
-      selectedFields.appendChild(listItem);
-      e.target.parentElement.style.display = "none";
-    } else {
-      const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-      if (listItem) selectedFields.removeChild(listItem);
-      e.target.parentElement.style.display = "block";
-    }
-  });
 
   $("select").selectize({
     create: false,

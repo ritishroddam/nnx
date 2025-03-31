@@ -63,6 +63,7 @@ def get_custom_reports():
 
 @reports_bp.route('/download_custom_report', methods=['POST'])
 def download_custom_report():
+    print("Report generation started") 
     data = request.json
     report_name = data.get("reportName")
     vehicle_number = data.get("vehicleNumber")
