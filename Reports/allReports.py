@@ -65,13 +65,40 @@ def download_custom_report():
     data = request.json
     report_name = data.get("reportName")
     vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
 
     # Fetch report configuration
     report_config = db['custom_reports'].find_one({"report_name": report_name})
+    if not report_config:
+        return jsonify({"success": False, "message": "Report not found."}), 404
+    
     fields = report_config["fields"]
+    
+    # Calculate date range
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    
+    if date_range == "last24hours":
+        start_date = now - timedelta(hours=24)
+    elif date_range == "today":
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif date_range == "yesterday":
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
+        end_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    elif date_range == "last7days":
+        start_date = now - timedelta(days=7)
+    elif date_range == "last30days":
+        start_date = now - timedelta(days=30)
+    else:
+        start_date = None  # For "custom" or other cases
 
     # Fetch data from MongoDB
     query = {"LicensePlateNumber": vehicle_number}
+    if start_date:
+        query["date"] = {"$gte": start_date}
+        if date_range == "yesterday":
+            query["date"]["$lt"] = end_date
+            
     results = list(db['atlanta'].find(query, {field: 1 for field in fields}))
 
     # Convert to Excel

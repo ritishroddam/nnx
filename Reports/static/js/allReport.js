@@ -29,40 +29,64 @@ document.querySelector(".cancel-btn").onclick = function () {
   }
 };
 
+function createReportCard(report) {
+  const reportCard = document.createElement("a");
+  reportCard.href = "#";
+  reportCard.className = "report-card";
+  reportCard.dataset.report = report.report_name;
+  reportCard.innerHTML = `
+    <h3>${report.report_name}</h3>
+    <i class="fa-solid fa-file-alt"></i>
+  `;
+  reportCard.onclick = function () {
+    openReportModal(report.report_name);
+  };
+  document.querySelector(".report-cards").appendChild(reportCard);
+}
+
+function openReportModal(reportName) {
+  const reportModal = document.getElementById("reportModal");
+  reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
+  reportModal.style.display = "block";
+
 document.getElementById("generateReport").onclick = function () {
   const fields = Array.from(selectedFields.children).map((li) => li.dataset.field);
-  const vehicleNumber = document.getElementById("vehicleNumber").value; // Get the vehicle number
+  const vehicleNumber = document.getElementById("vehicleNumber").value;
+  const dateRange = document.getElementById("dateRange").value;
 
 
+  if (!vehicleNumber) {
+    alert("Please select a vehicle number");
+    return;
+  }
 
   fetch("/reports/download_custom_report", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fields, vehicleNumber }), // Include vehicle number in the request body
-
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fields, vehicleNumber }), // Include vehicle number in the request body
-
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fields, vehicleNumber }), // Include vehicle number in the request body
-
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fields }),
+    body: JSON.stringify({ 
+      reportName, 
+      vehicleNumber,
+      dateRange 
+    }),
   })
+
     .then((response) => response.blob())
-    .then((blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Custom_Report.xlsx";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    });
-};
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${reportName}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to generate report");
+      });
+  };
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const customReportModal = document.getElementById("customReportModal");
@@ -229,6 +253,57 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // customReportForm.onsubmit = function (e) {
+  //   e.preventDefault();
+
+  //   const reportNameInput = document.getElementById("reportName");
+  //   if (!reportNameInput) {
+  //     alert("Report Name input is missing!");
+  //     return;
+  //   }
+
+  //   const reportName = reportNameInput.value.trim();
+  //   if (!reportName) {
+  //     alert("Please provide a valid report name.");
+  //     return;
+  //   }
+
+  //   const fields = Array.from(
+  //     new Set(Array.from(selectedFields.children).map((li) => li.dataset.field))
+  //   );
+
+  //   if (fields.length === 0) {
+  //     alert("Please select at least one field.");
+  //     return;
+  //   }
+
+  //   fetch("/reports/save_custom_report", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ reportName, fields }),
+  //   })
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Failed to save the report.");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       if (data.success) {
+  //         alert(data.message);
+
+  //         window.location.href = data.redirect_url;
+  //       } else {
+  //         console.error("Failed to save the report:", data);
+  //         alert(data.message || "Failed to save the report. Please try again.");
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error saving the report:", error);
+  //       alert("An error occurred while saving the report.");
+  //     });
+  // };
+
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
 
@@ -267,8 +342,9 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         if (data.success) {
           alert(data.message);
-
-          window.location.href = data.redirect_url;
+          // Create a new card for the saved report
+          createReportCard({ report_name: reportName });
+          customReportModal.style.display = "none";
         } else {
           console.error("Failed to save the report:", data);
           alert(data.message || "Failed to save the report. Please try again.");
@@ -279,6 +355,15 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("An error occurred while saving the report.");
       });
   };
+
+  // Load existing custom reports when page loads
+  fetch("/reports/get_custom_reports")
+    .then(response => response.json())
+    .then(reports => {
+      reports.forEach(report => {
+        createReportCard(report);
+      });
+    });
 
   fieldSelection.addEventListener("change", function (e) {
     const field = e.target.value;
@@ -315,11 +400,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       listItem.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", e.target.dataset.field);
-      });
-      listItem.addEventListener("dragover", (e) => e.preventDefault());
-      listItem.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const draggedField = e.dataTransfer.getData("text/plain");
         const draggedItem = selectedFields.querySelector(
           `[data-field="${draggedField}"]`
         );
@@ -335,54 +415,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // function createReportCard(reportName) {
-  //   const reportCard = document.createElement("a");
-  //   reportCard.href = "#";
-  //   reportCard.className = "report-card";
-  //   reportCard.dataset.report = reportName;
-  //   reportCard.innerHTML = `
-  //     <h3>${reportName}</h3>
-  //     <i class="fa-solid fa-file-alt"></i>
-  //   `;
-  //   reportCard.onclick = function () {
-  //     if (reportName) {
-  //       openReportModal(reportName);
-  //     }
-  //   };
-  //   reportCardsContainer.appendChild(reportCard);
-  // }
-
-  // function openReportModal(reportName) {
-  //   if (reportName) {
-  //     const reportModal = document.getElementById("reportModal");
-  //     reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
-  //     reportModal.style.display = "block";
-
-  //     document.getElementById("generateReport").onclick = function () {
-  //       const vehicleNumber = document.getElementById("vehicleNumber").value;
-  //       fetch("/reports/download_custom_report", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({ reportName, vehicleNumber }),
-  //       })
-  //         .then((response) => response.blob())
-  //         .then((blob) => {
-  //           const url = window.URL.createObjectURL(blob);
-  //           const a = document.createElement("a");
-  //           a.href = url;
-  //           a.download = `${reportName}.xlsx`;
-  //           document.body.appendChild(a);
-  //           a.click();
-  //           a.remove();
-  //         });
-  //     };
-  //   }
-  // }
-
   $("select").selectize({
     create: false,
     sortField: "text",
   });
 
-  // createReportCard();
 });
