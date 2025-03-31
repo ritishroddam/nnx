@@ -80,10 +80,10 @@ def download_custom_report():
     print(f"Fields: {fields}")
     # First get the IMEI number from vehicle inventory using license plate
     vehicle_data = db['vehicle_inventory'].find_one(
-        {"_id": 0},
-        {"LicensePlateNumber": vehicle_number},
-        {"imei": 1}
+        {"LicensePlateNumber": vehicle_number},  # Query filter to find the document
+        {"_id": 0, "imei": 1}  # Projection to include only 'imei' and exclude '_id'
     )
+
     print(f"Vehicle Data: {vehicle_data}")
     
     if not vehicle_data or 'imei' not in vehicle_data:
