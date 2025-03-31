@@ -6,7 +6,7 @@ from io import BytesIO
 
 from Reports.SpeedReport.speed import speed_bp
 
-reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
+reports_bp = Blueprint('reports', __name__, static_folder='static', template_folder='templates', url_prefix='/reports')
 
 reports_bp.register_blueprint(speed_bp, url_prefix='/speed')
 
