@@ -47,8 +47,15 @@ function createReportCard(report) {
 }
 
 function openReportModal(reportName) {
+  console.log("Opening report modal with report name:", reportName); // Debug print statement
   const reportModal = document.getElementById("reportModal");
-  reportModal.querySelector("h2").textContent = `${reportName}`;
+  
+  if (reportModal) {
+    reportModal.querySelector("h2").textContent = `${reportName}`;
+  } else {
+    console.error("Report modal not found!");
+  }
+
   reportModal.style.display = "block";
 }  
 
@@ -77,24 +84,24 @@ document.getElementById("generateReport").onclick = function () {
     .then((response) => { 
       if (!response.ok) {
         throw new Error('Network response was not ok');
-  }
-  return response.blob();
-})
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${reportName}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("Failed to generate report");
-      });
-  };
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${reportName}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Failed to generate report");
+    });
+};
 
 document.addEventListener("DOMContentLoaded", function () {
   const customReportModal = document.getElementById("customReportModal");
