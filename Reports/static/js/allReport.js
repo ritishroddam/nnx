@@ -36,6 +36,7 @@ function createReportCard(report) {
   reportCard.href = "#";
   reportCard.className = "report-card";
   reportCard.dataset.report = report.report_name;
+  console.log("Creating report card for:", report.report_name); // Debug print statement
   reportCard.innerHTML = `
     <h3>${report.report_name}</h3>
     <i class="fa-solid fa-file-alt"></i>
