@@ -80,6 +80,7 @@ def download_custom_report():
     print(f"Fields: {fields}")
     # First get the IMEI number from vehicle inventory using license plate
     imei_number = db['vehicle_inventory'].find_one({'LicensePlateNumber': vehicle_number}, {'_id': 0,'imei': 1})
+    print(f"IMEI Number: {imei_number}")
     
     if not imei_number:
         return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
