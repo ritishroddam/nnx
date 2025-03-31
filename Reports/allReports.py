@@ -80,6 +80,7 @@ def download_custom_report():
     print(f"Fields: {fields}")
     # First get the IMEI number from vehicle inventory using license plate
     vehicle_data = db['vehicle_inventory'].find_one(
+        {"_id": 0},
         {"LicensePlateNumber": vehicle_number},
         {"imei": 1}
     )
