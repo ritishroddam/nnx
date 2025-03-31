@@ -63,7 +63,7 @@ document.getElementById("generateReport").onclick = function () {
     return;
   }
 
-  fetch("/download_custom_report", {
+  fetch("/reports/download_custom_report", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ 
