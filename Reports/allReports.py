@@ -79,10 +79,8 @@ def download_custom_report():
     fields = report_config["fields"]
     print(f"Fields: {fields}")
     # First get the IMEI number from vehicle inventory using license plate
-    vehicle_data = db['vehicle_inventory'].find_one(
-        {"LicensePlateNumber": vehicle_number},  # Query filter to find the document
-        {"_id": 0, "imei": 1}  # Projection to include only 'imei' and exclude '_id'
-    )
+    imei_number = vehicle_inventory_collection.find_one({'LicensePlateNumber': vehicle_number}, {'imei': 1})
+    vehicle_data = {{"LicensePlateNumber": vehicle_number}, {"imei": imei_number}}
 
     print(f"Vehicle Data: {vehicle_data}")
     
