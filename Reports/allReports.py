@@ -79,7 +79,7 @@ def download_custom_report():
     fields = report_config["fields"]
     print(f"Fields: {fields}")
     # First get the IMEI number from vehicle inventory using license plate
-    imei_number = db['vehicle_inventory'].find_one({'LicensePlateNumber': vehicle_number}, {'_id': 0,'imei': 1})
+    imei_number = db['vehicle_inventory'].find_one({'LicensePlateNumber': vehicle_number}, {'_id': 0,'IMEI': 1})
     print(f"IMEI Number: {imei_number}")
     
     if not imei_number:
@@ -148,7 +148,7 @@ def download_custom_report():
     # Get vehicle data
     if 'vehicle_inventory' in collections_to_query:
         vehicle_data = db['vehicle_inventory'].find_one(
-            {"imei": imei_number},
+            {"IMEI": imei_number},
             {field: 1 for field in fields_by_collection['vehicle_inventory']}
         )
         if vehicle_data:
