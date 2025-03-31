@@ -42,8 +42,8 @@ function createReportCard(report) {
   <i class="fa-solid fa-file-alt"></i>
   `;
   reportCard.onclick = function () {
-    openReportModal(report.report_name);
     console.log("Creating report card for:", report.report_name); // Debug print statement
+    openReportModal(report.report_name);
   };
   document.querySelector(".report-cards").appendChild(reportCard);
 }
