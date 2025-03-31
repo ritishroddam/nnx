@@ -30,11 +30,24 @@ document.querySelector(".cancel-btn").onclick = function () {
 };
 
 document.getElementById("generateReport").onclick = function () {
-  const fields = Array.from(selectedFields.children).map(
-    (li) => li.dataset.field
-  );
+  const fields = Array.from(selectedFields.children).map((li) => li.dataset.field);
+  const vehicleNumber = document.getElementById("vehicleNumber").value; // Get the vehicle number
+
+
 
   fetch("/reports/download_custom_report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fields, vehicleNumber }), // Include vehicle number in the request body
+
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fields, vehicleNumber }), // Include vehicle number in the request body
+
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fields, vehicleNumber }), // Include vehicle number in the request body
+
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fields }),
