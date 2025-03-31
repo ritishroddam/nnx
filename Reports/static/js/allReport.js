@@ -48,6 +48,7 @@ function openReportModal(reportName) {
   const reportModal = document.getElementById("reportModal");
   reportModal.querySelector("h2").textContent = `Generate ${reportName}`;
   reportModal.style.display = "block";
+}  
 
 document.getElementById("generateReport").onclick = function () {
   const fields = Array.from(selectedFields.children).map((li) => li.dataset.field);
@@ -60,6 +61,9 @@ document.getElementById("generateReport").onclick = function () {
     return;
   }
 
+  // Get the report name from the modal title or data attribute
+  const reportName = document.querySelector("#reportModal h2").textContent.replace("Generate ", "").trim();
+
   fetch("/reports/download_custom_report", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -70,7 +74,11 @@ document.getElementById("generateReport").onclick = function () {
     }),
   })
 
-    .then((response) => response.blob())
+    .then((response) => { if (!response.ok) {
+      throw new Error('Network response was not ok');
+  }
+  return response.blob();
+})
       .then((blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -78,15 +86,14 @@ document.getElementById("generateReport").onclick = function () {
         a.download = `${reportName}.xlsx`;
         document.body.appendChild(a);
         a.click();
-        a.remove();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       })
       .catch(error => {
         console.error("Error:", error);
         alert("Failed to generate report");
       });
   };
-}
-
 
 document.addEventListener("DOMContentLoaded", function () {
   const customReportModal = document.getElementById("customReportModal");
@@ -146,6 +153,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelector(".close").onclick = function () {
     customReportModal.style.display = "none";
   };
+
+  document.getElementById("reportForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+  });
 
   function loadFields() {
     fetch("/reports/get_fields")
@@ -252,57 +263,6 @@ document.addEventListener("DOMContentLoaded", function () {
       e.target.parentElement.style.display = "block";
     }
   });
-
-  // customReportForm.onsubmit = function (e) {
-  //   e.preventDefault();
-
-  //   const reportNameInput = document.getElementById("reportName");
-  //   if (!reportNameInput) {
-  //     alert("Report Name input is missing!");
-  //     return;
-  //   }
-
-  //   const reportName = reportNameInput.value.trim();
-  //   if (!reportName) {
-  //     alert("Please provide a valid report name.");
-  //     return;
-  //   }
-
-  //   const fields = Array.from(
-  //     new Set(Array.from(selectedFields.children).map((li) => li.dataset.field))
-  //   );
-
-  //   if (fields.length === 0) {
-  //     alert("Please select at least one field.");
-  //     return;
-  //   }
-
-  //   fetch("/reports/save_custom_report", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ reportName, fields }),
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Failed to save the report.");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       if (data.success) {
-  //         alert(data.message);
-
-  //         window.location.href = data.redirect_url;
-  //       } else {
-  //         console.error("Failed to save the report:", data);
-  //         alert(data.message || "Failed to save the report. Please try again.");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error saving the report:", error);
-  //       alert("An error occurred while saving the report.");
-  //     });
-  // };
 
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
