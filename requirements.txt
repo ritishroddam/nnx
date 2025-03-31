@@ -1,4 +1,4 @@
-bcrypt==3.2.0
+bcrypt==4.3.0
 bidict==0.23.1
 blinker==1.9.0
 certifi==2025.1.31
@@ -9,8 +9,9 @@ colorama==0.4.6
 dnspython==2.7.0
 et_xmlfile==2.0.0
 eventlet==0.39.0
-Flask==3.0.3
+Flask==3.1.0
 Flask-Cors==5.0.0
+Flask-JWT-Extended==4.7.1
 Flask-PyMongo==2.3.0
 Flask-SocketIO==5.5.1
 geographiclib==2.0
@@ -20,14 +21,15 @@ gunicorn==23.0.0
 h11==0.14.0
 idna==3.10
 itsdangerous==2.2.0
-Jinja2==3.1.5
+Jinja2==3.1.6
 MarkupSafe==3.0.2
 numpy==2.2.2
 openpyxl==3.1.2
 packaging==24.2
 pandas==2.2.3
 pycparser==2.22
-pymongo==3.12.0
+PyJWT==2.10.1
+pymongo==4.11.3
 python-dateutil==2.9.0.post0
 python-engineio==4.11.2
 python-socketio==5.12.1
