@@ -10,7 +10,6 @@ reports_bp = Blueprint('Reports', __name__, static_folder='static', template_fol
 
 reports_bp.register_blueprint(speed_bp, url_prefix='/speed')
 
-
 from database import db
 vehicle_inventory_collection = db['vehicle_inventory']
 atlanta_collection = db['atlanta']
@@ -54,12 +53,10 @@ def save_custom_report():
         print(f"Error saving custom report: {e}")
         return jsonify({"success": False, "message": "An error occurred while saving the report."}), 500
 
-# Place the get_custom_reports function here
 @reports_bp.route('/get_custom_reports', methods=['GET'])
 def get_custom_reports():
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
     return jsonify(reports)
-
 
 @reports_bp.route('/download_custom_report', methods=['POST'])
 def download_custom_report():
@@ -69,8 +66,12 @@ def download_custom_report():
     vehicle_number = data.get("vehicleNumber")
     date_range = data.get("dateRange")
 
+    print(f"Report Name: {report_name}, Vehicle Number: {vehicle_number}, Date Range: {date_range}")
+
     # Fetch report configuration
     report_config = db['custom_reports'].find_one({"report_name": report_name})
+    print(f"Report Config: {report_config}")
+    
     if not report_config:
         return jsonify({"success": False, "message": "Report not found."}), 404
         
@@ -81,6 +82,7 @@ def download_custom_report():
         {"LicensePlateNumber": vehicle_number},
         {"imei": 1}
     )
+    print(f"Vehicle Data: {vehicle_data}")
     
     if not vehicle_data or 'imei' not in vehicle_data:
         return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
@@ -268,4 +270,3 @@ def download_custom_report():
         as_attachment=True,
         download_name=f"{report_name}.xlsx"
     )
-
