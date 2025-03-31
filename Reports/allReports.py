@@ -79,15 +79,10 @@ def download_custom_report():
     fields = report_config["fields"]
     print(f"Fields: {fields}")
     # First get the IMEI number from vehicle inventory using license plate
-    imei_number = vehicle_inventory_collection.find_one({'LicensePlateNumber': vehicle_number}, {'imei': 1})
-    vehicle_data = {{"LicensePlateNumber": vehicle_number}, {"imei": imei_number}}
-
-    print(f"Vehicle Data: {vehicle_data}")
+    imei_number = db['vehicle_inventory'].find_one({'LicensePlateNumber': vehicle_number}, {'_id': 0,'imei': 1})
     
-    if not vehicle_data or 'imei' not in vehicle_data:
+    if not imei_number:
         return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
-
-    imei_number = vehicle_data['imei']
 
     # Determine which collections we need to query based on the fields
     collections_to_query = set()
