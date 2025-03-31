@@ -215,7 +215,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'mobCountryCode': parts[22],
                     'mobNetworkCode': parts[23],
                     'localAreaCode': parts[24],
-                    'cellid': parts[25],  
+                    'cellid':  self.clean_cellid(parts[25]),  
                     'timestamp': str(datetime.now())
                 }
                 return json_data
