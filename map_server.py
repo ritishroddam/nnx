@@ -72,6 +72,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     # Extract the last 15 characters of the IMEI
         return imei[-15:]
     
+    @staticmethod
+    def clean_cellid(cellid):
+        return cellid[:5]
+    
     def should_emit(imei):
         now = time.time()
         if imei not in last_emit_time or now - last_emit_time[imei] > 1:
@@ -142,20 +146,24 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                 ignition, door, sos = '0', '0', '0'
 
-                if len(binary_string) >= 11:
+                if len(binary_string) == 14:
                     ignition = binary_string[0]
                     door = binary_string[1]
                     sos = binary_string[2]
-                    r1 = binary_string[3]
-                    r2 = binary_string[4]
+                    reserve1 = binary_string[3]
+                    reserve2 = binary_string[4]
                     ac = binary_string[5]
-                    r3 = binary_string[6]
+                    reserve3 = binary_string[6]
                     main_power = binary_string[7]
                     harsh_speed = binary_string[8]
-                    arm = binary_string[9]
-                    sleep = binary_string[10]
+                    harsh_break = binary_string[9]
+                    arm = binary_string[10]
+                    sleep = binary_string[11]
+                    reserve4 = binary_string[12]
+                    status_accelerometer = binary_string[13]
                 else:
-                    ignition = door = sos = r1 = r2 = ac = r3 = main_power = harsh_speed = arm = sleep = '0'
+                    print(f"Received data does not contain at least {expected_fields_count} fields.")
+                    return None
 
                 latitude = parts[4] if parts[4] != '-' else ''
                 longitude = parts[6] if parts[6] != '-' else ''
@@ -186,26 +194,28 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'ignition': ignition,
                     'door': door,
                     'sos': sos,
-                    'r1': r1,
-                    'r2': r2,
+                    'reserve1': reserve1,
+                    'reserve2': reserve2,
                     'ac': ac,
-                    'r3': r3,
+                    'reserve3': reserve3,
                     'main_power': main_power,
                     'harsh_speed': harsh_speed,
+                    'harsh_break': harsh_break,
                     'arm': arm,
                     'sleep': sleep,
-                    'accelerometer': parts[12],
-                    'adc': parts[15],
-                    'one_wire': parts[16],
+                    'reserve4': reserve4,
+                    'status_accelerometer': status_accelerometer,
+                    'adc_voltage': parts[15],
+                    'one_wire_temp': parts[16],
                     'i_btn': parts[17],
                     'odometer': parts[18],
-                    'temp': parts[19],
+                    'onBoard_temp': parts[19],
                     'internal_bat': parts[20],
                     'gsm_sig': parts[21],
-                    'mcc': parts[22],
-                    'mnc': parts[23],
-                    'cellid': parts[24],
-                    'address': address,  # Store address data
+                    'mobCountryCode': parts[22],
+                    'mobNetworkCode': parts[23],
+                    'localAreaCode': parts[24],
+                    'cellid': parts[25],  
                     'timestamp': str(datetime.now())
                 }
                 return json_data
@@ -219,7 +229,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     
     def store_data_in_mongodb(self, json_data):
         try:
-            result = collection.insert_one(json_data)  # Insert into MongoDB
+            result = collection.insert_one(json_data)  
         except Exception as e:
             print("Error storing data in MongoDB:", e)
 
