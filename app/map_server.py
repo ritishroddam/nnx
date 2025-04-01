@@ -21,7 +21,7 @@ last_emit_time = {}
 
 @sio.event
 def connect(sid, environ):
-    print(f"Client connected: {sid}")
+    print(f"Client connected: {sid} {environ}")
 
 @sio.event
 def disconnect(sid):
