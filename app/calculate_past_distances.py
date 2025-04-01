@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import os
-from .database import db
+from app.database import db
 
 
 atlanta_collection = db['atlanta']
