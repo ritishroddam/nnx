@@ -88,6 +88,12 @@
   flex: 1;
   margin: 0 10px;
 }
+.weather-container #weather {
+  color: black;
+}
+.dark-mode .weather-section #weather{
+  color: #ccc;
+}
 .traffic {
   width: 90%;
 }
