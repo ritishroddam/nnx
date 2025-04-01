@@ -180,7 +180,7 @@ def create_app(config_name='default'):
     @jwt.unauthorized_loader
     def custom_unauthorized_response(callback):
         flash("You must log in to access this page.", "danger")
-        return redirect(url_for('auth.loginPage'))
+        return redirect(url_for('auth.login'))
     
     from .auth import auth_bp
     from .routes import main_bp
