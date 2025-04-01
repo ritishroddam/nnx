@@ -69,8 +69,6 @@ def update_distinct_atlanta():
 
 def emit_data(json_data):
     try:
-        if not sio.connected:
-            return
 
         # Add additional data from vehicle_inventory_collection
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
