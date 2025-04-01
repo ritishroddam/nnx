@@ -284,15 +284,9 @@
 
 #     distance = R * c
 #     return distance
-from flask import Flask
-from flask_socketio import SocketIO
+import socket
 from pymongo import MongoClient
-from datetime import datetime, timedelta
-import time
-
-# Initialize Flask and SocketIO
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+from datetime import datetime
 
 # MongoDB setup
 client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB URI
@@ -305,7 +299,7 @@ last_emit_time = {}
 
 # Helper functions
 def should_emit(imei):
-    now = time.time()
+    now = datetime.timestamp(datetime.now())
     if imei not in last_emit_time or now - last_emit_time[imei] > 1:
         last_emit_time[imei] = now
         return True
@@ -330,30 +324,11 @@ def store_data_in_mongodb(json_data):
     except Exception as e:
         print("Error storing data in MongoDB:", e)
 
-# SocketIO event handlers
-@socketio.on('data')
-def handle_data(data):
-    print("Received data:", data)
+def parse_tcp_data(data):
     try:
-        # Parse the incoming data
-        json_data = parse_json_data(data)
-        if json_data:
-            # Handle SOS alerts
-            sos_state = json_data.get('sos', '0')
-            if sos_state == '1':
-                log_sos_to_mongodb(json_data)
-                if should_emit(json_data['imei']):
-                    socketio.emit('sos_alert', json_data)
+        data = data.decode(errors='ignore').strip()  # Decode bytes to string safely
+        print(f"Raw received data: {repr(data)}")  # Debugging
 
-            # Store the data in MongoDB
-            store_data_in_mongodb(json_data)
-        else:
-            print("Invalid JSON format")
-    except Exception as e:
-        print("Error handling data:", e)
-
-def parse_json_data(data):
-    try:
         parts = data.split(',')
         expected_fields_count = 35
 
@@ -389,10 +364,39 @@ def parse_json_data(data):
             print(f"Received data does not contain at least {expected_fields_count} fields.")
             return None
     except Exception as e:
-        print("Error parsing JSON data:", e)
+        print("Error parsing TCP data:", e)
         return None
 
-# Run the server
+# TCP Server
+def start_tcp_server(host="0.0.0.0", port=8000):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(5)
+    print(f"TCP Server started on {host}:{port}")
+
+    while True:
+        client_socket, addr = server_socket.accept()
+        print(f"Connection from {addr}")
+
+        try:
+            while True:
+                data = client_socket.recv(1024)  # Receive up to 1024 bytes
+                if not data:
+                    break  # No data received, close the connection
+                
+                json_data = parse_tcp_data(data)
+                if json_data:
+                    store_data_in_mongodb(json_data)
+                    
+                    # Handle SOS alert
+                    if json_data.get('sos') == '1':
+                        log_sos_to_mongodb(json_data)
+                
+        except Exception as e:
+            print("Error handling client connection:", e)
+        
+        finally:
+            client_socket.close()
+
 if __name__ == "__main__":
-    print("Starting SocketIO server...")
-    socketio.run(app, host="0.0.0.0", port=8000)
+    start_tcp_server(port=8000)  # Start server on port 9000
