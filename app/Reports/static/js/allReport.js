@@ -62,15 +62,20 @@ function openReportModal(reportName) {
 }  
 
 document.getElementById("generateReport").onclick = function () {
-  const fields = Array.from(selectedFields.children).map((li) => li.dataset.field);
+  const reportName = document.querySelector("#reportModal h2").textContent.replace("Generate ", "").trim();
   const vehicleNumber = document.getElementById("vehicleNumber").value;
   const dateRange = document.getElementById("dateRange").value;
-  const reportName = document.querySelector("#reportModal h2").textContent.replace("Generate ", "").trim();
 
   if (!vehicleNumber) {
     alert("Please select a vehicle number");
     return;
   }
+
+  // Show loading indicator
+  const generateBtn = document.getElementById("generateReport");
+  const originalText = generateBtn.textContent;
+  generateBtn.disabled = true;
+  generateBtn.textContent = "Generating...";
 
   fetch("/reports/download_custom_report", {
     method: "POST",
@@ -78,31 +83,37 @@ document.getElementById("generateReport").onclick = function () {
     body: JSON.stringify({ 
       reportName, 
       vehicleNumber,
-      dateRange,
-      fields  
+      dateRange,  
     }),
   })
-
-    .then((response) => { 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.blob();
-    })
-    .then((blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${reportName}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      alert("Failed to generate report");
-    });
+  .then((response) => {
+    if (!response.ok) {
+      return response.json().then(err => { throw err; });
+    }
+    return response.blob();
+  })
+  .then((blob) => {
+    if (blob.size === 0) {
+      throw new Error("Empty file received");
+    }
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${reportName}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    const message = error.message || "Failed to generate report";
+    alert(message);
+  })
+  .finally(() => {
+    generateBtn.disabled = false;
+    generateBtn.textContent = originalText;
+  });
 };
 
 document.addEventListener("DOMContentLoaded", function () {

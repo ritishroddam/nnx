@@ -196,48 +196,106 @@ def download_custom_report():
     if not all_results:
         return jsonify({"success": False, "message": "No data found for the selected criteria."}), 404
 
-    # Convert to Excel
+# Convert to Excel
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        merged_data = {}
-        
-        # Add vehicle data
-        if 'vehicle_inventory' in collections_to_query and vehicle_data:
-            for field, value in vehicle_data.items():
-                if field != '_id':
-                    merged_data[field] = [value] * len(atlanta_data) if atlanta_data else [value]
-        
-        # Add device data
-        if 'device_inventory' in collections_to_query and device_data:
-            for field, value in device_data.items():
-                if field != '_id':
-                    merged_data[field] = [value] * len(atlanta_data) if atlanta_data else [value]
-        
-        # Add time-series data
-        if 'atlanta' in collections_to_query and atlanta_data:
-            for record in atlanta_data:
-                for field, value in record.items():
-                    if field != '_id':
-                        if field not in merged_data:
-                            merged_data[field] = []
-                        merged_data[field].append(value)
-        
-        # Create DataFrame
-        if merged_data:
-            df = pd.DataFrame(merged_data)
+    try:
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            try:
+                # Create a list to hold all records
+                all_records = []
+                
+                # Handle time-series data first
+                if 'atlanta' in collections_to_query and atlanta_data:
+                    for record in atlanta_data:
+                        new_record = {}
+                        
+                        # Add vehicle data if available
+                        if 'vehicle_inventory' in collections_to_query and vehicle_data:
+                            for field, value in vehicle_data.items():
+                                if field != '_id' and field in fields:
+                                    new_record[field] = value
+                        
+                        # Add device data if available
+                        if 'device_inventory' in collections_to_query and device_data:
+                            for field, value in device_data.items():
+                                if field != '_id' and field in fields:
+                                    new_record[field] = value
+                        
+                        # Add time-series data
+                        for field, value in record.items():
+                            if field != '_id' and field in fields:
+                                new_record[field] = value
+                        
+                        all_records.append(new_record)
+                else:
+                    # Handle case when there's no time-series data
+                    new_record = {}
+                    if 'vehicle_inventory' in collections_to_query and vehicle_data:
+                        for field, value in vehicle_data.items():
+                            if field != '_id' and field in fields:
+                                new_record[field] = value
+                    if 'device_inventory' in collections_to_query and device_data:
+                        for field, value in device_data.items():
+                            if field != '_id' and field in fields:
+                                new_record[field] = value
+                    if new_record:
+                        all_records.append(new_record)
+                
+                if not all_records:
+                    return jsonify({"success": False, "message": "No data to export."}), 404
+                
+                # Create DataFrame
+                df = pd.DataFrame(all_records)
+                
+                # Verify DataFrame is not empty
+                if df.empty:
+                    return jsonify({"success": False, "message": "No valid data found for the selected criteria."}), 404
+                
+                # Format date/time columns
+                if 'date' in df.columns:
+                    try:
+                        df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+                    except Exception as date_format_error:
+                        print(f"Date formatting error: {date_format_error}")
+                        # Continue without formatting if there's an error
+                
+                if 'time' in df.columns:
+                    try:
+                        df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+                    except Exception as time_format_error:
+                        print(f"Time formatting error: {time_format_error}")
+                        # Continue without formatting if there's an error
+                
+                # Write to Excel
+                df.to_excel(writer, index=False, sheet_name="Combined Report")
+                
+                # Verify the Excel file was written successfully
+                if writer.book.worksheets[0].max_row == 1:  # Only headers
+                    return jsonify({"success": False, "message": "No data rows to export."}), 404
+                    
+            except Exception as excel_gen_error:
+                print(f"Error during Excel generation: {excel_gen_error}")
+                return jsonify({
+                    "success": False,
+                    "message": "Failed to generate Excel file. Please try again."
+                }), 500
+                
+        # Verify the output buffer has content
+        output.seek(0)
+        if output.getbuffer().nbytes == 0:
+            return jsonify({
+                "success": False,
+                "message": "Failed to generate report file (empty output)."
+            }), 500
             
-            # Format date/time columns
-            if 'date' in df.columns:
-                df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-            if 'time' in df.columns:
-                df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-            
-            df.to_excel(writer, index=False, sheet_name="Combined Report")
-        else:
-            return jsonify({"success": False, "message": "No data to export."}), 404
+    except Exception as excel_write_error:
+        print(f"Error creating Excel writer: {excel_write_error}")
+        return jsonify({
+            "success": False,
+            "message": "Failed to initialize Excel writer. Please try again."
+        }), 500
 
-    output.seek(0)
-
+    # If we get here, everything succeeded
     return send_file(
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
