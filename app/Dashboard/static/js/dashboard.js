@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Create gradient colors
       const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
       gradient1.addColorStop(0, "#336699");
-      gradient1.addColorStop(1, "#204060");
+      gradient1.addColorStop(1, "#1b3651");
 
       const gradient2 = ctx.createLinearGradient(0, 0, 0, 400);
       gradient2.addColorStop(0, "#bfbfbf");
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 data.offline_vehicles,
               ],
               backgroundColor: [gradient1, gradient2, gradient3],
-              hoverBackgroundColor: ["#2ecc71", "#e67e22", "#2980b9"],
+              hoverBackgroundColor: ["#336699", "#bfbfbf", "#595959"],
               borderWidth: 0,
             },
           ],
