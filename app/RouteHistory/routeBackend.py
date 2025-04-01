@@ -33,16 +33,22 @@ def page():
         vehicle_list = []
         for item in vehicle_data:
             latestVehicleData = distinct_atlanta_collection.find_one({"imei": item.get("IMEI")},{"_id": 0})
-            vehicle_list.append({
-                "License Plate Number": item.get("LicensePlateNumber", "Unknown"),
-                "IMEI Number": item.get("IMEI", "Unknown"),
-                "Vehicle Model": item.get("VehicleModel", "Unknown"),
-                "Vehicle Make": item.get("VehicleMake", "Unknown"),
-                "Company Name": company_collection.find_one({"_id": item.get("CompanyID")},{"_id": 0, "Company Name": 1}),
-                "Driver Name": item.get("DriverName", "Unknown"),
-                "Location": f"{latestVehicleData.get('latitude', 'N/A')}, {latestVehicleData.get('longitude', 'N/A')}",
-                "Odometer Reading": latestVehicleData.get("odometer", "Unknown")
-            })
+        if latestVehicleData:
+            location = f"{latestVehicleData.get('latitude', 'N/A')}, {latestVehicleData.get('longitude', 'N/A')}"
+            odometer_reading = latestVehicleData.get("odometer", "Unknown")
+        else:
+            location = "N/A"
+            odometer_reading = "Unknown"
+        vehicle_list.append({
+            "License Plate Number": item.get("LicensePlateNumber", "Unknown"),
+            "IMEI Number": item.get("IMEI", "Unknown"),
+            "Vehicle Model": item.get("VehicleModel", "Unknown"),
+            "Vehicle Make": item.get("VehicleMake", "Unknown"),
+            "Company Name": company_collection.find_one({"_id": item.get("CompanyID")},{"_id": 0, "Company Name": 1}),
+            "Driver Name": item.get("DriverName", "Unknown"),
+            "Location": location,
+            "Odometer Reading": odometer_reading
+        })
         return render_template('vehicle_list.html', vehicle_list=vehicle_list)
     except Exception as e:
         print(f"Error fetching vehicle list: {e}")
