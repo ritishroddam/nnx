@@ -127,6 +127,7 @@ jwt = JWTManager()
 mongo_client = None
 db = None
 socketio = SocketIO()
+pool = eventlet.GreenPool()
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -208,8 +209,6 @@ def create_app(config_name='default'):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
-
-    pool = eventlet.GreenPool()
 
     def start_background_tasks():
         pool.spawn(run_servers)
