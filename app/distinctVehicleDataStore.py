@@ -4,7 +4,7 @@ import os
 import time
 import socketio
 import json
-from app.database import db
+from database import db
 
 atlanta_collection = db['atlanta']
 distinct_atlanta_collection = db['distinctAtlanta']

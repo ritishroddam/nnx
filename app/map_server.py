@@ -14,7 +14,7 @@ import socketio
 import eventlet
 import eventlet.wsgi
 import time
-from app.database import db
+from database import db
 
 
 app = Flask(__name__)
