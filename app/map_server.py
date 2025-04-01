@@ -20,14 +20,6 @@ from app import db, socketio as sio
 last_emit_time = {}
 
 @sio.event
-def connect(sid, environ):
-    print(f"Client connected: {sid} {environ}")
-
-@sio.event
-def disconnect(sid):
-    print(f"Client disconnected: {sid}")
-
-@sio.event
 def vehicle_update(sid, data):
     print(f"Received vehicle_update event: {data}")
     sio.emit('vehicle_update', data)  

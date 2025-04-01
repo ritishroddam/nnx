@@ -19,6 +19,14 @@ def create_app(config_name='default'):
 
     jwt.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*", transports=["websocket"])
+
+    @socketio.on('connect')
+    def connect(sid, environ):
+        print(f"Client connected: {sid} {environ}")
+
+    @socketio.on('disconnect')
+    def disconnect(sid):
+        print(f"Client disconnected: {sid}")
     
     global mongo_client, db
     mongo_client = MongoClient(app.config['MONGO_URI'])
