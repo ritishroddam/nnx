@@ -176,16 +176,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Create gradient colors
       const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient1.addColorStop(0, "#3cba9f");
-      gradient1.addColorStop(1, "#36d1dc");
+      gradient1.addColorStop(0, "#336699");
+      gradient1.addColorStop(1, "#204060");
 
       const gradient2 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient2.addColorStop(0, "#f39c12");
-      gradient2.addColorStop(1, "#f7b733");
+      gradient2.addColorStop(0, "#bfbfbf");
+      gradient2.addColorStop(1, "#f2f2f2");
 
       const gradient3 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient3.addColorStop(0, "#3498db");
-      gradient3.addColorStop(1, "#3d84e6");
+      gradient3.addColorStop(0, "#595959");
+      gradient3.addColorStop(1, "#0d0d0d");
 
       const chartConfig = {
         type: "doughnut",
@@ -360,10 +360,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(data.error || "Unknown error fetching distance data");
       }
 
-      // Debugging logs
       console.log("Fetched Distance Data:", data);
 
-      // Update chart data
       devicesChart.data.labels = data.labels;
       devicesChart.data.datasets[0].data = data.distances;
       devicesChart.update();
@@ -372,51 +370,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Fetch and update the chart data initially
   await fetchDistanceTravelledData();
-
-  // async function fetchVehicleDistances() {
-  //   try {
-  //     const response = await fetch("/dashboard/get_vehicle_distances");
-  //     const data = await response.json();
-
-  //     let tableBody = document.getElementById("vehicleTable");
-  //     tableBody.innerHTML = ""; // Clear existing table data
-
-  //     data.forEach((vehicle) => {
-  //       let row = `<tr>
-  //                 <td>${vehicle.registration}</td>
-  //                 <td>${vehicle.distance.toFixed(2)}</td>
-  //             </tr>`;
-  //       tableBody.innerHTML += row;
-  //     });
-  //   } catch (error) {
-  //     console.error("Error fetching vehicle distances:", error);
-  //   }
-  // }
-
-  // document.getElementById("sortBtn").addEventListener("click", function () {
-  //   const table = document.querySelector("#vehicleTable");
-  //   const rows = Array.from(table.rows);
-  //   const headerRow = rows.shift();
-
-  //   rows.sort((a, b) => {
-  //     const x = parseFloat(a.cells[1].innerText);
-  //     const y = parseFloat(b.cells[1].innerText);
-  //     return y - x;
-  //   });
-
-  //   table.innerHTML = "";
-  //   table.appendChild(headerRow);
-  //   rows.forEach((row) => table.appendChild(row));
-  // });
 
   async function fetchVehicleDistances() {
     try {
       const response = await fetch("/dashboard/get_vehicle_distances");
       const data = await response.json();
-      
-      // Sort data before rendering
+
       data.sort((a, b) => b.distance - a.distance);
       
       let tableBody = document.getElementById("vehicleTable");
