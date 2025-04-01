@@ -310,31 +310,34 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reportName, fields }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to save the report.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          alert(data.message);
-          // Create a new card for the saved report
-          createReportCard({ report_name: reportName });
-          customReportModal.style.display = "none";
-        } else {
-          console.error("Failed to save the report:", data);
-          alert(data.message || "Failed to save the report. Please try again.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving the report:", error);
-        alert("An error occurred while saving the report.");
-      });
-  };
+  })
+  .then(async (response) => {
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(text || 'Invalid response from server');
+    }
+    return response.json();
+})
+.then((data) => {
+  if (data.success) {
+      alert(data.message);
+      createReportCard({ report_name: reportName });
+      customReportModal.style.display = "none";
+  } else {
+      console.error("Failed to save the report:", data);
+      alert(data.message || "Failed to save the report. Please try again.");
+  }
+})
+  .catch((error) => {
+    console.error("Error saving the report:", error);
+    const errorMessage = error.message.includes('<html') ? 
+        "Server error occurred. Please try again later." : 
+        error.message;
+    alert(errorMessage);
+});
+};
 
-  // Load existing custom reports when page loads
   fetch("/reports/get_custom_reports")
     .then(response => response.json())
     .then(reports => {
