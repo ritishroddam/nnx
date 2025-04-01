@@ -316,25 +316,29 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "POST",
       headers: { 
           "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest" 
+          "Accept": "application/json" 
       },
       body: JSON.stringify({ reportName, fields }),
   })
-  .then((response) => {
+  // .then((response) => {
+  //   if (!response.ok) {
+  //     throw new Error("Failed to save the report.");
+  //   }
+  //   return response.json();
+  // })
+  .then(async (response) => {
+    const data = await response.json();
+    
     if (!response.ok) {
-      throw new Error("Failed to save the report.");
+        // Use server-provided message if available
+        throw new Error(data.message || "Failed to save report");
     }
-    return response.json();
-  })
+    return data;
+})
 .then((data) => {
-  if (data.success) {
       alert(data.message);
       createReportCard({ report_name: reportName });
       customReportModal.style.display = "none";
-  } else {
-      console.error("Failed to save the report:", data);
-      alert(data.message || "Failed to save the report. Please try again.");
-  }
 })
 .catch((error) => {
   console.error("Error saving the report:", error);
