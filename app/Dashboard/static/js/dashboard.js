@@ -375,14 +375,53 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fetch and update the chart data initially
   await fetchDistanceTravelledData();
 
+  // async function fetchVehicleDistances() {
+  //   try {
+  //     const response = await fetch("/dashboard/get_vehicle_distances");
+  //     const data = await response.json();
+
+  //     let tableBody = document.getElementById("vehicleTable");
+  //     tableBody.innerHTML = ""; // Clear existing table data
+
+  //     data.forEach((vehicle) => {
+  //       let row = `<tr>
+  //                 <td>${vehicle.registration}</td>
+  //                 <td>${vehicle.distance.toFixed(2)}</td>
+  //             </tr>`;
+  //       tableBody.innerHTML += row;
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching vehicle distances:", error);
+  //   }
+  // }
+
+  // document.getElementById("sortBtn").addEventListener("click", function () {
+  //   const table = document.querySelector("#vehicleTable");
+  //   const rows = Array.from(table.rows);
+  //   const headerRow = rows.shift();
+
+  //   rows.sort((a, b) => {
+  //     const x = parseFloat(a.cells[1].innerText);
+  //     const y = parseFloat(b.cells[1].innerText);
+  //     return y - x;
+  //   });
+
+  //   table.innerHTML = "";
+  //   table.appendChild(headerRow);
+  //   rows.forEach((row) => table.appendChild(row));
+  // });
+
   async function fetchVehicleDistances() {
     try {
       const response = await fetch("/dashboard/get_vehicle_distances");
       const data = await response.json();
-
+      
+      // Sort data before rendering
+      data.sort((a, b) => b.distance - a.distance);
+      
       let tableBody = document.getElementById("vehicleTable");
-      tableBody.innerHTML = ""; // Clear existing table data
-
+      tableBody.innerHTML = "";
+      
       data.forEach((vehicle) => {
         let row = `<tr>
                   <td>${vehicle.registration}</td>
@@ -398,17 +437,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("sortBtn").addEventListener("click", function () {
     const table = document.querySelector("#vehicleTable");
     const rows = Array.from(table.rows);
-    const headerRow = rows.shift();
-
-    rows.sort((a, b) => {
+    
+    // Separate header row from data rows
+    const headerRow = rows[0];
+    const dataRows = rows.slice(1);
+  
+    // Sort data rows by distance (descending)
+    dataRows.sort((a, b) => {
       const x = parseFloat(a.cells[1].innerText);
       const y = parseFloat(b.cells[1].innerText);
       return y - x;
     });
-
+  
+    // Rebuild table with header first, then sorted data
     table.innerHTML = "";
     table.appendChild(headerRow);
-    rows.forEach((row) => table.appendChild(row));
+    dataRows.forEach((row) => table.appendChild(row));
   });
 
   await fetchVehicleDistances();
