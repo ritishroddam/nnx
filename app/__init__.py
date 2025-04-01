@@ -112,5 +112,5 @@ def create_app(config_name='default'):
 
 
     start_background_task()
-    
+    print("Background tasks started")
     return app
