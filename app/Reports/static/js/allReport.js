@@ -341,14 +341,6 @@ document.addEventListener("DOMContentLoaded", function () {
 })
 .catch((error) => {
   console.error("Error saving the report:", error);
-  
-  // Check if this is a potential authentication issue
-  if (error.message.includes('HTML') || error.message.includes('DOCTYPE')) {
-      alert("Your session may have expired. Please try logging in again.");
-      window.location.href = '/login';  // Redirect to login
-  } else {
-      alert(error.message || "Failed to save the report. Please try again.");
-  }
 });
 };
 
