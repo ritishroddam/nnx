@@ -1,11 +1,7 @@
-// Get CSRF token from meta tag
-function getCSRFToken() {
-  const metaTag = document.querySelector('meta[name="csrf-token"]') || document.querySelector('meta[name="csrf_token"]');
-  return metaTag ? metaTag.content : '';
-}
-
 var modal = document.getElementById("reportModal");
+
 var reportCards = document.querySelectorAll(".report-card");
+
 var span = document.getElementsByClassName("close")[0];
 
 reportCards.forEach(function (card) {
@@ -125,10 +121,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const customReportForm = document.getElementById("customReportForm");
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
-  // const reportCardsContainer = document.querySelector(".report-cards");
-  // const customReportsContainer = document.getElementById(
-  //   "custom-reports-container"
-  // );
+  const reportCardsContainer = document.querySelector(".report-cards");
+  const customReportsContainer = document.getElementById(
+    "custom-reports-container"
+  );
 
   const allowedFields = [
     "main_power",
@@ -184,12 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function loadFields() {
-    fetch("/reports/get_fields", {
-      headers: {
-        "X-CSRFToken": getCSRFToken(),
-        "X-Requested-With": "XMLHttpRequest"
-      }
-    })
+    fetch("/reports/get_fields")
       .then((response) => response.json())
       .then((fields) => {
         fieldSelection.innerHTML = "";
@@ -318,12 +309,10 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/reports/save_custom_report", {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken(),
-        "X-Requested-With": "XMLHttpRequest"
+          "Content-Type": "application/json",
       },
       body: JSON.stringify({ reportName, fields }),
-    })
+  })
   .then(async (response) => {
     // First check if response is HTML
     const contentType = response.headers.get('content-type');
@@ -363,12 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 };
 
-fetch("/reports/get_custom_reports", {
-    headers: {
-      "X-CSRFToken": getCSRFToken(),
-      "X-Requested-With": "XMLHttpRequest"
-    }
-  })
+  fetch("/reports/get_custom_reports")
     .then(response => response.json())
     .then(reports => {
       reports.forEach(report => {
