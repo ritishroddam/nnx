@@ -308,16 +308,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetch("/reports/save_custom_report", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+          "Content-Type": "application/json",
+      },
       body: JSON.stringify({ reportName, fields }),
   })
   .then(async (response) => {
+    // First check if response is HTML
     const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
+    if (contentType && contentType.includes('text/html')) {
         const text = await response.text();
-        throw new Error(text || 'Invalid response from server');
+        throw new Error('Server returned HTML instead of JSON. You may need to login again.');
     }
-    return response.json();
+    
+    // Then try to parse as JSON
+    const data = await response.json();
+    
+    if (!response.ok) {
+        throw new Error(data.message || 'Request failed');
+    }
+    return data;
 })
 .then((data) => {
   if (data.success) {
@@ -329,12 +339,8 @@ document.addEventListener("DOMContentLoaded", function () {
       alert(data.message || "Failed to save the report. Please try again.");
   }
 })
-  .catch((error) => {
-    console.error("Error saving the report:", error);
-    const errorMessage = error.message.includes('<html') ? 
-        "Server error occurred. Please try again later." : 
-        error.message;
-    alert(errorMessage);
+.catch((error) => {
+  console.error("Error saving the report:", error);
 });
 };
 
