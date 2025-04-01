@@ -88,7 +88,7 @@
   flex: 1;
   margin: 0 10px;
 }
-.weather-container #weather {
+.weather-container #weather p{
   color: black;
 }
 .dark-mode .weather-section #weather{
