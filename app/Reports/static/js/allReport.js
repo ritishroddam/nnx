@@ -1,7 +1,11 @@
+// Get CSRF token from meta tag
+function getCSRFToken() {
+  const metaTag = document.querySelector('meta[name="csrf-token"]') || document.querySelector('meta[name="csrf_token"]');
+  return metaTag ? metaTag.content : '';
+}
+
 var modal = document.getElementById("reportModal");
-
 var reportCards = document.querySelectorAll(".report-card");
-
 var span = document.getElementsByClassName("close")[0];
 
 reportCards.forEach(function (card) {
@@ -121,10 +125,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const customReportForm = document.getElementById("customReportForm");
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
-  const reportCardsContainer = document.querySelector(".report-cards");
-  const customReportsContainer = document.getElementById(
-    "custom-reports-container"
-  );
+  // const reportCardsContainer = document.querySelector(".report-cards");
+  // const customReportsContainer = document.getElementById(
+  //   "custom-reports-container"
+  // );
 
   const allowedFields = [
     "main_power",
@@ -180,7 +184,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function loadFields() {
-    fetch("/reports/get_fields")
+    fetch("/reports/get_fields", {
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
       .then((response) => response.json())
       .then((fields) => {
         fieldSelection.innerHTML = "";
@@ -308,16 +317,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetch("/reports/save_custom_report", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      },
       body: JSON.stringify({ reportName, fields }),
-  })
+    })
   .then(async (response) => {
+    // First check if response is HTML
     const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
+    if (contentType && contentType.includes('text/html')) {
         const text = await response.text();
-        throw new Error(text || 'Invalid response from server');
+        throw new Error('Server returned HTML instead of JSON. You may need to login again.');
     }
-    return response.json();
+    
+    // Then try to parse as JSON
+    const data = await response.json();
+    
+    if (!response.ok) {
+        throw new Error(data.message || 'Request failed');
+    }
+    return data;
 })
 .then((data) => {
   if (data.success) {
@@ -329,16 +350,25 @@ document.addEventListener("DOMContentLoaded", function () {
       alert(data.message || "Failed to save the report. Please try again.");
   }
 })
-  .catch((error) => {
-    console.error("Error saving the report:", error);
-    const errorMessage = error.message.includes('<html') ? 
-        "Server error occurred. Please try again later." : 
-        error.message;
-    alert(errorMessage);
+.catch((error) => {
+  console.error("Error saving the report:", error);
+  
+  // Check if this is a potential authentication issue
+  if (error.message.includes('HTML') || error.message.includes('DOCTYPE')) {
+      alert("Your session may have expired. Please try logging in again.");
+      window.location.href = '/login';  // Redirect to login
+  } else {
+      alert(error.message || "Failed to save the report. Please try again.");
+  }
 });
 };
 
-  fetch("/reports/get_custom_reports")
+fetch("/reports/get_custom_reports", {
+    headers: {
+      "X-CSRFToken": getCSRFToken(),
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  })
     .then(response => response.json())
     .then(reports => {
       reports.forEach(report => {
