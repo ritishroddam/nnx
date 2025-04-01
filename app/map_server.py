@@ -217,14 +217,14 @@ def run_servers():
     
     # Use eventlet's WSGI server for better concurrency
     from eventlet import wsgi
-    from app import pool
+    from app import app, pool
 
     # Initialize the server with your TCP handler
     server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
     print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
     
     # Use GreenPool to manage green threads
-    pool.spawn(wsgi.server, server)  # This will spawn the server to handle requests
+    pool.spawn(wsgi.server, server, app)  # This will spawn the server to handle requests
 
     print("Server running. Press Ctrl+C to stop.")
     while True:
