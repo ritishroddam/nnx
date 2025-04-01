@@ -267,7 +267,17 @@ def log_data(json_data):
         print("Error logging data to MongoDB:", e)
 
 def start_flask_server():
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 8555)), app)
+    cert_path = os.path.join("cert", "cert.pem")
+    key_path = os.path.join("cert", "key.pem")
+    eventlet.wsgi.server(
+        eventlet.wrap_ssl(
+            eventlet.listen(('0.0.0.0', 8555)),
+            certfile=cert_path,
+            keyfile=key_path,
+            server_side=True
+        ),
+        app
+    )
 
 def run_servers():
     HOST = "0.0.0.0"
