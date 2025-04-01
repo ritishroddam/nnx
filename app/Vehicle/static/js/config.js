@@ -1,3 +1,3 @@
 const CONFIG = {
-  SOCKET_SERVER_URL: `${window.location.protocol}//${window.location.hostname}:5000`,
+  SOCKET_SERVER_URL: "http://64.227.137.175:8555",
 };
