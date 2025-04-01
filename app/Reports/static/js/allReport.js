@@ -306,14 +306,21 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Show loading state
+    const saveBtn = document.getElementById("saveCustomReport");
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+
     fetch("/reports/save_custom_report", {
       method: "POST",
       headers: { 
           "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest" 
       },
       body: JSON.stringify({ reportName, fields }),
   })
-  .then((response) => {
+  .then(async(response) => {
     if (!response.ok) {
       throw new Error("Failed to save the report.");
     }
@@ -332,7 +339,11 @@ document.addEventListener("DOMContentLoaded", function () {
 .catch((error) => {
   console.error("Error saving the report:", error);
   alert("An error occurred while saving the report.");
-});
+})
+  .finally(() => {
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
+  });
 };
 
   fetch("/reports/get_custom_reports")
