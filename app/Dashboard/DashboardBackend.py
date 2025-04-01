@@ -90,34 +90,25 @@ def atlanta_pie_data():
 @jwt_required()
 def atlanta_distance_data():
     try:
+        now = datetime.now()
+        seven_days_ago = now - timedelta(days=7)
 
         results = list(distance_travelled_collection.find())
 
-        # Dictionary to store total distance per day
         total_distance_per_day = {}
-
-        now = datetime.now()
-        seven_days_ago = now - timedelta(days=7)
 
         for record in results:
             date_str = record['date']
             total_distance = record.get('totalDistance', 0)
 
-            # Convert date_str to datetime object
             date_obj = datetime.strptime(date_str, '%d%m%y')
 
-            # Filter records for the past seven days
             if date_obj >= seven_days_ago:
-
 
                 total_distance_per_day[date_str] = total_distance
 
-
-        # Prepare the response data
         labels = sorted(total_distance_per_day.keys())
         distances = [total_distance_per_day[date_str] for date_str in labels]
-
-        # Format labels to "DD MMM"
         
         formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
 
