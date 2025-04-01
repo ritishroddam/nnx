@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify({ reportName, fields }),
   })
-  .then(async(response) => {
+  .then((response) => {
     if (!response.ok) {
       throw new Error("Failed to save the report.");
     }
