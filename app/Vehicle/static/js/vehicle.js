@@ -1,34 +1,22 @@
 const SOCKET_SERVER_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
 const socket = io(SOCKET_SERVER_URL, { transports: ["websocket"] });
 
-socket.on("connect", function () {
-  console.log("Connected to WebSocket server");
-  socket.emit("request_vehicle_data");
-});
-
-socket.on("connect_error", (error) => {
-  console.error("WebSocket connection error:", error);
-});
-
-socket.on("disconnect", () => {
-  console.warn("WebSocket disconnected");
-});
-
-socket.onAny((event, ...args) => {
-  console.log(`Received event: ${event}`, args);
-});
-
-socket.on("vehicle_update", function (data) {
+// Listen for 'vehicle_update' event from the server
+socket.on("vehicle_update", (data) => {
   console.log("Vehicle update received:", data);
-  updateVehicleData(data);
-  updateVehicleCard(data);
+  updateVehicleData(data); // Update the vehicle data on the map and UI
+  updateVehicleCard(data); // Update the vehicle card in the UI
 });
 
-socket.on("sos_alert", function (data) {
+// Listen for 'sos_alert' event from the server
+socket.on("sos_alert", (data) => {
   console.log("SOS alert received:", data);
-  imei = data.imei;
+  const imei = sanitizeIMEI(data.imei);
+
   if (markers[imei]) {
-    triggerSOS(imei, markers[imei]);
+    triggerSOS(imei, markers[imei]); // Trigger SOS alert for the corresponding marker
+  } else {
+    console.warn(`Marker not found for IMEI: ${imei}`);
   }
 });
 
