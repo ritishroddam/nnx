@@ -101,19 +101,29 @@ def atlanta_distance_data():
             date_str = record['date']
             total_distance = record.get('totalDistance', 0)
 
-            date_obj = datetime.strptime(date_str, '%d%m%y')
+            try:
+                date_obj = datetime.strptime(date_str, '%d%m%y')
+                
+                # Only include dates within the last 7 days
+                if date_obj >= seven_days_ago and date_obj <= now:
+                    # Use consistent date string as key
+                    date_key = date_obj.strftime('%d%m%y')
+                    total_distance_per_day[date_key] = total_distance
+            except ValueError:
+                continue  # skip invalid date formats
 
-            if date_obj >= seven_days_ago:
-
-                total_distance_per_day[date_str] = total_distance
-
-        labels = sorted(total_distance_per_day.keys())
-        distances = [total_distance_per_day[date_str] for date_str in labels]
+        # Sort by date
+        sorted_dates = sorted(
+            total_distance_per_day.keys(),
+            key=lambda x: datetime.strptime(x, '%d%m%y')
+        )
         
-        formatted_labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in labels]
+        # Prepare data for chart
+        labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in sorted_dates]
+        distances = [total_distance_per_day[date_str] for date_str in sorted_dates]
 
         return jsonify({
-            "labels": formatted_labels,
+            "labels": labels,
             "distances": distances
         }), 200
 
