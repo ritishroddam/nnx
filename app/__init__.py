@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, verify_jwt
 from pymongo import MongoClient
 from config import config
 from flask_socketio import SocketIO
-import subprocess
+import threading
 import signal
 
 
@@ -96,38 +96,20 @@ def create_app(config_name='default'):
 
 
     def start_background_task():
-        from app.map_server import signal_handler
+        from app.distinctVehicleDataStore import run_distinct_vehicle_data_store
+        distinctVehicleThread = threading.Thread(target=run_distinct_vehicle_data_store, args=(socketio,), daemon=True)
+        distinctVehicleThread.start()
 
-        # Start the distinct vehicle data store as a subprocess
-        distinct_vehicle_process = subprocess.Popen(
-            ["python", "-m", "app.distinctVehicleDataStore"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+        from app.map_server import run_servers, signal_handler
+        mapServerThread = threading.Thread(target=run_servers, daemon=True)
+        mapServerThread.start()
 
-        # Start the map server as a subprocess
-        map_server_process = subprocess.Popen(
-            ["python", "-m", "app.map_server"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
 
-        # Start the past distance calculation as a subprocess
-        past_distance_process = subprocess.Popen(
-            ["python", "-m", "app.calculate_past_distances"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-
-        # Register signal handlers to terminate subprocesses gracefully
-        def terminate_subprocesses(signum, frame):
-            distinct_vehicle_process.terminate()
-            map_server_process.terminate()
-            past_distance_process.terminate()
-            signal_handler(signum, frame)
-
-        signal.signal(signal.SIGINT, terminate_subprocesses)
-        signal.signal(signal.SIGTERM, terminate_subprocesses)
+        from app.calculate_past_distances import calculate_distance_for_past_days
+        pastDistanceThread = threading.Thread(target=calculate_distance_for_past_days, daemon=True)
+        pastDistanceThread.start()
 
     start_background_task()
     
