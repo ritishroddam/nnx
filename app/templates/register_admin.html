@@ -1,0 +1,27 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="register-container">
+    <h2>Register</h2>
+    <form method="POST" action="{{ url_for('auth.register_admin') }}">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="secret_key">Enter Secret Key</label>
+            <input type="password" id="secret_key" name="secret_key" required>
+        </div>
+        <button type="submit" class="btn">Register</button>
+    </form>
+    <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+</div>
+{% endblock %}

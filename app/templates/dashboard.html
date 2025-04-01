@@ -1,0 +1,23 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>Hello, {{ username }}!</h2>
+    <div class="user-info">
+        <p><strong>Role:</strong> {{ role }}</p>
+    </div>
+
+    <!-- {% if role == 'admin' %} -->
+    <!-- <div class="admin-links">
+        <a href="{{ url_for('main.admin_dashboard') }}" class="btn">Admin Dashboard</a>
+    </div> -->
+    <!-- {% endif %} -->
+
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+        {% if csrf_token %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+        <button type="submit" class="btn btn-logout">Logout</button>
+    </form>
+</div>
+{% endblock %}

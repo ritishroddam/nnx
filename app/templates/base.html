@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="topbar">
+        <h1>{% block h1 %} {% endblock %}</h1>
+        <div class="topbar-icons">
+            {% block topbar_icons %}{% endblock %}
+            <div class="theme-toggle" id="theme-toggle">
+                <i class="fa-solid fa-sun"></i>
+            </div>
+            <div class="notification">
+                <i class="fa-solid fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="profile" id="profile">
+                <img src="user.png" alt="User">
+                <div class="profile-hover" id="profile-hover">
+                    <div class="dashboard-container">
+                        <h2>Hello, {{ username }}!</h2>
+                        <div class="user-info">
+                            <p><strong>Role:</strong> {{ role }}</p>
+                        </div>
+
+                        <form action="{{ url_for('auth.logout') }}" method="POST">
+                            {% if csrf_token %}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            {% endif %}
+                            <button type="submit" class="btn btn-logout">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="sidebar">
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h2 class="sidebar-text">Cordon</h2>
+        </div>
+
+        <ul class="menu">
+            <li>
+                <a href="{{url_for('Dashboard.page')}}" class="menu-item">
+                    <i class="fa-solid fa-chart-bar"></i> <span class="sidebar-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-car"></i>
+                    <span class="sidebar-text">Vehicles</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('Vehicle.map')}}">
+                            Vehicle Map
+                            <i class="fa-solid fa-map-location-dot" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('RouteHistory.page')}}">
+                            Route History
+                            <i class="fa-solid fa-route" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-bell"></i> <span class="sidebar-text">Alerts</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-book" style='white-space:pre'></i><span class="sidebar-text">Reports</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('Reports.index')}}">
+                            All Reports
+                            <i class="fa-solid fa-file-alt" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-archive"></i>
+                    <span class="sidebar-text">Inventory</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('CompanyDetails.page')}}">
+                            Company Details
+                            <i class="fa-solid fa-building" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('DeviceInvy.page')}}">
+                            Device Inventory
+                            <i class="fa-solid fa-microchip" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('SimInvy.page')}}">
+                            Sim Inventory
+                            <i class="fa-solid fa-sim-card" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="submenu">
+                    <li>
+                        <a href="{{url_for('VehicleDetails.page')}}">
+                            Vehicle Details
+                            <i class="fa-solid fa-warehouse" style='white-space:pre'></i>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-user"></i> <span class="sidebar-text">Drivers</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="#">Driver List</a> <i class="fa-solid fa-id-card" style='white-space:pre'></i></li>
+                    <li><a href="#">Performance</a> <i class="fa-solid fa-chart-column" style='white-space:pre'></i>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="#" class="menu-item"><i class="fa-solid fa-store"></i> <span
+                        class="sidebar-text">Vendors</span></a></li>
+        </ul>
+    </div>
+
+    <div id="block-container" class="block-container">
+        {% block block_container %}{% endblock %}
+    </div>
+
+    {% block content %}{% endblock %}
+
+
+
+</body>
+
+</html>
