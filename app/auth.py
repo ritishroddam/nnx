@@ -6,7 +6,7 @@ import datetime
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/loginpage', methods=['GET'])
+@auth_bp.route('/loginPage', methods=['GET'])
 def login_page():
     try:
         verify_jwt_in_request()
@@ -30,7 +30,7 @@ def login():
         user = User.find_by_username(username)
         if not user or not User.verify_password(user, password):
             flash('Invalid username or password', 'danger')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.loginPage'))
         
         # Create the tokens we will be sending back to the user
         additional_claims = {
@@ -68,7 +68,7 @@ def register():
         
         User.create_user(username, email, password)
         flash('Registration successful. Please login.', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.loginPage'))
     
     return render_template('register.html')
 
@@ -88,14 +88,14 @@ def register_admin():
         
         User.create_user(username, email, password, role='admin')
         flash('Admin registration successful. Please login.', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.loginPage'))
     
     return render_template('register_admin.html')  # You'll need to create this template
 
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    response = redirect(url_for('auth.login'))
+    response = redirect(url_for('auth.loginPage'))
     unset_jwt_cookies(response)
     flash('You have been logged out', 'info')
     return response

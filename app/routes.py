@@ -11,7 +11,7 @@ def home():
         verify_jwt_in_request()
         return redirect(url_for('Vehicle.map'))
     except:
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.loginPage'))
 
 @main_bp.route('/registerAdmin')
 def register_admin():
