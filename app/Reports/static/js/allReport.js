@@ -313,22 +313,12 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify({ reportName, fields }),
   })
-  .then(async (response) => {
-    // First check if response is HTML
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
-        const text = await response.text();
-        throw new Error('Server returned HTML instead of JSON. You may need to login again.');
-    }
-    
-    // Then try to parse as JSON
-    const data = await response.json();
-    
+  .then((response) => {
     if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
+      throw new Error("Failed to save the report.");
     }
-    return data;
-})
+    return response.json();
+  })
 .then((data) => {
   if (data.success) {
       alert(data.message);
@@ -341,6 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
 })
 .catch((error) => {
   console.error("Error saving the report:", error);
+  alert("An error occurred while saving the report.");
 });
 };
 
