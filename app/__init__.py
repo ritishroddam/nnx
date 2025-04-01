@@ -79,9 +79,6 @@ def create_app(config_name='default'):
     from app.SimInvy.SimBackend import sim_bp
     from app.VehicleDetails.vehicleDetails import vehicleDetails_bp
 
-    from app.distinctVehicleDataStore import run_distinct_vehicle_data_store
-    from app.calculate_past_distances import calculate_distance_for_past_days
-
     app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(company_bp, url_prefix='/companyDetails')
