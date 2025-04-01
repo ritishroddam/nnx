@@ -1,11 +1,9 @@
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import os
-
 from pymongo import MongoClient
-from config import config
 
-mongo_client = MongoClient(config['default'].MONGO_URI)
+mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = mongo_client["nnx"]
 
 atlanta_collection = db['atlanta']
