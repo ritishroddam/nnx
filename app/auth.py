@@ -6,6 +6,15 @@ import datetime
 
 auth_bp = Blueprint('auth', __name__)
 
+@auth_bp.route('/loginpage', methods=['GET'])
+def login_page():
+    try:
+        verify_jwt_in_request()
+        return redirect(url_for('Vehicle.map'))
+    except:
+        pass
+    return render_template('login.html')
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
