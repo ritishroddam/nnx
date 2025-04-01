@@ -284,119 +284,118 @@
 
 #     distance = R * c
 #     return distance
-import socket
+import socketserver
+import json
+from datetime import datetime, timedelta
 from pymongo import MongoClient
-from datetime import datetime
+import threading
+import time
 
-# MongoDB setup
-client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB URI
-db = client['your_database_name']
+# MongoDB collections
+from app import db
+
 collection = db['atlanta']
 sos_logs_collection = db['sos_logs']
 
-# Global variables for rate-limiting SOS alerts
-last_emit_time = {}
+# TCP Handler for processing incoming data
+class MyTCPHandler(socketserver.BaseRequestHandler):
+    lock = threading.Lock()
 
-# Helper functions
-def should_emit(imei):
-    now = datetime.timestamp(datetime.now())
-    if imei not in last_emit_time or now - last_emit_time[imei] > 1:
-        last_emit_time[imei] = now
-        return True
-    return False
-
-def log_sos_to_mongodb(json_data):
-    try:
-        sos_log = {
-            'imei': json_data['imei'],
-            'latitude': json_data['latitude'],
-            'longitude': json_data['longitude'],
-            'timestamp': str(datetime.now())
-        }
-        sos_logs_collection.insert_one(sos_log)
-    except Exception as e:
-        print("Error logging SOS alert to MongoDB:", e)
-
-def store_data_in_mongodb(json_data):
-    try:
-        result = collection.insert_one(json_data)
-        print("Data stored in MongoDB:", result.inserted_id)
-    except Exception as e:
-        print("Error storing data in MongoDB:", e)
-
-def parse_tcp_data(data):
-    try:
-        data = data.decode(errors='ignore').strip()  # Decode bytes to string safely
-        print(f"Raw received data: {repr(data)}")  # Debugging
-
-        parts = data.split(',')
-        expected_fields_count = 35
-
-        if len(parts) >= expected_fields_count:
-            binary_string = parts[14].strip('#')
-
-            ignition, door, sos = '0', '0', '0'
-            if len(binary_string) == 14:
-                ignition = binary_string[0]
-                door = binary_string[1]
-                sos = binary_string[2]
-
-            latitude = parts[4] if parts[4] != '-' else ''
-            longitude = parts[6] if parts[6] != '-' else ''
-
-            speed_mph = float(parts[8]) if parts[8].replace('.', '', 1).isdigit() else 0.0
-            speed_kmph = round(speed_mph * 1.60934, 2)
-
-            json_data = {
-                'imei': parts[0][-15:],  # Clean IMEI
-                'header': parts[1],
-                'time': parts[2],
-                'gps': parts[3],
-                'latitude': latitude,
-                'longitude': longitude,
-                'speed': str(speed_kmph),
-                'date': parts[10],
-                'sos': sos,
-                'timestamp': str(datetime.now())
-            }
-            return json_data
-        else:
-            print(f"Received data does not contain at least {expected_fields_count} fields.")
-            return None
-    except Exception as e:
-        print("Error parsing TCP data:", e)
-        return None
-
-# TCP Server
-def start_tcp_server(host="0.0.0.0", port=8000):
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
-    server_socket.listen(5)
-    print(f"TCP Server started on {host}:{port}")
-
-    while True:
-        client_socket, addr = server_socket.accept()
-        print(f"Connection from {addr}")
+    def handle(self):
+        # Receive data from the client
+        receive_data = self.request.recv(4096).strip()
+        print(f"Received raw data: {receive_data}")
 
         try:
-            while True:
-                data = client_socket.recv(1024)  # Receive up to 1024 bytes
-                if not data:
-                    break  # No data received, close the connection
-                
-                json_data = parse_tcp_data(data)
-                if json_data:
-                    store_data_in_mongodb(json_data)
-                    
-                    # Handle SOS alert
-                    if json_data.get('sos') == '1':
-                        log_sos_to_mongodb(json_data)
-                
-        except Exception as e:
-            print("Error handling client connection:", e)
-        
-        finally:
-            client_socket.close()
+            # Decode the data
+            try:
+                data = receive_data.decode('utf-8').strip()
+            except UnicodeDecodeError:
+                data = receive_data.decode('latin-1').strip()
 
-if __name__ == "__main__":
-    start_tcp_server(port=8000)  # Start server on port 9000
+            # Parse the data into JSON format
+            json_data = self.parse_json_data(data)
+            if json_data:
+                print(f"Parsed JSON data: {json_data}")
+
+                # Handle SOS alerts
+                sos_state = json_data.get('sos', '0')
+                with MyTCPHandler.lock:
+                    if sos_state == '1':
+                        self.log_sos_to_mongodb(json_data)
+
+                # Store the data in MongoDB
+                self.store_data_in_mongodb(json_data)
+            else:
+                print("Invalid JSON format")
+
+        except Exception as e:
+            print(f"Error handling request: {e}")
+
+    def parse_json_data(self, data):
+        try:
+            parts = data.split(',')
+            expected_fields_count = 35
+
+            if len(parts) >= expected_fields_count:
+                binary_string = parts[14].strip('#')
+                ignition, door, sos = '0', '0', '0'
+
+                if len(binary_string) == 14:
+                    ignition = binary_string[0]
+                    door = binary_string[1]
+                    sos = binary_string[2]
+
+                latitude = parts[4] if parts[4] != '-' else ''
+                longitude = parts[6] if parts[6] != '-' else ''
+
+                json_data = {
+                    'imei': parts[0][-15:],  # Extract last 15 characters of IMEI
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'sos': sos,
+                    'timestamp': str(datetime.now())
+                }
+                return json_data
+            else:
+                print(f"Received data does not contain at least {expected_fields_count} fields.")
+                return None
+
+        except Exception as e:
+            print(f"Error parsing JSON data: {e}")
+            return None
+
+    def store_data_in_mongodb(self, json_data):
+        try:
+            collection.insert_one(json_data)
+            print("Data stored in MongoDB")
+        except Exception as e:
+            print(f"Error storing data in MongoDB: {e}")
+
+    def log_sos_to_mongodb(self, json_data):
+        try:
+            sos_log = {
+                'imei': json_data['imei'],
+                'latitude': json_data['latitude'],
+                'longitude': json_data['longitude'],
+                'timestamp': str(datetime.now())
+            }
+            sos_logs_collection.insert_one(sos_log)
+            print("SOS alert logged in MongoDB")
+        except Exception as e:
+            print(f"Error logging SOS alert to MongoDB: {e}")
+
+
+# Run the TCP server
+def run_servers():
+    HOST = "0.0.0.0"
+    PORT = 8000
+
+    # Start the TCP server
+    with socketserver.ThreadingTCPServer((HOST, PORT), MyTCPHandler) as server:
+        print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print("Shutting down the server...")
+            server.shutdown()
