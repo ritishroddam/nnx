@@ -20,12 +20,12 @@ from app import db, socketio as sio
 last_emit_time = {}
 
 @sio.event
-def vehicle_update(sid, data):
+def vehicle_update(data):
     print(f"Received vehicle_update event: {data}")
     sio.emit('vehicle_update', data)  
 
 @sio.event
-def sos_alert(sid, data):
+def sos_alert(data):
     print(f"Received sos alert: {data}")
     sio.emit('sos_alert', data) 
 
