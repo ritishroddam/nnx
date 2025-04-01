@@ -15,21 +15,35 @@ import eventlet
 import eventlet.wsgi
 import time
 
-from app import db, socketio as sio
+
+app = Flask(__name__)
+CORS(app)
 
 last_emit_time = {}
 
+sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20, transports=['websocket'])
+app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+
 @sio.event
-def vehicle_update(data):
+def connect(sid, environ):
+    print(f"Client connected: {sid}")
+
+@sio.event
+def disconnect(sid):
+    print(f"Client disconnected: {sid}")
+
+@sio.event
+def vehicle_update(sid, data):
     print(f"Received vehicle_update event: {data}")
-    sio.emit('vehicle_update', data)  
+    sio.emit('vehicle_update', data)
 
 @sio.event
-def sos_alert(data):
+def vehicle_update(sid, data):
     print(f"Received sos alert: {data}")
-    sio.emit('sos_alert', data) 
+    sio.emit('sos_alert', data)
 
 
+from database import db
 collection = db['atlanta']
 distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  
@@ -105,11 +119,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         self.log_sos_to_mongodb(json_data)
 
                         if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) < datetime.now() - timedelta(minutes = 5):
-                            LicensePlateNumber = vehicle_inventory_collection.find_one({'imei': json_data['imei']}, {'_id': 0,'LicensePlateNumber': 1})
-                            if LicensePlateNumber:
-                                json_data['LicensePlateNumber'] = LicensePlateNumber.get('LicensePlateNumber', '')
-                            else:
-                                json_data['LicensePlateNumber'] = ""
                             sio.emit('sos_alert', json_data)
 
                 self.store_data_in_mongodb(json_data)
@@ -255,6 +264,9 @@ def log_data(json_data):
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
+def start_flask_server():
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 8555)), app)
+
 def run_servers():
     HOST = "0.0.0.0"
     PORT = 8000
@@ -264,6 +276,13 @@ def run_servers():
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
+
+    flask_thread = threading.Thread(target=start_flask_server)
+    flask_thread.daemon = True
+    flask_thread.start()
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     print("Server running. Press Ctrl+C to stop.")
     while True:
@@ -278,3 +297,6 @@ def run_servers():
 def signal_handler(signal, frame):
     print("Received signal:", signal)
     sys.exit(0)
+
+if __name__ == "__main__":
+    run_servers()
