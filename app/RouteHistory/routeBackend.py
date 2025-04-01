@@ -24,20 +24,14 @@ def convert_to_decimal(degrees_minutes, direction):
         decimal = -decimal
     return decimal
 
-
-@route_bp.route('/page')
+@route_bp.route("/page", methods=["GET"])
 @jwt_required()
 def page():
-    return render_template('vehicle_list.html')
-
-@route_bp.route("/vehicle", methods=["GET"])
-@jwt_required()
-def show_all_vehicles():
     try:
         vehicle_data = list(data_collection.find({}))
-        
         vehicle_list = []
         for item in vehicle_data:
+            latestVehicleData = distinct_atlanta_collection.find_one({"imei": item.get("IMEI")},{"_id": 0})
             vehicle_list.append({
                 "License Plate Number": item.get("Vehicle Data", {}).get("License Plate Number", "Unknown"),
                 "IMEI Number": item.get("IMEI Number", "Unknown"),
@@ -45,8 +39,8 @@ def show_all_vehicles():
                 "Vehicle Make": item.get("Vehicle Data", {}).get("Vehicle Make", "Unknown"),
                 "Company Name": item.get("Company Name", "Unknown"),
                 "Driver Name": item.get("Driver Name", "Unknown"),
-                "Location": f"{item.get('Vehicle Data', {}).get('Latitude', 'N/A')}, {item.get('Vehicle Data', {}).get('Longitude', 'N/A')}",
-                "Odometer Reading": item.get("Vehicle Data", {}).get("Odometer", "Unknown")
+                "Location": f"{latestVehicleData.get('Latitude', 'N/A')}, {latestVehicleData.get('Longitude', 'N/A')}",
+                "Odometer Reading": latestVehicleData.get("Odometer", "Unknown")
             })
         return render_template('vehicle_list.html', vehicle_list=vehicle_list)
     except Exception as e:
