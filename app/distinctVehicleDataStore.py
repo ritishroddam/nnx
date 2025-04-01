@@ -16,7 +16,7 @@ vehicle_inventory_collection = db['vehicle_inventory']
 sio = socketio.Client()
 
 try:
-    sio.connect('http://0.0.0.0:8555', transports=['websocket'])
+    sio.connect('https://0.0.0.0:8555', transports=['websocket'])
     print("Socket.IO connected successfully")
 except Exception as e:
     print(f"Error connecting to Socket.IO server: {str(e)}")
