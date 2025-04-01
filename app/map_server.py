@@ -225,7 +225,7 @@ def run_servers():
     print(f"Starting WSGI Server @ IP: {HOST}, port: {PORT}")
 
     # Run the WSGI server
-    wsgi.server(server_socket, app)
+    wsgi.server(server_socket, MyTCPHandler)
 
     print("Server running. Press Ctrl+C to stop.")
 
