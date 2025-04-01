@@ -14,6 +14,7 @@ route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_
 data_collection = db["vehicle_inventory"]
 distinct_atlanta_collection = db["distinctAtlanta"]
 atlanta_collection = db["atlanta"]
+company_collection = db["customers_list"]
 
 def convert_to_decimal(degrees_minutes, direction):
     """Convert GPS coordinates from degrees-minutes to decimal format."""
@@ -33,14 +34,14 @@ def page():
         for item in vehicle_data:
             latestVehicleData = distinct_atlanta_collection.find_one({"imei": item.get("IMEI")},{"_id": 0})
             vehicle_list.append({
-                "License Plate Number": item.get("Vehicle Data", {}).get("License Plate Number", "Unknown"),
-                "IMEI Number": item.get("IMEI Number", "Unknown"),
-                "Vehicle Model": item.get("Vehicle Data", {}).get("Vehicle Model", "Unknown"),
-                "Vehicle Make": item.get("Vehicle Data", {}).get("Vehicle Make", "Unknown"),
-                "Company Name": item.get("Company Name", "Unknown"),
-                "Driver Name": item.get("Driver Name", "Unknown"),
-                "Location": f"{latestVehicleData.get('Latitude', 'N/A')}, {latestVehicleData.get('Longitude', 'N/A')}",
-                "Odometer Reading": latestVehicleData.get("Odometer", "Unknown")
+                "License Plate Number": item.get("LicensePlateNumber", "Unknown"),
+                "IMEI Number": item.get("IMEI", "Unknown"),
+                "Vehicle Model": item.get("VehicleModel", "Unknown"),
+                "Vehicle Make": item.get("VehicleMake", "Unknown"),
+                "Company Name": company_collection.find_one({"_id": item.get("CompanyID")},{"_id": 0, "Company Name": 1}),
+                "Driver Name": item.get("DriverName", "Unknown"),
+                "Location": f"{latestVehicleData.get('latitude', 'N/A')}, {latestVehicleData.get('longitude', 'N/A')}",
+                "Odometer Reading": latestVehicleData.get("odometer", "Unknown")
             })
         return render_template('vehicle_list.html', vehicle_list=vehicle_list)
     except Exception as e:
