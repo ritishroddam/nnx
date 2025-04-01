@@ -1,4 +1,5 @@
-const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
+const SOCKET_SERVER_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
+const socket = io(SOCKET_SERVER_URL, { transports: ["websocket"] });
 
 socket.on("connect", function () {
   console.log("Connected to WebSocket server");
