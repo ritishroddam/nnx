@@ -43,6 +43,7 @@ def update_distinct_atlanta(socketio):
             if imei in existing_documents:
                 # Compare with existing data
                 if doc != existing_documents[imei]:
+                    print("\nemmiting",doc)
                     # Data has changed, emit the updated data
                     emit_data(socketio, doc)
                     count += 1
