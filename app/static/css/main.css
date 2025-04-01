@@ -233,12 +233,12 @@ body {
   color: #ccc;
 }
 
-.profile-hover .btn-logout {
+.profile-hover .button-logout {
   background-color: #dc3545;
   margin-top: 20px;
 }
 
-.btn {
+.button-logout {
   width: 100%;
   padding: 10px;
   background-color: #007bff;

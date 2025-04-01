@@ -266,7 +266,7 @@ function fetchAndDisplayAlerts(imei) {
   const alertsTableBody = document.querySelector(".alarm-section tbody");
   alertsTableBody.innerHTML = ""; // Clear existing rows
 
-  fetch(`/routeHistory/api/alerts?imei=${encodeURIComponent(imei)}`)
+  fetch(`/routeHistory/alerts?imei=${encodeURIComponent(imei)}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);

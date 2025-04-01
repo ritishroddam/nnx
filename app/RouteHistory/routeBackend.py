@@ -11,7 +11,8 @@ from app.utils import roles_required
 
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
-data_collection = db["data"]
+data_collection = db["vehicle_inventory"]
+distinct_atlanta_collection = db["distinctAtlanta"]
 atlanta_collection = db["atlanta"]
 
 def convert_to_decimal(degrees_minutes, direction):
@@ -34,6 +35,7 @@ def page():
 def show_all_vehicles():
     try:
         vehicle_data = list(data_collection.find({}))
+        
         vehicle_list = []
         for item in vehicle_data:
             vehicle_list.append({
@@ -43,7 +45,6 @@ def show_all_vehicles():
                 "Vehicle Make": item.get("Vehicle Data", {}).get("Vehicle Make", "Unknown"),
                 "Company Name": item.get("Company Name", "Unknown"),
                 "Driver Name": item.get("Driver Name", "Unknown"),
-                "Current Status": item.get("Vehicle Data", {}).get("Current Status", "Unknown"),
                 "Location": f"{item.get('Vehicle Data', {}).get('Latitude', 'N/A')}, {item.get('Vehicle Data', {}).get('Longitude', 'N/A')}",
                 "Odometer Reading": item.get("Vehicle Data", {}).get("Odometer", "Unknown")
             })
@@ -161,7 +162,7 @@ def fetch_vehicle_alerts(imei):
         print(f"Error fetching alerts for IMEI {imei}: {e}")
         return jsonify({"error": "Error fetching alerts"}), 500
 
-@route_bp.route("/api/alerts", methods=["GET"])
+@route_bp.route("/alerts", methods=["GET"])
 @jwt_required()
 def get_alerts():
     try:
