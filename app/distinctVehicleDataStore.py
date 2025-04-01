@@ -5,21 +5,13 @@ import time
 import socketio
 import json
 from pymongo import MongoClient
+from map_server import sio
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = mongo_client["nnx"]
 atlanta_collection = db['atlanta']
 distinct_atlanta_collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
-
-# Initialize Socket.IO client
-sio = socketio.Client()
-
-try:
-    sio.connect('https://0.0.0.0:8555', transports=['websocket'])
-    print("Socket.IO connected successfully")
-except Exception as e:
-    print(f"Error connecting to Socket.IO server: {str(e)}")
 
 def clean_imei(imei):
     # Extract the last 15 characters of the IMEI
@@ -77,6 +69,8 @@ def update_distinct_atlanta():
 
 def emit_data(json_data):
     try:
+        if not sio.connected:
+            return
 
         # Add additional data from vehicle_inventory_collection
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
@@ -87,13 +81,6 @@ def emit_data(json_data):
             json_data['LicensePlateNumber'] = 'Unknown'
         json_data['_id'] = str(json_data['_id'])
 
-        if not sio.connected:
-            try:
-                sio.connect('https://0.0.0.0:8555', transports=['websocket'])
-                print("Socket.IO connected successfully")
-            except Exception as e:
-                print(f"Error connecting to Socket.IO server: {str(e)}")
-        
         sio.emit('vehicle_update', json_data)
         print(f"Emitted data for IMEI {json_data['imei']}")
 
