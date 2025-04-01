@@ -222,7 +222,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def log_sos_to_mongodb(self, json_data):
         try:
+            license_plate = vehicle_inventory_collection.find_one({'IMEI': json_data['imei']},{"_id": 0, "LicensePlateNumber": 1})
             sos_log = {
+                'lisence_plate': license_plate,
                 'imei': json_data['imei'],
                 'date': json_data['date'],
                 'time': json_data['time'],
