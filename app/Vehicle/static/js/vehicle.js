@@ -1,13 +1,20 @@
-const SOCKET_SERVER_URL = `${window.location.protocol}//${window.location.hostname}:5000`;
-const socket = io(SOCKET_SERVER_URL, { transports: ["websocket"] });
+const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
 
 socket.on("connect", function () {
   console.log("Connected to WebSocket server");
   socket.emit("request_vehicle_data");
 });
 
+socket.on("connect_error", (error) => {
+  console.error("WebSocket connection error:", error);
+});
+
 socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
+});
+
+socket.onAny((event, ...args) => {
+  console.log(`Received event: ${event}`, args);
 });
 
 socket.on("vehicle_update", function (data) {
