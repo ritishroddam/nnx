@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, verify_jwt
 from pymongo import MongoClient
 from config import config
 from flask_socketio import SocketIO
+import eventlet
 import threading
 import signal
 
@@ -97,19 +98,18 @@ def create_app(config_name='default'):
 
     def start_background_task():
         from app.distinctVehicleDataStore import run_distinct_vehicle_data_store
-        distinctVehicleThread = threading.Thread(target=run_distinct_vehicle_data_store, args=(socketio,), daemon=True)
-        distinctVehicleThread.start()
-
         from app.map_server import run_servers, signal_handler
-        mapServerThread = threading.Thread(target=run_servers, daemon=True)
-        mapServerThread.start()
+        from app.calculate_past_distances import calculate_distance_for_past_days
 
+        # Use eventlet.spawn instead of threading.Thread
+        eventlet.spawn(run_distinct_vehicle_data_store, socketio)
+        eventlet.spawn(run_servers)
+        eventlet.spawn(calculate_distance_for_past_days)
+
+        # Register signal handlers
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
 
-        from app.calculate_past_distances import calculate_distance_for_past_days
-        pastDistanceThread = threading.Thread(target=calculate_distance_for_past_days, daemon=True)
-        pastDistanceThread.start()
 
     start_background_task()
     
