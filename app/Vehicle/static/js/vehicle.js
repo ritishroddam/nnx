@@ -6,16 +6,8 @@ socket.on("connect", function () {
   socket.emit("request_vehicle_data");
 });
 
-socket.on("connect_error", (error) => {
-  console.error("WebSocket connection error:", error);
-});
-
 socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
-});
-
-socket.onAny((event, ...args) => {
-  console.log(`Received event: ${event}`, args);
 });
 
 socket.on("vehicle_update", function (data) {
