@@ -32,29 +32,68 @@ def get_fields():
     all_fields = set(atlanta_fields) | set(inventory_fields) | set(device_fields)
     return jsonify(list(all_fields))
 
+# @reports_bp.route('/save_custom_report', methods=['POST'])
+# @jwt_required()
+# def save_custom_report():
+#     data = request.json
+#     report_name = data.get("reportName")
+#     fields = data.get("fields")
+
+#     if not report_name or not fields:
+#         return jsonify({"success": False, "message": "Invalid data provided."}), 400
+
+#     try:
+#         # Save the custom report to the database
+#         db['custom_reports'].insert_one({
+#             "report_name": report_name,
+#             "fields": fields
+#         })
+
+#         # Return a success response with a redirect URL
+#         return jsonify({"success": True, "message": "Custom report saved successfully!", "redirect_url": url_for('Reports.index')}), 200
+#     except Exception as e:
+#         # Log the error and return a failure response
+#         print(f"Error saving custom report: {e}")
+#         return jsonify({"success": False, "message": "An error occurred while saving the report."}), 500
+
 @reports_bp.route('/save_custom_report', methods=['POST'])
 @jwt_required()
 def save_custom_report():
-    data = request.json
-    report_name = data.get("reportName")
-    fields = data.get("fields")
-
-    if not report_name or not fields:
-        return jsonify({"success": False, "message": "Invalid data provided."}), 400
-
     try:
-        # Save the custom report to the database
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No JSON data provided."}), 400
+            
+        report_name = data.get("reportName")
+        fields = data.get("fields")
+
+        if not report_name or not fields:
+            return jsonify({"success": False, "message": "Invalid data provided."}), 400
+
+        # Check if report already exists
+        if db['custom_reports'].find_one({"report_name": report_name}):
+            return jsonify({"success": False, "message": "Report with this name already exists."}), 400
+
+        # Save the custom report
         db['custom_reports'].insert_one({
             "report_name": report_name,
-            "fields": fields
+            "fields": fields,
+            "created_at": datetime.now(),
+            "created_by": get_jwt_identity()
         })
 
-        # Return a success response with a redirect URL
-        return jsonify({"success": True, "message": "Custom report saved successfully!", "redirect_url": url_for('Reports.index')}), 200
+        return jsonify({
+            "success": True, 
+            "message": "Custom report saved successfully!",
+            "redirect_url": url_for('Reports.index')
+        }), 200
+
     except Exception as e:
-        # Log the error and return a failure response
-        print(f"Error saving custom report: {e}")
-        return jsonify({"success": False, "message": "An error occurred while saving the report."}), 500
+        # Ensure we return JSON even for errors
+        return jsonify({
+            "success": False,
+            "message": f"An error occurred: {str(e)}"
+        }), 500
 
 @reports_bp.route('/get_custom_reports', methods=['GET'])
 @jwt_required()
