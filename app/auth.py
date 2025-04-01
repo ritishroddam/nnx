@@ -36,8 +36,8 @@ def login():
         response = redirect(url_for('Vehicle.map'))
         set_access_cookies(response, access_token)
         return response
-    
-    return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
