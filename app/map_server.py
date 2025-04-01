@@ -214,28 +214,20 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 def run_servers():
     HOST = "0.0.0.0"
     PORT = 8000
-    
+
     # Use eventlet's WSGI server for better concurrency
     from eventlet import wsgi
-    from app import pool, app  # Import your Flask app here
+    from eventlet import listen
+    from app import app  # Import your Flask app here
 
-    # Initialize the server with your TCP handler
-    server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
-    print(f"Starting TCP Server @ IP: {HOST}, port: {PORT}")
-    
-    # Use GreenPool to manage green threads
-    pool.spawn(wsgi.server, server, app)  # This will spawn the server to handle requests
+    # Create a socket using eventlet's listen
+    server_socket = listen((HOST, PORT))
+    print(f"Starting WSGI Server @ IP: {HOST}, port: {PORT}")
+
+    # Run the WSGI server
+    wsgi.server(server_socket, app)
 
     print("Server running. Press Ctrl+C to stop.")
-    while True:
-        try:
-            eventlet.sleep(100)  # Sleep and keep the server running
-        except KeyboardInterrupt:
-            print("Server shutting down...")
-            server.shutdown()
-            server.server_close()
-            sys.exit(0)
-
 
 # Replace signal handling for eventlet
 def signal_handler(signal, frame):
