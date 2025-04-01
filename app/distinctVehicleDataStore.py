@@ -4,8 +4,12 @@ import os
 import time
 import socketio
 import json
-from database import db
 
+from pymongo import MongoClient
+from config import config
+
+mongo_client = MongoClient(config['default'].MONGO_URI)
+db = mongo_client["nnx"]
 atlanta_collection = db['atlanta']
 distinct_atlanta_collection = db['distinctAtlanta']
 vehicle_inventory_collection = db['vehicle_inventory']

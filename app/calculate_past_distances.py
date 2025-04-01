@@ -1,8 +1,12 @@
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import os
-from database import db
 
+from pymongo import MongoClient
+from config import config
+
+mongo_client = MongoClient(config['default'].MONGO_URI)
+db = mongo_client["nnx"]
 
 atlanta_collection = db['atlanta']
 distance_travelled_collection = db['distanceTravelled']
