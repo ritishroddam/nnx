@@ -35,9 +35,6 @@ def get_fields():
 @reports_bp.route('/save_custom_report', methods=['POST'])
 @jwt_required()
 def save_custom_report():
-    current_user = get_jwt_identity()
-    print(f"User {current_user} is saving a report")
-    print("Save custom report endpoint hit")
     try:
         data = request.get_json()
         if not data:
