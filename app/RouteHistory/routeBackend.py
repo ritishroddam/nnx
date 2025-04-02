@@ -54,12 +54,12 @@ def page():
         print(f"Error fetching vehicle list: {e}")
         return "An error occurred while fetching vehicle list.", 500
     
-@route_bp.route("/vehicle/<vehicle_number>", methods=["GET"])
+@route_bp.route("/vehicle/<LicensePlateNumber>", methods=["GET"])
 @jwt_required()
-def show_vehicle_data(vehicle_number):
+def show_vehicle_data(LicensePlateNumber):
     try:
         # Fetch vehicle data for the given vehicle number
-        vehicle_data = list(data_collection.find({"Vehicle Data.License Plate Number": vehicle_number}))
+        vehicle_data = list(data_collection.find({"LicensePlateNumber": LicensePlateNumber}))
         if not vehicle_data:
             return render_template('vehicle.html', vehicle_data=None, recent_data=None, alerts=None)
 
@@ -131,7 +131,7 @@ def show_vehicle_data(vehicle_number):
 
         return render_template('vehicle.html', vehicle_data=processed_data, recent_data=recent_data, alerts=alerts)
     except Exception as e:
-        print(f"Error processing vehicle data for {vehicle_number}: {e}")
+        print(f"Error processing vehicle data for {LicensePlateNumber}: {e}")
         return "An error occurred while processing vehicle data.", 500
 
     
