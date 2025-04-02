@@ -1,3 +1,9 @@
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadFormContainer").classList.toggle("hidden");
 });
@@ -73,6 +79,7 @@ function saveCustomer(customerId) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
     },
     body: JSON.stringify(updatedData),
   })

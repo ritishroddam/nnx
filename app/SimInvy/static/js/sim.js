@@ -1,3 +1,9 @@
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
@@ -228,6 +234,7 @@ function saveSim(simId) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
     },
     body: JSON.stringify(updatedData),
   })

@@ -90,7 +90,10 @@ document.getElementById("generateReport").onclick = function () {
 
   fetch("/reports/download_custom_report", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+    },
     body: JSON.stringify({
       reportName,
       vehicleNumber,
