@@ -5,7 +5,14 @@ import time
 import socketio
 import json
 from pymongo import MongoClient
-from map_server import sio
+import socketio
+
+sio = socketio.Client()
+
+try:
+    sio.connect('https://0.0.0.0:8555')
+except Exception as e:
+    print(f"Failed to connect to WebSocket server: {e}")
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = mongo_client["nnx"]
@@ -69,7 +76,11 @@ def update_distinct_atlanta():
 
 def emit_data(json_data):
     try:
-
+        if not sio.connected:
+            try:
+                sio.connect('https://0.0.0.0:8555')
+            except Exception as e:
+                print(f"Failed to connect to WebSocket server: {e}")
         # Add additional data from vehicle_inventory_collection
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
         json_data['date_time'] = str(json_data['date_time'])
