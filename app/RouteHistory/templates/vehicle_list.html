@@ -34,7 +34,7 @@ Vehicle Map
           <tr>
             <td>{{ vehicle['License Plate Number'] }}</td>
             <td>
-              <a href="{{ url_for('show_vehicle_data', vehicle_number=vehicle['License Plate Number']) }}"
+              <a href="{{ url_for('RouteHistory.show_vehicle_data', LicensePlateNumber=vehicle['License Plate Number']) }}"
                 class="btn btn-primary">
                 View Details
               </a>
