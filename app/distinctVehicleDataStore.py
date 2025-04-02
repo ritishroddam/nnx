@@ -11,11 +11,14 @@ import os
 
 sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
 
-server_url = "https://localhost:8555"  # Use 'localhost' instead of '0.0.0.0'
-cert_path = os.path.join("cert", "cert.pem")  # Same path used in map_server.py
+server_url = "https://localhost:8555" 
+cert_path = os.path.join("cert", "cert.pem")  
+
+ssl_context = ssl.create_default_context(cafile=cert_path)
 
 try:
-    sio.connect(server_url)  # Explicitly provide the cert
+    sio.connect(server_url, transports=['websocket'], ssl=ssl_context)
+    print("Connected to WebSocket server successfully!")
 except Exception as e:
     print(f"Failed to connect to WebSocket server: {e}")
 
@@ -83,10 +86,11 @@ def emit_data(json_data):
     try:
         if not sio.connected:
             try:
-                sio.connect(server_url)  # Explicitly provide the cert
+                sio.connect(server_url, transports=['websocket'], ssl=ssl_context)
+                print("Connected to WebSocket server successfully!")
             except Exception as e:
                 print(f"Failed to connect to WebSocket server: {e}")
-        # Add additional data from vehicle_inventory_collection
+
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
         json_data['date_time'] = str(json_data['date_time'])
         if inventory_data:
