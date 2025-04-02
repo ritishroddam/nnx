@@ -6,11 +6,16 @@ import socketio
 import json
 from pymongo import MongoClient
 import socketio
+import ssl
+import os
 
-sio = socketio.Client()
+sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
+
+server_url = "https://localhost:8555"  # Use 'localhost' instead of '0.0.0.0'
+cert_path = os.path.join("cert", "cert.pem")  # Same path used in map_server.py
 
 try:
-    sio.connect('https://0.0.0.0:8555')
+    sio.connect(server_url, cert=cert_path)  # Explicitly provide the cert
 except Exception as e:
     print(f"Failed to connect to WebSocket server: {e}")
 
@@ -78,7 +83,7 @@ def emit_data(json_data):
     try:
         if not sio.connected:
             try:
-                sio.connect('https://0.0.0.0:8555')
+                sio.connect(server_url, cert=cert_path)  # Explicitly provide the cert
             except Exception as e:
                 print(f"Failed to connect to WebSocket server: {e}")
         # Add additional data from vehicle_inventory_collection
