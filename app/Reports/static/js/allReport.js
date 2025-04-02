@@ -240,15 +240,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
 
-      removeButton.style.cssText = `
-      margin-left: 10px;
-      padding: 5px 10px;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    `;
       removeButton.onclick = function () {
         selectedFields.removeChild(listItem);
         const checkbox = fieldSelection.querySelector(
@@ -324,10 +315,10 @@ document.addEventListener("DOMContentLoaded", function () {
       body: JSON.stringify({ reportName, fields }),
     })
       .then(async (response) => {
-        console.log("Response status:", response.status);
-        console.log("Response text:", await response.text()); // Log the raw response
-        const data = await response.json(); // This will throw if the response is not valid JSON
+        const data = await response.json();
+
         if (!response.ok) {
+          // Use server-provided message if available
           throw new Error(data.message || "Failed to save report");
         }
         return data;
