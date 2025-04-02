@@ -30,7 +30,9 @@ document.querySelector(".cancel-btn").onclick = function () {
 };
 
 function createReportCard(report) {
-  const existingCard = document.querySelector(`.report-card[data-report="${report.report_name}"]`);
+  const existingCard = document.querySelector(
+    `.report-card[data-report="${report.report_name}"]`
+  );
   if (existingCard) return; // Avoid duplicates
   const reportCard = document.createElement("a");
   reportCard.href = "#";
@@ -51,7 +53,7 @@ function createReportCard(report) {
 function openReportModal(reportName) {
   console.log("Opening report modal with report name:", reportName); // Debug print statement
   const reportModal = document.getElementById("reportModal");
-  
+
   if (reportModal) {
     reportModal.querySelector("h2").textContent = `${reportName}`;
   } else {
@@ -59,10 +61,13 @@ function openReportModal(reportName) {
   }
 
   reportModal.style.display = "block";
-}  
+}
 
 document.getElementById("generateReport").onclick = function () {
-  const reportName = document.querySelector("#reportModal h2").textContent.replace("Generate ", "").trim();
+  const reportName = document
+    .querySelector("#reportModal h2")
+    .textContent.replace("Generate ", "")
+    .trim();
   const vehicleNumber = document.getElementById("vehicleNumber").value;
   const dateRange = document.getElementById("dateRange").value;
 
@@ -80,40 +85,42 @@ document.getElementById("generateReport").onclick = function () {
   fetch("/reports/download_custom_report", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ 
-      reportName, 
+    body: JSON.stringify({
+      reportName,
       vehicleNumber,
-      dateRange,  
+      dateRange,
     }),
   })
-  .then((response) => {
-    if (!response.ok) {
-      return response.json().then(err => { throw err; });
-    }
-    return response.blob();
-  })
-  .then((blob) => {
-    if (blob.size === 0) {
-      throw new Error("Empty file received");
-    }
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${reportName}.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    const message = error.message || "Failed to generate report";
-    alert(message);
-  })
-  .finally(() => {
-    generateBtn.disabled = false;
-    generateBtn.textContent = originalText;
-  });
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then((err) => {
+          throw err;
+        });
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      if (blob.size === 0) {
+        throw new Error("Empty file received");
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${reportName}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      const message = error.message || "Failed to generate report";
+      alert(message);
+    })
+    .finally(() => {
+      generateBtn.disabled = false;
+      generateBtn.textContent = originalText;
+    });
 };
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -175,9 +182,11 @@ document.addEventListener("DOMContentLoaded", function () {
     customReportModal.style.display = "none";
   };
 
-  document.getElementById("reportForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-  });
+  document
+    .getElementById("reportForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+    });
 
   function loadFields() {
     fetch("/reports/get_fields")
@@ -213,7 +222,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // console.log("Field changed:", field, "Checked:", e.target.checked);
 
     if (e.target.checked) {
-      const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
+      const existingField = selectedFields.querySelector(
+        `[data-field="${field}"]`
+      );
       if (existingField) {
         console.log("Duplicate field detected:", field);
         alert("This field is already selected.");
@@ -252,7 +263,9 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
       removeButton.onclick = function () {
         selectedFields.removeChild(listItem);
-        const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
+        const checkbox = fieldSelection.querySelector(
+          `input[value="${field}"]`
+        );
         if (checkbox) {
           checkbox.checked = false;
           checkbox.parentElement.style.display = "block";
@@ -269,7 +282,9 @@ document.addEventListener("DOMContentLoaded", function () {
       listItem.addEventListener("drop", (e) => {
         e.preventDefault();
         const draggedField = e.dataTransfer.getData("text/plain");
-        const draggedItem = selectedFields.querySelector(`[data-field="${draggedField}"]`);
+        const draggedItem = selectedFields.querySelector(
+          `[data-field="${draggedField}"]`
+        );
         selectedFields.insertBefore(draggedItem, e.target);
       });
 
@@ -314,46 +329,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetch("/reports/save_custom_report", {
       method: "POST",
-      headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json" 
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({ reportName, fields }),
-  })
-  // .then((response) => {
-  //   if (!response.ok) {
-  //     throw new Error("Failed to save the report.");
-  //   }
-  //   return response.json();
-  // })
-  .then(async (response) => {
-    const data = await response.json();
-    
-    if (!response.ok) {
-        // Use server-provided message if available
-        throw new Error(data.message || "Failed to save report");
-    }
-    return data;
-})
-.then((data) => {
-      alert(data.message);
-      createReportCard({ report_name: reportName });
-      customReportModal.style.display = "none";
-})
-.catch((error) => {
-  console.error("Error saving the report:", error);
-  alert("An error occurred while saving the report.");
-})
-  .finally(() => {
-    saveBtn.disabled = false;
-    saveBtn.textContent = originalText;
-  });
-};
+    })
+      .then(async (response) => {
+        console.log("Response status:", response.status);
+        console.log("Response text:", await response.text()); // Log the raw response
+        const data = await response.json(); // This will throw if the response is not valid JSON
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to save report");
+        }
+        return data;
+      })
+      .then((data) => {
+        alert(data.message);
+        createReportCard({ report_name: reportName });
+        customReportModal.style.display = "none";
+      })
+      .catch((error) => {
+        console.error("Error saving the report:", error);
+        alert("An error occurred while saving the report.");
+      })
+      .finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+      });
+  };
 
   fetch("/reports/get_custom_reports")
-    .then(response => response.json())
-    .then(reports => {
-      reports.forEach(report => {
+    .then((response) => response.json())
+    .then((reports) => {
+      reports.forEach((report) => {
         createReportCard(report);
       });
     });
@@ -362,5 +371,4 @@ document.addEventListener("DOMContentLoaded", function () {
     create: false,
     sortField: "text",
   });
-
 });
