@@ -7,39 +7,6 @@ import requests
 
 auth_bp = Blueprint('auth', __name__)
 
-# @auth_bp.route('/login', methods=['GET', 'POST'])
-# def login():
-#     try:
-#         verify_jwt_in_request()
-#         return redirect(url_for('Vehicle.map'))
-#     except:
-#         pass
-
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
-        
-#         user = User.find_by_username(username)
-#         if not user or not User.verify_password(user, password):
-#             flash('Invalid username or password', 'danger')
-#             return redirect(url_for('auth.login'))
-        
-#         # Create the tokens we will be sending back to the user
-#         additional_claims = {
-#             'roles': [user['role']],
-#             'user_id': str(user['_id'])
-#         }
-#         access_token = create_access_token(
-#             identity=username,
-#             additional_claims=additional_claims
-#         )
-        
-#         response = redirect(url_for('Vehicle.map'))
-#         set_access_cookies(response, access_token)
-#         return response
-    
-#     return render_template('login.html')
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     try:
@@ -51,45 +18,78 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
-        # Call the /api/login route internally
-        api_url = url_for('auth.api_login', _external=True)
-        response = requests.post(api_url, data={'username': username, 'password': password})
-
-        if response.status_code == 200:
-            # Extract the access token from the API response
-            access_token = response.json().get('access_token')
-            if access_token:
-                # Redirect to Vehicle.map and set the access token in cookies
-                redirect_response = redirect(url_for('Vehicle.map'))
-                set_access_cookies(redirect_response, access_token)
-                return redirect_response
-        else:
+        
+        user = User.find_by_username(username)
+        if not user or not User.verify_password(user, password):
             flash('Invalid username or password', 'danger')
             return redirect(url_for('auth.login'))
-
+        
+        # Create the tokens we will be sending back to the user
+        additional_claims = {
+            'roles': [user['role']],
+            'user_id': str(user['_id'])
+        }
+        access_token = create_access_token(
+            identity=username,
+            additional_claims=additional_claims
+        )
+        
+        response = redirect(url_for('Vehicle.map'))
+        set_access_cookies(response, access_token)
+        return response
+    
     return render_template('login.html')
 
-@auth_bp.route('/api/login', methods=['POST'])
-def api_login():
-    username = request.form.get('username')
-    password = request.form.get('password')
+# @auth_bp.route('/login', methods=['GET', 'POST'])
+# def login():
+#     try:
+#         verify_jwt_in_request()
+#         return redirect(url_for('Vehicle.map'))
+#     except:
+#         pass
+
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         password = request.form.get('password')
+
+#         # Call the /api/login route internally
+#         api_url = url_for('auth.api_login', _external=True)
+#         response = requests.post(api_url, data={'username': username, 'password': password})
+
+#         if response.status_code == 200:
+#             # Extract the access token from the API response
+#             access_token = response.json().get('access_token')
+#             if access_token:
+#                 # Redirect to Vehicle.map and set the access token in cookies
+#                 redirect_response = redirect(url_for('Vehicle.map'))
+#                 set_access_cookies(redirect_response, access_token)
+#                 return redirect_response
+#         else:
+#             flash('Invalid username or password', 'danger')
+#             return redirect(url_for('auth.login'))
+
+#     return render_template('login.html')
+
+# @auth_bp.route('/api/login', methods=['POST'])
+# def api_login():
+#     username = request.form.get('username')
+#     password = request.form.get('password')
     
-    user = User.find_by_username(username)
-    if not user or not User.verify_password(user, password):
-        return jsonify({'error': 'Invalid username or password'}), 401
+#     user = User.find_by_username(username)
+#     if not user or not User.verify_password(user, password):
+#         return jsonify({'error': 'Invalid username or password'}), 401
     
-    # Create the tokens we will be sending back to the user
-    additional_claims = {
-        'roles': [user['role']],
-        'user_id': str(user['_id'])
-    }
-    access_token = create_access_token(
-        identity=username,
-        additional_claims=additional_claims
-    )
+#     # Create the tokens we will be sending back to the user
+#     additional_claims = {
+#         'roles': [user['role']],
+#         'user_id': str(user['_id'])
+#     }
+#     access_token = create_access_token(
+#         identity=username,
+#         additional_claims=additional_claims
+#     )
     
-    return jsonify({'access_token': access_token})
+#     return jsonify({'access_token': access_token})
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
