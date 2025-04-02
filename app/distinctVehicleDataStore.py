@@ -17,7 +17,7 @@ cert_path = os.path.join("cert", "cert.pem")
 ssl_context = ssl.create_default_context(cafile=cert_path)
 
 try:
-    sio.connect(server_url, transports=['websocket'], ssl=ssl_context)
+    sio.connect(server_url, transports=['websocket'])
     print("Connected to WebSocket server successfully!")
 except Exception as e:
     print(f"Failed to connect to WebSocket server: {e}")
@@ -86,7 +86,7 @@ def emit_data(json_data):
     try:
         if not sio.connected:
             try:
-                sio.connect(server_url, transports=['websocket'], ssl=ssl_context)
+                sio.connect(server_url, transports=['websocket'])
                 print("Connected to WebSocket server successfully!")
             except Exception as e:
                 print(f"Failed to connect to WebSocket server: {e}")
