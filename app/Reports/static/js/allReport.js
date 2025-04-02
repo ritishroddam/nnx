@@ -237,18 +237,6 @@ document.addEventListener("DOMContentLoaded", function () {
       listItem.dataset.field = field;
       listItem.draggable = true;
 
-      listItem.style.cssText = `
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid #007bff;
-      border-radius: 5px;
-      background-color: #e7f3ff;
-      cursor: grab;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    `;
-
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
 

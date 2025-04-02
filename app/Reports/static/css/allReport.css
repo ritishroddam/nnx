@@ -10,6 +10,18 @@
   gap: 10px;
 }
 
+.selected-fields li {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  background-color: #e7f3ff;
+  cursor: grab;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .filter-btn {
   padding: 10px 20px;
   border: none;
@@ -193,4 +205,3 @@
 .modal-content form .form-actions .cancel-btn:hover {
   background-color: #ccc;
 }
-
