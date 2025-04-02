@@ -176,7 +176,7 @@ async function renderVehicles() {
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
 <strong>Data:</strong> <a href="
         {{ url_for('RouteHistory.show_vehicle_data', ${
-          data.LicensePlateNumber
+          vehicle.LicensePlateNumber
         } }}" target="_blank">View Data</a>
       </div>
     `;
@@ -244,7 +244,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
                     <p><strong>Data:</strong> <a href="
                       {{ url_for('RouteHistory.show_vehicle_data', ${
-                        data.LicensePlateNumber
+                        device.LicensePlateNumber
                       } }}" target="_blank">View Data</a>
                     </p>
                 </div>`;
@@ -704,7 +704,7 @@ function updateFloatingCard(vehicles, filterValue) {
           } <br>
           <strong>Data:</strong> <a href="
         {{ url_for('RouteHistory.show_vehicle_data', ${
-          data.LicensePlateNumber
+          vehicle.LicensePlateNumber
         } }}" target="_blank">View Data</a>
         </div>`;
 
@@ -838,7 +838,7 @@ async function populateVehicleTable() {
     row.insertCell(8).innerText = vehicle.gsm;
     row.insertCell(9).innerText = vehicle.sos;
     row.insertCell(10).innerHTML = `<a href="
-        {{ url_for('RouteHistory.show_vehicle_data', ${data.LicensePlateNumber} }}" target="_blank">View Data</a>`;
+        {{ url_for('RouteHistory.show_vehicle_data', ${vehicle.LicensePlateNumber} }}" target="_blank">View Data</a>`;
   });
   showHidecar();
 }
