@@ -38,12 +38,12 @@ def disconnect(sid):
 @sio.event
 def vehicle_update(sid, data):
     print(f"Received vehicle_update event: {data}")
-    sio.emit('vehicle_update', data)
+    sio.emit('vehicle_update', data, broadcast=True)
 
 @sio.event
 def sos_alert(sid, data):
     print(f"Received sos alert: {data}")
-    sio.emit('sos_alert', data)
+    sio.emit('sos_alert', data, broadcast=True)
 
 
 collection = db['atlanta']
