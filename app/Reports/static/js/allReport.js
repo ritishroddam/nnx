@@ -1,3 +1,9 @@
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 var modal = document.getElementById("reportModal");
 
 var reportCards = document.querySelectorAll(".report-card");
@@ -19,12 +25,6 @@ window.onclick = function (event) {
     modal.style.display = "none";
   }
 };
-
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-}
 
 document.querySelector(".cancel-btn").onclick = function () {
   const modal = document.getElementById("customReportModal"); // Make sure to select the modal
@@ -284,68 +284,6 @@ document.addEventListener("DOMContentLoaded", function () {
       e.target.parentElement.style.display = "block";
     }
   });
-
-  // customReportForm.onsubmit = function (e) {
-  //   e.preventDefault();
-
-  //   const reportNameInput = document.getElementById("reportName");
-  //   if (!reportNameInput) {
-  //     alert("Report Name input is missing!");
-  //     return;
-  //   }
-
-  //   const reportName = reportNameInput.value.trim();
-  //   if (!reportName) {
-  //     alert("Please provide a valid report name.");
-  //     return;
-  //   }
-
-  //   const fields = Array.from(
-  //     new Set(Array.from(selectedFields.children).map((li) => li.dataset.field))
-  //   );
-
-  //   if (fields.length === 0) {
-  //     alert("Please select at least one field.");
-  //     return;
-  //   }
-
-  //   // Show loading state
-  //   const saveBtn = document.getElementById("saveCustomReport");
-  //   const originalText = saveBtn.textContent;
-  //   saveBtn.disabled = true;
-  //   saveBtn.textContent = "Saving...";
-
-  //   fetch("/reports/save_custom_report", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Accept: "application/json",
-  //     },
-  //     body: JSON.stringify({ reportName, fields }),
-  //   })
-  //     .then(async (response) => {
-  //       const data = await response.json();
-
-  //       if (!response.ok) {
-  //         // Use server-provided message if available
-  //         throw new Error(data.message || "Failed to save report");
-  //       }
-  //       return data;
-  //     })
-  //     .then((data) => {
-  //       alert(data.message);
-  //       createReportCard({ report_name: reportName });
-  //       customReportModal.style.display = "none";
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error saving the report:", error);
-  //       alert("An error occurred while saving the report.");
-  //     })
-  //     .finally(() => {
-  //       saveBtn.disabled = false;
-  //       saveBtn.textContent = originalText;
-  //     });
-  // };
 
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
