@@ -33,7 +33,6 @@ def get_fields():
     return jsonify(list(all_fields))
 
 @reports_bp.route('/save_custom_report', methods=['POST'])
-@jwt_required()
 def save_custom_report():
     try:
         data = request.get_json()
