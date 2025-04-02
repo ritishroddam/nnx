@@ -276,6 +276,68 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // customReportForm.onsubmit = function (e) {
+  //   e.preventDefault();
+
+  //   const reportNameInput = document.getElementById("reportName");
+  //   if (!reportNameInput) {
+  //     alert("Report Name input is missing!");
+  //     return;
+  //   }
+
+  //   const reportName = reportNameInput.value.trim();
+  //   if (!reportName) {
+  //     alert("Please provide a valid report name.");
+  //     return;
+  //   }
+
+  //   const fields = Array.from(
+  //     new Set(Array.from(selectedFields.children).map((li) => li.dataset.field))
+  //   );
+
+  //   if (fields.length === 0) {
+  //     alert("Please select at least one field.");
+  //     return;
+  //   }
+
+  //   // Show loading state
+  //   const saveBtn = document.getElementById("saveCustomReport");
+  //   const originalText = saveBtn.textContent;
+  //   saveBtn.disabled = true;
+  //   saveBtn.textContent = "Saving...";
+
+  //   fetch("/reports/save_custom_report", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Accept: "application/json",
+  //     },
+  //     body: JSON.stringify({ reportName, fields }),
+  //   })
+  //     .then(async (response) => {
+  //       const data = await response.json();
+
+  //       if (!response.ok) {
+  //         // Use server-provided message if available
+  //         throw new Error(data.message || "Failed to save report");
+  //       }
+  //       return data;
+  //     })
+  //     .then((data) => {
+  //       alert(data.message);
+  //       createReportCard({ report_name: reportName });
+  //       customReportModal.style.display = "none";
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error saving the report:", error);
+  //       alert("An error occurred while saving the report.");
+  //     })
+  //     .finally(() => {
+  //       saveBtn.disabled = false;
+  //       saveBtn.textContent = originalText;
+  //     });
+  // };
+
   customReportForm.onsubmit = function (e) {
     e.preventDefault();
 
@@ -312,6 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
+      credentials: "include", // Include cookies in the request
       body: JSON.stringify({ reportName, fields }),
     })
       .then(async (response) => {
