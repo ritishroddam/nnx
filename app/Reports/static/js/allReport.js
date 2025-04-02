@@ -20,6 +20,12 @@ window.onclick = function (event) {
   }
 };
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 document.querySelector(".cancel-btn").onclick = function () {
   const modal = document.getElementById("customReportModal"); // Make sure to select the modal
   if (modal) {
@@ -372,6 +378,7 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
         Accept: "application/json",
       },
       credentials: "include", // Include cookies in the request
