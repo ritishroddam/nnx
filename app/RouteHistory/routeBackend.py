@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, Blueprint
+from flask import Flask, jsonify, request, render_template, redirect, Blueprint, flash
 from pymongo import MongoClient
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -61,7 +61,8 @@ def show_vehicle_data(LicensePlateNumber):
         # Fetch vehicle data for the given vehicle number
         vehicle_data = list(data_collection.find({"LicensePlateNumber": LicensePlateNumber}))
         if not vehicle_data:
-            return render_template('vehicle.html', vehicle_data=None, recent_data=None, alerts=None)
+            flash(f"Vehicle with License Plate Number '{LicensePlateNumber}' does not exist.", "warning")
+            return render_template('vehicleMap.html')
 
         processed_data = []
         recent_data = None
