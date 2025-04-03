@@ -22,70 +22,71 @@ Device Inventory
     <button id="downloadExcel" class="btn">Download Table</button>
 
     <div id="manualEntryForm" class="hidden">
-      
+
       <form id="manualForm" action="{{ url_for('DeviceInvy.manual_entry')}}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-container">
-        <div class="form-group">
-          <label for="IMEI">IMEI</label>
-          <input type="text" name="IMEI" id="IMEI" required />
-          <div id="imeiError" class="error hidden">
-            IMEI must be 15 digits long.
+          <div class="form-group">
+            <label for="IMEI">IMEI</label>
+            <input type="text" name="IMEI" id="IMEI" required />
+            <div id="imeiError" class="error hidden">
+              IMEI must be 15 digits long.
+            </div>
           </div>
+          <div class="form-group">
+            <label for="GLNumber">GL Number</label>
+            <input type="text" name="GLNumber" id="GLNumber" />
+          </div>
+          <div class="form-group">
+            <label for="DeviceModel">Device Model</label>
+            <input type="text" name="DeviceModel" id="DeviceModel" required />
+          </div>
+          <div class="form-group">
+            <label for="DeviceMake">Device Make</label>
+            <input type="text" name="DeviceMake" id="DeviceMake" required />
+          </div>
+          <div class="form-group">
+            <label for="DateIn">Date In</label>
+            <input type="date" name="DateIn" id="DateIn" required max="" />
+          </div>
+          <div class="form-group">
+            <label for="Warranty">Warranty</label>
+            <input type="date" name="Warranty" id="Warranty" required readonly />
+          </div>
+          <div class="form-group">
+            <label for="SentBy">Sent By</label>
+            <input type="text" name="SentBy" id="SentBy" required />
+          </div>
+          <div class="form-group">
+            <label for="OutwardTo">Outward To</label>
+            <input type="text" name="OutwardTo" id="OutwardTo" />
+          </div>
+          <div class="form-group">
+            <label for="Package">Package</label>
+            <select name="Package" id="Package" required>
+              <option value="">Select Package</option>
+              <option value="Rental">Rental</option>
+              <option value="Package">Package</option>
+              <option value="Outrate">Outrate</option>
+            </select>
+          </div>
+          <div class="form-group" id="TenureContainer" class="hidden">
+            <label for="Tenure">Tenure</label>
+            <input type="text" name="Tenure" id="Tenure" />
+          </div>
+          <div class="form-group">
+            <label for="Status">Status</label>
+            <select name="Status" required>
+              <option value="">Select Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <button type="submit" id="submitBtn" class="btn success">Submit</button>
+          <button type="button" id="cancelBtn" class="btn danger">
+            Cancel
+          </button>
         </div>
-        <div class="form-group">
-          <label for="GLNumber">GL Number</label>
-          <input type="text" name="GLNumber" id="GLNumber" />
-        </div>
-        <div class="form-group">
-          <label for="DeviceModel">Device Model</label>
-          <input type="text" name="DeviceModel" id="DeviceModel" required />
-        </div>
-        <div class="form-group">
-          <label for="DeviceMake">Device Make</label>
-          <input type="text" name="DeviceMake" id="DeviceMake" required />
-        </div>
-        <div class="form-group">
-          <label for="DateIn">Date In</label>
-          <input type="date" name="DateIn" id="DateIn" required max="" />
-        </div>
-        <div class="form-group">
-          <label for="Warranty">Warranty</label>
-          <input type="date" name="Warranty" id="Warranty" required readonly />
-        </div>
-        <div class="form-group">
-          <label for="SentBy">Sent By</label>
-          <input type="text" name="SentBy" id="SentBy" required />
-        </div>
-        <div class="form-group">
-          <label for="OutwardTo">Outward To</label>
-          <input type="text" name="OutwardTo" id="OutwardTo" />
-        </div>
-        <div class="form-group">
-          <label for="Package">Package</label>
-          <select name="Package" id="Package" required>
-            <option value="">Select Package</option>
-            <option value="Rental">Rental</option>
-            <option value="Package">Package</option>
-            <option value="Outrate">Outrate</option>
-          </select>
-        </div>
-        <div class="form-group" id="TenureContainer" class="hidden">
-          <label for="Tenure">Tenure</label>
-          <input type="text" name="Tenure" id="Tenure" />
-        </div>
-        <div class="form-group">
-          <label for="Status">Status</label>
-          <select name="Status" required>
-            <option value="">Select Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-        <button type="submit" id="submitBtn" class="btn success">Submit</button>
-        <button type="button" id="cancelBtn" class="btn danger">
-          Cancel
-        </button>
-      </div>
       </form>
     </div>
     <div id="uploadBox" class="hidden">
@@ -160,7 +161,7 @@ Device Inventory
         {% endfor %}
       </tbody>
     </table>
-    
+
   </div>
 
 </section>

@@ -22,6 +22,7 @@ Sim Inventory
 
 <div id="manualEntryForm" class="hidden">
   <form id="manualForm" action="{{ url_for('SimInvy.manual_entry') }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="mb-4">
       <label for="MobileNumber">Mobile Number</label>
       <input type="text" name="MobileNumber" id="MobileNumber" required />

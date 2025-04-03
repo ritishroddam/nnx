@@ -27,6 +27,7 @@ Vehicle Details
 
 <div id="manualEntryForm" class="hidden">
   <form id="manualForm" action="{{ url_for('VehicleDetails.manual_entry') }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="mb-4">
       <label for="LicensePlateNumber">License Plate Number</label>
       <input type="text" name="LicensePlateNumber" id="LicensePlateNumber" required
@@ -69,43 +70,43 @@ Vehicle Details
         <option value="bike">Bike</option>
       </select>
     </div>
-    
+
     <div class="mb-4 hidden" id="NumberOfSeatsContainer">
       <label for="NumberOfSeats">Number of Seats (excluding driver)</label>
-      <input type="number" name="NumberOfSeats" id="NumberOfSeats" class="form-control"/>
+      <input type="number" name="NumberOfSeats" id="NumberOfSeats" class="form-control" />
     </div>
 
     <div class="mb-4">
       <label for="VehicleModel">Vehicle Model</label>
-      <input type="text" name="VehicleModel" id="VehicleModel" class="form-control"/>
+      <input type="text" name="VehicleModel" id="VehicleModel" class="form-control" />
 
     </div>
     <div class="mb-4">
       <label for="VehicleMake">Vehicle Make</label>
-      <input type="text" name="VehicleMake" id="VehicleMake" class="form-control"/>
+      <input type="text" name="VehicleMake" id="VehicleMake" class="form-control" />
 
     </div>
     <div class="mb-4">
       <label for="YearOfManufacture">Year of Manufacture</label>
-      <input type="text" name="YearOfManufacture" id="YearOfManufacture" class="form-control"/>
+      <input type="text" name="YearOfManufacture" id="YearOfManufacture" class="form-control" />
 
     </div>
     <div class="mb-4">
       <label for="DateOfPurchase">Date of Purchase</label>
-      <input type="date" name="DateOfPurchase" id="DateOfPurchase" class="form-control"/>
+      <input type="date" name="DateOfPurchase" id="DateOfPurchase" class="form-control" />
 
     </div>
     <div class="mb-4">
       <label for="InsuranceNumber">Insurance Number</label>
-      <input type="text" name="InsuranceNumber" id="InsuranceNumber" class="form-control"/>
+      <input type="text" name="InsuranceNumber" id="InsuranceNumber" class="form-control" />
     </div>
     <div class="mb-4">
       <label for="DriverName">Driver Name</label>
-      <input type="text" name="DriverName" id="DriverName" class="form-control"/>
+      <input type="text" name="DriverName" id="DriverName" class="form-control" />
     </div>
     <div class="mb-4">
       <label for="CurrentStatus">Current Status</label>
-      <input type="text" name="CurrentStatus" id="CurrentStatus"class="form-control" />
+      <input type="text" name="CurrentStatus" id="CurrentStatus" class="form-control" />
     </div>
 
     <div class="mb-4">
@@ -114,14 +115,14 @@ Vehicle Details
         <option value="">Select Location</option>
       </select>
     </div>
-    
+
     <div class="mb-4">
       <label for="OdometerReading">Odometer Reading</label>
-      <input type="text" name="OdometerReading" id="OdometerReading" class="form-control"/>
+      <input type="text" name="OdometerReading" id="OdometerReading" class="form-control" />
     </div>
     <div class="mb-4">
       <label for="ServiceDueDate">Service Due Date</label>
-      <input type="date" name="ServiceDueDate" id="ServiceDueDate" class="form-control"/>
+      <input type="date" name="ServiceDueDate" id="ServiceDueDate" class="form-control" />
     </div>
     <button type="submit" class="btn success">Submit</button>
     <button type="button" id="cancelBtn" class="btn danger">
