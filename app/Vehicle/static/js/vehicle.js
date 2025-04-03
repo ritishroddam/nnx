@@ -39,6 +39,7 @@ function updateVehicleCard(data) {
 
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
+  const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
 
   if (vehicleCard) {
     // Update existing vehicle card
@@ -55,10 +56,7 @@ function updateVehicleCard(data) {
         data.time
       )} <br>
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-      <strong>Data:</strong> <a href="
-        {{ url_for('RouteHistory.show_vehicle_data', ${
-          data.LicensePlateNumber
-        } }}" target="_blank">View Data</a>
+      <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
   } else {
     // Create a new vehicle card
@@ -66,7 +64,6 @@ function updateVehicleCard(data) {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
-
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
       data.status || "Unknown"
@@ -84,10 +81,7 @@ function updateVehicleCard(data) {
           data.time
         )} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Data:</strong> <a href="
-        {{ url_for('RouteHistory.show_vehicle_data', ${
-          data.LicensePlateNumber
-        } }}" target="_blank">View Data</a>
+        <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
     `;
     listContainer.appendChild(vehicleElement);
@@ -156,6 +150,7 @@ async function renderVehicles() {
 
     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+    const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
 
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
@@ -174,10 +169,7 @@ async function renderVehicles() {
           vehicle.time
         )} <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
-<strong>Data:</strong> <a href="
-        {{ url_for('RouteHistory.show_vehicle_data', ${
-          vehicle.LicensePlateNumber
-        } }}" target="_blank">View Data</a>
+        <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
     `;
     listContainer.appendChild(vehicleElement);
@@ -230,6 +222,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const time = device.time || "N/A";
   const addressText =
     address || '<span class="missing-data">Location unknown</span>';
+  const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
   const content = `<div class="info-window show">
                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
@@ -242,10 +235,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                       device.time
                     )}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><strong>Data:</strong> <a href="
-                      {{ url_for('RouteHistory.show_vehicle_data', ${
-                        device.LicensePlateNumber
-                      } }}" target="_blank">View Data</a>
+                    <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
                     </p>
                 </div>`;
 
@@ -683,6 +673,8 @@ function updateFloatingCard(vehicles, filterValue) {
         ? parseFloat(vehicle.longitude)
         : null;
 
+      const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
+
       vehicleElement.innerHTML = `
         <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
         vehicle.status || "Unknown"
@@ -702,10 +694,7 @@ function updateFloatingCard(vehicles, filterValue) {
           <strong>Location:</strong> ${
             vehicle.address || "Location unknown"
           } <br>
-          <strong>Data:</strong> <a href="
-        {{ url_for('RouteHistory.show_vehicle_data', ${
-          vehicle.LicensePlateNumber
-        } }}" target="_blank">View Data</a>
+          <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
         </div>`;
 
       vehicleList.appendChild(vehicleElement);
@@ -809,6 +798,7 @@ async function populateVehicleTable() {
 
     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
     const address = vehicle.address || "Location unknown";
+    const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
 
     console.log(vehicle.imei);
 
@@ -837,8 +827,9 @@ async function populateVehicleTable() {
     row.insertCell(7).innerText = vehicle.ignition;
     row.insertCell(8).innerText = vehicle.gsm;
     row.insertCell(9).innerText = vehicle.sos;
-    row.insertCell(10).innerHTML = `<a href="
-        {{ url_for('RouteHistory.show_vehicle_data', ${vehicle.LicensePlateNumber} }}" target="_blank">View Data</a>`;
+    row.insertCell(
+      10
+    ).innerHTML = `<a href="${url}" target="_blank">View Data</a>`;
   });
   showHidecar();
 }
