@@ -25,7 +25,8 @@ cities_collection = db['cities']
 def page():
     vehicles = list(vehicle_collection.find({}))
     for vehicle in vehicles:
-        vehicle['CompanyID'] = companies_collection.find_one({"_id": vehicle['CompanyID']}, {"Company Name": 1}).get("Company Name") if vehicle.get('CompanyID') else None
+        if vehicle.get('CompanyID'):
+            vehicle['CompanyID'] = companies_collection.find_one({"_id": vehicle['CompanyID']}, {"Company Name": 1}).get("Company Name") if vehicle.get('CompanyID') else None
     return render_template('vehicleDetails.html', vehicles=vehicles)
 
 # API to fetch IMEI Numbers
