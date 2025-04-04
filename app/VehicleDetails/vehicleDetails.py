@@ -26,7 +26,7 @@ def page():
     vehicles = list(vehicle_collection.find({}))
     for vehicle in vehicles:
         if vehicle.get('CompanyID'):
-            tempCompanyDict = companies_collection.find_one({"_id": vehicle['CompanyID']}, {"Company Name": 1})
+            tempCompanyDict = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
             if tempCompanyDict:
                 vehicle['CompanyID'] = str(tempCompanyDict['Company Name'])
             else:
