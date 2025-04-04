@@ -69,82 +69,21 @@ function openReportModal(reportName) {
   reportModal.style.display = "block";
 }
 
-// document.getElementById("generateReport").onclick = function () {
-//   const reportName = document
-//     .querySelector("#reportModal h2")
-//     .textContent.replace("Generate ", "")
-//     .trim();
-//   const vehicleNumber = document.getElementById("vehicleNumber").value;
-//   const dateRange = document.getElementById("dateRange").value;
-
-//   if (!vehicleNumber) {
-//     alert("Please select a vehicle number");
-//     return;
-//   }
-
-//   // Show loading indicator
-//   const generateBtn = document.getElementById("generateReport");
-//   const originalText = generateBtn.textContent;
-//   generateBtn.disabled = true;
-//   generateBtn.textContent = "Generating...";
-
-//   fetch("/reports/download_custom_report", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//     },
-//     body: JSON.stringify({
-//       reportName,
-//       vehicleNumber,
-//       dateRange,
-//     }),
-//   })
-//     .then((response) => {
-//       if (!response.ok) {
-//         return response.json().then((err) => {
-//           throw err;
-//         });
-//       }
-//       return response.blob();
-//     })
-//     .then((blob) => {
-//       if (blob.size === 0) {
-//         throw new Error("Empty file received");
-//       }
-//       const url = window.URL.createObjectURL(blob);
-//       const a = document.createElement("a");
-//       a.href = url;
-//       a.download = `${reportName}.xlsx`;
-//       document.body.appendChild(a);
-//       a.click();
-//       window.URL.revokeObjectURL(url);
-//       document.body.removeChild(a);
-//     })
-//     .catch((error) => {
-//       console.error("Error:", error);
-//       const message = error.message || "Failed to generate report";
-//       alert(message);
-//     })
-//     .finally(() => {
-//       generateBtn.disabled = false;
-//       generateBtn.textContent = originalText;
-//     });
-// };
-
 // Modify the report card click handlers
 document.querySelectorAll('.report-card').forEach(card => {
   card.onclick = function() {
-      const reportType = this.dataset.report;
-      
-      if (reportType === 'custom') {
-          // Existing custom report logic
-          const reportName = this.querySelector('h3').textContent;
-          openReportModal(reportName);
-      } else {
-          // For other report types
-          openGenericReportModal(reportType);
-      }
+    const reportType = this.dataset.report;
+    
+    if (reportType === 'custom') {
+      const reportName = this.querySelector('h3').textContent;
+      openReportModal(reportName);
+      // Store the report type
+      document.getElementById("generateReport").dataset.reportType = 'custom';
+    } else {
+      openGenericReportModal(reportType);
+      // Store the report type
+      document.getElementById("generateReport").dataset.reportType = reportType;
+    }
   };
 });
 
@@ -169,13 +108,13 @@ function openGenericReportModal(reportType) {
 }
 
 document.getElementById("generateReport").onclick = async function () {
-  const reportName = document.querySelector("#reportModal h2").textContent;
+  const reportType = this.dataset.reportType; // Get stored report type
   const vehicleNumber = document.getElementById("vehicleNumber").value;
   const dateRange = document.getElementById("dateRange").value;
 
   if (!vehicleNumber) {
-      alert("Please select a vehicle number");
-      return;
+    alert("Please select a vehicle number");
+    return;
   }
 
   // Show loading state
@@ -185,53 +124,62 @@ document.getElementById("generateReport").onclick = async function () {
   generateBtn.textContent = "Generating...";
 
   try {
-      // Determine endpoint based on report type
-      let endpoint;
-      if (reportName.includes("Travel Path")) {
-          endpoint = "/reports/download_travel_path_report";
-      } else if (reportName.includes("Distance")) {
-          endpoint = "/reports/download_distance_report";
-      } // Add other report types here...
+    // Map report types to endpoints
+    const endpointMap = {
+      'daily-distance': '/reports/download_travel_path_report',
+      'odometer-daily-distance': '/reports/download_distance_report',
+      'distance-speed-range': '/reports/download_speed_report',
+      'stoppage': '/reports/download_stoppage_report',
+      'idle': '/reports/download_idle_report',
+      'ignition': '/reports/download_ignition_report',
+      'daily': '/reports/download_daily_report',
+      'sos': '/reports/download_panic_report',
+      'custom': '/reports/download_custom_report'
+    };
 
-      const response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-          },
-          body: JSON.stringify({
-              reportName: reportName.trim(),
-              vehicleNumber,
-              dateRange,
-          }),
-      });
+    const endpoint = endpointMap[reportType];
+    if (!endpoint) {
+      throw new Error("Invalid report type");
+    }
 
-      if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Failed to generate report");
-      }
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify({
+        vehicleNumber,
+        dateRange
+      }),
+    });
 
-      const blob = await response.blob();
-      if (blob.size === 0) {
-          throw new Error("Empty file received");
-      }
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to generate report");
+    }
 
-      // Download the file
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${reportName.replace(/\s+/g, '_')}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+    const blob = await response.blob();
+    if (blob.size === 0) {
+      throw new Error("Empty file received");
+    }
+
+    // Download the file
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${reportType.replace(/-/g, '_')}_report.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 
   } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "Failed to generate report");
+    console.error("Error:", error);
+    alert(error.message || "Failed to generate report. Please check console for details.");
   } finally {
-      generateBtn.disabled = false;
-      generateBtn.textContent = originalText;
+    generateBtn.disabled = false;
+    generateBtn.textContent = originalText;
   }
 };
 
