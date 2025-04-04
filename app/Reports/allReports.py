@@ -4,7 +4,7 @@ from pymongo import MongoClient # type: ignore
 import pandas as pd # type: ignore
 from io import BytesIO
 from app.database import db
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 
@@ -166,7 +166,7 @@ def download_travel_path_report():
         }), 500
 
 # Distance Report
-@reports_bp.route('/download_distance_report', methods=['POST'])
+@reports_bp.route('/download_distance_report', methods=['POST'])  # No trailing slash
 @jwt_required()
 def download_distance_report():
     try:
@@ -256,10 +256,9 @@ def download_distance_report():
         )
 
     except Exception as e:
-        print(f"Error generating distance report: {str(e)}")
         return jsonify({
             "success": False,
-            "message": f"An error occurred while generating the report: {str(e)}"
+            "message": f"Server error: {str(e)}"
         }), 500
 
 # Speed Report
