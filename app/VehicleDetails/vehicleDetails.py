@@ -190,10 +190,11 @@ def upload_vehicle_file():
         df = pd.read_excel(file)
 
         required_columns = [
-            'LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 'VehicleMake',
+            'LicensePlateNumber', 'ComapnyName', 'IMEI', 'SIM', 'VehicleType', 'NumberOfSeatsContainer', 'VehicleModel', 'VehicleMake',
             'YearOfManufacture', 'DateOfPurchase', 'InsuranceNumber', 'DriverName',
             'CurrentStatus', 'Location', 'OdometerReading', 'ServiceDueDate'
         ]
+
 
         # Check if all required columns are present
         for column in required_columns:
@@ -204,8 +205,11 @@ def upload_vehicle_file():
         records = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip()
+            dictCompanyID = companies_collection.find_one({"Company Name": str(row['ComapanyName']).strip()},{"_id": 1})
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
+            vehicle_type = str(row['VehicleType']).strip()
+            number_of_seats = str(row['NumberOfSeatsContainer']).strip()
             vehicle_model = str(row['VehicleModel']).strip()
             vehicle_make = str(row['VehicleMake']).strip()
             year_of_manufacture = str(row['YearOfManufacture']).strip()
@@ -217,6 +221,7 @@ def upload_vehicle_file():
             odometer_reading = str(row['OdometerReading']).strip()
             service_due_date = str(row['ServiceDueDate']).strip()
 
+            number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
             vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
             vehicle_make = vehicle_make if vehicle_make != 'nan' else ""
             year_of_manufacture = year_of_manufacture if year_of_manufacture != 'nan' else ""
@@ -231,16 +236,28 @@ def upload_vehicle_file():
                 flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
+            
             pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
             pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
             if not (pattern1.match(license_plate_number) or pattern2.match(license_plate_number)):
                 flash(f"License Plate Number {license_plate_number} is invalid.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if dictCompanyID:
+                companyID = str(dictCompanyID['_id'])
+            else:
+                flash(f"For row {row} Company Name invalid", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
             # Validate length of SIM and IMEI
             if len(sim) != 20:
                 flash(f"SIM {sim} must be 20 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
+            
+            if vehicle_type in ['bus', 'car', 'truck']:
+                if not number_of_seats:
+                    flash(f"In row {row} Number of seats is required for {vehicle_type}.", "danger")
+                    return redirect(url_for('VehicleDetails.page'))
 
             if len(imei) != 15:
                 flash(f"IMEI {imei} must be 15 characters long.", "danger")
@@ -271,8 +288,11 @@ def upload_vehicle_file():
 
             record = {
                 "LicensePlateNumber": license_plate_number,
+                "CompanyID": companyID,
                 "IMEI": imei,
                 "SIM": sim,
+                "VehicleType": vehicle_type,
+                "NumberOfSeats": number_of_seats,
                 "VehicleModel": vehicle_model,
                 "VehicleMake": vehicle_make,
                 "YearOfManufacture": year_of_manufacture,

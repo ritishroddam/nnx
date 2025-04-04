@@ -23,17 +23,17 @@ document
 function editCustomer(customerId) {
   const row = document.querySelector(`tr[data-id='${customerId}']`);
 
-  const companyName = row.cells[1].innerText;
-  const contactPerson = row.cells[2].innerText;
-  const emailAddress = row.cells[3].innerText;
-  const phoneNumber = row.cells[4].innerText;
-  const companyAddress = row.cells[5].innerText;
-  const gpsDevices = row.cells[6].innerText;
-  const vehicles = row.cells[7].innerText;
-  const drivers = row.cells[8].innerText;
-  const paymentStatus = row.cells[9].innerText;
-  const supportContact = row.cells[10].innerText;
-  const remarks = row.cells[11].innerText;
+  const companyName = row.cells[0].innerText;
+  const contactPerson = row.cells[1].innerText;
+  const emailAddress = row.cells[2].innerText;
+  const phoneNumber = row.cells[3].innerText;
+  const companyAddress = row.cells[4].innerText;
+  const gpsDevices = row.cells[5].innerText;
+  const vehicles = row.cells[6].innerText;
+  const drivers = row.cells[7].innerText;
+  const paymentStatus = row.cells[8].innerText;
+  const supportContact = row.cells[9].innerText;
+  const remarks = row.cells[10].innerText;
 
   // row.cells[0].innerHTML = `<input type="text" value="${companyID}" />`;
   row.cells[0].innerHTML = `<input type="text" value="${companyName}" />`;
@@ -61,17 +61,17 @@ function saveCustomer(customerId) {
 
   const updatedData = {
     // CompanyID: row.cells[0].querySelector("input").value.trim(),
-    CompanyName: row.cells[1].querySelector("input").value.trim(),
-    ContactPerson: row.cells[2].querySelector("input").value.trim(),
-    EmailAddress: row.cells[3].querySelector("input").value.trim(),
-    PhoneNumber: row.cells[4].querySelector("input").value.trim(),
-    CompanyAddress: row.cells[5].querySelector("input").value.trim(),
-    NumberOfGPSDevices: row.cells[6].querySelector("input").value.trim(),
-    NumberOfVehicles: row.cells[7].querySelector("input").value.trim(),
-    NumberOfDrivers: row.cells[8].querySelector("input").value.trim(),
-    PaymentStatus: row.cells[9].querySelector("input").value.trim(),
-    SupportContact: row.cells[10].querySelector("input").value.trim(),
-    Remarks: row.cells[11].querySelector("input").value.trim(),
+    CompanyName: row.cells[0].querySelector("input").value.trim(),
+    ContactPerson: row.cells[1].querySelector("input").value.trim(),
+    EmailAddress: row.cells[2].querySelector("input").value.trim(),
+    PhoneNumber: row.cells[3].querySelector("input").value.trim(),
+    CompanyAddress: row.cells[4].querySelector("input").value.trim(),
+    NumberOfGPSDevices: row.cells[5].querySelector("input").value.trim(),
+    NumberOfVehicles: row.cells[6].querySelector("input").value.trim(),
+    NumberOfDrivers: row.cells[7].querySelector("input").value.trim(),
+    PaymentStatus: row.cells[8].querySelector("input").value.trim(),
+    SupportContact: row.cells[9].querySelector("input").value.trim(),
+    Remarks: row.cells[10].querySelector("input").value.trim(),
   };
 
   fetch(`/companyDetails/edit_customer/${customerId}`, {

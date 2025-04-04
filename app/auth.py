@@ -16,7 +16,7 @@ def login():
         current_user = get_jwt_identity()
         if current_user:
             return redirect(url_for('Vehicle.map'))
-    except:
+    except NoAuthorizationError:
         pass
 
     if request.method == 'POST':
@@ -130,7 +130,7 @@ def register_admin():
 def logout():
     try:
         verify_jwt_in_request()
-    except ExpiredSignatureError:
+    except:
         pass  # Still allow logout even if token is expired
 
     response = redirect(url_for('auth.login'))
