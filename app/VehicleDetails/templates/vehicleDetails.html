@@ -156,10 +156,12 @@ if messages %} {% for category, message in messages %}
 <table>
   <thead>
     <tr>
-      <th>Vehicle ID</th>
       <th>License Plate Number</th>
+      <th>Company Name</th>
       <th>IMEI Number</th>
       <th>SIM Number</th>
+      <th>Vehicle Type</th>
+      <th>Number of Seats</th>
       <th>Vehicle Model</th>
       <th>Vehicle Make</th>
       <th>Year of Manufacture</th>
@@ -176,10 +178,12 @@ if messages %} {% for category, message in messages %}
   <tbody>
     {% for vehicle in vehicles %}
     <tr data-id="{{ vehicle['_id'] }}">
-      <td>{{ vehicle['Vehicle ID'] }}</td>
       <td data-editable data-key="LicensePlateNumber">{{ vehicle['LicensePlateNumber'] }}</td>
+      <td data-editable data-key="CompanyName">{{ vehicle['CompanyName'] }}</td>
       <td data-editable data-key="IMEI">{{ vehicle['IMEI'] }}</td>
       <td data-editable data-key="SIM">{{ vehicle['SIM'] }}</td>
+      <td data-editable data-key="VehicleType">{{ vehicle['VehicleType'] }}</td>
+      <td data-editable data-key="NumberOfSeats">{{ vehicle['NumberOfSeats'] }}</td>
       <td data-editable data-key="VehicleModel">{{ vehicle['VehicleModel'] }}</td>
       <td data-editable data-key="VehicleMake">{{ vehicle['VehicleMake'] }}</td>
       <td data-editable data-key="YearOfManufacture">{{ vehicle['YearOfManufacture'] }}</td>
