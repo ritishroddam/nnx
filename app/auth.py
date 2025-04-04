@@ -1,44 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_jwt_extended import verify_jwt_in_request, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended.exceptions import NoAuthorizationError, ExpiredSignatureError
 from .models import User
 from .utils import roles_required
 import datetime
 import requests
 
 auth_bp = Blueprint('auth', __name__)
-
-# @auth_bp.route('/login', methods=['GET', 'POST'])
-# def login():
-#     try:
-#         verify_jwt_in_request()
-#         return redirect(url_for('Vehicle.map'))
-#     except:
-#         pass
-
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
-        
-#         user = User.find_by_username(username)
-#         if not user or not User.verify_password(user, password):
-#             flash('Invalid username or password', 'danger')
-#             return redirect(url_for('auth.login'))
-        
-#         # Create the tokens we will be sending back to the user
-#         additional_claims = {
-#             'roles': [user['role']],
-#             'user_id': str(user['_id'])
-#         }
-#         access_token = create_access_token(
-#             identity=username,
-#             additional_claims=additional_claims
-#         )
-        
-#         response = redirect(url_for('Vehicle.map'))
-#         set_access_cookies(response, access_token)
-#         return response
-    
-#     return render_template('login.html')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,12 +16,17 @@ def login():
         current_user = get_jwt_identity()
         if current_user:
             return redirect(url_for('Vehicle.map'))
-    except:
+    except NoAuthorizationError:
         pass
 
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+
+        data = request.get_json()
+        if not data or 'username' not in data or 'password' not in data:
+            return jsonify({'error': 'Missing username or password'}), 400
+
+        username = data['username']
+        password = data['password']
 
         user = User.find_by_username(username)
         if not user or not User.verify_password(user, password):
@@ -158,8 +131,12 @@ def register_admin():
     return render_template('register_admin.html')  # You'll need to create this template
 
 @auth_bp.route('/logout', methods=['POST'])
-@jwt_required()
 def logout():
+    try:
+        verify_jwt_in_request()
+    except ExpiredSignatureError:
+        pass  # Still allow logout even if token is expired
+
     response = redirect(url_for('auth.login'))
     unset_jwt_cookies(response)
     flash('You have been logged out', 'info')
