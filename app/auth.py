@@ -21,12 +21,8 @@ def login():
 
     if request.method == 'POST':
 
-        data = request.get_json()
-        if not data or 'username' not in data or 'password' not in data:
-            return jsonify({'error': 'Missing username or password'}), 400
-
-        username = data['username']
-        password = data['password']
+        username = request.form.get('username')
+        password = request.form.get('password')
 
         user = User.find_by_username(username)
         if not user or not User.verify_password(user, password):
