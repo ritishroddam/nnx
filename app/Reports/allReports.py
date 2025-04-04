@@ -169,81 +169,98 @@ def download_travel_path_report():
 @reports_bp.route('/download_distance_report', methods=['POST'])
 @jwt_required()
 def download_distance_report():
-    data = request.json
-    vehicle_number = data.get("vehicleNumber")
-    date_range = data.get("dateRange")
-    
-    # Get vehicle IMEI
-    vehicle_data = db['vehicle_inventory'].find_one(
-        {'LicensePlateNumber': vehicle_number},
-        {'_id': 0, 'IMEI': 1}
-    )
-    
-    if not vehicle_data or 'IMEI' not in vehicle_data:
-        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
-    
-    imei_number = vehicle_data['IMEI']
-    
-    # Calculate date range
-    now = datetime.now()
-    date_str = now.strftime("%d%m%y")
-    
-    if date_range == "last24hours":
-        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
-    elif date_range == "today":
-        start_date = now.strftime("%d%m%y")
-    elif date_range == "yesterday":
-        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
-    elif date_range == "last7days":
-        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
-    elif date_range == "last30days":
-        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
-    else:
-        start_date = None
-    
-    # Query data
-    query = {"imei": imei_number}
-    if start_date:
-        if date_range == "yesterday":
-            query["date"] = start_date
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+            
+        vehicle_number = data.get("vehicleNumber")
+        date_range = data.get("dateRange")
+        
+        # Get vehicle IMEI
+        vehicle_data = db['vehicle_inventory'].find_one(
+            {'LicensePlateNumber': vehicle_number},
+            {'_id': 0, 'IMEI': 1}
+        )
+        
+        if not vehicle_data or 'IMEI' not in vehicle_data:
+            return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+        
+        imei_number = vehicle_data['IMEI']
+        
+        # Calculate date range
+        now = datetime.now()
+        
+        if date_range == "last24hours":
+            start_date = (now - timedelta(hours=24))
+        elif date_range == "today":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif date_range == "yesterday":
+            start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        elif date_range == "last7days":
+            start_date = now - timedelta(days=7)
+        elif date_range == "last30days":
+            start_date = now - timedelta(days=30)
         else:
-            query["date"] = {"$gte": start_date}
-    
-    # Get travel data with odometer readings
-    travel_data = list(db['atlanta'].find(
-        query,
-        {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, 'odometer': 1, '_id': 0}
-    ).sort([("date", 1), ("time", 1)]))
-    
-    if not travel_data:
-        return jsonify({"success": False, "message": "No travel data found."}), 404
-    
-    # Process data for Excel
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df = pd.DataFrame(travel_data)
+            start_date = None
         
-        # Format date/time
-        if 'date' in df.columns:
-            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-        if 'time' in df.columns:
-            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        # Query data
+        query = {"imei": imei_number}
+        if start_date:
+            query["timestamp"] = {"$gte": start_date}
         
-        # Calculate distance between points (simplified calculation)
-        df['distance_km'] = 0.0
-        if len(df) > 1:
-            for i in range(1, len(df)):
-                if 'odometer' in df.columns and pd.notna(df.at[i, 'odometer']) and pd.notna(df.at[i-1, 'odometer']):
-                    df.at[i, 'distance_km'] = df.at[i, 'odometer'] - df.at[i-1, 'odometer']
+        # Get travel data with odometer readings
+        travel_data = list(db['atlanta'].find(
+            query,
+            {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, 'odometer': 1, 'timestamp': 1, '_id': 0}
+        ).sort([("timestamp", 1)]))
         
-        df.to_excel(writer, index=False, sheet_name="Distance Report")
-    
-    return send_file(
-        output,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        as_attachment=True,
-        download_name=f"distance_report_{vehicle_number}.xlsx"
-    )
+        if not travel_data:
+            return jsonify({"success": False, "message": "No travel data found."}), 404
+        
+        # Process data for Excel
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            df = pd.DataFrame(travel_data)
+            
+            if df.empty:
+                return jsonify({"success": False, "message": "No valid data to export"}), 404
+            
+            # Format date/time
+            if 'date' in df.columns:
+                df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+            if 'time' in df.columns:
+                df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+            
+            # Calculate distance between points
+            df['distance_km'] = 0.0
+            if len(df) > 1 and 'odometer' in df.columns:
+                # Convert odometer to numeric
+                df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+                
+                for i in range(1, len(df)):
+                    if pd.notna(df.at[i, 'odometer']) and pd.notna(df.at[i-1, 'odometer']):
+                        df.at[i, 'distance_km'] = df.at[i, 'odometer'] - df.at[i-1, 'odometer']
+            
+            # Ensure we have valid data to write
+            if len(df) == 0:
+                return jsonify({"success": False, "message": "No valid data rows to export"}), 404
+                
+            df.to_excel(writer, index=False, sheet_name="Distance Report")
+            
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"distance_report_{vehicle_number}.xlsx"
+        )
+
+    except Exception as e:
+        print(f"Error generating distance report: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": f"An error occurred while generating the report: {str(e)}"
+        }), 500
 
 # Speed Report
 @reports_bp.route('/download_speed_report', methods=['POST'])
