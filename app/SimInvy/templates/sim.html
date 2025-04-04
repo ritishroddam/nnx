@@ -22,7 +22,7 @@ Sim Inventory
 
 <div id="manualEntryForm" class="hidden">
   <form id="manualForm" action="{{ url_for('SimInvy.manual_entry') }}" method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="mb-4">
       <label for="MobileNumber">Mobile Number</label>
       <input type="text" name="MobileNumber" id="MobileNumber" required />
@@ -64,6 +64,7 @@ Sim Inventory
 <!-- Hidden Upload Form Container -->
 <div id="uploadFormContainer" class="hidden">
   <form id="uploadForm" action="{{ url_for('SimInvy.upload_file') }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="file" name="file" accept=".xls,.xlsx" required />
     <button type="submit" class="btn">Upload Excel</button>
     <a href="{{ url_for('SimInvy.download_template') }}" class="btn">Download Template</a>
