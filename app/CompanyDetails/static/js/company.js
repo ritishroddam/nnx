@@ -36,21 +36,21 @@ function editCustomer(customerId) {
   const remarks = row.cells[11].innerText;
 
   // row.cells[0].innerHTML = `<input type="text" value="${companyID}" />`;
-  row.cells[1].innerHTML = `<input type="text" value="${companyName}" />`;
-  row.cells[2].innerHTML = `<input type="text" value="${contactPerson}" />`;
-  row.cells[3].innerHTML = `<input type="email" value="${emailAddress}" />`;
-  row.cells[4].innerHTML = `<input type="text" value="${phoneNumber}" />`;
-  row.cells[5].innerHTML = `<input type="text" value="${companyAddress}" />`;
-  row.cells[6].innerHTML = `<input type="number" value="${gpsDevices}" />`;
-  row.cells[7].innerHTML = `<input type="number" value="${vehicles}" />`;
-  row.cells[8].innerHTML = `<input type="number" value="${drivers}" />`;
-  row.cells[9].innerHTML = `<input type="text" value="${paymentStatus}" />`;
-  row.cells[10].innerHTML = `<input type="text" value="${supportContact}" />`;
-  row.cells[11].innerHTML = `<input type="text" value="${remarks}" />`;
+  row.cells[0].innerHTML = `<input type="text" value="${companyName}" />`;
+  row.cells[1].innerHTML = `<input type="text" value="${contactPerson}" />`;
+  row.cells[2].innerHTML = `<input type="email" value="${emailAddress}" />`;
+  row.cells[3].innerHTML = `<input type="text" value="${phoneNumber}" />`;
+  row.cells[4].innerHTML = `<input type="text" value="${companyAddress}" />`;
+  row.cells[5].innerHTML = `<input type="number" value="${gpsDevices}" />`;
+  row.cells[6].innerHTML = `<input type="number" value="${vehicles}" />`;
+  row.cells[7].innerHTML = `<input type="number" value="${drivers}" />`;
+  row.cells[8].innerHTML = `<input type="text" value="${paymentStatus}" />`;
+  row.cells[9].innerHTML = `<input type="text" value="${supportContact}" />`;
+  row.cells[10].innerHTML = `<input type="text" value="${remarks}" />`;
 
   // Keep Company ID as non-editable text
 
-  row.cells[12].innerHTML = `
+  row.cells[11].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveCustomer('${customerId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit()">❌</button>
   `;
