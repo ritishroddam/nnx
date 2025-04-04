@@ -15,7 +15,6 @@ document.getElementById("cancelBtn").addEventListener("click", function () {
 document
   .getElementById("manualEntryBtn")
   .addEventListener("click", function () {
-    fetchNextCompanyID();
     document.getElementById("manualEntryForm").classList.toggle("hidden");
   });
 
