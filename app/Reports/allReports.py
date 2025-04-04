@@ -77,6 +77,610 @@ def get_custom_reports():
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
     return jsonify(reports)
 
+# TravelPath
+@reports_bp.route('/download_travel_path_report', methods=['POST'])
+@jwt_required()
+def download_travel_path_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data
+    query = {"imei": imei_number}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    # Get travel path data
+    travel_data = list(db['atlanta'].find(
+        query,
+        {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, '_id': 0}
+    ))
+    
+    if not travel_data:
+        return jsonify({"success": False, "message": "No travel data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(travel_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        # Add location column (this would need geocoding implementation)
+        df['location'] = "To be implemented"  # Replace with actual geocoding
+        
+        df.to_excel(writer, index=False, sheet_name="Travel Path Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"travel_path_report_{vehicle_number}.xlsx"
+    )
+
+# Distance Report
+@reports_bp.route('/download_distance_report', methods=['POST'])
+@jwt_required()
+def download_distance_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data
+    query = {"imei": imei_number}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    # Get travel data with odometer readings
+    travel_data = list(db['atlanta'].find(
+        query,
+        {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, 'odometer': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not travel_data:
+        return jsonify({"success": False, "message": "No travel data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(travel_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        # Calculate distance between points (simplified calculation)
+        df['distance_km'] = 0.0
+        if len(df) > 1:
+            for i in range(1, len(df)):
+                if 'odometer' in df.columns and pd.notna(df.at[i, 'odometer']) and pd.notna(df.at[i-1, 'odometer']):
+                    df.at[i, 'distance_km'] = df.at[i, 'odometer'] - df.at[i-1, 'odometer']
+        
+        df.to_excel(writer, index=False, sheet_name="Distance Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"distance_report_{vehicle_number}.xlsx"
+    )
+
+# Speed Report
+@reports_bp.route('/download_speed_report', methods=['POST'])
+@jwt_required()
+def download_speed_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data
+    query = {"imei": imei_number}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    # Get speed data
+    speed_data = list(db['atlanta'].find(
+        query,
+        {'speed': 1, 'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not speed_data:
+        return jsonify({"success": False, "message": "No speed data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(speed_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        # Add speed classification
+        df['speed_status'] = df['speed'].apply(
+            lambda x: "Normal" if x <= 80 else ("High" if x <= 120 else "Very High")
+        )
+        
+        df.to_excel(writer, index=False, sheet_name="Speed Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"speed_report_{vehicle_number}.xlsx"
+    )
+
+# stoppage report
+@reports_bp.route('/download_stoppage_report', methods=['POST'])
+@jwt_required()
+def download_stoppage_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data - get all records where ignition is off
+    query = {"imei": imei_number, "ignition": "off"}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    stoppage_data = list(db['atlanta'].find(
+        query,
+        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not stoppage_data:
+        return jsonify({"success": False, "message": "No stoppage data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(stoppage_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        # Calculate duration of each stoppage (simplified)
+        df['duration_minutes'] = 10  # Default value, would need actual calculation
+        
+        df.to_excel(writer, index=False, sheet_name="Stoppage Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"stoppage_report_{vehicle_number}.xlsx"
+    )
+    
+# Idle Report
+@reports_bp.route('/download_idle_report', methods=['POST'])
+@jwt_required()
+def download_idle_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data - speed 0 and ignition on
+    query = {"imei": imei_number, "speed": "0.0", "ignition": "on"}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    idle_data = list(db['atlanta'].find(
+        query,
+        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not idle_data:
+        return jsonify({"success": False, "message": "No idle data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(idle_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        # Calculate idle duration (would need more complex logic)
+        df['duration_minutes'] = 5  # Placeholder
+        
+        df.to_excel(writer, index=False, sheet_name="Idle Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"idle_report_{vehicle_number}.xlsx"
+    )
+
+# Ignition Report
+@reports_bp.route('/download_ignition_report', methods=['POST'])
+@jwt_required()
+def download_ignition_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data - ignition on events
+    query = {"imei": imei_number, "ignition": "on"}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    ignition_data = list(db['atlanta'].find(
+        query,
+        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not ignition_data:
+        return jsonify({"success": False, "message": "No ignition data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(ignition_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        df.to_excel(writer, index=False, sheet_name="Ignition Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"ignition_report_{vehicle_number}.xlsx"
+    )
+    
+# Daily Report
+@reports_bp.route('/download_daily_report', methods=['POST'])
+@jwt_required()
+def download_daily_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query data
+    query = {"imei": imei_number}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    daily_data = list(db['atlanta'].find(
+        query,
+        {'date': 1, 'time': 1, 'odometer': 1, 'speed': 1, 'latitude': 1, 'longitude': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not daily_data:
+        return jsonify({"success": False, "message": "No daily data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(daily_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        # Calculate daily distance
+        if 'odometer' in df.columns:
+            df['daily_distance'] = df.groupby('date')['odometer'].transform(lambda x: x.max() - x.min())
+        
+        df.to_excel(writer, index=False, sheet_name="Daily Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"daily_report_{vehicle_number}.xlsx"
+    )
+
+# Panic Report
+@reports_bp.route('/download_panic_report', methods=['POST'])
+@jwt_required()
+def download_panic_report():
+    data = request.json
+    vehicle_number = data.get("vehicleNumber")
+    date_range = data.get("dateRange")
+    
+    # Get vehicle IMEI
+    vehicle_data = db['vehicle_inventory'].find_one(
+        {'LicensePlateNumber': vehicle_number},
+        {'_id': 0, 'IMEI': 1}
+    )
+    
+    if not vehicle_data or 'IMEI' not in vehicle_data:
+        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+    
+    imei_number = vehicle_data['IMEI']
+    
+    # Calculate date range
+    now = datetime.now()
+    date_str = now.strftime("%d%m%y")
+    
+    if date_range == "last24hours":
+        start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+    elif date_range == "today":
+        start_date = now.strftime("%d%m%y")
+    elif date_range == "yesterday":
+        start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+    elif date_range == "last7days":
+        start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+    elif date_range == "last30days":
+        start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+    else:
+        start_date = None
+    
+    # Query SOS logs
+    query = {"imei": imei_number}
+    if start_date:
+        if date_range == "yesterday":
+            query["date"] = start_date
+        else:
+            query["date"] = {"$gte": start_date}
+    
+    panic_data = list(db['sos_logs'].find(
+        query,
+        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, 'sos_type': 1, '_id': 0}
+    ).sort([("date", 1), ("time", 1)]))
+    
+    if not panic_data:
+        return jsonify({"success": False, "message": "No panic data found."}), 404
+    
+    # Process data for Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df = pd.DataFrame(panic_data)
+        
+        # Format date/time
+        if 'date' in df.columns:
+            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'time' in df.columns:
+            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
+        df.to_excel(writer, index=False, sheet_name="Panic Report")
+    
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"panic_report_{vehicle_number}.xlsx"
+    )                    
+
 @reports_bp.route('/download_custom_report', methods=['POST'])
 @jwt_required()
 def download_custom_report():
