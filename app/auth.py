@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_jwt_extended import verify_jwt_in_request, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
-from flask_jwt_extended.exceptions import NoAuthorizationError, ExpiredSignatureError
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from .models import User
 from .utils import roles_required
 import datetime
@@ -16,7 +16,7 @@ def login():
         current_user = get_jwt_identity()
         if current_user:
             return redirect(url_for('Vehicle.map'))
-    except NoAuthorizationError:
+    except:
         pass
 
     if request.method == 'POST':
