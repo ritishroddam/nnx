@@ -1,23 +1,298 @@
+# from datetime import datetime, timedelta
+# from flask import render_template, Blueprint, request, jsonify, send_file, url_for # type: ignore
+# from pymongo import MongoClient # type: ignore
+# import pandas as pd # type: ignore
+# from io import BytesIO
+# from app.database import db
+# from flask_jwt_extended import jwt_required, get_jwt_identity # type: ignore
+# from app.models import User
+# from app.utils import roles_required
+
+
+# reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
+
+# vehicle_inventory_collection = db['vehicle_inventory']
+# atlanta_collection = db['atlanta']
+
+# @reports_bp.route('/')
+# @jwt_required()
+# def index():
+#     vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
+#     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
+#     return render_template('allReport.html', vehicles=vehicles, reports=reports)
+
+# @reports_bp.route('/get_fields', methods=['GET'])
+# @jwt_required()
+# def get_fields():
+#     # Combine fields from all collections
+#     atlanta_fields = db['atlanta'].find_one().keys()
+#     inventory_fields = db['vehicle_inventory'].find_one().keys()
+#     # sim_fields = db['sim_inventory'].find_one().keys()
+#     device_fields = db['device_inventory'].find_one().keys()
+#     all_fields = set(atlanta_fields) | set(inventory_fields) | set(device_fields)
+#     return jsonify(list(all_fields))
+
+# @reports_bp.route('/save_custom_report', methods=['POST'])
+# @jwt_required()
+# def save_custom_report():
+#     try:
+#         data = request.get_json()
+#         if not data:
+#             return jsonify({"success": False, "message": "No JSON data provided."}), 400
+            
+#         report_name = data.get("reportName")
+#         fields = data.get("fields")
+
+#         if not report_name or not fields:
+#             return jsonify({"success": False, "message": "Invalid data provided."}), 400
+
+#         # Check if report already exists
+#         if db['custom_reports'].find_one({"report_name": report_name}):
+#             return jsonify({"success": False, "message": "Report with this name already exists."}), 400
+
+#         # Save the custom report
+#         db['custom_reports'].insert_one({
+#             "report_name": report_name,
+#             "fields": fields,
+#             "created_at": datetime.now(),
+#             "created_by": get_jwt_identity()
+#         })
+
+#         return jsonify({
+#             "success": True, 
+#             "message": "Custom report saved successfully!",
+#             "redirect_url": url_for('Reports.index')
+#         }), 200
+
+#     except Exception as e:
+#         # Ensure we return JSON even for errors
+#         return jsonify({
+#             "success": False,
+#             "message": f"An error occurred: {str(e)}"
+#         }), 500
+
+# @reports_bp.route('/get_custom_reports', methods=['GET'])
+# @jwt_required()
+# def get_custom_reports():
+#     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
+#     return jsonify(reports)
+
+# # TravelPath
+# @reports_bp.route('/download_travel_path_report', methods=['POST'])
+# @jwt_required()
+# def download_travel_path_report():
+#     try:
+#         data = request.get_json()
+#         if not data:
+#             return jsonify({"success": False, "message": "No data provided"}), 400
+            
+#         vehicle_number = data.get("vehicleNumber")
+#         date_range = data.get("dateRange")
+        
+#         # Get vehicle IMEI
+#         vehicle_data = db['vehicle_inventory'].find_one(
+#             {'LicensePlateNumber': vehicle_number},
+#             {'_id': 0, 'IMEI': 1}
+#         )
+        
+#         if not vehicle_data or 'IMEI' not in vehicle_data:
+#             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+        
+#         imei_number = vehicle_data['IMEI']
+        
+#         # Calculate date range
+#         now = datetime.now()
+#         date_str = now.strftime("%d%m%y")
+        
+#         if date_range == "last24hours":
+#             start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+#         elif date_range == "today":
+#             start_date = now.strftime("%d%m%y")
+#         elif date_range == "yesterday":
+#             start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+#         elif date_range == "last7days":
+#             start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+#         elif date_range == "last30days":
+#             start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+#         else:
+#             start_date = None
+        
+#         # Query data
+#         query = {"imei": imei_number}
+#         if start_date:
+#             if date_range == "yesterday":
+#                 query["date"] = start_date
+#             else:
+#                 query["date"] = {"$gte": start_date}
+        
+#         # Get travel path data
+#         travel_data = list(db['atlanta'].find(
+#             query,
+#             {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, '_id': 0}
+#         ))
+        
+#         if not travel_data:
+#             return jsonify({"success": False, "message": "No travel data found."}), 404
+        
+#         # Process data for Excel
+#         output = BytesIO()
+#         with pd.ExcelWriter(output, engine="openpyxl") as writer:
+#             df = pd.DataFrame(travel_data)
+            
+#             # Format date/time
+#             if 'date' in df.columns:
+#                 df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+#             if 'time' in df.columns:
+#                 df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+            
+#             # Add location column (this would need geocoding implementation)
+#             df['location'] = "To be implemented"  # Replace with actual geocoding
+            
+#             df.to_excel(writer, index=False, sheet_name="Travel Path Report")
+        
+#         return send_file(
+#             output,
+#             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#             as_attachment=True,
+#             download_name=f"travel_path_report_{vehicle_number}.xlsx"
+#         )
+
+#     except Exception as e:
+#         # This will catch any unexpected errors
+#         print(f"Error generating travel path report: {str(e)}")
+#         return jsonify({
+#             "success": False,
+#             "message": f"An error occurred while generating the report: {str(e)}"
+#         }), 500
+
+# # Distance Report
+# @reports_bp.route('/download_distance_report', methods=['POST'])  # No trailing slash
+# @jwt_required()
+# def download_distance_report():
+#     try:
+#         data = request.get_json()
+#         if not data:
+#             return jsonify({"success": False, "message": "No data provided"}), 400
+            
+#         vehicle_number = data.get("vehicleNumber")
+#         date_range = data.get("dateRange")
+        
+#         # Get vehicle IMEI
+#         vehicle_data = db['vehicle_inventory'].find_one(
+#             {'LicensePlateNumber': vehicle_number},
+#             {'_id': 0, 'IMEI': 1}
+#         )
+        
+#         if not vehicle_data or 'IMEI' not in vehicle_data:
+#             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+        
+#         imei_number = vehicle_data['IMEI']
+        
+#         # Calculate date range
+#         now = datetime.now()
+        
+#         if date_range == "last24hours":
+#             start_date = (now - timedelta(hours=24))
+#         elif date_range == "today":
+#             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+#         elif date_range == "yesterday":
+#             start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+#         elif date_range == "last7days":
+#             start_date = now - timedelta(days=7)
+#         elif date_range == "last30days":
+#             start_date = now - timedelta(days=30)
+#         else:
+#             start_date = None
+        
+#         # Query data
+#         query = {"imei": imei_number}
+#         if start_date:
+#             query["timestamp"] = {"$gte": start_date}
+        
+#         # Get travel data with odometer readings
+#         travel_data = list(db['atlanta'].find(
+#             query,
+#             {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, 'odometer': 1, 'timestamp': 1, '_id': 0}
+#         ).sort([("timestamp", 1)]))
+        
+#         if not travel_data:
+#             return jsonify({"success": False, "message": "No travel data found."}), 404
+        
+#         # Process data for Excel
+#         output = BytesIO()
+#         with pd.ExcelWriter(output, engine="openpyxl") as writer:
+#             df = pd.DataFrame(travel_data)
+            
+#             if df.empty:
+#                 return jsonify({"success": False, "message": "No valid data to export"}), 404
+            
+#             # Format date/time
+#             if 'date' in df.columns:
+#                 df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+#             if 'time' in df.columns:
+#                 df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+            
+#             # Calculate distance between points
+#             df['distance_km'] = 0.0
+#             if len(df) > 1 and 'odometer' in df.columns:
+#                 # Convert odometer to numeric
+#                 df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+                
+#                 for i in range(1, len(df)):
+#                     if pd.notna(df.at[i, 'odometer']) and pd.notna(df.at[i-1, 'odometer']):
+#                         df.at[i, 'distance_km'] = df.at[i, 'odometer'] - df.at[i-1, 'odometer']
+            
+#             # Ensure we have valid data to write
+#             if len(df) == 0:
+#                 return jsonify({"success": False, "message": "No valid data rows to export"}), 404
+                
+#             df.to_excel(writer, index=False, sheet_name="Distance Report")
+            
+#         return send_file(
+#             output,
+#             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#             as_attachment=True,
+#             download_name=f"distance_report_{vehicle_number}.xlsx"
+#         )
+
+#     except Exception as e:
+#         return jsonify({
+#             "success": False,
+#             "message": f"Server error: {str(e)}"
+#         }), 500
+
 from datetime import datetime, timedelta
-from flask import render_template, Blueprint, request, jsonify, send_file, url_for # type: ignore
-from pymongo import MongoClient # type: ignore
-import pandas as pd # type: ignore
+from flask import render_template, Blueprint, request, jsonify, send_file, url_for
+from pymongo import MongoClient
+import pandas as pd
 from io import BytesIO
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 
-
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
-vehicle_inventory_collection = db['vehicle_inventory']
-atlanta_collection = db['atlanta']
+# Define field to collection mapping at module level
+FIELD_COLLECTION_MAP = {
+    'atlanta': ['status', 'time', 'gps', 'latitude', 'longitude', 'speed', 
+                'date', 'ignition', 'door', 'sos', 'main_power', 'odometer',
+                'internal_bat', 'gsm_sig', 'cellid', 'temp', 'harsh_speed',
+                'timestamp', 'course', 'checksum', 'reserve1', 'reserve2',
+                'ac', 'reserve3', 'harsh_break', 'arm', 'sleep', 'reserve4',
+                'status_accelerometer', 'adc_voltage', 'one_wire_temp', 'i_btn',
+                'onBoard_temp', 'mobCountryCode', 'mobNetworkCode', 'localAreaCode'],
+    'vehicle_inventory': ['LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 
+                         'VehicleMake', 'YearOfManufacture', 'DateOfPurchase',
+                         'InsuranceNumber', 'DriverName', 'CurrentStatus',
+                         'Location', 'OdometerReading', 'ServiceDueDate'],
+    'device_inventory': []  # Add device inventory fields if needed
+}
 
 @reports_bp.route('/')
 @jwt_required()
 def index():
-    vehicles = list(vehicle_inventory_collection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
     return render_template('allReport.html', vehicles=vehicles, reports=reports)
 
@@ -25,11 +300,9 @@ def index():
 @jwt_required()
 def get_fields():
     # Combine fields from all collections
-    atlanta_fields = db['atlanta'].find_one().keys()
-    inventory_fields = db['vehicle_inventory'].find_one().keys()
-    # sim_fields = db['sim_inventory'].find_one().keys()
-    device_fields = db['device_inventory'].find_one().keys()
-    all_fields = set(atlanta_fields) | set(inventory_fields) | set(device_fields)
+    all_fields = set()
+    for collection, fields in FIELD_COLLECTION_MAP.items():
+        all_fields.update(fields)
     return jsonify(list(all_fields))
 
 @reports_bp.route('/save_custom_report', methods=['POST'])
@@ -45,6 +318,12 @@ def save_custom_report():
 
         if not report_name or not fields:
             return jsonify({"success": False, "message": "Invalid data provided."}), 400
+
+        # Validate fields exist in our collections
+        try:
+            validate_fields(fields)
+        except ValueError as e:
+            return jsonify({"success": False, "message": str(e)}), 400
 
         # Check if report already exists
         if db['custom_reports'].find_one({"report_name": report_name}):
@@ -65,7 +344,6 @@ def save_custom_report():
         }), 200
 
     except Exception as e:
-        # Ensure we return JSON even for errors
         return jsonify({
             "success": False,
             "message": f"An error occurred: {str(e)}"
@@ -77,188 +355,157 @@ def get_custom_reports():
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1}))
     return jsonify(reports)
 
-# TravelPath
-@reports_bp.route('/download_travel_path_report', methods=['POST'])
+def validate_fields(fields):
+    """Validate requested fields exist in our collections"""
+    invalid_fields = []
+    for field in fields:
+        found = False
+        for collection_fields in FIELD_COLLECTION_MAP.values():
+            if field in collection_fields:
+                found = True
+                break
+        if not found:
+            invalid_fields.append(field)
+    
+    if invalid_fields:
+        raise ValueError(f"Fields not found in any collection: {', '.join(invalid_fields)}")
+
+def build_queries(fields, imei, date_range):
+    """Build queries for all needed collections based on requested fields"""
+    queries = {}
+
+    collections_needed = set()
+    for field in fields:
+        for collection, coll_fields in FIELD_COLLECTION_MAP.items():
+            if field in coll_fields:
+                collections_needed.add(collection)
+                break
+
+    for collection in collections_needed:
+        query = {}
+        
+        if collection == 'vehicle_inventory':
+            query['IMEI'] = imei
+        else:
+            query['imei'] = imei
+
+        if collection == 'atlanta' and date_range:
+            now = datetime.now()
+            if date_range == "last24hours":
+                start_date = (now - timedelta(hours=24))
+                query['timestamp'] = {'$gte': start_date}
+            elif date_range == "today":
+                start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                query['timestamp'] = {'$gte': start_date}
+            elif date_range == "yesterday":
+                start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                end_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                query['timestamp'] = {'$gte': start_date, '$lt': end_date}
+            elif date_range == "last7days":
+                start_date = now - timedelta(days=7)
+                query['timestamp'] = {'$gte': start_date}
+            elif date_range == "last30days":
+                start_date = now - timedelta(days=30)
+                query['timestamp'] = {'$gte': start_date}
+        
+        queries[collection] = {
+            'query': query,
+            'projection': {field: 1 for field in fields if field in FIELD_COLLECTION_MAP[collection]}
+        }
+    
+    return queries
+
+def merge_data(results_from_collections, fields):
+    """Merge data from multiple collections into a unified format"""
+    merged_data = []
+
+    static_data = {}
+    for collection in ['vehicle_inventory', 'device_inventory']:
+        if collection in results_from_collections:
+            static_data.update(results_from_collections[collection][0] if results_from_collections[collection] else {})
+
+    if 'atlanta' in results_from_collections:
+        for record in results_from_collections['atlanta']:
+            merged_record = {**static_data, **record}
+            merged_data.append({k: v for k, v in merged_record.items() if k in fields})
+    else:
+        merged_data.append({k: v for k, v in static_data.items() if k in fields})
+    
+    return merged_data
+
+@reports_bp.route('/download_custom_report', methods=['POST'])
 @jwt_required()
-def download_travel_path_report():
+def download_custom_report():
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
-            
+        data = request.json
+        report_name = data.get("reportName")
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange")
-        
-        # Get vehicle IMEI
+
+        report_config = db['custom_reports'].find_one({"report_name": report_name})
+        if not report_config:
+            return jsonify({"success": False, "message": "Report not found."}), 404
+            
+        fields = report_config["fields"]
+
         vehicle_data = db['vehicle_inventory'].find_one(
             {'LicensePlateNumber': vehicle_number},
-            {'_id': 0, 'IMEI': 1}
+            {'_id': 0, 'IMEI': 1, 'SIM': 1}
         )
-        
         if not vehicle_data or 'IMEI' not in vehicle_data:
             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
-        
+            
         imei_number = vehicle_data['IMEI']
+
+        try:
+            validate_fields(fields)
+        except ValueError as e:
+            return jsonify({"success": False, "message": str(e)}), 400
+
+        queries = build_queries(fields, imei_number, date_range)
+
+        results = {}
+        for collection, query_info in queries.items():
+            cursor = db[collection].find(
+                query_info['query'],
+                query_info['projection']
+            )
+            results[collection] = list(cursor)
+
+        merged_data = merge_data(results, fields)
         
-        # Calculate date range
-        now = datetime.now()
-        date_str = now.strftime("%d%m%y")
-        
-        if date_range == "last24hours":
-            start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
-        elif date_range == "today":
-            start_date = now.strftime("%d%m%y")
-        elif date_range == "yesterday":
-            start_date = (now - timedelta(days=1)).strftime("%d%m%y")
-        elif date_range == "last7days":
-            start_date = (now - timedelta(days=7)).strftime("%d%m%y")
-        elif date_range == "last30days":
-            start_date = (now - timedelta(days=30)).strftime("%d%m%y")
-        else:
-            start_date = None
-        
-        # Query data
-        query = {"imei": imei_number}
-        if start_date:
-            if date_range == "yesterday":
-                query["date"] = start_date
-            else:
-                query["date"] = {"$gte": start_date}
-        
-        # Get travel path data
-        travel_data = list(db['atlanta'].find(
-            query,
-            {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, '_id': 0}
-        ))
-        
-        if not travel_data:
-            return jsonify({"success": False, "message": "No travel data found."}), 404
-        
-        # Process data for Excel
+        if not merged_data:
+            return jsonify({"success": False, "message": "No data found for the selected criteria."}), 404
+
         output = BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df = pd.DataFrame(travel_data)
-            
-            # Format date/time
-            if 'date' in df.columns:
-                df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-            if 'time' in df.columns:
-                df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-            
-            # Add location column (this would need geocoding implementation)
-            df['location'] = "To be implemented"  # Replace with actual geocoding
-            
-            df.to_excel(writer, index=False, sheet_name="Travel Path Report")
-        
-        return send_file(
-            output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"travel_path_report_{vehicle_number}.xlsx"
-        )
+            df = pd.DataFrame(merged_data)
 
-    except Exception as e:
-        # This will catch any unexpected errors
-        print(f"Error generating travel path report: {str(e)}")
-        return jsonify({
-            "success": False,
-            "message": f"An error occurred while generating the report: {str(e)}"
-        }), 500
-
-# Distance Report
-@reports_bp.route('/download_distance_report', methods=['POST'])  # No trailing slash
-@jwt_required()
-def download_distance_report():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
-            
-        vehicle_number = data.get("vehicleNumber")
-        date_range = data.get("dateRange")
-        
-        # Get vehicle IMEI
-        vehicle_data = db['vehicle_inventory'].find_one(
-            {'LicensePlateNumber': vehicle_number},
-            {'_id': 0, 'IMEI': 1}
-        )
-        
-        if not vehicle_data or 'IMEI' not in vehicle_data:
-            return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
-        
-        imei_number = vehicle_data['IMEI']
-        
-        # Calculate date range
-        now = datetime.now()
-        
-        if date_range == "last24hours":
-            start_date = (now - timedelta(hours=24))
-        elif date_range == "today":
-            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        elif date_range == "yesterday":
-            start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        elif date_range == "last7days":
-            start_date = now - timedelta(days=7)
-        elif date_range == "last30days":
-            start_date = now - timedelta(days=30)
-        else:
-            start_date = None
-        
-        # Query data
-        query = {"imei": imei_number}
-        if start_date:
-            query["timestamp"] = {"$gte": start_date}
-        
-        # Get travel data with odometer readings
-        travel_data = list(db['atlanta'].find(
-            query,
-            {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, 'odometer': 1, 'timestamp': 1, '_id': 0}
-        ).sort([("timestamp", 1)]))
-        
-        if not travel_data:
-            return jsonify({"success": False, "message": "No travel data found."}), 404
-        
-        # Process data for Excel
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df = pd.DataFrame(travel_data)
-            
-            if df.empty:
-                return jsonify({"success": False, "message": "No valid data to export"}), 404
-            
-            # Format date/time
             if 'date' in df.columns:
-                df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+                try:
+                    df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+                except Exception as e:
+                    print(f"Error formatting date: {str(e)}")
+            
             if 'time' in df.columns:
-                df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+                try:
+                    df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+                except Exception as e:
+                    print(f"Error formatting time: {str(e)}")
             
-            # Calculate distance between points
-            df['distance_km'] = 0.0
-            if len(df) > 1 and 'odometer' in df.columns:
-                # Convert odometer to numeric
-                df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-                
-                for i in range(1, len(df)):
-                    if pd.notna(df.at[i, 'odometer']) and pd.notna(df.at[i-1, 'odometer']):
-                        df.at[i, 'distance_km'] = df.at[i, 'odometer'] - df.at[i-1, 'odometer']
-            
-            # Ensure we have valid data to write
-            if len(df) == 0:
-                return jsonify({"success": False, "message": "No valid data rows to export"}), 404
-                
-            df.to_excel(writer, index=False, sheet_name="Distance Report")
+            df.to_excel(writer, index=False, sheet_name=report_name)
             
         return send_file(
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,
-            download_name=f"distance_report_{vehicle_number}.xlsx"
+            download_name=f"{report_name}.xlsx"
         )
-
+        
     except Exception as e:
         return jsonify({
             "success": False,
-            "message": f"Server error: {str(e)}"
+            "message": f"An error occurred: {str(e)}"
         }), 500
 
 # Speed Report
