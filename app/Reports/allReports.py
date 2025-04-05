@@ -1101,3 +1101,4 @@ def download_custom_report():
         as_attachment=True,
         download_name=f"{report_name}.xlsx"
     )
+    pass
