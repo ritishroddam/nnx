@@ -124,7 +124,6 @@ document.getElementById("generateReport").onclick = async function () {
   generateBtn.textContent = "Generating...";
 
   try {
-    // Map report types to endpoints
     const endpointMap = {
       'daily-distance': '/reports/download_travel_path_report',
       'odometer-daily-distance': '/reports/download_distance_report',

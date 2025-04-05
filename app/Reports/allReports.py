@@ -205,7 +205,7 @@ def download_travel_path_report():
     #     vehicle_number = data.get("vehicleNumber")
     #     date_range = data.get("dateRange")
     try:
-        data = request.json
+        data = request.get_json()
         report_name = data.get("reportName")
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange")
