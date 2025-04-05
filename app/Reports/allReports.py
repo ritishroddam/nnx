@@ -456,6 +456,40 @@ def download_custom_report():
             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
             
         imei_number = vehicle_data['IMEI']
+        
+        # Calculate date range
+        now = datetime.now()
+        date_str = now.strftime("%d%m%y")
+        
+        if date_range == "last24hours":
+            start_date = (now - timedelta(hours=24)).strftime("%d%m%y")
+        elif date_range == "today":
+            start_date = now.strftime("%d%m%y")
+        elif date_range == "yesterday":
+            start_date = (now - timedelta(days=1)).strftime("%d%m%y")
+        elif date_range == "last7days":
+            start_date = (now - timedelta(days=7)).strftime("%d%m%y")
+        elif date_range == "last30days":
+            start_date = (now - timedelta(days=30)).strftime("%d%m%y")
+        else:
+            start_date = None
+        
+        # Query data
+        query = {"imei": imei_number}
+        if start_date:
+            if date_range == "yesterday":
+                query["date"] = start_date
+            else:
+                query["date"] = {"$gte": start_date}
+        
+        # Get travel path data
+        travel_data = list(db['atlanta'].find(
+            query,
+            {'latitude': 1, 'longitude': 1, 'date': 1, 'time': 1, '_id': 0}
+        ))
+        
+        if not travel_data:
+            return jsonify({"success": False, "message": "No travel data found."}), 404
 
         try:
             validate_fields(fields)
