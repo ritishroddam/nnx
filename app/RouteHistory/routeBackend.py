@@ -59,76 +59,72 @@ def page():
 def show_vehicle_data(LicensePlateNumber):
     try:
         # Fetch vehicle data for the given vehicle number
-        vehicle_data = list(data_collection.find({"LicensePlateNumber": LicensePlateNumber}))
-        if not vehicle_data:
+        vehicleData = data_collection.find({"LicensePlateNumber": LicensePlateNumber},{"IMEI": 1, "_id": 0}).get("IMEI")
+        if not vehicleData:
             flash(f"Vehicle with License Plate Number '{LicensePlateNumber}' does not exist.", "warning")
             return render_template('vehicleMap.html')
 
         processed_data = []
         recent_data = None
-        for item in vehicle_data:
-            imei_number = item.get("IMEI Number", "Unknown")
-            atlanta_data = item.get("Atlanta Data", [])
-            driver_name = item.get("Driver Name", "No Data Provided")
-            license_number = item.get("Vehicle Data", {}).get("License", "No Data Provided")
-            phone_number = item.get("Vehicle Data", {}).get("Phone", "No Data Provided")
+        vehicle_data = list(atlanta_collection.find({"imei": vehicleData['IMEI']}))
 
-            # Process Atlanta data for most recent entry and determine current status
-            is_active = False
-            most_recent_entry = None
-            if atlanta_data:
-                atlanta_data = [
-                    entry for entry in atlanta_data
-                    if entry.get("date") and
-                       entry.get("latitude") is not None and
-                       entry.get("longitude") is not None and
-                       entry.get("speed") is not None
+        # if not vehicle_data:
+        #     flash(f"No data found for vehicle with License Plate Number '{LicensePlateNumber}'.", "warning")
+        #     return render_template('vehicleMap.html')
+
+        is_active = False
+        most_recent_entry = None
+        if vehicle_data:
+            vehicle_data = [
+                entry for entry in vehicle_data
+                if entry.get("date") and
+                   entry.get("latitude") is not None and
+                   entry.get("longitude") is not None and
+                   entry.get("speed") is not None
+            ]
+            if vehicle_data:
+                most_recent_entry = max(
+                    vehicle_data,
+                    key=lambda x: datetime.strptime(x["date"] + x["time"], "%y%m%d%H%M%S")
+                )
+                most_recent_datetime = datetime.strptime(
+                    most_recent_entry["date"] + most_recent_entry["time"], "%y%m%d%H%M%S"
+                )
+                if most_recent_datetime.date() == datetime.utcnow().date():
+                    is_active = True
+
+                # Get data from the last 5 minutes
+                now = datetime.utcnow()
+                five_minutes_ago = now - timedelta(minutes=5)
+                recent_data = [
+                    {
+                        "time": entry["time"],
+                        "speed": entry["speed"]
+                    }
+                    for entry in vehicle_data
+                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") >= five_minutes_ago
                 ]
-                if atlanta_data:
-                    most_recent_entry = max(
-                        atlanta_data,
-                        key=lambda x: datetime.strptime(x["date"] + x["time"], "%y%m%d%H%M%S")
-                    )
-                    most_recent_datetime = datetime.strptime(
-                        most_recent_entry["date"] + most_recent_entry["time"], "%y%m%d%H%M%S"
-                    )
-                    if most_recent_datetime.date() == datetime.utcnow().date():
-                        is_active = True
 
-                    # Get data from the last 5 minutes
-                    now = datetime.utcnow()
-                    five_minutes_ago = now - timedelta(minutes=5)
-                    recent_data = [
-                        {
-                            "time": entry["time"],
-                            "speed": entry["speed"]
-                        }
-                        for entry in atlanta_data
-                        if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") >= five_minutes_ago
-                    ]
-
-            processed_data.append({
-                "License Plate Number": item.get("Vehicle Data", {}).get("License Plate Number", "Unknown"),
-                "Vehicle Model": item.get("Vehicle Data", {}).get("Vehicle Model", "Unknown"),
-                "Vehicle Make": item.get("Vehicle Data", {}).get("Vehicle Make", "Unknown"),
-                "Driver Name": driver_name,
-                "License Number": license_number,
-                "Phone Number": phone_number,
-                "Current Status": "Active" if is_active else "Inactive",
-                "Time": most_recent_entry.get("time", "N/A") if most_recent_entry else "N/A",
-                "Latitude": most_recent_entry.get("latitude", "N/A") if most_recent_entry else "N/A",
-                "Longitude": most_recent_entry.get("longitude", "N/A") if most_recent_entry else "N/A",
-                "Speed": most_recent_entry.get("speed", "N/A") if most_recent_entry else "N/A",
-                "Date": most_recent_entry.get("date", "N/A") if most_recent_entry else "N/A",
-                "Ignition": most_recent_entry.get("ignition", "Unknown") if most_recent_entry else "Unknown",
-                "Door": most_recent_entry.get("door", "Unknown") if most_recent_entry else "Unknown",
-                "SOS": most_recent_entry.get("sos", "Unknown") if most_recent_entry else "Unknown",
-                "Odometer": most_recent_entry.get("odometer", "Unknown") if most_recent_entry else "Unknown",
-                "IMEI Number": imei_number
-            })
+        processed_data.append({
+            "License Plate Number": vehicleData.get("License Plate Number", "Unknown"),
+            "Vehicle Model": vehicleData.get("Vehicle Data", {}).get("Vehicle Model", "Unknown"),
+            "Vehicle Make": vehicleData.get("Vehicle Data", {}).get("Vehicle Make", "Unknown"),
+            "Driver Name": vehicleData.get("Driver Name", "Unknown"),
+            "Current Status": "Active" if is_active else "Inactive",
+            "Time": most_recent_entry.get("time", "N/A") if most_recent_entry else "N/A",
+            "Latitude": most_recent_entry.get("latitude", "N/A") if most_recent_entry else "N/A",
+            "Longitude": most_recent_entry.get("longitude", "N/A") if most_recent_entry else "N/A",
+            "Speed": most_recent_entry.get("speed", "N/A") if most_recent_entry else "N/A",
+            "Date": most_recent_entry.get("date", "N/A") if most_recent_entry else "N/A",
+            "Ignition": most_recent_entry.get("ignition", "Unknown") if most_recent_entry else "Unknown",
+            "Door": most_recent_entry.get("door", "Unknown") if most_recent_entry else "Unknown",
+            "SOS": most_recent_entry.get("sos", "Unknown") if most_recent_entry else "Unknown",
+            "Odometer": most_recent_entry.get("odometer", "Unknown") if most_recent_entry else "Unknown",
+            "IMEI Number": vehicleData.get("IMEI", "Unknown"),
+        })
 
         # Fetch alerts for the vehicle
-        alerts = list(db['sos_logs'].find({"imei": imei_number}))
+        alerts = list(db['sos_logs'].find({"imei": vehicleData['IMEI']}))
 
         return render_template('vehicle.html', vehicle_data=processed_data, recent_data=recent_data, alerts=alerts)
     except Exception as e:
