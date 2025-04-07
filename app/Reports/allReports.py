@@ -1806,14 +1806,29 @@ def download_panic_report():
     date_filter = get_date_range_filter(date_range)
     if date_filter:
         query.update(date_filter)
-    
-    panic_data = list(db['sos_logs'].find(
-        query,
-        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, 'sos_type': 1, '_id': 0}
+
+    # First try to get SOS events from atlanta collection
+    atlanta_panic_data = list(db['atlanta'].find(
+        {**query, "sos": {"$exists": True}},
+        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, 'sos': 1, '_id': 0}
     ).sort([("date", 1), ("time", 1)]))
     
-    if not panic_data:
-        return jsonify({"success": False, "message": "No panic data found."}), 404
+    # If no data in atlanta, try sos_logs collection
+    if not atlanta_panic_data:
+        sos_logs_data = list(db['sos_logs'].find(
+            query,
+            {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, 'sos_type': 1, '_id': 0}
+        ).sort([("date", 1), ("time", 1)]))
+        
+        if not sos_logs_data:
+            return jsonify({
+                "success": False,
+                "message": "No panic data found in either atlanta or sos_logs collections."
+            }), 404
+        
+        panic_data = sos_logs_data
+    else:
+        panic_data = atlanta_panic_data
     
     # Process data for Excel
     output = BytesIO()
@@ -1826,6 +1841,10 @@ def download_panic_report():
         if 'time' in df.columns:
             df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
         
+        # Rename sos_type column if it exists (from sos_logs)
+        if 'sos_type' in df.columns:
+            df.rename(columns={'sos_type': 'sos'}, inplace=True)
+        
         df.to_excel(writer, index=False, sheet_name="Panic Report")
     
     return send_file(
@@ -1833,7 +1852,7 @@ def download_panic_report():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
         download_name=f"panic_report_{vehicle_number}.xlsx"
-    )                    
+    )
 
 @reports_bp.route('/download_custom_report', methods=['POST'])
 @jwt_required()
