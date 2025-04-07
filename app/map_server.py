@@ -177,6 +177,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 status = parts[0]
                 status_prefix = status[:-15] if len(status) > 15 else ''
 
+                date_time_str = f"{parts[10]} {parts[1]}"
+                date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
+
                 json_data = {
                     'status': self.status_prefix,
                     'imei': self.clean_imei(parts[0]),
@@ -216,6 +219,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'mobNetworkCode': parts[23],
                     'localAreaCode': parts[24],
                     'cellid':  self.clean_cellid(parts[25]),  
+                    'date_time': date_time,
                     'timestamp': datetime.now()
                 }
                 return json_data

@@ -58,10 +58,8 @@ def update_distinct_atlanta():
         distinct_documents = {}
         for doc in all_documents:
             imei = clean_imei(doc['imei'])
-            date_time_str = f"{doc['date']} {doc['time']}"
-            date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
             doc.pop('_id', None)
-            distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
+            distinct_documents[imei] = {**doc, 'imei': imei}
 
         distinct_atlanta_collection.delete_many({})
 
