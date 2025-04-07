@@ -59,7 +59,7 @@ def page():
 def show_vehicle_data(LicensePlateNumber):
     try:
         # Fetch vehicle data for the given vehicle number
-        vehicleData = list(data_collection.find({"LicensePlateNumber": LicensePlateNumber},{"IMEI": 1, "_id": 0}).get("IMEI"))
+        vehicleData = data_collection.find_one({"LicensePlateNumber": LicensePlateNumber},{"IMEI": 1, "_id": 0}).get("IMEI")
         if not vehicleData:
             flash(f"Vehicle with License Plate Number '{LicensePlateNumber}' does not exist.", "warning")
             return render_template('vehicleMap.html')
