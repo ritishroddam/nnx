@@ -1812,6 +1812,9 @@ def clean_panic_data(df):
 @jwt_required()
 def download_panic_report():
     try:
+        # Debug: Print incoming request data
+        print("Incoming request data:", request.data)
+        
         data = request.get_json()
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
@@ -1819,25 +1822,28 @@ def download_panic_report():
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange")
         
-        # Get vehicle IMEI
+        print(f"Processing panic report for: {vehicle_number}, date range: {date_range}")
+
+        # Get vehicle IMEI - ensure this matches sos_logs.inet format
         vehicle_data = db['vehicle_inventory'].find_one(
             {'LicensePlateNumber': vehicle_number},
             {'_id': 0, 'IMEI': 1}
         )
         
         if not vehicle_data or 'IMEI' not in vehicle_data:
+            print(f"Vehicle not found: {vehicle_number}")
             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
         
-        imei_number = vehicle_data['IMEI']
+        imei_number = str(vehicle_data['IMEI'])  # Convert to string to match sos_logs format
+        print(f"Using IMEI: {imei_number} (type: {type(imei_number)})")
 
-        query = {"inet": str(imei_number)}  # Using string conversion as shown in your data
+        # Build query - EXACTLY as shown in your Compass screenshot
+        query = {"inet": imei_number}
         
-        # Add date range filter
-        if date_range and date_range != "all":
-            date_filter = get_date_range_filter(date_range)
-            if date_filter:
-                query.update(date_filter)
-
+        # Debug: Print the raw query
+        print("Database query:", query)
+        
+        # Get panic data from CORRECT collection
         panic_data = list(db['sos_logs'].find(
             query,
             {
@@ -1845,18 +1851,24 @@ def download_panic_report():
                 'time': 1, 
                 'latitude': 1, 
                 'longitude': 1,
-                '_id': 0
+                '_id': 0,
+                'inet': 1  # Include for verification
             }
         ).sort([("date", 1), ("time", 1)]))
         
+        print(f"Found {len(panic_data)} matching records")
+        
         if not panic_data:
+            # Get sample record for debugging
+            sample_record = db['sos_logs'].find_one()
             return jsonify({
                 "success": False,
-                "message": "No panic data found.",
+                "message": "No panic data found - but collection exists",
                 "debug_info": {
-                    "imei_used": imei_number,
-                    "query_used": query,
-                    "collection_checked": "sos_logs"
+                    "used_imei": imei_number,
+                    "sample_record_imei": sample_record.get('inet') if sample_record else None,
+                    "total_records_in_collection": db['sos_logs'].count_documents({}),
+                    "query_used": query
                 }
             }), 404
 
@@ -1886,9 +1898,11 @@ def download_panic_report():
         )
 
     except Exception as e:
+        print(f"Error generating report: {str(e)}")
         return jsonify({
             "success": False,
-            "message": f"Server error: {str(e)}"
+            "message": f"Server error: {str(e)}",
+            "error_type": type(e).__name__
         }), 500
 
 def clean_panic_data(df):
