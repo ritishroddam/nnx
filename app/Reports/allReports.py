@@ -1782,6 +1782,31 @@ def download_daily_report():
         download_name=f"daily_report_{vehicle_number}.xlsx"
     )
 
+def clean_panic_data(df):
+    """Clean and format panic report data (without location field)"""
+    # Format date/time
+    if 'date' in df.columns:
+        df['date'] = df['date'].apply(
+            lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
+        )
+    
+    if 'time' in df.columns:
+        df['time'] = df['time'].apply(
+            lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
+        )
+    
+    # Handle empty coordinates
+    if 'latitude' in df.columns:
+        df['latitude'] = df['latitude'].replace('', 'N/A')
+    if 'longitude' in df.columns:
+        df['longitude'] = df['longitude'].replace('', 'N/A')
+    
+    # Ensure location field is not in the DataFrame
+    if 'location' in df.columns:
+        df = df.drop(columns=['location'])
+    
+    return df
+
 # Panic Report
 @reports_bp.route('/download_panic_report', methods=['POST'])
 @jwt_required()
@@ -1812,59 +1837,42 @@ def download_panic_report():
         date_filter = get_date_range_filter(date_range)
         base_query = {"imei": imei_number}
         
-        # Try sos_logs first (since that's where your data exists)
+        # Query sos_logs collection
         query = {**base_query}
         if date_filter:
             query.update(date_filter)
         
+        # Fetch data but exclude location from projection
         panic_data = list(db['sos_logs'].find(
             query,
             {
                 'date': 1, 
                 'time': 1, 
                 'latitude': 1, 
-                'longitude': 1, 
-                'location': 1,
+                'longitude': 1,
+                # 'location': 1,  # Commented out as requested
                 'timestamp': 1,
                 '_id': 0
             }
         ).sort([("date", 1), ("time", 1)]))
         
-        # If no data in sos_logs, try atlanta as fallback
         if not panic_data:
-            atlanta_query = {**base_query, "sos": {"$exists": True}}
-            if date_filter:
-                atlanta_query.update(date_filter)
-                
-            panic_data = list(db['atlanta'].find(
-                atlanta_query,
-                {
-                    'date': 1,
-                    'time': 1,
-                    'latitude': 1,
-                    'longitude': 1,
-                    'sos': 1,
-                    '_id': 0
+            return jsonify({
+                "success": False,
+                "message": "No panic data found.",
+                "debug": {
+                    "imei": imei_number,
+                    "date_range": date_range,
+                    "query_used": query
                 }
-            ).sort([("date", 1), ("time", 1)]))
-            
-            if not panic_data:
-                return jsonify({
-                    "success": False,
-                    "message": "No panic data found in either collection.",
-                    "debug": {
-                        "imei": imei_number,
-                        "date_range": date_range,
-                        "query_used": query
-                    }
-                }), 404
+            }), 404
 
         # Process data for Excel
         output = BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
             df = pd.DataFrame(panic_data)
             
-            # Clean and format data
+            # Clean and format data (excluding location field)
             df = clean_panic_data(df)
             
             if df.empty:
