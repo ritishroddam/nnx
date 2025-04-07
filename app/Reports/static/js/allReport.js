@@ -416,13 +416,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   
     const btn = document.getElementById("generatePanicReportBtn");
-    const originalText = btn.textContent;
     btn.disabled = true;
+    const originalText = btn.textContent;
     btn.textContent = "Generating...";
   
     try {
-      console.log("Requesting panic report for:", vehicleNumber);
+      console.log("Requesting report for:", vehicleNumber);
       
+      // First test if endpoint exists
+      const testResponse = await fetch('/reports/test_panic_endpoint');
+      if (!testResponse.ok) {
+        throw new Error("Endpoint not found - check server routes");
+      }
+  
+      // Now make the actual request
       const response = await fetch('/reports/download_panic_report', {
         method: 'POST',
         headers: {
@@ -438,23 +445,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const result = await response.json();
       
       if (!response.ok) {
-        console.error("Error response:", result);
+        console.error("Full error response:", result);
         
+        let errorMsg = result.message;
         if (result.debug_info) {
-          console.error("Debug info:", result.debug_info);
-          let message = result.message;
-          
-          if (result.debug_info.sample_record_imei) {
-            message += `\n\nSample record IMEI: ${result.debug_info.sample_record_imei}`;
-          }
-          if (result.debug_info.vehicle_imei) {
-            message += `\nVehicle IMEI: ${result.debug_info.vehicle_imei}`;
-          }
-          
-          alert(message);
-        } else {
-          alert(result.message || "Failed to generate report");
+          errorMsg += `\n\nDebug Info:\nYour IMEI: ${result.debug_info.your_imei}\n`;
+          errorMsg += `Sample IMEI in DB: ${result.debug_info.sample_imei}\n`;
+          errorMsg += `Matching records: ${result.debug_info.total_records}`;
         }
+        
+        alert(errorMsg);
         return;
       }
   
@@ -470,8 +470,8 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.removeChild(a);
       
     } catch (error) {
-      console.error("Request failed:", error);
-      alert(`Request failed: ${error.message}`);
+      console.error("Error:", error);
+      alert(`Failed: ${error.message}\nCheck console for details`);
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
