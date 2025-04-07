@@ -35,7 +35,18 @@ def clean_imei(imei):
 def update_distinct_atlanta():
     try:
         print("Successfully running distinct Vehicle")
-        all_documents = list(atlanta_collection.find())
+        all_documents = list(atlanta_collection.aggregate([
+                {"$match": {"gps": "A"}},
+                {"$sort": {"timestamp": -1}},
+                {
+                    "$group": {
+                        "_id": "$imei",
+                        "latest_doc": {"$first": "$$ROOT"}
+                    }
+                },
+                {"$replaceRoot": {"newRoot": "$latest_doc"}}
+            ]))
+        
         print(f"Fetched {len(all_documents)} documents from the atlanta collection")
 
         # Fetch existing data from distinctAtlanta collection
@@ -50,10 +61,7 @@ def update_distinct_atlanta():
             date_time_str = f"{doc['date']} {doc['time']}"
             date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
             doc.pop('_id', None)
-
-            if imei not in distinct_documents or date_time > distinct_documents[imei]['date_time']:
-                if doc['gps'] != 'V':
-                    distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
+            distinct_documents[imei] = {**doc, 'imei': imei, 'date_time': date_time}
 
         distinct_atlanta_collection.delete_many({})
 
@@ -93,6 +101,7 @@ def emit_data(json_data):
 
         inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
         json_data['date_time'] = str(json_data['date_time'])
+        json_data['timestamp'] = str(json_data['timestamp'])
         if inventory_data:
             json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
         else:
