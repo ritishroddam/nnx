@@ -58,34 +58,15 @@ Vehicle Data
         </button>
       </div>
     </div>
-
-    <div class="info-box">
-      <h3>Driver: Info</h3>
-      <div class="info-row">
-        <span>Name:</span>
-        <strong>{{ vehicle_data[0]['Driver Name'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>License:</span>
-        <strong>{{ vehicle_data[0]['License Number'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Phone:</span>
-        <strong>{{ vehicle_data[0]['Phone Number'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Status:</span>
-        <strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-    </div>
-
-
   </div>
 
   <div class="right-column">
-
     <div class="info-box">
       <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
+      <div class="info-row">
+        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
       <div class="info-row">
         <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
           Available'}}</strong>
@@ -138,10 +119,10 @@ Vehicle Data
           {% if alerts %}
           {% for alert in alerts %}
           <tr>
-            <td>{{ alert.timestamp }}</td>
-            <td>{{ alert.location }}</td>
-            <td>{{ alert.severity }}</td>
-            <td>{{ alert.status }}</td>
+            <td>{{ alert["timestamp"] }}</td>
+            <td>{{ alert["location"] }}</td>
+            <td>{{ alert["severity"] }}</td>
+            <td>{{ alert["status"] }}</td>
           </tr>
           {% endfor %}
           {% else %}

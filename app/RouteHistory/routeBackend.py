@@ -107,9 +107,10 @@ def show_vehicle_data(LicensePlateNumber):
 
         processed_data.append({
             "License Plate Number": vehicleData.get("License Plate Number", "Unknown"),
-            "Vehicle Model": vehicleData.get("Vehicle Data", {}).get("Vehicle Model", "Unknown"),
-            "Vehicle Make": vehicleData.get("Vehicle Data", {}).get("Vehicle Make", "Unknown"),
-            "Driver Name": vehicleData.get("Driver Name", "Unknown"),
+            "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
+            "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
+            "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
+            "Driver Name": vehicleData.get("DriverName", "Unknown"),
             "Current Status": "Active" if is_active else "Inactive",
             "Time": most_recent_entry.get("time", "N/A") if most_recent_entry else "N/A",
             "Latitude": most_recent_entry.get("latitude", "N/A") if most_recent_entry else "N/A",
