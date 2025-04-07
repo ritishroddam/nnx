@@ -66,13 +66,16 @@ let animationInterval = null;
 let speedMultiplier = 1;
 
 async function initMap(darkMode = true) {
+  const { Map } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
   if (!google || !google.maps || !google.maps.ControlPosition) {
     console.error("Google Maps API is not loaded properly.");
     return;
   }
 
   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
-  map = new google.maps.Map(document.getElementById("map"), {
+  map = new Map(document.getElementById("map"), {
     zoom: 10,
     center: { lat: 0, lng: 0 },
     mapId: mapId,
