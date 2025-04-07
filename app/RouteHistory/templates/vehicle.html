@@ -31,7 +31,8 @@ Vehicle Data
       <div id="map"></div>
 
       <form id="vehicle-form">
-        <input type="hidden" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}">
+        <label for="imei">IMEI:</label>
+        <input type="text" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}" required>
         <label for="start_date">Start Date:</label>
         <input type="date" id="start_date" name="start_date" required>
         <label for="end_date">End Date:</label>
