@@ -1819,9 +1819,6 @@ def download_panic_report():
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange")
         
-        if not vehicle_number or not date_range:
-            return jsonify({"success": False, "message": "Missing required parameters"}), 400
-
         # Get vehicle IMEI
         vehicle_data = db['vehicle_inventory'].find_one(
             {'LicensePlateNumber': vehicle_number},
@@ -1833,13 +1830,14 @@ def download_panic_report():
         
         imei_number = vehicle_data['IMEI']
 
-        # Build query with date range filter
-        query = {"imei": imei_number}
-        date_filter = get_date_range_filter(date_range)
-        if date_filter:
-            query.update(date_filter)
+        query = {"inet": str(imei_number)}  # Using string conversion as shown in your data
         
-        # Get panic data from sos_logs collection
+        # Add date range filter
+        if date_range and date_range != "all":
+            date_filter = get_date_range_filter(date_range)
+            if date_filter:
+                query.update(date_filter)
+
         panic_data = list(db['sos_logs'].find(
             query,
             {
@@ -1852,7 +1850,15 @@ def download_panic_report():
         ).sort([("date", 1), ("time", 1)]))
         
         if not panic_data:
-            return jsonify({"success": False, "message": "No panic data found for the selected criteria."}), 404
+            return jsonify({
+                "success": False,
+                "message": "No panic data found.",
+                "debug_info": {
+                    "imei_used": imei_number,
+                    "query_used": query,
+                    "collection_checked": "sos_logs"
+                }
+            }), 404
 
         # Process data for Excel
         output = BytesIO()
@@ -1872,7 +1878,6 @@ def download_panic_report():
             
             df.to_excel(writer, index=False, sheet_name="Panic Report")
         
-        output.seek(0)
         return send_file(
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1881,10 +1886,9 @@ def download_panic_report():
         )
 
     except Exception as e:
-        print(f"Error generating panic report: {str(e)}")
         return jsonify({
             "success": False,
-            "message": f"An error occurred while generating the report: {str(e)}"
+            "message": f"Server error: {str(e)}"
         }), 500
 
 def clean_panic_data(df):
