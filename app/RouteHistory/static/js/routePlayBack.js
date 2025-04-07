@@ -66,6 +66,11 @@ let animationInterval = null;
 let speedMultiplier = 1;
 
 async function initMap(darkMode = true) {
+  if (!google || !google.maps || !google.maps.ControlPosition) {
+    console.error("Google Maps API is not loaded properly.");
+    return;
+  }
+
   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
   map = new google.maps.Map(document.getElementById("map"), {
     zoom: 10,
