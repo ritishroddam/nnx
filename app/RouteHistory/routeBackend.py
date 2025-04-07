@@ -16,6 +16,15 @@ distinct_atlanta_collection = db["distinctAtlanta"]
 atlanta_collection = db["atlanta"]
 company_collection = db["customers_list"]
 
+def convertDate(dateStr, timeStr):
+    try:
+        combined_datetime = datetime.strptime(dateStr + timeStr, "%d%m%y%H%M%S")
+        iso_format = combined_datetime.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        return iso_format
+    except ValueError as e:
+        print(f"Error converting to ISO format: {e}")
+        return None
+
 def convert_to_decimal(degrees_minutes, direction):
     """Convert GPS coordinates from degrees-minutes to decimal format."""
     degrees = int(float(degrees_minutes) / 100)

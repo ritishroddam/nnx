@@ -2,6 +2,7 @@ import threading
 import socketserver
 import json
 from datetime import datetime, timedelta
+from pytz import timezone
 import os
 from pymongo import MongoClient
 from flask import Flask, render_template, jsonify, request
@@ -177,8 +178,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 status = parts[0]
                 status_prefix = status[:-15] if len(status) > 15 else ''
 
+                ist = timezone('Asia/Kolkata')
+
                 date_time_str = f"{parts[10]} {parts[2]}"
                 date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
+                date_time_ist = date_time.astimezone(ist)
 
                 json_data = {
                     'status': self.status_prefix,
@@ -220,7 +224,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'localAreaCode': parts[24],
                     'cellid':  self.clean_cellid(parts[25]),  
                     'date_time': date_time,
-                    'timestamp': datetime.now()
+                    'timestamp': datetime.now(ist)
                 }
                 return json_data
             else:
