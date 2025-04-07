@@ -410,57 +410,71 @@ document.addEventListener("DOMContentLoaded", function () {
     const vehicleNumber = document.getElementById("vehicleNumber").value;
     const dateRange = document.getElementById("dateRange").value;
     
-    // Show loading state
+    if (!vehicleNumber) {
+      alert("Please select a vehicle");
+      return;
+    }
+  
     const btn = document.getElementById("generatePanicReportBtn");
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = "Generating...";
   
     try {
-        console.log("Sending request with:", { vehicleNumber, dateRange });
-        
-        const response = await fetch('/reports/download_panic_report', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': getCookie('csrf_access_token')
-            },
-            body: JSON.stringify({
-                vehicleNumber: vehicleNumber,
-                dateRange: dateRange
-            })
-        });
+      console.log("Requesting panic report for:", vehicleNumber);
+      
+      const response = await fetch('/reports/download_panic_report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCookie('csrf_access_token')
+        },
+        body: JSON.stringify({
+          vehicleNumber: vehicleNumber,
+          dateRange: dateRange || 'all'
+        })
+      });
   
-        const data = await response.json();
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error("Error response:", result);
         
-        if (!response.ok) {
-            console.error("Error response:", data);
-            if (data.debug_info) {
-                console.error("Debug info:", data.debug_info);
-                alert(`Error: ${data.message}\nCheck console for details.`);
-            } else {
-                alert(`Error: ${data.message || "Failed to generate report"}`);
-            }
-            return;
+        if (result.debug_info) {
+          console.error("Debug info:", result.debug_info);
+          let message = result.message;
+          
+          if (result.debug_info.sample_record_imei) {
+            message += `\n\nSample record IMEI: ${result.debug_info.sample_record_imei}`;
+          }
+          if (result.debug_info.vehicle_imei) {
+            message += `\nVehicle IMEI: ${result.debug_info.vehicle_imei}`;
+          }
+          
+          alert(message);
+        } else {
+          alert(result.message || "Failed to generate report");
         }
+        return;
+      }
   
-        // Handle file download
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `panic_report_${vehicleNumber}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
+      // Handle file download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `panic_report_${vehicleNumber}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
     } catch (error) {
-        console.error("Error generating report:", error);
-        alert(`Error: ${error.message}\nCheck console for details.`);
+      console.error("Request failed:", error);
+      alert(`Request failed: ${error.message}`);
     } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
   }
 
