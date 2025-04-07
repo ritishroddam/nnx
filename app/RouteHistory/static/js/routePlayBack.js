@@ -294,26 +294,47 @@ function plotPathOnMap(pathCoordinates) {
     pathCoordinates.forEach((coord) => bounds.extend(coord));
     map.fitBounds(bounds);
 
+    // Create DOM elements for start and end markers
+    const startContent = document.createElement("div");
+    startContent.style.backgroundColor = "green";
+    startContent.style.color = "white";
+    startContent.style.padding = "5px";
+    startContent.style.borderRadius = "5px";
+    startContent.textContent = "Start";
+
+    const endContent = document.createElement("div");
+    endContent.style.backgroundColor = "red";
+    endContent.style.color = "white";
+    endContent.style.padding = "5px";
+    endContent.style.borderRadius = "5px";
+    endContent.textContent = "End";
+
     // Markers for start and end points using AdvancedMarkerElement
     startMarker = new google.maps.marker.AdvancedMarkerElement({
       position: pathCoordinates[0],
       map: map,
       title: "Start",
-      content: `<div style="background-color: green; color: white; padding: 5px; border-radius: 5px;">Start</div>`,
+      content: startContent, // Pass the DOM element
     });
 
     endMarker = new google.maps.marker.AdvancedMarkerElement({
       position: pathCoordinates[pathCoordinates.length - 1],
       map: map,
       title: "End",
-      content: `<div style="background-color: red; color: white; padding: 5px; border-radius: 5px;">End</div>`,
+      content: endContent, // Pass the DOM element
     });
+
+    const carContent = document.createElement("img");
+    carContent.src = "/static/images/car_green.png";
+    carContent.style.width = "50px";
+    carContent.style.height = "50px";
+    carContent.alt = "Car";
 
     carMarker = new google.maps.marker.AdvancedMarkerElement({
       position: pathCoordinates[0],
       map: map,
       title: "Car",
-      content: `<img src="/static/images/car_green.png" style="width: 50px; height: 50px;" alt="Car">`,
+      content: carContent, // Pass the DOM element
     });
 
     document.getElementById("controls-container").style.display = "block";
