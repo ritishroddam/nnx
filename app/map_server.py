@@ -184,6 +184,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
                 date_time_ist = date_time.astimezone(ist)
 
+                current_time = datetime.now(ist)
+
                 json_data = {
                     'status': self.status_prefix,
                     'imei': self.clean_imei(parts[0]),
@@ -223,8 +225,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'mobNetworkCode': parts[23],
                     'localAreaCode': parts[24],
                     'cellid':  self.clean_cellid(parts[25]),  
-                    'date_time': date_time,
-                    'timestamp': datetime.now(ist)
+                    'date_time': date_time_ist,
+                    'timestamp': current_time
                 }
                 return json_data
             else:
