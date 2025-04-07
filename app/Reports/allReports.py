@@ -1812,93 +1812,60 @@ def clean_panic_data(df):
 @jwt_required()
 def download_panic_report():
     try:
-        print("Endpoint hit!")  # Debugging line
+        # Debug: Print headers to verify request is coming through
+        print("Headers:", request.headers)
+        print("Raw data:", request.data)
         
-        if not request.is_json:
-            return jsonify({"success": False, "message": "Missing JSON in request"}), 400
-            
         data = request.get_json()
-        print("Received data:", data)  # Debugging
-        
+        if not data:
+            return jsonify({"success": False, "message": "No JSON data provided"}), 400
+            
         vehicle_number = data.get("vehicleNumber")
-        date_range = data.get("dateRange")
-        
         if not vehicle_number:
             return jsonify({"success": False, "message": "Vehicle number is required"}), 400
 
-        # Get vehicle IMEI - convert to string to match ses_logs format
+        # Get vehicle IMEI - handle both string and number formats
         vehicle = db.vehicle_inventory.find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "_id": 0}
         )
         
-        if not vehicle:
-            return jsonify({"success": False, "message": "Vehicle not found"}), 404
+        if not vehicle or not vehicle.get("IMEI"):
+            return jsonify({"success": False, "message": "Vehicle IMEI not found"}), 404
             
-        imei = str(vehicle.get('IMEI', ''))
-        if not imei:
-            return jsonify({"success": False, "message": "Vehicle IMEI missing"}), 400
-
-        print(f"Searching for IMEI: {imei}")  # Debugging
+        imei = str(vehicle["IMEI"]).strip()  # Convert to string and clean
         
-        # Build query for ses_logs collection
-        query = {"inet": imei}
+        # Debug: Print the IMEI being used
+        print(f"Searching for IMEI: {imei} (type: {type(imei)})")
         
-        # Apply date filter if specified
-        if date_range and date_range.lower() != "all":
-            date_filter = get_date_range_filter(date_range)
-            if date_filter:
-                query.update(date_filter)
+        # Query the ses_logs collection (case-sensitive)
+        records = list(db.ses_logs.find(
+            {"inet": imei},
+            {"date": 1, "time": 1, "latitude": 1, "longitude": 1, "_id": 0}
+        ))
         
-        print("Final query:", query)  # Debugging
-        
-        # Get panic data from ses_logs collection
-        panic_data = list(db.ses_logs.find(
-            query,
-            {
-                "date": 1,
-                "time": 1,
-                "latitude": 1,
-                "longitude": 1,
-                "_id": 0
-            }
-        ).sort([("date", 1), ("time", 1)]))
-        
-        print(f"Found {len(panic_data)} records")  # Debugging
-        
-        if not panic_data:
-            # Verify collection exists and has data
-            collection_stats = db.command("collstats", "ses_logs")
-            sample_record = db.ses_logs.find_one()
-            
+        if not records:
+            # Get sample record to show what IMEI format exists
+            sample = db.ses_logs.find_one({}, {"inet": 1})
             return jsonify({
                 "success": False,
-                "message": "No matching panic data found",
+                "message": "No matching records found",
                 "debug_info": {
-                    "used_imei": imei,
-                    "collection_exists": True,
-                    "total_records": collection_stats.get('count', 0),
-                    "sample_record_imei": sample_record.get('inet') if sample_record else None,
-                    "vehicle_imei": imei
+                    "your_imei": imei,
+                    "sample_imei": sample.get("inet") if sample else None,
+                    "total_records": db.ses_logs.count_documents({"inet": imei})
                 }
             }), 404
 
         # Generate Excel file
         output = BytesIO()
+        df = pd.DataFrame(records)
+        
+        # Format date/time
+        df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df = pd.DataFrame(panic_data)
-            
-            # Format date/time
-            if 'date' in df.columns:
-                df['date'] = df['date'].apply(
-                    lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
-                )
-            
-            if 'time' in df.columns:
-                df['time'] = df['time'].apply(
-                    lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
-                )
-            
             df.to_excel(writer, index=False, sheet_name="Panic Report")
         
         output.seek(0)
@@ -1910,7 +1877,7 @@ def download_panic_report():
         )
 
     except Exception as e:
-        print(f"Error in panic report: {str(e)}")
+        print(f"Error generating report: {str(e)}")
         return jsonify({
             "success": False,
             "message": f"Server error: {str(e)}",
