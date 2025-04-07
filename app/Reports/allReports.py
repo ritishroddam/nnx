@@ -1812,69 +1812,80 @@ def clean_panic_data(df):
 @jwt_required()
 def download_panic_report():
     try:
-        # Debug: Print incoming request data
-        print("Incoming request data:", request.data)
+        print("Endpoint hit!")  # Debugging line
         
-        data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
+        if not request.is_json:
+            return jsonify({"success": False, "message": "Missing JSON in request"}), 400
             
+        data = request.get_json()
+        print("Received data:", data)  # Debugging
+        
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange")
         
-        print(f"Processing panic report for: {vehicle_number}, date range: {date_range}")
+        if not vehicle_number:
+            return jsonify({"success": False, "message": "Vehicle number is required"}), 400
 
-        # Get vehicle IMEI - ensure this matches sos_logs.inet format
-        vehicle_data = db['vehicle_inventory'].find_one(
-            {'LicensePlateNumber': vehicle_number},
-            {'_id': 0, 'IMEI': 1}
+        # Get vehicle IMEI - convert to string to match ses_logs format
+        vehicle = db.vehicle_inventory.find_one(
+            {"LicensePlateNumber": vehicle_number},
+            {"IMEI": 1, "_id": 0}
         )
         
-        if not vehicle_data or 'IMEI' not in vehicle_data:
-            print(f"Vehicle not found: {vehicle_number}")
-            return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
-        
-        imei_number = str(vehicle_data['IMEI'])  # Convert to string to match sos_logs format
-        print(f"Using IMEI: {imei_number} (type: {type(imei_number)})")
+        if not vehicle:
+            return jsonify({"success": False, "message": "Vehicle not found"}), 404
+            
+        imei = str(vehicle.get('IMEI', ''))
+        if not imei:
+            return jsonify({"success": False, "message": "Vehicle IMEI missing"}), 400
 
-        # Build query - EXACTLY as shown in your Compass screenshot
-        query = {"inet": imei_number}
+        print(f"Searching for IMEI: {imei}")  # Debugging
         
-        # Debug: Print the raw query
-        print("Database query:", query)
+        # Build query for ses_logs collection
+        query = {"inet": imei}
         
-        # Get panic data from CORRECT collection
-        panic_data = list(db['sos_logs'].find(
+        # Apply date filter if specified
+        if date_range and date_range.lower() != "all":
+            date_filter = get_date_range_filter(date_range)
+            if date_filter:
+                query.update(date_filter)
+        
+        print("Final query:", query)  # Debugging
+        
+        # Get panic data from ses_logs collection
+        panic_data = list(db.ses_logs.find(
             query,
             {
-                'date': 1, 
-                'time': 1, 
-                'latitude': 1, 
-                'longitude': 1,
-                '_id': 0,
-                'inet': 1  # Include for verification
+                "date": 1,
+                "time": 1,
+                "latitude": 1,
+                "longitude": 1,
+                "_id": 0
             }
         ).sort([("date", 1), ("time", 1)]))
         
-        print(f"Found {len(panic_data)} matching records")
+        print(f"Found {len(panic_data)} records")  # Debugging
         
         if not panic_data:
-            # Get sample record for debugging
-            sample_record = db['sos_logs'].find_one()
+            # Verify collection exists and has data
+            collection_stats = db.command("collstats", "ses_logs")
+            sample_record = db.ses_logs.find_one()
+            
             return jsonify({
                 "success": False,
-                "message": "No panic data found - but collection exists",
+                "message": "No matching panic data found",
                 "debug_info": {
-                    "used_imei": imei_number,
+                    "used_imei": imei,
+                    "collection_exists": True,
+                    "total_records": collection_stats.get('count', 0),
                     "sample_record_imei": sample_record.get('inet') if sample_record else None,
-                    "total_records_in_collection": db['sos_logs'].count_documents({}),
-                    "query_used": query
+                    "vehicle_imei": imei
                 }
             }), 404
 
-        # Process data for Excel
+        # Generate Excel file
         output = BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df = pd.DataFrame(panic_data)
             
             # Format date/time
@@ -1890,6 +1901,7 @@ def download_panic_report():
             
             df.to_excel(writer, index=False, sheet_name="Panic Report")
         
+        output.seek(0)
         return send_file(
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1898,7 +1910,7 @@ def download_panic_report():
         )
 
     except Exception as e:
-        print(f"Error generating report: {str(e)}")
+        print(f"Error in panic report: {str(e)}")
         return jsonify({
             "success": False,
             "message": f"Server error: {str(e)}",
