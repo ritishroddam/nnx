@@ -224,7 +224,7 @@ def get_vehicle_path():
         records_list = list(records)
 
         if not records_list:
-            return jsonify({"error": "No path data found for the specified IMEI and date range"}), 404
+            return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} {iso_end_date} "}), 404
 
         # Step 3: Convert latitude and longitude to decimal format and prepare path data
         path_data = []
