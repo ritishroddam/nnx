@@ -196,7 +196,7 @@ function plotPathOnMap(pathCoordinates) {
       position: pathCoordinates[0],
       map: map,
       icon: {
-        url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+        url: "/images/green-map-pin.png",
         scaledSize: new google.maps.Size(30, 30),
       },
       title: "Start",
@@ -206,7 +206,7 @@ function plotPathOnMap(pathCoordinates) {
       position: pathCoordinates[pathCoordinates.length - 1],
       map: map,
       icon: {
-        url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+        url: "/static/images/red-map-pin.png",
         scaledSize: new google.maps.Size(30, 30),
       },
       title: "End",
@@ -216,7 +216,7 @@ function plotPathOnMap(pathCoordinates) {
       position: pathCoordinates[0],
       map: map,
       icon: {
-        url: "http://64.227.135.38/icon1.png",
+        url: "/static/images/car_green.png",
         scaledSize: new google.maps.Size(50, 50), // Adjust to fit your map scale
         anchor: new google.maps.Point(25, 25), // Centered anchor for better placement
       },
@@ -348,7 +348,7 @@ function moveCar() {
         const lng = start.lng + lngDiff * stepIndex;
 
         carMarker.setIcon({
-          url: "http://64.227.135.38/icon1.png",
+          url: "/static/images/car_green.png",
           scaledSize: new google.maps.Size(50, 50),
           anchor: new google.maps.Point(20, 20),
           rotation: bearing,
