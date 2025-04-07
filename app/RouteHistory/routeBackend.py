@@ -230,6 +230,10 @@ def get_vehicle_path():
         # Step 3: Convert latitude and longitude to decimal format and prepare path data
         path_data = []
         for record in records_list:
+            
+            if not record['latitude'] or not record['longitude']:
+                continue
+
             latitude = convert_to_decimal(record["latitude"], record["dir1"])
             longitude = convert_to_decimal(record["longitude"], record["dir2"])
             path_data.append({
