@@ -359,8 +359,15 @@ function moveCar() {
         const lat = start.lat + latDiff * stepIndex;
         const lng = start.lng + lngDiff * stepIndex;
 
+        const carContent = document.createElement("img");
+        carContent.src = "/static/images/car_green.png";
+        carContent.style.width = "50px";
+        carContent.style.height = "50px";
+        carContent.style.transform = `rotate(${bearing}deg)`;
+        carContent.alt = "Car";
+
+        carMarker.content = carContent; // Set the DOM element as content
         carMarker.position = { lat, lng };
-        carMarker.content = `<img src="/static/images/car_green.png" style="width: 50px; height: 50px; transform: rotate(${bearing}deg);" alt="Car">`;
 
         map.panTo({ lat, lng });
 
