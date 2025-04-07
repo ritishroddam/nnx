@@ -2,8 +2,7 @@ from flask import Flask, jsonify, request, render_template, redirect, Blueprint,
 from pymongo import MongoClient
 from flask_cors import CORS
 from datetime import datetime, timedelta
-import sys
-import os
+import pytz 
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
@@ -16,14 +15,16 @@ distinct_atlanta_collection = db["distinctAtlanta"]
 atlanta_collection = db["atlanta"]
 company_collection = db["customers_list"]
 
-def convertDate(dateStr, timeStr):
-    try:
-        combined_datetime = datetime.strptime(dateStr + timeStr, "%d%m%y%H%M%S")
-        iso_format = combined_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
-        return iso_format
-    except ValueError as e:
-        print(f"Error converting to ISO format: {e}")
-        return None
+def convertDate(ddmmyy, hhmmss):
+    day = int(ddmmyy[0:2])
+    month = int(ddmmyy[2:4])
+    year = 2000 + int(ddmmyy[4:6])  # assuming YY is 2000+
+    
+    hour = int(hhmmss[0:2])
+    minute = int(hhmmss[2:4])
+    second = int(hhmmss[4:6])
+    
+    return datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
 
 def convert_to_decimal(degrees_minutes, direction):
     """Convert GPS coordinates from degrees-minutes to decimal format."""
