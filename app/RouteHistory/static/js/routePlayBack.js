@@ -1,3 +1,10 @@
+const themeToggle = document.getElementById("theme-toggle");
+let darkMode = true;
+themeToggle.addEventListener("click", function () {
+  darkMode = !darkMode; // Toggle the state
+  initMap(darkMode); // Reinitialize the map with the new mapId
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const recentData = recent_data | tojson;
   const labels = recentData.map((data) => data.time); // Extract times for X-axis
@@ -57,10 +64,23 @@ let currentIndex = 0;
 let animationInterval = null;
 let speedMultiplier = 1;
 
-function initMap() {
+async function initMap(darkMode = true) {
+  const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
   map = new google.maps.Map(document.getElementById("map"), {
     zoom: 10,
-    center: { lat: 0, lng: 0 }, // Default center, updated dynamically
+    center: { lat: 0, lng: 0 },
+    mapId: mapId,
+    gestureHandling: "greedy",
+    zoomControl: true,
+    mapTypeControl: false, // Disable default map type buttons
+    clickableIcons: false, // Disable POI icons
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
+    fullscreenControl: true,
+    fullscreenControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
   });
 
   document

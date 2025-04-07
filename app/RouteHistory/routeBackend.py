@@ -219,6 +219,7 @@ def get_vehicle_path():
         # Step 2: Fetch path data from the 'atlanta' collection for the verified IMEI
         query = {
             "imei": str(imei_numeric),
+            "gps": "A",
             "date_time": {"$gte": iso_start_date, "$lte": iso_end_date}
         }
         records = atlanta_collection.find(query, {"_id": 0, "latitude": 1, "longitude": 1, "dir1": 1, "dir2": 1, "time": 1})
