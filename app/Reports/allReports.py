@@ -1786,73 +1786,133 @@ def download_daily_report():
 @reports_bp.route('/download_panic_report', methods=['POST'])
 @jwt_required()
 def download_panic_report():
-    data = request.json
-    vehicle_number = data.get("vehicleNumber")
-    date_range = data.get("dateRange")
-    
-    # Get vehicle IMEI
-    vehicle_data = db['vehicle_inventory'].find_one(
-        {'LicensePlateNumber': vehicle_number},
-        {'_id': 0, 'IMEI': 1}
-    )
-    
-    if not vehicle_data or 'IMEI' not in vehicle_data:
-        return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
-    
-    imei_number = vehicle_data['IMEI']
-    
-    # Build query with date range filter
-    query = {"imei": imei_number}
-    date_filter = get_date_range_filter(date_range)
-    if date_filter:
-        query.update(date_filter)
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+            
+        vehicle_number = data.get("vehicleNumber")
+        date_range = data.get("dateRange")
+        
+        if not vehicle_number:
+            return jsonify({"success": False, "message": "Vehicle number is required"}), 400
 
-    # First try to get SOS events from atlanta collection
-    atlanta_panic_data = list(db['atlanta'].find(
-        {**query, "sos": {"$exists": True}},
-        {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, 'sos': 1, '_id': 0}
-    ).sort([("date", 1), ("time", 1)]))
-    
-    # If no data in atlanta, try sos_logs collection
-    if not atlanta_panic_data:
-        sos_logs_data = list(db['sos_logs'].find(
+        # Get vehicle IMEI
+        vehicle_data = db['vehicle_inventory'].find_one(
+            {'LicensePlateNumber': vehicle_number},
+            {'_id': 0, 'IMEI': 1}
+        )
+        
+        if not vehicle_data or 'IMEI' not in vehicle_data:
+            return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
+        
+        imei_number = vehicle_data['IMEI']
+        
+        # Build date filter
+        date_filter = get_date_range_filter(date_range)
+        base_query = {"imei": imei_number}
+        
+        # Try sos_logs first (since that's where your data exists)
+        query = {**base_query}
+        if date_filter:
+            query.update(date_filter)
+        
+        panic_data = list(db['sos_logs'].find(
             query,
-            {'date': 1, 'time': 1, 'latitude': 1, 'longitude': 1, 'sos_type': 1, '_id': 0}
+            {
+                'date': 1, 
+                'time': 1, 
+                'latitude': 1, 
+                'longitude': 1, 
+                'location': 1,
+                'timestamp': 1,
+                '_id': 0
+            }
         ).sort([("date", 1), ("time", 1)]))
         
-        if not sos_logs_data:
-            return jsonify({
-                "success": False,
-                "message": "No panic data found in either atlanta or sos_logs collections."
-            }), 404
+        # If no data in sos_logs, try atlanta as fallback
+        if not panic_data:
+            atlanta_query = {**base_query, "sos": {"$exists": True}}
+            if date_filter:
+                atlanta_query.update(date_filter)
+                
+            panic_data = list(db['atlanta'].find(
+                atlanta_query,
+                {
+                    'date': 1,
+                    'time': 1,
+                    'latitude': 1,
+                    'longitude': 1,
+                    'sos': 1,
+                    '_id': 0
+                }
+            ).sort([("date", 1), ("time", 1)]))
+            
+            if not panic_data:
+                return jsonify({
+                    "success": False,
+                    "message": "No panic data found in either collection.",
+                    "debug": {
+                        "imei": imei_number,
+                        "date_range": date_range,
+                        "query_used": query
+                    }
+                }), 404
+
+        # Process data for Excel
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            df = pd.DataFrame(panic_data)
+            
+            # Clean and format data
+            df = clean_panic_data(df)
+            
+            if df.empty:
+                return jsonify({
+                    "success": False,
+                    "message": "No valid data after processing",
+                    "debug": {
+                        "initial_records": len(panic_data),
+                        "filtered_records": 0
+                    }
+                }), 404
+                
+            df.to_excel(writer, index=False, sheet_name="Panic Report")
         
-        panic_data = sos_logs_data
-    else:
-        panic_data = atlanta_panic_data
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"panic_report_{vehicle_number}.xlsx"
+        )
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}",
+            "error_type": type(e).__name__
+        }), 500
+
+def clean_panic_data(df):
+    """Clean and format panic report data"""
+    # Format date/time
+    if 'date' in df.columns:
+        df['date'] = df['date'].apply(
+            lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
+        )
     
-    # Process data for Excel
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df = pd.DataFrame(panic_data)
-        
-        # Format date/time
-        if 'date' in df.columns:
-            df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-        if 'time' in df.columns:
-            df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-        
-        # Rename sos_type column if it exists (from sos_logs)
-        if 'sos_type' in df.columns:
-            df.rename(columns={'sos_type': 'sos'}, inplace=True)
-        
-        df.to_excel(writer, index=False, sheet_name="Panic Report")
+    if 'time' in df.columns:
+        df['time'] = df['time'].apply(
+            lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
+        )
     
-    return send_file(
-        output,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        as_attachment=True,
-        download_name=f"panic_report_{vehicle_number}.xlsx"
-    )
+    # Handle empty coordinates
+    if 'latitude' in df.columns:
+        df['latitude'] = df['latitude'].replace('', 'N/A')
+    if 'longitude' in df.columns:
+        df['longitude'] = df['longitude'].replace('', 'N/A')
+    
+    return df
 
 @reports_bp.route('/download_custom_report', methods=['POST'])
 @jwt_required()

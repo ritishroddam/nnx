@@ -400,6 +400,30 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   };
 
+fetch('/reports/download_panic_report', {
+  method: "POST",
+  headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+  },
+  body: JSON.stringify({
+      vehicleNumber: vehicle_number,
+      dateRange: date_range
+  }),
+})
+.then(async (response) => {
+  if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Failed to generate report");
+  }
+  return response.blob();
+})
+.catch(error => {
+  console.error("Error:", error);
+  alert(error.message || "Failed to generate report. Please check console for details.");
+  throw error; // Re-throw to prevent further processing
+});
+
   fetch("/reports/get_custom_reports")
     .then((response) => response.json())
     .then((reports) => {
