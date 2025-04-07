@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let map;
 let pathCoordinates = [];
+let coords = []; // Coordinates for the path
 let carMarker;
 let pathPolyline;
 let startMarker;
@@ -135,7 +136,11 @@ document
             lng: item.longitude,
             time: item.time,
           }));
-          plotPathOnMap(pathCoordinates);
+          coords = data.map((item) => ({
+            lat: item.latitude,
+            lng: item.longitude,
+          }));
+          plotPathOnMap(coords);
         } else {
           alert("No path data found for the given IMEI and date range.");
         }
