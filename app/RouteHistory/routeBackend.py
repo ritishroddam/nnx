@@ -19,7 +19,7 @@ company_collection = db["customers_list"]
 def convertDate(dateStr, timeStr):
     try:
         combined_datetime = datetime.strptime(dateStr + timeStr, "%d%m%y%H%M%S")
-        iso_format = combined_datetime.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        iso_format = combined_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
         return iso_format
     except ValueError as e:
         print(f"Error converting to ISO format: {e}")
@@ -206,16 +206,19 @@ def get_vehicle_path():
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
+    iso_start_date = convertDate(start_date, "000000")
+    iso_end_date = convertDate(end_date, "235959")
+
     try:
         # Step 1: Verify if the IMEI number exists in the 'data' collection
-        data_record = data_collection.find_one({"IMEI Number": {"$regex": f".*{imei_numeric}$"}})
+        data_record = data_collection.find_one({"IMEI": str(imei_numeric)})
         if not data_record:
             return jsonify({"error": f"IMEI number {imei_numeric} not found in data collection"}), 404
 
         # Step 2: Fetch path data from the 'atlanta' collection for the verified IMEI
         query = {
             "imei": {"$regex": f".*{imei_numeric}$"},
-            "date": {"$gte": start_date, "$lte": end_date}
+            "date_time": {"$gte": iso_start_date, "$lte": iso_end_date}
         }
         records = atlanta_collection.find(query, {"_id": 0, "latitude": 1, "longitude": 1, "dir1": 1, "dir2": 1, "time": 1})
         records_list = list(records)
