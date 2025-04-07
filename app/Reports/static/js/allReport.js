@@ -406,46 +406,63 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // Update your fetch call in allReport.js
-async function generatePanicReport() {
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  const dateRange = document.getElementById("dateRange").value;
+  async function generatePanicReport() {
+    const vehicleNumber = document.getElementById("vehicleNumber").value;
+    const dateRange = document.getElementById("dateRange").value;
+    
+    // Show loading state
+    const btn = document.getElementById("generatePanicReportBtn");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Generating...";
   
-  try {
-      console.log("Sending request with:", { vehicleNumber, dateRange });
-      
-      const response = await fetch('/reports/download_panic_report', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': getCookie('csrf_access_token')
-          },
-          body: JSON.stringify({
-              vehicleNumber: vehicleNumber,
-              dateRange: dateRange
-          })
-      });
-
-      if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Server error response:", errorData);
-          throw new Error(errorData.message || "Failed to generate report");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `panic_report_${vehicleNumber}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-  } catch (error) {
-      console.error("Error generating report:", error);
-      alert(`Error: ${error.message}\nCheck console for details.`);
+    try {
+        console.log("Sending request with:", { vehicleNumber, dateRange });
+        
+        const response = await fetch('/reports/download_panic_report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCookie('csrf_access_token')
+            },
+            body: JSON.stringify({
+                vehicleNumber: vehicleNumber,
+                dateRange: dateRange
+            })
+        });
+  
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Error response:", data);
+            if (data.debug_info) {
+                console.error("Debug info:", data.debug_info);
+                alert(`Error: ${data.message}\nCheck console for details.`);
+            } else {
+                alert(`Error: ${data.message || "Failed to generate report"}`);
+            }
+            return;
+        }
+  
+        // Handle file download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `panic_report_${vehicleNumber}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+    } catch (error) {
+        console.error("Error generating report:", error);
+        alert(`Error: ${error.message}\nCheck console for details.`);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
   }
-}
 
 fetch('/reports/download_panic_report', {
   method: "POST",
