@@ -22,7 +22,7 @@ vehicle_inventory_collection = db['vehicle_inventory']
 def get_vehicles():
     try:
         # Fetch data from the distinctAtlanta collection
-        vehicles = list(collection.find())
+        vehicles = list(collection.find({},{'timestamp': 0}))
         
         # Iterate through vehicles and fetch the LicensePlateNumber from vehicle_inventory
         for vehicle in vehicles:
