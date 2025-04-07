@@ -46,7 +46,6 @@ def sos_alert(sid, data):
 
 
 collection = db['atlanta']
-distinctCollection = db['distinctAtlanta']
 sos_logs_collection = db['sos_logs']  
 distance_travelled_collection = db['distanceTravelled']
 vehicle_inventory_collection = db['vehicle_inventory']

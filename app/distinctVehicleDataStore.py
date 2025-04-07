@@ -36,7 +36,7 @@ def update_distinct_atlanta():
     try:
         print("Successfully running distinct Vehicle")
         all_documents = list(atlanta_collection.aggregate([
-                {"$match": {"gps": "A"}},
+                {"$match": {"gps": "A", "status": "01"}},
                 {"$sort": {"timestamp": -1}},
                 {
                     "$group": {
