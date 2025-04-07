@@ -177,7 +177,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 status = parts[0]
                 status_prefix = status[:-15] if len(status) > 15 else ''
 
-                date_time_str = f"{parts[10]} {parts[1]}"
+                date_time_str = f"{parts[10]} {parts[2]}"
                 date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
 
                 json_data = {
