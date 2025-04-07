@@ -1812,9 +1812,6 @@ def clean_panic_data(df):
 @jwt_required()
 def download_panic_report():
     try:
-        # Debug incoming request
-        print(f"Incoming request data: {request.data}")
-        
         data = request.get_json()
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
@@ -1822,38 +1819,27 @@ def download_panic_report():
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange")
         
-        print(f"Processing panic report for: {vehicle_number}, date range: {date_range}")
+        if not vehicle_number or not date_range:
+            return jsonify({"success": False, "message": "Missing required parameters"}), 400
 
-        # Get vehicle IMEI with debug
+        # Get vehicle IMEI
         vehicle_data = db['vehicle_inventory'].find_one(
             {'LicensePlateNumber': vehicle_number},
             {'_id': 0, 'IMEI': 1}
         )
         
         if not vehicle_data or 'IMEI' not in vehicle_data:
-            print(f"Vehicle not found: {vehicle_number}")
             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
         
         imei_number = vehicle_data['IMEI']
-        print(f"Found IMEI: {imei_number}")
 
-        # Build query with debug
+        # Build query with date range filter
         query = {"imei": imei_number}
         date_filter = get_date_range_filter(date_range)
         if date_filter:
             query.update(date_filter)
         
-        print(f"Final query: {query}")
-
-        # Check collections exist
-        collections = db.list_collection_names()
-        print(f"Available collections: {collections}")
-        
-        if 'sos_logs' not in collections:
-            print("sos_logs collection missing!")
-            return jsonify({"success": False, "message": "sos_logs collection not found"}), 404
-
-        # Fetch data with debug
+        # Get panic data from sos_logs collection
         panic_data = list(db['sos_logs'].find(
             query,
             {
@@ -1861,36 +1847,19 @@ def download_panic_report():
                 'time': 1, 
                 'latitude': 1, 
                 'longitude': 1,
-                # 'location': 1,  # Still excluded
                 '_id': 0
             }
-        ))
+        ).sort([("date", 1), ("time", 1)]))
         
-        print(f"Found {len(panic_data)} records matching query")
-
         if not panic_data:
-            # Try alternative query if no results
-            alt_query = {"imei": str(imei_number)}  # Handle string/number mismatch
-            panic_data = list(db['sos_logs'].find(alt_query))
-            print(f"Tried alternative query, found {len(panic_data)} records")
+            return jsonify({"success": False, "message": "No panic data found for the selected criteria."}), 404
 
-        if not panic_data:
-            return jsonify({
-                "success": False,
-                "message": "No panic data found.",
-                "debug_info": {
-                    "imei": imei_number,
-                    "query_used": query,
-                    "collection_stats": db.command('collstats', 'sos_logs')
-                }
-            }), 404
-
-        # Process data
+        # Process data for Excel
         output = BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
             df = pd.DataFrame(panic_data)
             
-            # Format data
+            # Format date/time
             if 'date' in df.columns:
                 df['date'] = df['date'].apply(
                     lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
@@ -1901,9 +1870,9 @@ def download_panic_report():
                     lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x
                 )
             
-            print(f"Final DataFrame shape: {df.shape}")
             df.to_excel(writer, index=False, sheet_name="Panic Report")
         
+        output.seek(0)
         return send_file(
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1912,12 +1881,10 @@ def download_panic_report():
         )
 
     except Exception as e:
-        print(f"Error generating report: {str(e)}")
+        print(f"Error generating panic report: {str(e)}")
         return jsonify({
             "success": False,
-            "message": f"Server error: {str(e)}",
-            "error_type": type(e).__name__,
-            "traceback": traceback.format_exc()
+            "message": f"An error occurred while generating the report: {str(e)}"
         }), 500
 
 def clean_panic_data(df):

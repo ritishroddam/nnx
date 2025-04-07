@@ -248,10 +248,10 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
     });
 
-  document.getElementById("generatePanicReportBtn").addEventListener("click", function(e) {
-    e.preventDefault();
-    generatePanicReport();
-  });  
+    document.getElementById("generatePanicReportBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      generatePanicReport();
+  });
 
   function loadFields() {
     fetch("/reports/get_fields")
