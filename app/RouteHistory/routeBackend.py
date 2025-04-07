@@ -217,13 +217,29 @@ def get_vehicle_path():
             return jsonify({"error": f"IMEI number {imei_numeric} not found in data collection"}), 404
 
         # Step 2: Fetch path data from the 'atlanta' collection for the verified IMEI
-        query = {
-            "imei": str(imei_numeric),
-            "gps": "A",
-            "date_time": {"$gte": iso_start_date, "$lte": iso_end_date}
-        }
-        records = atlanta_collection.find(query, {"_id": 0, "latitude": 1, "longitude": 1, "dir1": 1, "dir2": 1, "time": 1})
-        records_list = list(records)
+        pipeline = [
+            {
+                "$match": {
+                    "imei": str(imei_numeric),
+                    "gps": "A",
+                    "date_time": {"$gte": iso_start_date, "$lte": iso_end_date}
+                }
+            },
+            {
+                "$sort": {"date_time": 1}  # Sort by date_time in ascending order
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "latitude": 1,
+                    "longitude": 1,
+                    "dir1": 1,
+                    "dir2": 1,
+                    "time": 1
+                }
+            }
+        ]
+        records_list = list(atlanta_collection.aggregate(pipeline))
 
         if not records_list:
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
