@@ -295,7 +295,7 @@ function moveCar() {
 document.addEventListener("DOMContentLoaded", () => {
   const imei =
     "{{ vehicle_data[0]['IMEI Number'] if vehicle_data else 'No Data Available'}}";
-  window.imeii = imei;
+
   if (imei) {
     fetch(`/routeHistory/vehicle/${imei}/alerts`)
       .then((response) => response.json())
