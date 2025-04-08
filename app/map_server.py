@@ -181,8 +181,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 ist = timezone('Asia/Kolkata')
 
                 date_time_str = f"{parts[10]} {parts[2]}"
-                date_time_utc = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
-                date_time = ist.localize(date_time_utc)
+                date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S').replace(tzinfo=ist)
 
                 json_data = {
                     'status': self.status_prefix,
