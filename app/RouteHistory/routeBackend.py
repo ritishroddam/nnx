@@ -116,7 +116,7 @@ def show_vehicle_data(LicensePlateNumber):
                 ]
 
         processed_data.append({
-            "License Plate Number": vehicleData.get("License Plate Number", "Unknown"),
+            "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
             "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
             "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
             "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
