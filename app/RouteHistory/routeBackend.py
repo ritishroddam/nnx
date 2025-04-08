@@ -100,7 +100,7 @@ def show_vehicle_data(LicensePlateNumber):
                 most_recent_datetime = datetime.strptime(
                     most_recent_entry["date"] + most_recent_entry["time"], "%y%m%d%H%M%S"
                 )
-                if most_recent_datetime.date() == datetime.utcnow().date():
+                if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
 
                 # Get data from the last 5 minutes
