@@ -181,7 +181,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 ist = timezone('Asia/Kolkata')
 
                 date_time_str = f"{parts[10]} {parts[2]}"
-                date_time = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
+                date_time = ist.localize(datetime.strptime(date_time_str, '%d%m%y %H%M%S'))
 
                 json_data = {
                     'status': self.status_prefix,
@@ -223,7 +223,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'localAreaCode': parts[24],
                     'cellid':  self.clean_cellid(parts[25]),  
                     'date_time': date_time,
-                    'timestamp': datetime.now()                }
+                    'timestamp': datetime.now(timezone("Asia/Kolkata"))          
+                }
                 return json_data
             else:
                 print(f"Received data does not contain at least {expected_fields_count} fields.")
