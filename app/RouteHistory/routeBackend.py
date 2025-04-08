@@ -107,7 +107,7 @@ def show_vehicle_data(LicensePlateNumber):
                 now = datetime.now()
                 five_minutes_ago = now - timedelta(minutes=5)
 
-                for entry in vehicle_data[-3:]:
+                for entry in vehicle_data:
                     print(f"Entry: {entry['date_time']} | Is Recent: {entry['date_time'] >= five_minutes_ago}")
 
                 recent_data = [
