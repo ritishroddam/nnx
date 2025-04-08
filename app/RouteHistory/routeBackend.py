@@ -105,7 +105,7 @@ def show_vehicle_data(LicensePlateNumber):
                 five_minutes_ago = now - timedelta(minutes=5)
 
                 for entry in vehicle_data[:3]:  # Check first 3 entries
-                    entry_dt = datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S").replace(tzinfo=pytz.UTC)
+                    entry_dt = datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S")
                     print(f"Entry: {entry_dt} | Is Recent: {entry_dt >= five_minutes_ago}")
 
                 recent_data = [
