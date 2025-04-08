@@ -1,5 +1,8 @@
 window.onload = initMap;
 
+const dataElement = document.getElementById("vehicle-data");
+const vehicleData = JSON.parse(dataElement.textContent);
+
 const themeToggle = document.getElementById("theme-toggle");
 let darkMode = true;
 themeToggle.addEventListener("click", function () {
@@ -293,8 +296,7 @@ function moveCar() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const imei =
-    "{{ vehicle_data[0]['IMEI Number'] if vehicle_data else 'No Data Available'}}";
+  const imei = vehicleData.IMEI;
 
   if (imei) {
     fetch(`/routeHistory/vehicle/${imei}/alerts`)

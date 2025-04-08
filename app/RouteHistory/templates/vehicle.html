@@ -142,6 +142,9 @@ Vehicle Data
     {{ vehicle_data[0] | tojson if vehicle_data else 'No Data Available'}}
 </script>
 
+<script id="recent-data" type="application/json">
+    {{ recent_data | tojson if vehicle_data else 'No Data Available'}}
+</script>
 
 
 {% endblock %}
