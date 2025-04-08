@@ -104,7 +104,7 @@ def show_vehicle_data(LicensePlateNumber):
                     is_active = True
 
                 # Get data from the last 5 minutes
-                now = datetime.utcnow()
+                now = datetime.now()
                 five_minutes_ago = now - timedelta(minutes=5)
                 recent_data = [
                     {
