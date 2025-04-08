@@ -739,8 +739,11 @@ def download_panic_report():
         ).sort("date_time", 1))
 
         if not records:
-            # Get sample document to check field names and values
+            # Get sample document and convert ObjectId to string
             sample = db.atlanta.find_one({"imei": imei})
+            if sample and '_id' in sample:
+                sample['_id'] = str(sample['_id'])  # Convert ObjectId to string
+            
             return jsonify({
                 "success": False,
                 "message": "No panic events found for the selected criteria",

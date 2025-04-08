@@ -421,15 +421,6 @@ document.addEventListener("DOMContentLoaded", function () {
     btn.textContent = "Generating...";
   
     try {
-      console.log("Requesting report for:", vehicleNumber);
-      
-      // First test if endpoint exists
-      const testResponse = await fetch('/reports/test_panic_endpoint');
-      if (!testResponse.ok) {
-        throw new Error("Endpoint not found - check server routes");
-      }
-  
-      // Now make the actual request
       const response = await fetch('/reports/download_panic_report', {
         method: 'POST',
         headers: {
@@ -445,17 +436,14 @@ document.addEventListener("DOMContentLoaded", function () {
       const result = await response.json();
       
       if (!response.ok) {
-        console.error("Full error response:", result);
-        
-        let errorMsg = result.message;
-        if (result.debug_info) {
-          errorMsg += `\n\nDebug Info:\nYour IMEI: ${result.debug_info.your_imei}\n`;
-          errorMsg += `Sample IMEI in DB: ${result.debug_info.sample_imei}\n`;
-          errorMsg += `Matching records: ${result.debug_info.total_records}`;
+        // Format the sample document for better display
+        if (result.debug_info && result.debug_info.sample_document) {
+          result.debug_info.sample_document = 
+            JSON.stringify(result.debug_info.sample_document, null, 2)
+              .replace(/\\n/g, '\n')
+              .replace(/\\"/g, '"');
         }
-        
-        alert(errorMsg);
-        return;
+        throw result;
       }
   
       // Handle file download
@@ -473,16 +461,17 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Full error:", error);
       let errorMsg = "Failed to generate panic report";
       
-      if (error.message) {  // If it's our custom error from the backend
+      if (error.message) {
         errorMsg += `: ${error.message}`;
         if (error.debug_info) {
           errorMsg += `\n\nDebug Info:\nIMEI: ${error.debug_info.your_imei}`;
           errorMsg += `\nTotal Records: ${error.debug_info.total_for_imei}`;
-          errorMsg += `\nSample Document: ${JSON.stringify(error.debug_info.sample_document, null, 2)}`;
+          if (error.debug_info.sample_document) {
+            errorMsg += `\nSample Document:\n${error.debug_info.sample_document}`;
+          }
         }
       } else {
-        // Handle network or other errors
-        errorMsg += `: ${error.message || 'Unknown error'}`;
+        errorMsg += `: ${error.toString()}`;
       }
       
       alert(errorMsg);
