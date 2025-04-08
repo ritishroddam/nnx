@@ -182,7 +182,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                 date_time_str = f"{parts[10]} {parts[2]}"
                 date_time_utc = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
-                date_time = date_time_utc.replace(tzinfo=ist)
+                date_time = date_time_utc.astimezone(ist)
+                
                 json_data = {
                     'status': self.status_prefix,
                     'imei': self.clean_imei(parts[0]),
