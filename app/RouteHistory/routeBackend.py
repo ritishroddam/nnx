@@ -105,14 +105,14 @@ def show_vehicle_data(LicensePlateNumber):
 
                 # Get data from the last 5 minutes
                 now = datetime.utcnow()
-                five_minutes_ago = now - timedelta(days=1)
+                five_minutes_ago = now - timedelta(minutes=5)
                 recent_data = [
                     {
                         "time": entry["time"],
                         "speed": entry["speed"]
                     }
                     for entry in vehicle_data
-                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") >= five_minutes_ago
+                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") <= five_minutes_ago
                 ]
 
         processed_data.append({
