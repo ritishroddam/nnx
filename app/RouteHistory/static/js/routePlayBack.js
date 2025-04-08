@@ -1,3 +1,5 @@
+window.onload = initMap;
+
 const themeToggle = document.getElementById("theme-toggle");
 let darkMode = true;
 themeToggle.addEventListener("click", function () {
@@ -431,5 +433,3 @@ document.querySelector(".back-arrow").addEventListener("click", () => {
   // Navigate to the previous page in the browser's history
   window.history.back();
 });
-
-window.onload = initMap;
