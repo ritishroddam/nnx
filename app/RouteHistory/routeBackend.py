@@ -105,7 +105,7 @@ def show_vehicle_data(LicensePlateNumber):
 
                 # Get data from the last 5 minutes
                 now = datetime.utcnow()
-                five_minutes_ago = now - timedelta(minutes=30)
+                five_minutes_ago = now - timedelta(days=1)
                 recent_data = [
                     {
                         "time": entry["time"],
