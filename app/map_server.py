@@ -181,11 +181,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 ist = timezone('Asia/Kolkata')
 
                 date_time_str = f"{parts[10]} {parts[2]}"
-                date_time_utc = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
-                print(date_time_utc)
-                date_time = date_time_utc.astimezone(ist)
-                print(date_time)
-                print(datetime.now(timezone("Asia/Kolkata")))
+                date_time_tz = datetime.strptime(date_time_str, '%d%m%y %H%M%S')
+                date_time_ist = ist.localize(date_time_tz.replace(tzinfo=None))
+                date_time = date_time_ist.astimezone(timezone('UTC'))
+
                 json_data = {
                     'status': self.status_prefix,
                     'imei': self.clean_imei(parts[0]),
@@ -226,7 +225,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     'localAreaCode': parts[24],
                     'cellid':  self.clean_cellid(parts[25]),  
                     'date_time': date_time,
-                    'timestamp': datetime.now(timezone("Asia/Kolkata"))          
+                    'timestamp': datetime.now(timezone('UTC'))     
                 }
                 return json_data
             else:
