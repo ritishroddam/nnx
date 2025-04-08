@@ -136,7 +136,7 @@ def show_vehicle_data(LicensePlateNumber):
             "SOS": most_recent_entry.get("sos", "Unknown") if most_recent_entry else "Unknown",
             "Odometer": most_recent_entry.get("odometer", "Unknown") if most_recent_entry else "Unknown",
             "IMEI": vehicleData.get("IMEI", "Unknown"),
-            "date_time": vehicle_data.get("date_time", "Unknown"),
+
         })
 
         # Fetch alerts for the vehicle
