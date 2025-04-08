@@ -470,8 +470,22 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.removeChild(a);
       
     } catch (error) {
-      console.error("Error:", error);
-      alert(`Failed: ${error.message}\nCheck console for details`);
+      console.error("Full error:", error);
+      let errorMsg = "Failed to generate panic report";
+      
+      if (error.message) {  // If it's our custom error from the backend
+        errorMsg += `: ${error.message}`;
+        if (error.debug_info) {
+          errorMsg += `\n\nDebug Info:\nIMEI: ${error.debug_info.your_imei}`;
+          errorMsg += `\nTotal Records: ${error.debug_info.total_for_imei}`;
+          errorMsg += `\nSample Document: ${JSON.stringify(error.debug_info.sample_document, null, 2)}`;
+        }
+      } else {
+        // Handle network or other errors
+        errorMsg += `: ${error.message || 'Unknown error'}`;
+      }
+      
+      alert(errorMsg);
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;

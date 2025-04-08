@@ -690,10 +690,21 @@ def download_panic_report():
             
         imei = str(vehicle_data["IMEI"]).strip()
 
-        # Build query with date range filter
-        query = {"imei": imei, "sos": "1"}  # Only SOS/panic events
-        
-        # Add date range filter using date_time field
+        # Build query - check for SOS in multiple possible formats
+        query = {
+            "imei": imei,
+            "$or": [
+                {"sos": "1"},
+                {"sos": 1},
+                {"sos": True}
+            ]
+        }
+
+        # Debug logging
+        print(f"Searching for IMEI: {imei}")
+        print(f"Initial query matches: {db.atlanta.count_documents(query)} records")
+
+        # Add date range filter if specified
         if date_range and date_range != "all":
             now = datetime.now()
             if date_range == "last24hours":
@@ -714,7 +725,6 @@ def download_panic_report():
                 start_date = now - timedelta(days=30)
                 query["date_time"] = {"$gte": start_date}
 
-        # Query the atlanta collection for panic events
         records = list(db.atlanta.find(
             query,
             {
@@ -723,17 +733,22 @@ def download_panic_report():
                 "longitude": 1,
                 "speed": 1,
                 "odometer": 1,
+                "sos": 1,
                 "_id": 0
             }
         ).sort("date_time", 1))
 
         if not records:
+            # Get sample document to check field names and values
+            sample = db.atlanta.find_one({"imei": imei})
             return jsonify({
                 "success": False,
                 "message": "No panic events found for the selected criteria",
                 "debug_info": {
                     "your_imei": imei,
-                    "total_records": db.atlanta.count_documents({"imei": imei, "sos": "1"})
+                    "sample_document": sample,
+                    "total_matching": db.atlanta.count_documents(query),
+                    "total_for_imei": db.atlanta.count_documents({"imei": imei})
                 }
             }), 404
 
