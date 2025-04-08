@@ -189,13 +189,6 @@ function plotPathOnMap(pathCoordinates) {
       strokeColor: "#FF4500",
       strokeOpacity: 0.9,
       strokeWeight: 3,
-      icons: [
-        {
-          icon: arrowSymbol,
-          offset: "0%",
-          repeat: "75px",
-        },
-      ],
     });
 
     pathPolyline.setMap(map);
@@ -393,8 +386,6 @@ function setSpeed(multiplier) {
   speedMultiplier = multiplier;
 }
 
-window.onload = initMap;
-
 // Speed Chart using Chart.js
 const ctx = document.getElementById("speedChart").getContext("2d");
 const speedChart = new Chart(ctx, {
@@ -440,3 +431,5 @@ document.querySelector(".back-arrow").addEventListener("click", () => {
   // Navigate to the previous page in the browser's history
   window.history.back();
 });
+
+window.onload = initMap;
