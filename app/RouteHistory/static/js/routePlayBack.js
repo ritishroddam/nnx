@@ -11,7 +11,8 @@ themeToggle.addEventListener("click", function () {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const recentData = recent_data | tojson;
+  const recentdataElement = document.getElementById("recent-data");
+  const recentData = JSON.parse(recentdataElement.textContent);
   const labels = recentData.map((data) => data.time); // Extract times for X-axis
   const speeds = recentData.map((data) => data.speed); // Extract speeds for Y-axis
 
