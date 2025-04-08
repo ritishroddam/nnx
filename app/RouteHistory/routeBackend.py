@@ -95,7 +95,7 @@ def show_vehicle_data(LicensePlateNumber):
             if vehicle_data:
                 most_recent_entry = max(
                     vehicle_data,
-                    key=lambda x: datetime.strptime(x["date"] + x["time"], "%y%m%d%H%M%S")
+                    key=lambda x: datetime.strptime(x["date"] + x["time"], "%d%m%y%H%M%S")
                 )
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
@@ -105,7 +105,7 @@ def show_vehicle_data(LicensePlateNumber):
                 five_minutes_ago = now - timedelta(minutes=5)
 
                 for entry in vehicle_data[-3:]:  # Check first 3 entries
-                    entry_dt = datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S")
+                    entry_dt = datetime.strptime(entry["date"] + entry["time"], "%d%m%y%H%M%S")
                     print(f"Entry: {entry_dt} | Is Recent: {entry_dt >= five_minutes_ago}")
 
                 recent_data = [
@@ -114,7 +114,7 @@ def show_vehicle_data(LicensePlateNumber):
                         "speed": entry["speed"]
                     }
                     for entry in vehicle_data
-                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") >= five_minutes_ago
+                    if datetime.strptime(entry["date"] + entry["time"], "%d%m%y%H%M%S") >= five_minutes_ago
                 ]
 
         processed_data.append({
