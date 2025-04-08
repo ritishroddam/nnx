@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from flask import render_template, Blueprint, request, jsonify, send_file, url_for # type: ignore
 from pymongo import MongoClient # type: ignore
 import pandas as pd # type: ignore
+from datetime import datetime
+from pytz import timezone
 from io import BytesIO
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity # type: ignore
@@ -741,6 +743,7 @@ def download_panic_report():
         
         # Format date/time
         if 'date_time' in df.columns:
+            df['date_time'] = df['date_time'].astimezone(timezone('Asia/Kolkata'))
             df['date_time'] = pd.to_datetime(df['date_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
         
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
