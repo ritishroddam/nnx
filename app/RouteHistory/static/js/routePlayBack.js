@@ -191,6 +191,13 @@ function plotPathOnMap(pathCoordinates) {
       strokeColor: "#FF4500",
       strokeOpacity: 0.9,
       strokeWeight: 3,
+      icons: [
+        {
+          icon: arrowSymbol,
+          offset: "0%",
+          repeat: "75px",
+        },
+      ],
     });
 
     pathPolyline.setMap(map);
