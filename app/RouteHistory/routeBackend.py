@@ -97,9 +97,6 @@ def show_vehicle_data(LicensePlateNumber):
                     vehicle_data,
                     key=lambda x: datetime.strptime(x["date"] + x["time"], "%y%m%d%H%M%S")
                 )
-                most_recent_datetime = datetime.strptime(
-                    most_recent_entry["date"] + most_recent_entry["time"], "%y%m%d%H%M%S"
-                )
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
 
