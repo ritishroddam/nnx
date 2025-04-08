@@ -76,7 +76,13 @@ def show_vehicle_data(LicensePlateNumber):
 
         processed_data = []
         recent_data = None
-        vehicle_data = list(atlanta_collection.find({"imei": vehicleData['IMEI']}))
+
+        pipeline = [
+            {"$match": {"imei": vehicleData['IMEI']}},
+            {"$sort": {"date_time": -1}},  
+        ]
+
+        vehicle_data = list(atlanta_collection.aggregate(pipeline))
 
         # if not vehicle_data:
         #     flash(f"No data found for vehicle with License Plate Number '{LicensePlateNumber}'.", "warning")
@@ -93,10 +99,7 @@ def show_vehicle_data(LicensePlateNumber):
                    entry.get("speed") is not None
             ]
             if vehicle_data:
-                most_recent_entry = max(
-                    vehicle_data,
-                    key=lambda x: x['date_time']
-                )
+                most_recent_entry = vehicle_data[0]
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
 
