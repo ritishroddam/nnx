@@ -669,48 +669,71 @@ def download_daily_report():
 @jwt_required()
 def download_panic_report():
     try:
-        # Debug: Print headers to verify request is coming through
-        print("Headers:", request.headers)
-        print("Raw data:", request.data)
-        
         data = request.get_json()
         if not data:
             return jsonify({"success": False, "message": "No JSON data provided"}), 400
             
         vehicle_number = data.get("vehicleNumber")
+        date_range = data.get("dateRange")
+        
         if not vehicle_number:
             return jsonify({"success": False, "message": "Vehicle number is required"}), 400
 
-        # Get vehicle IMEI - handle both string and number formats
-        vehicle = db.vehicle_inventory.find_one(
+        # Get vehicle IMEI
+        vehicle_data = db.vehicle_inventory.find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "_id": 0}
         )
         
-        if not vehicle or not vehicle.get("IMEI"):
+        if not vehicle_data or not vehicle_data.get("IMEI"):
             return jsonify({"success": False, "message": "Vehicle IMEI not found"}), 404
             
-        imei = str(vehicle["IMEI"]).strip()  # Convert to string and clean
+        imei = str(vehicle_data["IMEI"]).strip()
+
+        # Build query with date range filter
+        query = {"imei": imei, "sos": "1"}  # Only SOS/panic events
         
-        # Debug: Print the IMEI being used
-        print(f"Searching for IMEI: {imei} (type: {type(imei)})")
-        
-        # Query the ses_logs collection (case-sensitive)
-        records = list(db.ses_logs.find(
-            {"inet": imei},
-            {"date": 1, "time": 1, "latitude": 1, "longitude": 1, "_id": 0}
-        ))
-        
+        # Add date range filter using date_time field
+        if date_range and date_range != "all":
+            now = datetime.now()
+            if date_range == "last24hours":
+                start_date = now - timedelta(hours=24)
+                query["date_time"] = {"$gte": start_date}
+            elif date_range == "today":
+                start_date = datetime(now.year, now.month, now.day)
+                query["date_time"] = {"$gte": start_date}
+            elif date_range == "yesterday":
+                yesterday = now - timedelta(days=1)
+                start_date = datetime(yesterday.year, yesterday.month, yesterday.day)
+                end_date = datetime(now.year, now.month, now.day)
+                query["date_time"] = {"$gte": start_date, "$lt": end_date}
+            elif date_range == "last7days":
+                start_date = now - timedelta(days=7)
+                query["date_time"] = {"$gte": start_date}
+            elif date_range == "last30days":
+                start_date = now - timedelta(days=30)
+                query["date_time"] = {"$gte": start_date}
+
+        # Query the atlanta collection for panic events
+        records = list(db.atlanta.find(
+            query,
+            {
+                "date_time": 1,
+                "latitude": 1,
+                "longitude": 1,
+                "speed": 1,
+                "odometer": 1,
+                "_id": 0
+            }
+        ).sort("date_time", 1))
+
         if not records:
-            # Get sample record to show what IMEI format exists
-            sample = db.ses_logs.find_one({}, {"inet": 1})
             return jsonify({
                 "success": False,
-                "message": "No matching records found",
+                "message": "No panic events found for the selected criteria",
                 "debug_info": {
                     "your_imei": imei,
-                    "sample_imei": sample.get("inet") if sample else None,
-                    "total_records": db.ses_logs.count_documents({"inet": imei})
+                    "total_records": db.atlanta.count_documents({"imei": imei, "sos": "1"})
                 }
             }), 404
 
@@ -718,9 +741,18 @@ def download_panic_report():
         output = BytesIO()
         df = pd.DataFrame(records)
         
-        # Format date/time
-        df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-        df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        # Format date_time column
+        if 'date_time' in df.columns:
+            df['date_time'] = pd.to_datetime(df['date_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Add location column if coordinates exist
+        if 'latitude' in df.columns and 'longitude' in df.columns:
+            df['location'] = df.apply(
+                lambda row: f"{row['latitude']}, {row['longitude']}" 
+                if pd.notna(row['latitude']) and pd.notna(row['longitude']) 
+                else "N/A", 
+                axis=1
+            )
         
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Panic Report")
