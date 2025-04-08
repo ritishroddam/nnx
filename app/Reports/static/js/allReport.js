@@ -416,6 +416,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   
     const btn = document.getElementById("generatePanicReportBtn");
+    if (!btn) {
+      console.error("Generate button not found!");
+      return;
+    }
+  
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.textContent = "Generating...";
@@ -433,20 +438,24 @@ document.addEventListener("DOMContentLoaded", function () {
         })
       });
   
-      const result = await response.json();
-      
       if (!response.ok) {
-        // Format the sample document for better display
-        if (result.debug_info && result.debug_info.sample_document) {
-          result.debug_info.sample_document = 
-            JSON.stringify(result.debug_info.sample_document, null, 2)
-              .replace(/\\n/g, '\n')
-              .replace(/\\"/g, '"');
+        const errorData = await response.json().catch(() => ({}));
+        let errorMsg = errorData.message || "Failed to generate report";
+        
+        if (errorData.debug_info) {
+          errorMsg += `\n\nDebug Info:
+          IMEI Used: ${errorData.debug_info.imei_used}
+          Total Records: ${errorData.debug_info.total_records}
+          Query Used: ${JSON.stringify(errorData.debug_info.query_used, null, 2)}`;
+          
+          if (errorData.debug_info.sample_document) {
+            errorMsg += `\nSample Document: ${JSON.stringify(errorData.debug_info.sample_document, null, 2)}`;
+          }
         }
-        throw result;
+        
+        throw new Error(errorMsg);
       }
-  
-      // Handle file download
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -458,28 +467,25 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.removeChild(a);
       
     } catch (error) {
-      console.error("Full error:", error);
-      let errorMsg = "Failed to generate panic report";
-      
-      if (error.message) {
-        errorMsg += `: ${error.message}`;
-        if (error.debug_info) {
-          errorMsg += `\n\nDebug Info:\nIMEI: ${error.debug_info.your_imei}`;
-          errorMsg += `\nTotal Records: ${error.debug_info.total_for_imei}`;
-          if (error.debug_info.sample_document) {
-            errorMsg += `\nSample Document:\n${error.debug_info.sample_document}`;
-          }
-        }
-      } else {
-        errorMsg += `: ${error.toString()}`;
-      }
-      
-      alert(errorMsg);
+      console.error("Error:", error);
+      alert(error.message);
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
     }
   }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const panicBtn = document.getElementById('generatePanicReportBtn');
+    if (panicBtn) {
+      panicBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        generatePanicReport();
+      });
+    } else {
+      console.error("Panic report button not found in DOM");
+    }
+  });
 
 fetch('/reports/download_panic_report', {
   method: "POST",

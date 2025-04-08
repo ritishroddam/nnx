@@ -671,59 +671,40 @@ def download_panic_report():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"success": False, "message": "No JSON data provided"}), 400
+            return jsonify({"success": False, "message": "No data provided"}), 400
             
         vehicle_number = data.get("vehicleNumber")
-        date_range = data.get("dateRange")
-        
-        if not vehicle_number:
-            return jsonify({"success": False, "message": "Vehicle number is required"}), 400
+        date_range = data.get("dateRange", "all")
+
+        # Debug print
+        print(f"Received request for vehicle: {vehicle_number}, date range: {date_range}")
 
         # Get vehicle IMEI
-        vehicle_data = db.vehicle_inventory.find_one(
+        vehicle = db.vehicle_inventory.find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "_id": 0}
         )
         
-        if not vehicle_data or not vehicle_data.get("IMEI"):
-            return jsonify({"success": False, "message": "Vehicle IMEI not found"}), 404
+        if not vehicle or not vehicle.get("IMEI"):
+            return jsonify({"success": False, "message": "Vehicle not found"}), 404
             
-        imei = str(vehicle_data["IMEI"]).strip()
+        imei = str(vehicle["IMEI"])
 
-        # Build query - check for SOS in multiple possible formats
+        # More flexible query for SOS events
         query = {
             "imei": imei,
             "$or": [
                 {"sos": "1"},
                 {"sos": 1},
-                {"sos": True}
+                {"sos": True},
+                {"status": "SOS"},
+                {"alarm": "SOS"}
             ]
         }
 
-        # Debug logging
-        print(f"Searching for IMEI: {imei}")
-        print(f"Initial query matches: {db.atlanta.count_documents(query)} records")
-
-        # Add date range filter if specified
-        if date_range and date_range != "all":
-            now = datetime.now()
-            if date_range == "last24hours":
-                start_date = now - timedelta(hours=24)
-                query["date_time"] = {"$gte": start_date}
-            elif date_range == "today":
-                start_date = datetime(now.year, now.month, now.day)
-                query["date_time"] = {"$gte": start_date}
-            elif date_range == "yesterday":
-                yesterday = now - timedelta(days=1)
-                start_date = datetime(yesterday.year, yesterday.month, yesterday.day)
-                end_date = datetime(now.year, now.month, now.day)
-                query["date_time"] = {"$gte": start_date, "$lt": end_date}
-            elif date_range == "last7days":
-                start_date = now - timedelta(days=7)
-                query["date_time"] = {"$gte": start_date}
-            elif date_range == "last30days":
-                start_date = now - timedelta(days=30)
-                query["date_time"] = {"$gte": start_date}
+        # Debug print
+        print(f"Querying with IMEI: {imei}")
+        print(f"Total matching documents: {db.atlanta.count_documents(query)}")
 
         records = list(db.atlanta.find(
             query,
@@ -733,25 +714,24 @@ def download_panic_report():
                 "longitude": 1,
                 "speed": 1,
                 "odometer": 1,
-                "sos": 1,
                 "_id": 0
             }
         ).sort("date_time", 1))
 
         if not records:
-            # Get sample document and convert ObjectId to string
+            # Get sample document to help debugging
             sample = db.atlanta.find_one({"imei": imei})
             if sample and '_id' in sample:
-                sample['_id'] = str(sample['_id'])  # Convert ObjectId to string
+                sample['_id'] = str(sample['_id'])
             
             return jsonify({
                 "success": False,
-                "message": "No panic events found for the selected criteria",
+                "message": "No panic events found",
                 "debug_info": {
-                    "your_imei": imei,
+                    "imei_used": imei,
                     "sample_document": sample,
-                    "total_matching": db.atlanta.count_documents(query),
-                    "total_for_imei": db.atlanta.count_documents({"imei": imei})
+                    "total_records": db.atlanta.count_documents({"imei": imei}),
+                    "query_used": query
                 }
             }), 404
 
@@ -759,18 +739,9 @@ def download_panic_report():
         output = BytesIO()
         df = pd.DataFrame(records)
         
-        # Format date_time column
+        # Format date/time
         if 'date_time' in df.columns:
             df['date_time'] = pd.to_datetime(df['date_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Add location column if coordinates exist
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            df['location'] = df.apply(
-                lambda row: f"{row['latitude']}, {row['longitude']}" 
-                if pd.notna(row['latitude']) and pd.notna(row['longitude']) 
-                else "N/A", 
-                axis=1
-            )
         
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Panic Report")
