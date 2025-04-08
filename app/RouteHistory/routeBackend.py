@@ -112,7 +112,7 @@ def show_vehicle_data(LicensePlateNumber):
                         "speed": entry["speed"]
                     }
                     for entry in vehicle_data
-                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") >= five_minutes_ago
+                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") <= five_minutes_ago
                 ]
 
         processed_data.append({
