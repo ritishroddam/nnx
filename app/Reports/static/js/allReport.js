@@ -416,20 +416,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   
     const btn = document.getElementById("generatePanicReportBtn");
+    if (!btn) {
+      console.error("Generate button not found!");
+      return;
+    }
+  
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.textContent = "Generating...";
   
     try {
-      console.log("Requesting report for:", vehicleNumber);
-      
-      // First test if endpoint exists
-      const testResponse = await fetch('/reports/test_panic_endpoint');
-      if (!testResponse.ok) {
-        throw new Error("Endpoint not found - check server routes");
-      }
-  
-      // Now make the actual request
       const response = await fetch('/reports/download_panic_report', {
         method: 'POST',
         headers: {
@@ -442,23 +438,24 @@ document.addEventListener("DOMContentLoaded", function () {
         })
       });
   
-      const result = await response.json();
-      
       if (!response.ok) {
-        console.error("Full error response:", result);
+        const errorData = await response.json().catch(() => ({}));
+        let errorMsg = errorData.message || "Failed to generate report";
         
-        let errorMsg = result.message;
-        if (result.debug_info) {
-          errorMsg += `\n\nDebug Info:\nYour IMEI: ${result.debug_info.your_imei}\n`;
-          errorMsg += `Sample IMEI in DB: ${result.debug_info.sample_imei}\n`;
-          errorMsg += `Matching records: ${result.debug_info.total_records}`;
+        if (errorData.debug_info) {
+          errorMsg += `\n\nDebug Info:
+          IMEI Used: ${errorData.debug_info.imei_used}
+          Total Records: ${errorData.debug_info.total_records}
+          Query Used: ${JSON.stringify(errorData.debug_info.query_used, null, 2)}`;
+          
+          if (errorData.debug_info.sample_document) {
+            errorMsg += `\nSample Document: ${JSON.stringify(errorData.debug_info.sample_document, null, 2)}`;
+          }
         }
         
-        alert(errorMsg);
-        return;
+        throw new Error(errorMsg);
       }
-  
-      // Handle file download
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -471,12 +468,24 @@ document.addEventListener("DOMContentLoaded", function () {
       
     } catch (error) {
       console.error("Error:", error);
-      alert(`Failed: ${error.message}\nCheck console for details`);
+      alert(error.message);
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
     }
   }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const panicBtn = document.getElementById('generatePanicReportBtn');
+    if (panicBtn) {
+      panicBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        generatePanicReport();
+      });
+    } else {
+      console.error("Panic report button not found in DOM");
+    }
+  });
 
 fetch('/reports/download_panic_report', {
   method: "POST",

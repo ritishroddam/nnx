@@ -669,48 +669,69 @@ def download_daily_report():
 @jwt_required()
 def download_panic_report():
     try:
-        # Debug: Print headers to verify request is coming through
-        print("Headers:", request.headers)
-        print("Raw data:", request.data)
-        
         data = request.get_json()
         if not data:
-            return jsonify({"success": False, "message": "No JSON data provided"}), 400
+            return jsonify({"success": False, "message": "No data provided"}), 400
             
         vehicle_number = data.get("vehicleNumber")
-        if not vehicle_number:
-            return jsonify({"success": False, "message": "Vehicle number is required"}), 400
+        date_range = data.get("dateRange", "all")
 
-        # Get vehicle IMEI - handle both string and number formats
+        # Debug print
+        print(f"Received request for vehicle: {vehicle_number}, date range: {date_range}")
+
+        # Get vehicle IMEI
         vehicle = db.vehicle_inventory.find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "_id": 0}
         )
         
         if not vehicle or not vehicle.get("IMEI"):
-            return jsonify({"success": False, "message": "Vehicle IMEI not found"}), 404
+            return jsonify({"success": False, "message": "Vehicle not found"}), 404
             
-        imei = str(vehicle["IMEI"]).strip()  # Convert to string and clean
-        
-        # Debug: Print the IMEI being used
-        print(f"Searching for IMEI: {imei} (type: {type(imei)})")
-        
-        # Query the ses_logs collection (case-sensitive)
-        records = list(db.ses_logs.find(
-            {"inet": imei},
-            {"date": 1, "time": 1, "latitude": 1, "longitude": 1, "_id": 0}
-        ))
-        
+        imei = str(vehicle["IMEI"])
+
+        # More flexible query for SOS events
+        query = {
+            "imei": imei,
+            "$or": [
+                {"sos": "1"},
+                {"sos": 1},
+                {"sos": True},
+                {"status": "SOS"},
+                {"alarm": "SOS"}
+            ]
+        }
+
+        # Debug print
+        print(f"Querying with IMEI: {imei}")
+        print(f"Total matching documents: {db.atlanta.count_documents(query)}")
+
+        records = list(db.atlanta.find(
+            query,
+            {
+                "date_time": 1,
+                "latitude": 1,
+                "longitude": 1,
+                "speed": 1,
+                "odometer": 1,
+                "_id": 0
+            }
+        ).sort("date_time", 1))
+
         if not records:
-            # Get sample record to show what IMEI format exists
-            sample = db.ses_logs.find_one({}, {"inet": 1})
+            # Get sample document to help debugging
+            sample = db.atlanta.find_one({"imei": imei})
+            if sample and '_id' in sample:
+                sample['_id'] = str(sample['_id'])
+            
             return jsonify({
                 "success": False,
-                "message": "No matching records found",
+                "message": "No panic events found",
                 "debug_info": {
-                    "your_imei": imei,
-                    "sample_imei": sample.get("inet") if sample else None,
-                    "total_records": db.ses_logs.count_documents({"inet": imei})
+                    "imei_used": imei,
+                    "sample_document": sample,
+                    "total_records": db.atlanta.count_documents({"imei": imei}),
+                    "query_used": query
                 }
             }), 404
 
@@ -719,8 +740,8 @@ def download_panic_report():
         df = pd.DataFrame(records)
         
         # Format date/time
-        df['date'] = df['date'].apply(lambda x: f"{x[:2]}/{x[2:4]}/20{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
-        df['time'] = df['time'].apply(lambda x: f"{x[:2]}:{x[2:4]}:{x[4:]}" if isinstance(x, str) and len(x) == 6 else x)
+        if 'date_time' in df.columns:
+            df['date_time'] = pd.to_datetime(df['date_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
         
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Panic Report")
