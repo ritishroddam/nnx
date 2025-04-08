@@ -169,96 +169,6 @@ function formatDateToDB(dateString) {
   return `${day}${month}${year}`;
 }
 
-// function plotPathOnMap(pathCoordinates) {
-//   if (pathPolyline) pathPolyline.setMap(null);
-//   if (startMarker) startMarker.setMap(null);
-//   if (endMarker) endMarker.setMap(null);
-//   if (carMarker) carMarker.setMap(null); // Clear the previous car marker
-
-//   if (pathCoordinates.length > 0) {
-//     const arrowSymbol = {
-//       path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-//       scale: 2, // Adjusted scale for smaller arrows
-//       strokeColor: "#0000FF", // Arrow color
-//       strokeWeight: 2, // Arrow stroke thickness
-//     };
-
-//     // Gradient stroke for polyline
-//     const gradientColors = [
-//       "#ff0000", // Red
-//       "#ff7300", // Orange
-//       "#ffd700", // Yellow
-//       "#00b300", // Green
-//       "#0000ff", // Blue
-//     ];
-//     const gradientIconSet = gradientColors.map((color, index) => ({
-//       icon: {
-//         path: google.maps.SymbolPath.CIRCLE,
-//         scale: 3,
-//         fillColor: color,
-//         fillOpacity: 1,
-//         strokeColor: color,
-//         strokeWeight: 1,
-//       },
-//       offset: `${index * 20}%`, // Spread evenly across the line
-//     }));
-
-//     pathPolyline = new google.maps.Polyline({
-//       path: pathCoordinates,
-//       geodesic: true,
-//       strokeColor: "#FF4500", // Polyline color (orange-red for more contrast)
-//       strokeOpacity: 0.9, // Slightly transparent
-//       strokeWeight: 3, // Line thickness
-//       icons: [
-//         {
-//           icon: arrowSymbol,
-//           offset: "0%", // Start position of the first arrow
-//           repeat: "75px", // Distance between arrows
-//         },
-//       ],
-//     });
-
-//     pathPolyline.setMap(map);
-
-//     const bounds = new google.maps.LatLngBounds();
-//     pathCoordinates.forEach((coord) => bounds.extend(coord));
-//     map.fitBounds(bounds);
-
-//     // Markers for start and end points
-//     startMarker = new google.maps.Marker({
-//       position: pathCoordinates[0],
-//       map: map,
-//       icon: {
-//         url: "/images/green-map-pin.png",
-//         scaledSize: new google.maps.Size(30, 30),
-//       },
-//       title: "Start",
-//     });
-
-//     endMarker = new google.maps.Marker({
-//       position: pathCoordinates[pathCoordinates.length - 1],
-//       map: map,
-//       icon: {
-//         url: "/static/images/red-map-pin.png",
-//         scaledSize: new google.maps.Size(30, 30),
-//       },
-//       title: "End",
-//     });
-
-//     carMarker = new google.maps.Marker({
-//       position: pathCoordinates[0],
-//       map: map,
-//       icon: {
-//         url: "/static/images/car_green.png",
-//         scaledSize: new google.maps.Size(50, 50), // Adjust to fit your map scale
-//         anchor: new google.maps.Point(25, 25), // Centered anchor for better placement
-//       },
-//     });
-
-//     document.getElementById("controls-container").style.display = "block";
-//   }
-// }
-
 function plotPathOnMap(pathCoordinates) {
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
@@ -336,8 +246,6 @@ function plotPathOnMap(pathCoordinates) {
       title: "Car",
       content: carContent, // Pass the DOM element
     });
-
-    document.getElementById("controls-container").style.display = "block";
   }
 }
 
@@ -484,44 +392,6 @@ function stopCarAnimation() {
 function setSpeed(multiplier) {
   speedMultiplier = multiplier;
 }
-
-// function moveCar() {
-//   if (currentIndex < pathCoordinates.length - 1) {
-//     const start = pathCoordinates[currentIndex];
-//     const end = pathCoordinates[currentIndex + 1];
-//     const steps = 100;
-//     const stepDuration = 10 / speedMultiplier;
-
-//     let stepIndex = 0;
-//     const latDiff = (end.lat - start.lat) / steps;
-//     const lngDiff = (end.lng - start.lng) / steps;
-
-//     const bearing = calculateBearing(start, end);
-
-//     animationInterval = setInterval(() => {
-//       if (stepIndex < steps) {
-//         const lat = start.lat + latDiff * stepIndex;
-//         const lng = start.lng + lngDiff * stepIndex;
-
-//         carMarker.setIcon({
-//           url: "/static/images/car_green.png",
-//           scaledSize: new google.maps.Size(50, 50),
-//           anchor: new google.maps.Point(20, 20),
-//           rotation: bearing,
-//         });
-
-//         carMarker.setPosition({ lat, lng });
-//         map.panTo({ lat, lng });
-
-//         stepIndex++;
-//       } else {
-//         currentIndex++;
-//         clearInterval(animationInterval);
-//         moveCar();
-//       }
-//     }, stepDuration);
-//   }
-// }
 
 window.onload = initMap;
 
