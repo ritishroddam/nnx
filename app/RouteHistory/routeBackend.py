@@ -113,7 +113,7 @@ def show_vehicle_data(LicensePlateNumber):
                         "speed": entry["speed"]
                     }
                     for entry in vehicle_data
-                    if entry['date_time'] >= five_minutes_ago
+                    if entry['date_time'] <= five_minutes_ago
                 ]
 
         processed_data.append({
