@@ -185,7 +185,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 print(date_time_utc)
                 date_time = date_time_utc.astimezone(ist)
                 print(date_time)
-
+                print(datetime.now(timezone("Asia/Kolkata")))
                 json_data = {
                     'status': self.status_prefix,
                     'imei': self.clean_imei(parts[0]),
