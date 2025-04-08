@@ -398,46 +398,6 @@ function setSpeed(multiplier) {
   speedMultiplier = multiplier;
 }
 
-// Speed Chart using Chart.js
-const ctx = document.getElementById("speedChart").getContext("2d");
-const speedChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: [
-      "10:16:30",
-      "10:17:00",
-      "10:17:30",
-      "10:18:00",
-      "10:18:30",
-      "10:19:00",
-      "10:19:30",
-    ],
-    datasets: [
-      {
-        label: "Speed MPH",
-        data: [47, 42, 40, 47, 50, 40, 60],
-        borderColor: "rgba(0, 122, 255, 1)",
-        backgroundColor: "rgba(0, 122, 255, 0.2)",
-        borderWidth: 2,
-        fill: true,
-      },
-    ],
-  },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  },
-});
-
 // Add a click event listener to the back button
 document.querySelector(".back-arrow").addEventListener("click", () => {
   // Navigate to the previous page in the browser's history
