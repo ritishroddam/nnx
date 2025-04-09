@@ -255,8 +255,8 @@ function plotPathOnMap(pathCoordinates) {
         arrowContent.style.borderLeft = "5px solid transparent";
         arrowContent.style.borderRight = "5px solid transparent";
         arrowContent.style.transform = `rotate(${calculateBearing(
-          coord,
-          pathCoordinates[index + 1]
+          pathCoordinates[index + 1],
+          coord
         )}deg)`;
 
         new google.maps.marker.AdvancedMarkerElement({
