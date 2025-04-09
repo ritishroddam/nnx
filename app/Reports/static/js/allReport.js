@@ -66,15 +66,17 @@ function openReportModal(reportName) {
 // Modify the report card click handlers
 document.querySelectorAll('.report-card').forEach(card => {
   card.onclick = function() {
-    const reportType = this.dataset.reportType || this.dataset.report;
+    const reportType = this.dataset.report;
+    const reportName = this.querySelector('h3').textContent;
     
     if (reportType === 'custom') {
-      const reportName = this.querySelector('h3').textContent;
       openReportModal(reportName);
       document.getElementById("generateReport").dataset.reportType = 'custom';
       document.getElementById("generateReport").dataset.reportName = reportName;
+    } else if (reportType === 'sos') {
+      generatePanicReport();
     } else {
-      openGenericReportModal(reportType);
+      openReportModal(reportName);
       document.getElementById("generateReport").dataset.reportType = reportType;
     }
   };
@@ -96,7 +98,6 @@ function openGenericReportModal(reportType) {
   modal.querySelector("h2").textContent = titleMap[reportType] || 'Generate Report';
   modal.style.display = "block";
 }
-
   // Modal close handlers
   span.onclick = function() {
     modal.style.display = "none";
@@ -111,6 +112,88 @@ function openGenericReportModal(reportType) {
       customReportModal.style.display = "none";
     }
   };
+
+  // document.getElementById("generateReport").onclick = async function() {
+  //   const reportType = this.dataset.reportType;
+  //   const reportName = this.dataset.reportName;
+  //   const vehicleNumber = document.getElementById("vehicleNumber").value;
+  //   const dateRange = document.getElementById("dateRange").value;
+
+  //   if (!vehicleNumber) {
+  //     alert("Please select a vehicle number");
+  //     return;
+  //   }
+
+  //   // Show loading state
+  //   const generateBtn = this;
+  //   const originalText = generateBtn.textContent;
+  //   generateBtn.disabled = true;
+  //   generateBtn.textContent = "Generating...";
+
+  //   try {
+  //     const endpointMap = {
+  //       'travel-path': '/reports/download_travel_path_report',
+  //       'distance': '/reports/download_distance_report',
+  //       'speed': '/reports/download_speed_report',
+  //       'stoppage': '/reports/download_stoppage_report',
+  //       'idle': '/reports/download_idle_report',
+  //       'ignition': '/reports/download_ignition_report',
+  //       'daily': '/reports/download_daily_report',
+  //       'panic': '/reports/download_panic_report',
+  //       'custom': '/reports/download_custom_report'
+  //     };
+
+  //     const endpoint = endpointMap[reportType];
+  //     if (!endpoint) {
+  //       throw new Error("Invalid report type");
+  //     }
+
+  //     const requestBody = {
+  //       vehicleNumber,
+  //       dateRange
+  //     };
+
+  //     if (reportType === 'custom' && reportName) {
+  //       requestBody.reportName = reportName;
+  //     }
+
+  //     const response = await fetch(endpoint, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+  //       },
+  //       body: JSON.stringify(requestBody),
+  //     });
+
+  //     if (!response.ok) {
+  //       const error = await response.json().catch(() => ({}));
+  //       throw new Error(error.message || "Failed to generate report");
+  //     }
+
+  //     const blob = await response.blob();
+  //     if (blob.size === 0) {
+  //       throw new Error("Empty file received");
+  //     }
+
+  //     // Download the file
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = `${reportType}_report_${vehicleNumber}.xlsx`;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     window.URL.revokeObjectURL(url);
+  //     document.body.removeChild(a);
+
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     alert(error.message || "Failed to generate report. Please check console for details.");
+  //   } finally {
+  //     generateBtn.disabled = false;
+  //     generateBtn.textContent = originalText;
+  //   }
+  // };
 
   document.getElementById("generateReport").onclick = async function() {
     const reportType = this.dataset.reportType;
@@ -130,39 +213,17 @@ function openGenericReportModal(reportType) {
     generateBtn.textContent = "Generating...";
 
     try {
-      const endpointMap = {
-        'travel-path': '/reports/download_travel_path_report',
-        'distance': '/reports/download_distance_report',
-        'speed': '/reports/download_speed_report',
-        'stoppage': '/reports/download_stoppage_report',
-        'idle': '/reports/download_idle_report',
-        'ignition': '/reports/download_ignition_report',
-        'daily': '/reports/download_daily_report',
-        'panic': '/reports/download_panic_report',
-        'custom': '/reports/download_custom_report'
-      };
-
-      const endpoint = endpointMap[reportType];
-      if (!endpoint) {
-        throw new Error("Invalid report type");
-      }
-
-      const requestBody = {
-        vehicleNumber,
-        dateRange
-      };
-
-      if (reportType === 'custom' && reportName) {
-        requestBody.reportName = reportName;
-      }
-
-      const response = await fetch(endpoint, {
+      const response = await fetch('/reports/download_custom_report', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRF-TOKEN": getCookie("csrf_access_token"),
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          reportName: reportType,
+          vehicleNumber,
+          dateRange
+        }),
       });
 
       if (!response.ok) {
@@ -171,11 +232,6 @@ function openGenericReportModal(reportType) {
       }
 
       const blob = await response.blob();
-      if (blob.size === 0) {
-        throw new Error("Empty file received");
-      }
-
-      // Download the file
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -194,13 +250,75 @@ function openGenericReportModal(reportType) {
     }
   };
 
+  // Panic report function
+  async function generatePanicReport() {
+    const vehicleNumber = document.getElementById("vehicleNumber").value;
+    const dateRange = document.getElementById("dateRange").value;
+    
+    if (!vehicleNumber) {
+      alert("Please select a vehicle");
+      return;
+    }
+  
+    const btn = document.getElementById("generatePanicReportBtn");
+    if (!btn) return;
+  
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = "Generating...";
+  
+    try {
+      const response = await fetch('/reports/download_panic_report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCookie('csrf_access_token')
+        },
+        body: JSON.stringify({
+          vehicleNumber: vehicleNumber,
+          dateRange: dateRange || 'all'
+        })
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to generate report");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `panic_report_${vehicleNumber}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
   fetch("/reports/get_custom_reports")
-  .then((response) => response.json())
-  .then((reports) => {
-    reports.forEach((report) => {
-      createReportCard(report);
+    .then((response) => response.json())
+    .then((reports) => {
+      reports.forEach((report) => {
+        const reportCard = document.createElement("a");
+        reportCard.href = "#";
+        reportCard.className = "report-card";
+        reportCard.dataset.report = "custom";
+        reportCard.innerHTML = `
+          <h3>${report.report_name}</h3>
+          <i class="fa-solid fa-file-alt"></i>
+        `;
+        document.querySelector(".report-cards").appendChild(reportCard);
+      });
     });
-  });
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -208,10 +326,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const customReportForm = document.getElementById("customReportForm");
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
-  const reportCardsContainer = document.querySelector(".report-cards");
-  const customReportsContainer = document.getElementById(
-    "custom-reports-container"
-  );
+  const modal = document.getElementById("reportModal");
+  const span = document.getElementsByClassName("close")[0];
 
   const allowedFields = [
     "main_power",
@@ -424,87 +540,7 @@ document.addEventListener("DOMContentLoaded", function () {
         saveBtn.textContent = originalText;
       });
   };
-
-  // Update your fetch call in allReport.js
-  async function generatePanicReport() {
-
-    const LOADING_TIMEOUT = 30000; // 30 seconds
-    
-    const startTime = Date.now();
-    const timeoutId = setTimeout(() => {
-        alert("Report generation is taking longer than expected. Please wait...");
-    }, LOADING_TIMEOUT);
-
-    const vehicleNumber = document.getElementById("vehicleNumber").value;
-    const dateRange = document.getElementById("dateRange").value;
-    
-    if (!vehicleNumber) {
-      alert("Please select a vehicle");
-      return;
-    }
   
-    const btn = document.getElementById("generatePanicReportBtn");
-    if (!btn) {
-      console.error("Generate button not found!");
-      return;
-    }
-  
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = "Generating...";
-  
-    try {
-      const response = await fetch('/reports/download_panic_report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCookie('csrf_access_token')
-        },
-        body: JSON.stringify({
-          vehicleNumber: vehicleNumber,
-          dateRange: dateRange || 'all'
-        })
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        let errorMsg = errorData.message || "Failed to generate report";
-        
-        if (errorData.debug_info) {
-          errorMsg += `\n\nDebug Info:
-          IMEI Used: ${errorData.debug_info.imei_used}
-          Total Records: ${errorData.debug_info.total_records}
-          Query Used: ${JSON.stringify(errorData.debug_info.query_used, null, 2)}`;
-          
-          if (errorData.debug_info.sample_document) {
-            errorMsg += `\nSample Document: ${JSON.stringify(errorData.debug_info.sample_document, null, 2)}`;
-          }
-        }
-        
-        throw new Error(errorMsg);
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `panic_report_${vehicleNumber}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-    } catch (error) {
-      console.error("Error:", error);
-      alert(error.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
-      clearTimeout(timeoutId);
-    }
-  }
-  
-  document.addEventListener('DOMContentLoaded', function() {
     const panicBtn = document.getElementById('generatePanicReportBtn');
     if (panicBtn) {
       panicBtn.addEventListener('click', function(e) {
@@ -514,7 +550,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       console.error("Panic report button not found in DOM");
     }
-  });
 
 fetch('/reports/download_panic_report', {
   method: "POST",
