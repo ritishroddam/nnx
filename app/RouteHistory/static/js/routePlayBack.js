@@ -202,7 +202,7 @@ function plotPathOnMap(pathCoordinates) {
       geodesic: true,
       strokeColor: "#FF4500",
       strokeOpacity: 0.9,
-      strokeWeight: 3,
+      strokeWeight: 7,
       icons: [
         {
           icon: arrowSymbol,
