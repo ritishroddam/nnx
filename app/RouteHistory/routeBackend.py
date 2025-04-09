@@ -240,8 +240,8 @@ def get_vehicle_path():
                     "_id": 0,
                     "latitude": 1,
                     "longitude": 1,
-                    "dir1": 1,
-                    "dir2": 1,
+                    "speed": 1,
+                    "ignition": 1,
                     "time": 1
                 }
             }
