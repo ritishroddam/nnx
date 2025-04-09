@@ -251,7 +251,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 'time': json_data['time'],
                 'latitude': json_data['latitude'],
                 'longitude': json_data['longitude'],
-                'location': json_data['address'],
                 'date_time': json_data['date_time'],
                 'timestamp': json_data['timestamp'],
             }
