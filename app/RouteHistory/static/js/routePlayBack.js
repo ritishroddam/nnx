@@ -272,7 +272,7 @@ function moveCar() {
   if (currentIndex < pathCoordinates.length - 1) {
     const start = pathCoordinates[currentIndex];
     const end = pathCoordinates[currentIndex + 1];
-    const stepDuration = 10 / speedMultiplier;
+    const stepDuration = 20 / speedMultiplier;
     const steps = Math.floor(
       google.maps.geometry.spherical.computeDistanceBetween(
         new google.maps.LatLng(start.lat, start.lng),
@@ -421,6 +421,11 @@ function resumeCarAnimation() {
 
 function setSpeed(multiplier) {
   speedMultiplier = multiplier;
+
+  if (animationInterval) {
+    clearInterval(animationInterval);
+    moveCar();
+  }
 }
 
 // Add a click event listener to the back button
