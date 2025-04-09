@@ -198,13 +198,10 @@ function plotPathOnMap(pathCoordinates) {
       geodesic: true,
       strokeColor: "#FF4500",
       strokeOpacity: 0.9,
-      strokeWeight: 4,
+      strokeWeight: 3,
       map: map,
     });
 
-    // pathPolyline.setMap(map);
-
-    // Create DOM elements for start and end markers
     const startContent = document.createElement("div");
     startContent.style.backgroundColor = "green";
     startContent.style.color = "white";
