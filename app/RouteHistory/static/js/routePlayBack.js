@@ -7,7 +7,8 @@ const themeToggle = document.getElementById("theme-toggle");
 let darkMode = true;
 themeToggle.addEventListener("click", function () {
   darkMode = !darkMode; // Toggle the state
-  initMap(darkMode); // Reinitialize the map with the new mapId
+  initMap(darkMode);
+  if (!coords.length == 0) plotPathOnMap(coords);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
