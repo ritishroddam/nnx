@@ -197,12 +197,16 @@ function plotPathOnMap(pathCoordinates) {
       strokeWeight: 2,
     };
 
+    const bounds = new google.maps.LatLngBounds();
+    pathCoordinates.forEach((coord) => bounds.extend(coord));
+    map.fitBounds(bounds);
+
     pathPolyline = new google.maps.Polyline({
       path: pathCoordinates,
       geodesic: true,
       strokeColor: "#FF4500",
       strokeOpacity: 0.9,
-      strokeWeight: 7,
+      strokeWeight: 4,
       icons: [
         {
           icon: arrowSymbol,
@@ -213,10 +217,6 @@ function plotPathOnMap(pathCoordinates) {
     });
 
     pathPolyline.setMap(map);
-
-    const bounds = new google.maps.LatLngBounds();
-    pathCoordinates.forEach((coord) => bounds.extend(coord));
-    map.fitBounds(bounds);
 
     // Create DOM elements for start and end markers
     const startContent = document.createElement("div");
