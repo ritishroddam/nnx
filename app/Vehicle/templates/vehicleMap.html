@@ -46,23 +46,23 @@ Vehicle Map
 {% block content %}
 <div class="icon-legend">
   <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_yellow.png') }}" alt="Yellow Car" />
+    <img src="{{ url_for('static', filename='images/car_yellow.png') }}" alt="Yellow Car" />
     Stationary (0 km/h)
   </div>
   <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_green.png') }}" alt="Green Car" />
+    <img src="{{ url_for('static', filename='images/car_green.png') }}" alt="Green Car" />
     Slow Speed (0-40 km/h)
   </div>
   <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_blue.png') }}" alt="Blue Car" />
+    <img src="{{ url_for('static', filename='images/car_blue.png') }}" alt="Blue Car" />
     Moderate Speed (40-60 km/h)
   </div>
   <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_red.png') }}" alt="Red Car" />
+    <img src="{{ url_for('static', filename='images/car_red.png') }}" alt="Red Car" />
     High Speed (Above 60 km/h)
   </div>
   <div>
-    <img src="{{ url_for('Vehicle.static', filename='images/car_black.png') }}" alt="Black Car" />
+    <img src="{{ url_for('static', filename='images/car_black.png') }}" alt="Black Car" />
     Stationary for more than 24 hours
   </div>
 </div>

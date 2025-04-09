@@ -76,7 +76,13 @@ def show_vehicle_data(LicensePlateNumber):
 
         processed_data = []
         recent_data = None
-        vehicle_data = list(atlanta_collection.find({"imei": vehicleData['IMEI']}))
+
+        pipeline = [
+            {"$match": {"imei": vehicleData['IMEI']}},
+            {"$sort": {"date_time": -1}},  
+        ]
+
+        vehicle_data = list(atlanta_collection.aggregate(pipeline))
 
         # if not vehicle_data:
         #     flash(f"No data found for vehicle with License Plate Number '{LicensePlateNumber}'.", "warning")
@@ -93,30 +99,29 @@ def show_vehicle_data(LicensePlateNumber):
                    entry.get("speed") is not None
             ]
             if vehicle_data:
-                most_recent_entry = max(
-                    vehicle_data,
-                    key=lambda x: datetime.strptime(x["date"] + x["time"], "%y%m%d%H%M%S")
-                )
-                most_recent_datetime = datetime.strptime(
-                    most_recent_entry["date"] + most_recent_entry["time"], "%y%m%d%H%M%S"
-                )
-                if most_recent_datetime.date() == datetime.utcnow().date():
+                most_recent_entry = vehicle_data[0]
+                if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
 
                 # Get data from the last 5 minutes
-                now = datetime.utcnow()
+                now = datetime.now()
                 five_minutes_ago = now - timedelta(minutes=5)
+
+                for entry in vehicle_data:
+
+                    print(f"Entry: {entry['date_time']} for {now} | Is Recent: {(now - entry['date_time']) <= timedelta(minutes=5)}")
+
                 recent_data = [
                     {
                         "time": entry["time"],
                         "speed": entry["speed"]
                     }
                     for entry in vehicle_data
-                    if datetime.strptime(entry["date"] + entry["time"], "%y%m%d%H%M%S") >= five_minutes_ago
+                    if entry['date_time'] >= five_minutes_ago
                 ]
 
         processed_data.append({
-            "License Plate Number": vehicleData.get("License Plate Number", "Unknown"),
+            "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
             "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
             "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
             "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),

@@ -181,7 +181,7 @@ body {
   position: absolute;
   width: 20px;
   height: 20px;
-  background: url("http://64.227.135.38/sirenicon.png");
+  background: url("/static/images/sirenicon.png");
   background-size: contain;
   animation: sos-blink-animation 1s steps(2, start) infinite;
   z-index: 1000;
