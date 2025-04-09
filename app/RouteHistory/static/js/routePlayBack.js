@@ -188,8 +188,8 @@ function plotPathOnMap(pathCoordinates) {
   if (carMarker) carMarker.map = null; // Clear the previous car marker
 
   coords = pathCoordinates.map((item) => ({
-    lat: item.latitude,
-    lng: item.longitude,
+    lat: item.lat,
+    lng: item.lng,
   }));
 
   if (coords.length > 0) {
