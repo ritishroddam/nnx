@@ -154,7 +154,7 @@ def show_vehicle_data(LicensePlateNumber):
 def fetch_vehicle_alerts(imei):
     try:
         # Query the `sos_logs` collection for the specific IMEI
-        alerts = list(db["sos_logs"].find({"imei": imei}, {"_id": 0, "timestamp": 1, "location": 1}))
+        alerts = list(db["sos_logs"].find({"imei": imei}, {"_id": 0}))
 
         # If no alerts found, return an empty list
         if not alerts:
@@ -166,7 +166,7 @@ def fetch_vehicle_alerts(imei):
         formatted_alerts = [
             {
                 "timestamp": datetime.strptime(str(alert["date_time"].astimezone(ist)), "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M:%S"),
-                "location": alert.get("location", "Unknown"),
+                "location": f"{alert['latitude']}, {alert['longitude']}",
                 "severity": "Critical",
                 "status": "Active",
             }
