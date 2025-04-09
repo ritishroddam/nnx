@@ -8,8 +8,7 @@ let darkMode = true;
 themeToggle.addEventListener("click", function () {
   darkMode = !darkMode; // Toggle the state
   initMap(darkMode);
-  if (!coords.length == 0) {
-  }
+  if (!coords.length == 0) document.getElementById("vehicle-form").submit();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
