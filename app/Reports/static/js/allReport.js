@@ -39,49 +39,42 @@ function createReportCard(report) {
   const existingCard = document.querySelector(
     `.report-card[data-report="${report.report_name}"]`
   );
-  if (existingCard) return; // Avoid duplicates
+  if (existingCard) return;
+  
   const reportCard = document.createElement("a");
   reportCard.href = "#";
   reportCard.className = "report-card";
   reportCard.dataset.report = report.report_name;
-  console.log("Creating report card for:", report.report_name); // Debug print statement
+  reportCard.dataset.reportType = "custom";
+  
   reportCard.innerHTML = `
-  <h3>${report.report_name}</h3>
-  <i class="fa-solid fa-file-alt"></i>
+    <h3>${report.report_name}</h3>
+    <i class="fa-solid fa-file-alt"></i>
   `;
-  reportCard.onclick = function () {
-    console.log("Creating report card for:", report.report_name); // Debug print statement
-    openReportModal(report.report_name);
-  };
+  
   document.querySelector(".report-cards").appendChild(reportCard);
 }
 
 function openReportModal(reportName) {
-  console.log("Opening report modal with report name:", reportName); // Debug print statement
   const reportModal = document.getElementById("reportModal");
-
   if (reportModal) {
     reportModal.querySelector("h2").textContent = `${reportName}`;
-  } else {
-    console.error("Report modal not found!");
+    reportModal.style.display = "block";
   }
-
-  reportModal.style.display = "block";
 }
 
 // Modify the report card click handlers
 document.querySelectorAll('.report-card').forEach(card => {
   card.onclick = function() {
-    const reportType = this.dataset.report;
+    const reportType = this.dataset.reportType || this.dataset.report;
     
     if (reportType === 'custom') {
       const reportName = this.querySelector('h3').textContent;
       openReportModal(reportName);
-      // Store the report type
       document.getElementById("generateReport").dataset.reportType = 'custom';
+      document.getElementById("generateReport").dataset.reportName = reportName;
     } else {
       openGenericReportModal(reportType);
-      // Store the report type
       document.getElementById("generateReport").dataset.reportType = reportType;
     }
   };
@@ -90,97 +83,124 @@ document.querySelectorAll('.report-card').forEach(card => {
 function openGenericReportModal(reportType) {
   const modal = document.getElementById("reportModal");
   const titleMap = {
-      'daily-distance': 'Travel Path Report',
-      'odometer-daily-distance': 'Distance Report',
-      'distance-speed-range': 'Speed Report',
-      'stoppage': 'Stoppage Report',
-      'idle': 'Idle Report',
-      'ignition': 'Ignition Report',
-      'daily': 'Daily Report',
-      'sos': 'Panic Report'
+    'travel-path': 'Travel Path Report',
+    'distance': 'Distance Report',
+    'speed': 'Speed Report',
+    'stoppage': 'Stoppage Report',
+    'idle': 'Idle Report',
+    'ignition': 'Ignition Report',
+    'daily': 'Daily Report',
+    'panic': 'Panic Report'
   };
   
   modal.querySelector("h2").textContent = titleMap[reportType] || 'Generate Report';
   modal.style.display = "block";
-  
-  // Store the report type in the generate button
-  document.getElementById("generateReport").dataset.reportType = reportType;
 }
 
-document.getElementById("generateReport").onclick = async function () {
-  const reportType = this.dataset.reportType; // Get stored report type
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  const dateRange = document.getElementById("dateRange").value;
+  // Modal close handlers
+  span.onclick = function() {
+    modal.style.display = "none";
+    customReportModal.style.display = "none";
+  };
 
-  if (!vehicleNumber) {
-    alert("Please select a vehicle number");
-    return;
-  }
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+    if (event.target == customReportModal) {
+      customReportModal.style.display = "none";
+    }
+  };
 
-  // Show loading state
-  const generateBtn = this;
-  const originalText = generateBtn.textContent;
-  generateBtn.disabled = true;
-  generateBtn.textContent = "Generating...";
+  document.getElementById("generateReport").onclick = async function() {
+    const reportType = this.dataset.reportType;
+    const reportName = this.dataset.reportName;
+    const vehicleNumber = document.getElementById("vehicleNumber").value;
+    const dateRange = document.getElementById("dateRange").value;
 
-  try {
-    const endpointMap = {
-      'daily-distance': '/reports/download_travel_path_report',
-      'odometer-daily-distance': '/reports/download_distance_report',
-      'distance-speed-range': '/reports/download_speed_report',
-      'stoppage': '/reports/download_stoppage_report',
-      'idle': '/reports/download_idle_report',
-      'ignition': '/reports/download_ignition_report',
-      'daily': '/reports/download_daily_report',
-      'sos': '/reports/download_panic_report',
-      'custom': '/reports/download_custom_report'
-    };
-
-    const endpoint = endpointMap[reportType];
-    if (!endpoint) {
-      throw new Error("Invalid report type");
+    if (!vehicleNumber) {
+      alert("Please select a vehicle number");
+      return;
     }
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify({
+    // Show loading state
+    const generateBtn = this;
+    const originalText = generateBtn.textContent;
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Generating...";
+
+    try {
+      const endpointMap = {
+        'travel-path': '/reports/download_travel_path_report',
+        'distance': '/reports/download_distance_report',
+        'speed': '/reports/download_speed_report',
+        'stoppage': '/reports/download_stoppage_report',
+        'idle': '/reports/download_idle_report',
+        'ignition': '/reports/download_ignition_report',
+        'daily': '/reports/download_daily_report',
+        'panic': '/reports/download_panic_report',
+        'custom': '/reports/download_custom_report'
+      };
+
+      const endpoint = endpointMap[reportType];
+      if (!endpoint) {
+        throw new Error("Invalid report type");
+      }
+
+      const requestBody = {
         vehicleNumber,
         dateRange
-      }),
+      };
+
+      if (reportType === 'custom' && reportName) {
+        requestBody.reportName = reportName;
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Failed to generate report");
+      }
+
+      const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error("Empty file received");
+      }
+
+      // Download the file
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${reportType}_report_${vehicleNumber}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message || "Failed to generate report. Please check console for details.");
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.textContent = originalText;
+    }
+  };
+
+  fetch("/reports/get_custom_reports")
+  .then((response) => response.json())
+  .then((reports) => {
+    reports.forEach((report) => {
+      createReportCard(report);
     });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || "Failed to generate report");
-    }
-
-    const blob = await response.blob();
-    if (blob.size === 0) {
-      throw new Error("Empty file received");
-    }
-
-    // Download the file
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${reportType.replace(/-/g, '_')}_report.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-
-  } catch (error) {
-    console.error("Error:", error);
-    alert(error.message || "Failed to generate report. Please check console for details.");
-  } finally {
-    generateBtn.disabled = false;
-    generateBtn.textContent = originalText;
-  }
-};
+  });
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -407,6 +427,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Update your fetch call in allReport.js
   async function generatePanicReport() {
+
+    const LOADING_TIMEOUT = 30000; // 30 seconds
+    
+    const startTime = Date.now();
+    const timeoutId = setTimeout(() => {
+        alert("Report generation is taking longer than expected. Please wait...");
+    }, LOADING_TIMEOUT);
+
     const vehicleNumber = document.getElementById("vehicleNumber").value;
     const dateRange = document.getElementById("dateRange").value;
     
@@ -472,6 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
+      clearTimeout(timeoutId);
     }
   }
   
@@ -510,14 +539,6 @@ fetch('/reports/download_panic_report', {
   alert(error.message || "Failed to generate report. Please check console for details.");
   throw error; // Re-throw to prevent further processing
 });
-
-  fetch("/reports/get_custom_reports")
-    .then((response) => response.json())
-    .then((reports) => {
-      reports.forEach((report) => {
-        createReportCard(report);
-      });
-    });
 
   $("select").selectize({
     create: false,
