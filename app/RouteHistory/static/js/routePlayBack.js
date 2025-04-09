@@ -105,10 +105,10 @@ async function initMap(darkMode = true) {
   document
     .getElementById("play-button")
     .addEventListener("click", startCarAnimation);
+  document.getElementById("resume-button").addEventListener("click", moveCar);
   document
-    .getElementById("resume-button")
-    .addEventListener("click", () => setSpeed(1));
-  document.getElementById("stop-button").addEventListener("click", setSpeed(0));
+    .getElementById("stop-button")
+    .addEventListener("click", stopCarAnimation);
   document
     .getElementById("speed-2x-button")
     .addEventListener("click", () => setSpeed(2));
@@ -270,9 +270,7 @@ function moveCar() {
   if (currentIndex < pathCoordinates.length - 1) {
     const start = pathCoordinates[currentIndex];
     const end = pathCoordinates[currentIndex + 1];
-    const steps = 100;
-    let stepDuration = 0;
-    if (speedMultiplier != 0) stepDuration = 10 / speedMultiplier;
+    const stepDuration = 10 / speedMultiplier;
     let stepIndex = 0;
     const latDiff = (end.lat - start.lat) / steps;
     const lngDiff = (end.lng - start.lng) / steps;
