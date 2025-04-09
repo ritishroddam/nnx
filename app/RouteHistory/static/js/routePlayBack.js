@@ -201,26 +201,12 @@ function plotPathOnMap(pathCoordinates) {
     pathCoordinates.forEach((coord) => bounds.extend(coord));
     map.fitBounds(bounds);
 
-    let pathCoordinatesLatLng = [];
-
-    pathCoordinates.forEach((coord) => {
-      const latLng = new google.maps.LatLng(coord.lat, coord.lng);
-      pathCoordinatesLatLng.push(latLng);
-    });
-
     pathPolyline = new google.maps.Polyline({
-      path: pathCoordinatesLatLng,
+      path: pathCoordinates,
       geodesic: true,
       strokeColor: "#FF4500",
       strokeOpacity: 0.9,
       strokeWeight: 4,
-      icons: [
-        {
-          icon: arrowSymbol,
-          offset: "0%",
-          repeat: "75px",
-        },
-      ],
     });
 
     pathPolyline.setMap(map);
@@ -266,6 +252,28 @@ function plotPathOnMap(pathCoordinates) {
       map: map,
       title: "Car",
       content: carContent, // Pass the DOM element
+    });
+
+    pathCoordinates.forEach((coord, index) => {
+      if (index < pathCoordinates.length - 1) {
+        const arrowContent = document.createElement("div");
+        arrowContent.style.width = "10px";
+        arrowContent.style.height = "10px";
+        arrowContent.style.borderTop = "10px solid blue";
+        arrowContent.style.borderLeft = "5px solid transparent";
+        arrowContent.style.borderRight = "5px solid transparent";
+        arrowContent.style.transform = `rotate(${calculateBearing(
+          coord,
+          pathCoordinates[index + 1]
+        )}deg)`;
+
+        new google.maps.marker.AdvancedMarkerElement({
+          position: coord,
+          map: map,
+          title: "Arrow",
+          content: arrowContent, // Pass the DOM element
+        });
+      }
     });
   }
 }
