@@ -97,7 +97,7 @@ button {
 .chart-section h3 {
   margin-bottom: 0.5rem;
 }
-canvas {
+#speedChart {
   width: 100% !important;
   height: 160px !important;
 }
