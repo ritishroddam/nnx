@@ -229,30 +229,32 @@ function openGenericReportModal(reportType) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to generate report");
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to generate report");
       }
 
-      const blob = new Blob([JSON.stringify(data)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${reportType}_report_${vehicleNumber}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${reportType}_report_${vehicleNumber}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
 
     } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "Failed to generate report. Please check console for details.");
-      
-      // More detailed error messages
-      if (error.message.includes("No data found")) {
-        alert("No data found for the selected vehicle and date range. Please try different criteria.");
-      }
+        console.error("Error details:", error);
+        // Extract JSON error message if present
+        try {
+            const errorData = JSON.parse(error.message);
+            alert(`Error: ${errorData.message || "Unknown error"}`);
+        } catch {
+            alert(`Error: ${error.message || "Failed to generate report"}`);
+        }
     } finally {
-      generateBtn.disabled = false;
-      generateBtn.textContent = originalText;
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalText;
     }
 };
 
@@ -262,53 +264,48 @@ function openGenericReportModal(reportType) {
     const dateRange = document.getElementById("dateRange").value;
     
     if (!vehicleNumber) {
-      alert("Please select a vehicle");
-      return;
+        alert("Please select a vehicle");
+        return;
     }
-  
-    const btn = document.getElementById("generatePanicReportBtn");
-    if (!btn) return;
-  
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = "Generating...";
-  
-    try {
-      const response = await fetch('/reports/download_panic_report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCookie('csrf_access_token')
-        },
-        body: JSON.stringify({
-          vehicleNumber: vehicleNumber,
-          dateRange: dateRange || 'all'
-        })
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to generate report");
-      }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `panic_report_${vehicleNumber}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
+    try {
+        const response = await fetch('/reports/download_panic_report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCookie('csrf_access_token')
+            },
+            body: JSON.stringify({
+                vehicleNumber: vehicleNumber,
+                dateRange: dateRange || 'all'
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `panic_report_${vehicleNumber}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
     } catch (error) {
-      console.error("Error:", error);
-      alert(error.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
+        console.error("Panic report error:", error);
+        try {
+            const errorData = JSON.parse(error.message);
+            alert(errorData.message || "Failed to generate panic report");
+        } catch {
+            alert(error.message || "Failed to generate panic report");
+        }
     }
-  }
+}
 
   fetch("/reports/get_custom_reports")
     .then((response) => response.json())

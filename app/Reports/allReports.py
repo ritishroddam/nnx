@@ -314,42 +314,28 @@ def download_custom_report():
 
         # Process data
         output = BytesIO()
-        df = pd.DataFrame(data)
-        
-        # Format date/time
-        if 'date_time' in df.columns:
-            df['date_time'] = pd.to_datetime(df['date_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Apply post-processing if defined
-        if 'post_process' in config:
-            df = config['post_process'](df)
-
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
         
-        # Get file data and close buffer
+        # Prepare response
         output.seek(0)
-        file_data = output.getvalue()
-        output.close()
-        
-        # Create response with explicit content length
         response = send_file(
-            BytesIO(file_data),
+            output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,
             download_name=f"{report_name}_report_{vehicle_number}.xlsx"
         )
         
-        # Set content length explicitly to prevent mismatch
-        response.headers['Content-Length'] = len(file_data)
+        # Ensure no JSON interpretation
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         return response
 
     except Exception as e:
+        # Return proper JSON error response
         return jsonify({
             "success": False,
             "message": str(e),
-            "error_type": type(e).__name__,
-            "traceback": traceback.format_exc()  # Include traceback for debugging
+            "error_type": type(e).__name__
         }), 500
 
 # Keep the panic report function as is
