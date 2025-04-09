@@ -165,7 +165,7 @@ def fetch_vehicle_alerts(imei):
         # Format alerts for frontend
         formatted_alerts = [
             {
-                "timestamp": str(alert["date_time"].astimezone(ist)),
+                "timestamp": alert["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p"),
                 "location": f"{alert['latitude']}, {alert['longitude']}",
                 "severity": "Critical",
                 "status": "Active",
