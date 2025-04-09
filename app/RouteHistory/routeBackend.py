@@ -261,8 +261,11 @@ def get_vehicle_path():
             latitude = convert_to_decimal(record["latitude"], record["dir1"])
             longitude = convert_to_decimal(record["longitude"], record["dir2"])
             path_data.append({
+                "LicensePlateNumber": data_record.get("LicensePlateNumber", "Unknown"),
                 "latitude": latitude,
                 "longitude": longitude,
+                "speed": record["speed"],
+                "ignition": record["ignition"],
                 "time": record["time"]
             })
 

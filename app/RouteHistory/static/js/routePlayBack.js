@@ -153,15 +153,14 @@ document
       .then((data) => {
         if (data.length > 0) {
           pathCoordinates = data.map((item) => ({
+            LicensePlateNumber: item.LicensePlateNumber,
             lat: item.latitude,
             lng: item.longitude,
             time: item.time,
+            speed: item.speed,
+            ignition: item.ignition,
           }));
-          coords = data.map((item) => ({
-            lat: item.latitude,
-            lng: item.longitude,
-          }));
-          plotPathOnMap(coords);
+          plotPathOnMap(pathCoordinates);
         } else {
           alert("No path data found for the given IMEI and date range.");
         }
@@ -188,15 +187,20 @@ function plotPathOnMap(pathCoordinates) {
   if (endMarker) endMarker.map = null;
   if (carMarker) carMarker.map = null; // Clear the previous car marker
 
-  if (pathCoordinates.length > 0) {
+  coords = pathCoordinates.map((item) => ({
+    lat: item.latitude,
+    lng: item.longitude,
+  }));
+
+  if (coords.length > 0) {
     const bounds = new google.maps.LatLngBounds();
-    pathCoordinates.forEach((coord) => bounds.extend(coord));
+    coords.forEach((coord) => bounds.extend(coord));
     map.fitBounds(bounds);
 
     pathPolyline = new google.maps.Polyline({
-      path: pathCoordinates,
+      path: coords,
       geodesic: true,
-      strokeColor: "#FF4500",
+      strokeColor: "#f0f0f0",
       strokeOpacity: 0.9,
       strokeWeight: 3,
       map: map,
@@ -218,14 +222,14 @@ function plotPathOnMap(pathCoordinates) {
 
     // Markers for start and end points using AdvancedMarkerElement
     startMarker = new google.maps.marker.AdvancedMarkerElement({
-      position: pathCoordinates[0],
+      position: coords[0],
       map: map,
       title: "Start",
       content: startContent, // Pass the DOM element
     });
 
     endMarker = new google.maps.marker.AdvancedMarkerElement({
-      position: pathCoordinates[pathCoordinates.length - 1],
+      position: coords[coords.length - 1],
       map: map,
       title: "End",
       content: endContent, // Pass the DOM element
@@ -238,33 +242,53 @@ function plotPathOnMap(pathCoordinates) {
     carContent.alt = "Car";
 
     carMarker = new google.maps.marker.AdvancedMarkerElement({
-      position: pathCoordinates[0],
+      position: coords[0],
       map: map,
       title: "Car",
       content: carContent, // Pass the DOM element
     });
 
-    pathCoordinates.forEach((coord, index) => {
-      if (index < pathCoordinates.length - 1) {
-        const arrowContent = document.createElement("div");
-        arrowContent.style.width = "10px";
-        arrowContent.style.height = "10px";
-        arrowContent.style.borderTop = "10px solid blue";
-        arrowContent.style.borderLeft = "5px solid transparent";
-        arrowContent.style.borderRight = "5px solid transparent";
-        arrowContent.style.transform = `rotate(${calculateBearing(
-          pathCoordinates[index + 1],
-          coord
-        )}deg)`;
+    for (let index = 0; index < coords.length - 1; index++) {
+      const coord = coords[index];
+      const pathCoord = pathCoordinates[index];
+      const nextCoord = coords[index + 1];
+      const nextPathCoord = pathCoordinates[index + 1];
 
-        new google.maps.marker.AdvancedMarkerElement({
-          position: coord,
+      const arrowContent = document.createElement("div");
+      arrowContent.style.width = "10px";
+      arrowContent.style.height = "10px";
+      arrowContent.style.borderTop = "10px solid blue";
+      arrowContent.style.borderLeft = "5px solid transparent";
+      arrowContent.style.borderRight = "5px solid transparent";
+      arrowContent.style.transform = `rotate(${calculateBearing(
+        nextCoord,
+        coord
+      )}deg)`;
+
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: coord,
+        map: map,
+        title: "Arrow",
+        content: arrowContent, // Pass the DOM element
+      });
+
+      const ignition = pathCoord.ignition === "1" ? "On" : "Off";
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div>
+                <h3>${pathCoord.LicensePlateNumber}</h3>
+                <p><strong>Speed:</strong> ${pathCoord.speed}</p>
+                <p><strong>Ignition:</strong> ${ignition}</p>
+              </div>`,
+      });
+
+      marker.addListener("gmp-click", () => {
+        infoWindow.open({
+          anchor: marker,
           map: map,
-          title: "Arrow",
-          content: arrowContent, // Pass the DOM element
         });
-      }
-    });
+      });
+    }
   }
 }
 
