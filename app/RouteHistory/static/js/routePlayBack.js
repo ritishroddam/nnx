@@ -283,8 +283,7 @@ function moveCar() {
         carMarker.content = carContent; // Set the DOM element as content
         carMarker.position = { lat, lng };
 
-        if (!map.getBounds().contains(carMarker.position))
-          map.panTo(carMarker.position);
+        if (!map.getBounds().contains(carMarker.position)) map.panTo(end);
 
         stepIndex++;
       } else {
