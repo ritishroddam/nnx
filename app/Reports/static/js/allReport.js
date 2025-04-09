@@ -226,12 +226,13 @@ function openGenericReportModal(reportType) {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || "Failed to generate report");
+        throw new Error(data.message || "Failed to generate report");
       }
 
-      const blob = await response.blob();
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -244,11 +245,16 @@ function openGenericReportModal(reportType) {
     } catch (error) {
       console.error("Error:", error);
       alert(error.message || "Failed to generate report. Please check console for details.");
+      
+      // More detailed error messages
+      if (error.message.includes("No data found")) {
+        alert("No data found for the selected vehicle and date range. Please try different criteria.");
+      }
     } finally {
       generateBtn.disabled = false;
       generateBtn.textContent = originalText;
     }
-  };
+};
 
   // Panic report function
   async function generatePanicReport() {
@@ -541,15 +547,17 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   };
   
-    const panicBtn = document.getElementById('generatePanicReportBtn');
-    if (panicBtn) {
-      panicBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        generatePanicReport();
-      });
-    } else {
-      console.error("Panic report button not found in DOM");
-    }
+  // document.addEventListener('DOMContentLoaded', function() {
+  //   const panicBtn = document.getElementById('generatePanicReportBtn');
+  //   if (panicBtn) {
+  //     panicBtn.addEventListener('click', function(e) {
+  //       e.preventDefault();
+  //       generatePanicReport();
+  //     });
+  //   } else {
+  //     console.error("Panic report button not found in DOM");
+  //   }
+  // });
 
 fetch('/reports/download_panic_report', {
   method: "POST",
