@@ -183,6 +183,101 @@ function formatDateToDB(dateString) {
   return `${day}${month}${year}`;
 }
 
+// function plotPathOnMap(pathCoordinates) {
+//   if (pathPolyline) pathPolyline.setMap(null);
+//   if (startMarker) startMarker.map = null;
+//   if (endMarker) endMarker.map = null;
+//   if (carMarker) carMarker.map = null; // Clear the previous car marker
+
+//   if (pathCoordinates.length > 0) {
+//     const arrowSymbol = {
+//       path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+//       scale: 2,
+//       strokeColor: "#0000FF",
+//       strokeWeight: 2,
+//     };
+
+//     const bounds = new google.maps.LatLngBounds();
+//     pathCoordinates.forEach((coord) => bounds.extend(coord));
+//     map.fitBounds(bounds);
+
+//     pathPolyline = new google.maps.Polyline({
+//       path: pathCoordinates,
+//       geodesic: true,
+//       strokeColor: "#FF4500",
+//       strokeOpacity: 0.9,
+//       strokeWeight: 4,
+//     });
+
+//     pathPolyline.setMap(map);
+
+//     // Create DOM elements for start and end markers
+//     const startContent = document.createElement("div");
+//     startContent.style.backgroundColor = "green";
+//     startContent.style.color = "white";
+//     startContent.style.padding = "5px";
+//     startContent.style.borderRadius = "5px";
+//     startContent.textContent = "Start";
+
+//     const endContent = document.createElement("div");
+//     endContent.style.backgroundColor = "red";
+//     endContent.style.color = "white";
+//     endContent.style.padding = "5px";
+//     endContent.style.borderRadius = "5px";
+//     endContent.textContent = "End";
+
+//     // Markers for start and end points using AdvancedMarkerElement
+//     startMarker = new google.maps.marker.AdvancedMarkerElement({
+//       position: pathCoordinates[0],
+//       map: map,
+//       title: "Start",
+//       content: startContent, // Pass the DOM element
+//     });
+
+//     endMarker = new google.maps.marker.AdvancedMarkerElement({
+//       position: pathCoordinates[pathCoordinates.length - 1],
+//       map: map,
+//       title: "End",
+//       content: endContent, // Pass the DOM element
+//     });
+
+//     const carContent = document.createElement("img");
+//     carContent.src = "/static/images/car_green.png";
+//     carContent.style.width = "18px";
+//     carContent.style.height = "32px";
+//     carContent.alt = "Car";
+
+//     carMarker = new google.maps.marker.AdvancedMarkerElement({
+//       position: pathCoordinates[0],
+//       map: map,
+//       title: "Car",
+//       content: carContent, // Pass the DOM element
+//     });
+
+//     pathCoordinates.forEach((coord, index) => {
+//       if (index < pathCoordinates.length - 1) {
+//         const arrowContent = document.createElement("div");
+//         arrowContent.style.width = "10px";
+//         arrowContent.style.height = "10px";
+//         arrowContent.style.borderTop = "10px solid blue";
+//         arrowContent.style.borderLeft = "5px solid transparent";
+//         arrowContent.style.borderRight = "5px solid transparent";
+//         arrowContent.style.transform = `rotate(${calculateBearing(
+//           coord,
+//           pathCoordinates[index + 1]
+//         )}deg)`;
+
+//         new google.maps.marker.AdvancedMarkerElement({
+//           position: coord,
+//           map: map,
+//           title: "Arrow",
+//           content: arrowContent, // Pass the DOM element
+//         });
+//       }
+//     });
+//   }
+// }
+
 function plotPathOnMap(pathCoordinates) {
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
@@ -190,13 +285,6 @@ function plotPathOnMap(pathCoordinates) {
   if (carMarker) carMarker.map = null; // Clear the previous car marker
 
   if (pathCoordinates.length > 0) {
-    const arrowSymbol = {
-      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-      scale: 2,
-      strokeColor: "#0000FF",
-      strokeWeight: 2,
-    };
-
     const bounds = new google.maps.LatLngBounds();
     pathCoordinates.forEach((coord) => bounds.extend(coord));
     map.fitBounds(bounds);
@@ -254,6 +342,7 @@ function plotPathOnMap(pathCoordinates) {
       content: carContent, // Pass the DOM element
     });
 
+    // Add arrow markers for each coordinate
     pathCoordinates.forEach((coord, index) => {
       if (index < pathCoordinates.length - 1) {
         const arrowContent = document.createElement("div");
