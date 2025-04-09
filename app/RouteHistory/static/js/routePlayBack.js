@@ -271,8 +271,8 @@ function moveCar() {
     const start = pathCoordinates[currentIndex];
     const end = pathCoordinates[currentIndex + 1];
     const steps = 100;
-    const stepDuration = 10 / speedMultiplier;
-
+    let stepDuration = 0;
+    if (speedMultiplier != 0) stepDuration = 10 / speedMultiplier;
     let stepIndex = 0;
     const latDiff = (end.lat - start.lat) / steps;
     const lngDiff = (end.lng - start.lng) / steps;
