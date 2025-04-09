@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, render_template, redirect, Blueprint,
 from pymongo import MongoClient
 from flask_cors import CORS
 from datetime import datetime, timedelta
-import pytz 
+import pytz
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
@@ -160,10 +160,12 @@ def fetch_vehicle_alerts(imei):
         if not alerts:
             return jsonify([])
 
+        ist = pytz.timezone("Asia/Kolkata")
+
         # Format alerts for frontend
         formatted_alerts = [
             {
-                "timestamp": datetime.strptime(str(alert["timestamp"]), "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M:%S"),
+                "timestamp": datetime.strptime(str(alert["date_time"].astimezone(ist)), "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M:%S"),
                 "location": alert.get("location", "Unknown"),
                 "severity": "Critical",
                 "status": "Active",
