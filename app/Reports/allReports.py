@@ -302,7 +302,14 @@ def download_custom_report():
         ).sort("date_time", 1))
 
         if not data:
-            return jsonify({"success": False, "message": "No data found for the selected criteria."}), 404
+            return jsonify({
+                "success": False,
+                "message": "No data found for the selected criteria.",
+                "debug_info": {
+                    "query": config['query'],
+                    "fields": config['fields']
+                }
+            }), 404
 
         # Process data
         output = BytesIO()
@@ -329,7 +336,8 @@ def download_custom_report():
     except Exception as e:
         return jsonify({
             "success": False,
-            "message": f"Error generating report: {str(e)}"
+            "message": str(e),
+            "error_type": type(e).__name__
         }), 500
 
 # Keep the panic report function as is
