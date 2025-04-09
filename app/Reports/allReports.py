@@ -215,6 +215,9 @@ def merge_data(results_from_collections, fields):
 def download_custom_report():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
         report_name = data.get("reportName", "custom")
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
@@ -222,14 +225,13 @@ def download_custom_report():
         # Get vehicle IMEI
         vehicle_data = db['vehicle_inventory'].find_one(
             {'LicensePlateNumber': vehicle_number},
-            {'_id': 0, 'IMEI': 1, 'SIM': 1}
+            {'_id': 0, 'IMEI': 1}
         )
         
         if not vehicle_data or 'IMEI' not in vehicle_data:
             return jsonify({"success": False, "message": "Vehicle IMEI not found."}), 404
 
         imei_number = vehicle_data['IMEI']
-        sim_number = vehicle_data.get('SIM', 'N/A')
 
         # Define report configurations
         report_configs = {
@@ -311,6 +313,16 @@ def download_custom_report():
                     "fields": config['fields']
                 }
             }), 404
+        
+        cursor = db[config['collection']].find(
+            config['query'],
+            config.get('projection', {})
+        )
+            
+        df = pd.DataFrame(list(cursor))
+
+        if df.empty:
+            return jsonify({"success": False, "message": "No data found for the given criteria"}), 404
 
         # Process data
         output = BytesIO()
@@ -326,12 +338,9 @@ def download_custom_report():
             download_name=f"{report_name}_report_{vehicle_number}.xlsx"
         )
         
-        # Ensure no JSON interpretation
-        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         return response
 
     except Exception as e:
-        # Return proper JSON error response
         return jsonify({
             "success": False,
             "message": str(e),
