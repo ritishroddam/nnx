@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import traceback
 from flask import render_template, Blueprint, request, jsonify, send_file, url_for # type: ignore
 from pymongo import MongoClient # type: ignore
 import pandas as pd # type: ignore
@@ -326,18 +327,29 @@ def download_custom_report():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
         
-        return send_file(
-            output,
+        # Get file data and close buffer
+        output.seek(0)
+        file_data = output.getvalue()
+        output.close()
+        
+        # Create response with explicit content length
+        response = send_file(
+            BytesIO(file_data),
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,
             download_name=f"{report_name}_report_{vehicle_number}.xlsx"
         )
+        
+        # Set content length explicitly to prevent mismatch
+        response.headers['Content-Length'] = len(file_data)
+        return response
 
     except Exception as e:
         return jsonify({
             "success": False,
             "message": str(e),
-            "error_type": type(e).__name__
+            "error_type": type(e).__name__,
+            "traceback": traceback.format_exc()  # Include traceback for debugging
         }), 500
 
 # Keep the panic report function as is

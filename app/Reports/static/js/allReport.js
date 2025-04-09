@@ -547,17 +547,17 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   };
   
-  // document.addEventListener('DOMContentLoaded', function() {
-  //   const panicBtn = document.getElementById('generatePanicReportBtn');
-  //   if (panicBtn) {
-  //     panicBtn.addEventListener('click', function(e) {
-  //       e.preventDefault();
-  //       generatePanicReport();
-  //     });
-  //   } else {
-  //     console.error("Panic report button not found in DOM");
-  //   }
-  // });
+  document.addEventListener('DOMContentLoaded', function() {
+    const panicBtn = document.getElementById('generatePanicReportBtn');
+    if (panicBtn) {
+      panicBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        generatePanicReport();
+      });
+    } else {
+      console.error("Panic report button not found in DOM");
+    }
+  });
 
 fetch('/reports/download_panic_report', {
   method: "POST",
