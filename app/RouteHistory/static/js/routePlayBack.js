@@ -105,7 +105,9 @@ async function initMap(darkMode = true) {
   document
     .getElementById("play-button")
     .addEventListener("click", startCarAnimation);
-  document.getElementById("resume-button").addEventListener("click", moveCar);
+  document
+    .getElementById("resume-button")
+    .addEventListener("click", resumeCarAnimation);
   document
     .getElementById("stop-button")
     .addEventListener("click", stopCarAnimation);
@@ -405,7 +407,16 @@ function startCarAnimation() {
 }
 
 function stopCarAnimation() {
-  clearInterval(animationInterval);
+  if (animationInterval) {
+    clearInterval(animationInterval); // Pause the animation
+    animationInterval = null; // Mark the animation as paused
+  }
+}
+
+function resumeCarAnimation() {
+  if (!animationInterval && currentIndex < pathCoordinates.length - 1) {
+    moveCar(); // Resume the animation from the current state
+  }
 }
 
 function setSpeed(multiplier) {
