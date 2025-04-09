@@ -201,6 +201,12 @@ function plotPathOnMap(pathCoordinates) {
     pathCoordinates.forEach((coord) => bounds.extend(coord));
     map.fitBounds(bounds);
 
+    pathCoordinates.forEach((coord) => {
+      const latLng = new google.maps.LatLng(coord.lat, coord.lng);
+      coord.lat = latLng.lat();
+      coord.lng = latLng.lng();
+    });
+
     pathPolyline = new google.maps.Polyline({
       path: pathCoordinates,
       geodesic: true,
