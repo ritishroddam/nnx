@@ -163,7 +163,7 @@ def fetch_vehicle_alerts(imei):
         # Format alerts for frontend
         formatted_alerts = [
             {
-                "timestamp": datetime.strptime(alert["timestamp"], "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M:%S"),
+                "timestamp": datetime.strptime(str(alert["timestamp"]), "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M:%S"),
                 "location": alert.get("location", "Unknown"),
                 "severity": "Critical",
                 "status": "Active",
