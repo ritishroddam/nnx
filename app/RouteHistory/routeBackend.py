@@ -242,6 +242,8 @@ def get_vehicle_path():
                     "longitude": 1,
                     "speed": 1,
                     "ignition": 1,
+                    "dir1": 1,
+                    "dir2": 1,
                     "time": 1
                 }
             }
