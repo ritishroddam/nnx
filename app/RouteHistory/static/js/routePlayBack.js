@@ -200,7 +200,7 @@ function plotPathOnMap(pathCoordinates) {
     pathPolyline = new google.maps.Polyline({
       path: coords,
       geodesic: true,
-      strokeColor: "#f0f0f0",
+      strokeColor: "black",
       strokeOpacity: 0.9,
       strokeWeight: 3,
       map: map,
