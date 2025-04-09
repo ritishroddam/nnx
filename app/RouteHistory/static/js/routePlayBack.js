@@ -105,9 +105,12 @@ async function initMap(darkMode = true) {
   document
     .getElementById("play-button")
     .addEventListener("click", startCarAnimation);
-  // document
-  //   .getElementById("resume-button")
-  //   .addEventListener("click", () => setSpeed(1));
+  document.getElementById("resume-button").addEventListener("click", () => {
+    if (animationInterval === null) {
+      moveCar(); // Resume the car animation
+    }
+    setSpeed(1); // Set the speed to normal (1x)
+  });
   document
     .getElementById("stop-button")
     .addEventListener("click", stopCarAnimation);
