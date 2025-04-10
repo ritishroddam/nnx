@@ -156,8 +156,6 @@ async function initMap(darkMode = true) {
     .addEventListener("click", () => setSpeed(8));
 }
 
-timelineSlider.addEventListener("input", handleSliderInput);
-
 function handleSliderInput() {
   const index = parseInt(this.value);
   currentIndex = index;
@@ -238,6 +236,7 @@ function interpolateSpeed(index, originalData) {
 }
 
 async function plotPathOnMap(pathCoordinates) {
+  timelineSlider.addEventListener("input", handleSliderInput);
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
   if (endMarker) endMarker.map = null;
