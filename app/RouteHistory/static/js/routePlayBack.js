@@ -339,9 +339,8 @@ async function plotPathOnMap(pathCoordinates) {
       const nextPathCoord = pathCoordinates[index + 1];
 
       const arrowContent = document.createElement("i");
-      arrowContent.className = "fa-solid fa-caret-right";
+      arrowContent.className = "fa-solid fa-caret-up";
       arrowContent.style.color = "#2a2a2a"; // Optional: Set the color of the arrow
-      arrowContent.style.fontSize = "16px";
       arrowContent.style.transform = `rotate(${calculateBearing(
         coord,
         nextCoord
