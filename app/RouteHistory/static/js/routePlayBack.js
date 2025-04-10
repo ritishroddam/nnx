@@ -345,6 +345,7 @@ async function plotPathOnMap(pathCoordinates) {
       arrowContent.style.borderTop = "10px solid #2a2a2a";
       arrowContent.style.borderLeft = "5px solid transparent";
       arrowContent.style.borderRight = "5px solid transparent";
+      arrowContent.style.transformOrigin = "50% 50%";
       arrowContent.style.transform = `rotate(${calculateBearing(
         nextCoord,
         coord
