@@ -68,6 +68,7 @@ def geocode():
         saved_coord = (nearby_entry['lat'], nearby_entry['lng'])
         current_coord = (lat, lng)
         distance = geodesic(saved_coord, current_coord).km
+        print(f"Distance: {distance} km")
         if distance != 0:
             bearing = calculate_bearing(saved_coord, current_coord)
             address = f"{distance:.2f} km {bearing} from {nearby_entry['address']}"
