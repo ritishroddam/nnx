@@ -448,11 +448,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 import pytz
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-import time
-
-geolocator = Nominatim(user_agent="reports_app")
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -538,22 +533,6 @@ def save_custom_report():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-def get_location(lat, lon):
-    """Get location name from coordinates with retry logic"""
-    if not lat or not lon:
-        return "N/A"
-    
-    try:
-        # Convert from "1259.4363" format to decimal degrees
-        latitude = float(lat[:2]) + float(lat[2:])/60
-        longitude = float(lon[:3]) + float(lon[3:])/60
-        location = geolocator.reverse(f"{latitude}, {longitude}", exactly_one=True)
-        return location.address if location else "N/A"
-    except (GeocoderTimedOut, GeocoderServiceError):
-        time.sleep(1)
-        return get_location(lat, lon)  # Retry once
-    except Exception:
-        return "N/A"    
 
 @reports_bp.route('/get_custom_report', methods=['GET'])
 @jwt_required()
@@ -697,13 +676,6 @@ def download_custom_report():
         # Add vehicle number column
         df['Vehicle Number'] = vehicle["LicensePlateNumber"]
 
-        # Add location if we have coordinates
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            df['Location'] = df.apply(
-                lambda row: get_location(row['latitude'], row['longitude']), 
-                axis=1
-            )
-
         # Apply post-processing if defined
         if report_name != "custom" and post_process:
             df = post_process(df)
@@ -830,12 +802,6 @@ def download_panic_report():
         # Add vehicle number
         df['Vehicle Number'] = vehicle["LicensePlateNumber"]
         
-        # Add location using geocoding
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            df['Location'] = df.apply(
-                lambda row: get_location(row['latitude'], row['longitude']), 
-                axis=1
-            )
 
         # Generate Excel
         output = BytesIO()
