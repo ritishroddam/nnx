@@ -338,13 +338,11 @@ async function plotPathOnMap(pathCoordinates) {
       const pathCoord = pathCoordinates[index];
       const nextPathCoord = pathCoordinates[index + 1];
 
-      const arrowContent = document.createElement("div");
-      arrowContent.style.width = "10px";
-      arrowContent.style.height = "10px";
-      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-      arrowContent.style.borderTop = "1px solid black";
-      arrowContent.style.borderLeft = "1px solid black";
-      arrowContent.style.borderRight = "1px solid black";
+      const arrowContent = document.createElement("i");
+      arrowContent.className = "fa-solid fa-location-arrow";
+      arrowContent.style.setProperty("--fa-rotate-angle", "45deg");
+      arrowContent.style.color = "black"; // Optional: Set the color of the arrow
+      arrowContent.style.fontSize = "16px";
       arrowContent.style.transform = `rotate(${calculateBearing(
         nextCoord,
         coord
