@@ -72,6 +72,8 @@ def geocode():
         if distance != 0:
             bearing = calculate_bearing(saved_coord, current_coord)
             address = f"{distance:.2f} km {bearing} from {nearby_entry['address']}"
+        else:
+            address = nearby_entry['address']
         
         return jsonify({
             'address': address,
