@@ -106,32 +106,27 @@ from config import config
 from pymongo import ASCENDING
 
 gecoding_bp = Blueprint('geocode', __name__)
+
 # Initialize Google Maps API client
 gmaps = googlemaps.Client(key=config['development']().GMAPS_API_KEY)
 
-# Create 2d index for legacy coordinate pairs (run once)
+# Create compound index for fast queries
 collection = db['geocoded_address']
 collection.create_index([("lat", ASCENDING), ("lng", ASCENDING)])
 
-# Direction mapping optimization
 DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 BEARING_DEGREES = 360 / len(DIRECTIONS)
 
 def calculate_bearing(coord1, coord2):
-    """Optimized bearing calculation"""
     lat1, lon1 = radians(coord1[0]), radians(coord1[1])
     lat2, lon2 = radians(coord2[0]), radians(coord2[1])
-    
     d_lon = lon2 - lon1
     x = sin(d_lon) * cos(lat2)
     y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(d_lon)
-    
     bearing = (degrees(atan2(x, y)) + 360) % 360
-    index = int(((bearing + (BEARING_DEGREES/2)) % 360) // BEARING_DEGREES)
-    return DIRECTIONS[index]
+    return DIRECTIONS[int(((bearing + (BEARING_DEGREES/2)) % 360) // BEARING_DEGREES)]
 
 def validate_coordinates(lat, lng):
-    """Validate coordinate ranges"""
     if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
         raise ValueError("Invalid coordinates")
 
@@ -148,37 +143,36 @@ def geocode():
         return jsonify({'error': 'Invalid coordinates'}), 400
 
     try:
-        # Find nearest existing point within 0.5 km using 2d index
-        nearby_entry = collection.find_one({
-            "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},  # ~0.5km latitude range
-            "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045},  # ~0.5km longitude range
-            "$expr": {
-                "$lte": [
-                    {"$sqrt": {
-                        {"$add": [
-                            {"$pow": [{"$subtract": ["$lat", lat]}, 2]},
-                            {"$pow": [{"$subtract": ["$lng", lng]}, 2]}
-                        ]}
-                    }},
-                    0.0045  # Euclidean approximation for 0.5km
-                ]
-            }
+        # Step 1: Fast bounding box filter (0.5km range)
+        nearby_entries = collection.find({
+            "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},
+            "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045}
         })
 
-        if nearby_entry:
-            saved_coord = (nearby_entry['lat'], nearby_entry['lng'])
+        # Step 2: Precise distance calculation
+        nearest_entry = None
+        min_distance = 0.5  # Max search radius in km
+        
+        for entry in nearby_entries:
+            saved_coord = (entry['lat'], entry['lng'])
             current_coord = (lat, lng)
-            
-            # Calculate exact distance
             distance = geodesic(saved_coord, current_coord).km
+            
+            if distance <= min_distance:
+                nearest_entry = entry
+                min_distance = distance
+
+        if nearest_entry:
+            saved_coord = (nearest_entry['lat'], nearest_entry['lng'])
+            current_coord = (lat, lng)
             bearing = calculate_bearing(saved_coord, current_coord)
             
-            address = (f"{distance:.2f} km {bearing} from {nearby_entry['address']}"
-                      if distance > 0 else nearby_entry['address'])
+            address = (f"{min_distance:.2f} km {bearing} from {nearest_entry['address']}"
+                      if min_distance > 0 else nearest_entry['address'])
             
             return jsonify({'address': address})
 
-        # Geocode new coordinates
+        # Step 3: Geocode new coordinates
         reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
         if not reverse_geocode_result:
             print("Geocoding API failed")
@@ -186,7 +180,7 @@ def geocode():
 
         address = reverse_geocode_result[0]['formatted_address']
         
-        # Insert new document with double coordinates
+        # Step 4: Insert new entry
         collection.insert_one({
             'lat': lat,
             'lng': lng,
@@ -196,5 +190,5 @@ def geocode():
         return jsonify({'address': address})
 
     except Exception as e:
-        print(f"Geocoding error: {str(e)}")
+        print(f"Geocoding error: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error'}), 500
