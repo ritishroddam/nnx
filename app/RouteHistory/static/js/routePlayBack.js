@@ -250,7 +250,7 @@ async function plotPathOnMap(pathCoordinates) {
         .map((p) => `${p.lat},${p.lng}`)
         .join("|");
 
-      const response = await fetch("/snap-to-roads", {
+      const response = await fetch("/routeHistory/snap-to-roads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
