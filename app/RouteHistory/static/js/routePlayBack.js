@@ -257,8 +257,8 @@ async function plotPathOnMap(pathCoordinates) {
       content: startContent, // Pass the DOM element
     });
 
-    const ignition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
-    const location = await getAddressFromCoordinates(
+    const startIgnition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
+    const startLocation = await getAddressFromCoordinates(
       pathCoordinates[0].lat,
       pathCoordinates[0].lng
     );
@@ -266,10 +266,10 @@ async function plotPathOnMap(pathCoordinates) {
     const startMarkerInfo = new google.maps.InfoWindow({
       content: `<div>
                 <h3>${pathCoordinates[0].LicensePlateNumber}</h3>
-                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Location:</strong> ${startLocation}</p>
                 <p><strong>Timestamp:</strong> ${pathCoordinates[0].time}</p>
                 <p><strong>Speed:</strong> ${pathCoordinates[0].speed}</p>
-                <p><strong>Ignition:</strong> ${ignition}</p>
+                <p><strong>Ignition:</strong> ${startIgnition}</p>
               </div>`,
     });
 
@@ -287,19 +287,28 @@ async function plotPathOnMap(pathCoordinates) {
       content: endContent, // Pass the DOM element
     });
 
+    const endIgnition =
+      pathCoordinates[pathCoordinates.length - 1].ignition === "1"
+        ? "On"
+        : "Off";
+    const endLocation = await getAddressFromCoordinates(
+      pathCoordinates[pathCoordinates.length - 1].lat,
+      pathCoordinates[pathCoordinates.length - 1].lng
+    );
+
     const endMarkerInfo = new google.maps.InfoWindow({
       content: `<div>
                 <h3>${
                   pathCoordinates[pathCoordinates.length - 1].LicensePlateNumber
                 }</h3>
-                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Location:</strong> ${endLocation}</p>
                 <p><strong>Timestamp:</strong> ${
                   pathCoordinates[pathCoordinates.length - 1].time
                 }</p>
                 <p><strong>Speed:</strong> ${
                   pathCoordinates[pathCoordinates.length - 1].speed
                 }</p>
-                <p><strong>Ignition:</strong> ${ignition}</p>
+                <p><strong>Ignition:</strong> ${endIgnition}</p>
               </div>`,
     });
 
