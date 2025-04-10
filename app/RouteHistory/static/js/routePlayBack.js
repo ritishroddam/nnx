@@ -338,27 +338,23 @@ async function plotPathOnMap(pathCoordinates) {
       const pathCoord = pathCoordinates[index];
       const nextPathCoord = pathCoordinates[index + 1];
 
-      const arrowContainer = document.createElement("div"); // Create a container div
-      arrowContainer.style.display = "flex";
-      arrowContainer.style.justifyContent = "center";
-      arrowContainer.style.alignItems = "center";
-
       const arrowContent = document.createElement("i");
-      arrowContent.className = "fa-solid fa-caret-up";
-      arrowContent.style.color = "#2a2a2a";
-      arrowContent.style.fontSize = "20px";
+      arrowContent.style.width = "10px";
+      arrowContent.style.height = "10px";
+      arrowContent.style.backgroundColor = "	rgba(92, 89, 89, 0.39)";
+      arrowContent.style.borderTop = "10px solid #2a2a2a";
+      arrowContent.style.borderLeft = "5px solid transparent";
+      arrowContent.style.borderRight = "5px solid transparent";
       arrowContent.style.transform = `rotate(${calculateBearing(
-        coord,
-        nextCoord
+        nextCoord,
+        coord
       )}deg)`;
-
-      arrowContainer.appendChild(arrowContent);
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: coord,
         map: map,
         title: "Arrow",
-        content: arrowContainer, // Pass the DOM element
+        content: arrowContent, // Pass the DOM element
       });
 
       const ignition = pathCoord.ignition === "1" ? "On" : "Off";
