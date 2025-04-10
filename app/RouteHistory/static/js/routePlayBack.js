@@ -287,6 +287,29 @@ async function plotPathOnMap(pathCoordinates) {
       content: endContent, // Pass the DOM element
     });
 
+    const endMarkerInfo = new google.maps.InfoWindow({
+      content: `<div>
+                <h3>${
+                  pathCoordinates[pathCoordinates.length - 1].LicensePlateNumber
+                }</h3>
+                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Timestamp:</strong> ${
+                  pathCoordinates[pathCoordinates.length - 1].time
+                }</p>
+                <p><strong>Speed:</strong> ${
+                  pathCoordinates[pathCoordinates.length - 1].speed
+                }</p>
+                <p><strong>Ignition:</strong> ${ignition}</p>
+              </div>`,
+    });
+
+    endMarker.addListener("gmp-click", () => {
+      endMarkerInfo.open({
+        anchor: endMarker,
+        map: map,
+      });
+    });
+
     const carContent = document.createElement("img");
     carContent.src = "/static/images/car_green.png";
     carContent.style.width = "18px";
