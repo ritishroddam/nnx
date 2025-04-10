@@ -21,7 +21,25 @@ def calculate_bearing(coord1, coord2):
     y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(d_lon)
     initial_bearing = atan2(x, y)
     initial_bearing = degrees(initial_bearing)
-    return (initial_bearing + 360) % 360
+    bearing = (initial_bearing + 360) % 360
+
+    # Convert bearing to cardinal direction
+    if 22.5 <= bearing < 67.5:
+        return "NE"
+    elif 67.5 <= bearing < 112.5:
+        return "E"
+    elif 112.5 <= bearing < 157.5:
+        return "SE"
+    elif 157.5 <= bearing < 202.5:
+        return "S"
+    elif 202.5 <= bearing < 247.5:
+        return "SW"
+    elif 247.5 <= bearing < 292.5:
+        return "W"
+    elif 292.5 <= bearing < 337.5:
+        return "NW"
+    else:
+        return "N"
 
 @gecoding_bp.route('/geocode', methods=['POST'])
 @jwt_required()
@@ -50,10 +68,11 @@ def geocode():
         saved_coord = (nearby_entry['lat'], nearby_entry['lng'])
         current_coord = (lat, lng)
         distance = geodesic(saved_coord, current_coord).km
-        bearing = calculate_bearing(saved_coord, current_coord)
+        if distance != 0:
+            bearing = calculate_bearing(saved_coord, current_coord)
+            address = f"{distance:.2f} km {bearing} from {nearby_entry['address']}"
+        
         return jsonify({
-            'distance_km': distance,
-            'bearing_deg': bearing,
             'address': nearby_entry['address']
         })
 
