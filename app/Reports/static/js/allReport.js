@@ -387,14 +387,17 @@ document.addEventListener("DOMContentLoaded", function() {
       
       if (reportType === 'custom') {
         fetch(`/reports/get_custom_report?name=${encodeURIComponent(reportName)}`)
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+          })
           .then(data => {
             if (data.success) {
               openReportModal(reportName);
               document.getElementById("generateReport").dataset.reportType = 'custom';
               document.getElementById("generateReport").dataset.reportName = reportName;
             } else {
-              alert(data.message || "Failed to load custom report");
+              throw new Error(data.message || "Failed to load custom report");
             }
           })
           .catch(error => {
@@ -402,6 +405,11 @@ document.addEventListener("DOMContentLoaded", function() {
             alert("Failed to load custom report configuration");
           });
       } else if (reportType === 'sos') {
+        // Ensure vehicle and date range are selected for panic report
+        if (!document.getElementById("vehicleNumber").value) {
+          alert("Please select a vehicle first");
+          return;
+        }
         generatePanicReport();
       } else {
         openReportModal(reportName);
@@ -504,7 +512,10 @@ document.addEventListener("DOMContentLoaded", function() {
         fields: fields
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+    })
     .then(data => {
       if (data.success) {
         alert(data.message);
@@ -585,7 +596,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Load custom reports on page load
   fetch("/reports/get_custom_reports")
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+    })
     .then(reports => {
       reports.forEach(report => {
         createReportCard(report);
@@ -627,7 +641,7 @@ async function generatePanicReport() {
   const dateRange = document.getElementById("dateRange").value;
   
   if (!vehicleNumber) {
-    alert("Please select a vehicle");
+    alert("Please select a vehicle first");
     return;
   }
 
@@ -667,7 +681,10 @@ async function generatePanicReport() {
 
 function loadFields() {
   fetch("/reports/get_fields")
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+    })
     .then(fields => {
       fieldSelection.innerHTML = "";
       const filteredFields = fields.filter(field => allowedFields.includes(field));
@@ -691,6 +708,6 @@ function loadFields() {
     })
     .catch(error => {
       console.error("Error loading fields:", error);
-      alert("Failed to load available fields");
+      alert("Failed to load available fields. Please try again.");
     });
 }

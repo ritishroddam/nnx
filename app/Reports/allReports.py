@@ -448,6 +448,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 import pytz
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import time
+
+geolocator = Nominatim(user_agent="reports_app")
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -533,11 +538,46 @@ def save_custom_report():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@reports_bp.route('/get_custom_reports', methods=['GET'])
+def get_location(lat, lon):
+    """Get location name from coordinates with retry logic"""
+    if not lat or not lon:
+        return "N/A"
+    
+    try:
+        # Convert from "1259.4363" format to decimal degrees
+        latitude = float(lat[:2]) + float(lat[2:])/60
+        longitude = float(lon[:3]) + float(lon[3:])/60
+        location = geolocator.reverse(f"{latitude}, {longitude}", exactly_one=True)
+        return location.address if location else "N/A"
+    except (GeocoderTimedOut, GeocoderServiceError):
+        time.sleep(1)
+        return get_location(lat, lon)  # Retry once
+    except Exception:
+        return "N/A"    
+
+@reports_bp.route('/get_custom_report', methods=['GET'])
 @jwt_required()
-def get_custom_reports():
-    reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1, "fields": 1}))
-    return jsonify(reports)
+def get_custom_report():
+    try:
+        report_name = request.args.get('name')
+        if not report_name:
+            return jsonify({"success": False, "message": "Report name missing"}), 400
+            
+        report = db['custom_reports'].find_one(
+            {"report_name": report_name},
+            {"_id": 0, "fields": 1}
+        )
+        
+        if not report:
+            return jsonify({"success": False, "message": "Report not found"}), 404
+            
+        return jsonify({
+            "success": True,
+            "fields": report["fields"]
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @reports_bp.route('/download_custom_report', methods=['POST'])
 @jwt_required()
@@ -548,10 +588,10 @@ def download_custom_report():
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
 
-        # Get vehicle IMEI
+        # Get vehicle details including IMEI and LicensePlateNumber
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
-            {"IMEI": 1, "_id": 0}
+            {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
         )
         if not vehicle:
             return jsonify({"success": False, "message": "Vehicle not found"}), 404
@@ -572,10 +612,10 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "Custom report not found"}), 404
                 
             fields = report["fields"]
-            collection = "atlanta"  # Default collection for custom reports
+            collection = "atlanta"
         else:
-            # Standard reports
-            report_config = {
+            # Standard reports configuration
+            report_configs = {
                 'daily-distance': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "latitude", "longitude", "speed"],
@@ -587,58 +627,51 @@ def download_custom_report():
                     'fields': ["date_time", "odometer", "latitude", "longitude"],
                     'query': {"imei": imei, "gps": "A"},
                     'sheet_name': "Distance Report",
-                    'post_process': lambda df: df.assign(
-                        distance_km=pd.to_numeric(df['odometer'], errors='coerce').diff().fillna(0)
-                    )
+                    'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"])
                 },
                 'distance-speed-range': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "speed", "latitude", "longitude"],
                     'query': {"imei": imei, "gps": "A"},
-                    'sheet_name': "Speed Report",
-                    'post_process': lambda df: df.assign(
-                        speed_status=df['speed'].apply(
-                            lambda x: "Normal" if float(x) <= 80 else ("High" if float(x) <= 120 else "Very High")
-                        )
-                    )
+                    'sheet_name': "Speed Report"
                 },
                 'stoppage': {
                     'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude"],
+                    'fields': ["date_time", "latitude", "longitude", "ignition"],
                     'query': {"imei": imei, "ignition": "0"},
-                    'sheet_name': "Stoppage Report"
+                    'sheet_name': "Stoppage Report",
+                    'post_process': lambda df: process_duration_report(df, "Stoppage Duration (min)")
                 },
                 'idle': {
                     'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude"],
+                    'fields': ["date_time", "latitude", "longitude", "ignition", "speed"],
                     'query': {"imei": imei, "ignition": "1", "speed": "0.0"},
-                    'sheet_name': "Idle Report"
+                    'sheet_name': "Idle Report",
+                    'post_process': lambda df: process_duration_report(df, "Idle Duration (min)")
                 },
                 'ignition': {
                     'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude"],
+                    'fields': ["date_time", "latitude", "longitude", "ignition"],
                     'query': {"imei": imei},
-                    'sheet_name': "Ignition Report"
+                    'sheet_name': "Ignition Report",
+                    'post_process': lambda df: process_duration_report(df, "Ignition Duration (min)")
                 },
                 'daily': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
                     'query': {"imei": imei},
-                    'sheet_name': "Daily Report",
-                    'post_process': lambda df: df.assign(
-                        date=pd.to_datetime(df['date_time']).dt.date,
-                        daily_distance=df.groupby('date')['odometer'].transform(lambda x: x.max() - x.min())
-                    )
+                    'sheet_name': "Daily Report"
                 }
-            }.get(report_name)
+            }
 
-            if not report_config:
+            if report_name not in report_configs:
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
 
-            fields = report_config['fields']
-            collection = report_config['collection']
-            base_query = report_config['query']
-            post_process = report_config.get('post_process')
+            config = report_configs[report_name]
+            fields = config['fields']
+            collection = config['collection']
+            base_query = config['query']
+            post_process = config.get('post_process')
 
         # Add date range filter
         date_filter = get_date_range_filter(date_range)
@@ -661,13 +694,27 @@ def download_custom_report():
         if df.empty:
             return jsonify({"success": False, "message": "No data found"}), 404
 
+        # Add vehicle number column
+        df['Vehicle Number'] = vehicle["LicensePlateNumber"]
+
+        # Add location if we have coordinates
+        if 'latitude' in df.columns and 'longitude' in df.columns:
+            df['Location'] = df.apply(
+                lambda row: get_location(row['latitude'], row['longitude']), 
+                axis=1
+            )
+
         # Apply post-processing if defined
         if report_name != "custom" and post_process:
             df = post_process(df)
 
+        # Remove MongoDB _id if present
+        if '_id' in df.columns:
+            df.drop('_id', axis=1, inplace=True)
+
         # Generate Excel
         output = BytesIO()
-        sheet_name = report_config['sheet_name'] if report_name != "custom" else custom_report_name
+        sheet_name = config['sheet_name'] if report_name != "custom" else custom_report_name
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=sheet_name)
 
@@ -684,6 +731,45 @@ def download_custom_report():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+def process_distance_report(df, vehicle_number):
+    """Calculate total distance traveled"""
+    try:
+        # Convert odometer to numeric and calculate differences
+        df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+        df['Distance (km)'] = df['odometer'].diff().fillna(0)
+        
+        # Calculate total distance
+        total_distance = df['Distance (km)'].sum()
+        
+        # Add summary row
+        summary_df = pd.DataFrame({
+            'Vehicle Number': [vehicle_number],
+            'Total Distance (km)': [total_distance],
+            'Start Odometer': [df['odometer'].iloc[0]],
+            'End Odometer': [df['odometer'].iloc[-1]]
+        })
+        
+        # Combine with original data
+        return pd.concat([df, summary_df], ignore_index=True)
+    except Exception:
+        return df
+
+def process_duration_report(df, duration_col_name):
+    """Calculate duration between records in minutes"""
+    try:
+        # Convert to datetime if not already
+        df['date_time'] = pd.to_datetime(df['date_time'])
+        
+        # Calculate time differences in minutes
+        df['time_diff'] = df['date_time'].diff().dt.total_seconds().div(60).fillna(0)
+        df[duration_col_name] = df['time_diff'].cumsum()
+        
+        # Drop intermediate column
+        df.drop('time_diff', axis=1, inplace=True)
+        return df
+    except Exception:
+        return df    
+
 @reports_bp.route('/download_panic_report', methods=['POST'])
 @jwt_required()
 def download_panic_report():
@@ -692,24 +778,38 @@ def download_panic_report():
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
 
+        if not vehicle_number:
+            return jsonify({"success": False, "message": "Please select a vehicle"}), 400
+
         # Get vehicle IMEI
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
-            {"IMEI": 1, "_id": 0}
+            {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
         )
         if not vehicle:
             return jsonify({"success": False, "message": "Vehicle not found"}), 404
 
         imei = vehicle["IMEI"]
 
-        # Build query for sos_logs
-        query = {"imei": imei}
+        # Build query
+        query = {
+            "imei": imei,
+            "$or": [
+                {"sos": "1"},
+                {"sos": 1},
+                {"sos": True},
+                {"status": "SOS"},
+                {"alarm": "SOS"}
+            ]
+        }
+
+        # Add date range filter
         date_filter = get_date_range_filter(date_range)
         if date_filter:
             query.update(date_filter)
 
-        # Fetch data
-        cursor = db['sos_logs'].find(
+        # Fetch data from sos_logs collection
+        records = list(db['sos_logs'].find(
             query,
             {
                 "date_time": 1,
@@ -719,16 +819,23 @@ def download_panic_report():
                 "odometer": 1,
                 "_id": 0
             }
-        ).sort("date_time", 1)
+        ).sort("date_time", 1))
 
-        df = pd.DataFrame(list(cursor))
-
-        if df.empty:
+        if not records:
             return jsonify({"success": False, "message": "No panic events found"}), 404
 
-        # Format date_time
-        if 'date_time' in df.columns:
-            df['date_time'] = pd.to_datetime(df['date_time']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        # Create DataFrame
+        df = pd.DataFrame(records)
+        
+        # Add vehicle number
+        df['Vehicle Number'] = vehicle["LicensePlateNumber"]
+        
+        # Add location using geocoding
+        if 'latitude' in df.columns and 'longitude' in df.columns:
+            df['Location'] = df.apply(
+                lambda row: get_location(row['latitude'], row['longitude']), 
+                axis=1
+            )
 
         # Generate Excel
         output = BytesIO()
