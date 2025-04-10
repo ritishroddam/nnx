@@ -6,7 +6,7 @@ from app import db
 from flask_jwt_extended import jwt_required
 from config import config
 
-gecoding_bp = Blueprint('auth', __name__)
+gecoding_bp = Blueprint('geocode', __name__)
 
 # Initialize Google Maps API client
 gmaps = googlemaps.Client(key=config['development']().GMAPS_API_KEY)
