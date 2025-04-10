@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, Blueprint
 from geopy.distance import geodesic
 from math import atan2, degrees, radians, sin, cos
 import googlemaps
-from database import db
+from app import db
 from flask_jwt_extended import jwt_required
 
 gecoding_bp = Blueprint('auth', __name__)
