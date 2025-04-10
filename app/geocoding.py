@@ -74,7 +74,7 @@ def geocode():
             address = f"{distance:.2f} km {bearing} from {nearby_entry['address']}"
         
         return jsonify({
-            'address': nearby_entry['address']
+            'address': address,
         })
 
     # Geocode the new coordinates using Google Maps API
