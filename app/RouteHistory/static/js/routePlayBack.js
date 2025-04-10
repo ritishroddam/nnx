@@ -323,6 +323,7 @@ async function plotPathOnMap(pathCoordinates) {
     carContent.src = "/static/images/car_green.png";
     carContent.style.width = "18px";
     carContent.style.height = "32px";
+    carContent.style.position = "absolute";
     carContent.alt = "Car";
 
     carMarker = new google.maps.marker.AdvancedMarkerElement({
@@ -403,6 +404,7 @@ function moveCar() {
 
         const carContent = document.createElement("img");
         carContent.src = "/static/images/car_green.png";
+        carContent.style.position = "absolute";
         carContent.style.width = "18px";
         carContent.style.height = "32px";
         carContent.style.transform = `rotate(${bearing}deg)`;
