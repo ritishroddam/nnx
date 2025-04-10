@@ -275,7 +275,7 @@ async function plotPathOnMap(pathCoordinates) {
 
     startMarker.addListener("gmp-click", () => {
       startMarkerInfo.open({
-        anchor: marker,
+        anchor: startMarker,
         map: map,
       });
     });
