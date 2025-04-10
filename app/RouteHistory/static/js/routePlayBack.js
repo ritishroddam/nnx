@@ -341,7 +341,7 @@ async function plotPathOnMap(pathCoordinates) {
       const arrowContent = document.createElement("i");
       arrowContent.className = "fa-solid fa-caret-up";
       arrowContent.style.color = "#2a2a2a";
-      arrowContent.style.top = "5px";
+      arrowContent.style.top = "20px";
       arrowContent.style.fontSize = "20px";
       arrowContent.style.transform = `rotate(${calculateBearing(
         coord,
