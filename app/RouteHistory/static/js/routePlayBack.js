@@ -107,11 +107,16 @@ let endMarker;
 let currentIndex = 0;
 let animationInterval = null;
 let speedMultiplier = 1;
+let timelineSlider;
+let sliderTimeDisplay;
 
 async function initMap(darkMode = true) {
   const { Map } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   await google.maps.importLibrary("geometry");
+
+  timelineSlider = document.getElementById("timeline-slider");
+  sliderTimeDisplay = document.getElementById("slider-time");
 
   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
   map = new Map(document.getElementById("map"), {
@@ -149,6 +154,15 @@ async function initMap(darkMode = true) {
   document
     .getElementById("speed-8x-button")
     .addEventListener("click", () => setSpeed(8));
+}
+
+timelineSlider.addEventListener("input", handleSliderInput);
+
+function handleSliderInput() {
+  const index = parseInt(this.value);
+  currentIndex = index;
+  stopCarAnimation();
+  updateCarPosition(index);
 }
 
 document
@@ -210,11 +224,54 @@ function formatDateToDB(dateString) {
   return `${day}${month}${year}`;
 }
 
+function interpolateTime(index, originalData) {
+  if (index < originalData.length) return originalData[index].time;
+  const lastPoint = originalData[originalData.length - 1];
+  return new Date(
+    lastPoint.time.getTime() + (index - originalData.length + 1) * 60000
+  ).toISOString();
+}
+
+function interpolateSpeed(index, originalData) {
+  if (index < originalData.length) return originalData[index].speed;
+  return originalData[originalData.length - 1].speed;
+}
+
 async function plotPathOnMap(pathCoordinates) {
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
   if (endMarker) endMarker.map = null;
   if (carMarker) carMarker.map = null; // Clear the previous car marker
+  const enhanceAccuracy = document.getElementById("enhance-accuracy").checked;
+
+  if (enhanceAccuracy) {
+    try {
+      const encodedPoints = pathCoordinates
+        .map((p) => `${p.lat},${p.lng}`)
+        .join("|");
+
+      const response = await fetch("/snap-to-roads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({ points: encodedPoints }),
+      });
+
+      const snappedData = await response.json();
+
+      if (snappedData.length > 0) {
+        pathCoordinates = snappedData.map((point) => ({
+          ...point.location,
+          time: interpolateTime(point.originalIndex, pathCoordinates),
+          speed: interpolateSpeed(point.originalIndex, pathCoordinates),
+        }));
+      }
+    } catch (error) {
+      console.error("Snap to Roads failed:", error);
+    }
+  }
 
   coords = pathCoordinates.map((item) => ({
     lat: item.lat,
@@ -222,6 +279,11 @@ async function plotPathOnMap(pathCoordinates) {
   }));
 
   if (coords.length > 0) {
+    timelineSlider.min = 0;
+    timelineSlider.max = coords.length - 1;
+    timelineSlider.value = 0;
+    sliderTimeDisplay.textContent = pathCoordinates[0].time;
+
     const bounds = new google.maps.LatLngBounds();
     coords.forEach((coord) => bounds.extend(coord));
     map.fitBounds(bounds);
@@ -380,8 +442,32 @@ async function plotPathOnMap(pathCoordinates) {
   }
 }
 
+function updateCarPosition(index) {
+  const point = pathCoordinates[index];
+  const bearing = calculateBearing(
+    pathCoordinates[Math.max(0, index - 1)],
+    point
+  );
+
+  const carContent = document.createElement("img");
+  carContent.src = "/static/images/car_green.png";
+  carContent.style.transform = `rotate(${bearing}deg)`;
+  carContent.style.width = "18px";
+  carContent.style.height = "32px";
+
+  carMarker.content = carContent;
+  carMarker.position = { lat: point.lat, lng: point.lng };
+  map.panTo(carMarker.position);
+
+  // Update time display
+  sliderTimeDisplay.textContent = point.time;
+}
+
 function moveCar() {
   if (currentIndex < pathCoordinates.length - 1) {
+    timelineSlider.value = currentIndex;
+    sliderTimeDisplay.textContent = pathCoordinates[currentIndex].time;
+
     const start = pathCoordinates[currentIndex];
     const end = pathCoordinates[currentIndex + 1];
     const stepDuration = 20 / speedMultiplier;

@@ -31,6 +31,12 @@ Vehicle Data
 
       <div id="map"></div>
 
+      <div class="accuracy-option">
+        <label>
+          <input type="checkbox" id="enhance-accuracy"> Snap to Roads
+        </label>
+      </div>
+
       <form id="vehicle-form">
         <input type="hidden" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}">
         <label for="start_date">Start Date:</label>
@@ -43,6 +49,10 @@ Vehicle Data
       </form>
 
       <div id="controls-container">
+        <div class="timeline-container">
+          <input type="range" id="timeline-slider" min="0" max="100" value="0" class="slider">
+          <div id="slider-time"></div>
+        </div>
         <button id="play-button" class="control-button">
           <i class="fas fa-play"></i>
         </button>

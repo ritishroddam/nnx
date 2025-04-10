@@ -3,10 +3,12 @@ from pymongo import MongoClient
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import pytz
+import requests
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
+from config import config
 
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
@@ -255,7 +257,7 @@ def get_vehicle_path():
 
         # Step 3: Convert latitude and longitude to decimal format and prepare path data
         ist = pytz.timezone("Asia/Kolkata")
-        
+
         path_data = []
         for record in records_list:
             
@@ -278,3 +280,16 @@ def get_vehicle_path():
     except Exception as e:
         print(f"Error fetching path data: {str(e)}")
         return jsonify({"error": "Error fetching path data"}), 500
+
+@route_bp.route('/snap-to-roads', methods=['POST'])
+def snap_to_roads():
+    points = request.json['points']
+    api_key = config['development']().GMAPS_API_KEY
+    url = f'https://roads.googleapis.com/v1/snapToRoads?path={points}&interpolate=true&key={api_key}'
+    
+    try:
+        response = requests.get(url)
+        result = response.json()
+        return jsonify(result.get('snappedPoints', []))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
