@@ -69,6 +69,7 @@ def create_app(config_name='default'):
     
     from .auth import auth_bp
     from .routes import main_bp
+    from .geocoding import gecoding_bp
 
     from app.Vehicle.VehicleBackend import vehicle_bp
     from app.Dashboard.DashboardBackend import dashboard_bp
@@ -90,6 +91,7 @@ def create_app(config_name='default'):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(gecoding_bp)
 
     map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
     subprocess.Popen(['python', map_server_path])

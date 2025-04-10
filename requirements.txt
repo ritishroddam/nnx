@@ -16,6 +16,7 @@ Flask-PyMongo==2.3.0
 Flask-SocketIO==5.5.1
 geographiclib==2.0
 geopy==2.4.1
+googlemaps==4.10.0
 greenlet==3.1.1
 gunicorn==23.0.0
 h11==0.14.0

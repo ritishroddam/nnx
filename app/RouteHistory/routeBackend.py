@@ -244,7 +244,7 @@ def get_vehicle_path():
                     "ignition": 1,
                     "dir1": 1,
                     "dir2": 1,
-                    "time": 1
+                    "date_time": 1
                 }
             }
         ]
@@ -254,6 +254,8 @@ def get_vehicle_path():
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
 
         # Step 3: Convert latitude and longitude to decimal format and prepare path data
+        ist = pytz.timezone("Asia/Kolkata")
+        
         path_data = []
         for record in records_list:
             
@@ -268,7 +270,7 @@ def get_vehicle_path():
                 "longitude": longitude,
                 "speed": record["speed"],
                 "ignition": record["ignition"],
-                "time": record["time"]
+                "time": record["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p")
             })
 
         return jsonify(path_data)

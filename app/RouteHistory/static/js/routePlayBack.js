@@ -1,7 +1,36 @@
 window.onload = initMap;
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 const dataElement = document.getElementById("vehicle-data");
 const vehicleData = JSON.parse(dataElement.textContent);
+
+async function getAddressFromCoordinates(lat, lng) {
+  try {
+    const response = await fetch("/geocode", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify({ lat, lng }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.address; // Assuming the route returns an object with an 'address' field
+  } catch (error) {
+    console.error("Error fetching address:", error);
+    return null;
+  }
+}
 
 const themeToggle = document.getElementById("theme-toggle");
 let darkMode = true;
@@ -181,7 +210,7 @@ function formatDateToDB(dateString) {
   return `${day}${month}${year}`;
 }
 
-function plotPathOnMap(pathCoordinates) {
+async function plotPathOnMap(pathCoordinates) {
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
   if (endMarker) endMarker.map = null;
@@ -228,6 +257,29 @@ function plotPathOnMap(pathCoordinates) {
       content: startContent, // Pass the DOM element
     });
 
+    const ignition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
+    const location = await getAddressFromCoordinates(
+      pathCoordinates[0].lat,
+      pathCoordinates[0].lng
+    );
+
+    const startMarkerInfo = new google.maps.InfoWindow({
+      content: `<div>
+                <h3>${pathCoordinates[0].LicensePlateNumber}</h3>
+                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Timestamp:</strong> ${pathCoordinates[0].time}</p>
+                <p><strong>Speed:</strong> ${pathCoordinates[0].speed}</p>
+                <p><strong>Ignition:</strong> ${ignition}</p>
+              </div>`,
+    });
+
+    startMarker.addListener("gmp-click", () => {
+      startMarkerInfo.open({
+        anchor: marker,
+        map: map,
+      });
+    });
+
     endMarker = new google.maps.marker.AdvancedMarkerElement({
       position: coords[coords.length - 1],
       map: map,
@@ -250,16 +302,17 @@ function plotPathOnMap(pathCoordinates) {
 
     for (let index = 0; index < coords.length - 1; index++) {
       const coord = coords[index];
-      const pathCoord = pathCoordinates[index];
       const nextCoord = coords[index + 1];
+      const pathCoord = pathCoordinates[index];
       const nextPathCoord = pathCoordinates[index + 1];
 
       const arrowContent = document.createElement("div");
       arrowContent.style.width = "10px";
       arrowContent.style.height = "10px";
-      arrowContent.style.borderTop = "10px solid blue";
-      arrowContent.style.borderLeft = "5px solid transparent";
-      arrowContent.style.borderRight = "5px solid transparent";
+      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
+      arrowContent.style.borderTop = "1px solid black";
+      arrowContent.style.borderLeft = "1px solid black";
+      arrowContent.style.borderRight = "1px solid black";
       arrowContent.style.transform = `rotate(${calculateBearing(
         nextCoord,
         coord
@@ -277,6 +330,7 @@ function plotPathOnMap(pathCoordinates) {
       const infoWindow = new google.maps.InfoWindow({
         content: `<div>
                 <h3>${pathCoord.LicensePlateNumber}</h3>
+                <p><strong>Timestamp:</strong> ${pathCoord.time}</p>
                 <p><strong>Speed:</strong> ${pathCoord.speed}</p>
                 <p><strong>Ignition:</strong> ${ignition}</p>
               </div>`,
