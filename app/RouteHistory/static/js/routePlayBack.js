@@ -343,10 +343,10 @@ async function plotPathOnMap(pathCoordinates) {
       arrowContent.style.setProperty("--fa-rotate-angle", "45deg");
       arrowContent.style.color = "#2a2a2a"; // Optional: Set the color of the arrow
       arrowContent.style.fontSize = "16px";
-      // arrowContent.style.transform = `rotate(${calculateBearing(
-      //   nextCoord,
-      //   coord
-      // )}deg)`;
+      arrowContent.style.transform = `rotate(${calculateBearing(
+        coord,
+        nextCoord
+      )}deg)`;
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: coord,
