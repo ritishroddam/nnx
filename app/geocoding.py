@@ -4,11 +4,12 @@ from math import atan2, degrees, radians, sin, cos
 import googlemaps
 from app import db
 from flask_jwt_extended import jwt_required
+from config import config
 
 gecoding_bp = Blueprint('auth', __name__)
 
 # Initialize Google Maps API client
-gmaps = googlemaps.Client(key='YOUR_GOOGLE_MAPS_API_KEY')
+gmaps = googlemaps.Client(key=config['development']().GMAPS_API_KEY)
 
 # Helper function to calculate bearing
 def calculate_bearing(coord1, coord2):
