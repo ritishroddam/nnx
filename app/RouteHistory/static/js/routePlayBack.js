@@ -338,10 +338,10 @@ async function plotPathOnMap(pathCoordinates) {
       const pathCoord = pathCoordinates[index];
       const nextPathCoord = pathCoordinates[index + 1];
 
-      const arrowContent = document.createElement("i");
+      const arrowContent = document.createElement("div");
       arrowContent.style.width = "10px";
       arrowContent.style.height = "10px";
-      arrowContent.style.backgroundColor = "	rgba(92, 89, 89, 0.39)";
+      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
       arrowContent.style.borderTop = "10px solid #2a2a2a";
       arrowContent.style.borderLeft = "5px solid transparent";
       arrowContent.style.borderRight = "5px solid transparent";
