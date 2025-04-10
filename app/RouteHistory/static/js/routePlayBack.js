@@ -229,7 +229,7 @@ async function plotPathOnMap(pathCoordinates) {
     pathPolyline = new google.maps.Polyline({
       path: coords,
       geodesic: true,
-      strokeColor: "black",
+      strokeColor: "#4f4f4f",
       strokeOpacity: 0.9,
       strokeWeight: 3,
       map: map,
@@ -340,8 +340,8 @@ async function plotPathOnMap(pathCoordinates) {
 
       const arrowContent = document.createElement("i");
       arrowContent.className = "fa-solid fa-location-arrow";
-      arrowContent.style.setProperty("--fa-rotate-angle", "45deg");
-      arrowContent.style.color = "black"; // Optional: Set the color of the arrow
+      // arrowContent.style.setProperty("--fa-rotate-angle", "45deg");
+      arrowContent.style.color = "#2a2a2a"; // Optional: Set the color of the arrow
       arrowContent.style.fontSize = "16px";
       arrowContent.style.transform = `rotate(${calculateBearing(
         nextCoord,
