@@ -676,13 +676,6 @@ def download_custom_report():
         # Add vehicle number column
         df['Vehicle Number'] = vehicle["LicensePlateNumber"]
 
-        # Add location if we have coordinates
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            df['Location'] = df.apply(
-                lambda row: get_location(row['latitude'], row['longitude']), 
-                axis=1
-            )
-
         # Apply post-processing if defined
         if report_name != "custom" and post_process:
             df = post_process(df)
