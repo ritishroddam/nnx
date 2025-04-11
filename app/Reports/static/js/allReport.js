@@ -153,53 +153,51 @@ document.addEventListener("DOMContentLoaded", function () {
         await generatePanicReport();
         generateBtn.disabled = false; // Re-enable the button after completion
         generateBtn.textContent = originalText;
-        return;
-        return;
-      }
+      } else {
+        try {
+          let endpoint = "/reports/download_custom_report";
+          let body = {
+            reportName: reportType,
+            vehicleNumber: vehicleNumber,
+            dateRange: dateRange,
+          };
 
-      try {
-        let endpoint = "/reports/download_custom_report";
-        let body = {
-          reportName: reportType,
-          vehicleNumber: vehicleNumber,
-          dateRange: dateRange,
-        };
+          if (reportType === "custom") {
+            body.customReportName = reportName;
+          }
 
-        if (reportType === "custom") {
-          body.customReportName = reportName;
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify(body),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to generate report");
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${
+            reportType === "custom" ? reportName : reportType
+          }_report_${vehicleNumber}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Error:", error);
+          alert(error.message || "Failed to generate report");
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.textContent = originalText;
         }
-
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Failed to generate report");
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${
-          reportType === "custom" ? reportName : reportType
-        }_report_${vehicleNumber}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } catch (error) {
-        console.error("Error:", error);
-        alert(error.message || "Failed to generate report");
-      } finally {
-        generateBtn.disabled = false;
-        generateBtn.textContent = originalText;
       }
     });
 
