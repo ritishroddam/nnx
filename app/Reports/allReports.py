@@ -429,26 +429,31 @@ def download_panic_report():
             cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
             df = df[cols]
 
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            from app.geocoding import geocodeInternal
-            
-            df['latitude'] = df['latitude'].apply(nmea_to_decimal)
-            df['longitude'] = df['longitude'].apply(nmea_to_decimal)
 
-            # Add Location column
-            df['Location'] = df.apply(
-                lambda row: geocodeInternal(row['latitude'], row['longitude']) 
-                    if pd.notnull(row['latitude']) and pd.notnull(row['longitude']) 
-                    else 'Missing coordinates',
-                axis=1
-            )
+        from app.geocoding import geocodeInternal
+        
+        df['latitude'] = df['latitude'].apply(
+            lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+        )
+        df['longitude'] = df['longitude'].apply(
+            lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+        )
 
-            cols = df.columns.tolist()
-            if 'Location' in cols:
-                cols.remove('Location')
-            lng_idx = cols.index('longitude')
-            cols.insert(lng_idx + 1, 'Location')
-            df = df[cols]
+        # Add Location column
+        df['Location'] = df.apply(
+            lambda row: geocodeInternal(row['latitude'], row['longitude'])
+            if pd.notnull(row['latitude']) and row['latitude'] != "" and
+               pd.notnull(row['longitude']) and row['longitude'] != ""
+            else 'Missing coordinates',
+            axis=1
+        )
+        
+        cols = df.columns.tolist()
+        if 'Location' in cols:
+            cols.remove('Location')
+        lng_idx = cols.index('longitude')
+        cols.insert(lng_idx + 1, 'Location')
+        df = df[cols]
 
         # Generate Excel
         output = BytesIO()
