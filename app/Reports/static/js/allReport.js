@@ -99,8 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (reportName === "Panic Report") {
             openReportModal(reportName);
-            document.getElementById("generateReport").dataset.reportType = "panic";
-            document.getElementById("generateReport").dataset.reportName = "Panic Report";
+
         } else if (reportType === "custom") {
             fetch(`/reports/get_custom_report?name=${encodeURIComponent(reportName)}`)
                 .then((response) => {
