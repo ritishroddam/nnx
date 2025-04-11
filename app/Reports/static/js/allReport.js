@@ -4,6 +4,13 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
+const allowedFields = [ "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps",
+  "gsm_sig", "arm", "date", "time", "sos", "harsh_speed", "odometer", "cellid", "internal_bat",
+  "Package", "DateOfPurchase", "mnc", "r1", "r2", "r3", "YearOfManufacture", "DriverName",
+  "InsuranceNumber", "sleep", "dir1", "SIM","LicensePlateNumber", "ac", "longitude",
+  "latitude", "speed", "door", "temp", "address", "Status", "MobileNumber",
+];
+
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize elements
   const reportModal = document.getElementById("reportModal");
@@ -11,47 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
   const customReportForm = document.getElementById("customReportForm");
-
-  // Allowed fields for custom reports
-  const allowedFields = [
-    "main_power",
-    "i_btn",
-    "mcc",
-    "ignition",
-    "Tenure",
-    "gps",
-    "gsm_sig",
-    "arm",
-    "date",
-    "time",
-    "sos",
-    "harsh_speed",
-    "odometer",
-    "cellid",
-    "internal_bat",
-    "Package",
-    "DateOfPurchase",
-    "mnc",
-    "r1",
-    "r2",
-    "r3",
-    "YearOfManufacture",
-    "DriverName",
-    "InsuranceNumber",
-    "sleep",
-    "dir1",
-    "SIM",
-    "LicensePlateNumber",
-    "ac",
-    "longitude",
-    "latitude",
-    "speed",
-    "door",
-    "temp",
-    "address",
-    "Status",
-    "MobileNumber",
-  ];
 
   // Initialize Selectize for dropdowns
   $("select").selectize({
