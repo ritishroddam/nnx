@@ -595,19 +595,19 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // Load custom reports on page load
-  fetch("/reports/get_custom_reports")
-    .then(response => {
-      if (!response.ok) throw new Error("Network response was not ok");
-      return response.json();
-    })
-    .then(reports => {
-      reports.forEach(report => {
-        createReportCard(report);
-      });
-    })
-    .catch(error => {
-      console.error("Error loading custom reports:", error);
-    });
+  // fetch("/reports/get_custom_reports")
+  //   .then(response => {
+  //     if (!response.ok) throw new Error("Network response was not ok");
+  //     return response.json();
+  //   })
+  //   .then(reports => {
+  //     reports.forEach(report => {
+  //       createReportCard(report);
+  //     });
+  //   })
+  //   .catch(error => {
+  //     console.error("Error loading custom reports:", error);
+  //   });
 });
 
 // Helper functions
