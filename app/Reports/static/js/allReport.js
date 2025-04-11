@@ -370,7 +370,6 @@ function openReportModal(reportName) {
 async function generatePanicReport() {
   const vehicleNumber = document.getElementById("vehicleNumber").value;
   const dateRange = document.getElementById("dateRange").value;
-  print(vehicleNumber);
 
   if (!vehicleNumber) {
     alert("Please select a vehicle first");

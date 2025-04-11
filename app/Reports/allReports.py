@@ -323,6 +323,7 @@ def download_panic_report():
         data = request.get_json()
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
+        print(f"Received vehicle_number: {vehicle_number}, date_range: {date_range}")  # Debugging line
 
         if not vehicle_number:
             return jsonify({"success": False, "message": "Please select a vehicle"}), 400
