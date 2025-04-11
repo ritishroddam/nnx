@@ -401,7 +401,9 @@ def download_custom_report():
         # Add location column using geocode function
         def get_location(row):
             lat, lng = row['latitude'], row['longitude']
-            with current_app.test_request_context(json={"lat": lat, "lng": lng}):
+            with current_app.test_request_context(json={"lat": lat, "lng": lng}) as ctx:
+                # Set the access_token_cookie manually
+                ctx.request.cookies['access_token_cookie'] = request.cookies.get('access_token_cookie')
                 response = geocode()
                 if response.status_code == 200:
                     return response.get_json().get('address', 'Unknown')
