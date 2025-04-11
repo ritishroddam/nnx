@@ -100,21 +100,15 @@
                     <i class="fa-solid fa-bell"></i> <span class="sidebar-text">Alerts</span>
                 </a>
             </li>
-            <li class="dropdown">
+            <li>
                 <a href="#" class="menu-item">
-                    <i class="fa-solid fa-book" style='white-space:pre'></i><span class="sidebar-text">Reports</span>
+                    <i class="fa-solid fa-book" style='white-space:pre'>
+                        <a href="{{url_for('Reports.index')}}">
+                        </a>
+                    </i><span class="sidebar-text">Reports</span>
                     <span class="arrow">&#x25BC;</span>
                 </a>
-
-                <ul class="submenu">
-                    <li>
-                        <a href="{{url_for('Reports.index')}}">
-                            All Reports
-                            <i class="fa-solid fa-file-alt" style='white-space:pre'></i>
-                        </a>
-                    </li>
-                </ul>
-
+            </li>
             <li class="dropdown">
                 <a href="#" class="menu-item">
                     <i class="fa-solid fa-archive"></i>
