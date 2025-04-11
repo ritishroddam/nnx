@@ -269,9 +269,10 @@ def download_custom_report():
                     else 'Missing coordinates',
                 axis=1
             )
-            
-            # Reorder columns to place Location after longitude
+
             cols = df.columns.tolist()
+            if 'Location' in cols:
+                cols.remove('Location')
             lng_idx = cols.index('longitude')
             cols.insert(lng_idx + 1, 'Location')
             df = df[cols]
@@ -286,6 +287,9 @@ def download_custom_report():
         # Remove MongoDB _id if present
         if '_id' in df.columns:
             df.drop('_id', axis=1, inplace=True)
+
+        if "ignition" in fields:
+            df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
         # Generate Excel
         output = BytesIO()
