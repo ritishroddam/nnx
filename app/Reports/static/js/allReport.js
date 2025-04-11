@@ -150,7 +150,10 @@ document.addEventListener("DOMContentLoaded", function () {
       generateBtn.textContent = "Generating...";
 
       if (reportName === "Panic Report") {
-        generatePanicReport();
+        await generatePanicReport();
+        generateBtn.disabled = false; // Re-enable the button after completion
+        generateBtn.textContent = originalText;
+        return;
         return;
       }
 
