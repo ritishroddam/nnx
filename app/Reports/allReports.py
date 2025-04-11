@@ -66,6 +66,8 @@ def get_fields():
     all_fields = set()
     for collection, fields in FIELD_COLLECTION_MAP.items():
         all_fields.update(fields)
+        
+    print(all_fields)  # Debugging line to check the fields being returned
     return jsonify(sorted(list(all_fields)))
 
 @reports_bp.route('/save_custom_report', methods=['POST'])
