@@ -98,20 +98,18 @@
   width: 90%;
 }
 .weather-section {
-  margin-top: 20px;
   width: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   display: flex;
-  flex-direction: column;
   gap: 0;
 }
 
 .datetime-container,
 .weather-container {
   margin-right: 10px;
-  width: 60%;
+  width: 100%;
   text-align: center;
   padding: 15px;
   border-radius: 10px;
@@ -119,6 +117,7 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
   transition: background 0.5s ease;
+  font-size: 18px;
 }
 
 .dark-mode .datetime-container,
