@@ -16,7 +16,6 @@ const allowedFields = [
   "sos",
   "harsh_speed",
   "odometer",
-  "cellid",
   "internal_bat",
   "Package",
   "DateOfPurchase",

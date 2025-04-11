@@ -261,15 +261,20 @@ def download_custom_report():
         
         if 'latitude' in df.columns and 'longitude' in df.columns:
             from app.geocoding import geocodeInternal
-            
-            df['latitude'] = df['latitude'].apply(nmea_to_decimal)
-            df['longitude'] = df['longitude'].apply(nmea_to_decimal)
+
+            df['latitude'] = df['latitude'].apply(
+                lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+            )
+            df['longitude'] = df['longitude'].apply(
+                lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+            )
 
             # Add Location column
             df['Location'] = df.apply(
-                lambda row: geocodeInternal(row['latitude'], row['longitude']) 
-                    if pd.notnull(row['latitude']) and pd.notnull(row['longitude']) 
-                    else 'Missing coordinates',
+                lambda row: geocodeInternal(row['latitude'], row['longitude'])
+                if pd.notnull(row['latitude']) and row['latitude'] != "" and
+                   pd.notnull(row['longitude']) and row['longitude'] != ""
+                else 'Missing coordinates',
                 axis=1
             )
 
