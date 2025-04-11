@@ -94,12 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const reportType = this.dataset.report;
       const reportName = this.querySelector("h3").textContent;
 
-      if (reportType === "panic") {
-        console.log("reportType", reportType);
-        openReportModal(reportName);
-        document.getElementById("generateReport").dataset.reportType =
-          reportType;
-      } else if (reportType === "custom") {
+      if (reportType === "custom") {
         fetch(
           `/reports/get_custom_report?name=${encodeURIComponent(reportName)}`
         )
@@ -122,6 +117,11 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("Error:", error);
             alert("Failed to load custom report configuration");
           });
+      } else if (reportType === "panic") {
+        console.log("reportType", reportType);
+        openReportModal(reportName);
+        document.getElementById("generateReport").dataset.reportType =
+          reportType;
       } else {
         openReportModal(reportName);
         document.getElementById("generateReport").dataset.reportType =
