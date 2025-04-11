@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 import pytz
+from app.geocoding import geocodeInternal
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -393,6 +394,23 @@ def download_custom_report():
 
         if df.empty:
             return jsonify({"success": False, "message": "No data found"}), 404
+        
+        if 'latitude' in df.columns and 'longitude' in df.columns:
+            from app.geocoding import geocodeInternal
+            
+            # Add Location column
+            df['Location'] = df.apply(
+                lambda row: geocodeInternal(row['latitude'], row['longitude']) 
+                    if pd.notnull(row['latitude']) and pd.notnull(row['longitude']) 
+                    else 'Missing coordinates',
+                axis=1
+            )
+            
+            # Reorder columns to place Location after longitude
+            cols = df.columns.tolist()
+            lng_idx = cols.index('longitude')
+            cols.insert(lng_idx + 1, 'Location')
+            df = df[cols]
 
         # Add vehicle number column
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])

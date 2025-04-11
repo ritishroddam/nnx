@@ -31,6 +31,62 @@ def calculate_bearing(coord1, coord2):
 def validate_coordinates(lat, lng):
     if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
         raise ValueError("Invalid coordinates")
+    
+def geocodeInternal(lat,lng):
+    try:
+        validate_coordinates(lat, lng)
+    except(ValueError) as e:
+        print(f"Invalid input: {str(e)}")
+        return "Invalid coordinates"
+
+    try:
+        # Step 1: Fast bounding box filter (0.5km range)
+        nearby_entries = collection.find({
+            "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},
+            "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045}
+        })
+
+        # Step 2: Precise distance calculation
+        nearest_entry = None
+        min_distance = 0.5  # Max search radius in km
+        
+        for entry in nearby_entries:
+            saved_coord = (entry['lat'], entry['lng'])
+            current_coord = (lat, lng)
+            distance = geodesic(saved_coord, current_coord).km
+            
+            if distance <= min_distance:
+                nearest_entry = entry
+                min_distance = distance
+
+        if nearest_entry:
+            saved_coord = (nearest_entry['lat'], nearest_entry['lng'])
+            current_coord = (lat, lng)
+            bearing = calculate_bearing(saved_coord, current_coord)
+            
+            return (f"{min_distance:.2f} km {bearing} from {nearest_entry['address']}"
+                      if min_distance > 0 else nearest_entry['address'])
+
+        # Step 3: Geocode new coordinates
+        reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
+        if not reverse_geocode_result:
+            print("Geocoding API failed")
+            return "Address unavailable"
+
+        address = reverse_geocode_result[0]['formatted_address']
+        
+        # Step 4: Insert new entry
+        collection.insert_one({
+            'lat': lat,
+            'lng': lng,
+            'address': address
+        })
+
+        return address
+
+    except Exception as e:
+        print(f"Geocoding error: {str(e)}", exc_info=True)
+        return "Error retrieving address"
 
 @gecoding_bp.route('/geocode', methods=['POST'])
 @jwt_required()
