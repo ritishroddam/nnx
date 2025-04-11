@@ -165,7 +165,7 @@ def download_custom_report():
 
         # For custom reports, get the fields from the saved report
         if report_type == "custom":
-            custom_report_name = data.get("ReportName")
+            custom_report_name = data.get("reportName")
             if not custom_report_name:
                 return jsonify({"success": False, "message": "Custom report name missing"}), 400
                 

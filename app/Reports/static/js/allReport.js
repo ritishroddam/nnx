@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
           let body = {
             reportType: reportType,
             vehicleNumber: vehicleNumber,
-            customReportName: reportName,
+            reportName: reportName,
             dateRange: dateRange,
           };
 
