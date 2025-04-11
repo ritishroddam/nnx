@@ -21,14 +21,9 @@ const allowedFields = [
   "Package",
   "DateOfPurchase",
   "mnc",
-  "r1",
-  "r2",
-  "r3",
-  "YearOfManufacture",
   "DriverName",
   "InsuranceNumber",
   "sleep",
-  "dir1",
   "SIM",
   "ac",
   "longitude",
@@ -39,6 +34,7 @@ const allowedFields = [
   "address",
   "Status",
   "MobileNumber",
+  "VechicleType",
 ];
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -106,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
               openReportModal(reportName);
               document.getElementById("generateReport").dataset.reportType =
-                "custom";
+                reportType;
               document.getElementById("generateReport").dataset.reportName =
                 reportName;
             } else {
@@ -157,14 +153,11 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
           let endpoint = "/reports/download_custom_report";
           let body = {
-            reportName: reportType,
+            reportType: reportType,
             vehicleNumber: vehicleNumber,
+            reportName: reportName,
             dateRange: dateRange,
           };
-
-          if (reportType === "custom") {
-            body.customReportName = reportName;
-          }
 
           const response = await fetch(endpoint, {
             method: "POST",
