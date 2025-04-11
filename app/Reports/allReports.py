@@ -208,6 +208,8 @@ def download_custom_report():
                 }
             }
 
+            if report_name is "Panic Report":
+                return download_panic_report()
             if report_name not in report_configs:
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
 
