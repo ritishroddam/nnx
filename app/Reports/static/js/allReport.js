@@ -159,10 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
             dateRange: dateRange,
           };
 
-          if (reportType === "custom") {
-            body.customReportName = reportName;
-          }
-
           const response = await fetch(endpoint, {
             method: "POST",
             headers: {
