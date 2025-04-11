@@ -4,11 +4,44 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
-const allowedFields = [ "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps",
-  "gsm_sig", "arm", "date", "time", "sos", "harsh_speed", "odometer", "cellid", "internal_bat",
-  "Package", "DateOfPurchase", "mnc", "r1", "r2", "r3", "YearOfManufacture", "DriverName",
-  "InsuranceNumber", "sleep", "dir1", "SIM","LicensePlateNumber", "ac", "longitude",
-  "latitude", "speed", "door", "temp", "address", "Status", "MobileNumber",
+const allowedFields = [
+  "main_power",
+  "i_btn",
+  "mcc",
+  "ignition",
+  "Tenure",
+  "gps",
+  "gsm_sig",
+  "arm",
+  "date",
+  "time",
+  "sos",
+  "harsh_speed",
+  "odometer",
+  "cellid",
+  "internal_bat",
+  "Package",
+  "DateOfPurchase",
+  "mnc",
+  "r1",
+  "r2",
+  "r3",
+  "YearOfManufacture",
+  "DriverName",
+  "InsuranceNumber",
+  "sleep",
+  "dir1",
+  "SIM",
+  "LicensePlateNumber",
+  "ac",
+  "longitude",
+  "latitude",
+  "speed",
+  "door",
+  "temp",
+  "address",
+  "Status",
+  "MobileNumber",
 ];
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -90,11 +123,11 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         } else if (reportType === "sos") {
           // Ensure vehicle and date range are selected for panic report
+          generatePanicReport();
           if (!document.getElementById("vehicleNumber").value) {
             alert("Please select a vehicle first");
             return;
           }
-          generatePanicReport();
         } else {
           openReportModal(reportName);
           document.getElementById("generateReport").dataset.reportType =
