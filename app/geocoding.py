@@ -34,8 +34,10 @@ def validate_coordinates(lat, lng):
     
 def geocodeInternal(lat,lng):
     try:
+        lat = float(lat)
+        lng = float(lng)
         validate_coordinates(lat, lng)
-    except(ValueError) as e:
+    except(ValueError, TypeError) as e:
         print(f"Invalid input: {str(e)}")
         return "Invalid coordinates"
 
