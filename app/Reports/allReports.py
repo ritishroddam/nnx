@@ -182,28 +182,28 @@ def download_custom_report():
                 'stoppage': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "latitude", "longitude", "ignition"],
-                    'query': {"imei": imei, "ignition": "0"},
+                    'query': {"imei": imei, "ignition": "0", "gps": "A"},
                     'sheet_name': "Stoppage Report",
                     'post_process': lambda df: process_duration_report(df, "Stoppage Duration (min)")
                 },
                 'idle': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "latitude", "longitude", "ignition", "speed"],
-                    'query': {"imei": imei, "ignition": "1", "speed": "0.0"},
+                    'query': {"imei": imei, "ignition": "1", "speed": "0.0", "gps": "A"},
                     'sheet_name': "Idle Report",
                     'post_process': lambda df: process_duration_report(df, "Idle Duration (min)")
                 },
                 'ignition': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "latitude", "longitude", "ignition"],
-                    'query': {"imei": imei},
+                    'query': {"imei": imei, "gps": "A"},
                     'sheet_name': "Ignition Report",
                     'post_process': lambda df: process_duration_report(df, "Ignition Duration (min)")
                 },
                 'daily': {
                     'collection': 'atlanta',
                     'fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
-                    'query': {"imei": imei},
+                    'query': {"imei": imei, "gps": "A"},
                     'sheet_name': "Daily Report"
                 }
             }
