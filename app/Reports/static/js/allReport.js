@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Modal open/close handlers
   document
-    .querySelector('[data-report="customReport"]')
+    .querySelector('[data-report="custom"]')
     .addEventListener("click", function () {
       customReportModal.style.display = "block";
       loadFields();
