@@ -337,14 +337,13 @@ def download_panic_report():
 
         imei = vehicle["IMEI"]
 
-        # Build query - more comprehensive SOS detection
+        # Simplified query without $where
         query = {
             "imei": imei,
             "$or": [
                 {"sos": {"$in": ["1", 1, True]}},
                 {"status": "SOS"},
-                {"alarm": "SOS"},
-                {"$where": "this.status && this.status.includes('SOS')"}
+                {"alarm": "SOS"}
             ]
         }
 
@@ -367,7 +366,21 @@ def download_panic_report():
         ).sort("date_time", 1))
 
         if not records:
-            return jsonify({"success": False, "message": "No panic events found"}), 404
+            # Also check atlanta collection if no records found in sos_logs
+            records = list(db['atlanta'].find(
+                query,
+                {
+                    "date_time": 1,
+                    "latitude": 1,
+                    "longitude": 1,
+                    "speed": 1,
+                    "odometer": 1,
+                    "_id": 0
+                }
+            ).sort("date_time", 1))
+
+            if not records:
+                return jsonify({"success": False, "message": "No panic events found"}), 404
 
         # Create DataFrame
         df = pd.DataFrame(records)
@@ -392,4 +405,6 @@ def download_panic_report():
         )
 
     except Exception as e:
+        print(f"Error generating panic report: {str(e)}")  # Add this for debugging
+        traceback.print_exc()  # Add this to print full traceback
         return jsonify({"success": False, "message": str(e)}), 500
