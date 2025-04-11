@@ -90,6 +90,14 @@ document.addEventListener("DOMContentLoaded", function () {
       const reportType = this.dataset.report;
       const reportName = this.querySelector("h3").textContent;
 
+      if (reportName === "Custom Report") {
+        document.getElementById("generateReport").dataset.reportType =
+          reportType;
+        document.getElementById("generateReport").dataset.reportName =
+          reportName;
+        return;
+      }
+
       if (reportType === "custom") {
         fetch(
           `/reports/get_custom_report?name=${encodeURIComponent(reportName)}`
