@@ -258,13 +258,17 @@ def download_custom_report():
 
         if df.empty:
             return jsonify({"success": False, "message": "No data found"}), 404
+
         
         if 'latitude' in df.columns and 'longitude' in df.columns:
             from app.geocoding import geocodeInternal
             
+            df['latitude'] = df['latitude'].apply(nmea_to_decimal)
+            df['longitude'] = df['longitude'].apply(nmea_to_decimal)
+
             # Add Location column
             df['Location'] = df.apply(
-                lambda row: geocodeInternal(nmea_to_decimal(row['latitude']), nmea_to_decimal(row['longitude'])) 
+                lambda row: geocodeInternal(row['latitude'], row['longitude']) 
                     if pd.notnull(row['latitude']) and pd.notnull(row['longitude']) 
                     else 'Missing coordinates',
                 axis=1
@@ -287,10 +291,6 @@ def download_custom_report():
         # Remove MongoDB _id if present
         if '_id' in df.columns:
             df.drop('_id', axis=1, inplace=True)
-
-        if "latitude" in fields and "longitude" in fields:
-            df['latitude'] = df['latitude'].apply(nmea_to_decimal)
-            df['longitude'] = df['longitude'].apply(nmea_to_decimal)
 
         if "ignition" in fields:
             df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
@@ -427,6 +427,27 @@ def download_panic_report():
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
         if 'date_time' in df.columns:
             cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
+            df = df[cols]
+
+        if 'latitude' in df.columns and 'longitude' in df.columns:
+            from app.geocoding import geocodeInternal
+            
+            df['latitude'] = df['latitude'].apply(nmea_to_decimal)
+            df['longitude'] = df['longitude'].apply(nmea_to_decimal)
+
+            # Add Location column
+            df['Location'] = df.apply(
+                lambda row: geocodeInternal(row['latitude'], row['longitude']) 
+                    if pd.notnull(row['latitude']) and pd.notnull(row['longitude']) 
+                    else 'Missing coordinates',
+                axis=1
+            )
+
+            cols = df.columns.tolist()
+            if 'Location' in cols:
+                cols.remove('Location')
+            lng_idx = cols.index('longitude')
+            cols.insert(lng_idx + 1, 'Location')
             df = df[cols]
 
         # Generate Excel
