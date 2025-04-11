@@ -4,52 +4,85 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   // Initialize elements
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
   const customReportForm = document.getElementById("customReportForm");
-  
+
   // Allowed fields for custom reports
   const allowedFields = [
-    "main_power", "i_btn", "mcc", "ignition", "Tenure", "gps", "gsm_sig", "arm", 
-    "date", "time", "sos", "harsh_speed", "odometer", "cellid", "internal_bat", 
-    "Package", "DateOfPurchase", "mnc", "r1", "r2", "r3", "YearOfManufacture", 
-    "DriverName", "InsuranceNumber", "sleep", "dir1", "SIM", "LicensePlateNumber", 
-    "ac", "longitude", "latitude", "speed", "door", "temp", "address", "Status", 
-    "MobileNumber"
+    "main_power",
+    "i_btn",
+    "mcc",
+    "ignition",
+    "Tenure",
+    "gps",
+    "gsm_sig",
+    "arm",
+    "date",
+    "time",
+    "sos",
+    "harsh_speed",
+    "odometer",
+    "cellid",
+    "internal_bat",
+    "Package",
+    "DateOfPurchase",
+    "mnc",
+    "r1",
+    "r2",
+    "r3",
+    "YearOfManufacture",
+    "DriverName",
+    "InsuranceNumber",
+    "sleep",
+    "dir1",
+    "SIM",
+    "LicensePlateNumber",
+    "ac",
+    "longitude",
+    "latitude",
+    "speed",
+    "door",
+    "temp",
+    "address",
+    "Status",
+    "MobileNumber",
   ];
 
   // Initialize Selectize for dropdowns
   $("select").selectize({
     create: false,
-    sortField: "text"
+    sortField: "text",
   });
 
   // Modal open/close handlers
-  document.querySelector('[data-report="custom"]').addEventListener('click', function() {
-    customReportModal.style.display = "block";
-    loadFields();
-  });
+  document
+    .querySelector('[data-report="custom"]')
+    .addEventListener("click", function () {
+      customReportModal.style.display = "block";
+      loadFields();
+    });
 
-  document.querySelectorAll('.close').forEach(closeBtn => {
-    closeBtn.addEventListener('click', function() {
+  document.querySelectorAll(".close").forEach((closeBtn) => {
+    closeBtn.addEventListener("click", function () {
       customReportModal.style.display = "none";
       reportModal.style.display = "none";
     });
   });
 
-  document.querySelectorAll('.cancel-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+  document.querySelectorAll(".cancel-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
       customReportModal.style.display = "none";
       reportModal.style.display = "none";
     });
   });
 
   // Window click handler to close modals
-  window.addEventListener('click', function(event) {
+  window.addEventListener("click", function (event) {
     if (event.target == reportModal) {
       reportModal.style.display = "none";
     }
@@ -59,120 +92,130 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // Report card click handlers
-  document.querySelectorAll('.report-card').forEach(card => {
-    card.addEventListener('click', function(e) {
+  document.querySelectorAll(".report-card").forEach((card) => {
+    card.addEventListener("click", function (e) {
       e.preventDefault();
       const reportType = this.dataset.report;
-      const reportName = this.querySelector('h3').textContent;
+      const reportName = this.querySelector("h3").textContent;
 
-      if(reportName !== "Custom Report") {
-      if (reportType === 'custom') {
-        fetch(`/reports/get_custom_report?name=${encodeURIComponent(reportName)}`)
-          .then(response => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-          })
-          .then(data => {
-            if (data.success) {
-              openReportModal(reportName);
-              document.getElementById("generateReport").dataset.reportType = 'custom';
-              document.getElementById("generateReport").dataset.reportName = reportName;
-            } else {
-              throw new Error(data.message || "Failed to load custom report");
-            }
-          })
-          .catch(error => {
-            console.error("Error:", error);
-            alert("Failed to load custom report configuration");
-          });
-      } else if (reportType === 'sos') {
-        // Ensure vehicle and date range are selected for panic report
-        if (!document.getElementById("vehicleNumber").value) {
-          alert("Please select a vehicle first");
-          return;
+      if (reportName !== "Custom Report") {
+        if (reportType === "custom") {
+          fetch(
+            `/reports/get_custom_report?name=${encodeURIComponent(reportName)}`
+          )
+            .then((response) => {
+              if (!response.ok) throw new Error("Network response was not ok");
+              return response.json();
+            })
+            .then((data) => {
+              if (data.success) {
+                openReportModal(reportName);
+                document.getElementById("generateReport").dataset.reportType =
+                  "custom";
+                document.getElementById("generateReport").dataset.reportName =
+                  reportName;
+              } else {
+                throw new Error(data.message || "Failed to load custom report");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Failed to load custom report configuration");
+            });
+        } else if (reportType === "sos") {
+          // Ensure vehicle and date range are selected for panic report
+          if (!document.getElementById("vehicleNumber").value) {
+            alert("Please select a vehicle first");
+            return;
+          }
+          generatePanicReport();
+        } else {
+          openReportModal(reportName);
+          document.getElementById("generateReport").dataset.reportType =
+            reportType;
         }
-        generatePanicReport();
-      } else {
-        openReportModal(reportName);
-        document.getElementById("generateReport").dataset.reportType = reportType;
       }
-    }
     });
   });
 
   // Generate report button handler
-  document.getElementById("generateReport").addEventListener('click', async function() {
-    const reportType = this.dataset.reportType;
-    const reportName = this.dataset.reportName;
-    const vehicleNumber = document.getElementById("vehicleNumber").value;
-    const dateRange = document.getElementById("dateRange").value;
+  document
+    .getElementById("generateReport")
+    .addEventListener("click", async function () {
+      const reportType = this.dataset.reportType;
+      const reportName = this.dataset.reportName;
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const dateRange = document.getElementById("dateRange").value;
 
-    if (!vehicleNumber) {
-      alert("Please select a vehicle number");
-      return;
-    }
-
-    const generateBtn = this;
-    const originalText = generateBtn.textContent;
-    generateBtn.disabled = true;
-    generateBtn.textContent = "Generating...";
-
-    try {
-      let endpoint = '/reports/download_custom_report';
-      let body = {
-        reportName: reportType,
-        vehicleNumber: vehicleNumber,
-        dateRange: dateRange
-      };
-
-      if (reportType === 'custom') {
-        body.customReportName = reportName;
+      if (!vehicleNumber) {
+        alert("Please select a vehicle number");
+        return;
       }
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-TOKEN": getCookie("csrf_access_token")
-        },
-        body: JSON.stringify(body)
-      });
+      const generateBtn = this;
+      const originalText = generateBtn.textContent;
+      generateBtn.disabled = true;
+      generateBtn.textContent = "Generating...";
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to generate report");
+      try {
+        let endpoint = "/reports/download_custom_report";
+        let body = {
+          reportName: reportType,
+          vehicleNumber: vehicleNumber,
+          dateRange: dateRange,
+        };
+
+        if (reportType === "custom") {
+          body.customReportName = reportName;
+        }
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Failed to generate report");
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${
+          reportType === "custom" ? reportName : reportType
+        }_report_${vehicleNumber}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error("Error:", error);
+        alert(error.message || "Failed to generate report");
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalText;
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${reportType === 'custom' ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-    } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "Failed to generate report");
-    } finally {
-      generateBtn.disabled = false;
-      generateBtn.textContent = originalText;
-    }
-  });
+    });
 
   // Custom report form submission
-  customReportForm.addEventListener('submit', function(e) {
+  customReportForm.addEventListener("submit", function (e) {
     e.preventDefault();
-    
+
     const reportName = document.getElementById("reportName").value.trim();
     if (!reportName) {
       alert("Please provide a report name");
       return;
     }
 
-    const fields = Array.from(selectedFields.children).map(li => li.dataset.field);
+    const fields = Array.from(selectedFields.children).map(
+      (li) => li.dataset.field
+    );
     if (fields.length === 0) {
       alert("Please select at least one field");
       return;
@@ -187,44 +230,46 @@ document.addEventListener("DOMContentLoaded", function() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token")
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       },
       body: JSON.stringify({
         reportName: reportName,
-        fields: fields
+        fields: fields,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
       })
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("Network response was not ok");
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        alert(data.message);
-        createReportCard({ report_name: reportName, fields: fields });
-        customReportModal.style.display = "none";
-        customReportForm.reset();
-        selectedFields.innerHTML = "";
-      } else {
-        throw new Error(data.message || "Failed to save report");
-      }
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      alert(error.message);
-    })
-    .finally(() => {
-      saveBtn.disabled = false;
-      saveBtn.textContent = originalText;
-    });
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          createReportCard({ report_name: reportName, fields: fields });
+          customReportModal.style.display = "none";
+          customReportForm.reset();
+          selectedFields.innerHTML = "";
+        } else {
+          throw new Error(data.message || "Failed to save report");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert(error.message);
+      })
+      .finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+      });
   });
 
   // Field selection handling
-  fieldSelection.addEventListener('change', function(e) {
+  fieldSelection.addEventListener("change", function (e) {
     const field = e.target.value;
 
     if (e.target.checked) {
-      const existingField = selectedFields.querySelector(`[data-field="${field}"]`);
+      const existingField = selectedFields.querySelector(
+        `[data-field="${field}"]`
+      );
       if (existingField) {
         alert("This field is already selected.");
         e.target.checked = false;
@@ -241,9 +286,11 @@ document.addEventListener("DOMContentLoaded", function() {
       removeButton.className = "btn btn-sm btn-danger";
       removeButton.style.marginLeft = "10px";
 
-      removeButton.addEventListener('click', function() {
+      removeButton.addEventListener("click", function () {
         selectedFields.removeChild(listItem);
-        const checkbox = fieldSelection.querySelector(`input[value="${field}"]`);
+        const checkbox = fieldSelection.querySelector(
+          `input[value="${field}"]`
+        );
         if (checkbox) {
           checkbox.checked = false;
           checkbox.parentElement.style.display = "block";
@@ -253,15 +300,17 @@ document.addEventListener("DOMContentLoaded", function() {
       listItem.appendChild(removeButton);
 
       // Drag and drop functionality
-      listItem.addEventListener('dragstart', (e) => {
+      listItem.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", e.target.dataset.field);
       });
 
-      listItem.addEventListener('dragover', (e) => e.preventDefault());
-      listItem.addEventListener('drop', (e) => {
+      listItem.addEventListener("dragover", (e) => e.preventDefault());
+      listItem.addEventListener("drop", (e) => {
         e.preventDefault();
         const draggedField = e.dataTransfer.getData("text/plain");
-        const draggedItem = selectedFields.querySelector(`[data-field="${draggedField}"]`);
+        const draggedItem = selectedFields.querySelector(
+          `[data-field="${draggedField}"]`
+        );
         if (draggedItem) {
           selectedFields.insertBefore(draggedItem, e.target);
         }
@@ -294,9 +343,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Helper functions
 function createReportCard(report) {
-  const existingCard = document.querySelector(`.report-card[data-report="${report.report_name}"]`);
+  const existingCard = document.querySelector(
+    `.report-card[data-report="${report.report_name}"]`
+  );
   if (existingCard) return;
-  
+
   const reportCard = document.createElement("a");
   reportCard.href = "#";
   reportCard.className = "report-card";
@@ -305,7 +356,7 @@ function createReportCard(report) {
     <h3>${report.report_name}</h3>
     <i class="fa-solid fa-file-alt"></i>
   `;
-  
+
   const container = document.querySelector(".report-cards");
   container.insertBefore(reportCard, container.lastElementChild);
 }
@@ -321,23 +372,23 @@ function openReportModal(reportName) {
 async function generatePanicReport() {
   const vehicleNumber = document.getElementById("vehicleNumber").value;
   const dateRange = document.getElementById("dateRange").value;
-  
+
   if (!vehicleNumber) {
     alert("Please select a vehicle first");
     return;
   }
 
   try {
-    const response = await fetch('/reports/download_panic_report', {
-      method: 'POST',
+    const response = await fetch("/reports/download_panic_report", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': getCookie('csrf_access_token')
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       },
       body: JSON.stringify({
         vehicleNumber: vehicleNumber,
-        dateRange: dateRange || 'all'
-      })
+        dateRange: dateRange || "all",
+      }),
     });
 
     if (!response.ok) {
@@ -347,14 +398,13 @@ async function generatePanicReport() {
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `panic_report_${vehicleNumber}.xlsx`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    
   } catch (error) {
     console.error("Error:", error);
     alert(error.message || "Failed to generate panic report");
@@ -363,14 +413,16 @@ async function generatePanicReport() {
 
 function loadFields() {
   fetch("/reports/get_fields")
-    .then(response => {
+    .then((response) => {
       if (!response.ok) throw new Error("Network response was not ok");
       return response.json();
     })
-    .then(fields => {
+    .then((fields) => {
       fieldSelection.innerHTML = "";
-      const filteredFields = fields.filter(field => .includes(field));
-      filteredFields.forEach(field => {
+      const filteredFields = fields.filter((field) =>
+        allowedFields.includes(field)
+      );
+      filteredFields.forEach((field) => {
         const fieldItem = document.createElement("div");
         fieldItem.className = "field-item";
         fieldItem.style.cssText = `
@@ -388,7 +440,7 @@ function loadFields() {
         fieldSelection.appendChild(fieldItem);
       });
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Error loading fields:", error);
       alert("Failed to load available fields. Please try again.");
     });
