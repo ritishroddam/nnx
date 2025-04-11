@@ -384,7 +384,8 @@ document.addEventListener("DOMContentLoaded", function() {
       e.preventDefault();
       const reportType = this.dataset.report;
       const reportName = this.querySelector('h3').textContent;
-      
+
+      if(reportName !== "Custom Report") {
       if (reportType === 'custom') {
         fetch(`/reports/get_custom_report?name=${encodeURIComponent(reportName)}`)
           .then(response => {
@@ -415,6 +416,7 @@ document.addEventListener("DOMContentLoaded", function() {
         openReportModal(reportName);
         document.getElementById("generateReport").dataset.reportType = reportType;
       }
+    }
     });
   });
 
