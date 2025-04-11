@@ -111,7 +111,8 @@
 .datetime-container,
 .weather-container {
   margin-right: 10px;
-  width: 60%;
+  width: 100%;
+  height: 100%;
   text-align: center;
   padding: 15px;
   border-radius: 10px;
