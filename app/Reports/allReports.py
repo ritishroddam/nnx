@@ -288,6 +288,10 @@ def download_custom_report():
         if '_id' in df.columns:
             df.drop('_id', axis=1, inplace=True)
 
+        if "latitude" in fields and "longitude" in fields:
+            df['latitude'] = df['latitude'].apply(nmea_to_decimal)
+            df['longitude'] = df['longitude'].apply(nmea_to_decimal)
+
         if "ignition" in fields:
             df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
