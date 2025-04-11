@@ -86,14 +86,11 @@
                         </a>
                     </li>
                 </ul>
-                <ul class="submenu">
-                    <li>
-                        <a href="{{url_for('RouteHistory.page')}}">
-                            Route History
-                            <i class="fa-solid fa-route" style='white-space:pre'></i>
-                        </a>
-                    </li>
-                </ul>
+                <li>
+                    <a href="{{url_for('RouteHistory.page')}}" class="menu-item">
+                        <i class="fa-solid fa-route"></i> <span class="sidebar-text">Reports</span>
+                    </a>
+                </li>
             </li>
             <li>
                 <a href="#" class="menu-item">
@@ -102,8 +99,9 @@
             </li>
             <li>
                 <a href="#" class="menu-item">
+                    <i class="fa-solid fa-book"></i>
                         <a href="{{url_for('Reports.index')}}">
-                            <i class="fa-solid fa-book"></i> <span class="sidebar-text">Reports</span>
+                            <span class="sidebar-text">Reports</span>
                         </a>
                     </i>
                 </a>
