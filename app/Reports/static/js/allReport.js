@@ -94,31 +94,37 @@ document.addEventListener("DOMContentLoaded", function () {
       const reportType = this.dataset.report;
       const reportName = this.querySelector("h3").textContent;
 
-        if (reportName === "Panic Report") {
-            openReportModal(reportName);
-        } else if (reportType === "custom") {
-            fetch(`/reports/get_custom_report?name=${encodeURIComponent(reportName)}`)
-                .then((response) => {
-                    if (!response.ok) throw new Error("Network response was not ok");
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        openReportModal(reportName);
-                        document.getElementById("generateReport").dataset.reportType = "custom";
-                        document.getElementById("generateReport").dataset.reportName = reportName;
-                    } else {
-                        throw new Error(data.message || "Failed to load custom report");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                    alert("Failed to load custom report configuration");
-                });
-        } else {
-            openReportModal(reportName);
-            document.getElementById("generateReport").dataset.reportType = reportType;
-        }
+      if (reportName === "Panic Report") {
+        console.log("reportType", reportType);
+        openReportModal(reportName);
+      } else if (reportType === "custom") {
+        fetch(
+          `/reports/get_custom_report?name=${encodeURIComponent(reportName)}`
+        )
+          .then((response) => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+          })
+          .then((data) => {
+            if (data.success) {
+              openReportModal(reportName);
+              document.getElementById("generateReport").dataset.reportType =
+                "custom";
+              document.getElementById("generateReport").dataset.reportName =
+                reportName;
+            } else {
+              throw new Error(data.message || "Failed to load custom report");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Failed to load custom report configuration");
+          });
+      } else {
+        openReportModal(reportName);
+        document.getElementById("generateReport").dataset.reportType =
+          reportType;
+      }
     });
   });
 
