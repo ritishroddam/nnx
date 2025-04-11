@@ -121,13 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
               console.error("Error:", error);
               alert("Failed to load custom report configuration");
             });
-        } else if (reportType === "sos") {
-          // Ensure vehicle and date range are selected for panic report
-          generatePanicReport();
-          if (!document.getElementById("vehicleNumber").value) {
-            alert("Please select a vehicle first");
-            return;
-          }
         } else {
           openReportModal(reportName);
           document.getElementById("generateReport").dataset.reportType =
@@ -155,6 +148,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const originalText = generateBtn.textContent;
       generateBtn.disabled = true;
       generateBtn.textContent = "Generating...";
+
+      if (reportName === "Panic Report") {
+        generatePanicReport();
+        return;
+      }
 
       try {
         let endpoint = "/reports/download_custom_report";
