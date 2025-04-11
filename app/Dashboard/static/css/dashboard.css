@@ -117,7 +117,7 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
   transition: background 0.5s ease;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .dark-mode .datetime-container,
