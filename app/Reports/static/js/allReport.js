@@ -13,8 +13,6 @@ const allowedFields = [
   "gps",
   "gsm_sig",
   "arm",
-  "date",
-  "time",
   "sos",
   "harsh_speed",
   "odometer",
@@ -32,7 +30,6 @@ const allowedFields = [
   "sleep",
   "dir1",
   "SIM",
-  "LicensePlateNumber",
   "ac",
   "longitude",
   "latitude",
@@ -93,13 +90,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Report card click handlers
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function (e) {
-        e.preventDefault();
-        const reportType = this.dataset.report;
-        const reportName = this.querySelector("h3").textContent;
+      e.preventDefault();
+      const reportType = this.dataset.report;
+      const reportName = this.querySelector("h3").textContent;
 
         if (reportName === "Panic Report") {
             openReportModal(reportName);
-
+            document.getElementById("generateReport").dataset.reportType = "panic";
+            document.getElementById("generateReport").dataset.reportName = "Panic Report";
         } else if (reportType === "custom") {
             fetch(`/reports/get_custom_report?name=${encodeURIComponent(reportName)}`)
                 .then((response) => {
@@ -124,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("generateReport").dataset.reportType = reportType;
         }
     });
-});
+  });
 
   // Generate report button handler
   document
