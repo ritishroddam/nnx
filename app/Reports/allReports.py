@@ -208,8 +208,8 @@ def download_custom_report():
                 }
             }
 
-            if report_name is "Panic Report":
-                return download_panic_report()
+            # if report_name is "Panic Report":
+            #     return download_panic_report()
             if report_name not in report_configs:
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
 
@@ -241,7 +241,14 @@ def download_custom_report():
             return jsonify({"success": False, "message": "No data found"}), 404
 
         # Add vehicle number column
-        df['Vehicle Number'] = vehicle["LicensePlateNumber"]
+        # df['Vehicle Number'] = vehicle["LicensePlateNumber"]
+        
+        df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+        
+        # Reorder columns if date_time exists
+        if 'date_time' in df.columns:
+            cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
+            df = df[cols]
 
         # Apply post-processing if defined
         if report_name != "custom" and post_process:
@@ -330,15 +337,14 @@ def download_panic_report():
 
         imei = vehicle["IMEI"]
 
-        # Build query
+        # Build query - more comprehensive SOS detection
         query = {
             "imei": imei,
             "$or": [
-                {"sos": "1"},
-                {"sos": 1},
-                {"sos": True},
+                {"sos": {"$in": ["1", 1, True]}},
                 {"status": "SOS"},
-                {"alarm": "SOS"}
+                {"alarm": "SOS"},
+                {"$where": "this.status && this.status.includes('SOS')"}
             ]
         }
 
@@ -366,9 +372,11 @@ def download_panic_report():
         # Create DataFrame
         df = pd.DataFrame(records)
         
-        # Add vehicle number
-        df['Vehicle Number'] = vehicle["LicensePlateNumber"]
-        
+        # Reorder columns - Vehicle Number first, then date_time
+        df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+        if 'date_time' in df.columns:
+            cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
+            df = df[cols]
 
         # Generate Excel
         output = BytesIO()
