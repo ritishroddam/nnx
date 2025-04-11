@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const reportType = this.dataset.report;
       const reportName = this.querySelector("h3").textContent;
 
-      if (reportName === "Panic Report") {
+      if (reportType === "panic") {
         console.log("reportType", reportType);
         openReportModal(reportName);
         document.getElementById("generateReport").dataset.reportType =
