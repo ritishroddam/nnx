@@ -88,6 +88,9 @@
   flex: 1;
   margin: 0 10px;
 }
+.weather-info, .datetime-container{
+  margin: 10px 0 10px 0;
+}
 .weather-container #weather p{
   color: black;
 }
@@ -118,7 +121,6 @@
   backdrop-filter: blur(10px);
   transition: background 0.5s ease;
   font-size: 18px;
-  margin: 5px 0 5px 0;
 }
 
 .dark-mode .datetime-container,
