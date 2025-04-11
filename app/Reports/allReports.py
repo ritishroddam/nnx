@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import traceback
-from flask import render_template, Blueprint, request, jsonify, send_file, current_app
-from app.geocoding import geocode
+from flask import render_template, Blueprint, request, jsonify, send_file
 from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime
@@ -397,28 +396,6 @@ def download_custom_report():
 
         # Add vehicle number column
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
-        
-        # Add location column using geocode function
-        def get_location(row):
-            lat, lng = row['latitude'], row['longitude']
-            with current_app.test_request_context(json={"lat": lat, "lng": lng}) as ctx:
-                # Set the access_token_cookie manually
-                ctx.request.cookies['access_token_cookie'] = request.cookies.get('access_token_cookie')
-                response = geocode()
-                if response.status_code == 200:
-                    return response.get_json().get('address', 'Unknown')
-                return 'Unknown'
-
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            df['location'] = df.apply(get_location, axis=1)
-
-        # Reorder columns to place location after latitude and longitude
-        if 'latitude' in df.columns and 'longitude' in df.columns and 'location' in df.columns:
-            cols = list(df.columns)
-            lat_idx = cols.index('latitude')
-            lng_idx = cols.index('longitude')
-            cols.insert(lng_idx + 1, cols.pop(cols.index('location')))
-            df = df[cols]
 
         # Apply post-processing if defined
         if report_name != "custom" and post_process:
