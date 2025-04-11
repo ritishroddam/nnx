@@ -27,7 +27,7 @@ FIELD_COLLECTION_MAP = {
                 'onBoard_temp', 'mobCountryCode', 'mobNetworkCode', 'localAreaCode'],
     'vehicle_inventory': ['LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 
                          'VehicleMake', 'YearOfManufacture', 'DateOfPurchase',
-                         'InsuranceNumber', 'DriverName', 'CurrentStatus',
+                         'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType'
                          'Location', 'OdometerReading', 'ServiceDueDate'],
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
@@ -149,7 +149,7 @@ def get_custom_report():
 def download_custom_report():
     try:
         data = request.get_json()
-        report_name = data.get("reportName")
+        report_type = data.get("reportType")
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
 
@@ -164,8 +164,8 @@ def download_custom_report():
         imei = vehicle["IMEI"]
 
         # For custom reports, get the fields from the saved report
-        if report_name == "custom":
-            custom_report_name = data.get("customReportName")
+        if report_type == "custom":
+            custom_report_name = data.get("ReportName")
             if not custom_report_name:
                 return jsonify({"success": False, "message": "Custom report name missing"}), 400
                 
@@ -229,10 +229,10 @@ def download_custom_report():
                 }
             }
 
-            if report_name not in report_configs:
+            if report_type not in report_configs:
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
 
-            config = report_configs[report_name]
+            config = report_configs[report_type]
             fields = config['fields']
             collection = config['collection']
             base_query = config['query']
@@ -245,7 +245,7 @@ def download_custom_report():
             query.update(date_filter)
         
         # For standard reports, merge with their specific query
-        if report_name != "custom":
+        if report_type != "custom":
             query.update(base_query)
 
         # Fetch data
@@ -285,7 +285,7 @@ def download_custom_report():
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
         # Apply post-processing if defined
-        if report_name != "custom" and post_process:
+        if report_type != "custom" and post_process:
             df = post_process(df)
 
         # Remove MongoDB _id if present
@@ -297,12 +297,12 @@ def download_custom_report():
 
         # Generate Excel
         output = BytesIO()
-        sheet_name = config['sheet_name'] if report_name != "custom" else custom_report_name
+        sheet_name = config['sheet_name'] if report_type != "custom" else custom_report_name
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=sheet_name)
 
         output.seek(0)
-        filename = f"{report_name}_report_{vehicle_number}.xlsx" if report_name != "custom" else f"{custom_report_name}_{vehicle_number}.xlsx"
+        filename = f"{report_type }_report_{vehicle_number}.xlsx" if report_type  != "custom" else f"{custom_report_name}_{vehicle_number}.xlsx"
         
         return send_file(
             output,
@@ -447,7 +447,7 @@ def download_panic_report():
             else 'Missing coordinates',
             axis=1
         )
-        
+
         cols = df.columns.tolist()
         if 'Location' in cols:
             cols.remove('Location')
