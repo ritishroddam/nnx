@@ -239,7 +239,10 @@ def download_custom_report():
 
         # Add date range filter
         date_filter = get_date_range_filter(date_range)
-        query = {"imei": imei}
+        if 'latitude' in fields or 'longitude' in fields:
+            query = {"imei": imei, "gps": "A"}
+        else:
+            query = {"imei": imei}
         if date_filter:
             query.update(date_filter)
         
@@ -283,7 +286,6 @@ def download_custom_report():
                 cols.remove('Location')
             lng_idx = cols.index('longitude')
             cols.insert(lng_idx + 1, 'Location')
-            df = df[cols]
 
         # Add vehicle number column
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
