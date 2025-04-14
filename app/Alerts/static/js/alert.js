@@ -1,3 +1,9 @@
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // Initialize elements
     const alertFilterModal = document.getElementById("alertFilterModal");
@@ -18,10 +24,32 @@ document.addEventListener("DOMContentLoaded", function () {
     let unreadNotifications = 0;
 
     // Initialize Selectize for dropdowns
-    $("select").selectize({
-        create: false,
-        sortField: "text",
-    });
+    if (typeof $ !== 'undefined') {
+        $("select").selectize({
+            create: false,
+            sortField: "text",
+        });
+    } else {
+        console.error("jQuery not loaded - Selectize won't work");
+    }
+
+    function setupAlertCards() {
+        alertCards.forEach(card => {
+            card.addEventListener("click", function (e) {
+                e.preventDefault();
+                console.log("Alert card clicked");
+                currentAlertType = this.dataset.alert;
+                const alertName = this.querySelector("h3").textContent;
+                
+                document.getElementById("alertModalTitle").textContent = alertName;
+                document.getElementById("alertResultsTitle").textContent = `${alertName} Results`;
+                
+                alertFilterModal.style.display = "block";
+            });
+        });
+    }
+    
+    setupAlertCards();
 
     // Alert card click handlers
     alertCards.forEach(card => {
