@@ -79,6 +79,7 @@ def create_app(config_name='default'):
     from app.RouteHistory.routeBackend import route_bp
     from app.SimInvy.SimBackend import sim_bp
     from app.VehicleDetails.vehicleDetails import vehicleDetails_bp
+    from app.Alerts.alerts import alerts_bp
 
     app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
@@ -88,6 +89,7 @@ def create_app(config_name='default'):
     app.register_blueprint(route_bp, url_prefix='/routeHistory')
     app.register_blueprint(sim_bp, url_prefix='/simInvy')
     app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
+    app.register_blueprint(alerts_bp, url_prefix='/alerts')
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)

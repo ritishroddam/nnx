@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Alerts</title>
+<link rel="stylesheet" href="{{ url_for('Alerts.static', filename='css/alerts.css') }}">
+<script defer src="{{ url_for('Alerts.static', filename='js/alerts.js') }}"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+{% endblock %}
+
+{% block h1 %}
+Alerts
+{% endblock %}
+
+{% block block_container %}
+<div class="alert-header">
+    <h2>View Alerts</h2>
+</div>
+<div class="alert-cards">
+    <a href="#" class="alert-card" data-alert="panic">
+        <h3>Panic Alert</h3>
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="speeding">
+        <h3>Speeding Alert</h3>
+        <i class="fa-solid fa-gauge-high"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="harsh_break">
+        <h3>Harsh Break Alert</h3>
+        <i class="fa-solid fa-car-burst"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="harsh_acceleration">
+        <h3>Harsh Acceleration Alert</h3>
+        <i class="fa-solid fa-car-rear"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="gsm_low">
+        <h3>GSM Signal Low Alert</h3>
+        <i class="fa-solid fa-signal"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="internal_battery_low">
+        <h3>Internal Battery Low Alert</h3>
+        <i class="fa-solid fa-battery-quarter"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="external_battery_low">
+        <h3>External Battery Low Alert</h3>
+        <i class="fa-solid fa-bolt"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="main_power_off">
+        <h3>Main Supply Remove Alert</h3>
+        <i class="fa-solid fa-plug-circle-xmark"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="door_open">
+        <h3>Door Open Alert</h3>
+        <i class="fa-solid fa-car-side"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="door_close">
+        <h3>Door Close Alert</h3>
+        <i class="fa-solid fa-car-side"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="idle">
+        <h3>Idle Alert</h3>
+        <i class="fa-solid fa-hourglass-half"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="ignition_off">
+        <h3>Ignition Off Alert</h3>
+        <i class="fa-solid fa-key"></i>
+    </a>
+
+    <a href="#" class="alert-card" data-alert="ignition_on">
+        <h3>Ignition On Alert</h3>
+        <i class="fa-solid fa-key"></i>
+    </a>
+</div>
+
+<!-- Alert Filter Modal -->
+<div id="alertFilterModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="alertModalTitle">Alert Filter</h2>
+        <form id="alertFilterForm">
+            <div class="form-group">
+                <label for="alertDateRange">Date Range*</label>
+                <select id="alertDateRange" name="dateRange">
+                    <option value="last24hours">Last 24 Hours</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days">Last 7 Days</option>
+                    <option value="last30days">Last 30 Days</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="alertVehicleNumber">Vehicle Number</label>
+                <select id="alertVehicleNumber" name="vehicleNumber">
+                    <option value="">All Vehicles</option>
+                    {% for vehicle in vehicles %}
+                    <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" id="searchAlerts">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Alert Results Modal -->
+<div id="alertResultsModal" class="modal large-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="alertResultsTitle">Alert Results</h2>
+        <div class="alert-results-container">
+            <table id="alertResultsTable" class="alert-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle Number</th>
+                        <th>Date & Time</th>
+                        <th>Alert Type</th>
+                        <th>Location</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Alert results will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="alert-actions">
+            <button type="button" id="downloadAlertResults" class="download-btn">
+                <i class="fa-solid fa-download"></i> Download
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Bell -->
+<div class="notification-bell">
+    <i class="fa-solid fa-bell"></i>
+    <span class="notification-count">0</span>
+</div>
+
+<!-- Notification Panel -->
+<div class="notification-panel">
+    <div class="notification-header">
+        <h3>Recent Alerts</h3>
+        <button class="close-notifications">&times;</button>
+    </div>
+    <div class="notification-list">
+        <!-- Notifications will be added here -->
+    </div>
+</div>
+{% endblock %}
