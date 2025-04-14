@@ -105,6 +105,12 @@ def save_custom_report():
         if db['custom_reports'].find_one({"report_name": report_name}):
             return jsonify({"success": False, "message": "Report name already exists."}), 400
 
+        # Validate fields against FIELD_COLLECTION_MAP
+        valid_fields = set(FIELD_COLLECTION_MAP['atlanta'] + FIELD_COLLECTION_MAP['vehicle_inventory'])
+        invalid_fields = [field for field in fields if field not in valid_fields]
+        if invalid_fields:
+            return jsonify({"success": False, "message": f"Invalid fields: {', '.join(invalid_fields)}"}), 400
+
         # Save the report
         db['custom_reports'].insert_one({
             "report_name": report_name,
@@ -117,6 +123,34 @@ def save_custom_report():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+# @reports_bp.route('/save_custom_report', methods=['POST'])
+# @jwt_required()
+# def save_custom_report():
+#     try:
+#         data = request.get_json()
+#         report_name = data.get("reportName")
+#         fields = data.get("fields")
+
+#         if not report_name or not fields:
+#             return jsonify({"success": False, "message": "Invalid data provided."}), 400
+
+#         # Check for duplicate report name
+#         if db['custom_reports'].find_one({"report_name": report_name}):
+#             return jsonify({"success": False, "message": "Report name already exists."}), 400
+
+#         # Save the report
+#         db['custom_reports'].insert_one({
+#             "report_name": report_name,
+#             "fields": fields,
+#             "created_at": datetime.now(),
+#             "created_by": get_jwt_identity()
+#         })
+
+#         return jsonify({"success": True, "message": "Report saved successfully!"}), 200
+
+#     except Exception as e:
+#         return jsonify({"success": False, "message": str(e)}), 500
 
 
 @reports_bp.route('/get_custom_report', methods=['GET'])
@@ -167,16 +201,71 @@ def download_custom_report():
             custom_report_name = data.get("reportName")
             if not custom_report_name:
                 return jsonify({"success": False, "message": "Custom report name missing"}), 400
-                
+
             report = db['custom_reports'].find_one(
                 {"report_name": custom_report_name},
                 {"fields": 1, "_id": 0}
             )
             if not report:
                 return jsonify({"success": False, "message": "Custom report not found"}), 404
-                
+
             fields = report["fields"]
-            collection = "atlanta"
+
+            # Separate fields by collection
+            atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
+            vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]
+
+            # Fetch data from vehicle_inventory
+            vehicle_inventory_data = db['vehicle_inventory'].find_one(
+                {"IMEI": imei},
+                {field: 1 for field in vehicle_inventory_fields}
+            )
+
+            # Fetch data from atlanta
+            date_filter = get_date_range_filter(date_range)
+            atlanta_query = {"imei": imei}
+            if date_filter:
+                atlanta_query.update(date_filter)
+
+            atlanta_data = list(db['atlanta'].find(
+                atlanta_query,
+                {field: 1 for field in atlanta_fields}
+            ).sort("date_time", 1))
+
+            # Combine data
+            combined_data = []
+            for record in atlanta_data:
+                combined_record = {**vehicle_inventory_data, **record}
+                combined_data.append(combined_record)
+
+            # Convert to DataFrame
+            df = pd.DataFrame(combined_data)
+
+            if df.empty:
+                return jsonify({"success": False, "message": "No data found"}), 404
+
+            # Process latitude and longitude if present
+            if 'latitude' in df.columns and 'longitude' in df.columns:
+                df['latitude'] = df['latitude'].apply(
+                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+                )
+                df['longitude'] = df['longitude'].apply(
+                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+                )
+
+            # Generate Excel
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name=custom_report_name)
+
+            output.seek(0)
+            return send_file(
+                output,
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                as_attachment=True,
+                download_name=f"{custom_report_name}_{vehicle_number}.xlsx"
+            )
+
         else:
             # Standard reports configuration
             report_configs = {
@@ -237,89 +326,239 @@ def download_custom_report():
             base_query = config['query']
             post_process = config.get('post_process')
 
-        # Add date range filter
-        date_filter = get_date_range_filter(date_range)
-        if 'latitude' in fields or 'longitude' in fields:
-            query = {"imei": imei, "gps": "A"}
-        else:
+            # Add date range filter
+            date_filter = get_date_range_filter(date_range)
             query = {"imei": imei}
-        if date_filter:
-            query.update(date_filter)
-        
-        # For standard reports, merge with their specific query
-        if report_type != "custom":
+            if date_filter:
+                query.update(date_filter)
+
+            # Merge with specific query for standard reports
             query.update(base_query)
 
-        # Fetch data
-        cursor = db[collection].find(
-            query,
-            {field: 1 for field in fields}
-        ).sort("date_time", 1)
+            # Fetch data
+            cursor = db[collection].find(
+                query,
+                {field: 1 for field in fields}
+            ).sort("date_time", 1)
 
-        df = pd.DataFrame(list(cursor))
+            df = pd.DataFrame(list(cursor))
 
-        if df.empty:
-            return jsonify({"success": False, "message": "No data found"}), 404
+            if df.empty:
+                return jsonify({"success": False, "message": "No data found"}), 404
 
-        
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            from app.geocoding import geocodeInternal
+            # Process latitude and longitude if present
+            if 'latitude' in df.columns and 'longitude' in df.columns:
+                df['latitude'] = df['latitude'].apply(
+                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+                )
+                df['longitude'] = df['longitude'].apply(
+                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+                )
 
-            df['latitude'] = df['latitude'].apply(
-                lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+            # Add vehicle number column
+            df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+
+            # Apply post-processing if defined
+            if post_process:
+                df = post_process(df)
+
+            # Remove MongoDB _id if present
+            if '_id' in df.columns:
+                df.drop('_id', axis=1, inplace=True)
+
+            # Generate Excel
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
+
+            output.seek(0)
+            return send_file(
+                output,
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                as_attachment=True,
+                download_name=f"{report_type}_report_{vehicle_number}.xlsx"
             )
-            df['longitude'] = df['longitude'].apply(
-                lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-            )
-
-            # Add Location column
-            df['Location'] = df.apply(
-                lambda row: geocodeInternal(row['latitude'], row['longitude'])
-                if pd.notnull(row['latitude']) and row['latitude'] != "" and
-                   pd.notnull(row['longitude']) and row['longitude'] != ""
-                else 'Missing coordinates',
-                axis=1
-            )
-
-            cols = df.columns.tolist()
-            if 'Location' in cols:
-                cols.remove('Location')
-            lng_idx = cols.index('longitude')
-            cols.insert(lng_idx + 1, 'Location')
-            df = df[cols]
-
-        # Add vehicle number column
-        df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
-
-        # Apply post-processing if defined
-        if report_type != "custom" and post_process:
-            df = post_process(df)
-
-        # Remove MongoDB _id if present
-        if '_id' in df.columns:
-            df.drop('_id', axis=1, inplace=True)
-
-        if "ignition" in fields:
-            df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-
-        # Generate Excel
-        output = BytesIO()
-        sheet_name = config['sheet_name'] if report_type != "custom" else custom_report_name
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name=sheet_name)
-
-        output.seek(0)
-        filename = f"{report_type }_report_{vehicle_number}.xlsx" if report_type  != "custom" else f"{custom_report_name}_{vehicle_number}.xlsx"
-        
-        return send_file(
-            output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=filename
-        )
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+# @reports_bp.route('/download_custom_report', methods=['POST'])
+# @jwt_required()
+# def download_custom_report():
+#     try:
+#         data = request.get_json()
+#         report_type = data.get("reportType")
+#         vehicle_number = data.get("vehicleNumber")
+#         date_range = data.get("dateRange", "all")
+
+#         # Get vehicle details including IMEI and LicensePlateNumber
+#         vehicle = db['vehicle_inventory'].find_one(
+#             {"LicensePlateNumber": vehicle_number},
+#             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
+#         )
+#         if not vehicle:
+#             return jsonify({"success": False, "message": "Vehicle not found"}), 404
+
+#         imei = vehicle["IMEI"]
+
+#         # For custom reports, get the fields from the saved report
+#         if report_type == "custom":
+#             custom_report_name = data.get("reportName")
+#             if not custom_report_name:
+#                 return jsonify({"success": False, "message": "Custom report name missing"}), 400
+                
+#             report = db['custom_reports'].find_one(
+#                 {"report_name": custom_report_name},
+#                 {"fields": 1, "_id": 0}
+#             )
+#             if not report:
+#                 return jsonify({"success": False, "message": "Custom report not found"}), 404
+                
+#             fields = report["fields"]
+#             collection = "atlanta"
+#         else:
+#             # Standard reports configuration
+#             report_configs = {
+#                 'daily-distance': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "latitude", "longitude", "speed"],
+#                     'query': {"imei": imei, "gps": "A"},
+#                     'sheet_name': "Travel Path Report"
+#                 },
+#                 'odometer-daily-distance': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "odometer", "latitude", "longitude"],
+#                     'query': {"imei": imei, "gps": "A"},
+#                     'sheet_name': "Distance Report",
+#                     'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"])
+#                 },
+#                 'distance-speed-range': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "speed", "latitude", "longitude"],
+#                     'query': {"imei": imei, "gps": "A"},
+#                     'sheet_name': "Speed Report"
+#                 },
+#                 'stoppage': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "latitude", "longitude", "ignition"],
+#                     'query': {"imei": imei, "ignition": "0", "gps": "A"},
+#                     'sheet_name': "Stoppage Report",
+#                     'post_process': lambda df: process_duration_report(df, "Stoppage Duration (min)")
+#                 },
+#                 'idle': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "latitude", "longitude", "ignition", "speed"],
+#                     'query': {"imei": imei, "ignition": "1", "speed": "0.0", "gps": "A"},
+#                     'sheet_name': "Idle Report",
+#                     'post_process': lambda df: process_duration_report(df, "Idle Duration (min)")
+#                 },
+#                 'ignition': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "latitude", "longitude", "ignition"],
+#                     'query': {"imei": imei, "gps": "A"},
+#                     'sheet_name': "Ignition Report",
+#                     'post_process': lambda df: process_duration_report(df, "Ignition Duration (min)")
+#                 },
+#                 'daily': {
+#                     'collection': 'atlanta',
+#                     'fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
+#                     'query': {"imei": imei, "gps": "A"},
+#                     'sheet_name': "Daily Report"
+#                 }
+#             }
+
+#             if report_type not in report_configs:
+#                 return jsonify({"success": False, "message": "Invalid report type"}), 400
+
+#             config = report_configs[report_type]
+#             fields = config['fields']
+#             collection = config['collection']
+#             base_query = config['query']
+#             post_process = config.get('post_process')
+
+#         # Add date range filter
+#         date_filter = get_date_range_filter(date_range)
+#         if 'latitude' in fields or 'longitude' in fields:
+#             query = {"imei": imei, "gps": "A"}
+#         else:
+#             query = {"imei": imei}
+#         if date_filter:
+#             query.update(date_filter)
+        
+#         # For standard reports, merge with their specific query
+#         if report_type != "custom":
+#             query.update(base_query)
+
+#         # Fetch data
+#         cursor = db[collection].find(
+#             query,
+#             {field: 1 for field in fields}
+#         ).sort("date_time", 1)
+
+#         df = pd.DataFrame(list(cursor))
+
+#         if df.empty:
+#             return jsonify({"success": False, "message": "No data found"}), 404
+
+        
+#         if 'latitude' in df.columns and 'longitude' in df.columns:
+#             from app.geocoding import geocodeInternal
+
+#             df['latitude'] = df['latitude'].apply(
+#                 lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+#             )
+#             df['longitude'] = df['longitude'].apply(
+#                 lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+#             )
+
+#             # Add Location column
+#             df['Location'] = df.apply(
+#                 lambda row: geocodeInternal(row['latitude'], row['longitude'])
+#                 if pd.notnull(row['latitude']) and row['latitude'] != "" and
+#                    pd.notnull(row['longitude']) and row['longitude'] != ""
+#                 else 'Missing coordinates',
+#                 axis=1
+#             )
+
+#             cols = df.columns.tolist()
+#             if 'Location' in cols:
+#                 cols.remove('Location')
+#             lng_idx = cols.index('longitude')
+#             cols.insert(lng_idx + 1, 'Location')
+#             df = df[cols]
+
+#         # Add vehicle number column
+#         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+
+#         # Apply post-processing if defined
+#         if report_type != "custom" and post_process:
+#             df = post_process(df)
+
+#         # Remove MongoDB _id if present
+#         if '_id' in df.columns:
+#             df.drop('_id', axis=1, inplace=True)
+
+#         if "ignition" in fields:
+#             df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+
+#         # Generate Excel
+#         output = BytesIO()
+#         sheet_name = config['sheet_name'] if report_type != "custom" else custom_report_name
+#         with pd.ExcelWriter(output, engine='openpyxl') as writer:
+#             df.to_excel(writer, index=False, sheet_name=sheet_name)
+
+#         output.seek(0)
+#         filename = f"{report_type }_report_{vehicle_number}.xlsx" if report_type  != "custom" else f"{custom_report_name}_{vehicle_number}.xlsx"
+        
+#         return send_file(
+#             output,
+#             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#             as_attachment=True,
+#             download_name=filename
+#         )
+
+#     except Exception as e:
+#         return jsonify({"success": False, "message": str(e)}), 500
 
 def process_distance_report(df, vehicle_number):
     """Calculate total distance traveled"""
