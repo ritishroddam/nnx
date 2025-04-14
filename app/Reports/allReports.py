@@ -216,10 +216,11 @@ def download_custom_report():
             vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]
             print(f"ATLANTA FIELDS: {atlanta_fields}, VEHICLE INVENTORY FIELDS: {vehicle_inventory_fields}")  # Debugging line
             # Fetch data from vehicle_inventory
-            vehicle_inventory_data = db['vehicle_inventory'].find_one(
-                {"IMEI": imei},
-                {field: 1 for field in vehicle_inventory_fields}
-            )
+            if vehicle_inventory_fields:
+                vehicle_inventory_data = db['vehicle_inventory'].find_one(
+                    {"IMEI": imei},
+                    {field: 1 for field in vehicle_inventory_fields}
+                )
 
             # Fetch data from atlanta
             date_filter = get_date_range_filter(date_range)
@@ -227,16 +228,24 @@ def download_custom_report():
             if date_filter:
                 atlanta_query.update(date_filter)
 
-            atlanta_data = list(db['atlanta'].find(
-                atlanta_query,
-                {field: 1 for field in atlanta_fields}
-            ).sort("date_time", 1))
+            if atlanta_fields:
+                atlanta_data = list(db['atlanta'].find(
+                    atlanta_query,
+                    {field: 1 for field in atlanta_fields}
+                ).sort("date_time", 1))
 
             # Combine data
-            combined_data = []
-            for record in atlanta_data:
-                combined_record = {**vehicle_inventory_data, **record}
-                combined_data.append(combined_record)
+            if atlanta_data and vehicle_inventory_data:
+                combined_data = []
+                for record in atlanta_data:
+                    combined_record = {**vehicle_inventory_data, **record}
+                    combined_data.append(combined_record)
+            elif atlanta_data and not vehicle_inventory_data:
+                combined_data = atlanta_data
+            elif not atlanta_data and vehicle_inventory_data:
+                combined_data = [vehicle_inventory_data]
+            else:
+                return jsonify({"success": False, "message": "No data found"}), 404
 
             # Convert to DataFrame
             df = pd.DataFrame(combined_data)
