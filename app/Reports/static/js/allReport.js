@@ -1,3 +1,23 @@
+function displayFlashMessage(message, category = "danger") {
+  const flashMessagesContainer = document.getElementById(
+    "flash-messages-container"
+  );
+  if (flashMessagesContainer) {
+    const flashMessage = document.createElement("div");
+    flashMessage.className = `flash-message flash-${category}`;
+    flashMessage.innerHTML = `
+      <span>${message}</span>
+      <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+    `;
+    flashMessagesContainer.appendChild(flashMessage);
+
+    // Optionally, remove the message after a few seconds
+    setTimeout(() => flashMessage.remove(), 5000);
+  } else {
+    console.error("Flash messages container not found");
+  }
+}
+
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -310,21 +330,6 @@ document.addEventListener("DOMContentLoaded", function () {
       e.target.parentElement.style.display = "block";
     }
   });
-
-  // Load custom reports on page load
-  // fetch("/reports/get_custom_reports")
-  //   .then(response => {
-  //     if (!response.ok) throw new Error("Network response was not ok");
-  //     return response.json();
-  //   })
-  //   .then(reports => {
-  //     reports.forEach(report => {
-  //       createReportCard(report);
-  //     });
-  //   })
-  //   .catch(error => {
-  //     console.error("Error loading custom reports:", error);
-  //   });
 });
 
 // Helper functions

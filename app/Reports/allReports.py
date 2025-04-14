@@ -523,7 +523,7 @@ def download_panic_report():
 
             if not records:
                 flash("No panic events found", "warning")
-                return redirect(url_for('Reports.index'))
+                return jsonify({"success": True, "message": "No panic events found"}), 404
 
         # Create DataFrame
         df = pd.DataFrame(records)
