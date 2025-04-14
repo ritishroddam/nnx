@@ -90,7 +90,10 @@ document.addEventListener("DOMContentLoaded", function () {
           `/reports/get_custom_report?name=${encodeURIComponent(reportName)}`
         )
           .then((response) => {
-            if (!response.ok) throw new Error("Network response was not ok");
+            if (!response.ok) {
+              displayFlashMessage("Network response was not ok", "danger");
+              throw new Error("Network response was not ok");
+            }
             return response.json();
           })
           .then((data) => {
@@ -165,7 +168,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || "Failed to generate report");
+            displayFlashMessage(
+              errorData.message || "Failed to generate panic report",
+              errorData.category || "danger"
+            );
           }
 
           const blob = await response.blob();
@@ -224,7 +230,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }),
     })
       .then((response) => {
-        if (!response.ok) throw new Error("Network response was not ok");
+        if (!response.ok) {
+          displayFlashMessage("Network response was not ok", "danger");
+          throw new Error("Network response was not ok");
+        }
         return response.json();
       })
       .then((data) => {
@@ -389,7 +398,10 @@ async function generatePanicReport() {
 function loadFields() {
   fetch("/reports/get_fields")
     .then((response) => {
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {
+        displayFlashMessage("Network response was not ok", "danger");
+        throw new Error("Network response was not ok");
+      }
       return response.json();
     })
     .then((fields) => {
