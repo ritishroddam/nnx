@@ -138,10 +138,15 @@ def page():
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now.replace(hour=23, minute=59, second=59, microsecond=0)
+    
+    # Calculate alert counts for the default date range
+    alert_counts = get_alert_counts(default_start, default_end)
+    
     return render_template('alerts.html', 
                          vehicles=vehicles,
                          default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
-                         default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'))
+                         default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'),
+                         alert_counts=alert_counts)
 
 @alerts_bp.route('/get_alerts', methods=['POST'])
 @jwt_required()
@@ -281,7 +286,7 @@ def get_alerts():
                 "acknowledged": acknowledged
             })
             
-            counts = get_alert_counts(start_date, end_date, vehicle_number)
+        counts = get_alert_counts(start_date, end_date, vehicle_number)
         
         return jsonify({
             "success": True,
