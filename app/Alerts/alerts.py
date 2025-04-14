@@ -131,24 +131,6 @@ def get_alert_counts(start_date, end_date, vehicle_number=None):
         "type_counts": type_counts
     }
 
-# Update your page route to include counts
-@alerts_bp.route('/')
-@jwt_required()
-def page():
-    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
-    now = datetime.now()
-    default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    default_end = now.replace(hour=23, minute=59, second=59, microsecond=0)
-    
-    # Get alert counts for today
-    counts = get_alert_counts(default_start, default_end)
-    
-    return render_template('alerts.html', 
-                         vehicles=vehicles,
-                         default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
-                         default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'),
-                         alert_counts=counts)
-
 @alerts_bp.route('/')
 @jwt_required()
 def page():
