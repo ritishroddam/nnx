@@ -384,6 +384,10 @@ async function generatePanicReport() {
 
     if (!response.ok) {
       const errorData = await response.json();
+      displayFlashMessage(
+        errorData.message || "Failed to generate panic report",
+        errorData.category || "danger"
+      );
       throw new Error(errorData.message || "Failed to generate panic report");
     }
 
