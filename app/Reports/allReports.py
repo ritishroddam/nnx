@@ -275,6 +275,7 @@ def download_custom_report():
             # Remove MongoDB _id if present
             if '_id' in df.columns:
                 df.drop('_id', axis=1, inplace=True)
+            print(f"DataFrame columns: {df.columns}")
 
             # Generate Excel
             output = BytesIO()
