@@ -270,12 +270,30 @@ def download_custom_report():
                     lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
                 )
 
+                df['Location'] = df.apply(
+                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
+                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
+                       pd.notnull(row['longitude']) and row['longitude'] != ""
+                    else 'Missing coordinates',
+                    axis=1
+                )
+
+                cols = df.columns.tolist()
+                if 'Location' in cols:
+                    cols.remove('Location')
+                lng_idx = cols.index('longitude')
+                cols.insert(lng_idx + 1, 'Location')
+                df = df[cols]
+
             df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
             # Remove MongoDB _id if present
             if '_id' in df.columns:
                 df.drop('_id', axis=1, inplace=True)
             print(f"DataFrame columns: {df.columns}")
+
+            if "ignition" in fields:
+                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
             # Generate Excel
             output = BytesIO()
@@ -381,6 +399,21 @@ def download_custom_report():
                     lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
                 )
 
+                df['Location'] = df.apply(
+                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
+                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
+                       pd.notnull(row['longitude']) and row['longitude'] != ""
+                    else 'Missing coordinates',
+                    axis=1
+                )
+
+                cols = df.columns.tolist()
+                if 'Location' in cols:
+                    cols.remove('Location')
+                lng_idx = cols.index('longitude')
+                cols.insert(lng_idx + 1, 'Location')
+                df = df[cols]
+
             # Add vehicle number column
             df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
@@ -391,6 +424,9 @@ def download_custom_report():
             # Remove MongoDB _id if present
             if '_id' in df.columns:
                 df.drop('_id', axis=1, inplace=True)
+
+            if "ignition" in fields:
+                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
             # Generate Excel
             output = BytesIO()
@@ -528,31 +564,31 @@ def download_custom_report():
 #             return jsonify({"success": False, "message": "No data found"}), 404
 
         
-#         if 'latitude' in df.columns and 'longitude' in df.columns:
-#             from app.geocoding import geocodeInternal
+        # if 'latitude' in df.columns and 'longitude' in df.columns:
+        #     from app.geocoding import geocodeInternal
 
-#             df['latitude'] = df['latitude'].apply(
-#                 lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-#             )
-#             df['longitude'] = df['longitude'].apply(
-#                 lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-#             )
+        #     df['latitude'] = df['latitude'].apply(
+        #         lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+        #     )
+        #     df['longitude'] = df['longitude'].apply(
+        #         lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
+        #     )
 
-#             # Add Location column
-#             df['Location'] = df.apply(
-#                 lambda row: geocodeInternal(row['latitude'], row['longitude'])
-#                 if pd.notnull(row['latitude']) and row['latitude'] != "" and
-#                    pd.notnull(row['longitude']) and row['longitude'] != ""
-#                 else 'Missing coordinates',
-#                 axis=1
-#             )
+        #     # Add Location column
+        #     df['Location'] = df.apply(
+        #         lambda row: geocodeInternal(row['latitude'], row['longitude'])
+        #         if pd.notnull(row['latitude']) and row['latitude'] != "" and
+        #            pd.notnull(row['longitude']) and row['longitude'] != ""
+        #         else 'Missing coordinates',
+        #         axis=1
+        #     )
 
-#             cols = df.columns.tolist()
-#             if 'Location' in cols:
-#                 cols.remove('Location')
-#             lng_idx = cols.index('longitude')
-#             cols.insert(lng_idx + 1, 'Location')
-#             df = df[cols]
+        #     cols = df.columns.tolist()
+        #     if 'Location' in cols:
+        #         cols.remove('Location')
+        #     lng_idx = cols.index('longitude')
+        #     cols.insert(lng_idx + 1, 'Location')
+        #     df = df[cols]
 
 #         # Add vehicle number column
 #         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
@@ -565,8 +601,8 @@ def download_custom_report():
 #         if '_id' in df.columns:
 #             df.drop('_id', axis=1, inplace=True)
 
-#         if "ignition" in fields:
-#             df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+        # if "ignition" in fields:
+        #     df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
 #         # Generate Excel
 #         output = BytesIO()
