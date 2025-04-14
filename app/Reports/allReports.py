@@ -1,4 +1,4 @@
-from flask import render_template, Blueprint, request, jsonify, send_file, flash
+from flask import render_template, Blueprint, request, jsonify, send_file, flash, redirect, url_for
 from datetime import datetime, timedelta
 import traceback
 from pymongo import MongoClient
@@ -523,7 +523,7 @@ def download_panic_report():
 
             if not records:
                 flash("No panic events found", "warning")
-                return jsonify({"success": False, "message": "No panic events found"}), 404
+                return redirect(url_for('Reports.index'))
 
         # Create DataFrame
         df = pd.DataFrame(records)
