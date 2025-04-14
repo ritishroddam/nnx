@@ -217,6 +217,7 @@ def download_custom_report():
             print(f"ATLANTA FIELDS: {atlanta_fields}, VEHICLE INVENTORY FIELDS: {vehicle_inventory_fields}")  # Debugging line
             
             # Fetch data from vehicle_inventory
+            vehicle_inventory_data = None
             if vehicle_inventory_fields:
                 vehicle_inventory_data = db['vehicle_inventory'].find_one(
                     {"IMEI": imei},
