@@ -18,54 +18,89 @@ Alerts
 <div class="alerts-container">
     <!-- Left sidebar with alert cards (20%) -->
     <div class="alert-sidebar">
-        <div class="alert-cards">
-            <div class="alert-card active" data-alert="all">
-                <h3>All Alerts</h3>
-                <span class="alert-count">48</span>
-            </div>
-            <div class="alert-card" data-alert="critical">
-                <h3>Critical</h3>
-                <span class="alert-count">17</span>
-            </div>
-            <div class="alert-card" data-alert="non_critical">
-                <h3>Non Critical</h3>
-                <span class="alert-count">26</span>
-            </div>
-            
-            <div class="alert-type-header">Alert Types</div>
-            
-            <div class="alert-card" data-alert="panic">
-                <h3>Panic Alert</h3>
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="alert-card" data-alert="speeding">
-                <h3>Speeding Alert</h3>
-                <i class="fa-solid fa-gauge-high"></i>
-            </div>
-            <div class="alert-card" data-alert="harsh_break">
-                <h3>Harsh Break Alert</h3>
-                <i class="fa-solid fa-car-burst"></i>
-            </div>
-            <div class="alert-card" data-alert="harsh_acceleration">
-                <h3>Harsh Acceleration Alert</h3>
-                <i class="fa-solid fa-car-rear"></i>
-            </div>
-            <div class="alert-card" data-alert="ignition_on_off">
-                <h3>Ignition On/Off</h3>
-                <i class="fa-solid fa-key"></i>
-                <span class="alert-count">504</span>
-            </div>
-            <div class="alert-card" data-alert="geofence">
-                <h3>Geofence Entry/Exit</h3>
-                <i class="fa-solid fa-map-marker-alt"></i>
-                <span class="alert-count">75</span>
-            </div>
-            <div class="alert-card" data-alert="device_removal">
-                <h3>Device Removal</h3>
-                <i class="fa-solid fa-plug-circle-xmark"></i>
-                <span class="alert-count">56</span>
-            </div>
-        </div>
+        <!-- Update the alert cards section -->
+<div class="alert-cards">
+    <div class="alert-card active" data-alert="all">
+        <h3>All Alerts</h3>
+        <span class="alert-count">{{ alert_counts.all }}</span>
+    </div>
+    <div class="alert-card" data-alert="critical">
+        <h3>Critical</h3>
+        <span class="alert-count">{{ alert_counts.critical }}</span>
+    </div>
+    <div class="alert-card" data-alert="non_critical">
+        <h3>Non Critical</h3>
+        <span class="alert-count">{{ alert_counts.non_critical }}</span>
+    </div>
+    
+    <div class="alert-type-header">ALERT TYPES</div>
+    
+    <div class="alert-card" data-alert="panic">
+        <h3>Panic Alert</h3>
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.panic }}</span>
+    </div>
+    <div class="alert-card" data-alert="speeding">
+        <h3>Speeding Alert</h3>
+        <i class="fa-solid fa-gauge-high"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.speeding }}</span>
+    </div>
+    <div class="alert-card" data-alert="harsh_break">
+        <h3>Harsh Break Alert</h3>
+        <i class="fa-solid fa-car-burst"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.harsh_break }}</span>
+    </div>
+    <div class="alert-card" data-alert="harsh_acceleration">
+        <h3>Harsh Acceleration Alert</h3>
+        <i class="fa-solid fa-car-rear"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.harsh_acceleration }}</span>
+    </div>
+    <div class="alert-card" data-alert="gsm_low">
+        <h3>GSM Signal Low Alert</h3>
+        <i class="fa-solid fa-signal"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.gsm_low }}</span>
+    </div>
+    <div class="alert-card" data-alert="internal_battery_low">
+        <h3>Internal Battery Low Alert</h3>
+        <i class="fa-solid fa-battery-quarter"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.internal_battery_low }}</span>
+    </div>
+    <div class="alert-card" data-alert="external_battery_low">
+        <h3>External Battery Low Alert</h3>
+        <i class="fa-solid fa-bolt"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.external_battery_low }}</span>
+    </div>
+    <div class="alert-card" data-alert="main_power_off">
+        <h3>Main Supply Remove Alert</h3>
+        <i class="fa-solid fa-plug-circle-xmark"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.main_power_off }}</span>
+    </div>
+    <div class="alert-card" data-alert="door_open">
+        <h3>Door Open Alert</h3>
+        <i class="fa-solid fa-car-side"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.door_open }}</span>
+    </div>
+    <div class="alert-card" data-alert="door_close">
+        <h3>Door Close Alert</h3>
+        <i class="fa-solid fa-car-side"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.door_close }}</span>
+    </div>
+    <div class="alert-card" data-alert="idle">
+        <h3>Idle Alert</h3>
+        <i class="fa-solid fa-hourglass-half"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.idle }}</span>
+    </div>
+    <div class="alert-card" data-alert="ignition_off">
+        <h3>Ignition Off Alert</h3>
+        <i class="fa-solid fa-key"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.ignition_off }}</span>
+    </div>
+    <div class="alert-card" data-alert="ignition_on">
+        <h3>Ignition On Alert</h3>
+        <i class="fa-solid fa-key"></i>
+        <span class="alert-count">{{ alert_counts.type_counts.ignition_on }}</span>
+    </div>
+</div>
     </div>
 
     <!-- Main content area with alerts table (80%) -->

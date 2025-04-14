@@ -51,6 +51,104 @@ def get_alert_type(record):
         return "Ignition Off Alert"
     return "Unknown Alert"
 
+def get_alert_counts(start_date, end_date, vehicle_number=None):
+    """Get counts of different alert types for the given date range"""
+    # Get vehicle IMEI if vehicle number is specified
+    imei = None
+    if vehicle_number:
+        vehicle = db['vehicle_inventory'].find_one(
+            {"LicensePlateNumber": vehicle_number},
+            {"IMEI": 1, "_id": 0}
+        )
+        if vehicle:
+            imei = vehicle["IMEI"]
+    
+    # Base query with date range
+    query = {
+        "date_time": {
+            "$gte": start_date,
+            "$lte": end_date
+        },
+        "gps": "A"
+    }
+    
+    if imei:
+        query["imei"] = imei
+    
+    # Critical alerts (panic and speeding)
+    critical_query = query.copy()
+    critical_query["$or"] = [
+        {"sos": {"$in": ["1", 1, True]}},
+        {"status": "SOS"},
+        {"alarm": "SOS"},
+        {"speed": {"$gte": "60"}}
+    ]
+    critical_count = db['atlanta'].count_documents(critical_query)
+    
+    # Non-critical alerts (everything except panic and speeding)
+    non_critical_query = query.copy()
+    non_critical_query["$nor"] = [
+        {"sos": {"$in": ["1", 1, True]}},
+        {"status": "SOS"},
+        {"alarm": "SOS"},
+        {"speed": {"$gte": "60"}}
+    ]
+    non_critical_count = db['atlanta'].count_documents(non_critical_query)
+    
+    # Count for each alert type
+    alert_types = {
+        "panic": {
+            "$or": [
+                {"sos": {"$in": ["1", 1, True]}},
+                {"status": "SOS"},
+                {"alarm": "SOS"}
+            ]
+        },
+        "speeding": {"speed": {"$gte": "60"}},
+        "harsh_break": {"harsh_break": "1"},
+        "harsh_acceleration": {"harsh_speed": "1"},
+        "gsm_low": {"gsm_sig": "0"},
+        "internal_battery_low": {"internal_bat": "1"},
+        "external_battery_low": {"external_bat": "1"},
+        "main_power_off": {"main_power": "0"},
+        "door_open": {"door": "1"},
+        "door_close": {"door": "0"},
+        "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
+        "ignition_off": {"ignition": "0"},
+        "ignition_on": {"ignition": "1"}
+    }
+    
+    type_counts = {}
+    for alert_type, condition in alert_types.items():
+        type_query = query.copy()
+        type_query.update(condition)
+        type_counts[alert_type] = db['atlanta'].count_documents(type_query)
+    
+    return {
+        "critical": critical_count,
+        "non_critical": non_critical_count,
+        "all": critical_count + non_critical_count,
+        "type_counts": type_counts
+    }
+
+# Update your page route to include counts
+@alerts_bp.route('/')
+@jwt_required()
+def page():
+    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    now = datetime.now()
+    default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    default_end = now.replace(hour=23, minute=59, second=59, microsecond=0)
+    
+    # Get alert counts for today
+    counts = get_alert_counts(default_start, default_end)
+    
+    return render_template('alerts.html', 
+                         vehicles=vehicles,
+                         default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
+                         default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'),
+                         alert_counts=counts)
+
 @alerts_bp.route('/')
 @jwt_required()
 def page():
@@ -72,6 +170,8 @@ def get_alerts():
         start_date = datetime.fromisoformat(data.get("startDate"))
         end_date = datetime.fromisoformat(data.get("endDate"))
         vehicle_number = data.get("vehicleNumber")
+        only_critical = data.get("onlyCritical", False)
+        only_non_critical = data.get("onlyNonCritical", False)
         
         # Convert to UTC
         tz = pytz.timezone('UTC')
@@ -101,32 +201,47 @@ def get_alerts():
         if imei:
             query["imei"] = imei
         
-        # For specific alert types, add additional filters
-        if alert_type != "all":
-            if alert_type == "panic":
-                query["$or"] = [
-                    {"sos": {"$in": ["1", 1, True]}},
-                    {"status": "SOS"},
-                    {"alarm": "SOS"}
-                ]
-            elif alert_type == "speeding":
-                query["speed"] = {"$gte": "60"}
-            elif alert_type == "harsh_break":
-                query["harsh_break"] = "1"
-            elif alert_type == "harsh_acceleration":
-                query["harsh_speed"] = "1"
-            elif alert_type == "ignition_on_off":
-                query["$or"] = [
-                    {"ignition": "1"},
-                    {"ignition": "0"}
-                ]
-            elif alert_type == "geofence":
-                # Assuming geofence alerts are marked differently
-                query["geofence_alert"] = {"$exists": True}
-            elif alert_type == "device_removal":
-                query["main_power"] = "0"
+        if only_critical:
+            query["$or"] = [
+                {"sos": {"$in": ["1", 1, True]}},
+                {"status": "SOS"},
+                {"alarm": "SOS"},
+                {"speed": {"$gte": "60"}}
+            ]
+        elif only_non_critical:
+            query["$nor"] = [
+                {"sos": {"$in": ["1", 1, True]}},
+                {"status": "SOS"},
+                {"alarm": "SOS"},
+                {"speed": {"$gte": "60"}}
+            ]
+        elif alert_type != "all":
+            # Handle specific alert type
+            alert_conditions = {
+                "panic": {
+                    "$or": [
+                        {"sos": {"$in": ["1", 1, True]}},
+                        {"status": "SOS"},
+                        {"alarm": "SOS"}
+                    ]
+                },
+                "speeding": {"speed": {"$gte": "60"}},
+                "harsh_break": {"harsh_break": "1"},
+                "harsh_acceleration": {"harsh_speed": "1"},
+                "gsm_low": {"gsm_sig": "0"},
+                "internal_battery_low": {"internal_bat": "1"},
+                "external_battery_low": {"external_bat": "1"},
+                "main_power_off": {"main_power": "0"},
+                "door_open": {"door": "1"},
+                "door_close": {"door": "0"},
+                "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
+                "ignition_off": {"ignition": "0"},
+                "ignition_on": {"ignition": "1"}
+            }
+            if alert_type in alert_conditions:
+                query.update(alert_conditions[alert_type])
         
-        # Fetch data from atlanta collection
+        # Fetch data
         records = list(db['atlanta'].find(
             query,
             {
@@ -142,9 +257,11 @@ def get_alerts():
                 "main_power": 1,
                 "door": 1,
                 "internal_bat": 1,
+                "external_bat": 1,
+                "gsm_sig": 1,
                 "_id": 1
             }
-        ).sort("date_time", -1).limit(50))  # Limit to 50 most recent
+        ).sort("date_time", -1).limit(50))
         
         # Process the records
         alerts = []
@@ -181,10 +298,13 @@ def get_alerts():
                 "location": location,
                 "acknowledged": acknowledged
             })
+            
+            counts = get_alert_counts(start_date, end_date, vehicle_number)
         
         return jsonify({
             "success": True,
-            "alerts": alerts
+            "alerts": alerts,
+            "counts": counts
         })
         
     except Exception as e:

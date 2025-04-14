@@ -427,49 +427,77 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         acknowledgeAlert();
     });
+
+function loadAlerts() {
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const vehicleNumber = document.getElementById("alertVehicleNumber").value;
     
-    // Function to load alerts
-    function loadAlerts() {
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-        
-        searchBtn.disabled = true;
-        searchBtn.textContent = "Loading...";
-        
-        fetch("/alerts/get_alerts", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-            },
-            body: JSON.stringify({
-                alertType: currentAlertType,
-                startDate: startDate,
-                endDate: endDate,
-                vehicleNumber: vehicleNumber
-            }),
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                displayAlerts(data.alerts);
-            } else {
-                throw new Error(data.message || "Failed to fetch alerts");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert(error.message || "Failed to fetch alerts");
-        })
-        .finally(() => {
-            searchBtn.disabled = false;
-            searchBtn.textContent = "Search";
-        });
+    searchBtn.disabled = true;
+    searchBtn.textContent = "Loading...";
+    
+    // Determine the query based on selected alert type
+    let query = {
+        startDate: startDate,
+        endDate: endDate,
+        vehicleNumber: vehicleNumber
+    };
+    
+    if (currentAlertType === "critical") {
+        query.onlyCritical = true;
+    } else if (currentAlertType === "non_critical") {
+        query.onlyNonCritical = true;
+    } else if (currentAlertType !== "all") {
+        query.alertType = currentAlertType;
     }
+    
+    fetch("/alerts/get_alerts", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify(query),
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            displayAlerts(data.alerts);
+            // Update counts if provided
+            if (data.counts) {
+                updateAlertCounts(data.counts);
+            }
+        } else {
+            throw new Error(data.message || "Failed to fetch alerts");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert(error.message || "Failed to fetch alerts");
+    })
+    .finally(() => {
+        searchBtn.disabled = false;
+        searchBtn.textContent = "Search";
+    });
+}
+
+// Function to update alert counts on the cards
+function updateAlertCounts(counts) {
+    document.querySelector('[data-alert="all"] .alert-count').textContent = counts.all;
+    document.querySelector('[data-alert="critical"] .alert-count').textContent = counts.critical;
+    document.querySelector('[data-alert="non_critical"] .alert-count').textContent = counts.non_critical;
+    
+    // Update individual alert type counts
+    for (const [alertType, count] of Object.entries(counts.type_counts)) {
+        const element = document.querySelector(`[data-alert="${alertType}"] .alert-count`);
+        if (element) {
+            element.textContent = count;
+        }
+    }
+}
     
     // Function to display alerts in table
     function displayAlerts(alerts) {
