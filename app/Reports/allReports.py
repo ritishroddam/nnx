@@ -1,6 +1,6 @@
+from flask import render_template, Blueprint, request, jsonify, send_file, flash
 from datetime import datetime, timedelta
 import traceback
-from flask import render_template, Blueprint, request, jsonify, send_file
 from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime
@@ -192,6 +192,7 @@ def download_custom_report():
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
         )
         if not vehicle:
+            flash("Vehicle not found", "danger")
             return jsonify({"success": False, "message": "Vehicle not found"}), 404
 
         imei = vehicle["IMEI"]
@@ -200,6 +201,7 @@ def download_custom_report():
         if report_type == "custom":
             custom_report_name = data.get("reportName")
             if not custom_report_name:
+                flash("Custom report name missing", "danger")
                 return jsonify({"success": False, "message": "Custom report name missing"}), 400
 
             report = db['custom_reports'].find_one(
@@ -207,6 +209,7 @@ def download_custom_report():
                 {"fields": 1, "_id": 0}
             )
             if not report:
+                flash("Custom report not found", "danger")
                 return jsonify({"success": False, "message": "Custom report not found"}), 404
 
             fields = report["fields"]
@@ -247,12 +250,14 @@ def download_custom_report():
             elif not atlanta_data and vehicle_inventory_data:
                 combined_data = [vehicle_inventory_data]
             else:
+                flash("No data found", "warning ")
                 return jsonify({"success": False, "message": "No data found"}), 404
 
             # Convert to DataFrame
             df = pd.DataFrame(combined_data)
 
             if df.empty:
+                flash("No data found", "warning")
                 return jsonify({"success": False, "message": "No data found"}), 404
 
             # Process latitude and longitude if present
@@ -330,6 +335,7 @@ def download_custom_report():
             }
 
             if report_type not in report_configs:
+                flash("Invalid report type", "danger")
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
 
             config = report_configs[report_type]
@@ -356,6 +362,7 @@ def download_custom_report():
             df = pd.DataFrame(list(cursor))
 
             if df.empty:
+                flash("No data found", "warning")
                 return jsonify({"success": False, "message": "No data found"}), 404
 
             # Process latitude and longitude if present
@@ -392,6 +399,7 @@ def download_custom_report():
             )
 
     except Exception as e:
+        flash(f"Error generating report: {str(e)}", "danger")
         return jsonify({"success": False, "message": str(e)}), 500
 
 # @reports_bp.route('/download_custom_report', methods=['POST'])
