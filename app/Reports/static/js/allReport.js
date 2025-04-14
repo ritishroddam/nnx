@@ -1,23 +1,3 @@
-function displayFlashMessage(message, category = "danger") {
-  const flashMessagesContainer = document.getElementById(
-    "flash-messages-container"
-  );
-  if (flashMessagesContainer) {
-    const flashMessage = document.createElement("div");
-    flashMessage.className = `flash-message flash-${category}`;
-    flashMessage.innerHTML = `
-      <span>${message}</span>
-      <button class="close-btn" onclick="this.parentElement.remove()">×</button>
-    `;
-    flashMessagesContainer.appendChild(flashMessage);
-
-    // Optionally, remove the message after a few seconds
-    setTimeout(() => flashMessage.remove(), 5000);
-  } else {
-    console.error("Flash messages container not found");
-  }
-}
-
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -388,7 +368,6 @@ async function generatePanicReport() {
         errorData.message || "Failed to generate panic report",
         errorData.category || "danger"
       );
-      throw new Error(errorData.message || "Failed to generate panic report");
     }
 
     const blob = await response.blob();
