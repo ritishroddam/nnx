@@ -368,6 +368,7 @@ async function generatePanicReport() {
         errorData.message || "Failed to generate panic report",
         errorData.category || "danger"
       );
+      return;
     }
 
     const blob = await response.blob();
