@@ -215,6 +215,7 @@ def download_custom_report():
             atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
             vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]
             print(f"ATLANTA FIELDS: {atlanta_fields}, VEHICLE INVENTORY FIELDS: {vehicle_inventory_fields}")  # Debugging line
+            
             # Fetch data from vehicle_inventory
             if vehicle_inventory_fields:
                 vehicle_inventory_data = db['vehicle_inventory'].find_one(
@@ -254,6 +255,7 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "No data found"}), 404
 
             # Process latitude and longitude if present
+            print(f"DataFrame columns: {df.columns}")
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['latitude'] = df['latitude'].apply(
                     lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
