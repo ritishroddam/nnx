@@ -123,36 +123,7 @@ def save_custom_report():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-# @reports_bp.route('/save_custom_report', methods=['POST'])
-# @jwt_required()
-# def save_custom_report():
-#     try:
-#         data = request.get_json()
-#         report_name = data.get("reportName")
-#         fields = data.get("fields")
-
-#         if not report_name or not fields:
-#             return jsonify({"success": False, "message": "Invalid data provided."}), 400
-
-#         # Check for duplicate report name
-#         if db['custom_reports'].find_one({"report_name": report_name}):
-#             return jsonify({"success": False, "message": "Report name already exists."}), 400
-
-#         # Save the report
-#         db['custom_reports'].insert_one({
-#             "report_name": report_name,
-#             "fields": fields,
-#             "created_at": datetime.now(),
-#             "created_by": get_jwt_identity()
-#         })
-
-#         return jsonify({"success": True, "message": "Report saved successfully!"}), 200
-
-#     except Exception as e:
-#         return jsonify({"success": False, "message": str(e)}), 500
-
-
+    
 @reports_bp.route('/get_custom_report', methods=['GET'])
 @jwt_required()
 def get_custom_report():
@@ -445,184 +416,6 @@ def download_custom_report():
         flash(f"Error generating report: {str(e)}", "danger")
         return jsonify({"success": False, "message": str(e)}), 500
 
-# @reports_bp.route('/download_custom_report', methods=['POST'])
-# @jwt_required()
-# def download_custom_report():
-#     try:
-#         data = request.get_json()
-#         report_type = data.get("reportType")
-#         vehicle_number = data.get("vehicleNumber")
-#         date_range = data.get("dateRange", "all")
-
-#         # Get vehicle details including IMEI and LicensePlateNumber
-#         vehicle = db['vehicle_inventory'].find_one(
-#             {"LicensePlateNumber": vehicle_number},
-#             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
-#         )
-#         if not vehicle:
-#             return jsonify({"success": False, "message": "Vehicle not found"}), 404
-
-#         imei = vehicle["IMEI"]
-
-#         # For custom reports, get the fields from the saved report
-#         if report_type == "custom":
-#             custom_report_name = data.get("reportName")
-#             if not custom_report_name:
-#                 return jsonify({"success": False, "message": "Custom report name missing"}), 400
-                
-#             report = db['custom_reports'].find_one(
-#                 {"report_name": custom_report_name},
-#                 {"fields": 1, "_id": 0}
-#             )
-#             if not report:
-#                 return jsonify({"success": False, "message": "Custom report not found"}), 404
-                
-#             fields = report["fields"]
-#             collection = "atlanta"
-#         else:
-#             # Standard reports configuration
-#             report_configs = {
-#                 'daily-distance': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "latitude", "longitude", "speed"],
-#                     'query': {"imei": imei, "gps": "A"},
-#                     'sheet_name': "Travel Path Report"
-#                 },
-#                 'odometer-daily-distance': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "odometer", "latitude", "longitude"],
-#                     'query': {"imei": imei, "gps": "A"},
-#                     'sheet_name': "Distance Report",
-#                     'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"])
-#                 },
-#                 'distance-speed-range': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "speed", "latitude", "longitude"],
-#                     'query': {"imei": imei, "gps": "A"},
-#                     'sheet_name': "Speed Report"
-#                 },
-#                 'stoppage': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "latitude", "longitude", "ignition"],
-#                     'query': {"imei": imei, "ignition": "0", "gps": "A"},
-#                     'sheet_name': "Stoppage Report",
-#                     'post_process': lambda df: process_duration_report(df, "Stoppage Duration (min)")
-#                 },
-#                 'idle': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "latitude", "longitude", "ignition", "speed"],
-#                     'query': {"imei": imei, "ignition": "1", "speed": "0.0", "gps": "A"},
-#                     'sheet_name': "Idle Report",
-#                     'post_process': lambda df: process_duration_report(df, "Idle Duration (min)")
-#                 },
-#                 'ignition': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "latitude", "longitude", "ignition"],
-#                     'query': {"imei": imei, "gps": "A"},
-#                     'sheet_name': "Ignition Report",
-#                     'post_process': lambda df: process_duration_report(df, "Ignition Duration (min)")
-#                 },
-#                 'daily': {
-#                     'collection': 'atlanta',
-#                     'fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
-#                     'query': {"imei": imei, "gps": "A"},
-#                     'sheet_name': "Daily Report"
-#                 }
-#             }
-
-#             if report_type not in report_configs:
-#                 return jsonify({"success": False, "message": "Invalid report type"}), 400
-
-#             config = report_configs[report_type]
-#             fields = config['fields']
-#             collection = config['collection']
-#             base_query = config['query']
-#             post_process = config.get('post_process')
-
-#         # Add date range filter
-#         date_filter = get_date_range_filter(date_range)
-#         if 'latitude' in fields or 'longitude' in fields:
-#             query = {"imei": imei, "gps": "A"}
-#         else:
-#             query = {"imei": imei}
-#         if date_filter:
-#             query.update(date_filter)
-        
-#         # For standard reports, merge with their specific query
-#         if report_type != "custom":
-#             query.update(base_query)
-
-#         # Fetch data
-#         cursor = db[collection].find(
-#             query,
-#             {field: 1 for field in fields}
-#         ).sort("date_time", 1)
-
-#         df = pd.DataFrame(list(cursor))
-
-#         if df.empty:
-#             return jsonify({"success": False, "message": "No data found"}), 404
-
-        
-        # if 'latitude' in df.columns and 'longitude' in df.columns:
-        #     from app.geocoding import geocodeInternal
-
-        #     df['latitude'] = df['latitude'].apply(
-        #         lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-        #     )
-        #     df['longitude'] = df['longitude'].apply(
-        #         lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-        #     )
-
-        #     # Add Location column
-        #     df['Location'] = df.apply(
-        #         lambda row: geocodeInternal(row['latitude'], row['longitude'])
-        #         if pd.notnull(row['latitude']) and row['latitude'] != "" and
-        #            pd.notnull(row['longitude']) and row['longitude'] != ""
-        #         else 'Missing coordinates',
-        #         axis=1
-        #     )
-
-        #     cols = df.columns.tolist()
-        #     if 'Location' in cols:
-        #         cols.remove('Location')
-        #     lng_idx = cols.index('longitude')
-        #     cols.insert(lng_idx + 1, 'Location')
-        #     df = df[cols]
-
-#         # Add vehicle number column
-#         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
-
-#         # Apply post-processing if defined
-#         if report_type != "custom" and post_process:
-#             df = post_process(df)
-
-#         # Remove MongoDB _id if present
-#         if '_id' in df.columns:
-#             df.drop('_id', axis=1, inplace=True)
-
-        # if "ignition" in fields:
-        #     df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-
-#         # Generate Excel
-#         output = BytesIO()
-#         sheet_name = config['sheet_name'] if report_type != "custom" else custom_report_name
-#         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-#             df.to_excel(writer, index=False, sheet_name=sheet_name)
-
-#         output.seek(0)
-#         filename = f"{report_type }_report_{vehicle_number}.xlsx" if report_type  != "custom" else f"{custom_report_name}_{vehicle_number}.xlsx"
-        
-#         return send_file(
-#             output,
-#             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-#             as_attachment=True,
-#             download_name=filename
-#         )
-
-#     except Exception as e:
-#         return jsonify({"success": False, "message": str(e)}), 500
-
 def process_distance_report(df, vehicle_number):
     """Calculate total distance traveled"""
     try:
@@ -672,6 +465,7 @@ def download_panic_report():
         print(f"Received vehicle_number: {vehicle_number}, date_range: {date_range}")  # Debugging line
 
         if not vehicle_number:
+            flash("Please select a vehicle", "danger")
             return jsonify({"success": False, "message": "Please select a vehicle"}), 400
 
         # Get vehicle IMEI
@@ -680,6 +474,7 @@ def download_panic_report():
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
         )
         if not vehicle:
+            flash("Vehicle not found", "danger")
             return jsonify({"success": False, "message": "Vehicle not found"}), 404
 
         imei = vehicle["IMEI"]
@@ -727,6 +522,7 @@ def download_panic_report():
             ).sort("date_time", 1))
 
             if not records:
+                flash("No panic events found", "warning")
                 return jsonify({"success": False, "message": "No panic events found"}), 404
 
         # Create DataFrame
@@ -778,6 +574,7 @@ def download_panic_report():
         )
 
     except Exception as e:
+        flash(f"Error generating panic report: {str(e)}", "danger")
         print(f"Error generating panic report: {str(e)}")  # Add this for debugging
         traceback.print_exc()  # Add this to print full traceback
         return jsonify({"success": False, "message": str(e)}), 500
