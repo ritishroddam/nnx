@@ -270,6 +270,12 @@ def download_custom_report():
                     lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
                 )
 
+            df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+
+            # Remove MongoDB _id if present
+            if '_id' in df.columns:
+                df.drop('_id', axis=1, inplace=True)
+
             # Generate Excel
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
