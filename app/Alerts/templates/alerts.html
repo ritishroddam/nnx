@@ -8,6 +8,67 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css">
 <script defer src="{{ url_for('Alerts.static', filename='js/alert.js') }}"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+.loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-indicator .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+.table-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.table-loading .loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+.loading-count {
+    display: inline-block;
+    min-width: 20px;
+    min-height: 20px;
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
 {% endblock %}
 
 {% block h1 %}
@@ -15,92 +76,96 @@ Alerts
 {% endblock %}
 
 {% block block_container %}
+<div id="loadingIndicator" class="loading-indicator" style="display: none;">
+    <div class="spinner"></div>
+    <span>Loading alerts...</span>
+</div>
+
 <div class="alerts-container">
     <!-- Left sidebar with alert cards (20%) -->
     <div class="alert-sidebar">
-        <!-- Update the alert cards section -->
-<div class="alert-cards">
-    <div class="alert-card active" data-alert="all">
-        <h3>All Alerts</h3>
-        <span class="alert-count">{{ alert_counts.all }}</span>
-    </div>
-    <div class="alert-card" data-alert="critical">
-        <h3>Critical</h3>
-        <span class="alert-count">{{ alert_counts.critical }}</span>
-    </div>
-    <div class="alert-card" data-alert="non_critical">
-        <h3>Non Critical</h3>
-        <span class="alert-count">{{ alert_counts.non_critical }}</span>
-    </div>
-    
-    <div class="alert-type-header">ALERT TYPES</div>
-    
-    <div class="alert-card" data-alert="panic">
-        <h3>Panic Alert</h3>
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.panic }}</span>
-    </div>
-    <div class="alert-card" data-alert="speeding">
-        <h3>Speeding Alert</h3>
-        <i class="fa-solid fa-gauge-high"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.speeding }}</span>
-    </div>
-    <div class="alert-card" data-alert="harsh_break">
-        <h3>Harsh Break Alert</h3>
-        <i class="fa-solid fa-car-burst"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.harsh_break }}</span>
-    </div>
-    <div class="alert-card" data-alert="harsh_acceleration">
-        <h3>Harsh Acceleration Alert</h3>
-        <i class="fa-solid fa-car-rear"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.harsh_acceleration }}</span>
-    </div>
-    <div class="alert-card" data-alert="gsm_low">
-        <h3>GSM Signal Low Alert</h3>
-        <i class="fa-solid fa-signal"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.gsm_low }}</span>
-    </div>
-    <div class="alert-card" data-alert="internal_battery_low">
-        <h3>Internal Battery Low Alert</h3>
-        <i class="fa-solid fa-battery-quarter"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.internal_battery_low }}</span>
-    </div>
-    <div class="alert-card" data-alert="external_battery_low">
-        <h3>External Battery Low Alert</h3>
-        <i class="fa-solid fa-bolt"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.external_battery_low }}</span>
-    </div>
-    <div class="alert-card" data-alert="main_power_off">
-        <h3>Main Supply Remove Alert</h3>
-        <i class="fa-solid fa-plug-circle-xmark"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.main_power_off }}</span>
-    </div>
-    <div class="alert-card" data-alert="door_open">
-        <h3>Door Open Alert</h3>
-        <i class="fa-solid fa-car-side"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.door_open }}</span>
-    </div>
-    <div class="alert-card" data-alert="door_close">
-        <h3>Door Close Alert</h3>
-        <i class="fa-solid fa-car-side"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.door_close }}</span>
-    </div>
-    <div class="alert-card" data-alert="idle">
-        <h3>Idle Alert</h3>
-        <i class="fa-solid fa-hourglass-half"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.idle }}</span>
-    </div>
-    <div class="alert-card" data-alert="ignition_off">
-        <h3>Ignition Off Alert</h3>
-        <i class="fa-solid fa-key"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.ignition_off }}</span>
-    </div>
-    <div class="alert-card" data-alert="ignition_on">
-        <h3>Ignition On Alert</h3>
-        <i class="fa-solid fa-key"></i>
-        <span class="alert-count">{{ alert_counts.type_counts.ignition_on }}</span>
-    </div>
-</div>
+        <div class="alert-cards">
+            <div class="alert-card active" data-alert="all" data-endpoint="all">
+                <h3>All Alerts</h3>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="critical" data-endpoint="critical">
+                <h3>Critical</h3>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="non_critical" data-endpoint="non_critical">
+                <h3>Non Critical</h3>
+                <span class="alert-count loading-count"></span>
+            </div>
+            
+            <div class="alert-type-header">ALERT TYPES</div>
+            
+            <div class="alert-card" data-alert="panic" data-endpoint="panic">
+                <h3>Panic Alert</h3>
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="speeding" data-endpoint="speeding">
+                <h3>Speeding Alert</h3>
+                <i class="fa-solid fa-gauge-high"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="harsh_break" data-endpoint="harsh_break">
+                <h3>Harsh Break Alert</h3>
+                <i class="fa-solid fa-car-burst"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="harsh_acceleration" data-endpoint="harsh_acceleration">
+                <h3>Harsh Acceleration Alert</h3>
+                <i class="fa-solid fa-car-rear"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="gsm_low" data-endpoint="gsm_low">
+                <h3>GSM Signal Low Alert</h3>
+                <i class="fa-solid fa-signal"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="internal_battery_low" data-endpoint="internal_battery_low">
+                <h3>Internal Battery Low Alert</h3>
+                <i class="fa-solid fa-battery-quarter"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="external_battery_low" data-endpoint="external_battery_low">
+                <h3>External Battery Low Alert</h3>
+                <i class="fa-solid fa-bolt"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="main_power_off" data-endpoint="main_power_off">
+                <h3>Main Supply Remove Alert</h3>
+                <i class="fa-solid fa-plug-circle-xmark"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="door_open" data-endpoint="door_open">
+                <h3>Door Open Alert</h3>
+                <i class="fa-solid fa-car-side"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="door_close" data-endpoint="door_close">
+                <h3>Door Close Alert</h3>
+                <i class="fa-solid fa-car-side"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="idle" data-endpoint="idle">
+                <h3>Idle Alert</h3>
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="ignition_off" data-endpoint="ignition_off">
+                <h3>Ignition Off Alert</h3>
+                <i class="fa-solid fa-key"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+            <div class="alert-card" data-alert="ignition_on" data-endpoint="ignition_on">
+                <h3>Ignition On Alert</h3>
+                <i class="fa-solid fa-key"></i>
+                <span class="alert-count loading-count"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Main content area with alerts table (80%) -->
@@ -125,6 +190,9 @@ Alerts
         </div>
 
         <div class="alerts-table-container">
+            <div class="table-loading" style="display: none;">
+                <div class="loading-spinner"></div>
+            </div>
             <table id="alertsTable" class="alerts-table">
                 <thead>
                     <tr>
@@ -141,16 +209,6 @@ Alerts
                     <!-- Alerts will be populated here by JavaScript -->
                 </tbody>
             </table>
-            <div class="pagination">
-                <span>Showing 1 - 50 of 504</span>
-                <div class="pagination-controls">
-                    <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
