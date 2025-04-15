@@ -18,7 +18,7 @@
         </div>
         <div class="form-group">
             <label for="company">Company</label>
-            {for company in companies}
+            {% for company in companies %}
             <input type="radio" id="{{ company.id }}" name="company" value="{{ company.id }}">
             <label for="{{ company.id }}">{{ company.name }}</label><br>
             {% endfor %}
