@@ -92,7 +92,6 @@ def alert_card_endpoint(alert_type):
             if imei:
                 query["imei"] = imei
             
-            # Add alert type specific conditions
             if alert_type == "critical":
                 query["$or"] = [
                     {"sos": {"$in": ["1", 1, True]}},
