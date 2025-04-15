@@ -117,12 +117,25 @@ def register_client_admin():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        company = request.form.get('company')
+
+        if not all([username, email, password, company]):
+            flash('All fields are required', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
+
+        if User.find_by_username(username):
+            flash('Username already exists', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
+            
+        if User.find_by_email(email):
+            flash('Email already registered', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
 
         from flask_jwt_extended import get_jwt
         claims = get_jwt()
         print(f"JWT Claims: {claims}") 
         
-        User.create_user(username, email, password, role='clientAdmin')
+        User.create_user(username, email, password, company, role='clientAdmin')
         flash('Admin registration successful. Please login.', 'success')
         return redirect(url_for('auth.login'))
 
@@ -143,6 +156,17 @@ def register_admin():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+
+        existing_user = User.find_by_username(username)
+        existing_email = User.find_by_email(email)
+
+        if existing_user:
+            flash('Username already exists', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
+            
+        if existing_email:
+            flash('Email already registered', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
         
         User.create_user(username, email, password, role='admin')
         flash('Admin registration successful. Please login.', 'success')
