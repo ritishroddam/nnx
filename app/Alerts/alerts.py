@@ -36,7 +36,7 @@ def get_alert_type(record):
         return "Harsh Break Alert"
     elif record.get('harsh_speed') == "1":
         return "Harsh Acceleration Alert"
-    elif record.get('internal_bat') == "1":
+    elif record.get('internal_bat') == "0.0" or float(record.get('internal_bat', 3.7)) < 3.7:
         return "Internal Battery Low Alert"
     elif record.get('main_power') == "0":
         return "Main Supply Remove Alert"
@@ -46,6 +46,8 @@ def get_alert_type(record):
         return "Ignition On Alert"
     elif record.get('ignition') == "0":
         return "Ignition Off Alert"
+    elif record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(record.get('gsm_sig')) < 7):
+        return "GSM Signal Low Alert"
     return "Unknown Alert"
 
 def alert_card_endpoint(alert_type):
@@ -116,9 +118,18 @@ def alert_card_endpoint(alert_type):
                 "speeding": {"speed": {"$gte": 60}},
                 "harsh_break": {"harsh_break": "1"},
                 "harsh_acceleration": {"harsh_speed": "1"},
-                "gsm_low": {"gsm_sig": "0"},
-                "internal_battery_low": {"internal_bat": "1"},
-                "external_battery_low": {"external_bat": "1"},
+                "gsm_low": {
+                    "$or": [
+                        {"gsm_sig": "0"},
+                        {"gsm_sig": {"$lt": "7"}}
+                    ]
+                },
+                "internal_battery_low": {
+                    "$or": [
+                        {"internal_bat": "0.0"},
+                        {"internal_bat": {"$lt": "3.7"}}
+                    ]
+                },
                 "main_power_off": {"main_power": "0"},
                 "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
                 "ignition_off": {"ignition": "0"},
@@ -126,7 +137,18 @@ def alert_card_endpoint(alert_type):
             }
             
             if alert_type in alert_conditions:
-                query.update(alert_conditions[alert_type])
+                if alert_type == 'internal_battery_low':
+                    query['$or'] = [
+                        {'internal_bat': '0.0'},
+                        {'internal_bat': {'$lt': '3.7'}}
+                    ]
+                elif alert_type == 'gsm_low':
+                    query['$or'] = [
+                        {'gsm_sig': '0'},
+                        {'gsm_sig': {'$lt': '7'}}
+                    ]
+                else:
+                    query.update(alert_conditions[alert_type])
             
             # Get count
             count = db['atlanta'].count_documents(query)
@@ -148,7 +170,6 @@ def alert_card_endpoint(alert_type):
                         "harsh_speed": 1,
                         "main_power": 1,
                         "internal_bat": 1,
-                        "external_bat": 1,
                         "gsm_sig": 1,
                         "_id": 1
                     }
