@@ -4,27 +4,13 @@
 //     const ackForm = document.getElementById("ackForm");
 //     const searchBtn = document.getElementById("searchAlerts");
 //     const alertCards = document.querySelectorAll(".alert-card");
-//     let currentAlertType = "all";
+//     const tableLoading = document.querySelector(".table-loading");
+//     let currentEndpoint = "all";
 //     let currentAlertId = null;
     
-//     // Set default dates (today)
-//     const now = new Date();
-//     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-//     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    
-//     document.getElementById("startDate").value = formatDateTimeLocal(todayStart);
-//     document.getElementById("endDate").value = formatDateTimeLocal(todayEnd);
-    
-//     // Initialize Selectize for dropdowns
-//     if (typeof $ !== 'undefined') {
-//         $("#alertVehicleNumber").selectize({
-//             create: false,
-//             sortField: "text",
-//         });
-//     }
-    
-//     // Load today's alerts by default
-//     loadAlerts();
+//     // Initialize counts
+//     loadAllCounts();
+//     loadAlerts(); // Load initial alerts
     
 //     // Alert card click handlers
 //     alertCards.forEach(card => {
@@ -35,10 +21,10 @@
 //             // Add active class to clicked card
 //             this.classList.add("active");
             
-//             // Update current alert type
-//             currentAlertType = this.dataset.alert;
+//             // Update current endpoint
+//             currentEndpoint = this.dataset.endpoint;
             
-//             // Reload alerts
+//             // Load alerts
 //             loadAlerts();
 //         });
 //     });
@@ -50,8 +36,7 @@
 //     document.addEventListener("click", function(e) {
 //         if (e.target.classList.contains("ack-btn")) {
 //             e.preventDefault();
-//             const alertId = e.target.dataset.alertId;
-//             currentAlertId = alertId;
+//             currentAlertId = e.target.dataset.alertId;
 //             ackModal.style.display = "block";
 //         }
 //     });
@@ -76,76 +61,120 @@
 //         acknowledgeAlert();
 //     });
 
-// function loadAlerts() {
-//     const startDate = document.getElementById("startDate").value;
-//     const endDate = document.getElementById("endDate").value;
-//     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-    
-//     searchBtn.disabled = true;
-//     searchBtn.textContent = "Loading...";
-    
-//     // Determine the query based on selected alert type
-//     let query = {
-//         startDate: startDate,
-//         endDate: endDate,
-//         vehicleNumber: vehicleNumber
-//     };
-    
-//     if (currentAlertType === "critical") {
-//         query.onlyCritical = true;
-//     } else if (currentAlertType === "non_critical") {
-//         query.onlyNonCritical = true;
-//     } else if (currentAlertType !== "all") {
-//         query.alertType = currentAlertType;
+//     // Load all counts initially
+//     function loadAllCounts() {
+//         const startDate = document.getElementById("startDate").value;
+//         const endDate = document.getElementById("endDate").value;
+//         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        
+//         // Show loading state for counts
+//         document.querySelectorAll('.alert-count').forEach(el => {
+//             el.classList.add('loading-count');
+//         });
+        
+//         // Only load counts for visible cards
+//         const endpoints = ['critical', 'non_critical', 'panic', 'speeding', 
+//                           'harsh_break', 'harsh_acceleration', 'gsm_low', 
+//                           'internal_battery_low', 'external_battery_low', 
+//                           'main_power_off', 'idle', 'ignition_off', 'ignition_on'];
+        
+//         const promises = endpoints.map(endpoint => {
+//             return fetch(`/alerts/${endpoint}_count`, {
+//                 method: "POST",
+//                 headers: {
+//                     "Content-Type": "application/json",
+//                     "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//                 },
+//                 body: JSON.stringify({
+//                     startDate: startDate,
+//                     endDate: endDate,
+//                     vehicleNumber: vehicleNumber
+//                 }),
+//             })
+//             .then(response => {
+//                 if (!response.ok) throw new Error("Network response was not ok");
+//                 return response.json();
+//             })
+//             .then(data => {
+//                 if (data.success) {
+//                     const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+//                     if (card) {
+//                         const countElement = card.querySelector('.alert-count');
+//                         if (countElement) {
+//                             countElement.textContent = data.count;
+//                             countElement.classList.remove('loading-count');
+//                         }
+//                     }
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error(`Error loading count for ${endpoint}:`, error);
+//                 const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+//                 if (card) {
+//                     const countElement = card.querySelector('.alert-count');
+//                     if (countElement) {
+//                         countElement.textContent = "0";
+//                         countElement.classList.remove('loading-count');
+//                     }
+//                 }
+//             });
+//         });
+        
+//         return Promise.all(promises);
 //     }
     
-//     fetch("/alerts/get_alerts", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//         },
-//         body: JSON.stringify(query),
-//     })
-//     .then(response => {
-//         if (!response.ok) throw new Error("Network response was not ok");
-//         return response.json();
-//     })
-//     .then(data => {
-//         if (data.success) {
-//             displayAlerts(data.alerts);
-//             // Update counts if provided
-//             if (data.counts) {
-//                 updateAlertCounts(data.counts);
+//     // Load alerts for the current endpoint
+//     function loadAlerts() {
+//         const startDate = document.getElementById("startDate").value;
+//         const endDate = document.getElementById("endDate").value;
+//         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        
+//         // Show table loading
+//         tableLoading.style.display = "flex";
+        
+//         fetch(`/alerts/${currentEndpoint}_alerts`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//             },
+//             body: JSON.stringify({
+//                 startDate: startDate,
+//                 endDate: endDate,
+//                 vehicleNumber: vehicleNumber
+//             }),
+//         })
+//         .then(response => {
+//             if (!response.ok) throw new Error("Network response was not ok");
+//             return response.json();
+//         })
+//         .then(data => {
+//             if (data.success) {
+//                 displayAlerts(data.alerts);
+//                 // Update count for the current card
+//                 updateCardCount(currentEndpoint, data.count);
+//             } else {
+//                 throw new Error(data.message || "Failed to fetch alerts");
 //             }
-//         } else {
-//             throw new Error(data.message || "Failed to fetch alerts");
-//         }
-//     })
-//     .catch(error => {
-//         console.error("Error:", error);
-//         alert(error.message || "Failed to fetch alerts");
-//     })
-//     .finally(() => {
-//         searchBtn.disabled = false;
-//         searchBtn.textContent = "Search";
-//     });
-// }
-
-// // Function to update alert counts on the cards
-// function updateAlertCounts(counts) {
-//     document.querySelector('[data-alert="all"] .alert-count').textContent = counts.all;
-//     document.querySelector('[data-alert="critical"] .alert-count').textContent = counts.critical;
-//     document.querySelector('[data-alert="non_critical"] .alert-count').textContent = counts.non_critical;
+//         })
+//         .catch(error => {
+//             console.error("Error:", error);
+//             showToast(error.message || "Failed to fetch alerts", "error");
+//         })
+//         .finally(() => {
+//             tableLoading.style.display = "none";
+//         });
+//     }
     
-//     // Update individual alert type counts
-//     for (const [alertType, count] of Object.entries(counts.type_counts)) {
-//         const element = document.querySelector(`[data-alert="${alertType}"] .alert-count`);
-//         if (element) {
-//             element.textContent = count;
+//     function updateCardCount(endpoint, count) {
+//         const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+//         if (card) {
+//             const countElement = card.querySelector('.alert-count');
+//             if (countElement) {
+//                 countElement.textContent = count;
+//             }
 //         }
 //     }
-// }
     
 //     // Function to display alerts in table
 //     function displayAlerts(alerts) {
@@ -162,12 +191,10 @@
 //         alerts.forEach(alert => {
 //             const row = document.createElement("tr");
             
-//             // Format status badge
 //             const statusBadge = alert.acknowledged ? 
 //                 `<span class="status-badge acknowledged">Acknowledged</span>` : 
 //                 `<span class="status-badge pending">Pending</span>`;
             
-//             // Format action button
 //             const actionBtn = alert.acknowledged ?
 //                 `<button class="action-btn" disabled>Acknowledged</button>` :
 //                 `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
@@ -197,7 +224,7 @@
         
 //         const ackBtn = ackForm.querySelector(".ack-btn");
 //         ackBtn.disabled = true;
-//         ackBtn.textContent = "Processing...";
+//         ackBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
         
 //         fetch("/alerts/acknowledge", {
 //             method: "POST",
@@ -217,7 +244,8 @@
 //         })
 //         .then(data => {
 //             if (data.success) {
-//                 alert("Alert acknowledged successfully");
+//                 // Show success toast/notification
+//                 showToast("Alert acknowledged successfully", "success");
 //                 ackModal.style.display = "none";
 //                 ackForm.reset();
 //                 loadAlerts(); // Refresh the alerts list
@@ -227,19 +255,30 @@
 //         })
 //         .catch(error => {
 //             console.error("Error:", error);
-//             alert(error.message || "Failed to acknowledge alert");
+//             showToast(error.message || "Failed to acknowledge alert", "error");
 //         })
 //         .finally(() => {
 //             ackBtn.disabled = false;
 //             ackBtn.textContent = "Acknowledge";
 //         });
 //     }
-    
-//     // Helper function to format date for datetime-local input
-//     function formatDateTimeLocal(date) {
-//         const d = new Date(date);
-//         const pad = num => num.toString().padStart(2, '0');
-//         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+//     function showToast(message, type = "success") {
+//         const toast = document.createElement("div");
+//         toast.className = `toast-notification ${type}`;
+//         toast.innerHTML = `
+//             <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+//             <span>${message}</span>
+//         `;
+//         document.body.appendChild(toast);
+        
+//         setTimeout(() => {
+//             toast.classList.add("show");
+//         }, 100);
+        
+//         setTimeout(() => {
+//             toast.remove();
+//         }, 5000);
 //     }
     
 //     // Helper function to format date for display
@@ -255,9 +294,7 @@
 //         const parts = value.split(`; ${name}=`);
 //         if (parts.length === 2) return parts.pop().split(";").shift();
 //     }
-// });
-
-
+// }); 
 
 
 
@@ -267,14 +304,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const ackForm = document.getElementById("ackForm");
     const searchBtn = document.getElementById("searchAlerts");
     const alertCards = document.querySelectorAll(".alert-card");
-    const loadingIndicator = document.getElementById("loadingIndicator");
     const tableLoading = document.querySelector(".table-loading");
-    let currentEndpoint = "all";
+    let currentEndpoint = "panic"; // Default to panic alerts
     let currentAlertId = null;
     
-    // Initialize counts
+    // Initialize counts and load panic alerts by default
     loadAllCounts();
-    loadAlerts(); // Load initial alerts
+    loadAlerts();
+    
+    // Highlight panic card as active by default
+    document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
     
     // Alert card click handlers
     alertCards.forEach(card => {
@@ -294,7 +333,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     
     // Search button handler
-    searchBtn.addEventListener("click", loadAlerts);
+    searchBtn.addEventListener("click", function() {
+        loadAllCounts();
+        loadAlerts();
+    });
     
     // Acknowledgment button handlers (delegated)
     document.addEventListener("click", function(e) {
@@ -325,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function() {
         acknowledgeAlert();
     });
 
-    // Load all counts initially
+    // Load all counts
     function loadAllCounts() {
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
@@ -336,8 +378,8 @@ document.addEventListener("DOMContentLoaded", function() {
             el.classList.add('loading-count');
         });
         
-        // Only load counts for visible cards
-        const endpoints = ['all', 'critical', 'non_critical', 'panic', 'speeding', 
+        // Only load counts for visible cards (removed 'all')
+        const endpoints = ['critical', 'non_critical', 'panic', 'speeding', 
                           'harsh_break', 'harsh_acceleration', 'gsm_low', 
                           'internal_battery_low', 'external_battery_low', 
                           'main_power_off', 'idle', 'ignition_off', 'ignition_on'];
@@ -347,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
                     startDate: startDate,
@@ -400,7 +442,7 @@ document.addEventListener("DOMContentLoaded", function() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+                "Authorization": `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify({
                 startDate: startDate,
@@ -455,6 +497,12 @@ document.addEventListener("DOMContentLoaded", function() {
         alerts.forEach(alert => {
             const row = document.createElement("tr");
             
+            // Add class based on alert type for styling
+            if (alert.alert_type) {
+                const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, '-');
+                row.classList.add(`alert-type-${alertTypeClass}`);
+            }
+            
             const statusBadge = alert.acknowledged ? 
                 `<span class="status-badge acknowledged">Acknowledged</span>` : 
                 `<span class="status-badge pending">Pending</span>`;
@@ -482,11 +530,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const reason = document.getElementById("ackReason").value;
         
         if (!pressedFor) {
-            alert("Please select a reason");
+            showToast("Please select a reason", "error");
             return;
         }
         
-        const ackBtn = ackForm.querySelector(".ack-btn");
+        const ackBtn = ackForm.querySelector(".ack-submit-btn");
+        const originalText = ackBtn.innerHTML;
         ackBtn.disabled = true;
         ackBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
         
@@ -494,7 +543,7 @@ document.addEventListener("DOMContentLoaded", function() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+                "Authorization": `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify({
                 alertId: currentAlertId,
@@ -508,11 +557,14 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(data => {
             if (data.success) {
-                // Show success toast/notification
                 showToast("Alert acknowledged successfully", "success");
                 ackModal.style.display = "none";
                 ackForm.reset();
-                loadAlerts(); // Refresh the alerts list
+                
+                // Refresh counts and alerts
+                loadAllCounts().then(() => {
+                    loadAlerts();
+                });
             } else {
                 throw new Error(data.message || "Failed to acknowledge alert");
             }
@@ -523,11 +575,14 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .finally(() => {
             ackBtn.disabled = false;
-            ackBtn.textContent = "Acknowledge";
+            ackBtn.innerHTML = originalText;
         });
     }
 
     function showToast(message, type = "success") {
+        // Remove any existing toasts first
+        document.querySelectorAll('.toast-notification').forEach(el => el.remove());
+        
         const toast = document.createElement("div");
         toast.className = `toast-notification ${type}`;
         toast.innerHTML = `
@@ -536,12 +591,17 @@ document.addEventListener("DOMContentLoaded", function() {
         `;
         document.body.appendChild(toast);
         
+        // Show the toast
         setTimeout(() => {
             toast.classList.add("show");
-        }, 100);
+        }, 10);
         
+        // Auto-remove after delay
         setTimeout(() => {
-            toast.remove();
+            toast.classList.remove("show");
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
         }, 5000);
     }
     
@@ -549,13 +609,35 @@ document.addEventListener("DOMContentLoaded", function() {
     function formatDateTime(dateTimeString) {
         if (!dateTimeString) return "N/A";
         const date = new Date(dateTimeString);
-        return date.toLocaleString();
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
     }
     
-    // Helper function to get cookie
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(";").shift();
+    // Set default date range (today)
+    function setDefaultDateRange() {
+        const now = new Date();
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        
+        const todayEnd = new Date(now);
+        todayEnd.setHours(23, 59, 59, 999);
+        
+        document.getElementById("startDate").value = formatDateForInput(todayStart);
+        document.getElementById("endDate").value = formatDateForInput(todayEnd);
     }
-}); 
+    
+    // Helper to format date for input fields
+    function formatDateForInput(date) {
+        return date.toISOString().slice(0, 16);
+    }
+    
+    // Initialize default dates
+    setDefaultDateRange();
+});

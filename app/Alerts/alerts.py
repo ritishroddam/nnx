@@ -88,43 +88,45 @@ def alert_card_endpoint(alert_type):
             if imei:
                 query["imei"] = imei
             
-            if alert_type == "critical":
-                query["$or"] = [
-                    {"sos": {"$in": ["1", 1, True]}},
-                    {"status": "SOS"},
-                    {"alarm": "SOS"},
-                    {"speed": {"$gte": "60"}}
-                ]
-            elif alert_type == "non_critical":
-                query["$nor"] = [
-                    {"sos": {"$in": ["1", 1, True]}},
-                    {"status": "SOS"},
-                    {"alarm": "SOS"},
-                    {"speed": {"$gte": "60"}}
-                ]
-            else:
-                # Specific alert type conditions
-                alert_conditions = {
-                    "panic": {
-                        "$or": [
-                            {"sos": {"$in": ["1", 1, True]}},
-                            {"status": "SOS"},
-                            {"alarm": "SOS"}
-                        ]
-                    },
-                    "speeding": {"speed": {"$gte": "60"}},
-                    "harsh_break": {"harsh_break": "1"},
-                    "harsh_acceleration": {"harsh_speed": "1"},
-                    "gsm_low": {"gsm_sig": "0"},
-                    "internal_battery_low": {"internal_bat": "1"},
-                    "external_battery_low": {"external_bat": "1"},
-                    "main_power_off": {"main_power": "0"},
-                    "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
-                    "ignition_off": {"ignition": "0"},
-                    "ignition_on": {"ignition": "1"}
-                }
-                if alert_type in alert_conditions:
-                    query.update(alert_conditions[alert_type])
+            # Specific alert type conditions
+            alert_conditions = {
+                "critical": {
+                    "$or": [
+                        {"sos": {"$in": ["1", 1, True]}},
+                        {"status": "SOS"},
+                        {"alarm": "SOS"},
+                        {"speed": {"$gte": 60}}
+                    ]
+                },
+                "non_critical": {
+                    "$and": [
+                        {"sos": {"$nin": ["1", 1, True]}},
+                        {"status": {"$ne": "SOS"}},
+                        {"alarm": {"$ne": "SOS"}},
+                        {"speed": {"$lt": 60}}
+                    ]
+                },
+                "panic": {
+                    "$or": [
+                        {"sos": {"$in": ["1", 1, True]}},
+                        {"status": "SOS"},
+                        {"alarm": "SOS"}
+                    ]
+                },
+                "speeding": {"speed": {"$gte": 60}},
+                "harsh_break": {"harsh_break": "1"},
+                "harsh_acceleration": {"harsh_speed": "1"},
+                "gsm_low": {"gsm_sig": "0"},
+                "internal_battery_low": {"internal_bat": "1"},
+                "external_battery_low": {"external_bat": "1"},
+                "main_power_off": {"main_power": "0"},
+                "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
+                "ignition_off": {"ignition": "0"},
+                "ignition_on": {"ignition": "1"}
+            }
+            
+            if alert_type in alert_conditions:
+                query.update(alert_conditions[alert_type])
             
             # Get count
             count = db['atlanta'].count_documents(query)
@@ -200,13 +202,6 @@ def page():
                          vehicles=vehicles,
                          default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
                          default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'))
-
-# Count endpoints
-@alerts_bp.route('/all_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("all")
-def all_count():
-    pass
 
 @alerts_bp.route('/critical_count', methods=['POST'])
 @jwt_required()
@@ -284,13 +279,6 @@ def ignition_off_count():
 @jwt_required()
 @alert_card_endpoint("ignition_on")
 def ignition_on_count():
-    pass
-
-# Alert data endpoints
-@alerts_bp.route('/all_alerts', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("all")
-def all_alerts():
     pass
 
 @alerts_bp.route('/critical_alerts', methods=['POST'])
@@ -384,10 +372,14 @@ def acknowledge_alert():
         if not alert_id or not pressed_for:
             return jsonify({"success": False, "message": "Missing required fields"}), 400
         
-        # Check if alert exists
+        # Check if alert exists and not already acknowledged
         alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
         if not alert:
             return jsonify({"success": False, "message": "Alert not found"}), 404
+            
+        existing_ack = db['Ack_alerts'].find_one({"alert_id": alert_id})
+        if existing_ack:
+            return jsonify({"success": False, "message": "Alert already acknowledged"}), 400
         
         # Save acknowledgment
         result = db['Ack_alerts'].insert_one({
@@ -395,7 +387,7 @@ def acknowledge_alert():
             "pressed_for": pressed_for,
             "reason": reason,
             "acknowledged_by": user_id,
-            "acknowledged_at": datetime.now(),
+            "acknowledged_at": datetime.now(pytz.utc),
             "alert_data": alert
         })
         
