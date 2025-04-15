@@ -117,6 +117,10 @@ def register_client_admin():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+
+        from flask_jwt_extended import get_jwt
+        claims = get_jwt()
+        print(f"JWT Claims: {claims}") 
         
         User.create_user(username, email, password, role='clientAdmin')
         flash('Admin registration successful. Please login.', 'success')
