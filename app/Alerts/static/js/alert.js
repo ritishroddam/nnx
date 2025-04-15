@@ -378,7 +378,6 @@ document.addEventListener("DOMContentLoaded", function() {
             el.classList.add('loading-count');
         });
         
-        // Only load counts for visible cards (removed 'all')
         const endpoints = ['critical', 'non_critical', 'panic', 'speeding', 
                           'harsh_break', 'harsh_acceleration', 'gsm_low', 
                           'internal_battery_low', 'external_battery_low', 
@@ -398,6 +397,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 }),
             })
             .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new TypeError("Server didn't return JSON");
+                }
                 if (!response.ok) throw new Error("Network response was not ok");
                 return response.json();
             })
@@ -415,12 +418,16 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(error => {
                 console.error(`Error loading count for ${endpoint}:`, error);
-                const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
-                if (card) {
-                    const countElement = card.querySelector('.alert-count');
-                    if (countElement) {
-                        countElement.textContent = "0";
-                        countElement.classList.remove('loading-count');
+                if (error.message.includes('Unexpected token') && error.message.includes('<!DOCTYPE')) {
+                    handleSessionExpired();
+                } else {
+                    const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+                    if (card) {
+                        const countElement = card.querySelector('.alert-count');
+                        if (countElement) {
+                            countElement.textContent = "0";
+                            countElement.classList.remove('loading-count');
+                        }
                     }
                 }
             });
