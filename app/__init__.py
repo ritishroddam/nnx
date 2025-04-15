@@ -54,7 +54,7 @@ def create_app(config_name='default'):
             user = User.get_user_by_id(user_id)
             print(f"User ID: {user['company']}")
             if user['company'] != 'none':
-                company = User.get_company_by_company_id(user['company']),
+                company = User.get_company_by_company_id(user['company'])
             else:
                 company = None
             print(f"Company: {company}")
