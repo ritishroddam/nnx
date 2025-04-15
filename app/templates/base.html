@@ -63,7 +63,11 @@
     <div class="sidebar">
         <div class="logo">
             <img src="logo.png" alt="Logo">
-            <h2 class="sidebar-text">{{ company | default('Cordon') }}</h2>
+            {% if company != 'None' %}
+            <h2 class="sidebar-text">{{ company }}</h2>
+            {% else %}
+            <h2 class="sidebar-text">Cordon</h2>
+            {% endif %}
         </div>
 
         <ul class="menu">
