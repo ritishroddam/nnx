@@ -55,7 +55,7 @@ def create_app(config_name='default'):
             return {
                 'username': current_user,
                 'role': user['role'],
-                'company': user['company'],
+                'company': User.get_user_by_id(user['company']),
             }
         except Exception:
             return {
