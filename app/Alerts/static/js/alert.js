@@ -380,8 +380,8 @@ document.addEventListener("DOMContentLoaded", function() {
         
         const endpoints = ['critical', 'non_critical', 'panic', 'speeding', 
                           'harsh_break', 'harsh_acceleration', 'gsm_low', 
-                          'internal_battery_low', 'external_battery_low', 
-                          'main_power_off', 'idle', 'ignition_off', 'ignition_on'];
+                          'internal_battery_low','main_power_off', 'idle', 
+                          'ignition_off', 'ignition_on'];
         
         const promises = endpoints.map(endpoint => {
             return fetch(`/alerts/${endpoint}_count`, {
