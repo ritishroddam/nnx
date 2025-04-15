@@ -30,10 +30,15 @@ def login():
             flash('Invalid username or password', 'danger')
             return redirect(url_for('auth.login'))
         
+        if user['company'] != 'none':
+            company = User.get_company_by_company_id(user['company']),
+        else:
+            company = None
+
         # Create both access and refresh tokens
         additional_claims = {
             'roles': [user['role']],
-            'company': User.get_user_by_id(user['company']),
+            'company': company,
             'user_id': str(user['_id']),
         }
         
@@ -63,9 +68,14 @@ def api_login():
     if not user or not User.verify_password(user, password):
         return jsonify({'error': 'Invalid username or password'}), 401
     
+    if user['company'] != 'none':
+        company = User.get_company_by_company_id(user['company']),
+    else:
+        company = None
+    
     additional_claims = {
         'roles': [user['role']],
-        'company': User.get_user_by_id(user['company']),
+        'company': company,
         'user_id': str(user['_id']),
     }
     
