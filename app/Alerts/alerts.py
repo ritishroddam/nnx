@@ -210,194 +210,194 @@ def page():
                          default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'))
 
 # Count endpoints
-@alerts_bp.route('/alerts/all_count', methods=['POST'])
+@alerts_bp.route('/all_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("all")
 def all_count():
     pass
 
-@alerts_bp.route('/alerts/critical_count', methods=['POST'])
+@alerts_bp.route('/critical_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("critical")
 def critical_count():
     pass
 
-@alerts_bp.route('/alerts/non_critical_count', methods=['POST'])
+@alerts_bp.route('/non_critical_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("non_critical")
 def non_critical_count():
     pass
 
-@alerts_bp.route('/alerts/panic_count', methods=['POST'])
+@alerts_bp.route('/panic_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("panic")
 def panic_count():
     pass
 
-@alerts_bp.route('/alerts/speeding_count', methods=['POST'])
+@alerts_bp.route('/speeding_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("speeding")
 def speeding_count():
     pass
 
-@alerts_bp.route('/alerts/harsh_break_count', methods=['POST'])
+@alerts_bp.route('/harsh_break_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("harsh_break")
 def harsh_break_count():
     pass
 
-@alerts_bp.route('/alerts/harsh_acceleration_count', methods=['POST'])
+@alerts_bp.route('/harsh_acceleration_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("harsh_acceleration")
 def harsh_acceleration_count():
     pass
 
-@alerts_bp.route('/alerts/gsm_low_count', methods=['POST'])
+@alerts_bp.route('/gsm_low_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("gsm_low")
 def gsm_low_count():
     pass
 
-@alerts_bp.route('/alerts/internal_battery_low_count', methods=['POST'])
+@alerts_bp.route('/internal_battery_low_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("internal_battery_low")
 def internal_battery_low_count():
     pass
 
-@alerts_bp.route('/alerts/external_battery_low_count', methods=['POST'])
+@alerts_bp.route('/external_battery_low_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("external_battery_low")
 def external_battery_low_count():
     pass
 
-@alerts_bp.route('/alerts/main_power_off_count', methods=['POST'])
+@alerts_bp.route('/main_power_off_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("main_power_off")
 def main_power_off_count():
     pass
 
-@alerts_bp.route('/alerts/door_open_count', methods=['POST'])
+@alerts_bp.route('/door_open_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("door_open")
 def door_open_count():
     pass
 
-@alerts_bp.route('/alerts/door_close_count', methods=['POST'])
+@alerts_bp.route('/door_close_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("door_close")
 def door_close_count():
     pass
 
-@alerts_bp.route('/alerts/idle_count', methods=['POST'])
+@alerts_bp.route('/idle_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("idle")
 def idle_count():
     pass
 
-@alerts_bp.route('/alerts/ignition_off_count', methods=['POST'])
+@alerts_bp.route('/ignition_off_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("ignition_off")
 def ignition_off_count():
     pass
 
-@alerts_bp.route('/alerts/ignition_on_count', methods=['POST'])
+@alerts_bp.route('/ignition_on_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("ignition_on")
 def ignition_on_count():
     pass
 
 # Alert data endpoints
-@alerts_bp.route('/alerts/all_alerts', methods=['POST'])
+@alerts_bp.route('/all_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("all")
 def all_alerts():
     pass
 
-@alerts_bp.route('/alerts/critical_alerts', methods=['POST'])
+@alerts_bp.route('/critical_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("critical")
 def critical_alerts():
     pass
 
-@alerts_bp.route('/alerts/non_critical_alerts', methods=['POST'])
+@alerts_bp.route('/non_critical_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("non_critical")
 def non_critical_alerts():
     pass
 
-@alerts_bp.route('/alerts/panic_alerts', methods=['POST'])
+@alerts_bp.route('/panic_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("panic")
 def panic_alerts():
     pass
 
-@alerts_bp.route('/alerts/speeding_alerts', methods=['POST'])
+@alerts_bp.route('/speeding_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("speeding")
 def speeding_alerts():
     pass
 
-@alerts_bp.route('/alerts/harsh_break_alerts', methods=['POST'])
+@alerts_bp.route('/harsh_break_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("harsh_break")
 def harsh_break_alerts():
     pass
 
-@alerts_bp.route('/alerts/harsh_acceleration_alerts', methods=['POST'])
+@alerts_bp.route('/harsh_acceleration_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("harsh_acceleration")
 def harsh_acceleration_alerts():
     pass
 
-@alerts_bp.route('/alerts/gsm_low_alerts', methods=['POST'])
+@alerts_bp.route('/gsm_low_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("gsm_low")
 def gsm_low_alerts():
     pass
 
-@alerts_bp.route('/alerts/internal_battery_low_alerts', methods=['POST'])
+@alerts_bp.route('/internal_battery_low_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("internal_battery_low")
 def internal_battery_low_alerts():
     pass
 
-@alerts_bp.route('/alerts/external_battery_low_alerts', methods=['POST'])
+@alerts_bp.route('/external_battery_low_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("external_battery_low")
 def external_battery_low_alerts():
     pass
 
-@alerts_bp.route('/alerts/main_power_off_alerts', methods=['POST'])
+@alerts_bp.route('/main_power_off_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("main_power_off")
 def main_power_off_alerts():
     pass
 
-@alerts_bp.route('/alerts/door_open_alerts', methods=['POST'])
+@alerts_bp.route('/door_open_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("door_open")
 def door_open_alerts():
     pass
 
-@alerts_bp.route('/alerts/door_close_alerts', methods=['POST'])
+@alerts_bp.route('/door_close_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("door_close")
 def door_close_alerts():
     pass
 
-@alerts_bp.route('/alerts/idle_alerts', methods=['POST'])
+@alerts_bp.route('/idle_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("idle")
 def idle_alerts():
     pass
 
-@alerts_bp.route('/alerts/ignition_off_alerts', methods=['POST'])
+@alerts_bp.route('/ignition_off_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("ignition_off")
 def ignition_off_alerts():
     pass
 
-@alerts_bp.route('/alerts/ignition_on_alerts', methods=['POST'])
+@alerts_bp.route('/ignition_on_alerts', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("ignition_on")
 def ignition_on_alerts():
