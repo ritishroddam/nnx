@@ -109,7 +109,7 @@ def register():
 
 @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
 @jwt_required()
-@roles_required('Admin')
+@roles_required('admin')
 def register_client_admin():
     
     if request.method == 'POST':
@@ -160,4 +160,5 @@ def logout():
 
 @auth_bp.route('/unauthorized')
 def unauthorized():
-    return render_template('unauthorized.html'), 403
+    flash('To access this page please login', 'danger')
+    return render_template('login.html'), 403
