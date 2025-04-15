@@ -53,10 +53,12 @@ def create_app(config_name='default'):
             user_id = claims['user_id']
             user = User.get_user_by_id(user_id)
             print(f"User ID: {user['company']}")
+            company = User.get_company_by_user_id(user['company'])
+            print(f"Company: {company}")
             return {
                 'username': current_user,
                 'role': user['role'],
-                'company': User.get_user_by_id(user['company']),
+                'company': company,
             }
         except Exception:
             return {
