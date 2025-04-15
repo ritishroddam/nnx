@@ -52,6 +52,7 @@ def create_app(config_name='default'):
             claims = get_jwt()
             user_id = claims['user_id']
             user = User.get_user_by_id(user_id)
+            print(f"User ID: {user['company']}")
             return {
                 'username': current_user,
                 'role': user['role'],
