@@ -18,10 +18,11 @@
         </div>
         <div class="form-group">
             <label for="company">Company</label>
-            {% for company in companies %}
-            <input type="radio" id="{{ company._id }}" name="company" value="{{ company._id }}">
-            <label for="{{ company._id }}">{{ company['Company Name'] }}</label><br>
-            {% endfor %}
+            <select id="company" name="company" required>
+                {% for company in companies %}
+                <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+                {% endfor %}
+            </select>
         </div>
         <button type="submit" class="btn">Register</button>
     </form>
