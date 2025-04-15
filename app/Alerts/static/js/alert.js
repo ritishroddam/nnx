@@ -331,51 +331,57 @@ document.addEventListener("DOMContentLoaded", function() {
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        const countElements = document.querySelectorAll('.alert-count');
-        countElements.forEach(el => {
+        // Show loading state for counts
+        document.querySelectorAll('.alert-count').forEach(el => {
             el.classList.add('loading-count');
         });
         
-        const promises = [];
+        // Only load counts for visible cards
+        const endpoints = ['all', 'critical', 'non_critical', 'panic', 'speeding', 
+                          'harsh_break', 'harsh_acceleration', 'gsm_low', 
+                          'internal_battery_low', 'external_battery_low', 
+                          'main_power_off', 'idle', 'ignition_off', 'ignition_on'];
         
-        document.querySelectorAll('.alert-card').forEach(card => {
-            const endpoint = card.dataset.endpoint;
-            promises.push(
-                fetch(`/alerts/${endpoint}_count`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-                    },
-                    body: JSON.stringify({
-                        startDate: startDate,
-                        endDate: endDate,
-                        vehicleNumber: vehicleNumber
-                    }),
-                })
-                .then(response => {
-                    if (response.status === 404) {
-                        throw new Error('Endpoint not found');
-                    }
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
+        const promises = endpoints.map(endpoint => {
+            return fetch(`/alerts/${endpoint}_count`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+                },
+                body: JSON.stringify({
+                    startDate: startDate,
+                    endDate: endDate,
+                    vehicleNumber: vehicleNumber
+                }),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+                    if (card) {
                         const countElement = card.querySelector('.alert-count');
-                        countElement.textContent = data.count;
+                        if (countElement) {
+                            countElement.textContent = data.count;
+                            countElement.classList.remove('loading-count');
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error(`Error loading count for ${endpoint}:`, error);
+                const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+                if (card) {
+                    const countElement = card.querySelector('.alert-count');
+                    if (countElement) {
+                        countElement.textContent = "0";
                         countElement.classList.remove('loading-count');
                     }
-                })
-                .catch(error => {
-                    console.error(`Error loading count for ${endpoint}:`, error);
-                    const countElement = card.querySelector('.alert-count');
-                    countElement.textContent = "0";
-                    countElement.classList.remove('loading-count');
-                })
-            );
+                }
+            });
         });
         
         return Promise.all(promises);
@@ -387,8 +393,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        // Show loading indicators
-        loadingIndicator.style.display = "flex";
+        // Show table loading
         tableLoading.style.display = "flex";
         
         fetch(`/alerts/${currentEndpoint}_alerts`, {
@@ -411,25 +416,28 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.success) {
                 displayAlerts(data.alerts);
                 // Update count for the current card
-                const currentCard = document.querySelector(`.alert-card[data-endpoint="${currentEndpoint}"]`);
-                if (currentCard) {
-                    const countElement = currentCard.querySelector('.alert-count');
-                    if (countElement) {
-                        countElement.textContent = data.count;
-                    }
-                }
+                updateCardCount(currentEndpoint, data.count);
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert(error.message || "Failed to fetch alerts");
+            showToast(error.message || "Failed to fetch alerts", "error");
         })
         .finally(() => {
-            loadingIndicator.style.display = "none";
             tableLoading.style.display = "none";
         });
+    }
+    
+    function updateCardCount(endpoint, count) {
+        const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+        if (card) {
+            const countElement = card.querySelector('.alert-count');
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        }
     }
     
     // Function to display alerts in table
@@ -480,7 +488,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         const ackBtn = ackForm.querySelector(".ack-btn");
         ackBtn.disabled = true;
-        ackBtn.textContent = "Processing...";
+        ackBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
         
         fetch("/alerts/acknowledge", {
             method: "POST",
@@ -500,7 +508,8 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(data => {
             if (data.success) {
-                alert("Alert acknowledged successfully");
+                // Show success toast/notification
+                showToast("Alert acknowledged successfully", "success");
                 ackModal.style.display = "none";
                 ackForm.reset();
                 loadAlerts(); // Refresh the alerts list
@@ -510,12 +519,30 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .catch(error => {
             console.error("Error:", error);
-            alert(error.message || "Failed to acknowledge alert");
+            showToast(error.message || "Failed to acknowledge alert", "error");
         })
         .finally(() => {
             ackBtn.disabled = false;
             ackBtn.textContent = "Acknowledge";
         });
+    }
+
+    function showToast(message, type = "success") {
+        const toast = document.createElement("div");
+        toast.className = `toast-notification ${type}`;
+        toast.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add("show");
+        }, 100);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
     }
     
     // Helper function to format date for display

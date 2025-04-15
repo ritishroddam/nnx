@@ -9,64 +9,66 @@
 <script defer src="{{ url_for('Alerts.static', filename='js/alert.js') }}"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
-.loading-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 10px;
-    text-align: center;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.loading-indicator .spinner {
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #3498db;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite;
-    margin-right: 10px;
-}
-
 .table-loading {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.9);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 10;
+    gap: 10px;
 }
 
 .table-loading .loading-spinner {
     border: 4px solid #f3f3f3;
     border-top: 4px solid #3498db;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     animation: spin 1s linear infinite;
 }
 
-.loading-count {
-    display: inline-block;
-    min-width: 20px;
-    min-height: 20px;
-    background: #f0f0f0;
-    border-radius: 4px;
+.table-loading span {
+    font-size: 16px;
+    color: #333;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-notification.success {
+    background-color: #28a745;
+}
+
+.toast-notification.error {
+    background-color: #dc3545;
+}
+
+.toast-notification i {
+    font-size: 20px;
 }
 </style>
 {% endblock %}
@@ -76,13 +78,12 @@ Alerts
 {% endblock %}
 
 {% block block_container %}
-<div id="loadingIndicator" class="loading-indicator" style="display: none;">
-    <div class="spinner"></div>
-    <span>Loading alerts...</span>
-</div>
 
 <div class="alerts-container">
-    <!-- Left sidebar with alert cards (20%) -->
+    <div class="table-loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Loading data...</span>
+    </div>
     <div class="alert-sidebar">
         <div class="alert-cards">
             <div class="alert-card active" data-alert="all" data-endpoint="all">
@@ -138,16 +139,6 @@ Alerts
             <div class="alert-card" data-alert="main_power_off" data-endpoint="main_power_off">
                 <h3>Main Supply Remove Alert</h3>
                 <i class="fa-solid fa-plug-circle-xmark"></i>
-                <span class="alert-count loading-count"></span>
-            </div>
-            <div class="alert-card" data-alert="door_open" data-endpoint="door_open">
-                <h3>Door Open Alert</h3>
-                <i class="fa-solid fa-car-side"></i>
-                <span class="alert-count loading-count"></span>
-            </div>
-            <div class="alert-card" data-alert="door_close" data-endpoint="door_close">
-                <h3>Door Close Alert</h3>
-                <i class="fa-solid fa-car-side"></i>
                 <span class="alert-count loading-count"></span>
             </div>
             <div class="alert-card" data-alert="idle" data-endpoint="idle">
