@@ -19,31 +19,33 @@ Register Client Admin
 {% block block_container %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
-<div class="register-container">
-    <h2>Register</h2>
-    <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="company">Company</label>
-            <select id="company" name="company" required>
-                {% for company in companies %}
-                <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <button type="submit" class="btn">Register</button>
-    </form>
+<div class="container">
+    <div class="register-container">
+        <h2>Register</h2>
+        <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="company">Company</label>
+                <select id="company" name="company" required>
+                    {% for company in companies %}
+                    <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
