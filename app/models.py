@@ -4,12 +4,13 @@ import bcrypt
 
 class User:
     @staticmethod
-    def create_user(username, email, password, role='user'):
+    def create_user(username, email, password, company = 'none', role='user'):
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         return db.users.insert_one({
             'username': username,
             'email': email,
             'password': hashed,
+            'company': company,
             'role': role
         })
     

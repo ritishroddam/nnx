@@ -17,7 +17,6 @@ def home():
 def register_admin():
     return render_template('register_admin.html')
 
-
 @main_bp.route('/dashboard')
 @jwt_required()
 def dashboard():

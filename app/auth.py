@@ -3,6 +3,7 @@ from flask_jwt_extended import verify_jwt_in_request, create_access_token, jwt_r
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from .models import User
 from .utils import roles_required
+from app import db
 import datetime
 import requests
 
@@ -105,6 +106,25 @@ def register():
         return redirect(url_for('auth.login'))
     
     return render_template('register.html')
+
+@auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
+@jwt_required()
+@roles_required('Admin')
+def register_client_admin():
+    
+    if request.method == 'POST':
+        # Rest of registration logic similar to regular register
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        User.create_user(username, email, password, role='clientAdmin')
+        flash('Admin registration successful. Please login.', 'success')
+        return redirect(url_for('auth.login'))
+
+    companies = db.customers_list.find()
+    
+    return render_template('register_client_admin.html', companies=companies)
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():
