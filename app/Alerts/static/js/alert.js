@@ -353,7 +353,15 @@ document.addEventListener("DOMContentLoaded", function() {
                         vehicleNumber: vehicleNumber
                     }),
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (response.status === 404) {
+                        throw new Error('Endpoint not found');
+                    }
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         const countElement = card.querySelector('.alert-count');
