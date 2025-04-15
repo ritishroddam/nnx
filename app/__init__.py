@@ -54,12 +54,14 @@ def create_app(config_name='default'):
             user = User.get_user_by_id(user_id)
             return {
                 'username': current_user,
-                'role': user['role']
+                'role': user['role'],
+                'company': user['company'],
             }
         except Exception:
             return {
                 'username': 'Guest',
-                'role': 'N/A'
+                'role': 'N/A',
+                'company': 'N/A',
             }
         
     @jwt.unauthorized_loader

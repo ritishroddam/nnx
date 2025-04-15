@@ -33,7 +33,8 @@ def login():
         # Create both access and refresh tokens
         additional_claims = {
             'roles': [user['role']],
-            'user_id': str(user['_id'])
+            'company': User.get_user_by_id(user['company']),
+            'user_id': str(user['_id']),
         }
         
         access_token = create_access_token(
@@ -64,7 +65,8 @@ def api_login():
     
     additional_claims = {
         'roles': [user['role']],
-        'user_id': str(user['_id'])
+        'company': User.get_user_by_id(user['company']),
+        'user_id': str(user['_id']),
     }
     
     access_token = create_access_token(
