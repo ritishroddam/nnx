@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
                 },
                 body: JSON.stringify({
                     startDate: startDate,
