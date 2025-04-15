@@ -40,10 +40,6 @@ def get_alert_type(record):
         return "Internal Battery Low Alert"
     elif record.get('main_power') == "0":
         return "Main Supply Remove Alert"
-    elif record.get('door') == "1":
-        return "Door Open Alert"
-    elif record.get('door') == "0":
-        return "Door Close Alert"
     elif record.get('speed') == "0.0" and record.get('ignition') == "1":
         return "Idle Alert"
     elif record.get('ignition') == "1":
@@ -123,8 +119,6 @@ def alert_card_endpoint(alert_type):
                     "internal_battery_low": {"internal_bat": "1"},
                     "external_battery_low": {"external_bat": "1"},
                     "main_power_off": {"main_power": "0"},
-                    "door_open": {"door": "1"},
-                    "door_close": {"door": "0"},
                     "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
                     "ignition_off": {"ignition": "0"},
                     "ignition_on": {"ignition": "1"}
@@ -151,7 +145,6 @@ def alert_card_endpoint(alert_type):
                         "harsh_break": 1,
                         "harsh_speed": 1,
                         "main_power": 1,
-                        "door": 1,
                         "internal_bat": 1,
                         "external_bat": 1,
                         "gsm_sig": 1,
@@ -275,18 +268,6 @@ def external_battery_low_count():
 def main_power_off_count():
     pass
 
-@alerts_bp.route('/door_open_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("door_open")
-def door_open_count():
-    pass
-
-@alerts_bp.route('/door_close_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("door_close")
-def door_close_count():
-    pass
-
 @alerts_bp.route('/idle_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("idle")
@@ -370,18 +351,6 @@ def external_battery_low_alerts():
 @jwt_required()
 @alert_card_endpoint("main_power_off")
 def main_power_off_alerts():
-    pass
-
-@alerts_bp.route('/door_open_alerts', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("door_open")
-def door_open_alerts():
-    pass
-
-@alerts_bp.route('/door_close_alerts', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("door_close")
-def door_close_alerts():
     pass
 
 @alerts_bp.route('/idle_alerts', methods=['POST'])
