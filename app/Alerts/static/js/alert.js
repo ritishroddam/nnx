@@ -5,8 +5,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const searchBtn = document.getElementById("searchAlerts");
     const alertCards = document.querySelectorAll(".alert-card");
     const tableLoading = document.querySelector(".table-loading");
+    const tableContainer = document.querySelector(".alerts-table-container");
+    const paginationContainer = document.createElement("div");
+    paginationContainer.className = "pagination";
+    tableContainer.appendChild(paginationContainer);
+    
     let currentEndpoint = "panic"; // Default to panic alerts
     let currentAlertId = null;
+    let currentPage = 1;
+    const perPage = 10;
     
     // Initialize counts and load panic alerts by default
     loadAllCounts();
@@ -27,6 +34,9 @@ document.addEventListener("DOMContentLoaded", function() {
             // Update current endpoint
             currentEndpoint = this.dataset.endpoint;
             
+            // Reset to first page
+            currentPage = 1;
+            
             // Load alerts
             loadAlerts();
         });
@@ -34,6 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Search button handler
     searchBtn.addEventListener("click", function() {
+        currentPage = 1;
         loadAllCounts();
         loadAlerts();
     });
@@ -78,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
             el.classList.add('loading-count');
         });
         
-        const endpoints = ['critical', 'non_critical', 'panic', 'speeding', 
+        const endpoints = ['panic', 'speeding', 
                           'harsh_break', 'harsh_acceleration', 'gsm_low', 
                           'internal_battery_low','main_power_off', 'idle', 
                           'ignition_off', 'ignition_on'];
@@ -143,7 +154,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
         // Show table loading
-        tableLoading.style.display = "flex";
+        const tableBody = document.querySelector("#alertsTable tbody");
+        tableBody.innerHTML = "";
+        const loadingRow = document.createElement("tr");
+        loadingRow.innerHTML = `<td colspan="7" style="text-align: center;">Loading alerts...</td>`;
+        tableBody.appendChild(loadingRow);
         
         fetch(`/alerts/${currentEndpoint}_alerts`, {
             method: "POST",
@@ -154,7 +169,9 @@ document.addEventListener("DOMContentLoaded", function() {
             body: JSON.stringify({
                 startDate: startDate,
                 endDate: endDate,
-                vehicleNumber: vehicleNumber
+                vehicleNumber: vehicleNumber,
+                page: currentPage,
+                per_page: perPage
             }),
         })
         .then(response => {
@@ -164,6 +181,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.success) {
                 displayAlerts(data.alerts);
+                updatePagination(data.count, data.page, data.per_page, data.total_pages);
                 // Update count for the current card
                 updateCardCount(currentEndpoint, data.count);
             } else {
@@ -173,10 +191,92 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => {
             console.error("Error:", error);
             showToast(error.message || "Failed to fetch alerts", "error");
-        })
-        .finally(() => {
-            tableLoading.style.display = "none";
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Error loading alerts</td></tr>`;
         });
+    }
+    
+    function updatePagination(totalItems, currentPage, perPage, totalPages) {
+        paginationContainer.innerHTML = "";
+        
+        if (totalItems <= perPage) return;
+        
+        // Previous button
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "Previous";
+        prevButton.disabled = currentPage === 1;
+        prevButton.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadAlerts();
+            }
+        });
+        paginationContainer.appendChild(prevButton);
+        
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        if (startPage > 1) {
+            const firstPageButton = document.createElement("button");
+            firstPageButton.textContent = "1";
+            firstPageButton.addEventListener("click", () => {
+                currentPage = 1;
+                loadAlerts();
+            });
+            paginationContainer.appendChild(firstPageButton);
+            
+            if (startPage > 2) {
+                const ellipsis = document.createElement("span");
+                ellipsis.textContent = "...";
+                paginationContainer.appendChild(ellipsis);
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageButton = document.createElement("button");
+            pageButton.textContent = i;
+            if (i === currentPage) {
+                pageButton.classList.add("active");
+            }
+            pageButton.addEventListener("click", () => {
+                currentPage = i;
+                loadAlerts();
+            });
+            paginationContainer.appendChild(pageButton);
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement("span");
+                ellipsis.textContent = "...";
+                paginationContainer.appendChild(ellipsis);
+            }
+            
+            const lastPageButton = document.createElement("button");
+            lastPageButton.textContent = totalPages;
+            lastPageButton.addEventListener("click", () => {
+                currentPage = totalPages;
+                loadAlerts();
+            });
+            paginationContainer.appendChild(lastPageButton);
+        }
+        
+        // Next button
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "Next";
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.addEventListener("click", () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadAlerts();
+            }
+        });
+        paginationContainer.appendChild(nextButton);
     }
     
     function updateCardCount(endpoint, count) {
@@ -268,10 +368,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 ackModal.style.display = "none";
                 ackForm.reset();
                 
-                // Refresh counts and alerts
-                loadAllCounts().then(() => {
-                    loadAlerts();
-                });
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    // Refresh counts and alerts
+                    loadAllCounts().then(() => {
+                        loadAlerts();
+                    });
+                }
             } else {
                 throw new Error(data.message || "Failed to acknowledge alert");
             }
@@ -333,16 +437,15 @@ document.addEventListener("DOMContentLoaded", function() {
         const todayStart = new Date(now);
         todayStart.setHours(0, 0, 0, 0);
         
-        const todayEnd = new Date(now);
-        todayEnd.setHours(23, 59, 59, 999);
-        
         document.getElementById("startDate").value = formatDateForInput(todayStart);
-        document.getElementById("endDate").value = formatDateForInput(todayEnd);
+        document.getElementById("endDate").value = formatDateForInput(now);
     }
     
     // Helper to format date for input fields
     function formatDateForInput(date) {
-        return date.toISOString().slice(0, 16);
+        const offset = date.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+        return localISOTime;
     }
     
     // Initialize default dates
