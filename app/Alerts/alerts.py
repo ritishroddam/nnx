@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, url_for
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -430,6 +430,7 @@ def acknowledge_alert():
         return jsonify({
             "success": True,
             "message": "Alert acknowledged successfully",
+            "redirect": url_for('.page')
         })
         
     except Exception as e:
