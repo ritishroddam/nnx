@@ -159,17 +159,33 @@
                 </ul>
             </li>
             {% if role == 'admin' %}
-            <li><a href="{{ url_for('auth.register_client_admin') }}" class="menu-item"><i class="fa-solid fa-user"></i>
-                    <span class="sidebar-text">Register Clients</span></a></li>
+
+            <li class="dropdown">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-user"></i> <span class="sidebar-text">Register</span>
+                    <span class="arrow">&#x25BC;</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{{ url_for('auth.register_client_admin') }}" class="menu-item"><i
+                                class="fa-solid fa-user"></i>
+                            <span class="sidebar-text">Register Clients</span>
+                        </a>
+                    </li>
+                    <li><a href="{{ url_for('auth.register') }}" class="menu-item"><i class="fa-solid fa-user"></i>
+                            <span class="sidebar-text">Register subaccounts</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
             {% endif %}
-            {% if role == 'admin' or role == 'clientAdmin' %}
+            {% if role == 'clientAdmin' %}
             <li><a href="{{ url_for('auth.register') }}" class="menu-item"><i class="fa-solid fa-user"></i>
                     <span class="sidebar-text">Register subaccounts</span></a></li>
             {% endif %}
         </ul>
     </div>
 
-    <div id="block-container" class="block-container">
+    <div id="block-container" class="block-container" style>
         {% block block_container %}{% endblock %}
     </div>
 
