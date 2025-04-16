@@ -46,7 +46,12 @@
   grid-template-columns: 5vh 1fr; /* Sidebar and block-container */
   gap: 1vw;
   height: 100vh;
-  top: 1vh;
+  position: relative;
+  top: 2vh;
+}
+
+.sidebar:hover .main-content {
+  grid-template-columns: 84vw 1fr;
 }
 
 .sidebar {
@@ -426,9 +431,4 @@ body {
 
 .dark-mode .block-container {
   background-color: black;
-}
-
-.sidebar:hover ~ .block-container {
-  left: 2vw;
-  width: 84vw;
 }
