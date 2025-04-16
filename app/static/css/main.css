@@ -53,12 +53,12 @@
   height: 100vh;
   position: relative;
   top: 2vh;
-  transition: grid-template-columns 0.3s ease-in-out,
-    margin-left 0.3s ease-in-out;
 }
 
-.sidebar:hover .main-content {
-  grid-template-columns: 20vw 1fr;
+.sidebar:hover .block-container {
+  width: calc(100% - 26vw);
+  left: 26vw;
+  transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
 }
 
 .sidebar {
@@ -81,12 +81,13 @@
   top: 0;
   left: 1vw;
   height: 100%;
-  width: 100%;
+  width: calc(100% - 1vw);
   background-color: white;
   border-radius: 0.5rem;
   padding: 1rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 2;
+  transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
 }
 
 body.dark-mode {
@@ -208,7 +209,7 @@ body {
 }
 
 .sidebar:hover {
-  width: 26vh;
+  width: 26vw;
 }
 
 .logo {
@@ -318,11 +319,6 @@ body {
 
 .rotate {
   transform: rotate(180deg);
-}
-
-.sidebar:hover ~ .topbar {
-  left: 14.5%; /* Adjusted to leave space for the expanded sidebar */
-  width: 84%; /* Adjusted to leave space for the expanded sidebar */
 }
 
 .topbar h1 {
