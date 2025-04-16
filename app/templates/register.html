@@ -1,27 +1,55 @@
-{% extends "base1.html" %}
+{% extends "base.html" %}
 
-{% block content %}
-<div class="register-container">
-    <h2>Register</h2>
-    <form method="POST" action="{{ url_for('auth.register') }}">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="confirm_password">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
-        </div>
-        <button type="submit" class="btn">Register</button>
-    </form>
-    <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+{% block head %}
+<title>Register Sub Account</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
+    integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
+    integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+{% endblock %}
+
+{% block h1 %}
+Register Sub Account
+{% endblock %}
+
+{% block block_container %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+<div class="container">
+    <div class="register-container">
+        <h2>Register</h2>
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            {% if role == 'clientAdmin' %}
+            <input type="hidden" name="company" value="{{ company_id }}">
+            {% elif role == 'admin' %}
+            <div class="form-group">
+                <label for="company">Company</label>
+                <select id="company" name="company" required>
+                    {% for company in companies %}
+                    <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <button type="submit" class="btn">Register</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

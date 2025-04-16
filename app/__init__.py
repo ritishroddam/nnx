@@ -61,12 +61,14 @@ def create_app(config_name='default'):
             return {
                 'username': current_user,
                 'role': user['role'],
-                'company': company,
+                'company_id': user['company'],
+                'company': company
             }
         except Exception:
             return {
                 'username': 'Guest',
                 'role': 'N/A',
+                'company_id': 'N/A',
                 'company': 'N/A',
             }
         

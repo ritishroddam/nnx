@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
-from flask_jwt_extended import verify_jwt_in_request, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended import get_jwt, verify_jwt_in_request, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from .models import User
 from .utils import roles_required
@@ -94,16 +94,13 @@ def api_login():
         # 'refresh_token': refresh_token
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@roles_required('admin', 'clientAdmin')
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        
-        if password != confirm_password:
-            flash('Passwords do not match', 'danger')
-            return redirect(url_for('auth.register'))
+        company = request.form.get('company')
         
         if User.find_by_username(username):
             flash('Username already taken', 'danger')
@@ -113,11 +110,21 @@ def register():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register'))
         
-        User.create_user(username, email, password)
+        User.create_user(username, email, password, company)
         flash('Registration successful. Please login.', 'success')
         return redirect(url_for('auth.login'))
-    
-    return render_template('register.html')
+
+    claims = get_jwt()
+    user_role = claims.get('roles', [])[0]  # Assuming roles is a list and taking the first role
+
+    if user_role == 'admin':
+        companies = db.customers_list.find()
+        return render_template('register_client_admin.html', companies=companies)
+    elif user_role == 'clientAdmin':
+        return render_template('register.html')
+    else:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('auth.unauthorized'))
 
 @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
 @jwt_required()
@@ -142,10 +149,6 @@ def register_client_admin():
         if User.find_by_email(email):
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
-
-        from flask_jwt_extended import get_jwt
-        claims = get_jwt()
-        print(f"JWT Claims: {claims}") 
         
         User.create_user(username, email, password, company, role='clientAdmin')
         flash('Admin registration successful. Please login.', 'success')
