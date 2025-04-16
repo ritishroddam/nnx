@@ -13,13 +13,8 @@
 }
 
 .dark-mode .alert-sidebar {
-    background-color: #343a40;
-    color: #f8f9fa;
-}
-
-.dark-mode .alerts-main-content {
-    background-color: #212529;
-    color: #f8f9fa;
+    background-color: #000;
+    color: #ccc
 }
 
 .alerts-main-content {
@@ -28,11 +23,21 @@
     overflow-y: auto;
 }
 
+.dark-mode .alerts-main-content {
+    background-color: #000;
+    color: #ccc
+}
+
 /* Alert cards */
 .alert-cards {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.dark-mode .alert-cards {
+    background-color: #000;
+    color: #ccc
 }
 
 .alert-card {
@@ -129,6 +134,11 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden;
+}
+
+.dark-mode .alerts-table-container {
+    background-color: #000;
+    color: #ccc
 }
 
 .alerts-table {
