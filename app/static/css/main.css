@@ -266,7 +266,7 @@ body {
   border-radius: 15px;
   color: #ccc;
   margin-bottom: 50px;
-  z-index: 1; /* Ensure the topbar is above the map */
+  z-index: 1000; /* Ensure the topbar is above the map */
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 

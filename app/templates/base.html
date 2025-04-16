@@ -28,24 +28,24 @@
             </div>
             <div class="profile" id="profile">
                 <img src="user.png" alt="User">
-                <div class="dashboard-container">
-                    <h2>Hello, {{ username }}!</h2>
-                    <div class="user-info">
-                        <p><strong>Role:</strong> {{ role }}</p>
-                    </div>
+                <div class="profile-hover" id="profile-hover">
+                    <div class="dashboard-container">
+                        <h2>Hello, {{ username }}!</h2>
+                        <div class="user-info">
+                            <p><strong>Role:</strong> {{ role }}</p>
+                        </div>
 
-                    <form action="{{ url_for('auth.logout') }}" method="POST">
-                        {% if csrf_token %}
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                        {% endif %}
-                        <button type="submit" class="button button-logout">Logout</button>
-                    </form>
+                        <form action="{{ url_for('auth.logout') }}" method="POST">
+                            {% if csrf_token %}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            {% endif %}
+                            <button type="submit" class="button button-logout">Logout</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-    <div class="profile-hover" id="profile-hover"></div>
 
     <div id="flash-messages-container" class="flash-messages-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
