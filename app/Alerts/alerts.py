@@ -430,7 +430,6 @@ def acknowledge_alert():
         return jsonify({
             "success": True,
             "message": "Alert acknowledged successfully",
-            "redirect": url_for('Alerts.page')
         })
         
     except Exception as e:
