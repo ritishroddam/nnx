@@ -4,28 +4,75 @@ document.addEventListener("DOMContentLoaded", function() {
     const ackForm = document.getElementById("ackForm");
     const searchBtn = document.getElementById("searchAlerts");
     const alertCards = document.querySelectorAll(".alert-card");
-    const tableLoading = document.querySelector(".table-loading");
     const tableContainer = document.querySelector(".alerts-table-container");
     const paginationContainer = document.createElement("div");
     paginationContainer.className = "pagination";
     tableContainer.appendChild(paginationContainer);
     
-    let currentEndpoint = "panic"; // Default to panic alerts
+    let currentEndpoint = "panic";
     let currentAlertId = null;
     let currentPage = 1;
     const perPage = 10;
-    let lastUpdateTime = new Date().toISOString();
     
-    // Initialize counts and load panic alerts by default
+    // Initialize WebSocket connection
+    const socket = io({
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+    });
+
+    // WebSocket event handlers
+    socket.on('connect', () => {
+        console.log('Connected to WebSocket server');
+        socket.emit('join_alerts');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from WebSocket server');
+    });
+
+    socket.on('new_alert', (data) => {
+        console.log('New alert received:', data);
+        if (shouldDisplayAlert(data.alert)) {
+            showToast('New alert received', 'info');
+            loadAllCounts();
+            if (currentPage === 1) {
+                loadAlerts();
+            }
+        }
+    });
+
+    socket.on('alert_updated', (data) => {
+        console.log('Alert updated:', data);
+        if (isAlertVisible(data.alert_id)) {
+            loadAlerts();
+        }
+    });
+
+    // Helper functions
+    function shouldDisplayAlert(alert) {
+        const currentStartDate = new Date(document.getElementById("startDate").value);
+        const currentEndDate = new Date(document.getElementById("endDate").value);
+        const alertDate = new Date(alert.date_time);
+        const vehicleFilter = document.getElementById("alertVehicleNumber").value;
+        
+        if (alertDate < currentStartDate || alertDate > currentEndDate) return false;
+        if (vehicleFilter && alert.vehicle_number !== vehicleFilter) return false;
+        if (alert.alert_type.toLowerCase().replace(/\s+/g, '_') !== currentEndpoint) return false;
+        
+        return true;
+    }
+
+    function isAlertVisible(alertId) {
+        return !!document.querySelector(`tr[data-alert-id="${alertId}"]`);
+    }
+
+    // Initialize with today's data
     setDefaultDateRange();
     loadAllCounts();
     loadAlerts();
-
-    const refreshInterval = setInterval(() => {
-        checkForNewAlerts();
-    }, 30000);
     
-    // Highlight panic card as active by default
     document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
     
     alertCards.forEach(card => {
@@ -101,7 +148,6 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => console.error("Error checking for new alerts:", error));
     }
 
-    // Load all counts
     function loadAllCounts() {
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
@@ -162,7 +208,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        // Show stylish loading animation
         const tableBody = document.querySelector("#alertsTable tbody");
         tableBody.innerHTML = `
             <tr class="loading-row">
@@ -304,22 +349,19 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    // Function to display alerts in table
     function displayAlerts(alerts) {
         const tableBody = document.querySelector("#alertsTable tbody");
         tableBody.innerHTML = "";
         
         if (alerts.length === 0) {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td colspan="7" style="text-align: center;">No alerts found for the selected criteria</td>`;
-            tableBody.appendChild(row);
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No alerts found</td></tr>`;
             return;
         }
         
         alerts.forEach(alert => {
             const row = document.createElement("tr");
+            row.dataset.alertId = alert._id;
             
-            // Add class based on alert type for styling
             if (alert.alert_type) {
                 const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, '-');
                 row.classList.add(`alert-type-${alertTypeClass}`);
