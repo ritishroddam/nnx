@@ -30,7 +30,7 @@ def get_alert_type(record):
     """Determine the alert type based on record data"""
     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
         return "Panic Alert"
-    elif float(record.get('speed', 0)) >= 60:
+    elif float(record.get('speed', 0.0)) >= 60:
         return "Speeding Alert"
     elif record.get('harsh_break') == "1":
         return "Harsh Break Alert"
@@ -272,12 +272,6 @@ def gsm_low_count():
 def internal_battery_low_count():
     pass
 
-@alerts_bp.route('/external_battery_low_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("external_battery_low")
-def external_battery_low_count():
-    pass
-
 @alerts_bp.route('/main_power_off_count', methods=['POST'])
 @jwt_required()
 @alert_card_endpoint("main_power_off")
@@ -348,12 +342,6 @@ def gsm_low_alerts():
 @jwt_required()
 @alert_card_endpoint("internal_battery_low")
 def internal_battery_low_alerts():
-    pass
-
-@alerts_bp.route('/external_battery_low_alerts', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("external_battery_low")
-def external_battery_low_alerts():
     pass
 
 @alerts_bp.route('/main_power_off_alerts', methods=['POST'])
