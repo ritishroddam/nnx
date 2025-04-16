@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -8,8 +8,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.geocoding import geocodeInternal
 from bson import ObjectId
 from functools import wraps
+from flask_socketio import SocketIO, emit
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
+socketio = SocketIO()
 
 def nmea_to_decimal(nmea_value):
     if nmea_value.startswith('0'):
@@ -223,6 +225,35 @@ def alert_card_endpoint(alert_type):
         return wrapper
     return decorator
 
+# WebSocket Events
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    emit('connected', {'data': 'Connected to alerts updates'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketio.on('join_alerts')
+def handle_join_alerts():
+    print('Client joined alerts room')
+    emit('alerts_joined', {'data': 'Joined alerts updates'})
+
+def broadcast_new_alert(alert_data):
+    socketio.emit('new_alert', {
+        'alert': alert_data,
+        'timestamp': datetime.now(pytz.utc).isoformat()
+    })
+
+def broadcast_alert_update(alert_id, action, user_id):
+    socketio.emit('alert_updated', {
+        'alert_id': alert_id,
+        'action': action,
+        'by': user_id,
+        'timestamp': datetime.now(pytz.utc).isoformat()
+    })
+
 @alerts_bp.route('/')
 @jwt_required()
 def page():
@@ -235,8 +266,6 @@ def page():
                          vehicles=vehicles,
                          default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
                          default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'))
-
-# Remove critical and non-critical endpoints
 
 @alerts_bp.route('/panic_count', methods=['POST'])
 @jwt_required()
@@ -395,11 +424,16 @@ def acknowledge_alert():
         if not result.inserted_id:
             return jsonify({"success": False, "message": "Failed to save acknowledgment"}), 500
         
+        # Broadcast the update
+        broadcast_alert_update(alert_id, 'acknowledged', user_id)
+        
         return jsonify({
             "success": True,
             "message": "Alert acknowledged successfully",
-            "redirect": url_for('Alerts.page')
         })
         
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+def init_socketio(app):
+    socketio.init_app(app)
