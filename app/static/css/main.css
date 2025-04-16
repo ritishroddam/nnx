@@ -120,9 +120,9 @@ body {
 .sidebar {
   position: relative;
   left: 1vw;
-  top: 8vh;
-  height: 91vh;
-  width: 5vw;
+  top: 9vh;
+  height: 90vh;
+  width: 4vw;
   background: black;
   color: #ccc;
   backdrop-filter: blur(10px);
@@ -385,10 +385,10 @@ body {
 
 .block-container {
   position: relative;
-  top: 11vh;
+  top: 9vh;
   left: 2vw;
   bottom: 1vh;
-  width: 92vw;
+  width: 93vw;
   border-radius: 1vw;
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
