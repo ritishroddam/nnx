@@ -46,7 +46,7 @@ def get_alert_type(record):
         return "Ignition On Alert"
     elif record.get('ignition') == "0":
         return "Ignition Off Alert"
-    elif record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(record.get('gsm_sig')) < 7):
+    elif record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(float(record.get('gsm_sig'))) < 7):
         return "GSM Signal Low Alert"
     return "Unknown Alert"
 
@@ -107,7 +107,8 @@ def alert_card_endpoint(alert_type):
                 "gsm_low": {
                     "$or": [
                         {"gsm_sig": "0"},
-                        {"gsm_sig": {"$lt": "7"}}
+                        {"gsm_sig": {"$lt": "7"}},
+                        {"$expr": {"$lt": [{"$toDouble": "$gsm_sig"}, 7]}}
                     ]
                 },
                 "internal_battery_low": {

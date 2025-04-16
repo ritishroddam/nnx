@@ -14,35 +14,30 @@ document.addEventListener("DOMContentLoaded", function() {
     let currentAlertId = null;
     let currentPage = 1;
     const perPage = 10;
+    let lastUpdateTime = new Date().toISOString();
     
     // Initialize counts and load panic alerts by default
+    setDefaultDateRange();
     loadAllCounts();
     loadAlerts();
+
+    const refreshInterval = setInterval(() => {
+        checkForNewAlerts();
+    }, 30000);
     
     // Highlight panic card as active by default
     document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
     
-    // Alert card click handlers
     alertCards.forEach(card => {
         card.addEventListener("click", function() {
-            // Remove active class from all cards
             alertCards.forEach(c => c.classList.remove("active"));
-            
-            // Add active class to clicked card
             this.classList.add("active");
-            
-            // Update current endpoint
             currentEndpoint = this.dataset.endpoint;
-            
-            // Reset to first page
             currentPage = 1;
-            
-            // Load alerts
             loadAlerts();
         });
     });
     
-    // Search button handler
     searchBtn.addEventListener("click", function() {
         currentPage = 1;
         loadAllCounts();
@@ -78,21 +73,47 @@ document.addEventListener("DOMContentLoaded", function() {
         acknowledgeAlert();
     });
 
+    function checkForNewAlerts() {
+        const now = new Date().toISOString();
+        fetch(`/alerts/${currentEndpoint}_count`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify({
+                startDate: document.getElementById("startDate").value,
+                endDate: now, // Check from last update to now
+                vehicleNumber: document.getElementById("alertVehicleNumber").value
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.count > 0) {
+                // New alerts found, update the display
+                lastUpdateTime = now;
+                loadAllCounts();
+                if (currentPage === 1) {
+                    loadAlerts();
+                }
+            }
+        })
+        .catch(error => console.error("Error checking for new alerts:", error));
+    }
+
     // Load all counts
     function loadAllCounts() {
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        // Show loading state for counts
         document.querySelectorAll('.alert-count').forEach(el => {
             el.classList.add('loading-count');
         });
         
-        const endpoints = ['panic', 'speeding', 
-                          'harsh_break', 'harsh_acceleration', 'gsm_low', 
-                          'internal_battery_low','main_power_off', 'idle', 
-                          'ignition_off', 'ignition_on'];
+        const endpoints = ['panic', 'speeding', 'harsh_break', 'harsh_acceleration', 
+                          'gsm_low', 'internal_battery_low', 'main_power_off', 
+                          'idle', 'ignition_off', 'ignition_on'];
         
         const promises = endpoints.map(endpoint => {
             return fetch(`/alerts/${endpoint}_count`, {
@@ -107,14 +128,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     vehicleNumber: vehicleNumber
                 }),
             })
-            .then(response => {
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new TypeError("Server didn't return JSON");
-                }
-                if (!response.ok) throw new Error("Network response was not ok");
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
@@ -129,16 +143,12 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(error => {
                 console.error(`Error loading count for ${endpoint}:`, error);
-                if (error.message.includes('Unexpected token') && error.message.includes('<!DOCTYPE')) {
-                    handleSessionExpired();
-                } else {
-                    const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
-                    if (card) {
-                        const countElement = card.querySelector('.alert-count');
-                        if (countElement) {
-                            countElement.textContent = "0";
-                            countElement.classList.remove('loading-count');
-                        }
+                const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+                if (card) {
+                    const countElement = card.querySelector('.alert-count');
+                    if (countElement) {
+                        countElement.textContent = "0";
+                        countElement.classList.remove('loading-count');
                     }
                 }
             });
@@ -147,18 +157,22 @@ document.addEventListener("DOMContentLoaded", function() {
         return Promise.all(promises);
     }
     
-    // Load alerts for the current endpoint
     function loadAlerts() {
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        // Show table loading
+        // Show stylish loading animation
         const tableBody = document.querySelector("#alertsTable tbody");
-        tableBody.innerHTML = "";
-        const loadingRow = document.createElement("tr");
-        loadingRow.innerHTML = `<td colspan="7" style="text-align: center;">Loading alerts...</td>`;
-        tableBody.appendChild(loadingRow);
+        tableBody.innerHTML = `
+            <tr class="loading-row">
+                <td colspan="7">
+                    <div class="loading-animation">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </td>
+            </tr>
+        `;
         
         fetch(`/alerts/${currentEndpoint}_alerts`, {
             method: "POST",
@@ -174,15 +188,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 per_page: perPage
             }),
         })
-        .then(response => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 displayAlerts(data.alerts);
                 updatePagination(data.count, data.page, data.per_page, data.total_pages);
-                // Update count for the current card
                 updateCardCount(currentEndpoint, data.count);
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
@@ -191,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => {
             console.error("Error:", error);
             showToast(error.message || "Failed to fetch alerts", "error");
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Error loading alerts</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" class="error-message">Error loading alerts</td></tr>`;
         });
     }
     
@@ -202,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Previous button
         const prevButton = document.createElement("button");
-        prevButton.textContent = "Previous";
+        prevButton.innerHTML = `<i class="fas fa-chevron-left"></i>`;
         prevButton.disabled = currentPage === 1;
         prevButton.addEventListener("click", () => {
             if (currentPage > 1) {
@@ -212,15 +222,17 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         paginationContainer.appendChild(prevButton);
         
-        // Page numbers
+        // Page numbers - show limited set around current page
         const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
         
+        // Adjust if we're at the end
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
         
+        // First page and ellipsis
         if (startPage > 1) {
             const firstPageButton = document.createElement("button");
             firstPageButton.textContent = "1";
@@ -237,11 +249,13 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         
+        // Page numbers
         for (let i = startPage; i <= endPage; i++) {
             const pageButton = document.createElement("button");
             pageButton.textContent = i;
             if (i === currentPage) {
                 pageButton.classList.add("active");
+                pageButton.disabled = true;
             }
             pageButton.addEventListener("click", () => {
                 currentPage = i;
@@ -250,6 +264,7 @@ document.addEventListener("DOMContentLoaded", function() {
             paginationContainer.appendChild(pageButton);
         }
         
+        // Last page and ellipsis
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 const ellipsis = document.createElement("span");
@@ -268,7 +283,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Next button
         const nextButton = document.createElement("button");
-        nextButton.textContent = "Next";
+        nextButton.innerHTML = `<i class="fas fa-chevron-right"></i>`;
         nextButton.disabled = currentPage === totalPages;
         nextButton.addEventListener("click", () => {
             if (currentPage < totalPages) {
