@@ -27,23 +27,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const isVisible = window.getComputedStyle(profileHover).display === "block";
     profileHover.style.display = isVisible ? "none" : "block";
 
-    try {
-      const iconLegend = document.querySelector(".icon-legend");
-
+    const iconLegend = document.querySelector(".icon-legend");
+    if (iconLegend) {
       if (!isVisible) {
         iconLegend.classList.add("slide");
       } else {
         iconLegend.classList.remove("slide");
       }
-    } catch (error) {}
+    }
   });
 
   document.addEventListener("click", () => {
     profileHover.style.display = "none"; // Hide when clicking outside
-    try {
-      const iconLegend = document.querySelector(".icon-legend");
+
+    const iconLegend = document.querySelector(".icon-legend");
+    if (iconLegend) {
       iconLegend.classList.remove("slide");
-    } catch (error) {}
+    }
   });
 });
 

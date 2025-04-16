@@ -162,7 +162,7 @@ body {
 }
 
 .icon-legend.slide {
-  right: 150px; /* Adjust this value to slide the legend */
+  top: 150px; /* Adjust this value to slide the legend */
 }
 
 .icon-legend img {
