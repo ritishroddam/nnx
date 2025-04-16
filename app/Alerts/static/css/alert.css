@@ -7,9 +7,16 @@
     background-color: #121212;
     color: #ccc;
 }
-.alerts-container .alert-sidebar {
-    background-color: #f8f9fa;
-    border-right: 1px solid #dee2e6;
+.dark-mode .alerts-table-container {
+    background-color: #1e1e1e;
+    color: #ccc;
+}
+.dark-mode .alert-cards, .alert-card, .alert-sidebar {
+    background-color: #1e1e1e;
+    color: #ccc;
+}
+.dark-mode .fa-solid{
+    color: #ccc;
 }
 
 .alert-sidebar {
