@@ -25,42 +25,39 @@
 
 .layout {
   display: grid;
-  grid-template-rows: auto 1fr; /* Topbar and main content */
-  grid-template-columns: 1fr; /* Single column for the layout */
-  height: 100vh; /* Full viewport height */
+  grid-template-columns: 1vw auto;
+  grid-template-rows: 10vh minmax(160px, auto) auto;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar container";
+  column-gap: 1vh;
+  row-gap: 1vh;
 }
 
 .topbar {
-  position: sticky;
+  /* position: sticky;
   top: 1vh;
   left: 1vw;
-  width: 98vw;
+  width: 98vw; */
+  grid-area: topbar;
+  padding: 1rem;
+  border-radius: 0.5rem;
   background: black;
+  color: #ccc;
   backdrop-filter: blur(10px);
-  display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1vw;
-  border-radius: 1vw;
-  color: #ccc;
+  display: flex;
   z-index: 1000;
 }
 
-.main-content {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1vw;
-  height: 100vh;
-  position: relative;
-  top: 2vh;
-}
-
 .sidebar {
-  position: sticky;
+  /* position: sticky;
   left: 1vw;
   top: 0;
   height: 100%;
-  width: 4vw;
+  width: 4.5vw; */
+  grid-area: sidebar;
   background: black;
   color: #ccc;
   backdrop-filter: blur(10px);
@@ -70,18 +67,23 @@
   z-index: 1;
 }
 
-.sidebar:hover .block-container {
+/* .sidebar:hover {
+  width: 11vw;
+} */
+
+/* .sidebar:hover .block-container {
   width: 54vw;
-  left: 15vw;
+  left: 17vw;
   transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
-}
+} */
 
 .block-container {
-  position: sticky;
+  /* position: sticky;
   top: 0;
   left: 6vw;
   height: 100%;
-  width: 92vw;
+  width: 92vw; */
+  grid-area: container;
   background-color: white;
   border-radius: 0.5rem;
   padding: 1rem;
@@ -206,10 +208,6 @@ body {
   content: "";
   height: 5px;
   display: block;
-}
-
-.sidebar:hover {
-  width: 11vw;
 }
 
 .logo {
