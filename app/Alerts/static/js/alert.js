@@ -166,13 +166,23 @@ document.addEventListener("DOMContentLoaded", function() {
     setDefaultDateRange();
     loadAlerts();
     
-    document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
+    const activeCard = document.querySelector(`.alert-card[data-endpoint="${currentEndpoint}"]`);
+    if (activeCard) {
+        alertCards.forEach(c => c.classList.remove("active"));
+        activeCard.classList.add("active");
+    } else {
+        // Fallback to panic if stored endpoint doesn't exist
+        currentEndpoint = "panic";
+        document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
+    }
     
     alertCards.forEach(card => {
         card.addEventListener("click", function() {
             alertCards.forEach(c => c.classList.remove("active"));
             this.classList.add("active");
             currentEndpoint = this.dataset.endpoint;
+            // Store the selected endpoint
+            sessionStorage.setItem('currentAlertEndpoint', currentEndpoint);
             currentPage = 1;
             loadAlerts();
         });
@@ -460,11 +470,6 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
-        if (!currentAlertId) {
-            showToast("No alert selected", "error");
-            return;
-        }
-        
         const ackBtn = ackForm.querySelector(".ack-submit-btn");
         const originalText = ackBtn.innerHTML;
         ackBtn.disabled = true;
@@ -482,24 +487,43 @@ document.addEventListener("DOMContentLoaded", function() {
                 reason: reason
             }),
         })
-        .then(response => {
-            if (response.status === 200) {
-                return response.json();
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                // If the status is not ok but we got a response
+                if (data && data.message) {
+                    throw new Error(data.message);
+                }
+                throw new Error(`Server responded with status ${response.status}`);
             }
-            throw new Error("Network response was not ok");
+            return data;
         })
         .then(data => {
-            if (data && data.success) {
-                showToast("Alert acknowledged successfully", "success");
+            if (data.success) {
+                showToast(data.message || "Alert acknowledged successfully", "success");
                 ackModal.style.display = "none";
                 ackForm.reset();
-                loadAlerts(); // Refresh the current view
+                
+                // Update the specific row if we have the alert_id
+                if (data.alert_id) {
+                    const row = document.querySelector(`tr[data-alert-id="${data.alert_id}"]`);
+                    if (row) {
+                        // Update the status and action buttons
+                        row.querySelector('.status-badge').textContent = 'Acknowledged';
+                        row.querySelector('.status-badge').className = 'status-badge acknowledged';
+                        row.querySelector('.action-btn').textContent = 'Acknowledged';
+                        row.querySelector('.action-btn').disabled = true;
+                    }
+                } else {
+                    // Fallback to reload if we don't have specific alert_id
+                    loadAlerts();
+                }
             } else {
-                throw new Error(data?.message || "Failed to acknowledge alert");
+                throw new Error(data.message || "Failed to acknowledge alert");
             }
         })
         .catch(error => {
-            console.error("Error:", error);
+            console.error("Acknowledgment error:", error);
             showToast(error.message || "Failed to acknowledge alert", "error");
         })
         .finally(() => {
