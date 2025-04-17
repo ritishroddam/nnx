@@ -1150,7 +1150,7 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = function () {
-  darkMode = getCookie("darkMode");
+  darkMode = getCookie("darkMode") ? true : false;
   initMap();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
