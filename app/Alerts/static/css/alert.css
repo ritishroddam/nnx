@@ -72,14 +72,6 @@
     color: #666;
 }
 
-.alert-count {
-    background-color: #e0e0e0;
-    border-radius: 12px;
-    padding: 2px 8px;
-    font-size: 12px;
-    margin-left: 10px;
-}
-
 .alert-type-header {
     margin-top: 20px;
     margin-bottom: 10px;
