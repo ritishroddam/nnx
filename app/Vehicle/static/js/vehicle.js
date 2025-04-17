@@ -877,7 +877,7 @@ function hideCard() {
 }
 
 async function initMap() {
-  const darkMode = getCookie("darkMode");
+  const darkMode = await getCookie("darkMode");
 
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
   const offset = -5;
