@@ -31,13 +31,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const isDarkMode = body.classList.toggle("dark-mode");
     themeToggle.classList.toggle("dark");
 
+    setCookie("darkMode", isDarkMode);
+
     if (isDarkMode) {
       themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
     } else {
       themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
-
-    setCookie("darkMode", isDarkMode);
   });
 
   const profile = document.getElementById("profile");
