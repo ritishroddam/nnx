@@ -378,10 +378,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await response.json();
 
       data.sort((a, b) => b.distance - a.distance);
-      
+
       let tableBody = document.getElementById("vehicleTable");
       tableBody.innerHTML = "";
-      
+
       data.forEach((vehicle) => {
         let row = `<tr>
                   <td>${vehicle.registration}</td>
@@ -397,18 +397,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("sortBtn").addEventListener("click", function () {
     const table = document.querySelector("#vehicleTable");
     const rows = Array.from(table.rows);
-    
+
     // Separate header row from data rows
     const headerRow = rows[0];
     const dataRows = rows.slice(1);
-  
+
     // Sort data rows by distance (descending)
     dataRows.sort((a, b) => {
       const x = parseFloat(a.cells[1].innerText);
       const y = parseFloat(b.cells[1].innerText);
       return y - x;
     });
-  
+
     // Rebuild table with header first, then sorted data
     table.innerHTML = "";
     table.appendChild(headerRow);
@@ -428,13 +428,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 let map, trafficLayer;
 
 const themeToggle = document.getElementById("theme-toggle");
-let darkMode = true;
 themeToggle.addEventListener("click", function () {
-  darkMode = !darkMode;
-  initMap(darkMode);
+  setTimeout(() => {
+    initMap();
+  }, 100);
 });
 
-async function initMap(darkMode = true) {
+async function initMap() {
   const mapOptions = {
     zoom: 12,
     disableDefaultUI: true,
@@ -448,7 +448,9 @@ async function initMap(darkMode = true) {
           lng: position.coords.longitude,
         };
 
-        const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+        const darkMode = document.body.classList.contains("dark-mode");
+
+        const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
 
         map = new google.maps.Map(document.getElementById("map"), {
           ...mapOptions,
@@ -475,7 +477,9 @@ async function fallbackToDefaultLocation() {
   try {
     console.log("Using fallback location: Bangalore");
     const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
-    const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+    const darkMode = document.body.classList.contains("dark-mode");
+
+    const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
     map = new google.maps.Map(document.getElementById("map"), {
       center: defaultLocation,
       zoom: 12,

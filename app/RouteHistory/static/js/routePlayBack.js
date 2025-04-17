@@ -27,18 +27,18 @@ async function getAddressFromCoordinates(lat, lng) {
 }
 
 const themeToggle = document.getElementById("theme-toggle");
-let darkMode = true;
 themeToggle.addEventListener("click", function () {
-  darkMode = !darkMode; // Toggle the state
-  initMap(darkMode);
-  if (coords.length > 0) {
-    const form = document.getElementById("vehicle-form");
-    const submitEvent = new Event("submit", {
-      bubbles: true,
-      cancelable: true,
-    });
-    form.dispatchEvent(submitEvent);
-  }
+  setTimeout(() => {
+    initMap();
+    if (coords.length > 0) {
+      const form = document.getElementById("vehicle-form");
+      const submitEvent = new Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      });
+      form.dispatchEvent(submitEvent);
+    }
+  }, 100);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -104,7 +104,7 @@ let speedMultiplier = 1;
 let timelineSlider;
 let sliderTimeDisplay;
 
-async function initMap(darkMode = true) {
+async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   await google.maps.importLibrary("geometry");
@@ -112,7 +112,10 @@ async function initMap(darkMode = true) {
   timelineSlider = document.getElementById("timeline-slider");
   sliderTimeDisplay = document.getElementById("slider-time");
 
-  const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+  const darkMode = document.body.classList.contains("dark-mode");
+
+  const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
+
   map = new Map(document.getElementById("map"), {
     zoom: 10,
     center: { lat: 0, lng: 0 },
