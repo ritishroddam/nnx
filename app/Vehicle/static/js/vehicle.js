@@ -912,7 +912,6 @@ async function initMap(darkMode = true) {
 
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
-let darkMode = true;
 themeToggle.addEventListener("click", function () {
   darkMode = !darkMode; // Toggle the state
   initMap(darkMode); // Reinitialize the map with the new mapId
@@ -1145,7 +1144,8 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = function () {
-  initMap();
+  let darkMode = getCookie("darkMode");
+  initMap(darkMode);
   updateMap();
   document.querySelector(".block-container").style.display = "none";
 };
