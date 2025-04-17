@@ -120,9 +120,8 @@ body {
 .sidebar {
   position: fixed;
   left: 1%;
-  top: 427px;
+  top: 11vh;
   height: 88%;
-  transform: translateY(-50%);
   width: 60px;
   background: black;
   color: #ccc;
