@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const alertCards = document.querySelectorAll(".alert-card");
     const tableContainer = document.querySelector(".alerts-table-container");
     const paginationContainer = document.createElement("div");
+    const downloadBtn = document.getElementById("downloadAlerts");
     paginationContainer.className = "pagination";
     tableContainer.appendChild(paginationContainer);
     
@@ -51,6 +52,55 @@ document.addEventListener("DOMContentLoaded", function() {
             loadAlerts(); // Reload the current view
         }
     });
+
+
+    //////////////////Excel download
+
+    downloadBtn.addEventListener("click", function() {
+        downloadAlertsAsExcel();
+    });
+
+    function downloadAlertsAsExcel() {
+        const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
+        const rows = [];
+        
+        // Get all visible rows from the table
+        document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
+            // Skip the loading row if present
+            if (row.classList.contains("loading-row")) return;
+            
+            const cells = row.querySelectorAll("td");
+            const rowData = [
+                cells[0].textContent.trim(),
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim(),
+                cells[3].textContent.trim(),
+                cells[4].textContent.trim(),
+                cells[5].textContent.trim()
+            ];
+            rows.push(rowData);
+        });
+        
+        // Create CSV content
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // Add headers
+        csvContent += headers.join(",") + "\r\n";
+        
+        // Add rows
+        rows.forEach(row => {
+            csvContent += row.join(",") + "\r\n";
+        });
+        
+        // Create download link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `alerts_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     function fetchCountForEndpoint(endpoint) {
         const startDate = document.getElementById("startDate").value;
@@ -399,6 +449,11 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
+        if (!currentAlertId) {
+            showToast("No alert selected", "error");
+            return;
+        }
+        
         const ackBtn = ackForm.querySelector(".ack-submit-btn");
         const originalText = ackBtn.innerHTML;
         ackBtn.disabled = true;
@@ -417,17 +472,19 @@ document.addEventListener("DOMContentLoaded", function() {
             }),
         })
         .then(response => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
+            if (response.status === 200) {
+                return response.json();
+            }
+            throw new Error("Network response was not ok");
         })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 showToast("Alert acknowledged successfully", "success");
                 ackModal.style.display = "none";
                 ackForm.reset();
                 loadAlerts(); // Refresh the current view
             } else {
-                throw new Error(data.message || "Failed to acknowledge alert");
+                throw new Error(data?.message || "Failed to acknowledge alert");
             }
         })
         .catch(error => {
