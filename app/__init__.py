@@ -16,6 +16,31 @@ db = None
 socketio = SocketIO()
 pool = eventlet.GreenPool()
 
+# This decorator is used to check if token needs to be refreshed
+def check_token_freshness():
+    def wrapper(fn):
+        @wraps(fn)
+        def decorator(*args, **kwargs):
+            try:
+                verify_jwt_in_request(optional=True)
+                claims = get_jwt()
+                if claims:
+                    # Check if token is about to expire (less than 12 hours left)
+                    exp_timestamp = claims["exp"]
+                    now = datetime.now(timezone.utc)
+                    target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+                    
+                    # If token is about to expire and we're not already on the refresh page
+                    if exp_timestamp < target_timestamp and request.endpoint != 'auth.refresh':
+                        return redirect(url_for('auth.refresh'))
+            except Exception as e:
+                # Token verification failed, continue with the original function
+                pass
+            
+            return fn(*args, **kwargs)
+        return decorator
+    return wrapper
+
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -36,33 +61,27 @@ def create_app(config_name='default'):
     mongo_client = MongoClient(app.config['MONGO_URI'])
     db = mongo_client["nnx"]
     
-    # This decorator is used to check if token needs to be refreshed
-    def check_token_freshness():
-        def wrapper(fn):
-            @wraps(fn)
-            def decorator(*args, **kwargs):
-                try:
-                    verify_jwt_in_request(optional=True)
-                    claims = get_jwt()
-                    if claims:
-                        # Check if token is about to expire (less than 12 hours left)
-                        exp_timestamp = claims["exp"]
+    # Apply token freshness check to all routes
+    @app.before_request
+    def before_request_func():
+        # Only check token freshness for non-refresh endpoints
+        if request.endpoint != 'auth.refresh':
+            try:
+                verify_jwt_in_request(optional=True)
+                claims = get_jwt()
+                if claims:
+                    # Check if token is about to expire (less than 12 hours left)
+                    exp_timestamp = claims.get("exp")
+                    if exp_timestamp:
                         now = datetime.now(timezone.utc)
-                        target_timestamp = datetime.timestamp(now + timedelta(hours=12))
+                        target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
                         
-                        # If token is about to expire and we're not already on the refresh page
-                        if exp_timestamp < target_timestamp and request.endpoint != 'auth.refresh':
+                        # If token is about to expire
+                        if exp_timestamp < target_timestamp:
                             return redirect(url_for('auth.refresh'))
-                except Exception as e:
-                    # Token verification failed, continue with the original function
-                    pass
-                
-                return fn(*args, **kwargs)
-            return decorator
-        return wrapper
-    
-    # Register the check_token_freshness to be used on all routes
-    app.before_request(check_token_freshness())
+            except Exception as e:
+                # Token verification failed, continue with the request
+                pass
     
     @app.context_processor
     def inject_csrf_token():

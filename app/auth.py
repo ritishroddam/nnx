@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_jwt_extended import (
     get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
     jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies,
-    jwt_refresh_token_required, set_refresh_cookies, unset_refresh_cookies
+    set_refresh_cookies, unset_refresh_cookies
 )
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from .models import User
