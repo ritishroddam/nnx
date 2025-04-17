@@ -404,49 +404,60 @@ def ignition_on_alerts():
 def acknowledge_alert():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
         alert_id = data.get("alertId")
         pressed_for = data.get("pressedFor")
         reason = data.get("reason", "")
         user_id = get_jwt_identity()
-        
+
         if not alert_id or not pressed_for:
             return jsonify({"success": False, "message": "Missing required fields"}), 400
-        
-        # Check if alert exists and not already acknowledged
+
+        # Check if alert exists
         alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
         if not alert:
             alert = db['sos_logs'].find_one({"_id": ObjectId(alert_id)})
             if not alert:
                 return jsonify({"success": False, "message": "Alert not found"}), 404
-            
+
+        # Check if already acknowledged
         existing_ack = db['Ack_alerts'].find_one({"alert_id": alert_id})
         if existing_ack:
             return jsonify({"success": False, "message": "Alert already acknowledged"}), 400
-        
+
         # Save acknowledgment
-        result = db['Ack_alerts'].insert_one({
+        ack_data = {
             "alert_id": alert_id,
             "pressed_for": pressed_for,
             "reason": reason,
             "acknowledged_by": user_id,
             "acknowledged_at": datetime.now(pytz.utc),
             "alert_data": alert
-        })
+        }
+        
+        result = db['Ack_alerts'].insert_one(ack_data)
         
         if not result.inserted_id:
             return jsonify({"success": False, "message": "Failed to save acknowledgment"}), 500
-        
+
         # Broadcast the update
         broadcast_alert_update(alert_id, 'acknowledged', user_id)
-        
+
         return jsonify({
             "success": True,
             "message": "Alert acknowledged successfully",
-            "redirect": url_for('.page')
+            "alert_id": alert_id
         })
-        
+
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
 
 def init_socketio(app):
     socketio.init_app(app)
