@@ -876,7 +876,11 @@ function hideCard() {
   }
 }
 
-async function initMap(darkMode = true) {
+async function initMap(darkMode = null) {
+  if (darkMode === null) {
+    darkMode = document.body.classList.contains("dark-mode");
+  }
+
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
   const offset = -5;
 
@@ -918,10 +922,12 @@ async function initMap(darkMode = true) {
 
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
-let darkMode = true;
 themeToggle.addEventListener("click", function () {
-  darkMode = !darkMode; // Toggle the state
-  initMap(darkMode); // Reinitialize the map with the new mapId
+  const body = document.body;
+  const isDarkMode = body.classList.toggle("dark-mode");
+
+  setCookie("darkMode", isDarkMode); // Set cookie for 30 days
+  initMap(isDarkMode); // Reinitialize the map with the new mapId
 });
 
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
