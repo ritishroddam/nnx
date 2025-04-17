@@ -876,9 +876,9 @@ function hideCard() {
   }
 }
 
-async function initMap() {
-  const darkMode = document.body.classList.contains("dark-mode");
+let darkMode = document.body.classList.contains("dark-mode");
 
+async function initMap() {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
   const offset = -5;
 
@@ -919,6 +919,7 @@ async function initMap() {
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function () {
+  darkMode = document.body.classList.contains("dark-mode");
   initMap();
 });
 
@@ -1149,6 +1150,7 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = function () {
+  darkMode = document.body.classList.contains("dark-mode");
   initMap();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
