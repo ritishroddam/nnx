@@ -885,7 +885,7 @@ async function initMap() {
     lng: defaultCenter.lng + offset,
   };
 
-  const darkMode = document.body.classList.contains("dark-mode");
+  const darkMode = getCookie("darkMode") === "true";
   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
 
   const { Map } = await google.maps.importLibrary("maps");
