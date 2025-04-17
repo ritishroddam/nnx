@@ -250,13 +250,8 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 
   geocodeLatLng(latLng, function (address) {
     marker.addListener("gmp-click", function () {
-      if (openMarker !== marker) {
-        setInfoWindowContent(infoWindow, marker, latLng, device, address);
-        infoWindow.open(map, marker);
-        openMarker = marker;
-      } else {
-        console.log("InfoWindow already open for this marker.");
-      }
+      setInfoWindowContent(infoWindow, marker, latLng, device, address);
+      infoWindow.open(map, marker);
     });
   });
 }
@@ -444,7 +439,6 @@ var addressCache = {};
 var refreshInterval = 5000;
 var infoWindow;
 var countdownTimer = refreshInterval / 1000;
-var openMarker = null;
 var firstFit = true;
 var manualClose = false;
 var dataAvailable = true;
