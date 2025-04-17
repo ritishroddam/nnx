@@ -5,7 +5,11 @@ function getCookie(name) {
 }
 
 function setCookie(name, value) {
-  document.cookie = `${name}=${value};path=/`;
+  if (name === "darkMode") {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 10);
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+  } else document.cookie = `${name}=${value};path=/`;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
