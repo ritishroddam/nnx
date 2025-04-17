@@ -31,8 +31,6 @@ socket.on("sos_alert", function (data) {
   }
 });
 
-let darkMode = document.body.classList.contains("dark-mode");
-
 function updateVehicleCard(data) {
   const imei = sanitizeIMEI(data.imei);
   const vehicleCard = document.querySelector(
@@ -887,6 +885,7 @@ async function initMap() {
     lng: defaultCenter.lng + offset,
   };
 
+  const darkMode = document.body.classList.contains("dark-mode");
   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
 
   const { Map } = await google.maps.importLibrary("maps");
@@ -919,7 +918,6 @@ async function initMap() {
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function () {
-  darkMode = document.body.classList.contains("dark-mode");
   initMap();
 });
 
@@ -1150,7 +1148,6 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = function () {
-  darkMode = getCookie("darkMode") ? true : false;
   initMap();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
