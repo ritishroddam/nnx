@@ -4,19 +4,36 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
+function setCookie(name, value) {
+  document.cookie = `${name}=${value};path=/`;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const themeToggle = document.getElementById("theme-toggle");
   const body = document.body;
 
+  const darkModePreference = getCookie("darkMode");
+  if (darkModePreference === "true") {
+    body.classList.add("dark-mode");
+    themeToggle.classList.add("dark");
+    themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+  } else {
+    body.classList.remove("dark-mode");
+    themeToggle.classList.remove("dark");
+    themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+  }
+
   themeToggle.addEventListener("click", function () {
-    body.classList.toggle("dark-mode");
+    const isDarkMode = body.classList.toggle("dark-mode");
     themeToggle.classList.toggle("dark");
 
-    if (body.classList.contains("dark-mode")) {
+    if (isDarkMode) {
       themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
     } else {
       themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
+
+    setCookie("darkMode", isDarkMode);
   });
 
   const profile = document.getElementById("profile");
