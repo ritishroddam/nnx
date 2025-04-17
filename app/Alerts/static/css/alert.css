@@ -131,6 +131,14 @@
     background-color: #5d6d7e;
 }
 
+.dark-mode .search-btn {
+    background-color: #5d6d7e;
+    color: #fff;
+}
+.dark-mode .search-btn:hover {
+    background-color: #34495e;
+}
+
 /* Table styles */
 .alerts-table-container {
     background-color: white;
