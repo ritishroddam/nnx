@@ -129,8 +129,13 @@ def alert_card_endpoint(alert_type):
                     query["imei"] = imei
                 
                 # Add specific conditions for each alert type
-                if alert_type == "speeding":
-                    query["speed"] = {"$gte": 60}
+                elif alert_type == "speeding":
+                    query["$expr"] = {
+                        "$gte": [
+                            {"$toDouble": {"$ifNull": ["$speed", 0]}},
+                            60
+                        ]
+                    }
                     projection = {
                         "date_time": 1,
                         "latitude": 1,
