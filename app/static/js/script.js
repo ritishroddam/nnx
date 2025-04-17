@@ -43,24 +43,10 @@ document.addEventListener("DOMContentLoaded", function () {
     event.stopPropagation(); // Prevent click from propagating to the document
     const isVisible = window.getComputedStyle(profileHover).display === "block";
     profileHover.style.display = isVisible ? "none" : "block";
-
-    // const iconLegend = document.querySelector(".icon-legend");
-    // if (iconLegend) {
-    //   if (!isVisible) {
-    //     iconLegend.classList.add("slide");
-    //   } else {
-    //     iconLegend.classList.remove("slide");
-    //   }
-    // }
   });
 
   document.addEventListener("click", () => {
-    profileHover.style.display = "none"; // Hide when clicking outside
-
-    // const iconLegend = document.querySelector(".icon-legend");
-    // if (iconLegend) {
-    //   iconLegend.classList.remove("slide");
-    // }
+    profileHover.style.display = "none";
   });
 });
 
