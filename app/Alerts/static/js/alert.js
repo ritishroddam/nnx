@@ -92,11 +92,22 @@ document.addEventListener("DOMContentLoaded", function() {
             csvContent += row.join(",") + "\r\n";
         });
         
+        // Get current alert type and vehicle number for filename
+        const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
+        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        
+        // Create filename
+        let filename = `Alerts_${alertType}`;
+        if (vehicleNumber) {
+            filename += `_${vehicleNumber}`;
+        }
+        filename += `_${new Date().toISOString().slice(0,10)}.csv`;
+        
         // Create download link
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `alerts_${new Date().toISOString().slice(0,10)}.csv`);
+        link.setAttribute("download", filename);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
