@@ -31,6 +31,8 @@ socket.on("sos_alert", function (data) {
   }
 });
 
+let darkMode = document.body.classList.contains("dark-mode");
+
 function updateVehicleCard(data) {
   const imei = sanitizeIMEI(data.imei);
   const vehicleCard = document.querySelector(
@@ -875,8 +877,6 @@ function hideCard() {
     sliderButton.classList.add("active");
   }
 }
-
-let darkMode = document.body.classList.contains("dark-mode");
 
 async function initMap() {
   const defaultCenter = { lat: 20.5937, lng: 78.9629 };
