@@ -103,7 +103,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Initialize with today's data
     setDefaultDateRange();
-    loadAllCounts();
     loadAlerts();
     
     document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
@@ -152,34 +151,6 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         acknowledgeAlert();
     });
-
-    // function checkForNewAlerts() {
-    //     const now = new Date().toISOString();
-    //     fetch(`/alerts/${currentEndpoint}_count`, {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-    //         },
-    //         body: JSON.stringify({
-    //             startDate: document.getElementById("startDate").value,
-    //             endDate: now, // Check from last update to now
-    //             vehicleNumber: document.getElementById("alertVehicleNumber").value
-    //         }),
-    //     })
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         if (data.success && data.count > 0) {
-    //             // New alerts found, update the display
-    //             lastUpdateTime = now;
-    //             loadAllCounts();
-    //             if (currentPage === 1) {
-    //                 loadAlerts();
-    //             }
-    //         }
-    //     })
-    //     .catch(error => console.error("Error checking for new alerts:", error));
-    // }
 
     async function loadAllCounts() {
         const startDate = document.getElementById("startDate").value;
@@ -288,7 +259,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.success) {
                 displayAlerts(data.alerts);
                 updatePagination(data.count, data.page, data.per_page, data.total_pages);
-                updateCardCount(currentEndpoint, data.count);
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
             }
@@ -379,15 +349,6 @@ document.addEventListener("DOMContentLoaded", function() {
         paginationContainer.appendChild(nextButton);
     }
     
-    function updateCardCount(endpoint, count) {
-        const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
-        if (card) {
-            const countElement = card.querySelector('.alert-count');
-            if (countElement) {
-                countElement.textContent = count;
-            }
-        }
-    }
     
     function displayAlerts(alerts) {
         const tableBody = document.querySelector("#alertsTable tbody");

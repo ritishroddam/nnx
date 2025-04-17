@@ -96,21 +96,25 @@ def alert_card_endpoint(alert_type):
                 count = db['sos_logs'].count_documents(panic_query)
                 
                 if request.endpoint.endswith('_alerts'):
-                    records = list(db['sos_logs'].find(
-                        panic_query,
-                        {
-                            "date_time": 1,
-                            "latitude": 1,
-                            "longitude": 1,
-                            "imei": 1,
-                            "speed": 1,
-                            "ignition": 1,
-                            "sos": 1,
-                            "_id": 1
-                        }
-                    ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
-                else:
-                    records = []
+                    if alert_type == "panic":
+                        records = list(db['sos_logs'].find(
+                            panic_query,
+                            {
+                                "date_time": 1,
+                                "latitude": 1,
+                                "longitude": 1,
+                                "imei": 1,
+                                "speed": 1,
+                                "ignition": 1,
+                                "sos": 1,
+                                "_id": 1
+                            }
+                        ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
+                    else:
+                        records = list(db['atlanta'].find(
+                            query,
+                            projection
+                        ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
             else:
                 # Base query for all other alerts (from atlanta collection)
                 query = {
@@ -329,66 +333,6 @@ def page():
                          vehicles=vehicles,
                          default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
                          default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'))
-
-@alerts_bp.route('/panic_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("panic")
-def panic_count():
-    pass
-
-@alerts_bp.route('/speeding_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("speeding")
-def speeding_count():
-    pass
-
-@alerts_bp.route('/harsh_break_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("harsh_break")
-def harsh_break_count():
-    pass
-
-@alerts_bp.route('/harsh_acceleration_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("harsh_acceleration")
-def harsh_acceleration_count():
-    pass
-
-@alerts_bp.route('/gsm_low_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("gsm_low")
-def gsm_low_count():
-    pass
-
-@alerts_bp.route('/internal_battery_low_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("internal_battery_low")
-def internal_battery_low_count():
-    pass
-
-@alerts_bp.route('/main_power_off_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("main_power_off")
-def main_power_off_count():
-    pass
-
-@alerts_bp.route('/idle_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("idle")
-def idle_count():
-    pass
-
-@alerts_bp.route('/ignition_off_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("ignition_off")
-def ignition_off_count():
-    pass
-
-@alerts_bp.route('/ignition_on_count', methods=['POST'])
-@jwt_required()
-@alert_card_endpoint("ignition_on")
-def ignition_on_count():
-    pass
 
 @alerts_bp.route('/panic_alerts', methods=['POST'])
 @jwt_required()
