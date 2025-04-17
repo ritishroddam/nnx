@@ -54,7 +54,8 @@
 
 .dark-mode .alert-card {
     background-color: #333;
-    color: #ccc
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .alert-card:hover {
@@ -64,6 +65,10 @@
 .alert-card.active {
     background-color: #e3f2fd;
     border-left: 4px solid #2196f3;
+}
+
+.dark-mode .alert-card.active {
+    color: #000;
 }
 
 .alert-card h3 {
@@ -145,7 +150,8 @@
 
 .dark-mode .alerts-table {
     background-color: #000;
-    color: #ccc
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .alerts-table th, .alerts-table td {
