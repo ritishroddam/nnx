@@ -109,8 +109,12 @@ def alert_card_endpoint(alert_type):
                 "gsm_low": {
                     "$or": [
                         {"gsm_sig": "0"},
-                        {"gsm_sig": {"$lt": "7"}},
-                        {"$expr": {"$lt": [{"$toDouble": "$gsm_sig"}, 7]}}
+                        {"$expr": {
+                            "$lt": [
+                                {"$toInt": {"$ifNull": [{"$toInt": "$gsm_sig"}, 99]}}, 
+                                7
+                            ]
+                        }}
                     ]
                 },
                 "internal_battery_low": {

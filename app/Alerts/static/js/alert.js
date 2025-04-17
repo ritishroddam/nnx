@@ -27,28 +27,61 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log('Connected to WebSocket server');
         socket.emit('join_alerts');
     });
-
-    socket.on('disconnect', () => {
-        console.log('Disconnected from WebSocket server');
-    });
-
+    
     socket.on('new_alert', (data) => {
         console.log('New alert received:', data);
         if (shouldDisplayAlert(data.alert)) {
             showToast('New alert received', 'info');
-            loadAllCounts();
-            if (currentPage === 1) {
+            // Update the specific card count
+            const endpoint = data.alert.alert_type.toLowerCase().replace(/\s+/g, '_');
+            fetchCountForEndpoint(endpoint);
+            
+            // If this alert is of the current type being viewed, reload the table
+            if (endpoint === currentEndpoint) {
                 loadAlerts();
             }
         }
     });
-
+    
     socket.on('alert_updated', (data) => {
         console.log('Alert updated:', data);
-        if (isAlertVisible(data.alert_id)) {
-            loadAlerts();
+        // If this alert is in our current view, update it
+        const row = document.querySelector(`tr[data-alert-id="${data.alert_id}"]`);
+        if (row) {
+            loadAlerts(); // Reload the current view
         }
     });
+
+    function fetchCountForEndpoint(endpoint) {
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        
+        fetch(`/alerts/${endpoint}_count`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify({
+                startDate: startDate,
+                endDate: endDate,
+                vehicleNumber: vehicleNumber
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+                if (card) {
+                    const countElement = card.querySelector('.alert-count');
+                    if (countElement) {
+                        countElement.textContent = data.count;
+                    }
+                }
+            }
+        });
+    }
 
     // Helper functions
     function shouldDisplayAlert(alert) {
@@ -120,48 +153,72 @@ document.addEventListener("DOMContentLoaded", function() {
         acknowledgeAlert();
     });
 
-    function checkForNewAlerts() {
-        const now = new Date().toISOString();
-        fetch(`/alerts/${currentEndpoint}_count`, {
+    // function checkForNewAlerts() {
+    //     const now = new Date().toISOString();
+    //     fetch(`/alerts/${currentEndpoint}_count`, {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+    //         },
+    //         body: JSON.stringify({
+    //             startDate: document.getElementById("startDate").value,
+    //             endDate: now, // Check from last update to now
+    //             vehicleNumber: document.getElementById("alertVehicleNumber").value
+    //         }),
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         if (data.success && data.count > 0) {
+    //             // New alerts found, update the display
+    //             lastUpdateTime = now;
+    //             loadAllCounts();
+    //             if (currentPage === 1) {
+    //                 loadAlerts();
+    //             }
+    //         }
+    //     })
+    //     .catch(error => console.error("Error checking for new alerts:", error));
+    // }
+
+    async function loadAllCounts() {
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        
+        // First load panic count immediately
+        await fetch(`/alerts/panic_count`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": getCookie("csrf_access_token"),
             },
             body: JSON.stringify({
-                startDate: document.getElementById("startDate").value,
-                endDate: now, // Check from last update to now
-                vehicleNumber: document.getElementById("alertVehicleNumber").value
+                startDate: startDate,
+                endDate: endDate,
+                vehicleNumber: vehicleNumber
             }),
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.count > 0) {
-                // New alerts found, update the display
-                lastUpdateTime = now;
-                loadAllCounts();
-                if (currentPage === 1) {
-                    loadAlerts();
+            if (data.success) {
+                const card = document.querySelector('.alert-card[data-endpoint="panic"]');
+                if (card) {
+                    const countElement = card.querySelector('.alert-count');
+                    if (countElement) {
+                        countElement.textContent = data.count;
+                        countElement.classList.remove('loading-count');
+                    }
                 }
             }
-        })
-        .catch(error => console.error("Error checking for new alerts:", error));
-    }
-
-    function loadAllCounts() {
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-        
-        document.querySelectorAll('.alert-count').forEach(el => {
-            el.classList.add('loading-count');
         });
         
-        const endpoints = ['panic', 'speeding', 'harsh_break', 'harsh_acceleration', 
+        // Then load other counts in parallel
+        const endpoints = ['speeding', 'harsh_break', 'harsh_acceleration', 
                           'gsm_low', 'internal_battery_low', 'main_power_off', 
                           'idle', 'ignition_off', 'ignition_on'];
         
-        const promises = endpoints.map(endpoint => {
+        await Promise.all(endpoints.map(endpoint => {
             return fetch(`/alerts/${endpoint}_count`, {
                 method: "POST",
                 headers: {
@@ -186,21 +243,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                     }
                 }
-            })
-            .catch(error => {
-                console.error(`Error loading count for ${endpoint}:`, error);
-                const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
-                if (card) {
-                    const countElement = card.querySelector('.alert-count');
-                    if (countElement) {
-                        countElement.textContent = "0";
-                        countElement.classList.remove('loading-count');
-                    }
-                }
             });
-        });
-        
-        return Promise.all(promises);
+        }));
     }
     
     function loadAlerts() {
@@ -267,41 +311,30 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         paginationContainer.appendChild(prevButton);
         
-        // Page numbers - show limited set around current page
-        const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        // Always show first page
+        const firstPageButton = document.createElement("button");
+        firstPageButton.textContent = "1";
+        firstPageButton.classList.toggle("active", currentPage === 1);
+        firstPageButton.addEventListener("click", () => {
+            currentPage = 1;
+            loadAlerts();
+        });
+        paginationContainer.appendChild(firstPageButton);
         
-        // Adjust if we're at the end
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        // Show current page and neighbors
+        const startPage = Math.max(2, currentPage - 1);
+        const endPage = Math.min(totalPages - 1, currentPage + 1);
+        
+        if (startPage > 2) {
+            const ellipsis = document.createElement("span");
+            ellipsis.textContent = "...";
+            paginationContainer.appendChild(ellipsis);
         }
         
-        // First page and ellipsis
-        if (startPage > 1) {
-            const firstPageButton = document.createElement("button");
-            firstPageButton.textContent = "1";
-            firstPageButton.addEventListener("click", () => {
-                currentPage = 1;
-                loadAlerts();
-            });
-            paginationContainer.appendChild(firstPageButton);
-            
-            if (startPage > 2) {
-                const ellipsis = document.createElement("span");
-                ellipsis.textContent = "...";
-                paginationContainer.appendChild(ellipsis);
-            }
-        }
-        
-        // Page numbers
         for (let i = startPage; i <= endPage; i++) {
             const pageButton = document.createElement("button");
             pageButton.textContent = i;
-            if (i === currentPage) {
-                pageButton.classList.add("active");
-                pageButton.disabled = true;
-            }
+            pageButton.classList.toggle("active", i === currentPage);
             pageButton.addEventListener("click", () => {
                 currentPage = i;
                 loadAlerts();
@@ -309,16 +342,17 @@ document.addEventListener("DOMContentLoaded", function() {
             paginationContainer.appendChild(pageButton);
         }
         
-        // Last page and ellipsis
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                const ellipsis = document.createElement("span");
-                ellipsis.textContent = "...";
-                paginationContainer.appendChild(ellipsis);
-            }
-            
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement("span");
+            ellipsis.textContent = "...";
+            paginationContainer.appendChild(ellipsis);
+        }
+        
+        // Always show last page if different from first
+        if (totalPages > 1) {
             const lastPageButton = document.createElement("button");
             lastPageButton.textContent = totalPages;
+            lastPageButton.classList.toggle("active", currentPage === totalPages);
             lastPageButton.addEventListener("click", () => {
                 currentPage = totalPages;
                 loadAlerts();
@@ -407,7 +441,7 @@ document.addEventListener("DOMContentLoaded", function() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem('token')}`
+                "X-CSRF-TOKEN": getCookie("csrf_access_token")
             },
             body: JSON.stringify({
                 alertId: currentAlertId,
@@ -424,15 +458,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 showToast("Alert acknowledged successfully", "success");
                 ackModal.style.display = "none";
                 ackForm.reset();
-                
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                } else {
-                    // Refresh counts and alerts
-                    loadAllCounts().then(() => {
-                        loadAlerts();
-                    });
-                }
+                loadAlerts(); // Refresh the current view
             } else {
                 throw new Error(data.message || "Failed to acknowledge alert");
             }
