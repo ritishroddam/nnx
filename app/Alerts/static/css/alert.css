@@ -163,6 +163,10 @@
     background-color: #f9f9f9;
 }
 
+.dark-mode .alerts-table tr:hover {
+    background-color: #444;
+}
+
 .dark-mode .alert-card:hover {
     background-color: #444;
 }
