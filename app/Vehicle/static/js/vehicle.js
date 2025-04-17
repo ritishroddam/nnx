@@ -209,9 +209,7 @@ function geocodeLatLng(latLng, callback) {
 }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
-  const isDarkMode = document.body.classList.contains("dark-mode"); // Check if dark mode is active
-  const backgroundColor = isDarkMode ? "#333" : "#fff";
-  const textColor = isDarkMode ? "#ccc" : "#333";
+  const imei = device.imei || '<span class="missing-data">N/A</span>';
   const LicensePlateNumber =
     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
   const speed =
@@ -220,12 +218,14 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       : '<span class="missing-data">Unknown</span>';
   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
+  const date = device.date || "N/A";
+  const time = device.time || "N/A";
   const addressText =
     address || '<span class="missing-data">Location unknown</span>';
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
-  const content = `<div class="info-window show" style="background-color: ${backgroundColor}; padding: 10px; border-radius: 8px;>
-                    <strong><span>${LicensePlateNumber}:</span></strong> <br>
+  const content = `<div class="info-window show">
+                    <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
@@ -235,7 +235,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                       device.time
                     )}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><strong>Data:</strong> <a href="${url}" style="color: ${textColor}" target="_blank">View Data</a>
+                    <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
                     </p>
                 </div>`;
 
@@ -250,8 +250,13 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 
   geocodeLatLng(latLng, function (address) {
     marker.addListener("gmp-click", function () {
-      setInfoWindowContent(infoWindow, marker, latLng, device, address);
-      infoWindow.open(map, marker);
+      if (openMarker !== marker) {
+        setInfoWindowContent(infoWindow, marker, latLng, device, address);
+        infoWindow.open(map, marker);
+        openMarker = marker;
+      } else {
+        console.log("InfoWindow already open for this marker.");
+      }
     });
   });
 }
@@ -439,6 +444,7 @@ var addressCache = {};
 var refreshInterval = 5000;
 var infoWindow;
 var countdownTimer = refreshInterval / 1000;
+var openMarker = null;
 var firstFit = true;
 var manualClose = false;
 var dataAvailable = true;
@@ -879,7 +885,7 @@ async function initMap(darkMode = true) {
     lng: defaultCenter.lng + offset,
   };
 
-  const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
+  const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
 
   // Request needed libraries
   //@ts-ignore
@@ -912,6 +918,7 @@ async function initMap(darkMode = true) {
 
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
+let darkMode = true;
 themeToggle.addEventListener("click", function () {
   darkMode = !darkMode; // Toggle the state
   initMap(darkMode); // Reinitialize the map with the new mapId
@@ -1144,8 +1151,7 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = function () {
-  let darkMode = getCookie("darkMode");
-  initMap(darkMode);
+  initMap();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
 };
