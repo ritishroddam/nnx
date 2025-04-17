@@ -887,7 +887,7 @@ async function initMap() {
     lng: defaultCenter.lng + offset,
   };
 
-  const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
+  const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
 
   // Request needed libraries
   //@ts-ignore
