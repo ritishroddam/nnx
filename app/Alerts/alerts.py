@@ -82,57 +82,7 @@ def alert_card_endpoint(alert_type):
                 if vehicle:
                     imei = vehicle["IMEI"]
             
-            # Base query - always filter by GPS=A
-            query = {
-                "date_time": {
-                    "$gte": start_date,
-                    "$lte": end_date
-                },
-                "gps": "A"
-            }
-            
-            if imei:
-                query["imei"] = imei
-            
-            # Specific alert type conditions
-            alert_conditions = {
-                "panic": {
-                    "$or": [
-                        {"sos": {"$in": ["1", 1, True]}},
-                        {"status": "SOS"},
-                        {"alarm": "SOS"}
-                    ]
-                },
-                "speeding": {"speed": {"$gte": 60}},
-                "harsh_break": {"harsh_break": "1"},
-                "harsh_acceleration": {"harsh_speed": "1"},
-                "gsm_low": {
-                    "$or": [
-                        {"gsm_sig": "0"},
-                        {"$expr": {
-                            "$lt": [
-                                {"$toInt": {"$ifNull": [{"$toInt": "$gsm_sig"}, 99]}}, 
-                                7
-                            ]
-                        }}
-                    ]
-                },
-                "internal_battery_low": {
-                    "$or": [
-                        {"internal_bat": "0.0"},
-                        {"internal_bat": {"$lt": "3.7"}}
-                    ]
-                },
-                "main_power_off": {"main_power": "0"},
-                "idle": {"$and": [{"speed": "0.0"}, {"ignition": "1"}]},
-                "ignition_off": {"ignition": "0"},
-                "ignition_on": {"$and": [{"ignition": "1"}, {"speed": {"$ne": "0.0"}}]}
-            }
-            
-            if alert_type in alert_conditions:
-                query.update(alert_conditions[alert_type])
-            
-            # Special handling for panic alerts from sos_logs
+            # Special handling for panic alerts (from sos_logs)
             if alert_type == "panic":
                 panic_query = {
                     "date_time": {
@@ -162,26 +112,135 @@ def alert_card_endpoint(alert_type):
                 else:
                     records = []
             else:
+                # Base query for all other alerts (from atlanta collection)
+                query = {
+                    "date_time": {
+                        "$gte": start_date,
+                        "$lte": end_date
+                    },
+                    "gps": "A"
+                }
+                
+                if imei:
+                    query["imei"] = imei
+                
+                # Add specific conditions for each alert type
+                if alert_type == "speeding":
+                    query["speed"] = {"$gte": 60}
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "speed": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "harsh_break":
+                    query["harsh_break"] = "1"
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "harsh_break": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "harsh_acceleration":
+                    query["harsh_speed"] = "1"
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "harsh_speed": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "gsm_low":
+                    query["$or"] = [
+                        {"gsm_sig": "0"},
+                        {"$expr": {
+                            "$lt": [
+                                {"$toInt": {"$ifNull": [{"$toInt": "$gsm_sig"}, 99]}}, 
+                                7
+                            ]
+                        }}
+                    ]
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "gsm_sig": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "internal_battery_low":
+                    query["$or"] = [
+                        {"internal_bat": "0.0"},
+                        {"internal_bat": {"$lt": "3.7"}}
+                    ]
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "internal_bat": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "main_power_off":
+                    query["main_power"] = "0"
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "main_power": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "idle":
+                    query["$and"] = [
+                        {"speed": "0.0"},
+                        {"ignition": "1"}
+                    ]
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "speed": 1,
+                        "ignition": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "ignition_off":
+                    query["ignition"] = "0"
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "ignition": 1,
+                        "_id": 1
+                    }
+                elif alert_type == "ignition_on":
+                    query["$and"] = [
+                        {"ignition": "1"},
+                        {"speed": {"$ne": "0.0"}}
+                    ]
+                    projection = {
+                        "date_time": 1,
+                        "latitude": 1,
+                        "longitude": 1,
+                        "imei": 1,
+                        "ignition": 1,
+                        "speed": 1,
+                        "_id": 1
+                    }
+                
                 count = db['atlanta'].count_documents(query)
                 
                 if request.endpoint.endswith('_alerts'):
                     records = list(db['atlanta'].find(
                         query,
-                        {
-                            "date_time": 1,
-                            "latitude": 1,
-                            "longitude": 1,
-                            "imei": 1,
-                            "speed": 1,
-                            "ignition": 1,
-                            "sos": 1,
-                            "harsh_break": 1,
-                            "harsh_speed": 1,
-                            "main_power": 1,
-                            "internal_bat": 1,
-                            "gsm_sig": 1,
-                            "_id": 1
-                        }
+                        projection
                     ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
                 else:
                     records = []
