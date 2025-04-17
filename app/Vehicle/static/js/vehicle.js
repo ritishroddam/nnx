@@ -888,13 +888,6 @@ async function initMap() {
   const darkMode = document.body.classList.contains("dark-mode");
   console.log("Dark mode:", darkMode);
 
-  setTimeout(() => {
-    console.log(
-      "Dark mode after delay:",
-      document.body.classList.contains("dark-mode")
-    );
-  }, 100);
-
   const mapId = darkMode ? "44775ccfe2c0bd88" : "8faa2d4ac644c8a2";
 
   const { Map } = await google.maps.importLibrary("maps");
@@ -927,7 +920,9 @@ async function initMap() {
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function () {
-  initMap();
+  setTimeout(() => {
+    initMap();
+  }, 100);
 });
 
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
