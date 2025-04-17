@@ -1,5 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
-from flask_jwt_extended import get_jwt, verify_jwt_in_request, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended import (
+    get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
+    jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies,
+    jwt_refresh_token_required, set_refresh_cookies, unset_refresh_cookies
+)
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from .models import User
 from .utils import roles_required
@@ -21,7 +25,6 @@ def login():
         pass
 
     if request.method == 'POST':
-
         username = request.form.get('username')
         password = request.form.get('password')
 
@@ -46,14 +49,14 @@ def login():
             identity=username,
             additional_claims=additional_claims
         )
-        # refresh_token = create_refresh_token(
-        #     identity=username,
-        #     additional_claims=additional_claims
-        # )
+        refresh_token = create_refresh_token(
+            identity=username,
+            additional_claims=additional_claims
+        )
         
         response = redirect(url_for('Vehicle.map'))
         set_access_cookies(response, access_token)
-        # set_refresh_cookies(response, refresh_token)
+        set_refresh_cookies(response, refresh_token)
         return response
 
     return render_template('login.html')
@@ -83,15 +86,44 @@ def api_login():
         identity=username,
         additional_claims=additional_claims
     )
-    # refresh_token = create_refresh_token(
-    #     identity=username,
-    #     additional_claims=additional_claims
-    # )
+    refresh_token = create_refresh_token(
+        identity=username,
+        additional_claims=additional_claims
+    )
     
     return jsonify({
         'access_token': access_token,
+        'refresh_token': refresh_token
     })
-        # 'refresh_token': refresh_token
+
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    """Refresh access token endpoint"""
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    
+    # Extract the necessary claims from the refresh token
+    additional_claims = {
+        'roles': claims.get('roles', []),
+        'company': claims.get('company'),
+        'user_id': claims.get('user_id'),
+    }
+    
+    # Create new access token
+    access_token = create_access_token(
+        identity=current_user,
+        additional_claims=additional_claims
+    )
+    
+    if request.content_type == 'application/json':
+        # For API clients
+        return jsonify(access_token=access_token)
+    else:
+        # For web clients using cookies
+        response = jsonify({'refresh': True})
+        set_access_cookies(response, access_token)
+        return response
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
@@ -198,6 +230,7 @@ def logout():
 
     response = redirect(url_for('auth.login'))
     unset_jwt_cookies(response)
+    unset_refresh_cookies(response)
     flash('You have been logged out', 'info')
     return response
 

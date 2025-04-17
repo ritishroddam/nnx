@@ -5,8 +5,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-here'
     GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY') or 'AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0'
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-here'
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7) 
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(minutes=5) 
     JWT_TOKEN_LOCATION = ['cookies']
     JWT_COOKIE_SECURE = True
     JWT_COOKIE_CSRF_PROTECT = True
