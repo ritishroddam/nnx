@@ -140,7 +140,8 @@
 
 .dark-mode .alerts-table-container {
     background-color: #000;
-    color: #ccc
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .alerts-table {
