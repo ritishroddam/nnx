@@ -55,7 +55,6 @@
 .dark-mode .alert-card {
     background-color: #333;
     color: #ccc;
-    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .alert-card:hover {
