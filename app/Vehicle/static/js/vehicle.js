@@ -209,7 +209,9 @@ function geocodeLatLng(latLng, callback) {
 }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
-  const imei = device.imei || '<span class="missing-data">N/A</span>';
+  const isDarkMode = document.body.classList.contains("dark-mode"); // Check if dark mode is active
+  const backgroundColor = isDarkMode ? "#333" : "#fff";
+  const textColor = isDarkMode ? "#ccc" : "#333";
   const LicensePlateNumber =
     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
   const speed =
@@ -218,14 +220,12 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       : '<span class="missing-data">Unknown</span>';
   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
-  const date = device.date || "N/A";
-  const time = device.time || "N/A";
   const addressText =
     address || '<span class="missing-data">Location unknown</span>';
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
-  const content = `<div class="info-window show">
-                    <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
+  const content = `<div class="info-window show" style="background-color: ${backgroundColor}; padding: 10px; border-radius: 8px;>
+                    <strong><span>${LicensePlateNumber}:</span></strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
@@ -235,7 +235,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                       device.time
                     )}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+                    <p><strong>Data:</strong> <a href="${url}" style="color: ${textColor}" target="_blank">View Data</a>
                     </p>
                 </div>`;
 
