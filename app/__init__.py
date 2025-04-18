@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, flash, jsonify, request, g
+from flask import Flask, redirect, url_for, flash, jsonify, request, g, render_template
 from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
@@ -104,9 +104,9 @@ def create_app(config_name='default'):
                 else:
                     raise NoAuthorizationError("No JWT claims found")
             except NoAuthorizationError:
-                return redirect(url_for('auth.login'))
+                return render_template('login.html')
             except JWTDecodeError:
-                response = redirect(url_for('auth.login'))
+                response = render_template('login.html')
                 unset_jwt_cookies(response)
                 unset_refresh_cookies(response)
                 flash('Your session has expired. Please log in again.', 'warning')
