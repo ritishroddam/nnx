@@ -6,7 +6,7 @@ async function refreshToken() {
       headers: {
         "Content-Type": "application/json",
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        "X-CSRF-REFRESH-TOKEN": getCookie("refresh_token"),
+        "X-CSRF-REFRESH-TOKEN": getCookie("csrf_refresh_token"),
       },
     });
 
