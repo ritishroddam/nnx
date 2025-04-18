@@ -96,6 +96,31 @@ def api_login():
         'refresh_token': refresh_token
     })
 
+@auth_bp.route('/api/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    """Refresh access token endpoint"""
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    
+    # Extract the necessary claims from the refresh token
+    additional_claims = {
+        'roles': claims.get('roles', []),
+        'company': claims.get('company'),
+        'user_id': claims.get('user_id'),
+    }
+    
+    # Create new access token
+    access_token = create_access_token(
+        identity=current_user,
+        additional_claims=additional_claims
+    )
+
+    print(f"Access Token: {access_token}")
+    
+
+    return jsonify(access_token=access_token)
+
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
@@ -118,16 +143,11 @@ def refresh():
 
     print(f"Access Token: {access_token}")
     
-    if request.content_type == 'application/json':
-        # For API clients
-        print("hi")
-        return jsonify(access_token=access_token)
-    else:
         # For web clients using cookies
-        response = jsonify({'refresh': True})
-        set_access_cookies(response, access_token)
-        print(f"Response headers: {response.headers}") 
-        return response
+    response = jsonify({'refresh': True})
+    set_access_cookies(response, access_token)
+    print(f"Response headers: {response.headers}") 
+    return response
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
