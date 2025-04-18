@@ -100,8 +100,6 @@ def create_app(config_name='default'):
                     )
                     # Set the new token in cookies
                     g.new_access_token = new_access_token
-            else:
-                raise NoAuthorizationError('No JWT token found.')
         except NoAuthorizationError:
             return redirect(url_for('auth.login'))
         except JWTDecodeError:
