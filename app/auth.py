@@ -115,6 +115,8 @@ def refresh():
         identity=current_user,
         additional_claims=additional_claims
     )
+
+    print(f"Access Token: {access_token}")
     
     if request.content_type == 'application/json':
         # For API clients
