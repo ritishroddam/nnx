@@ -144,35 +144,40 @@ def refresh():
     now = datetime.now(timezone.utc)
     target_timestamp = datetime.timestamp(now + timedelta(minutes=6))
 
-    try:
-        additional_claims = {
-            'roles': claims.get('roles', []),
-            'company': claims.get('company'),
-            'user_id': claims.get('user_id'),
-        }
-        # Create new access token
-        access_token = create_access_token(
-            identity=current_user,
-            additional_claims=additional_claims
-        )
-        print(f"Access Token: {access_token}")
-            # For web clients using cookies
-        response = jsonify({'refresh': True})
-        set_access_cookies(response, access_token)
-        print(f"Response headers: {response.headers}") 
-        return response
-    except NoAuthorizationError:
-        return redirect(url_for('auth.login'))
-    except JWTDecodeError:
-        response = redirect(url_for('auth.login'))
-        unset_jwt_cookies(response)
-        unset_refresh_cookies(response)
-        flash('Your session has expired. Please log in again.', 'warning')
-        return response
-    except Exception:
-        flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
-        return
+    if exp_timestamp < target_timestamp:
+        try:
+            additional_claims = {
+                'roles': claims.get('roles', []),
+                'company': claims.get('company'),
+                'user_id': claims.get('user_id'),
+            }
 
+            # Create new access token
+            access_token = create_access_token(
+                identity=current_user,
+                additional_claims=additional_claims
+            )
+
+            print(f"Access Token: {access_token}")
+
+                # For web clients using cookies
+            response = jsonify({'refresh': True})
+            set_access_cookies(response, access_token)
+            print(f"Response headers: {response.headers}") 
+            return response
+        except NoAuthorizationError:
+            return redirect(url_for('auth.login'))
+        except JWTDecodeError:
+            response = redirect(url_for('auth.login'))
+            unset_jwt_cookies(response)
+            unset_refresh_cookies(response)
+            flash('Your session has expired. Please log in again.', 'warning')
+            return response
+        except Exception:
+            flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
+            return
+    else:
+        return jsonify({'message': 'Token is still valid'}), 200
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
