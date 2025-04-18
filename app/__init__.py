@@ -76,6 +76,19 @@ def create_app(config_name='default'):
             }
         
     @app.before_request
+    def check_access_token():
+        try:
+            verify_jwt_in_request(optional=False)
+        except NoAuthorizationError:
+            return redirect(url_for('auth.login'))
+        except JWTDecodeError:
+            response = redirect(url_for('auth.login'))
+            unset_jwt_cookies(response)
+            unset_refresh_cookies(response)
+            flash('Your session has expired. Please log in again.', 'warning')
+            return response
+    
+    @app.before_request
     def refresh_token_if_needed():
         try:
             verify_jwt_in_request(optional=True)
