@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_jwt_extended import (
     get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
     jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies,
-    set_refresh_cookies, unset_refresh_cookies
+    set_refresh_cookies, unset_refresh_cookies, decode_token
 )
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from .models import User
@@ -53,10 +53,20 @@ def login():
             identity=username,
             additional_claims=additional_claims
         )
+
+        decoded_access_token = decode_token(access_token)
+        decoded_refresh_token = decode_token(refresh_token)
+
+        access_token_exp = decoded_access_token['exp']
+        refresh_token_exp = decoded_refresh_token['exp']
+        current_time = datetime.now(timezone.utc).timestamp()
         
+        access_token_max_age = int(access_token_exp - current_time)
+        refresh_token_max_age = int(refresh_token_exp - current_time)
+
         response = redirect(url_for('Vehicle.map'))
-        set_access_cookies(response, access_token)
-        set_refresh_cookies(response, refresh_token)
+        set_access_cookies(response, access_token, max_age=access_token_max_age)
+        set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
         return response
 
     return render_template('login.html')
