@@ -120,6 +120,7 @@ def refresh():
     
     if request.content_type == 'application/json':
         # For API clients
+        print("hi")
         return jsonify(access_token=access_token)
     else:
         # For web clients using cookies
