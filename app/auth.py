@@ -56,9 +56,7 @@ def login():
 
         decoded_access_token = decode_token(access_token)
         decoded_refresh_token = decode_token(refresh_token)
-        print("Access Token Contents:", decoded_access_token)
-        print("Refresh Token Contents:", decoded_refresh_token)
-        
+
         access_token_exp = decoded_access_token['exp']
         refresh_token_exp = decoded_refresh_token['exp']
         current_time = datetime.now(timezone.utc).timestamp()
@@ -70,11 +68,6 @@ def login():
         response = redirect(url_for('auth.login'))
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
-
-        print()
-        print("after response creation")
-
-        print("Response Headers:", response.headers)
 
         return response
 
