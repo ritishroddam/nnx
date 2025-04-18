@@ -490,11 +490,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(async response => {
             const data = await response.json();
             if (!response.ok) {
-                // If the status is not ok but we got a response
-                if (data && data.message) {
-                    throw new Error(data.message);
-                }
-                throw new Error(`Server responded with status ${response.status}`);
+                throw new Error(data.message || `Server responded with status ${response.status}`);
             }
             return data;
         })
