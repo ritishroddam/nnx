@@ -79,9 +79,7 @@ def create_app(config_name='default'):
     def check_access_token():
         try:
             verify_jwt_in_request(optional=False)
-        except NoAuthorizationError:
-            return redirect(url_for('auth.login'))
-        except JWTDecodeError:
+        except Exception:
             response = redirect(url_for('auth.login'))
             unset_jwt_cookies(response)
             unset_refresh_cookies(response)
