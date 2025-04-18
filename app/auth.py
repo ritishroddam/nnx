@@ -142,7 +142,7 @@ def api_refresh():
     
     exp_timestamp = claims["exp"]
     now = datetime.now(timezone.utc)
-    target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+    target_timestamp = datetime.timestamp(now + timedelta(minutes=6))
 
     if exp_timestamp < target_timestamp:
         try:
