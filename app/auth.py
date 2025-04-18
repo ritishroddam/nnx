@@ -125,6 +125,7 @@ def refresh():
         # For web clients using cookies
         response = jsonify({'refresh': True})
         set_access_cookies(response, access_token)
+        print(f"Response headers: {response.headers}") 
         return response
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
