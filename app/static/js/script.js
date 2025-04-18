@@ -12,7 +12,10 @@ async function refreshToken() {
 
     if (!response.ok) {
       console.error("Failed to refresh token");
-    } else console.log("Token refreshed successfully");
+    } else {
+      console.log("Token refreshed successfully");
+      console.log("Response:", response);
+    }
   } catch (error) {
     console.error("Error refreshing token:", error);
   }
