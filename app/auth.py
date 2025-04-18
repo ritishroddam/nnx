@@ -8,7 +8,7 @@ from flask_jwt_extended.exceptions import NoAuthorizationError
 from .models import User
 from .utils import roles_required
 from app import db
-import datetime
+from datetime import datetime, timezone, timedelta
 import requests
 
 auth_bp = Blueprint('auth', __name__)
@@ -128,26 +128,32 @@ def api_refresh():
     current_user = get_jwt_identity()
     claims = get_jwt()
     
-    # Extract the necessary claims from the refresh token
-    additional_claims = {
-        'roles': claims.get('roles', []),
-        'company': claims.get('company'),
-        'user_id': claims.get('user_id'),
-    }
-    
-    # Create new access token
-    access_token = create_access_token(
-        identity=current_user,
-        additional_claims=additional_claims
-    )
+    exp_timestamp = claims["exp"]
+    now = datetime.now(timezone.utc)
+    target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
 
-    print(f"Access Token: {access_token}")
-    
-        # For web clients using cookies
-    response = jsonify({'refresh': True})
-    set_access_cookies(response, access_token)
-    print(f"Response headers: {response.headers}") 
-    return response
+    if exp_timestamp < target_timestamp:
+        additional_claims = {
+            'roles': claims.get('roles', []),
+            'company': claims.get('company'),
+            'user_id': claims.get('user_id'),
+        }
+
+        # Create new access token
+        access_token = create_access_token(
+            identity=current_user,
+            additional_claims=additional_claims
+        )
+
+        print(f"Access Token: {access_token}")
+
+            # For web clients using cookies
+        response = jsonify({'refresh': True})
+        set_access_cookies(response, access_token)
+        print(f"Response headers: {response.headers}") 
+        return response
+    else:
+        return jsonify({'message': 'Token is still valid'}), 200
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')

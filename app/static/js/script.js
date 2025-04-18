@@ -22,17 +22,7 @@ async function refreshToken() {
 }
 
 // Refresh the token every 4 minutes (adjust based on your token expiration time)
-setInterval(async () => {
-  const token = getCookie("csrf_access_token"); // Assuming access_token is stored as a cookie
-  if (token) {
-    const payload = JSON.parse(atob(token.split(".")[1])); // Decode the JWT payload
-    const tokenExpiry = payload.exp; // Extract the expiry time from the payload
-    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-    if (tokenExpiry - currentTime <= 30) {
-      await refreshToken();
-    }
-  }
-}, 10 * 1000);
+setInterval(refreshToken, 10 * 1000);
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
