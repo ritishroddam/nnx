@@ -77,8 +77,8 @@ def create_app(config_name='default'):
 
     @app.before_request
     def refresh_token_if_needed():
-        if request.endpoint in ['login','auth.login']:
-            print(request.endpoint)
+
+        print(request.endpoint)
         if request.endpoint not in ['login','auth.login']:
             try:
                 verify_jwt_in_request(optional=True)
