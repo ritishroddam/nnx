@@ -4,7 +4,7 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies,
     set_refresh_cookies, unset_refresh_cookies
 )
-from flask_jwt_extended.exceptions import NoAuthorizationError
+from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from .models import User
 from .utils import roles_required
 from app import db
@@ -133,25 +133,37 @@ def api_refresh():
     target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
 
     if exp_timestamp < target_timestamp:
-        additional_claims = {
-            'roles': claims.get('roles', []),
-            'company': claims.get('company'),
-            'user_id': claims.get('user_id'),
-        }
+        try:
+            additional_claims = {
+                'roles': claims.get('roles', []),
+                'company': claims.get('company'),
+                'user_id': claims.get('user_id'),
+            }
 
-        # Create new access token
-        access_token = create_access_token(
-            identity=current_user,
-            additional_claims=additional_claims
-        )
+            # Create new access token
+            access_token = create_access_token(
+                identity=current_user,
+                additional_claims=additional_claims
+            )
 
-        print(f"Access Token: {access_token}")
+            print(f"Access Token: {access_token}")
 
-            # For web clients using cookies
-        response = jsonify({'refresh': True})
-        set_access_cookies(response, access_token)
-        print(f"Response headers: {response.headers}") 
-        return response
+                # For web clients using cookies
+            response = jsonify({'refresh': True})
+            set_access_cookies(response, access_token)
+            print(f"Response headers: {response.headers}") 
+            return response
+        except NoAuthorizationError:
+            return redirect(url_for('auth.login'))
+        except JWTDecodeError:
+            response = redirect(url_for('auth.login'))
+            unset_jwt_cookies(response)
+            unset_refresh_cookies(response)
+            flash('Your session has expired. Please log in again.', 'warning')
+            return response
+        except Exception:
+            flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
+            return
     else:
         return jsonify({'message': 'Token is still valid'}), 200
 
