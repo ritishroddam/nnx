@@ -123,7 +123,7 @@ def refresh():
 
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
-def refresh():
+def api_refresh():
     """Refresh access token endpoint"""
     current_user = get_jwt_identity()
     claims = get_jwt()
