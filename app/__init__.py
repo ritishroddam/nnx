@@ -77,6 +77,8 @@ def create_app(config_name='default'):
         
     @app.before_request
     def check_access_token():
+        if request.endpoint in ['auth.login', 'login']:
+            return  # Do not interfere with login routes
         try:
             verify_jwt_in_request(optional=False)
         except Exception:
