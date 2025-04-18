@@ -10,6 +10,7 @@ class Config:
     JWT_TOKEN_LOCATION = ['cookies']
     JWT_COOKIE_SECURE = True
     JWT_COOKIE_CSRF_PROTECT = True
+    JWT_SESSION_COOKIE = False
     JWT_CSRF_CHECK_FORM = True
     JWT_ACCESS_CSRF_HEADER_NAME = "X-CSRF-TOKEN"
     JWT_CSRF_IN_COOKIES = True
@@ -23,7 +24,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    JWT_COOKIE_SECURE = False  # For development only
+    JWT_COOKIE_SECURE = True  # For development only
 
 config = {
     'development': DevelopmentConfig,
