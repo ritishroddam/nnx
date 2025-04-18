@@ -10,11 +10,13 @@ async function refreshToken() {
       },
     });
 
-    if (!response.ok) {
-      console.error("Failed to refresh token");
-    } else {
+    if (response.status === 200) {
       console.log("Token refreshed successfully");
       console.log("Response:", response);
+    } else if (response.status === 304) {
+      console.log("No changes yet");
+    } else {
+      console.error("Failed to refresh token");
     }
   } catch (error) {
     console.error("Error refreshing token:", error);

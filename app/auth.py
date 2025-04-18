@@ -177,7 +177,7 @@ def refresh():
             flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
             return
     else:
-        return jsonify({'message': 'Token is still valid'}), 200
+        return jsonify({'message': 'Token is still valid'}), 304
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
