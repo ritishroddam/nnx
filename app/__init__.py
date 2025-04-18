@@ -75,41 +75,41 @@ def create_app(config_name='default'):
                 'company': 'N/A',
             }
         
-@app.before_request
-def refresh_token_if_needed():
-    try:
-        verify_jwt_in_request(optional=True)
-        claims = get_jwt()
-        if claims:
-            # Check if the token is about to expire (e.g., within 30 seconds)
-            exp_timestamp = claims["exp"]
-            now = datetime.now(timezone.utc)
-            target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
-            if exp_timestamp < target_timestamp:
-                current_user = get_jwt_identity()
-                additional_claims = {
-                    'roles': claims.get('roles', []),
-                    'company': claims.get('company'),
-                    'user_id': claims.get('user_id'),
-                }
-                # Create a new access token
-                new_access_token = create_access_token(
-                    identity=current_user,
-                    additional_claims=additional_claims
-                )
-                # Set the new token in cookies
-                response = jsonify({'message': 'Token refreshed'})
-                set_access_cookies(response, new_access_token)
-    except NoAuthorizationError:
-        return redirect(url_for('auth.login'))
-    except JWTDecodeError:
-        response = redirect(url_for('auth.login'))
-        unset_jwt_cookies(response)
-        unset_refresh_cookies(response)
-        flash('Your session has expired. Please log in again.', 'warning')
-        return response
-    except Exception:
-        pass
+    @app.before_request
+    def refresh_token_if_needed():
+        try:
+            verify_jwt_in_request(optional=True)
+            claims = get_jwt()
+            if claims:
+                # Check if the token is about to expire (e.g., within 30 seconds)
+                exp_timestamp = claims["exp"]
+                now = datetime.now(timezone.utc)
+                target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+                if exp_timestamp < target_timestamp:
+                    current_user = get_jwt_identity()
+                    additional_claims = {
+                        'roles': claims.get('roles', []),
+                        'company': claims.get('company'),
+                        'user_id': claims.get('user_id'),
+                    }
+                    # Create a new access token
+                    new_access_token = create_access_token(
+                        identity=current_user,
+                        additional_claims=additional_claims
+                    )
+                    # Set the new token in cookies
+                    response = jsonify({'message': 'Token refreshed'})
+                    set_access_cookies(response, new_access_token)
+        except NoAuthorizationError:
+            return redirect(url_for('auth.login'))
+        except JWTDecodeError:
+            response = redirect(url_for('auth.login'))
+            unset_jwt_cookies(response)
+            unset_refresh_cookies(response)
+            flash('Your session has expired. Please log in again.', 'warning')
+            return response
+        except Exception:
+            pass
         
     
     from .auth import auth_bp
