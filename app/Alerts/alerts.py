@@ -96,25 +96,25 @@ def alert_card_endpoint(alert_type):
                 count = db['sos_logs'].count_documents(panic_query)
                 
                 if request.endpoint.endswith('_alerts'):
-                    if alert_type == "panic":
-                        records = list(db['sos_logs'].find(
-                            panic_query,
-                            {
-                                "date_time": 1,
-                                "latitude": 1,
-                                "longitude": 1,
-                                "imei": 1,
-                                "speed": 1,
-                                "ignition": 1,
-                                "sos": 1,
-                                "_id": 1
-                            }
-                        ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
-                    else:
-                        records = list(db['atlanta'].find(
-                            query,
-                            projection
-                        ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
+                        if alert_type == "panic":
+                            records = list(db['sos_logs'].find(
+                                panic_query,
+                                {
+                                    "date_time": 1,
+                                    "latitude": 1,
+                                    "longitude": 1,
+                                    "imei": 1,
+                                    "speed": 1,
+                                    "ignition": 1,
+                                    "sos": 1,
+                                    "_id": 1
+                                }
+                            ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
+                        else:
+                            records = list(db['atlanta'].find(
+                                query,
+                                projection
+                            ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
             else:
                 # Base query for all other alerts (from atlanta collection)
                 query = {
