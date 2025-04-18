@@ -5,6 +5,7 @@ async function refreshToken() {
       credentials: "include", // Include cookies in the request
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       },
     });
 
