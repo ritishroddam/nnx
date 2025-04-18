@@ -74,19 +74,6 @@ def create_app(config_name='default'):
                 'company_id': 'N/A',
                 'company': 'N/A',
             }
-        
-    # @app.before_request
-    # def check_access_token():
-    #     if request.endpoint in ['auth.login', 'login']:
-    #         return  # Do not interfere with login routes
-    #     try:
-    #         verify_jwt_in_request(optional=False)
-    #     except Exception:
-    #         response = redirect(url_for('auth.login'))
-    #         unset_jwt_cookies(response)
-    #         unset_refresh_cookies(response)
-    #         flash('Your session has expired. Please log in again.', 'warning')
-    #         return response
     
     @app.before_request
     def refresh_token_if_needed():
