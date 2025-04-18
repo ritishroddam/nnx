@@ -13,20 +13,46 @@ from flask_socketio import SocketIO, emit
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 socketio = SocketIO()
 
+# def nmea_to_decimal(nmea_value):
+#     if nmea_value.startswith('0'):
+#         nmea_value = nmea_value[1:]
+    
+#     if len(nmea_value) >= 5:
+#         degrees = float(nmea_value[:-7])
+#         minutes = float(nmea_value[-7:])
+#     else:
+#         parts = nmea_value.split('.')
+#         degrees = float(parts[0][:-2])
+#         minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
+    
+#     decimal_degrees = degrees + (minutes / 60.0)
+#     return decimal_degrees
 def nmea_to_decimal(nmea_value):
-    if nmea_value.startswith('0'):
-        nmea_value = nmea_value[1:]
-    
-    if len(nmea_value) >= 5:
-        degrees = float(nmea_value[:-7])
-        minutes = float(nmea_value[-7:])
-    else:
-        parts = nmea_value.split('.')
-        degrees = float(parts[0][:-2])
-        minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
-    
-    decimal_degrees = degrees + (minutes / 60.0)
-    return decimal_degrees
+    if not nmea_value or str(nmea_value).strip() == "":
+        return None
+        
+    try:
+        nmea_value = str(nmea_value).strip()
+        
+        # Handle cases where value might already be in decimal format
+        if '.' in nmea_value and len(nmea_value.split('.')[0]) <= 2:
+            return float(nmea_value)
+            
+        if nmea_value.startswith('0'):
+            nmea_value = nmea_value[1:]
+        
+        if len(nmea_value) >= 5:
+            degrees = float(nmea_value[:-7])
+            minutes = float(nmea_value[-7:])
+        else:
+            parts = nmea_value.split('.')
+            degrees = float(parts[0][:-2])
+            minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
+        
+        decimal_degrees = degrees + (minutes / 60.0)
+        return decimal_degrees
+    except:
+        return None
 
 def get_alert_type(record):
     """Determine the alert type based on record data"""
@@ -88,7 +114,9 @@ def alert_card_endpoint(alert_type):
                     "date_time": {
                         "$gte": start_date,
                         "$lte": end_date
-                    }
+                    },
+                    "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+                    "longitude": {"$exists": True, "$ne": None, "$ne": ""}
                 }
                 if imei:
                     panic_query["imei"] = imei
@@ -122,7 +150,9 @@ def alert_card_endpoint(alert_type):
                         "$gte": start_date,
                         "$lte": end_date
                     },
-                    "gps": "A"
+                    "gps": "A",
+                    "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+                    "longitude": {"$exists": True, "$ne": None, "$ne": ""}
                 }
                 
                 if imei:
@@ -256,33 +286,50 @@ def alert_card_endpoint(alert_type):
             
             processed_records = []
             for record in records:
-                vehicle = db['vehicle_inventory'].find_one(
-                    {"IMEI": record["imei"]},
-                    {"LicensePlateNumber": 1, "DriverName": 1, "_id": 0}
-                )
-                
-                latitude = nmea_to_decimal(record["latitude"]) if "latitude" in record and record["latitude"] else None
-                longitude = nmea_to_decimal(record["longitude"]) if "longitude" in record and record["longitude"] else None
-                
-                location = None
-                if latitude and longitude:
+                if not record.get("latitude") or not record.get("longitude"):
+                    continue
+                try:
+                    latitude = nmea_to_decimal(record["latitude"])
+                    longitude = nmea_to_decimal(record["longitude"])
+                    
+                    # Skip if coordinates conversion fails
+                    if latitude is None or longitude is None:
+                        continue
+                    
+                    vehicle = db['vehicle_inventory'].find_one(
+                        {"IMEI": record["imei"]},
+                        {"LicensePlateNumber": 1, "DriverName": 1, "_id": 0}
+                    )
+                    
                     location = geocodeInternal(latitude, longitude)
                 
-                alert_type_detected = get_alert_type(record)
-                acknowledged = db['Ack_alerts'].find_one({"alert_id": str(record["_id"])}) is not None
-                
-                processed_records.append({
-                    "_id": str(record["_id"]),
-                    "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
-                    "driver": vehicle["DriverName"] if vehicle and "DriverName" in vehicle else "N/A",
-                    "date_time": record["date_time"],
-                    "alert_type": alert_type_detected,
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "location": location,
-                    "acknowledged": acknowledged
+                    latitude = nmea_to_decimal(record["latitude"]) if "latitude" in record and record["latitude"] else None
+                    longitude = nmea_to_decimal(record["longitude"]) if "longitude" in record and record["longitude"] else None
+
+                    location = None
+                    if latitude and longitude:
+                        location = geocodeInternal(latitude, longitude)
+                        
+                    if not location:
+                        continue    
+
+                    alert_type_detected = get_alert_type(record)
+                    acknowledged = db['Ack_alerts'].find_one({"alert_id": str(record["_id"])}) is not None
+
+                    processed_records.append({
+                        "_id": str(record["_id"]),
+                        "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                        "driver": vehicle["DriverName"] if vehicle and "DriverName" in vehicle else "N/A",
+                        "date_time": record["date_time"],
+                        "alert_type": alert_type_detected,
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "location": location,
+                        "acknowledged": acknowledged
                 })
-            
+                except:
+                    continue
+                
             if request.endpoint.endswith('_count'):
                 return jsonify({"success": True, "count": count})
             else:
