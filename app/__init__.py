@@ -95,6 +95,7 @@ def create_app(config_name='default'):
                     # Create a new access token
                     new_access_token = create_access_token(
                         identity=current_user,
+                        expires_delta=timedelta(hours=1),
                         additional_claims=additional_claims
                     )
                     # Set the new token in cookies

@@ -47,10 +47,12 @@ def login():
         
         access_token = create_access_token(
             identity=username,
+            expires_delta=timedelta(hours=1),
             additional_claims=additional_claims
         )
         refresh_token = create_refresh_token(
             identity=username,
+            expires_delta=timedelta(days=2),
             additional_claims=additional_claims
         )
         
@@ -84,10 +86,12 @@ def api_login():
     
     access_token = create_access_token(
         identity=username,
+        expires_delta=timedelta(hours=1),
         additional_claims=additional_claims
     )
     refresh_token = create_refresh_token(
         identity=username,
+        expires_delta=timedelta(days=2),
         additional_claims=additional_claims
     )
     
@@ -113,6 +117,7 @@ def refresh():
     # Create new access token
     access_token = create_access_token(
         identity=current_user,
+        expires_delta=timedelta(hours=1),
         additional_claims=additional_claims
     )
 
@@ -143,6 +148,7 @@ def api_refresh():
             # Create new access token
             access_token = create_access_token(
                 identity=current_user,
+                expires_delta=timedelta(hours=1),
                 additional_claims=additional_claims
             )
 
