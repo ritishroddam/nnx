@@ -57,7 +57,6 @@ def login():
         response = redirect(url_for('Vehicle.map'))
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
-        response.set_cookie('csrf_refresh_token', max_age=60*60*24*2)
         return response
 
     return render_template('login.html')
