@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, flash, jsonify, request
+from flask import Flask, redirect, url_for, flash, jsonify, request, g
 from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
@@ -99,8 +99,7 @@ def create_app(config_name='default'):
                         additional_claims=additional_claims
                     )
                     # Set the new token in cookies
-                    response = jsonify({'message': 'Token refreshed'})
-                    set_access_cookies(response, new_access_token)
+                    g.new_access_token = new_access_token
             else:
                 raise NoAuthorizationError('No JWT token found.')
         except NoAuthorizationError:
@@ -113,6 +112,15 @@ def create_app(config_name='default'):
             return response
         except Exception:
             pass
+
+    @app.after_request
+    def set_refreshed_token(response):
+        try:
+            if hasattr(g, 'new_access_token'):
+                set_access_cookies(response, g.new_access_token)
+        except Exception as e:
+            print(f"Error setting refreshed token: {e}")
+        return response
         
     
     from .auth import auth_bp
