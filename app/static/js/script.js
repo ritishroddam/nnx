@@ -1,3 +1,24 @@
+async function refreshToken() {
+  try {
+    const response = await fetch("/refresh", {
+      method: "POST",
+      credentials: "include", // Include cookies in the request
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to refresh token");
+    } else console.log("Token refreshed successfully");
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+  }
+}
+
+// Refresh the token every 4 minutes (adjust based on your token expiration time)
+setInterval(refreshToken, 4 * 60 * 1000);
+
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);

@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, flash, jsonify, request
-from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies
+from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
+from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
 from config import config
 from flask_socketio import SocketIO
@@ -15,31 +16,6 @@ mongo_client = None
 db = None
 socketio = SocketIO()
 pool = eventlet.GreenPool()
-
-# This decorator is used to check if token needs to be refreshed
-def check_token_freshness():
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request(optional=True)
-                claims = get_jwt()
-                if claims:
-                    # Check if token is about to expire (less than 12 hours left)
-                    exp_timestamp = claims["exp"]
-                    now = datetime.now(timezone.utc)
-                    target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
-                    
-                    # If token is about to expire and we're not already on the refresh page
-                    if exp_timestamp < target_timestamp and request.endpoint != 'auth.refresh':
-                        return redirect(url_for('auth.refresh'))
-            except Exception as e:
-                # Token verification failed, continue with the original function
-                pass
-            
-            return fn(*args, **kwargs)
-        return decorator
-    return wrapper
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -60,29 +36,7 @@ def create_app(config_name='default'):
     global mongo_client, db
     mongo_client = MongoClient(app.config['MONGO_URI'])
     db = mongo_client["nnx"]
-    
-    # Apply token freshness check to all routes
-    @app.before_request
-    def before_request_func():
-        # Only check token freshness for non-refresh endpoints
-        if request.endpoint != 'auth.refresh':
-            try:
-                verify_jwt_in_request(optional=True)
-                claims = get_jwt()
-                if claims:
-                    # Check if token is about to expire (less than 12 hours left)
-                    exp_timestamp = claims.get("exp")
-                    if exp_timestamp:
-                        now = datetime.now(timezone.utc)
-                        target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
-                        
-                        # If token is about to expire
-                        if exp_timestamp < target_timestamp:
-                            return redirect(url_for('auth.refresh'))
-            except Exception as e:
-                # Token verification failed, continue with the request
-                pass
-    
+
     @app.context_processor
     def inject_csrf_token():
         try:
@@ -121,25 +75,42 @@ def create_app(config_name='default'):
                 'company': 'N/A',
             }
         
-    @jwt.unauthorized_loader
-    def custom_unauthorized_response(callback):
-        flash("You must log in to access this page.", "danger")
+@app.before_request
+def refresh_token_if_needed():
+    try:
+        verify_jwt_in_request(optional=True)
+        claims = get_jwt()
+        if claims:
+            # Check if the token is about to expire (e.g., within 30 seconds)
+            exp_timestamp = claims["exp"]
+            now = datetime.now(timezone.utc)
+            target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+            if exp_timestamp < target_timestamp:
+                current_user = get_jwt_identity()
+                additional_claims = {
+                    'roles': claims.get('roles', []),
+                    'company': claims.get('company'),
+                    'user_id': claims.get('user_id'),
+                }
+                # Create a new access token
+                new_access_token = create_access_token(
+                    identity=current_user,
+                    additional_claims=additional_claims
+                )
+                # Set the new token in cookies
+                response = jsonify({'message': 'Token refreshed'})
+                set_access_cookies(response, new_access_token)
+    except NoAuthorizationError:
         return redirect(url_for('auth.login'))
-    
-    # Add token refresh handler
-    @jwt.token_in_blocklist_loader
-    def check_if_token_revoked(jwt_header, jwt_payload):
-        # You could implement token blocklist/revocation here if needed
-        return False  # For now, no tokens are blocked
-    
-    # Handler for expired tokens - redirect to refresh
-    @jwt.expired_token_loader
-    def expired_token_callback(jwt_header, jwt_payload):
-        if jwt_payload.get('type') == 'refresh':
-            flash("Your session has expired. Please log in again.", "warning")
-            return redirect(url_for('auth.login'))
-        else:
-            return redirect(url_for('auth.refresh'))
+    except JWTDecodeError:
+        response = redirect(url_for('auth.login'))
+        unset_jwt_cookies(response)
+        unset_refresh_cookies(response)
+        flash('Your session has expired. Please log in again.', 'warning')
+        return response
+    except Exception:
+        pass
+        
     
     from .auth import auth_bp
     from .routes import main_bp
