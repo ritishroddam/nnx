@@ -79,7 +79,7 @@ def create_app(config_name='default'):
     def refresh_token_if_needed():
 
         print(request.endpoint)
-        if request.endpoint not in ['login','auth.login']:
+        if request.endpoint not in ['login','auth.login', 'auth.logout', 'static']:
             try:
                 verify_jwt_in_request(optional=True)
                 claims = get_jwt()
