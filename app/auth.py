@@ -69,6 +69,10 @@ def login():
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
 
+        flash('You have been logged out', "warning")
+        flash('You have been logged out', 'danger')
+        flash('You have been logged out', 'info')
+
         return response
 
     return render_template('login.html')
