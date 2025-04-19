@@ -158,7 +158,7 @@ def create_app(config_name='default'):
     app.register_blueprint(main_bp)
     app.register_blueprint(gecoding_bp)
 
-    map_server_path = os.path.join(os.path.dirname(__file__), 'mapy.py')
+    map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
     subprocess.Popen(['python', map_server_path])
     
     run_distinct_vehicle_data_store_path = os.path.join(os.path.dirname(__file__), 'distinctVehicleDataStore.py')
