@@ -80,21 +80,21 @@ def create_app(config_name='default'):
         """Handle requests with missing or invalid JWTs."""
         if request.endpoint not in ['login', 'auth.login', 'auth.logout', 'static']:
             flash("You must log in to access this page.", "danger")
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.logout'))
 
     @jwt.invalid_token_loader
     def handle_invalid_token(error):
         """Handle requests with invalid JWTs."""
         if request.endpoint not in ['login', 'auth.login', 'auth.logout', 'static']:
             flash("Your session is invalid or has expired. Please log in again.", "warning")
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.logout'))
     
     @jwt.expired_token_loader
     def handle_expired_token(jwt_header, jwt_payload):
         """Handle requests with expired JWTs."""
         if request.endpoint not in ['login', 'auth.login', 'auth.logout', 'static']:
             flash("Your session has expired. Please log in again.", "warning")
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.logout'))
 
     @app.before_request
     def refresh_token_if_needed():
@@ -127,13 +127,10 @@ def create_app(config_name='default'):
                 else:
                     raise NoAuthorizationError("No JWT claims found")
             except NoAuthorizationError:
-                return render_template('login.html')
+                return redirect(url_for('auth.logout'))
             except JWTDecodeError:
-                response = render_template('login.html')
-                unset_jwt_cookies(response)
-                unset_refresh_cookies(response)
                 flash('Your session has expired. Please log in again.', 'warning')
-                return response
+                return redirect(url_for('auth.logout'))
             except Exception:
                 pass
 
