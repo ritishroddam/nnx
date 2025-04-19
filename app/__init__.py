@@ -74,6 +74,24 @@ def create_app(config_name='default'):
                 'company_id': 'N/A',
                 'company': 'N/A',
             }
+        
+    @jwt.unauthorized_loader
+    def handle_unauthorized(error):
+        """Handle requests with missing or invalid JWTs."""
+        flash("You must log in to access this page.", "danger")
+        return redirect(url_for('auth.login'))
+
+    @jwt.invalid_token_loader
+    def handle_invalid_token(error):
+        """Handle requests with invalid JWTs."""
+        flash("Your session is invalid or has expired. Please log in again.", "warning")
+        return redirect(url_for('auth.login'))
+    
+    @jwt.expired_token_loader
+    def handle_expired_token(jwt_header, jwt_payload):
+        """Handle requests with expired JWTs."""
+        flash("Your session has expired. Please log in again.", "warning")
+        return redirect(url_for('auth.login'))
 
     @app.before_request
     def refresh_token_if_needed():

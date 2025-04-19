@@ -137,47 +137,45 @@ def api_refresh():
 @jwt_required(refresh=True)
 def refresh():
     """Refresh access token endpoint"""
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    
-    exp_timestamp = claims["exp"]
-    now = datetime.now(timezone.utc)
-    target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+    try:
+        current_user = get_jwt_identity()
+        claims = get_jwt()
 
-    if exp_timestamp < target_timestamp:
-        try:
+        exp_timestamp = claims["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+
+        if exp_timestamp < target_timestamp:
             additional_claims = {
                 'roles': claims.get('roles', []),
                 'company': claims.get('company'),
                 'user_id': claims.get('user_id'),
             }
-
             # Create new access token
             access_token = create_access_token(
                 identity=current_user,
                 additional_claims=additional_claims
             )
-
             print(f"Access Token: {access_token}")
-
                 # For web clients using cookies
             response = jsonify({'refresh': True})
             set_access_cookies(response, access_token)
             print(f"Response headers: {response.headers}") 
             return response
-        except NoAuthorizationError:
-            return redirect(url_for('auth.login'))
-        except JWTDecodeError:
-            response = redirect(url_for('auth.login'))
-            unset_jwt_cookies(response)
-            unset_refresh_cookies(response)
-            flash('Your session has expired. Please log in again.', 'warning')
-            return response
-        except Exception:
-            flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
-            return
-    else:
-        return jsonify({'message': 'Token is still valid'}), 304
+        else:
+            return jsonify({'message': 'Token is still valid'}), 304
+    except NoAuthorizationError:
+        flash('You are not authorized to access this resource. Please log in', 'danger')
+        return redirect(url_for('auth.login'))
+    except JWTDecodeError:
+        response = redirect(url_for('auth.login'))
+        unset_jwt_cookies(response)
+        unset_refresh_cookies(response)
+        flash('Your session has expired. Please log in again.', 'warning')
+        return response
+    except Exception:
+        flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
+        return
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
