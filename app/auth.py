@@ -283,8 +283,8 @@ def logout():
     response = redirect(url_for('auth.login'))
     unset_jwt_cookies(response)
     unset_refresh_cookies(response)
-    flash('You have been logged out', 'info')
-    flash('You have been logged out', 'info')
+    flash('You have been logged out', "warning")
+    flash('You have been logged out', 'danger')
     flash('You have been logged out', 'info')
     return response
 
