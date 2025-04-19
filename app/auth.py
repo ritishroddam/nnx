@@ -273,7 +273,7 @@ def register_admin():
     
     return render_template('register_admin.html')  # You'll need to create this template
 
-@auth_bp.route('/logout', methods=['POST'])
+@auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():
     try:
         verify_jwt_in_request()
