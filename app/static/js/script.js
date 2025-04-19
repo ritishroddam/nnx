@@ -24,7 +24,7 @@ async function refreshToken() {
 }
 
 // Refresh the token every 4 minutes (adjust based on your token expiration time)
-setInterval(refreshToken, 5 * 1000);
+setInterval(refreshToken, 60 * 60 * 1000);
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;

@@ -143,7 +143,7 @@ def refresh():
 
         exp_timestamp = claims["exp"]
         now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+        target_timestamp = datetime.timestamp(now + timedelta(days = 1))
 
         if exp_timestamp < target_timestamp:
             additional_claims = {

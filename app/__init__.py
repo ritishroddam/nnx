@@ -95,7 +95,7 @@ def create_app(config_name='default'):
                     # Check if the token is about to expire (e.g., within 30 seconds)
                     exp_timestamp = claims["exp"]
                     now = datetime.now(timezone.utc)
-                    target_timestamp = datetime.timestamp(now + timedelta(seconds=30))
+                    target_timestamp = datetime.timestamp(now + timedelta(days = 1))
                     if exp_timestamp < target_timestamp:
                         current_user = get_jwt_identity()
                         additional_claims = {
