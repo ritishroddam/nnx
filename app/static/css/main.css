@@ -14,7 +14,7 @@ body.dark-mode {
   position: fixed;
   top: 10px;
   right: 10px;
-  z-index: 60;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -129,7 +129,7 @@ body {
   padding: 1% 0.5%;
   border-radius: 15px;
   transition: width 0.3s ease-in-out;
-  z-index: 1;
+  z-index: 2;
 }
 
 .sidebar::after {
@@ -265,7 +265,7 @@ body {
   border-radius: 15px;
   color: #ccc;
   margin-bottom: 50px;
-  z-index: 50; /* Ensure the topbar is above the map */
+  z-index: 2; /* Ensure the topbar is above the map */
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 
@@ -356,7 +356,7 @@ body {
   margin-top: 70px;
   padding: 20px;
   transition: margin-left 0.3s ease-in-out;
-  z-index: 1; /* Ensure the content is above the map */
+  z-index: 2; /* Ensure the content is above the map */
 }
 
 .sidebar:hover ~ .content {
@@ -394,7 +394,7 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   transition: left 0.3s ease-in-out;
-  z-index: 2;
+  z-index: 3;
   border-radius: 20px;
   padding: 1%;
 }
