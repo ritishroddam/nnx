@@ -1,6 +1,6 @@
 // const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
 
-const socket = io("https://your-server-url:8555", {
+const socket = io(CONFIG.SOCKET_SERVER_URL, {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: Infinity,
