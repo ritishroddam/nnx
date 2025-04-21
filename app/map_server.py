@@ -119,8 +119,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     if sos_state == '1':
                         self.log_sos_to_mongodb(json_data)
 
-                        if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) < datetime.now() - timedelta(minutes = 5):
+                        if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
                             sio.emit('sos_alert', json_data)
+                            print("Emited SOS alert")
 
                 self.store_data_in_mongodb(json_data)
             else:
