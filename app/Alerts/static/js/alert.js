@@ -10,9 +10,8 @@ document.addEventListener("DOMContentLoaded", function() {
     paginationContainer.className = "pagination";
     tableContainer.appendChild(paginationContainer);
     
-    let currentEndpoint = "panic";
-    let currentAlertId = null;
-    let currentPage = 1;
+    let currentEndpoint = sessionStorage.getItem('currentAlertEndpoint') || "panic";
+    let currentPage = parseInt(sessionStorage.getItem('currentAlertPage')) || 1;
     let perPage = 10;
     
     // Initialize WebSocket connection
@@ -169,13 +168,11 @@ document.addEventListener("DOMContentLoaded", function() {
             currentEndpoint = this.dataset.endpoint;
             // Store the selected endpoint
             sessionStorage.setItem('currentAlertEndpoint', currentEndpoint);
-            currentPage = 1;
             loadAlerts();
         });
     });
     
     searchBtn.addEventListener("click", function() {
-        currentPage = 1;
         loadAllCounts();
         loadAlerts();
     });
@@ -282,6 +279,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function loadAlerts() {
+        if (typeof currentPage !== 'number' || currentPage < 1) {
+            currentPage = 1;
+        }
+
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
@@ -306,9 +307,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 "X-CSRF-TOKEN": getCookie("csrf_access_token"),
             },
             body: JSON.stringify({
-                startDate: startDate,
-                endDate: endDate,
-                vehicleNumber: vehicleNumber,
+                startDate,
+                endDate,
+                vehicleNumber,
                 page: currentPage,    // Ensure this is correct
                 per_page: perPage      // Ensure this is correct
             }),
@@ -337,6 +338,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     function updatePagination(totalItems, currentPage, perPage, totalPages) {
         paginationContainer.innerHTML = "";
+
+        sessionStorage.setItem('currentAlertEndpoint', currentEndpoint);
+        sessionStorage.setItem('currentAlertPage', currentPage);
         
         // Previous button
         const prevButton = document.createElement("button");
