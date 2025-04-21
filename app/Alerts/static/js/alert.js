@@ -62,55 +62,41 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function downloadAlertsAsExcel() {
         const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
-        const rows = [];
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
         
         // Get all visible rows from the table
+        const rows = [];
         document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
-            // Skip the loading row if present
             if (row.classList.contains("loading-row")) return;
             
             const cells = row.querySelectorAll("td");
-            const rowData = [
+            rows.push([
                 cells[0].textContent.trim(),
                 cells[1].textContent.trim(),
                 cells[2].textContent.trim(),
                 cells[3].textContent.trim(),
-                cells[4].textContent.trim(),
+                cells[4].textContent.trim(), // Location as single column
                 cells[5].textContent.trim()
-            ];
-            rows.push(rowData);
+            ]);
         });
         
-        // Create CSV content
-        let csvContent = "data:text/csv;charset=utf-8,";
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
         
-        // Add headers
-        csvContent += headers.join(",") + "\r\n";
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Alerts");
         
-        // Add rows
-        rows.forEach(row => {
-            csvContent += row.join(",") + "\r\n";
-        });
-        
-        // Get current alert type and vehicle number for filename
+        // Generate filename
         const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-        
-        // Create filename
         let filename = `Alerts_${alertType}`;
-        if (vehicleNumber) {
-            filename += `_${vehicleNumber}`;
-        }
-        filename += `_${new Date().toISOString().slice(0,10)}.csv`;
+        if (vehicleNumber) filename += `_${vehicleNumber}`;
+        filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
         
-        // Create download link
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Export to Excel
+        XLSX.writeFile(wb, filename);
     }
 
     function fetchCountForEndpoint(endpoint) {
@@ -127,7 +113,9 @@ document.addEventListener("DOMContentLoaded", function() {
             body: JSON.stringify({
                 startDate: startDate,
                 endDate: endDate,
-                vehicleNumber: vehicleNumber
+                vehicleNumber: vehicleNumber,
+                page: currentPage, 
+                per_page: perPage  
             }),
         })
         .then(response => response.json())
@@ -239,7 +227,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({
                     startDate: startDate,
                     endDate: endDate,
-                    vehicleNumber: vehicleNumber
+                    vehicleNumber: vehicleNumber,
+                    page: currentPage,  // Make sure this is the correct variable
+                    per_page: perPage   // Make sure this is the correct variable
                 }),
             });
             
@@ -271,7 +261,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         body: JSON.stringify({
                             startDate: startDate,
                             endDate: endDate,
-                            vehicleNumber: vehicleNumber
+                            vehicleNumber: vehicleNumber,
+                            page: currentPage,  // Make sure this is the correct variable
+                            per_page: perPage   // Make sure this is the correct variable
                         }),
                     });
                     
