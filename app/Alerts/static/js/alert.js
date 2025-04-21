@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let currentEndpoint = "panic";
     let currentAlertId = null;
     let currentPage = 1;
-    const perPage = 10;
+    let perPage = 10;
     
     // Initialize WebSocket connection
     const socket = io({
@@ -62,55 +62,41 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function downloadAlertsAsExcel() {
         const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
-        const rows = [];
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
         
         // Get all visible rows from the table
+        const rows = [];
         document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
-            // Skip the loading row if present
             if (row.classList.contains("loading-row")) return;
             
             const cells = row.querySelectorAll("td");
-            const rowData = [
+            rows.push([
                 cells[0].textContent.trim(),
                 cells[1].textContent.trim(),
                 cells[2].textContent.trim(),
                 cells[3].textContent.trim(),
-                cells[4].textContent.trim(),
+                cells[4].textContent.trim(), // Location as single column
                 cells[5].textContent.trim()
-            ];
-            rows.push(rowData);
+            ]);
         });
         
-        // Create CSV content
-        let csvContent = "data:text/csv;charset=utf-8,";
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
         
-        // Add headers
-        csvContent += headers.join(",") + "\r\n";
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Alerts");
         
-        // Add rows
-        rows.forEach(row => {
-            csvContent += row.join(",") + "\r\n";
-        });
-        
-        // Get current alert type and vehicle number for filename
+        // Generate filename
         const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-        
-        // Create filename
         let filename = `Alerts_${alertType}`;
-        if (vehicleNumber) {
-            filename += `_${vehicleNumber}`;
-        }
-        filename += `_${new Date().toISOString().slice(0,10)}.csv`;
+        if (vehicleNumber) filename += `_${vehicleNumber}`;
+        filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
         
-        // Create download link
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Export to Excel
+        XLSX.writeFile(wb, filename);
     }
 
     function fetchCountForEndpoint(endpoint) {
@@ -311,6 +297,8 @@ document.addEventListener("DOMContentLoaded", function() {
             </tr>
         `;
         
+        console.log(`Loading page ${currentPage} with ${perPage} items`);  // Debug logging
+        
         fetch(`/alerts/${currentEndpoint}_alerts`, {
             method: "POST",
             headers: {
@@ -321,12 +309,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber,
-                page: currentPage,
-                per_page: perPage
+                page: currentPage,    // Ensure this is correct
+                per_page: perPage      // Ensure this is correct
             }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Received data:", data);  // Debug logging
             if (data.success) {
                 displayAlerts(data.alerts);
                 updatePagination(data.count, data.page, data.per_page, data.total_pages);
@@ -344,79 +338,46 @@ document.addEventListener("DOMContentLoaded", function() {
     function updatePagination(totalItems, currentPage, perPage, totalPages) {
         paginationContainer.innerHTML = "";
         
-        if (totalItems <= perPage) return;
-        
         // Previous button
         const prevButton = document.createElement("button");
         prevButton.innerHTML = `<i class="fas fa-chevron-left"></i>`;
         prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener("click", () => {
+        prevButton.addEventListener("click", (e) => {
+            e.preventDefault(); // Add this
             if (currentPage > 1) {
                 currentPage--;
                 loadAlerts();
             }
         });
-        paginationContainer.appendChild(prevButton);
-        
-        // Always show first page
-        const firstPageButton = document.createElement("button");
-        firstPageButton.textContent = "1";
-        firstPageButton.classList.toggle("active", currentPage === 1);
-        firstPageButton.addEventListener("click", () => {
-            currentPage = 1;
-            loadAlerts();
-        });
-        paginationContainer.appendChild(firstPageButton);
-        
-        // Show current page and neighbors
-        const startPage = Math.max(2, currentPage - 1);
-        const endPage = Math.min(totalPages - 1, currentPage + 1);
-        
-        if (startPage > 2) {
-            const ellipsis = document.createElement("span");
-            ellipsis.textContent = "...";
-            paginationContainer.appendChild(ellipsis);
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
+    
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
             const pageButton = document.createElement("button");
             pageButton.textContent = i;
             pageButton.classList.toggle("active", i === currentPage);
-            pageButton.addEventListener("click", () => {
+            pageButton.addEventListener("click", (e) => {
+                e.preventDefault(); // Add this
                 currentPage = i;
+                console.log(`Loading page ${currentPage}`); // Debug log
                 loadAlerts();
             });
             paginationContainer.appendChild(pageButton);
         }
-        
-        if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement("span");
-            ellipsis.textContent = "...";
-            paginationContainer.appendChild(ellipsis);
-        }
-        
-        // Always show last page if different from first
-        if (totalPages > 1) {
-            const lastPageButton = document.createElement("button");
-            lastPageButton.textContent = totalPages;
-            lastPageButton.classList.toggle("active", currentPage === totalPages);
-            lastPageButton.addEventListener("click", () => {
-                currentPage = totalPages;
-                loadAlerts();
-            });
-            paginationContainer.appendChild(lastPageButton);
-        }
-        
+    
         // Next button
         const nextButton = document.createElement("button");
         nextButton.innerHTML = `<i class="fas fa-chevron-right"></i>`;
         nextButton.disabled = currentPage === totalPages;
-        nextButton.addEventListener("click", () => {
+        nextButton.addEventListener("click", (e) => {
+            e.preventDefault(); // Add this
             if (currentPage < totalPages) {
                 currentPage++;
                 loadAlerts();
             }
         });
+        
+        paginationContainer.appendChild(prevButton);
+        // Add page buttons here
         paginationContainer.appendChild(nextButton);
     }
     
@@ -482,9 +443,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 "X-CSRF-TOKEN": getCookie("csrf_access_token")
             },
             body: JSON.stringify({
-                alertId: currentAlertId,
-                pressedFor: pressedFor,
-                reason: reason
+                startDate: startDate,
+                endDate: endDate,
+                vehicleNumber: vehicleNumber,
+                page: currentPage, 
+                per_page: perPage   
             }),
         })
         .then(async response => {
