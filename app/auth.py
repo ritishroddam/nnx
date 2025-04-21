@@ -40,9 +40,11 @@ def login():
 
         # Create both access and refresh tokens
         additional_claims = {
-            'roles': [user['role']],
-            'company': company,
+            'username': username,
             'user_id': str(user['_id']),
+            'roles': str([user['role']]),
+            'company_id': str(user['company']),
+            'company': str(company),
         }
         
         access_token = create_access_token(
