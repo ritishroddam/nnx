@@ -220,6 +220,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                         if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
                             # sio.emit('sos_alert', json_data)
+                            json_data['date_time'] = str(json_data['date_time'])
+                            json_data['timestamp'] = str(json_data['timestamp'])
                             broadcast_sos_alert(json_data)
                             print("Emited SOS alert")
 
@@ -343,6 +345,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             
             # sio.emit('vehicle_update', json_data, room="all_data")
             if MyTCPHandler.should_emit(json_data['imei'],json_data['date_time']):
+                json_data['_id'] = str(json_data['_id'])
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
                 broadcast_vehicle_data(json_data)
