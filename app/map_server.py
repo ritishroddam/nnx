@@ -103,7 +103,7 @@ def broadcast_vehicle_data(vehicle_data):
         
         if company:
             # Broadcast to specific company room
-            print(f"Emitted data for IMEI {vehicle_data['imei']}")
+            print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
             sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
             
         # Also send to users who should see all data
