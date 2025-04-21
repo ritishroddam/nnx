@@ -62,6 +62,7 @@ def create_app(config_name='default'):
                 company = None
             print(f"Company: {company}")
             return {
+                'user_id': user_id,
                 'username': current_user,
                 'role': user['role'],
                 'company_id': user['company'],

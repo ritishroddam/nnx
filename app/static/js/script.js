@@ -12,6 +12,10 @@ const userName = document
   .getElementById("username-data")
   .getAttribute("data-username");
 
+const userID = document
+  .getElementById("userID-data")
+  .getAttribute("data-userID");
+
 async function refreshToken() {
   try {
     const response = await fetch("/refresh", {

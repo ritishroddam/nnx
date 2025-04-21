@@ -1,8 +1,46 @@
-const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
+// const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
 
-socket.on("connect", function () {
-  console.log("Connected to WebSocket server");
-  socket.emit("request_vehicle_data");
+const socket = io("https://your-server-url:8555", {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+});
+
+// socket.on("connect", function () {
+//   console.log("Connected to WebSocket server");
+//   socket.emit("request_vehicle_data");
+// });
+
+socket.on("connect", () => {
+  console.log("Connected to socket server");
+
+  let companyNames = null;
+
+  if (companyName != "None") {
+    companyNames = companyName;
+  }
+
+  socket.emit("authenticate", {
+    user_id: userId,
+    company: companyNames, // Will be null for users without a company
+  });
+});
+
+socket.on("authentication_success", (data) => {
+  console.log("Authentication successful");
+  // Update UI to show connection status
+  // updateConnectionStatus("connected");
+
+  // You could request initial data here if needed
+  // socket.emit('request_initial_data');
+});
+
+socket.on("authentication_error", (data) => {
+  console.error("Authentication failed:", data.message);
+  // Update UI to show error
+  // updateConnectionStatus("auth-error");
 });
 
 socket.on("connect_error", (error) => {
