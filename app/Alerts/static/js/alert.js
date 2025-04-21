@@ -169,11 +169,13 @@ document.addEventListener("DOMContentLoaded", function() {
             currentEndpoint = this.dataset.endpoint;
             // Store the selected endpoint
             sessionStorage.setItem('currentAlertEndpoint', currentEndpoint);
+            currentPage = 1;
             loadAlerts();
         });
     });
     
     searchBtn.addEventListener("click", function() {
+        currentPage = 1;
         loadAllCounts();
         loadAlerts();
     });
@@ -280,10 +282,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function loadAlerts() {
-        if (typeof currentPage !== 'number' || currentPage < 1) {
-            currentPage = 1;
-        }
-        
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
