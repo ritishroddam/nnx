@@ -1,3 +1,7 @@
+const companyData = document
+  .getElementById("company-data")
+  .getAttribute("data-company");
+
 async function refreshToken() {
   try {
     const response = await fetch("/refresh", {

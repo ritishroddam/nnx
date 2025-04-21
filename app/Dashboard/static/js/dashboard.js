@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log(companyData);
   initMap();
 
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
