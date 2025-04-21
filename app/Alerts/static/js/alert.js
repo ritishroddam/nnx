@@ -297,6 +297,8 @@ document.addEventListener("DOMContentLoaded", function() {
             </tr>
         `;
         
+        console.log(`Loading page ${currentPage} with ${perPage} items`);  // Debug logging
+        
         fetch(`/alerts/${currentEndpoint}_alerts`, {
             method: "POST",
             headers: {
@@ -307,12 +309,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber,
-                page: currentPage,
-                per_page: perPage
+                page: currentPage,    // Ensure this is correct
+                per_page: perPage      // Ensure this is correct
             }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Received data:", data);  // Debug logging
             if (data.success) {
                 displayAlerts(data.alerts);
                 updatePagination(data.count, data.page, data.per_page, data.total_pages);
@@ -332,6 +340,8 @@ document.addEventListener("DOMContentLoaded", function() {
         
         if (totalItems <= perPage) return;
         
+        console.log(`Updating pagination: totalItems=${totalItems}, currentPage=${currentPage}, perPage=${perPage}, totalPages=${totalPages}`);
+        
         // Previous button
         const prevButton = document.createElement("button");
         prevButton.innerHTML = `<i class="fas fa-chevron-left"></i>`;
@@ -339,58 +349,23 @@ document.addEventListener("DOMContentLoaded", function() {
         prevButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
+                console.log(`Previous page clicked, loading page ${currentPage}`);
                 loadAlerts();
             }
         });
         paginationContainer.appendChild(prevButton);
         
-        // Always show first page
-        const firstPageButton = document.createElement("button");
-        firstPageButton.textContent = "1";
-        firstPageButton.classList.toggle("active", currentPage === 1);
-        firstPageButton.addEventListener("click", () => {
-            currentPage = 1;
-            loadAlerts();
-        });
-        paginationContainer.appendChild(firstPageButton);
-        
-        // Show current page and neighbors
-        const startPage = Math.max(2, currentPage - 1);
-        const endPage = Math.min(totalPages - 1, currentPage + 1);
-        
-        if (startPage > 2) {
-            const ellipsis = document.createElement("span");
-            ellipsis.textContent = "...";
-            paginationContainer.appendChild(ellipsis);
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
             const pageButton = document.createElement("button");
             pageButton.textContent = i;
             pageButton.classList.toggle("active", i === currentPage);
             pageButton.addEventListener("click", () => {
                 currentPage = i;
+                console.log(`Page ${i} clicked, loading page ${currentPage}`);
                 loadAlerts();
             });
             paginationContainer.appendChild(pageButton);
-        }
-        
-        if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement("span");
-            ellipsis.textContent = "...";
-            paginationContainer.appendChild(ellipsis);
-        }
-        
-        // Always show last page if different from first
-        if (totalPages > 1) {
-            const lastPageButton = document.createElement("button");
-            lastPageButton.textContent = totalPages;
-            lastPageButton.classList.toggle("active", currentPage === totalPages);
-            lastPageButton.addEventListener("click", () => {
-                currentPage = totalPages;
-                loadAlerts();
-            });
-            paginationContainer.appendChild(lastPageButton);
         }
         
         // Next button
@@ -400,6 +375,7 @@ document.addEventListener("DOMContentLoaded", function() {
         nextButton.addEventListener("click", () => {
             if (currentPage < totalPages) {
                 currentPage++;
+                console.log(`Next page clicked, loading page ${currentPage}`);
                 loadAlerts();
             }
         });

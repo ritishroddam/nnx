@@ -69,6 +69,7 @@ def alert_card_endpoint(alert_type):
         @wraps(f)
         def wrapper(*args, **kwargs):
             data = request.get_json()
+            print(f"Received request data: {data}")  # Debug logging
             
             try:
                 page = int(data.get("page", 1))
@@ -76,6 +77,8 @@ def alert_card_endpoint(alert_type):
             except (ValueError, TypeError):
                 page = 1
                 per_page = 10
+            
+            print(f"Using page: {page}, per_page: {per_page}")  # Debug logging
             
             start_date = data.get("startDate")
             end_date = data.get("endDate")
