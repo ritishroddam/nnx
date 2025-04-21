@@ -142,7 +142,6 @@ def alert_card_endpoint(alert_type):
                             # In the alert_card_endpoint decorator, modify the pagination part:
                             records = list(db['atlanta'].find(
                                 query,
-                                projection
                             ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
             else:
                 # Base query for all other alerts (from atlanta collection)
