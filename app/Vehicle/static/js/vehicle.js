@@ -23,7 +23,7 @@ socket.on("connect", () => {
   }
 
   socket.emit("authenticate", {
-    user_id: userId,
+    user_id: userID,
     company: companyNames, // Will be null for users without a company
   });
 });
