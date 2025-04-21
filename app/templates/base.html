@@ -14,6 +14,9 @@
 </head>
 
 <body>
+    <div id="username-data" style="display: none;" data-username="{{ username }}"></div>
+    <div id="role-data" style="display: none;" data-role="{{ role }}"></div>
+    <div id="companyID-data" style="display: none;" data-companyID="{{ company_id }}"></div>
     <div id="company-data" style="display: none;" data-company="{{ company }}"></div>
 
     <div class="layout">
@@ -34,6 +37,9 @@
                         <div class="dashboard-container">
                             <h2>Hello, {{ username }}!</h2>
                             <div class="user-info">
+                                {% if company != 'None' %}
+                                <p><strong>Company Name:</strong> {{ company }}</p>
+                                {% endif %}
                                 <p><strong>Role:</strong> {{ role }}</p>
                             </div>
 

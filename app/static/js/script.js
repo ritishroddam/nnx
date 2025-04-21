@@ -1,6 +1,16 @@
-const companyData = document
+const companyName = document
   .getElementById("company-data")
   .getAttribute("data-company");
+
+const companyID = document
+  .getElementById("companyID-data")
+  .getAttribute("data-companyID");
+
+const userRole = document.getElementById("role-data").getAttribute("data-role");
+
+const userName = document
+  .getElementById("username-data")
+  .getAttribute("data-username");
 
 async function refreshToken() {
   try {
