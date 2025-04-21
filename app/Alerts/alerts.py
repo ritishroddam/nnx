@@ -123,7 +123,6 @@ def alert_card_endpoint(alert_type):
                         if alert_type == "panic":
                             records = list(db['sos_logs'].find(
                                 panic_query,
-                                projection,
                                 {
                                     "date_time": 1,
                                     "latitude": 1,
