@@ -91,7 +91,7 @@ def broadcast_vehicle_data(vehicle_data):
     try:
         # Get the vehicle's company from inventory
         imei = vehicle_data.get('imei')
-        vehicle_info = vehicle_inventory_collection.find_one({"imei": imei})
+        vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
         
         if not vehicle_info:
             # If no vehicle info found, only broadcast to "all_data" users
