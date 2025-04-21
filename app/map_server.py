@@ -343,6 +343,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             
             # sio.emit('vehicle_update', json_data, room="all_data")
             if MyTCPHandler.should_emit(json_data['imei'],json_data['date_time']):
+                json_data['date_time'] = str(json_data['date_time'])
+                json_data['timestamp'] = str(json_data['timestamp'])
                 broadcast_vehicle_data(json_data)
         except Exception as e:
             print("Error storing data in MongoDB:", e)
