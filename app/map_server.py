@@ -221,13 +221,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     if sos_state == '1':
                         self.log_sos_to_mongodb(json_data)
 
-                        if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
-                            # sio.emit('sos_alert', json_data)
-                            json_data['date_time'] = str(json_data['date_time'])
-                            json_data['timestamp'] = str(json_data['timestamp'])
-                            broadcast_sos_alert(json_data)
-                            print("Emited SOS alert")
-
                 self.store_data_in_mongodb(json_data)
             else:
                 print("Invalid JSON format")
@@ -369,6 +362,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             }
             sos_logs_collection.insert_one(sos_log)
             # print("SOS alert logged in MongoDB:", sos_log)
+            if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
+                # sio.emit('sos_alert', json_data)
+                json_data['date_time'] = str(json_data['date_time'])
+                json_data['timestamp'] = str(json_data['timestamp'])
+                broadcast_sos_alert(json_data)
+                print("Emited SOS alert")
         except Exception as e:
             print("Error logging SOS alert to MongoDB:", e)
 
