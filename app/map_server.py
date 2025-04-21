@@ -107,7 +107,7 @@ def broadcast_vehicle_data(vehicle_data):
             sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
             
         # Also send to users who should see all data
-        print(f"Emitted no plate data for IMEI {vehicle_data['imei']}")
+        print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
         sio.emit('vehicle_update', vehicle_data, room="all_data")
         
     except Exception as e:
