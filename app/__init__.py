@@ -62,11 +62,11 @@ def create_app(config_name='default'):
                 company = None
             print(f"Company: {company}")
             return {
-                'user_id': user_id,
-                'username': current_user,
-                'role': user['role'],
-                'company_id': user['company'],
-                'company': company
+                'user_id': str(user_id),
+                'username': str(current_user),
+                'role': str(user['role']),
+                'company_id': str(user['company']),
+                'company': str(company)
             }
         except Exception:
             return {
