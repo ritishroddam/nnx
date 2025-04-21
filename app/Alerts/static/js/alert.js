@@ -338,46 +338,47 @@ document.addEventListener("DOMContentLoaded", function() {
     function updatePagination(totalItems, currentPage, perPage, totalPages) {
         paginationContainer.innerHTML = "";
         
+        if (totalItems <= perPage) return;
+        
+        console.log(`Updating pagination: totalItems=${totalItems}, currentPage=${currentPage}, perPage=${perPage}, totalPages=${totalPages}`);
+        
         // Previous button
         const prevButton = document.createElement("button");
         prevButton.innerHTML = `<i class="fas fa-chevron-left"></i>`;
         prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener("click", (e) => {
-            e.preventDefault(); // Add this
+        prevButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
+                console.log(`Previous page clicked, loading page ${currentPage}`);
                 loadAlerts();
             }
         });
-    
+        paginationContainer.appendChild(prevButton);
+        
         // Page buttons
         for (let i = 1; i <= totalPages; i++) {
             const pageButton = document.createElement("button");
             pageButton.textContent = i;
             pageButton.classList.toggle("active", i === currentPage);
-            pageButton.addEventListener("click", (e) => {
-                e.preventDefault(); // Add this
+            pageButton.addEventListener("click", () => {
                 currentPage = i;
-                console.log(`Loading page ${currentPage}`); // Debug log
+                console.log(`Page ${i} clicked, loading page ${currentPage}`);
                 loadAlerts();
             });
             paginationContainer.appendChild(pageButton);
         }
-    
+        
         // Next button
         const nextButton = document.createElement("button");
         nextButton.innerHTML = `<i class="fas fa-chevron-right"></i>`;
         nextButton.disabled = currentPage === totalPages;
-        nextButton.addEventListener("click", (e) => {
-            e.preventDefault(); // Add this
+        nextButton.addEventListener("click", () => {
             if (currentPage < totalPages) {
                 currentPage++;
+                console.log(`Next page clicked, loading page ${currentPage}`);
                 loadAlerts();
             }
         });
-        
-        paginationContainer.appendChild(prevButton);
-        // Add page buttons here
         paginationContainer.appendChild(nextButton);
     }
     
