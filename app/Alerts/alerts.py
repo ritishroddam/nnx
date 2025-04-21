@@ -69,16 +69,15 @@ def alert_card_endpoint(alert_type):
         @wraps(f)
         def wrapper(*args, **kwargs):
             data = request.get_json()
-            print(f"Received request data: {data}")  # Debug logging
             
             try:
-                page = int(data.get("page", 1))
-                per_page = int(data.get("per_page", 10))
+                page = int(data.get('page', 1))
+                per_page = int(data.get('per_page', 10))
             except (ValueError, TypeError):
                 page = 1
                 per_page = 10
-            
-            print(f"Using page: {page}, per_page: {per_page}")  # Debug logging
+                
+            page = max(1, page)
             
             start_date = data.get("startDate")
             end_date = data.get("endDate")
@@ -124,6 +123,7 @@ def alert_card_endpoint(alert_type):
                         if alert_type == "panic":
                             records = list(db['sos_logs'].find(
                                 panic_query,
+                                projection,
                                 {
                                     "date_time": 1,
                                     "latitude": 1,
@@ -331,13 +331,13 @@ def alert_card_endpoint(alert_type):
                 return jsonify({"success": True, "count": count})
             else:
                 return jsonify({
-                    "success": True, 
-                    "alerts": processed_records, 
-                    "count": count,
-                    "page": page,
-                    "per_page": per_page,
-                    "total_pages": (count // per_page) + (1 if count % per_page > 0 else 0)
-                })
+                "success": True,
+                "alerts": processed_records,
+                "count": count,
+                "page": page,  
+                "per_page": per_page,
+                "total_pages": (count // per_page) + (1 if count % per_page > 0 else 0)
+            })
         return wrapper
     return decorator
 
