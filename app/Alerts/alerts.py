@@ -69,6 +69,7 @@ def alert_card_endpoint(alert_type):
         @wraps(f)
         def wrapper(*args, **kwargs):
             data = request.get_json()
+            print(f"[DEBUG] Received request data: {data}")
             
             try:
                 page = int(data.get('page', 1))
@@ -78,12 +79,11 @@ def alert_card_endpoint(alert_type):
                 per_page = 10
                 
             page = max(1, page)
+            print(f"[DEBUG] Using page: {page}, per_page: {per_page}") 
             
             start_date = data.get("startDate")
             end_date = data.get("endDate")
             vehicle_number = data.get("vehicleNumber")
-            page = data.get("page", 1)
-            per_page = data.get("per_page", 10)
             
             # Convert to datetime objects
             start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)

@@ -282,13 +282,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function loadAlerts() {
-        console.log(`CURRENT PAGE WHEN LOADING: ${currentPage}`); // Add this
-        
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        console.log(`Sending to server - page: ${currentPage}, per_page: ${perPage}`); // Add this
+        const tableBody = document.querySelector("#alertsTable tbody");
+        tableBody.innerHTML = `
+            <tr class="loading-row">
+                <td colspan="7">
+                    <div class="loading-animation">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        console.log(`Loading page ${currentPage} with ${perPage} items`);  // Debug logging
         
         fetch(`/alerts/${currentEndpoint}_alerts`, {
             method: "POST",
@@ -300,8 +309,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber,
-                page: currentPage,    // Verify this is correct
-                per_page: perPage    // Verify this is correct
+                page: currentPage,    // Ensure this is correct
+                per_page: perPage      // Ensure this is correct
             }),
         })
         .then(response => {
