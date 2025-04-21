@@ -17,6 +17,7 @@ Vehicle Data
 {% endblock %}
 
 {% block block_container %}
+<div class="main">
 <div class="header">
   <span class="back-arrow">&larr;</span>
   <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
@@ -53,6 +54,7 @@ Vehicle Data
           <input type="range" id="timeline-slider" min="0" max="100" value="0" class="slider">
           <div id="slider-time"></div>
         </div>
+        
         <button id="play-button" class="control-button">
           <i class="fas fa-play"></i>
         </button>
@@ -71,7 +73,10 @@ Vehicle Data
         <button id="speed-8x-button" class="control-button">
           <i class="fas fa-forward"></i> 8X
         </button>
+
+
       </div>
+
     </div>
   </div>
 
@@ -149,6 +154,7 @@ Vehicle Data
       </table>
     </div>
   </div>
+</div>
 </div>
 
 <script id="vehicle-data" type="application/json">
