@@ -13,20 +13,6 @@ from flask_socketio import SocketIO, emit
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 socketio = SocketIO()
 
-# def nmea_to_decimal(nmea_value):
-#     if nmea_value.startswith('0'):
-#         nmea_value = nmea_value[1:]
-    
-#     if len(nmea_value) >= 5:
-#         degrees = float(nmea_value[:-7])
-#         minutes = float(nmea_value[-7:])
-#     else:
-#         parts = nmea_value.split('.')
-#         degrees = float(parts[0][:-2])
-#         minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
-    
-#     decimal_degrees = degrees + (minutes / 60.0)
-#     return decimal_degrees
 def nmea_to_decimal(nmea_value):
     if not nmea_value or str(nmea_value).strip() == "":
         return None
@@ -83,6 +69,14 @@ def alert_card_endpoint(alert_type):
         @wraps(f)
         def wrapper(*args, **kwargs):
             data = request.get_json()
+            
+            try:
+                page = int(data.get("page", 1))
+                per_page = int(data.get("per_page", 10))
+            except (ValueError, TypeError):
+                page = 1
+                per_page = 10
+            
             start_date = data.get("startDate")
             end_date = data.get("endDate")
             vehicle_number = data.get("vehicleNumber")
