@@ -106,8 +106,8 @@ def emit_data(json_data):
             json_data['LicensePlateNumber'] = 'Unknown'
         json_data['_id'] = str(json_data['_id'])
 
-        sio.emit('vehicle_update', json_data)
-        print(f"Emitted data for IMEI {json_data['imei']}")
+        # sio.emit('vehicle_update', json_data)
+        # print(f"Emitted data for IMEI {json_data['imei']}")
 
             
 
