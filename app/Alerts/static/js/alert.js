@@ -291,8 +291,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const endDate = document.getElementById("endDate").value;
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
-        console.log(`Loading page ${currentPage}`); // Debug log
-        
         const tableBody = document.querySelector("#alertsTable tbody");
         tableBody.innerHTML = `
             <tr class="loading-row">
@@ -314,32 +312,29 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber,
-                page: currentPage,
+                page: currentPage,  // Make sure this is being sent
                 per_page: perPage
             }),
         })
-        .then(async response => {
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log(`Received ${data.alerts.length} alerts for page ${currentPage}`); // Debug log
                 displayAlerts(data.alerts);
                 updateTotalAlerts(data.count);
-                updatePagination(data.count, data.page, data.per_page, data.total_pages);
+                updatePagination(data.count, currentPage, perPage, data.total_pages);  // Pass currentPage here
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
             }
         })
         .catch(error => {
-            console.error("Error loading alerts:", error);
+            console.error("Error:", error);
             showToast(error.message || "Failed to fetch alerts", "error");
             tableBody.innerHTML = `<tr><td colspan="7" class="error-message">Error loading alerts</td></tr>`;
         });
+    }
+    
+    function updateTotalAlerts(count) {
+        totalAlertsSpan.textContent = `Total Alerts: ${count}`;
     }
     
     function updatePagination(totalItems, currentPage, perPage, totalPages) {
@@ -361,7 +356,6 @@ document.addEventListener("DOMContentLoaded", function() {
         prevButton.addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
-                console.log(`Previous clicked, new page: ${currentPage}`); // Debug log
                 loadAlerts();
             }
         });
@@ -380,7 +374,6 @@ document.addEventListener("DOMContentLoaded", function() {
         nextButton.addEventListener("click", () => {
             if (currentPage < totalPages) {
                 currentPage++;
-                console.log(`Next clicked, new page: ${currentPage}`); // Debug log
                 loadAlerts();
             }
         });
