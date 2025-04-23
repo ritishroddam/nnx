@@ -63,7 +63,6 @@ def authenticate(sid, data):
         print(f"User {user_id} authenticated with company {company}")
         print(company_rooms)
         sio.emit('authentication_success', {'status': 'success'}, room=sid)
-        sio.emit('vehicle_update', {'message': 'Test data'})
     except Exception as e:
         print(f"Authentication error: {e}")
         sio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
@@ -90,7 +89,7 @@ def broadcast_vehicle_data(vehicle_data):
     """
     Broadcast vehicle data to the correct users based on company
     """
-    sio.emit('vehicle_update', vehicle_data)
+    sio.emit('vehicle_update', {'message': 'Test data'})
     try:
         # Get the vehicle's company from inventory
         imei = vehicle_data.get('imei')
