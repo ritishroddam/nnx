@@ -62,7 +62,7 @@ def authenticate(sid, data):
             
         print(f"User {user_id} authenticated with company {company}")
         print(company_rooms)
-        print(sid)
+        print("SID: ",sid)
         sio.emit('authentication_success', {'status': 'success'}, room=sid)
     except Exception as e:
         print(f"Authentication error: {e}")
