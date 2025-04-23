@@ -97,7 +97,7 @@ def broadcast_vehicle_data(vehicle_data):
         if not vehicle_info:
             # If no vehicle info found, only broadcast to "all_data" users
             print(f"Emitted no plate data for IMEI {vehicle_data['imei']}")
-            sio.emit('vehicle_update', vehicle_data, room="all_data")
+            sio.emit('vehicle_update', vehicle_data)
             return
             
         company = vehicle_info.get('CompanyName')
@@ -105,11 +105,11 @@ def broadcast_vehicle_data(vehicle_data):
         if company and company in company_rooms:
             # Broadcast to specific company room
             print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
-            sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
+            sio.emit('vehicle_update', vehicle_data)
             
         # Also send to users who should see all data
         print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
-        sio.emit('vehicle_update', vehicle_data, room="all_data")
+        sio.emit('vehicle_update', vehicle_data)
         
     except Exception as e:
         print(f"Error broadcasting vehicle data: {e}")
