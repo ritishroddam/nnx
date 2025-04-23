@@ -100,7 +100,7 @@ def broadcast_vehicle_data(vehicle_data):
             sio.emit('vehicle_update', vehicle_data, room="all_data")
             return
             
-        company = vehicle_info.get('CompanyName')
+        company = str(vehicle_info.get('_id'))
         
         if company and company in company_rooms:
             # Broadcast to specific company room
@@ -128,7 +128,7 @@ def broadcast_sos_alert(sos_data):
             sio.emit('sos_alert', sos_data)
             return
             
-        company = vehicle_info.get('CompanyName')
+        company = str(vehicle_info.get('_id'))
         
         if company:
             # Broadcast to specific company room
