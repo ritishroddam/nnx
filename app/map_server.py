@@ -51,7 +51,7 @@ def authenticate(sid, data):
         }
         
         # Add user to company room if they have one
-        if company:
+        if company not in (None, '', 'none'):
             if company not in company_rooms:
                 company_rooms[company] = []
             company_rooms[company].append(sid)
