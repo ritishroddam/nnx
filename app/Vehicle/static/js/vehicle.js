@@ -24,7 +24,7 @@ socket.on("connect", () => {
 
   socket.emit("authenticate", {
     user_id: userID,
-    company: companyID, // Will be null for users without a company
+    company: companyNames, // Will be null for users without a company
   });
 });
 
