@@ -91,15 +91,10 @@ def broadcast_vehicle_data(vehicle_data):
     Broadcast vehicle data to the correct users based on company
     """
     try:
-        # Loop through all connected clients
 
-        connected_sids = [
-            sid for sid in sio.manager.rooms['/']
-            if sid not in sio.manager.rooms['/'][sid]  # Filter out actual rooms
-        ]
+        matching_sids = [sid for sid, info in user_sessions.items() if info['company'] == 'none']
 
-
-        for sid in connected_sids:
+        for sid in matching_sids:
             sio.emit('vehicle_update', vehicle_data, room=sid)
             print(f"Sent vehicle update to SID: {sid}")
     except Exception as e:
