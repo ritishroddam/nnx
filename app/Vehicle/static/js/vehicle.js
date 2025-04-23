@@ -6,6 +6,7 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
+  secure: true,
 });
 
 socket.on("connect", () => {
