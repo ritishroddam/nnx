@@ -532,7 +532,6 @@ def nmea_to_decimal(nmea_value):
     try:
         nmea_value = str(nmea_value).strip()
         
-        # Handle cases where value might already be in decimal format
         if '.' in nmea_value and len(nmea_value.split('.')[0]) <= 2:
             return float(nmea_value)
             
@@ -585,7 +584,7 @@ def alert_card_endpoint(alert_type):
             end_date = data.get("endDate")
             vehicle_number = data.get("vehicleNumber")
             page = data.get("page", 1)
-            per_page = data.get("per_page", 100)  # Changed to 100 rows per page
+            per_page = data.get("per_page", 100)
             
             # Convert to datetime objects
             start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -606,6 +605,15 @@ def alert_card_endpoint(alert_type):
                 if vehicle:
                     imei = vehicle["IMEI"]
             
+            # Common projection fields for all alert types
+            base_projection = {
+                "date_time": 1,
+                "latitude": 1,
+                "longitude": 1,
+                "imei": 1,
+                "_id": 1
+            }
+
             # Special handling for panic alerts (from sos_logs)
             if alert_type == "panic":
                 panic_query = {
@@ -625,14 +633,10 @@ def alert_card_endpoint(alert_type):
                     records = list(db['sos_logs'].find(
                         panic_query,
                         {
-                            "date_time": 1,
-                            "latitude": 1,
-                            "longitude": 1,
-                            "imei": 1,
+                            **base_projection,
                             "speed": 1,
                             "ignition": 1,
-                            "sos": 1,
-                            "_id": 1
+                            "sos": 1
                         }
                     ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
             else:
@@ -658,10 +662,22 @@ def alert_card_endpoint(alert_type):
                             60
                         ]
                     }
+                    projection = {
+                        **base_projection,
+                        "speed": 1
+                    }
                 elif alert_type == "harsh_break":
                     query["harsh_break"] = "1"
+                    projection = {
+                        **base_projection,
+                        "harsh_break": 1
+                    }
                 elif alert_type == "harsh_acceleration":
                     query["harsh_speed"] = "1"
+                    projection = {
+                        **base_projection,
+                        "harsh_speed": 1
+                    }
                 elif alert_type == "gsm_low":
                     query["$or"] = [
                         {"gsm_sig": "0"},
@@ -672,31 +688,60 @@ def alert_card_endpoint(alert_type):
                             ]
                         }}
                     ]
+                    projection = {
+                        **base_projection,
+                        "gsm_sig": 1
+                    }
                 elif alert_type == "internal_battery_low":
                     query["$or"] = [
                         {"internal_bat": "0.0"},
                         {"internal_bat": {"$lt": "3.7"}}
                     ]
+                    projection = {
+                        **base_projection,
+                        "internal_bat": 1
+                    }
                 elif alert_type == "main_power_off":
                     query["main_power"] = "0"
+                    projection = {
+                        **base_projection,
+                        "main_power": 1
+                    }
                 elif alert_type == "idle":
                     query["$and"] = [
                         {"speed": "0.0"},
                         {"ignition": "1"}
                     ]
+                    projection = {
+                        **base_projection,
+                        "speed": 1,
+                        "ignition": 1
+                    }
                 elif alert_type == "ignition_off":
                     query["ignition"] = "0"
+                    projection = {
+                        **base_projection,
+                        "ignition": 1
+                    }
                 elif alert_type == "ignition_on":
                     query["$and"] = [
                         {"ignition": "1"},
                         {"speed": {"$ne": "0.0"}}
                     ]
+                    projection = {
+                        **base_projection,
+                        "ignition": 1,
+                        "speed": 1
+                    }
+                else:
+                    projection = base_projection
                 
                 count = db['atlanta'].count_documents(query)
                 
                 if request.endpoint.endswith('_alerts'):
                     records = list(db['atlanta'].find(
-                        query
+                        query,
+                        projection
                     ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
                 else:
                     records = []
@@ -709,7 +754,6 @@ def alert_card_endpoint(alert_type):
                     latitude = nmea_to_decimal(record["latitude"])
                     longitude = nmea_to_decimal(record["longitude"])
                     
-                    # Skip if coordinates conversion fails
                     if latitude is None or longitude is None:
                         continue
                     
