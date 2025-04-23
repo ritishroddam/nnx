@@ -8,11 +8,6 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
   reconnectionDelayMax: 5000,
 });
 
-// socket.on("connect", function () {
-//   console.log("Connected to WebSocket server");
-//   socket.emit("request_vehicle_data");
-// });
-
 socket.on("connect", () => {
   console.log("Connected to socket server");
 

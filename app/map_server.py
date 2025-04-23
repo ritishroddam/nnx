@@ -51,7 +51,8 @@ def authenticate(sid, data):
         }
         
         # Add user to company room if they have one
-        if company not in (None, '', 'none'):
+        if company not in ('none'):
+            company = company.strip().lower()
             if company not in company_rooms:
                 company_rooms[company] = []
             company_rooms[company].append(sid)
@@ -64,7 +65,6 @@ def authenticate(sid, data):
         print(company_rooms)
         print("SID: ",sid)
         sio.emit('authentication_success', {'status': 'success'}, room=sid)
-        sio.emit('vehicle_update', company)
     except Exception as e:
         print(f"Authentication error: {e}")
         sio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
@@ -106,16 +106,11 @@ def broadcast_vehicle_data(vehicle_data):
         imei = vehicle_data.get('imei')
         vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
         
-        if not vehicle_info:
-            # If no vehicle info found, only broadcast to "all_data" users
-            print(f"Emitted no plate data for IMEI {vehicle_data['imei']}")
-            sio.emit('vehicle_update', vehicle_data, room="all_data")
-            return
-            
-        company = vehicle_info.get('CompanyName')
+        company = vehicle_info.get('CompanyName') if vehicle_info else None
         
         if company and company in company_rooms:
             # Broadcast to specific company room
+            company = company.strip().lower()
             print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
             sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
             
