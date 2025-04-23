@@ -63,7 +63,7 @@ def authenticate(sid, data):
         print(f"User {user_id} authenticated with company {company}")
         print(company_rooms)
         sio.emit('authentication_success', {'status': 'success'}, room=sid)
-        sio.emit('test_event', {'message': 'Test data'})
+        sio.emit('vehicle_update', {'message': 'Test data'})
     except Exception as e:
         print(f"Authentication error: {e}")
         sio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
@@ -107,10 +107,7 @@ def broadcast_vehicle_data(vehicle_data):
         if company and company in company_rooms:
             # Broadcast to specific company room
             print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
-            room_name = f"company_{company}"
-            if room_name in sio.manager.rooms:
-                for sid in sio.manager.rooms[room_name]:
-                    sio.emit('vehicle_update', vehicle_data, room=sid)
+            sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
             sio.emit('vehicle_update', vehicle_data)
             
         # Also send to users who should see all data
