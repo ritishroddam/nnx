@@ -149,6 +149,14 @@ def sos_alert(sid, data):
     print(f"Received sos alert: {data}")
     broadcast_sos_alert(data)
 
+@sio.event
+def get_rooms(sid):
+    try:
+        rooms = sio.rooms(sid)
+        sio.emit('rooms_list', {'rooms': list(rooms)}, room=sid)
+    except Exception as e:
+        print(f"Error fetching rooms for SID {sid}: {e}")
+        sio.emit('rooms_list', {'error': str(e)}, room=sid)
 
 collection = db['atlanta']
 sos_logs_collection = db['sos_logs']  
