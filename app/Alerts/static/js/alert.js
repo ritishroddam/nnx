@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber,
-                page: currentPage,
+                page: currentPage,  // Make sure this is being sent
                 per_page: perPage
             }),
         })
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.success) {
                 displayAlerts(data.alerts);
                 updateTotalAlerts(data.count);
-                updatePagination(data.count, data.page, data.per_page, data.total_pages);
+                updatePagination(data.count, currentPage, perPage, data.total_pages);  // Pass currentPage here
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
             }
