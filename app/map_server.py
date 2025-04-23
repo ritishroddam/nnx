@@ -51,7 +51,7 @@ def authenticate(sid, data):
         }
         
         # Add user to company room if they have one
-        if company not in ('none'):
+        if company not in (None, '', 'none'):
             company = company.strip().lower()
             if company not in company_rooms:
                 company_rooms[company] = []
