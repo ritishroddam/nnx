@@ -28,8 +28,17 @@ socket.on("connect", () => {
   });
 });
 
+socket.on("rooms_list", (data) => {
+  if (data.error) {
+    console.error("Error fetching rooms:", data.error);
+  } else {
+    console.log("Rooms assigned to this client:", data.rooms);
+  }
+});
+
 socket.on("authentication_success", (data) => {
   console.log("Authentication successful");
+  socket.emit("get_rooms");
   // Update UI to show connection status
   // updateConnectionStatus("connected");
 
