@@ -89,7 +89,13 @@ def broadcast_vehicle_data(vehicle_data):
     """
     Broadcast vehicle data to the correct users based on company
     """
-    sio.emit('vehicle_update', {'message': 'Test data'})
+    try:
+        # Loop through all connected clients
+        for sid in sio.manager.rooms['/']:
+            sio.emit('vehicle_update', vehicle_data, room=sid)
+            print(f"Sent vehicle update to SID: {sid}")
+    except Exception as e:
+        print(f"Error broadcasting vehicle data: {e}")
     try:
         # Get the vehicle's company from inventory
         imei = vehicle_data.get('imei')
