@@ -143,7 +143,7 @@ def create_app(config_name='default'):
             print(f"Error broadcasting SOS alert: {e}")
 
     global mongo_client, db
-    mongo_client = MongoClient(app.config['MONGO_URI'])
+    mongo_client = MongoClient(app.config['MONGO_URI'], tz_aware=True )
     db = mongo_client["nnx"]
     vehicle_inventory_collection = db['vehicle_inventory']
 
