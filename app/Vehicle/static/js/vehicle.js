@@ -77,7 +77,7 @@ async function fetchdistance(data) {
   try {
     const distance = await fetch(`/vehicle/getVehiclesDistances/${data.imei}`);
 
-    data["distance"] = distance.distance; // Limit to 2 decimal places
+    data["distance"] = distance.distance_traveled; // Limit to 2 decimal places
     return data;
   } catch (error) {
     console.error("Error fetching vehicle distance:", error);
