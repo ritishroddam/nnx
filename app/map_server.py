@@ -97,7 +97,7 @@ def broadcast_vehicle_data(vehicle_data):
         imei = vehicle_data.get('imei')
         vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
 
-        sio.emit('test_message', vehicle_data)
+        sio.emit('test_event', {'message': 'test'})
         
         company = vehicle_info.get('CompanyName') if vehicle_info else None
         
