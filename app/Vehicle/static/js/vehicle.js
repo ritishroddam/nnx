@@ -65,6 +65,13 @@ socket.on("sos_alert", function (data) {
   }
 });
 
+async function fetchdistance(data) {
+  const distance = await fetch(`/vehicle/${imei}/getVehiclesDistances`);
+
+  data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
+  return data;
+}
+
 async function fetchVehicleData() {
   try {
     const response = await fetch("/vehicle/api/vehicles");
@@ -106,13 +113,6 @@ async function fetchVehicleData() {
     console.error("Error fetching vehicle data:", error);
     return [];
   }
-}
-
-async function fetchdistance(data) {
-  const distance = await fetch(`/vehicle/${imei}/getVehiclesDistances`);
-
-  data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
-  return data;
 }
 
 function updateVehicleCard(data) {
