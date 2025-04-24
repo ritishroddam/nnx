@@ -17,7 +17,7 @@ import eventlet.wsgi
 import time
 from pymongo import MongoClient
 import ssl
-from database import db
+from __init__ import db
 
 app = Flask(__name__)
 CORS(app)
