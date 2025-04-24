@@ -51,12 +51,25 @@ def create_app(config_name='default'):
                 'company': company
             }
             
+
             user = db['users'].find_one({"_id": ObjectId(user_id)})
 
-            if not user or user.get('company') != company:
-                flash("Invalid user or company", "danger")
-                socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid user {user_id} or company {company}'}, room=sid)
+            if not user:
+                flash("Invalid user", "danger")
+                socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid user {user_id}'}, room=sid)
                 return
+            
+            if user['company'] != 'none':
+                company_db = db['customers_list'].find_one({"Company Name": company})
+                if not company_db:
+                    flash("Invalid company", "danger")
+                    socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid company {company}'}, room=sid)
+                    return
+                
+                if company_db['_id'] != user['company']:
+                    flash("User does not belong to this company", "danger")
+                    socketio.emit('authentication_error', {'status': 'error', 'message': f'User does not belong to this company {company}'}, room=sid)
+                    return
 
             # Add user to company room if they have one
             if company not in (None, '', 'none'):
