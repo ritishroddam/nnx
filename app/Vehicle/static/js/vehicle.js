@@ -162,70 +162,89 @@ async function fetchLocation(lat, lng) {
 }
 
 // Update the vehicle card creation with all data
-function updateVehicleCard(data) {
-  const imei = sanitizeIMEI(data.imei);
-  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-  
-  // Format coordinates properly
-  const lat = data.latitude ? parseFloat(data.latitude).toFixed(6) : null;
-  const lon = data.longitude ? parseFloat(data.longitude).toFixed(6) : null;
-  const coordinates = lat && lon ? `${lat}, ${lon}` : "Unknown";
 
-  // Create icons and formatted data
-  const gsmIcon = getGsmSignalIcon(data.gsm);
-  const ignitionIcon = data.ignition === "1" ? 
-    '<i class="fas fa-power-on text-success" title="Ignition ON"></i>' : 
-    '<i class="fas fa-power-off text-danger" title="Ignition OFF"></i>';
+const imei = sanitizeIMEI(data.imei);
+const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
 
-  const cardContent = `
-    <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}</div>
-    <div class="vehicle-info">
-      <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
-      <strong>Coordinates:</strong> ${coordinates} <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
-      <strong>Distance Today:</strong> ${data.distance_today || "N/A"} <br>
-      <strong>Ignition:</strong> ${ignitionIcon} <br>
-      <strong>GSM Signal:</strong> ${gsmIcon} ${data.gsm && !isNaN(data.gsm) ? `(${data.gsm})` : ''} <br>
-      <strong>SOS Status:</strong> ${data.sos === "1" ? '<span class="text-danger">ACTIVE</span>' : 'Inactive'} <br>
-      <strong>Location:</strong> ${data.address || "No address found"} <br>
-      <strong>Data:</strong> <a href="/routeHistory/vehicle/${data.LicensePlateNumber}" target="_blank">View Data</a>
-    </div>
-  `;
+// Format coordinates
+const coordinates = data.latitude && data.longitude ? 
+  `${parseFloat(data.latitude).toFixed(6)}, ${parseFloat(data.longitude).toFixed(6)}` : 
+  "Unknown";
 
-  if (vehicleCard) {
-    vehicleCard.querySelector(".vehicle-info").innerHTML = cardContent;
+// Create status icons
+const statusIcons = `
+  <div class="status-icons">
+    ${getIgnitionIcon(data.ignition)}
+    ${getGsmSignalIcon(data.gsm)}
+    ${getSosIcon(data.sos, imei)}
+  </div>
+`;
+
+const cardContent = `
+  <div class="vehicle-header">
+    ${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}
+  </div>
+  <div class="vehicle-info">
+    ${statusIcons}
+    <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
+    <strong>Coordinates:</strong> ${coordinates} <br>
+    <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
+    <strong>Distance Today:</strong> ${data.distance_today || "N/A"} <br>
+    <strong>Location:</strong> ${data.address || "No address found"} <br>
+    <strong>Data:</strong> <a href="/routeHistory/vehicle/${data.LicensePlateNumber}" target="_blank">View Data</a>
+  </div>
+`;
+
+if (vehicleCard) {
+  vehicleCard.querySelector(".vehicle-info").innerHTML = cardContent;
+  // Add SOS blinking effect if active
+  if (data.sos === "1") {
+    vehicleCard.classList.add("sos-alert");
   } else {
-    const listContainer = document.getElementById("vehicle-list");
-    const vehicleElement = document.createElement("div");
-    vehicleElement.classList.add("vehicle-card");
-    vehicleElement.setAttribute("data-imei", data.imei);
-    vehicleElement.innerHTML = cardContent;
-    listContainer.appendChild(vehicleElement);
+    vehicleCard.classList.remove("sos-alert");
   }
+} else {
+  const listContainer = document.getElementById("vehicle-list");
+  const vehicleElement = document.createElement("div");
+  vehicleElement.classList.add("vehicle-card");
+  if (data.sos === "1") vehicleElement.classList.add("sos-alert");
+  vehicleElement.setAttribute("data-imei", data.imei);
+  vehicleElement.innerHTML = cardContent;
+  listContainer.appendChild(vehicleElement);
 }
 
-// Enhanced GSM signal icon function
+// Icon helper functions
+function getIgnitionIcon(ignitionStatus) {
+return ignitionStatus === "1" ?
+  '<i class="fas fa-power-off text-success" title="Ignition ON"></i>' :
+  '<i class="fas fa-power-off text-danger" title="Ignition OFF"></i>';
+}
+
 function getGsmSignalIcon(gsmValue) {
-  if (gsmValue === undefined || gsmValue === null || gsmValue === "Unknown") {
-    return '<i class="fas fa-question-circle text-muted" title="Unknown signal"></i>';
-  }
+if (gsmValue === undefined || gsmValue === null) {
+  return '<i class="fas fa-question-circle text-muted" title="Unknown signal"></i>';
+}
 
-  const gsmNum = parseInt(gsmValue);
-  if (isNaN(gsmNum)) {
-    return '<i class="fas fa-question-circle text-muted" title="Invalid signal"></i>';
-  }
+const gsmNum = parseInt(gsmValue);
+if (isNaN(gsmNum)) return '<i class="fas fa-question-circle text-muted" title="Invalid signal"></i>';
 
-  if (gsmNum === 0) {
-    return '<i class="fas fa-signal-slash text-danger" title="No signal (0)"></i>';
-  } else if (gsmNum < 7) {
-    return '<i class="fas fa-signal text-danger" title="Very low signal (1-6)"></i>';
-  } else if (gsmNum < 15) {
-    return '<i class="fas fa-signal text-warning" title="Low signal (7-14)"></i>';
-  } else if (gsmNum < 27) {
-    return '<i class="fas fa-signal text-info" title="Moderate signal (15-26)"></i>';
-  } else {
-    return '<i class="fas fa-signal text-success" title="Good signal (27+)"></i>';
-  }
+if (gsmNum === 0) {
+  return '<i class="fas fa-signal-slash text-danger" title="No signal"></i>';
+} else if (gsmNum < 7) {
+  return '<i class="fas fa-signal text-danger" title="Very low signal"></i>';
+} else if (gsmNum < 15) {
+  return '<i class="fas fa-signal text-warning" title="Low signal"></i>';
+} else if (gsmNum < 27) {
+  return '<i class="fas fa-signal text-info" title="Moderate signal"></i>';
+} else {
+  return '<i class="fas fa-signal text-success" title="Good signal"></i>';
+}
+}
+
+function getSosIcon(sosStatus, imei) {
+return sosStatus === "1" ?
+  `<i class="fas fa-exclamation-triangle blink text-danger" id="sos-${imei}" title="SOS ACTIVE"></i>` :
+  '<i class="fas fa-check-circle text-success" title="SOS Inactive"></i>';
 }
 
 function triggerSOS(imei, marker) {
@@ -275,47 +294,27 @@ function triggerSOS(imei, marker) {
 
 async function fetchVehicleData() {
   try {
-    // First fetch basic vehicle data
+    // Fetch vehicle data
     const vehiclesResponse = await fetch("/vehicle/api/vehicles");
     if (!vehiclesResponse.ok) throw new Error("Failed to fetch vehicle data");
     const vehicles = await vehiclesResponse.json();
 
-    // Then fetch additional data (distance today) in parallel with geocoding
-    const distanceResponse = fetch("/dashboard/get_vehicle_distances")
+    // Fetch distance data in parallel
+    const distancePromise = fetch("/dashboard/get_vehicle_distances")
       .then(res => res.ok ? res.json() : [])
       .catch(() => []);
 
-    // Process vehicle data with additional fields
+    // Process vehicle data
     const enhancedVehicles = await Promise.all(vehicles.map(async (vehicle) => {
-      // Get distance for this vehicle
-      const distances = await distanceResponse;
+      const distances = await distancePromise;
       const distanceEntry = distances.find(d => d.registration === vehicle.LicensePlateNumber);
-      const distanceToday = distanceEntry ? `${distanceEntry.distance.toFixed(2)} km` : "N/A";
-
-      // Get GSM signal strength with proper formatting
-      let gsmSignal = "Unknown";
-      if (vehicle.gsm_sig !== undefined && vehicle.gsm_sig !== null) {
-        const gsmValue = parseInt(vehicle.gsm_sig);
-        if (!isNaN(gsmValue)) {
-          gsmSignal = gsmValue.toString();
-        }
-      }
-
+      
       return {
         ...vehicle,
-        speed: vehicle.speed,
-        latitude: vehicle.latitude,
-        longitude: vehicle.longitude,
-        date: vehicle.date,
-        time: vehicle.time,
-        status: vehicle.status,
-        imei: vehicle.imei,
-        ignition: vehicle.ignition,
-        gsm: gsmSignal, // Now properly formatted
-        sos: vehicle.sos,
-        odometer: vehicle.odometer,
-        distance_today: distanceToday, // Now properly formatted
-        address: vehicle.address || await fetchLocation(vehicle.latitude, vehicle.longitude).catch(() => "No address found")
+        distance_today: distanceEntry ? `${distanceEntry.distance.toFixed(2)} km` : "N/A",
+        // Ensure GSM value is properly formatted
+        gsm: vehicle.gsm_sig !== undefined && vehicle.gsm_sig !== null ? 
+             parseInt(vehicle.gsm_sig) || 0 : 0
       };
     }));
 
@@ -442,50 +441,39 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h` 
     : '<span class="missing-data">Unknown</span>';
   
-  const lat = latLng.lat().toFixed(6);
-  const lon = latLng.lng().toFixed(6);
-  const coordinates = `${lat}, ${lon}`;
+  const coordinates = device.latitude && device.longitude ?
+    `${parseFloat(device.latitude).toFixed(6)}, ${parseFloat(device.longitude).toFixed(6)}` :
+    "Unknown";
   
   const date = device.date || "N/A";
   const time = device.time || "N/A";
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
-  // Create icons
-  const gsmIcon = getGsmSignalIcon(device.gsm);
-  const ignitionIcon = device.ignition === "1" ? 
-    '<i class="fas fa-power-off text-success" title="Ignition ON"></i>' : 
-    '<i class="fas fa-power-off text-danger" title="Ignition OFF"></i>';
+  // Create status icons for info window
+  const statusIcons = `
+    <div class="status-icons">
+      ${getIgnitionIcon(device.ignition)}
+      ${getGsmSignalIcon(device.gsm)}
+      ${getSosIcon(device.sos, device.imei)}
+    </div>
+  `;
 
-  // If we already have an address or don't have coordinates, show immediately
-  if (address || !lat || !lon) {
-    const content = createInfoWindowContent(
-      device, coordinates, speed, date, time, 
-      address || "Location unknown", url, gsmIcon, ignitionIcon
-    );
-    infoWindow.setContent(content);
-    infoWindow.setPosition(latLng);
-    return;
-  }
+  const content = `
+    <div class="info-window ${device.sos === "1" ? 'sos-alert' : ''}">
+      <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
+      <hr>
+      ${statusIcons}
+      <p><strong>Speed:</strong> ${speed}</p>
+      <p><strong>Coordinates:</strong> ${coordinates}</p>
+      <p><strong>Last Update:</strong> ${formatLastUpdatedText(date, time)}</p>
+      <p><strong>Distance Today:</strong> ${device.distance_today || "N/A"}</p>
+      <p class="address"><strong>Location:</strong> ${address || "No address found"}</p>
+      <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a></p>
+    </div>
+  `;
 
-  // Otherwise fetch location first
-  fetchLocation(lat, lon)
-    .then(location => {
-      const content = createInfoWindowContent(
-        device, coordinates, speed, date, time, 
-        location, url, gsmIcon, ignitionIcon
-      );
-      infoWindow.setContent(content);
-      infoWindow.setPosition(latLng);
-    })
-    .catch(error => {
-      console.error("Geocoding error:", error);
-      const content = createInfoWindowContent(
-        device, coordinates, speed, date, time, 
-        "Location unknown", url, gsmIcon, ignitionIcon
-      );
-      infoWindow.setContent(content);
-      infoWindow.setPosition(latLng);
-    });
+  infoWindow.setContent(content);
+  infoWindow.setPosition(latLng);
 }
 
 function createInfoWindowContent(device, coordinates, speed, date, time, location, url, gsmIcon, ignitionIcon) {
