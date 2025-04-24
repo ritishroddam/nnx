@@ -52,6 +52,7 @@ def authenticate(sid, data):
         
         # Add user to company room if they have one
         if company not in (None, '', 'none'):
+            company = company.strip().lower()
             if company not in company_rooms:
                 company_rooms[company] = []
             company_rooms[company].append(sid)
@@ -62,6 +63,7 @@ def authenticate(sid, data):
             
         print(f"User {user_id} authenticated with company {company}")
         print(company_rooms)
+        print("SID: ",sid)
         sio.emit('authentication_success', {'status': 'success'}, room=sid)
     except Exception as e:
         print(f"Authentication error: {e}")
@@ -90,26 +92,32 @@ def broadcast_vehicle_data(vehicle_data):
     Broadcast vehicle data to the correct users based on company
     """
     try:
+
+        matching_sids = [sid for sid, info in user_sessions.items() if info['company'] == 'none']
+
+        for sid in matching_sids:
+            sio.emit('vehicle_update', vehicle_data, room=sid)
+            print(f"Sent vehicle update to SID: {sid}")
+    except Exception as e:
+        print(f"Error broadcasting vehicle data: {e}")
+
+    try:
         # Get the vehicle's company from inventory
         imei = vehicle_data.get('imei')
         vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
         
-        if not vehicle_info:
-            # If no vehicle info found, only broadcast to "all_data" users
-            print(f"Emitted no plate data for IMEI {vehicle_data['imei']}")
-            sio.emit('vehicle_update', vehicle_data, room="all_data")
-            return
-            
-        company = vehicle_info.get('CompanyName')
+        company = vehicle_info.get('CompanyName') if vehicle_info else None
         
         if company and company in company_rooms:
             # Broadcast to specific company room
+            company = company.strip().lower()
             print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
             sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
             
         # Also send to users who should see all data
         print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
         sio.emit('vehicle_update', vehicle_data, room="all_data")
+        print("Emitted data", vehicle_data)
         
     except Exception as e:
         print(f"Error broadcasting vehicle data: {e}")
