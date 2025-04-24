@@ -56,11 +56,11 @@ def create_app(config_name='default'):
                 if company not in company_rooms:
                     company_rooms[company] = []
                 company_rooms[company].append(sid)
-                socketio.enter_room(sid, f"company_{company}")
+                # socketio.enter_room(sid, f"company_{company}")
                 join_room(f"company_{company}")
             else:
                 # Users without company see all data
-                socketio.enter_room(sid, "all_data")
+                # socketio.enter_room(sid, "all_data")
                 join_room("all_data")
                 
             print(f"User {user_id} authenticated with company {company}")
