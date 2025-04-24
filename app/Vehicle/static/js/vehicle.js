@@ -1,5 +1,3 @@
-// const socket = io(CONFIG.SOCKET_SERVER_URL, { transports: ["websocket"] });
-
 const socket = io(CONFIG.SOCKET_SERVER_URL, {
   transports: ["websocket"],
   reconnection: true,
@@ -7,11 +5,6 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
 });
-
-// socket.on("connect", function () {
-//   console.log("Connected to WebSocket server");
-//   socket.emit("request_vehicle_data");
-// });
 
 socket.on("connect", () => {
   console.log("Connected to socket server");
@@ -24,7 +17,7 @@ socket.on("connect", () => {
 
   socket.emit("authenticate", {
     user_id: userID,
-    company: companyNames, // Will be null for users without a company
+    company: companyNames,
   });
 });
 
@@ -39,17 +32,10 @@ socket.on("rooms_list", (data) => {
 socket.on("authentication_success", (data) => {
   console.log("Authentication successful");
   socket.emit("get_rooms");
-  // Update UI to show connection status
-  // updateConnectionStatus("connected");
-
-  // You could request initial data here if needed
-  // socket.emit('request_initial_data');
 });
 
 socket.on("authentication_error", (data) => {
   console.error("Authentication failed:", data.message);
-  // Update UI to show error
-  // updateConnectionStatus("auth-error");
 });
 
 socket.on("connect_error", (error) => {
