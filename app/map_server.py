@@ -98,7 +98,7 @@ def broadcast_vehicle_data(vehicle_data):
         vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
 
         sio.emit('test_event', {'message': 'test'})
-        
+        print(f"Connevcted clients: {sio.eio.sockets}")
         company = vehicle_info.get('CompanyName') if vehicle_info else None
         
         if company and company in company_rooms:
