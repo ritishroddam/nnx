@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, redirect, url_for, flash, jsonify, request, g, render_template
 from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
@@ -6,7 +8,6 @@ from config import config
 from flask_socketio import SocketIO
 import subprocess
 import os
-import eventlet
 import signal
 from datetime import datetime, timezone, timedelta
 from functools import wraps
