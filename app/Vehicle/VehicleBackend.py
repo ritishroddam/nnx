@@ -1,9 +1,10 @@
-from flask import Flask, Blueprint, render_template, request, jsonify
+from flask import Flask, Blueprint, render_template, request, jsonify, flash
 from pymongo import MongoClient
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
+from datetime import datetime, timedelta
 import os
 
 
@@ -15,7 +16,43 @@ def map():
     return render_template('vehicleMap.html')
 
 collection = db['distinctAtlanta']
+atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
+
+@vehicle_bp.route('/getVehiclesDistances/<imei>', methods=['GET'])
+@jwt_required()
+def getVehicleDistances(imei):
+    try:
+        today_str = datetime.now().strftime('%d%m%y')
+        pipeline = [
+            {"$match": {
+                "date": today_str,
+                "imei": imei
+            }},
+            {"$project": {  
+                "imei": 1,
+                "odometer": {"$toDouble": "$odometer"} 
+            }},
+            {"$group": {
+                "_id": "$imei",
+                "start_odometer": {"$min": "$odometer"},
+                "end_odometer": {"$max": "$odometer"}
+            }},
+            {"$project": {
+                "imei": "$_id",
+                "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+            }}
+        ]
+
+        distances = list(atlanta_collection.aggregate(pipeline))
+
+        distance = distances['distance_traveled']
+
+        return jsonify(distances), 200
+    except Exception as e:
+        print(f"Error fetching distances for IMEI {imei}: {e}")
+        flash("Error fetching distances", "danger")
+        return jsonify({"error": str(e)}), 500
 
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
 @jwt_required()

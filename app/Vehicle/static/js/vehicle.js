@@ -52,8 +52,9 @@ socket.onAny((event, ...args) => {
 
 socket.on("vehicle_update", function (data) {
   console.log("Vehicle update received:", data);
-  updateVehicleData(data);
-  updateVehicleCard(data);
+  const updatedData = fetchdistance(data);
+  updateVehicleData(updatedData);
+  updateVehicleCard(updatedData);
 });
 
 socket.on("sos_alert", function (data) {
@@ -63,6 +64,56 @@ socket.on("sos_alert", function (data) {
     triggerSOS(imei, markers[imei]);
   }
 });
+
+async function fetchVehicleData() {
+  try {
+    const response = await fetch("/vehicle/api/vehicles");
+    if (!response.ok) throw new Error("Failed to fetch vehicle data");
+    // return await response.json();
+
+    const fetchedData = await fetch("/dashboard/get_vehicle_distances")
+      .then((response) => response.json())
+      .catch((error) => {
+        console.error("Error fetching vehicle distances:", error);
+        return [];
+      });
+
+    const distanceMap = fetchedData.reduce((map, data) => {
+      map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
+      return map;
+    }, {});
+
+    const data = await response.json();
+
+    return data.map((vehicle) => ({
+      LicensePlateNumber: vehicle.LicensePlateNumber,
+      VehicleType: vehicle.VehicleType,
+      speed: vehicle.speed,
+      latitude: parseFloat(vehicle.latitude),
+      longitude: parseFloat(vehicle.longitude),
+      date: vehicle.date,
+      time: vehicle.time,
+      address: vehicle.address || "Location unknown",
+      status: vehicle.status,
+      imei: vehicle.imei,
+      ignition: vehicle.ignition,
+      gsm: vehicle.gsm_sig,
+      sos: vehicle.sos,
+      distance: distanceMap[vehicle.LicensePlateNumber] || "N/A",
+      odometer: vehicle.odometer,
+    }));
+  } catch (error) {
+    console.error("Error fetching vehicle data:", error);
+    return [];
+  }
+}
+
+async function fetchdistance(data) {
+  const distance = await fetch(`/vehicle/${imei}/getVehiclesDistances`);
+
+  data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
+  return data;
+}
 
 function updateVehicleCard(data) {
   const imei = sanitizeIMEI(data.imei);
@@ -134,49 +185,6 @@ function triggerSOS(imei, marker) {
     setTimeout(() => {
       removeSOS(imei);
     }, 60000);
-  }
-}
-
-async function fetchVehicleData() {
-  try {
-    const response = await fetch("/vehicle/api/vehicles");
-    if (!response.ok) throw new Error("Failed to fetch vehicle data");
-    // return await response.json();
-
-    const fetchedData = await fetch("/dashboard/get_vehicle_distances")
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Error fetching vehicle distances:", error);
-        return [];
-      });
-
-    const distanceMap = fetchedData.reduce((map, data) => {
-      map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
-      return map;
-    }, {});
-
-    const data = await response.json();
-
-    return data.map((vehicle) => ({
-      LicensePlateNumber: vehicle.LicensePlateNumber,
-      VehicleType: vehicle.VehicleType,
-      speed: vehicle.speed,
-      latitude: parseFloat(vehicle.latitude),
-      longitude: parseFloat(vehicle.longitude),
-      date: vehicle.date,
-      time: vehicle.time,
-      address: vehicle.address || "Location unknown",
-      status: vehicle.status,
-      imei: vehicle.imei,
-      ignition: vehicle.ignition,
-      gsm: vehicle.gsm_sig,
-      sos: vehicle.sos,
-      distance: distanceMap[vehicle.LicensePlateNumber] || "N/A",
-      odometer: vehicle.odometer,
-    }));
-  } catch (error) {
-    console.error("Error fetching vehicle data:", error);
-    return [];
   }
 }
 
