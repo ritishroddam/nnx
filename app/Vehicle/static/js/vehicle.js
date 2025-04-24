@@ -182,12 +182,12 @@ function updateVehicleCard(data) {
     <div class="vehicle-info">
       <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
       <strong>Coordinates:</strong> ${coordinates} <br>
+      <strong>Location:</strong> ${data.address || "No address found"} <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
       <strong>Distance Today:</strong> ${data.distance_today || "N/A"} <br>
       <strong>Ignition:</strong> ${ignitionIcon} <br>
       <strong>GSM Signal:</strong> ${gsmIcon} ${data.gsm && !isNaN(data.gsm) ? `(${data.gsm})` : ''} <br>
       <strong>SOS Status:</strong> ${data.sos === "1" ? '<span class="text-danger">ACTIVE</span>' : 'Inactive'} <br>
-      <strong>Location:</strong> ${data.address || "No address found"} <br>
       <strong>Data:</strong> <a href="/routeHistory/vehicle/${data.LicensePlateNumber}" target="_blank">View Data</a>
     </div>
   `;
