@@ -1,5 +1,4 @@
 import eventlet
-# eventlet.monkey_patch()
 import threading
 import socketserver
 import json
@@ -18,8 +17,6 @@ import eventlet.wsgi
 import time
 from pymongo import MongoClient
 import ssl
-# from app import socketio as sio
-
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
 db = mongo_client["nnx"]
@@ -28,6 +25,22 @@ app = Flask(__name__)
 CORS(app)
 
 last_emit_time = {}
+
+def lastEmitInitial():
+    all_documents = list(collection.aggregate([
+        {"$match": {"gps": "A", "status": "01"}},
+        {"$sort": {"timestamp": -1}},
+        {
+            "$group": {
+                "_id": "$imei",
+                "latest_doc": {"$first": "$$ROOT"}
+            }
+        },
+        {"$replaceRoot": {"newRoot": "$latest_doc"}}
+    ]))
+
+    for doc in all_documents:
+        last_emit_time[doc['imei']] = doc['date_time']
 
 sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
 
@@ -288,19 +301,6 @@ def log_data(json_data):
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
-# def start_flask_server():
-#     cert_path = os.path.join("cert", "cert.pem")
-#     key_path = os.path.join("cert", "key.pem")
-#     eventlet.wsgi.server(
-#         eventlet.wrap_ssl(
-#             eventlet.listen(('0.0.0.0', 8555)),
-#             certfile=cert_path,
-#             keyfile=key_path,
-#             server_side=True
-#         ),
-#         app
-#     )
-
 def run_servers():
     HOST = "0.0.0.0"
     PORT = 8000
@@ -310,10 +310,6 @@ def run_servers():
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
-
-    # flask_thread = threading.Thread(target=start_flask_server)
-    # flask_thread.daemon = True
-    # flask_thread.start()
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -333,4 +329,5 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 if __name__ == "__main__":
+    lastEmitInitial()
     run_servers()
