@@ -122,7 +122,7 @@ async function fetchVehicleData() {
 }
 
 function updateVehicleCard(data) {
-  const imei = sanitizeIMEI(data.imei);
+  const imei = data.imei;
   const vehicleCard = document.querySelector(
     `.vehicle-card[data-imei="${imei}"]`
   );
@@ -203,7 +203,7 @@ async function renderVehicles() {
   countContainer.innerText = vehicles.length;
 
   vehicles.forEach((vehicle) => {
-    const imei = sanitizeIMEI(vehicle.imei);
+    const imei = vehicle.imei;
 
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
@@ -334,7 +334,7 @@ function updateMap() {
       countContainer.innerText = data.length;
 
       data.forEach((device) => {
-        const imei = sanitizeIMEI(device.imei);
+        const imei = device.imei;
 
         if (
           device.latitude &&
@@ -614,12 +614,8 @@ function checkForDataTimeout(imei) {
   }
 }
 
-function sanitizeIMEI(imei) {
-  return imei.replace(/[^\w]/g, "").trim(); // Removes all non-alphanumeric characters
-}
-
 function updateVehicleData(vehicle) {
-  const imei = sanitizeIMEI(vehicle.imei);
+  const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); // Already returns google.maps.LatLng
   const iconUrl = getCarIconBySpeed(
     vehicle.speed,
