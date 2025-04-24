@@ -381,3 +381,11 @@ input:checked + .slider:before {
 .vehicle-table a:hover {
   text-decoration: underline;
 }
+
+.vehicle-card .vehicle-info i.fas {
+  margin-right: 5px;
+}
+.vehicle-card .text-success { color: #28a745; }
+.vehicle-card .text-danger { color: #dc3545; }
+.vehicle-card .text-warning { color: #ffc107; }
+.vehicle-card .text-info { color: #17a2b8; }
