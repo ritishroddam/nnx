@@ -21,14 +21,6 @@ socket.on("connect", () => {
   });
 });
 
-socket.on("rooms_list", (data) => {
-  if (data.error) {
-    console.error("Error fetching rooms:", data.error);
-  } else {
-    console.log("Rooms assigned to this client:", data.rooms);
-  }
-});
-
 socket.on("authentication_success", (data) => {
   console.log("Authentication successful");
   socket.emit("get_rooms");
@@ -46,13 +38,7 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
-socket.onAny((event, ...args) => {
-  console.log(`Received event: ${event}`, args);
-});
-
 socket.on("vehicle_update", async function (data) {
-  console.log("Vehicle update received:", data);
-
   try {
     // Wait for fetchdistance to resolve and return the updated data
     const updatedData = await fetchdistance(data);
@@ -80,6 +66,7 @@ async function fetchdistance(data) {
     const distance = data.odometer - oldData.odometer;
 
     data.distance = distance.toFixed(2);
+    print(distance.toFixed(2), "km");
   }
 
   return data;
@@ -432,8 +419,6 @@ function animateMarker(marker, newPosition, duration = 6000) {
     console.error("Marker's start position is not defined.");
     return;
   }
-  console.log("Animating marker:", marker, "from", startPosition);
-  console.log("Animating marker:", marker, "to", newPosition);
   const startTime = performance.now();
 
   function moveMarker(currentTime) {
@@ -454,7 +439,6 @@ function animateMarker(marker, newPosition, duration = 6000) {
   }
 
   requestAnimationFrame(moveMarker);
-  console.log("animation done");
 }
 
 function filterVehicles() {
