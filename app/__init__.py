@@ -55,7 +55,7 @@ def create_app(config_name='default'):
 
             if not user or user.get('company') != company:
                 flash("Invalid user or company", "danger")
-                socketio.emit('authentication_error', {'status': 'error', 'message': 'Invalid user or company'}, room=sid)
+                socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid user {user_id} or company {company}'}, room=sid)
                 return
 
             # Add user to company room if they have one
