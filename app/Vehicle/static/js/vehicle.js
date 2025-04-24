@@ -133,6 +133,35 @@ socket.on("sos_alert", function (data) {
 //   }
 // }
 
+async function fetchLocation(lat, lng) {
+  if (!lat || !lng) return "No coordinates";
+  
+  try {
+    const response = await fetch('/api/geocode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      body: JSON.stringify({ 
+        lat: parseFloat(lat), 
+        lng: parseFloat(lng) 
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.address || "No address found";
+  } catch (error) {
+    console.error("Geocoding failed:", error);
+    return "No address found";
+  }
+}
+
+// Update the vehicle card creation with all data
 function updateVehicleCard(data) {
   const imei = sanitizeIMEI(data.imei);
   const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
@@ -141,115 +170,62 @@ function updateVehicleCard(data) {
   const lat = data.latitude ? parseFloat(data.latitude).toFixed(6) : null;
   const lon = data.longitude ? parseFloat(data.longitude).toFixed(6) : null;
   const coordinates = lat && lon ? `${lat}, ${lon}` : "Unknown";
-  
-  const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
 
-  // Create icons for GSM and Ignition
+  // Create icons and formatted data
   const gsmIcon = getGsmSignalIcon(data.gsm);
   const ignitionIcon = data.ignition === "1" ? 
-    '<i class="fas fa-power-off text-success" title="Ignition ON"></i>' : 
+    '<i class="fas fa-power-on text-success" title="Ignition ON"></i>' : 
     '<i class="fas fa-power-off text-danger" title="Ignition OFF"></i>';
 
-  // Create basic card content
-  const basicCardContent = `
+  const cardContent = `
     <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}</div>
     <div class="vehicle-info">
       <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
       <strong>Coordinates:</strong> ${coordinates} <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
-      <strong>Distance Today:</strong> ${data.distance_today || "N/A"} km<br>
+      <strong>Distance Today:</strong> ${data.distance_today || "N/A"} <br>
       <strong>Ignition:</strong> ${ignitionIcon} <br>
-      <strong>GSM Signal:</strong> ${gsmIcon} <br>
+      <strong>GSM Signal:</strong> ${gsmIcon} ${data.gsm && !isNaN(data.gsm) ? `(${data.gsm})` : ''} <br>
       <strong>SOS Status:</strong> ${data.sos === "1" ? '<span class="text-danger">ACTIVE</span>' : 'Inactive'} <br>
-      <strong>Location:</strong> <span class="location-text">${data.address || "Loading location..."}</span> <br>
-      <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+      <strong>Location:</strong> ${data.address || "No address found"} <br>
+      <strong>Data:</strong> <a href="/routeHistory/vehicle/${data.LicensePlateNumber}" target="_blank">View Data</a>
     </div>
   `;
 
   if (vehicleCard) {
-    vehicleCard.querySelector(".vehicle-info").innerHTML = basicCardContent;
+    vehicleCard.querySelector(".vehicle-info").innerHTML = cardContent;
   } else {
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
-    vehicleElement.innerHTML = basicCardContent;
+    vehicleElement.innerHTML = cardContent;
     listContainer.appendChild(vehicleElement);
   }
-
-  // Fetch location if coordinates exist and address isn't already set
-  if (lat && lon && !data.address) {
-    fetchLocation(lat, lon).then(location => {
-      const locationElement = document.querySelector(`.vehicle-card[data-imei="${imei}"] .location-text`);
-      if (locationElement) {
-        locationElement.textContent = location;
-        // Update the data object with the new address
-        if (markers[imei] && markers[imei].device) {
-          markers[imei].device.address = location;
-        }
-      }
-    }).catch(error => {
-      console.error("Geocoding error:", error);
-      const locationElement = document.querySelector(`.vehicle-card[data-imei="${imei}"] .location-text`);
-      if (locationElement) {
-        locationElement.textContent = "Location unknown";
-      }
-    });
-  }
 }
 
+// Enhanced GSM signal icon function
 function getGsmSignalIcon(gsmValue) {
   if (gsmValue === undefined || gsmValue === null || gsmValue === "Unknown") {
-    return '<i class="fas fa-question-circle" title="Unknown signal"></i>';
+    return '<i class="fas fa-question-circle text-muted" title="Unknown signal"></i>';
   }
-  
-  const gsmNum = parseInt(gsmValue);
-  if (isNaN(gsmNum)) return '<i class="fas fa-question-circle" title="Unknown signal"></i>';
-  
-  if (gsmNum === 0) {
-    return '<i class="fas fa-signal-slash text-danger" title="No signal"></i>';
-  } else if (gsmNum < 7) {
-    return '<i class="fas fa-signal text-danger" title="Very low signal"></i>';
-  } else if (gsmNum < 15) {
-    return '<i class="fas fa-signal text-warning" title="Low signal"></i>';
-  } else if (gsmNum < 27) {
-    return '<i class="fas fa-signal text-info" title="Moderate signal"></i>';
-  } else {
-    return '<i class="fas fa-signal text-success" title="Good signal"></i>';
-  }
-}
 
-// Helper function to fetch location
-function fetchLocation(lat, lng, retries = 3) {
-  return new Promise((resolve, reject) => {
-    const attemptFetch = (attempt) => {
-      fetch('/api/geocode', {  // Changed endpoint to /api/geocode
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify({ lat: parseFloat(lat), lng: parseFloat(lng) })
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Geocoding failed');
-        return response.json();
-      })
-      .then(data => {
-        resolve(data.address || "No address found");
-      })
-      .catch(error => {
-        if (attempt < retries) {
-          setTimeout(() => attemptFetch(attempt + 1), 1000 * attempt);
-        } else {
-          console.error("Geocoding failed after retries:", error);
-          reject("Location unknown");
-        }
-      });
-    };
-    
-    attemptFetch(1);
-  });
+  const gsmNum = parseInt(gsmValue);
+  if (isNaN(gsmNum)) {
+    return '<i class="fas fa-question-circle text-muted" title="Invalid signal"></i>';
+  }
+
+  if (gsmNum === 0) {
+    return '<i class="fas fa-signal-slash text-danger" title="No signal (0)"></i>';
+  } else if (gsmNum < 7) {
+    return '<i class="fas fa-signal text-danger" title="Very low signal (1-6)"></i>';
+  } else if (gsmNum < 15) {
+    return '<i class="fas fa-signal text-warning" title="Low signal (7-14)"></i>';
+  } else if (gsmNum < 27) {
+    return '<i class="fas fa-signal text-info" title="Moderate signal (15-26)"></i>';
+  } else {
+    return '<i class="fas fa-signal text-success" title="Good signal (27+)"></i>';
+  }
 }
 
 function triggerSOS(imei, marker) {
@@ -299,33 +275,31 @@ function triggerSOS(imei, marker) {
 
 async function fetchVehicleData() {
   try {
-    // Fetch both vehicle data and distances in parallel
-    const [vehiclesResponse, distancesResponse] = await Promise.all([
-      fetch("/vehicle/api/vehicles"),
-      fetch("/dashboard/get_vehicle_distances").catch(() => ({ json: () => [] }))
-    ]);
-
+    // First fetch basic vehicle data
+    const vehiclesResponse = await fetch("/vehicle/api/vehicles");
     if (!vehiclesResponse.ok) throw new Error("Failed to fetch vehicle data");
-
     const vehicles = await vehiclesResponse.json();
-    const distances = await distancesResponse.json();
 
-    // Create a mapping of license plate to distance
-    const distanceMap = {};
-    if (Array.isArray(distances)) {
-      distances.forEach(item => {
-        if (item.registration && item.distance !== undefined) {
-          distanceMap[item.registration] = item.distance.toFixed(2) + " km";
-        }
-      });
-    }
+    // Then fetch additional data (distance today) in parallel with geocoding
+    const distanceResponse = fetch("/dashboard/get_vehicle_distances")
+      .then(res => res.ok ? res.json() : [])
+      .catch(() => []);
 
-    // Process vehicle data
-    return vehicles.map(vehicle => {
+    // Process vehicle data with additional fields
+    const enhancedVehicles = await Promise.all(vehicles.map(async (vehicle) => {
       // Get distance for this vehicle
-      const distanceToday = vehicle.LicensePlateNumber ? 
-        (distanceMap[vehicle.LicensePlateNumber] || "N/A") : 
-        "N/A";
+      const distances = await distanceResponse;
+      const distanceEntry = distances.find(d => d.registration === vehicle.LicensePlateNumber);
+      const distanceToday = distanceEntry ? `${distanceEntry.distance.toFixed(2)} km` : "N/A";
+
+      // Get GSM signal strength with proper formatting
+      let gsmSignal = "Unknown";
+      if (vehicle.gsm_sig !== undefined && vehicle.gsm_sig !== null) {
+        const gsmValue = parseInt(vehicle.gsm_sig);
+        if (!isNaN(gsmValue)) {
+          gsmSignal = gsmValue.toString();
+        }
+      }
 
       return {
         ...vehicle,
@@ -334,16 +308,18 @@ async function fetchVehicleData() {
         longitude: vehicle.longitude,
         date: vehicle.date,
         time: vehicle.time,
-        address: vehicle.address,
         status: vehicle.status,
         imei: vehicle.imei,
         ignition: vehicle.ignition,
-        gsm: vehicle.gsm_sig,
+        gsm: gsmSignal, // Now properly formatted
         sos: vehicle.sos,
         odometer: vehicle.odometer,
-        distance_today: distanceToday
+        distance_today: distanceToday, // Now properly formatted
+        address: vehicle.address || await fetchLocation(vehicle.latitude, vehicle.longitude).catch(() => "No address found")
       };
-    });
+    }));
+
+    return enhancedVehicles;
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     return [];
