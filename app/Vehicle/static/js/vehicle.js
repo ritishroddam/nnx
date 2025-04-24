@@ -6,8 +6,12 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
-  secure: true,
 });
+
+// socket.on("connect", function () {
+//   console.log("Connected to WebSocket server");
+//   socket.emit("request_vehicle_data");
+// });
 
 socket.on("connect", () => {
   console.log("Connected to socket server");
@@ -74,61 +78,135 @@ socket.on("sos_alert", function (data) {
   }
 });
 
+// function updateVehicleCard(data) {
+//   const imei = sanitizeIMEI(data.imei);
+//   const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+
+//   const latitude = data.latitude ? parseFloat(data.latitude) : null;
+//   const longitude = data.longitude ? parseFloat(data.longitude) : null;
+//   const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
+
+//   if (vehicleCard) {
+//     // Update existing vehicle card
+//     vehicleCard.querySelector(".vehicle-info").innerHTML = `
+//       <strong>Speed:</strong> ${
+//         data.speed
+//           ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
+//           : "Unknown"
+//       } <br>
+//       <strong>Lat:</strong> ${latitude} <br>
+//       <strong>Lon:</strong> ${longitude} <br>
+//       <strong>Last Update:</strong> ${formatLastUpdatedText(
+//         data.date,
+//         data.time
+//       )} <br>
+//       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
+//       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+//     `;
+//   } else {
+//     // Create a new vehicle card
+//     const listContainer = document.getElementById("vehicle-list");
+//     const vehicleElement = document.createElement("div");
+//     vehicleElement.classList.add("vehicle-card");
+//     vehicleElement.setAttribute("data-imei", data.imei);
+//     vehicleElement.innerHTML = `
+//       <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
+//       data.status || "Unknown"
+//     }</div>
+//       <div class="vehicle-info">
+//         <strong>Speed:</strong> ${
+//           data.speed
+//             ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
+//             : "Unknown"
+//         } <br>
+//         <strong>Lat:</strong> ${latitude} <br>
+//         <strong>Lon:</strong> ${longitude} <br>
+//         <strong>Last Update:</strong> ${formatLastUpdatedText(
+//           data.date,
+//           data.time
+//         )} <br>
+//         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
+//         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+//       </div>
+//     `;
+//     listContainer.appendChild(vehicleElement);
+//   }
+// }
+
 function updateVehicleCard(data) {
   const imei = sanitizeIMEI(data.imei);
-  const vehicleCard = document.querySelector(
-    `.vehicle-card[data-imei="${imei}"]`
-  );
-
-  const latitude = data.latitude ? parseFloat(data.latitude) : null;
-  const longitude = data.longitude ? parseFloat(data.longitude) : null;
+  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+  
+  // Format coordinates properly
+  const lat = data.latitude ? parseFloat(data.latitude).toFixed(6) : null;
+  const lon = data.longitude ? parseFloat(data.longitude).toFixed(6) : null;
+  const coordinates = lat && lon ? `${lat}, ${lon}` : "Unknown";
+  
   const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
 
-  if (vehicleCard) {
-    // Update existing vehicle card
-    vehicleCard.querySelector(".vehicle-info").innerHTML = `
-      <strong>Speed:</strong> ${
-        data.speed
-          ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
-          : "Unknown"
-      } <br>
-      <strong>Lat:</strong> ${latitude} <br>
-      <strong>Lon:</strong> ${longitude} <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(
-        data.date,
-        data.time
-      )} <br>
-      <strong>Location:</strong> ${data.address || "Location unknown"} <br>
+  // Create basic card content without location first
+  const basicCardContent = `
+    <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}</div>
+    <div class="vehicle-info">
+      <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
+      <strong>Coordinates:</strong> ${coordinates} <br>
+      <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
+      <strong>Distance Today:</strong> ${data.distance_today || "N/A"} km<br>
+      <strong>Ignition:</strong> ${data.ignition === "1" ? "ON" : "OFF"} <br>
+      <strong>GSM Signal:</strong> ${data.gsm || "Unknown"} <br>
+      <strong>SOS Status:</strong> ${data.sos === "1" ? "ACTIVE" : "Inactive"} <br>
+      <strong>Location:</strong> Loading location... <br>
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-    `;
+    </div>
+  `;
+
+  if (vehicleCard) {
+    vehicleCard.querySelector(".vehicle-info").innerHTML = basicCardContent;
   } else {
-    // Create a new vehicle card
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
-    vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
-      data.status || "Unknown"
-    }</div>
-      <div class="vehicle-info">
-        <strong>Speed:</strong> ${
-          data.speed
-            ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
-            : "Unknown"
-        } <br>
-        <strong>Lat:</strong> ${latitude} <br>
-        <strong>Lon:</strong> ${longitude} <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(
-          data.date,
-          data.time
-        )} <br>
-        <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-      </div>
-    `;
+    vehicleElement.innerHTML = basicCardContent;
     listContainer.appendChild(vehicleElement);
   }
+
+  // Fetch location asynchronously after creating the card
+  if (lat && lon) {
+    fetchLocation(lat, lon).then(location => {
+      const locationElement = document.querySelector(`.vehicle-card[data-imei="${imei}"] .vehicle-info strong:contains('Location:')`);
+      if (locationElement) {
+        locationElement.nextSibling.textContent = ` ${location}`;
+      }
+    }).catch(error => {
+      console.error("Geocoding error:", error);
+      const locationElement = document.querySelector(`.vehicle-card[data-imei="${imei}"] .vehicle-info strong:contains('Location:')`);
+      if (locationElement) {
+        locationElement.nextSibling.textContent = " Location unknown";
+      }
+    });
+  }
+}
+
+// Helper function to fetch location
+function fetchLocation(lat, lng) {
+  return fetch('/geocode', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    },
+    body: JSON.stringify({ lat: parseFloat(lat), lng: parseFloat(lng) })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Geocoding failed');
+    return response.json();
+  })
+  .then(data => data.address || "No address found")
+  .catch(error => {
+    console.error("Geocoding error:", error);
+    return "Location unknown";
+  });
 }
 
 function triggerSOS(imei, marker) {
@@ -146,29 +224,69 @@ function triggerSOS(imei, marker) {
   }
 }
 
+// async function fetchVehicleData() {
+//   try {
+//     const response = await fetch("/vehicle/api/vehicles");
+//     if (!response.ok) throw new Error("Failed to fetch vehicle data");
+//     // return await response.json();
+
+//     const data = await response.json();
+
+//     return data.map((vehicle) => ({
+//       LicensePlateNumber: vehicle.LicensePlateNumber,
+//       VehicleType: vehicle.VehicleType,
+//       speed: vehicle.speed,
+//       latitude: parseFloat(vehicle.latitude),
+//       longitude: parseFloat(vehicle.longitude),
+//       date: vehicle.date,
+//       time: vehicle.time,
+//       address: vehicle.address || "Location unknown",
+//       status: vehicle.status,
+//       imei: vehicle.imei,
+//       ignition: vehicle.ignition,
+//       gsm: vehicle.gsm_sig,
+//       sos: vehicle.sos,
+//       odometer: vehicle.odometer,
+//     }));
+//   } catch (error) {
+//     console.error("Error fetching vehicle data:", error);
+//     return [];
+//   }
+// }
+
 async function fetchVehicleData() {
   try {
-    const response = await fetch("/vehicle/api/vehicles");
-    if (!response.ok) throw new Error("Failed to fetch vehicle data");
-    // return await response.json();
+    const [vehiclesResponse, distancesResponse] = await Promise.all([
+      fetch("/vehicle/api/vehicles"),
+      fetch("/dashboard/get_vehicle_distances").catch(() => ({ json: () => [] }))
+    ]);
 
-    const data = await response.json();
+    if (!vehiclesResponse.ok) throw new Error("Failed to fetch vehicle data");
 
-    return data.map((vehicle) => ({
+    const vehicles = await vehiclesResponse.json();
+    const distances = await distancesResponse.json();
+
+    const distanceMap = distances.reduce((map, item) => {
+      map[item.registration] = item.distance?.toFixed(2) || "N/A";
+      return map;
+    }, {});
+
+    return vehicles.map(vehicle => ({
       LicensePlateNumber: vehicle.LicensePlateNumber,
       VehicleType: vehicle.VehicleType,
       speed: vehicle.speed,
-      latitude: parseFloat(vehicle.latitude),
-      longitude: parseFloat(vehicle.longitude),
+      latitude: vehicle.latitude,
+      longitude: vehicle.longitude,
       date: vehicle.date,
       time: vehicle.time,
-      address: vehicle.address || "Location unknown",
+      address: vehicle.address,
       status: vehicle.status,
       imei: vehicle.imei,
       ignition: vehicle.ignition,
       gsm: vehicle.gsm_sig,
       sos: vehicle.sos,
       odometer: vehicle.odometer,
+      distance_today: distanceMap[vehicle.LicensePlateNumber] || "N/A"
     }));
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
@@ -251,39 +369,89 @@ function geocodeLatLng(latLng, callback) {
   }
 }
 
+// function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
+//   const imei = device.imei || '<span class="missing-data">N/A</span>';
+//   const LicensePlateNumber =
+//     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
+//   const speed =
+//     device.speed !== null && device.speed !== undefined
+//       ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+//       : '<span class="missing-data">Unknown</span>';
+//   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
+//   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
+//   const date = device.date || "N/A";
+//   const time = device.time || "N/A";
+//   const addressText = address || '<span class="missing-data">Location unknown</span>';
+//   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
+
+//   const content = `<div class="info-window show">
+//                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
+//                     <hr>
+//                     <p><strong>Speed:</strong> ${speed}</p>
+//                     <p><strong>Lat:</strong> ${lat}</p>
+//                     <p><strong>Lon:</strong> ${lon}</p>
+//                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
+//                       device.date,
+//                       device.time
+//                     )}</p>
+//                     <p class="address"><strong>Location:</strong> ${addressText}</p>
+//                     <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+//                     </p>
+//                 </div>`;
+
+//   infoWindow.setContent(content);
+//   infoWindow.setPosition(latLng);
+// }
+
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
-  const LicensePlateNumber =
-    device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
-  const speed =
-    device.speed !== null && device.speed !== undefined
-      ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-      : '<span class="missing-data">Unknown</span>';
-  const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
-  const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
+  const LicensePlateNumber = device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
+  const speed = device.speed !== null && device.speed !== undefined 
+    ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h` 
+    : '<span class="missing-data">Unknown</span>';
+  
+  const lat = latLng.lat().toFixed(6);
+  const lon = latLng.lng().toFixed(6);
+  const coordinates = `${lat}, ${lon}`;
+  
   const date = device.date || "N/A";
   const time = device.time || "N/A";
-  const addressText =
-    address || '<span class="missing-data">Location unknown</span>';
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
-  const content = `<div class="info-window show">
-                    <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
-                    <hr>
-                    <p><strong>Speed:</strong> ${speed}</p>
-                    <p><strong>Lat:</strong> ${lat}</p>
-                    <p><strong>Lon:</strong> ${lon}</p>
-                    <p><strong>Last Update:</strong> ${formatLastUpdatedText(
-                      device.date,
-                      device.time
-                    )}</p>
-                    <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-                    </p>
-                </div>`;
+  // Fetch location if not provided
+  if (!address && lat && lon) {
+    fetchLocation(lat, lon)
+      .then(location => {
+        const content = createInfoWindowContent(device, coordinates, speed, date, time, location, url);
+        infoWindow.setContent(content);
+      })
+      .catch(error => {
+        console.error("Geocoding error:", error);
+        const content = createInfoWindowContent(device, coordinates, speed, date, time, "Location unknown", url);
+        infoWindow.setContent(content);
+      });
+    return;
+  }
 
+  const content = createInfoWindowContent(device, coordinates, speed, date, time, address || "Location unknown", url);
   infoWindow.setContent(content);
   infoWindow.setPosition(latLng);
+}
+
+function createInfoWindowContent(device, coordinates, speed, date, time, location, url) {
+  return `<div class="info-window show">
+            <strong><span style="color: #336699;">${device.LicensePlateNumber || "Unknown"}:</span></strong> <br>
+            <hr>
+            <p><strong>Speed:</strong> ${speed}</p>
+            <p><strong>Coordinates:</strong> ${coordinates}</p>
+            <p><strong>Last Update:</strong> ${formatLastUpdatedText(date, time)}</p>
+            <p><strong>Distance Today:</strong> ${device.distance_today || "N/A"} km</p>
+            <p><strong>Ignition:</strong> ${device.ignition === "1" ? "ON" : "OFF"}</p>
+            <p><strong>GSM Signal:</strong> ${device.gsm || "Unknown"}</p>
+            <p><strong>SOS Status:</strong> ${device.sos === "1" ? "ACTIVE" : "Inactive"}</p>
+            <p class="address"><strong>Location:</strong> ${location}</p>
+            <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a></p>
+          </div>`;
 }
 
 function addMarkerClickListener(marker, latLng, device, coords) {
