@@ -76,7 +76,7 @@ def create_app(config_name='default'):
         try:
             sid = request.sid
             current_rooms = rooms()
-            socketio.emit('rooms_list', {'rooms': list(rooms)}, room=sid)
+            socketio.emit('rooms_list', {'rooms': list(current_rooms)}, room=sid)
         except Exception as e:
             print(f"Error fetching rooms for SID {sid}: {e}")
             socketio.emit('rooms_list', {'error': str(e)}, room=sid)
