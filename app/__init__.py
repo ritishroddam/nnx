@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identit
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
 from config import config
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 import subprocess
 import os
 import signal
@@ -57,9 +57,11 @@ def create_app(config_name='default'):
                     company_rooms[company] = []
                 company_rooms[company].append(sid)
                 socketio.enter_room(sid, f"company_{company}")
+                join_room(f"company_{company}")
             else:
                 # Users without company see all data
                 socketio.enter_room(sid, "all_data")
+                join_room("all_data")
                 
             print(f"User {user_id} authenticated with company {company}")
             print(company_rooms)
