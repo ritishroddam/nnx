@@ -1,5 +1,5 @@
 import eventlet
-eventlet.monkey_patch()
+# eventlet.monkey_patch()
 import threading
 import socketserver
 import json
