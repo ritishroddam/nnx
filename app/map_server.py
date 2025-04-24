@@ -17,6 +17,7 @@ import socketio
 import eventlet.wsgi
 import time
 from pymongo import MongoClient
+from app import socketio as sio
 
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
@@ -28,9 +29,6 @@ CORS(app)
 last_emit_time = {}
 user_sessions = {}
 company_rooms = {}
-
-sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20, transports=['websocket'])
-app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
 
 @sio.event
 def connect(sid, environ):
@@ -396,18 +394,18 @@ def log_data(json_data):
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
-def start_flask_server():
-    cert_path = os.path.join("cert", "cert.pem")
-    key_path = os.path.join("cert", "key.pem")
-    eventlet.wsgi.server(
-        eventlet.wrap_ssl(
-            eventlet.listen(('0.0.0.0', 8555)),
-            certfile=cert_path,
-            keyfile=key_path,
-            server_side=True
-        ),
-        app
-    )
+# def start_flask_server():
+#     cert_path = os.path.join("cert", "cert.pem")
+#     key_path = os.path.join("cert", "key.pem")
+#     eventlet.wsgi.server(
+#         eventlet.wrap_ssl(
+#             eventlet.listen(('0.0.0.0', 8555)),
+#             certfile=cert_path,
+#             keyfile=key_path,
+#             server_side=True
+#         ),
+#         app
+#     )
 
 def run_servers():
     HOST = "0.0.0.0"
