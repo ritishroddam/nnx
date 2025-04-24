@@ -142,6 +142,18 @@ async function fetchVehicleData() {
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
     // return await response.json();
 
+    const fetchedData = await fetch("/dashboard/get_vehicle_distances")
+      .then((response) => response.json())
+      .catch((error) => {
+        console.error("Error fetching vehicle distances:", error);
+        return [];
+      });
+
+    const distanceMap = fetchedData.reduce((map, data) => {
+      map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
+      return map;
+    }, {});
+
     const data = await response.json();
 
     return data.map((vehicle) => ({
@@ -158,6 +170,7 @@ async function fetchVehicleData() {
       ignition: vehicle.ignition,
       gsm: vehicle.gsm_sig,
       sos: vehicle.sos,
+      distance: distanceMap[vehicle.LicensePlateNumber] || "N/A",
       odometer: vehicle.odometer,
     }));
   } catch (error) {
@@ -798,17 +811,6 @@ async function populateVehicleTable() {
   tableBody.innerHTML = ""; // Clear existing rows
 
   const vehicles = await fetchVehicleData();
-  const fetchedData = await fetch("/dashboard/get_vehicle_distances")
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error("Error fetching vehicle distances:", error);
-      return [];
-    });
-
-  const distanceMap = fetchedData.reduce((map, data) => {
-    map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
-    return map;
-  }, {});
 
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
@@ -854,8 +856,7 @@ async function populateVehicleTable() {
       speedCell.style.border = "2px solid red";
     }
 
-    row.insertCell(5).innerText =
-      distanceMap[vehicle.LicensePlateNumber] || "N/A"; // Assuming odometer is the distance traveled today
+    row.insertCell(5).innerText = vehicle.distance || "N/A"; // Assuming odometer is the distance traveled today
     row.insertCell(6).innerText = vehicle.odometer; // Assuming odometer reading
     row.insertCell(7).innerText = vehicle.ignition;
     row.insertCell(8).innerText = vehicle.gsm;
