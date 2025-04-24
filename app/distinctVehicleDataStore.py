@@ -97,9 +97,9 @@ def emit_data(json_data):
             except Exception as e:
                 print(f"Failed to connect to WebSocket server: {e}")
 
-        inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
         json_data['date_time'] = str(json_data['date_time'])
         json_data['timestamp'] = str(json_data['timestamp'])
+        inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
         if inventory_data:
             json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
         else:

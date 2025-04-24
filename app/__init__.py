@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identit
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
 from config import config
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room, rooms
 import subprocess
 import os
 import signal
@@ -17,6 +17,9 @@ db = None
 socketio = SocketIO()
 pool = eventlet.GreenPool()
 
+user_sessions = {}
+company_rooms = {}
+
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -25,17 +28,123 @@ def create_app(config_name='default'):
     jwt.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*", transports=["websocket"])
 
-    @socketio.on('connect')
+    @socketio.event
     def connect():
-        print(f"Client connected")
+        sid = request.sid
+        print(f"Client connected: {sid}")
 
-    @socketio.on('disconnect')
+    @socketio.event
+    def authenticate(data):
+        """
+        Handle user authentication and room assignment
+        Expected data: {user_id: string, company: string or null}
+        """
+        try:
+            sid = request.sid
+            user_id = data.get('user_id')
+            company = data.get('company')  # Can be None
+            
+            # Store user session info
+            user_sessions[sid] = {
+                'user_id': user_id,
+                'company': company
+            }
+            
+            # Add user to company room if they have one
+            if company not in (None, '', 'none'):
+                company = company.strip().lower()
+                if company not in company_rooms:
+                    company_rooms[company] = []
+                company_rooms[company].append(sid)
+                # socketio.enter_room(sid, f"company_{company}")
+                join_room(f"company_{company}")
+            else:
+                # Users without company see all data
+                # socketio.enter_room(sid, "all_data")
+                join_room("all_data")
+                
+            print(f"User {user_id} authenticated with company {company}")
+            print(company_rooms)
+            print("SID: ",sid)
+            socketio.emit('authentication_success', {'status': 'success'}, room=sid)
+        except Exception as e:
+            print(f"Authentication error: {e}")
+            socketio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
+
+    @socketio.event
+    def get_rooms():
+        try:
+            sid = request.sid
+            current_rooms = rooms()
+            socketio.emit('rooms_list', {'rooms': list(current_rooms)}, room=sid)
+        except Exception as e:
+            print(f"Error fetching rooms for SID {sid}: {e}")
+            socketio.emit('rooms_list', {'error': str(e)}, room=sid)
+
+    @socketio.event
     def disconnect():
-        print(f"Client disconnected")
-    
+        sid = request.sid
+        # Clean up session data
+        if sid in user_sessions:
+            user_data = user_sessions[sid]
+            company = user_data.get('company')
+
+            # Remove from company rooms if applicable
+            if company and company in company_rooms and sid in company_rooms[company]:
+                company_rooms[company].remove(sid)
+                if not company_rooms[company]:  # If company room is empty
+                    del company_rooms[company]
+
+            # Remove session
+            del user_sessions[sid]
+
+        print(f"Client disconnected: {sid}")
+
+    @socketio.on('vehicle_update')
+    def handle_vehicle_update(vehicle_data):
+            try:
+                # Get the vehicle's company from inventory
+                imei = vehicle_data.get('imei')
+                vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
+
+                company = vehicle_info.get('CompanyName') if vehicle_info else None
+
+                if company and company in company_rooms:
+                    # Broadcast to specific company room
+                    company = company.strip().lower()
+                    print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
+                    socketio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
+
+                # Also send to users who should see all data
+                socketio.emit('vehicle_update', vehicle_data, room="all_data")
+                print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
+
+            except Exception as e:
+                print(f"Error broadcasting vehicle data: {e}")
+
+    @socketio.on('sos_alert')
+    def handle_sos_alert(sos_data):
+        try:
+            # Get the vehicle's company from inventory
+            imei = sos_data.get('imei')
+            vehicle_info = vehicle_inventory_collection.find_one({"imei": imei})
+
+            company = vehicle_info.get('CompanyName') if vehicle_info else None
+
+            if company:
+                # Broadcast to specific company room
+                socketio.emit('sos_alert', sos_data, room=f"company_{company}")
+
+            # Also send to users who should see all data
+            socketio.emit('sos_alert', sos_data, room="all_data")
+
+        except Exception as e:
+            print(f"Error broadcasting SOS alert: {e}")
+
     global mongo_client, db
     mongo_client = MongoClient(app.config['MONGO_URI'])
     db = mongo_client["nnx"]
+    vehicle_inventory_collection = db['vehicle_inventory']
 
     @app.context_processor
     def inject_csrf_token():

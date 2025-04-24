@@ -17,6 +17,8 @@ import socketio
 import eventlet.wsgi
 import time
 from pymongo import MongoClient
+import ssl
+# from app import socketio as sio
 
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin")
@@ -26,139 +28,19 @@ app = Flask(__name__)
 CORS(app)
 
 last_emit_time = {}
-user_sessions = {}
-company_rooms = {}
 
-sio = socketio.Server(cors_allowed_origins="*", ping_timeout=60, ping_interval=20, transports=['websocket'])
-app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
 
-@sio.event
-def connect(sid, environ):
-    print(f"Client connected: {sid}")
+server_url = "https://localhost:5000" 
+cert_path = os.path.join("cert", "cert.pem")  
 
-@sio.event
-def authenticate(sid, data):
-    """
-    Handle user authentication and room assignment
-    Expected data: {user_id: string, company: string or null}
-    """
-    try:
-        user_id = data.get('user_id')
-        company = data.get('company')  # Can be None
-        
-        # Store user session info
-        user_sessions[sid] = {
-            'user_id': user_id,
-            'company': company
-        }
-        
-        # Add user to company room if they have one
-        if company not in (None, '', 'none'):
-            company = company.strip().lower()
-            if company not in company_rooms:
-                company_rooms[company] = []
-            company_rooms[company].append(sid)
-            sio.enter_room(sid, f"company_{company}")
-        else:
-            # Users without company see all data
-            sio.enter_room(sid, "all_data")
-            
-        print(f"User {user_id} authenticated with company {company}")
-        print(company_rooms)
-        print("SID: ",sid)
-        sio.emit('authentication_success', {'status': 'success'}, room=sid)
-    except Exception as e:
-        print(f"Authentication error: {e}")
-        sio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
+ssl_context = ssl.create_default_context(cafile=cert_path)
 
-@sio.event
-def disconnect(sid):
-    # Clean up session data
-    if sid in user_sessions:
-        user_data = user_sessions[sid]
-        company = user_data.get('company')
-        
-        # Remove from company rooms if applicable
-        if company and company in company_rooms and sid in company_rooms[company]:
-            company_rooms[company].remove(sid)
-            if not company_rooms[company]:  # If company room is empty
-                del company_rooms[company]
-                
-        # Remove session
-        del user_sessions[sid]
-        
-    print(f"Client disconnected: {sid}")
-
-def broadcast_vehicle_data(vehicle_data):
-    """
-    Broadcast vehicle data to the correct users based on company
-    """
-
-    try:
-        # Get the vehicle's company from inventory
-        imei = vehicle_data.get('imei')
-        vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
-
-        sio.emit('test_event', {'message': 'test'})
-        print(f"Connevcted clients: {sio.eio.sockets}")
-        company = vehicle_info.get('CompanyName') if vehicle_info else None
-        
-        if company and company in company_rooms:
-            # Broadcast to specific company room
-            company = company.strip().lower()
-            print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
-            sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
-            
-        # Also send to users who should see all data
-        print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
-        sio.emit('vehicle_update', vehicle_data, room="all_data")
-        
-    except Exception as e:
-        print(f"Error broadcasting vehicle data: {e}")
-
-def broadcast_sos_alert(sos_data):
-    """
-    Broadcast SOS alerts to the correct users based on company
-    """
-    try:
-        # Get the vehicle's company from inventory
-        imei = sos_data.get('imei')
-        vehicle_info = vehicle_inventory_collection.find_one({"imei": imei})
-        
-        if not vehicle_info:
-            # If no vehicle info found, broadcast to all users
-            sio.emit('sos_alert', sos_data)
-            return
-            
-        company = vehicle_info.get('CompanyName')
-        
-        if company:
-            # Broadcast to specific company room
-            sio.emit('sos_alert', sos_data, room=f"company_{company}")
-            
-        # Also send to users who should see all data
-        sio.emit('sos_alert', sos_data, room="all_data")
-        
-    except Exception as e:
-        print(f"Error broadcasting SOS alert: {e}")
-
-@sio.event
-def vehicle_update(sid, data):
-    broadcast_vehicle_data(data)
-
-@sio.event
-def sos_alert(sid, data):
-    print(f"Received sos alert: {data}")
-    broadcast_sos_alert(data)
-
-@sio.event
-def get_rooms(sid):
-    try:
-        rooms = sio.rooms(sid)
-        sio.emit('rooms_list', {'rooms': list(rooms)}, room=sid)
-    except Exception as e:
-        print(f"Error fetching rooms for SID {sid}: {e}")
-        sio.emit('rooms_list', {'error': str(e)}, room=sid)
+try:
+    sio.connect(server_url, transports=['websocket'])
+    print("Connected to WebSocket server successfully!")
+except Exception as e:
+    print(f"Failed to connect to WebSocket server: {e}")
 
 collection = db['atlanta']
 sos_logs_collection = db['sos_logs']  
@@ -355,7 +237,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 json_data['_id'] = str(json_data['_id'])
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
-                broadcast_vehicle_data(json_data)
+                inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+                if inventory_data:
+                    json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                else:
+                    json_data['LicensePlateNumber'] = 'Unknown'
+                sio.emit('vehicle_update', json_data)
         except Exception as e:
             print("Error storing data in MongoDB:", e)
 
@@ -377,7 +264,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 # sio.emit('sos_alert', json_data)
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
-                broadcast_sos_alert(json_data)
+                inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+                if inventory_data:
+                    json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                else:
+                    json_data['LicensePlateNumber'] = 'Unknown'
+                sio.emit('sos_alert', json_data)
                 print("Emited SOS alert")
         except Exception as e:
             print("Error logging SOS alert to MongoDB:", e)
@@ -396,18 +288,18 @@ def log_data(json_data):
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 
-def start_flask_server():
-    cert_path = os.path.join("cert", "cert.pem")
-    key_path = os.path.join("cert", "key.pem")
-    eventlet.wsgi.server(
-        eventlet.wrap_ssl(
-            eventlet.listen(('0.0.0.0', 8555)),
-            certfile=cert_path,
-            keyfile=key_path,
-            server_side=True
-        ),
-        app
-    )
+# def start_flask_server():
+#     cert_path = os.path.join("cert", "cert.pem")
+#     key_path = os.path.join("cert", "key.pem")
+#     eventlet.wsgi.server(
+#         eventlet.wrap_ssl(
+#             eventlet.listen(('0.0.0.0', 8555)),
+#             certfile=cert_path,
+#             keyfile=key_path,
+#             server_side=True
+#         ),
+#         app
+#     )
 
 def run_servers():
     HOST = "0.0.0.0"
@@ -418,8 +310,6 @@ def run_servers():
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
-
-    eventlet.spawn(start_flask_server)
 
     # flask_thread = threading.Thread(target=start_flask_server)
     # flask_thread.daemon = True
