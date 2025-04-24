@@ -66,7 +66,7 @@ def create_app(config_name='default'):
                     socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid company {company}'}, room=sid)
                     return
                 
-                if company_db['_id'] != user['company']:
+                if str(company_db['_id']) != user['company']:
                     flash("User does not belong to this company", "danger")
                     socketio.emit('authentication_error', {'status': 'error', 'message': f'User does not belong to this company {company}'}, room=sid)
                     return
