@@ -74,17 +74,18 @@ socket.on("sos_alert", function (data) {
 });
 
 async function fetchdistance(data) {
-  try {
-    const distance = await fetch(`/vehicle/getVehiclesDistances/${data.imei}`);
+  const oldData = vehicleData.get(data.imei);
 
-    data["distance"] = distance.distance_traveled; // Limit to 2 decimal places
-    return data;
-  } catch (error) {
-    console.error("Error fetching vehicle distance:", error);
-    data["distance"] = "N/A";
-    return data;
+  if (oldData) {
+    const distance = data.odometer - oldData.odometer;
+
+    data.distance = distance.toFixed(2);
   }
+
+  return data;
 }
+
+let vehicleData = new Map();
 
 async function fetchVehicleData() {
   try {
@@ -106,23 +107,25 @@ async function fetchVehicleData() {
 
     const data = await response.json();
 
-    return data.map((vehicle) => ({
-      LicensePlateNumber: vehicle.LicensePlateNumber,
-      VehicleType: vehicle.VehicleType,
-      speed: vehicle.speed,
-      latitude: parseFloat(vehicle.latitude),
-      longitude: parseFloat(vehicle.longitude),
-      date: vehicle.date,
-      time: vehicle.time,
-      address: vehicle.address || "Location unknown",
-      status: vehicle.status,
-      imei: vehicle.imei,
-      ignition: vehicle.ignition,
-      gsm: vehicle.gsm_sig,
-      sos: vehicle.sos,
-      distance: distanceMap[vehicle.LicensePlateNumber] || "N/A",
-      odometer: vehicle.odometer,
-    }));
+    data.forEach((vehicle) => {
+      vehicleData.set(vehicle.imei, {
+        LicensePlateNumber: vehicle.LicensePlateNumber,
+        VehicleType: vehicle.VehicleType,
+        speed: vehicle.speed,
+        latitude: parseFloat(vehicle.latitude),
+        longitude: parseFloat(vehicle.longitude),
+        date: vehicle.date,
+        time: vehicle.time,
+        address: vehicle.address || "Location unknown",
+        status: vehicle.status,
+        imei: vehicle.imei,
+        ignition: vehicle.ignition,
+        gsm: vehicle.gsm_sig,
+        sos: vehicle.sos,
+        distance: distanceMap[vehicle.LicensePlateNumber] || "N/A",
+        odometer: vehicle.odometer,
+      });
+    });
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     return [];
@@ -203,14 +206,13 @@ function triggerSOS(imei, marker) {
 }
 
 async function renderVehicles() {
-  const vehicles = await fetchVehicleData();
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
-  countContainer.innerText = vehicles.length;
+  countContainer.innerText = vehicleData.length;
 
-  vehicles.forEach((vehicle) => {
+  vehicleData.forEach((vehicle) => {
     const imei = vehicle.imei;
 
     const vehicleElement = document.createElement("div");
@@ -829,15 +831,13 @@ async function populateVehicleTable() {
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = ""; // Clear existing rows
 
-  const vehicles = await fetchVehicleData();
-
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
-  countContainer.innerText = vehicles.length;
+  countContainer.innerText = vehicleData.length;
 
-  vehicles.forEach((vehicle) => {
+  vehicleData.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", vehicle.imei);
