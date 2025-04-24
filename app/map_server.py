@@ -237,6 +237,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 json_data['_id'] = str(json_data['_id'])
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
+                inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+                if inventory_data:
+                    json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                else:
+                    json_data['LicensePlateNumber'] = 'Unknown'
                 sio.emit('vehicle_update', json_data)
         except Exception as e:
             print("Error storing data in MongoDB:", e)
@@ -259,6 +264,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 # sio.emit('sos_alert', json_data)
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
+                inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
+                if inventory_data:
+                    json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
+                else:
+                    json_data['LicensePlateNumber'] = 'Unknown'
                 sio.emit('sos_alert', json_data)
                 print("Emited SOS alert")
         except Exception as e:
