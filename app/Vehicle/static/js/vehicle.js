@@ -84,6 +84,7 @@ function updateVehicleCard(data) {
       } <br>
       <strong>Lat:</strong> ${latitude} <br>
       <strong>Lon:</strong> ${longitude} <br>
+      <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(
         data.date,
         data.time
