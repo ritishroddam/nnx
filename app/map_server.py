@@ -17,6 +17,7 @@ import socketio
 import eventlet.wsgi
 import time
 from pymongo import MongoClient
+import ssl
 from app import socketio as sio
 
 
@@ -29,6 +30,19 @@ CORS(app)
 last_emit_time = {}
 user_sessions = {}
 company_rooms = {}
+
+sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
+
+server_url = "https://localhost:8555" 
+cert_path = os.path.join("cert", "cert.pem")  
+
+ssl_context = ssl.create_default_context(cafile=cert_path)
+
+try:
+    sio.connect(server_url, transports=['websocket'])
+    print("Connected to WebSocket server successfully!")
+except Exception as e:
+    print(f"Failed to connect to WebSocket server: {e}")
 
 @sio.event
 def connect(sid, environ):
