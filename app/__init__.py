@@ -109,11 +109,12 @@ def create_app(config_name='default'):
 
                 company = vehicle_info.get('CompanyName') if vehicle_info else None
 
-                if company and company in company_rooms:
-                    # Broadcast to specific company room
+                if company:
                     company = company.strip().lower()
-                    print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
-                    socketio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
+                    if  company in company_rooms:
+                        # Broadcast to specific company room
+                        print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
+                        socketio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
 
                 # Also send to users who should see all data
                 socketio.emit('vehicle_update', vehicle_data, room="all_data")
