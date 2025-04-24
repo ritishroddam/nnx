@@ -50,11 +50,19 @@ socket.onAny((event, ...args) => {
   console.log(`Received event: ${event}`, args);
 });
 
-socket.on("vehicle_update", function (data) {
+socket.on("vehicle_update", async function (data) {
   console.log("Vehicle update received:", data);
-  const updatedData = fetchdistance(data);
-  updateVehicleData(updatedData);
-  updateVehicleCard(updatedData);
+
+  try {
+    // Wait for fetchdistance to resolve and return the updated data
+    const updatedData = await fetchdistance(data);
+
+    // Proceed with the updated data
+    updateVehicleData(updatedData);
+    updateVehicleCard(updatedData);
+  } catch (error) {
+    console.error("Error in vehicle_update handler:", error);
+  }
 });
 
 socket.on("sos_alert", function (data) {
@@ -69,7 +77,7 @@ async function fetchdistance(data) {
   try {
     const distance = await fetch(`/vehicle/getVehiclesDistances/${data.imei}`);
 
-    data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
+    data["distance"] = distance.distance; // Limit to 2 decimal places
     return data;
   } catch (error) {
     console.error("Error fetching vehicle distance:", error);
