@@ -67,7 +67,7 @@ socket.on("sos_alert", function (data) {
 
 async function fetchdistance(data) {
   try {
-    const distance = await fetch(`/vehicle/${imei}/getVehiclesDistances`);
+    const distance = await fetch(`/vehicle/${data.imei}/getVehiclesDistances`);
 
     data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
     return data;
