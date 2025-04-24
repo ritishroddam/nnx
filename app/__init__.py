@@ -1,3 +1,4 @@
+from bson import ObjectId
 import eventlet
 from flask import Flask, redirect, url_for, flash, jsonify, request, g, render_template
 from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
@@ -50,6 +51,13 @@ def create_app(config_name='default'):
                 'company': company
             }
             
+            user = db['users'].find_one({"_id": ObjectId(user_id)})
+
+            if not user or user.get('company') != company:
+                flash("Invalid user or company", "danger")
+                socketio.emit('authentication_error', {'status': 'error', 'message': 'Invalid user or company'}, room=sid)
+                return
+
             # Add user to company room if they have one
             if company not in (None, '', 'none'):
                 company = company.strip().lower()
