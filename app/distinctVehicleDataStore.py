@@ -11,7 +11,7 @@ import os
 
 sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
 
-server_url = "https://localhost:8555" 
+server_url = "https://localhost:5000" 
 cert_path = os.path.join("cert", "cert.pem")  
 
 ssl_context = ssl.create_default_context(cafile=cert_path)

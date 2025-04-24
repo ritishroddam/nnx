@@ -87,6 +87,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         return cellid[:5]
     
     def should_emit(imei, date_time):
+        print(f"date time of current imei: {date_time}")
+        print(f"last emit time of current imei: {last_emit_time.get(imei)}")
         if imei not in last_emit_time or date_time - last_emit_time[imei] > timedelta(seconds=1):
             last_emit_time[imei] = date_time
             return True
