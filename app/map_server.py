@@ -110,7 +110,6 @@ def broadcast_vehicle_data(vehicle_data):
         # Also send to users who should see all data
         print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
         sio.emit('vehicle_update', vehicle_data, room="all_data")
-        print("Emitted data", vehicle_data)
         
     except Exception as e:
         print(f"Error broadcasting vehicle data: {e}")
