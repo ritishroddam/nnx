@@ -29,7 +29,7 @@ def create_app(config_name='default'):
     socketio.init_app(app, cors_allowed_origins="*", transports=["websocket"])
 
     @socketio.event
-    def connect(sid, environ):
+    def connect(sid):
         print(f"Client connected: {sid}")
 
     @socketio.event
