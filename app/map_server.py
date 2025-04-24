@@ -111,8 +111,6 @@ def broadcast_vehicle_data(vehicle_data):
         imei = vehicle_data.get('imei')
         vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
 
-        sio.emit('test_event', {'message': 'test'})
-        print(f"Connevcted clients: {sio.eio.sockets}")
         company = vehicle_info.get('CompanyName') if vehicle_info else None
         
         if company and company in company_rooms:
@@ -122,8 +120,8 @@ def broadcast_vehicle_data(vehicle_data):
             sio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
             
         # Also send to users who should see all data
-        print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
         sio.emit('vehicle_update', vehicle_data, room="all_data")
+        print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
         
     except Exception as e:
         print(f"Error broadcasting vehicle data: {e}")
