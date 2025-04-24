@@ -419,9 +419,11 @@ def run_servers():
     server_thread.daemon = True
     server_thread.start()
 
-    flask_thread = threading.Thread(target=start_flask_server)
-    flask_thread.daemon = True
-    flask_thread.start()
+    eventlet.spawn(start_flask_server)
+
+    # flask_thread = threading.Thread(target=start_flask_server)
+    # flask_thread.daemon = True
+    # flask_thread.start()
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
