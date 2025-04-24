@@ -353,7 +353,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 json_data['_id'] = str(json_data['_id'])
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
-                broadcast_vehicle_data(json_data)
+                sio.start_background_task(broadcast_vehicle_data, json_data)
         except Exception as e:
             print("Error storing data in MongoDB:", e)
 
