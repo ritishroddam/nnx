@@ -66,10 +66,16 @@ socket.on("sos_alert", function (data) {
 });
 
 async function fetchdistance(data) {
-  const distance = await fetch(`/vehicle/${imei}/getVehiclesDistances`);
+  try {
+    const distance = await fetch(`/vehicle/${imei}/getVehiclesDistances`);
 
-  data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
-  return data;
+    data["distance"] = distance.distance.toFixed(2); // Limit to 2 decimal places
+    return data;
+  } catch (error) {
+    console.error("Error fetching vehicle distance:", error);
+    data["distance"] = "N/A";
+    return data;
+  }
 }
 
 async function fetchVehicleData() {
