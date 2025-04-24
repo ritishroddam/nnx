@@ -246,7 +246,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             result = collection.insert_one(json_data)
             
             # sio.emit('vehicle_update', json_data, room="all_data")
-            if MyTCPHandler.should_emit(json_data['imei'],json_data['date_time']):
+            if json_data['gps'] == 'A' and MyTCPHandler.should_emit(json_data['imei'],json_data['date_time']):
                 json_data['_id'] = str(json_data['_id'])
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
@@ -273,7 +273,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             }
             sos_logs_collection.insert_one(sos_log)
             # print("SOS alert logged in MongoDB:", sos_log)
-            if MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
+            if json_data['gps'] == 'A' and MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
                 # sio.emit('sos_alert', json_data)
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
