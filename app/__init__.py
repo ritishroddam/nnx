@@ -29,16 +29,18 @@ def create_app(config_name='default'):
     socketio.init_app(app, cors_allowed_origins="*", transports=["websocket"])
 
     @socketio.event
-    def connect(sid):
+    def connect():
+        sid = request.sid
         print(f"Client connected: {sid}")
 
     @socketio.event
-    def authenticate(sid, data):
+    def authenticate(data):
         """
         Handle user authentication and room assignment
         Expected data: {user_id: string, company: string or null}
         """
         try:
+            sid = request.sid
             user_id = data.get('user_id')
             company = data.get('company')  # Can be None
             
@@ -68,8 +70,9 @@ def create_app(config_name='default'):
             socketio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
 
     @socketio.event
-    def get_rooms(sid):
+    def get_rooms():
         try:
+            sid = request.sid
             rooms = socketio.rooms(sid)
             socketio.emit('rooms_list', {'rooms': list(rooms)}, room=sid)
         except Exception as e:
@@ -77,7 +80,8 @@ def create_app(config_name='default'):
             socketio.emit('rooms_list', {'error': str(e)}, room=sid)
 
     @socketio.event
-    def disconnect(sid):
+    def disconnect():
+        sid = request.sid
         # Clean up session data
         if sid in user_sessions:
             user_data = user_sessions[sid]
