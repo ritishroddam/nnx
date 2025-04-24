@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identit
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
 from config import config
-from flask_socketio import SocketIO, join_room, leave_room
+from flask_socketio import SocketIO, join_room, leave_room, rooms
 import subprocess
 import os
 import signal
@@ -75,7 +75,7 @@ def create_app(config_name='default'):
     def get_rooms():
         try:
             sid = request.sid
-            rooms = socketio.rooms(sid)
+            current_rooms = rooms(sid)
             socketio.emit('rooms_list', {'rooms': list(rooms)}, room=sid)
         except Exception as e:
             print(f"Error fetching rooms for SID {sid}: {e}")
