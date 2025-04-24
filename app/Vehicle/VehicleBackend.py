@@ -46,7 +46,11 @@ def getVehicleDistances(imei):
 
         distances = list(atlanta_collection.aggregate(pipeline))
 
-        distance = distances['distance_traveled']
+        if distances:  # Check if the list is not empty
+            distance = distances[0]['distance_traveled']  # Access the first document
+            return jsonify({"imei": imei, "distance_traveled": distance}), 200
+        else:
+            return jsonify({"imei": imei, "distance_traveled": 0}), 200  # No data found
 
         return jsonify(distances), 200
     except Exception as e:
