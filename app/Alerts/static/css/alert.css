@@ -238,7 +238,10 @@
 
 .pagination-controls {
     display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 5px;
+    margin-top: 15px;
 }
 
 .page-btn {
@@ -427,19 +430,35 @@
 .pagination-controls button {
     padding: 5px 10px;
     border: 1px solid #ddd;
-    background-color: white;
+    background: white;
     cursor: pointer;
     border-radius: 4px;
-    transition: all 0.3s;
 }
 
 .pagination-controls button:hover:not(:disabled) {
-    background-color: #eee;
+    background: #f0f0f0;
 }
 
 .pagination-controls button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.pagination-controls button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 5px;
+}
+
+.page-numbers span {
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
 }
 
 .page-info {
