@@ -75,6 +75,7 @@ async function updateData(data) {
         latLng.lat(),
         latLng.lng()
       );
+      print(data["location"]);
     }
 
     data["distance"] = String(distance);
