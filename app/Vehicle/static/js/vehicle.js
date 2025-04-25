@@ -71,11 +71,11 @@ async function updateData(data) {
     if (data.latitude != "" && data.longitude != "") {
       const latLng = parseCoordinates(data.latitude, data.longitude);
 
-      data["location"] = await getAddressFromCoordinates(
+      data["address"] = await getAddressFromCoordinates(
         latLng.lat(),
         latLng.lng()
       );
-      console.log(data["location"]);
+      console.log(data["address"]);
     }
 
     data["distance"] = String(distance);
