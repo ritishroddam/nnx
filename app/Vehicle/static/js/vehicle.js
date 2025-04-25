@@ -1169,7 +1169,7 @@ window.filterVehicles = filterVehicles;
 
 window.onload = async function () {
   await initMap();
-  fetchVehicleData();
+  await fetchVehicleData();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
 };
