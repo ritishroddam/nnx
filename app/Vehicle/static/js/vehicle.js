@@ -77,7 +77,7 @@ async function updateData(data) {
       );
     }
 
-    data["distance"] = str(distance);
+    data["distance"] = String(distance);
 
     vehicleData.set(data.imei, data);
   }
