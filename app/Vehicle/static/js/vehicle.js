@@ -335,7 +335,6 @@ function updateMap() {
       device.speed != null &&
       device.course != null
     ) {
-      console.log(device.latitude, device.longitude);
       const latLng = parseCoordinates(device.latitude, device.longitude); // Already returns google.maps.LatLng
       const iconUrl = getCarIconBySpeed(
         device.speed,
