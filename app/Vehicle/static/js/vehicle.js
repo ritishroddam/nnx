@@ -103,6 +103,7 @@ async function fetchVehicleData() {
         longitude: parseFloat(vehicle.longitude),
         date: vehicle.date,
         time: vehicle.time,
+        course: vehicle.course,
         address: vehicle.address || "Location unknown",
         status: vehicle.status,
         imei: vehicle.imei,
@@ -199,8 +200,7 @@ async function renderVehicles() {
   listContainer.innerHTML = "";
   countContainer.innerText = vehicleData.length;
   console.log(vehicleData.length);
-  vehicleData.forEach((vehicle) => {
-    const imei = vehicle.imei;
+  vehicleData.forEach((vehicle, imei) => {
     console.log(imei);
 
     const vehicleElement = document.createElement("div");
@@ -321,94 +321,73 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 }
 
 function updateMap() {
-  fetch("/vehicle/api/vehicles")
-    .then((response) => response.json())
-    .then((data) => {
-      const bounds = new google.maps.LatLngBounds();
-      dataAvailable = true;
-      countdownTimer = refreshInterval / 1000;
+  const bounds = new google.maps.LatLngBounds();
+  dataAvailable = true;
+  countdownTimer = refreshInterval / 1000;
 
-      const countContainer = document.getElementById("countee");
-      countContainer.innerText = data.length;
+  const countContainer = document.getElementById("countee");
+  countContainer.innerText = data.length;
 
-      data.forEach((device) => {
-        const imei = device.imei;
+  vehicleData.forEach((device, imei) => {
+    if (
+      device.latitude &&
+      device.longitude &&
+      device.speed != null &&
+      device.course != null
+    ) {
+      const latLng = parseCoordinates(device.latitude, device.longitude); // Already returns google.maps.LatLng
+      const iconUrl = getCarIconBySpeed(
+        device.speed,
+        imei,
+        device.date,
+        device.time
+      );
+      const rotation = device.course;
 
-        if (
-          device.latitude &&
-          device.longitude &&
-          device.speed != null &&
-          device.course != null
-        ) {
-          const latLng = parseCoordinates(device.latitude, device.longitude); // Already returns google.maps.LatLng
-          const iconUrl = getCarIconBySpeed(
-            device.speed,
-            imei,
-            device.date,
-            device.time
-          );
-          const rotation = device.course;
-
-          if (markers[imei]) {
-            updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
-            markers[imei].device = device;
-          } else {
-            markers[imei] = createAdvancedMarker(
-              latLng,
-              iconUrl,
-              rotation,
-              device
-            );
-          }
-
-          if (device.sos === "1") {
-            triggerSOS(imei, markers[imei]);
-          } else {
-            removeSOS(imei);
-          }
-
-          lastDataReceivedTime[imei] = new Date(
-            `${device.date}T${device.time}`
-          );
-          bounds.extend(latLng);
-        }
-
-        checkForDataTimeout(imei);
-      });
-
-      if (!bounds.isEmpty() && firstFit) {
-        map.fitBounds(bounds);
-        firstFit = false;
-
-        const boundsCenter = bounds.getCenter();
-        const offset = -2;
-        const newCenter = {
-          lat: boundsCenter.lat(),
-          lng: boundsCenter.lng() + offset,
-        };
-
-        map.setCenter(newCenter);
-
-        const listener = google.maps.event.addListener(
-          map,
-          "idle",
-          function () {
-            if (map.getZoom() < 7) {
-              // Adjust the zoom level as needed
-              map.setZoom(7);
-            }
-            google.maps.event.removeListener(listener);
-          }
-        );
+      if (markers[imei]) {
+        updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
+        markers[imei].device = device;
+      } else {
+        markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
       }
 
-      renderVehicles();
-      filterVehicles();
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-      dataAvailable = false;
+      if (device.sos === "1") {
+        triggerSOS(imei, markers[imei]);
+      } else {
+        removeSOS(imei);
+      }
+
+      lastDataReceivedTime[imei] = new Date(`${device.date}T${device.time}`);
+      bounds.extend(latLng);
+    }
+
+    checkForDataTimeout(imei);
+  });
+
+  if (!bounds.isEmpty() && firstFit) {
+    map.fitBounds(bounds);
+    firstFit = false;
+
+    const boundsCenter = bounds.getCenter();
+    const offset = -2;
+    const newCenter = {
+      lat: boundsCenter.lat(),
+      lng: boundsCenter.lng() + offset,
+    };
+
+    map.setCenter(newCenter);
+
+    const listener = google.maps.event.addListener(map, "idle", function () {
+      if (map.getZoom() < 7) {
+        // Adjust the zoom level as needed
+        map.setZoom(7);
+      }
+      google.maps.event.removeListener(listener);
     });
+  }
+
+  renderVehicles();
+  filterVehicles();
 }
 
 function animateMarker(marker, newPosition, duration = 6000) {
@@ -822,7 +801,7 @@ async function populateVehicleTable() {
   listContainer.innerHTML = "";
   countContainer.innerText = vehicleData.length;
 
-  vehicleData.forEach((vehicle) => {
+  vehicleData.forEach((vehicle, imei) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", vehicle.imei);
@@ -1190,6 +1169,7 @@ window.filterVehicles = filterVehicles;
 
 window.onload = function () {
   initMap();
+  fetchVehicleData();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
 };
