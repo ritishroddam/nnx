@@ -201,6 +201,7 @@ async function renderVehicles() {
   console.log(vehicleData.length);
   vehicleData.forEach((vehicle) => {
     const imei = vehicle.imei;
+    console.log(imei);
 
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
