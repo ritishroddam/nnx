@@ -99,8 +99,8 @@ async function fetchVehicleData() {
         LicensePlateNumber: vehicle.LicensePlateNumber,
         VehicleType: vehicle.VehicleType,
         speed: vehicle.speed,
-        latitude: parseFloat(vehicle.latitude),
-        longitude: parseFloat(vehicle.longitude),
+        latitude: vehicle.latitude,
+        longitude: vehicle.longitude,
         date: vehicle.date,
         time: vehicle.time,
         course: vehicle.course,
@@ -335,6 +335,7 @@ function updateMap() {
       device.speed != null &&
       device.course != null
     ) {
+      console.log(device.latitude, device.longitude);
       const latLng = parseCoordinates(device.latitude, device.longitude); // Already returns google.maps.LatLng
       const iconUrl = getCarIconBySpeed(
         device.speed,
