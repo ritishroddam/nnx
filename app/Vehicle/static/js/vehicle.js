@@ -906,7 +906,7 @@ async function initMap() {
 
   const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
 
-  const { Map } = await google.maps.importLibrary("maps");
+  const { Map, LatLngBounds } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
   // Initialize Map
