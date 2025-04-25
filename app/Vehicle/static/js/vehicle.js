@@ -1167,8 +1167,8 @@ function addHoverListenersToCardsAndMarkers() {
 
 window.filterVehicles = filterVehicles;
 
-window.onload = function () {
-  initMap();
+window.onload = async function () {
+  await initMap();
   fetchVehicleData();
   updateMap();
   document.querySelector(".block-container").style.display = "none";
