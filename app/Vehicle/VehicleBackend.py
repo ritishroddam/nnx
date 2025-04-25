@@ -83,8 +83,6 @@ def get_vehicles():
                     vehicles.append(data)
         else:
             userCompany = claims.get('company')
-            print("user Data:", claims)
-            print("User Company:", userCompany)
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
             for vehicle in inventory_data:
                 vehicleData = list((collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0})))
