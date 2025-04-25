@@ -34,7 +34,7 @@ def login():
             return redirect(url_for('auth.login'))
         
         if user['company'] != 'none':
-            company = User.get_company_by_company_id(user['company'])[0],
+            company = User.get_company_by_company_id(user['company']),
             print(f"Company: {company}")
         else:
             company = None
@@ -45,7 +45,7 @@ def login():
             'user_id': str(user['_id']),
             'roles': str([user['role']]),
             'company_id': str(user['company']),
-            'company': company,
+            'company': str(company),
         }
         
         access_token = create_access_token(
