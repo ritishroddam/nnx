@@ -65,7 +65,7 @@ async function fetchdistance(data) {
   const oldData = vehicleData.get(data.imei);
 
   if (oldData) {
-    const distance = data.odometer - oldData.odometer;
+    const distance = data.odometer - oldData.odometer + oldData.distance;
 
     data["distance"] = distance.toFixed(2);
     console.log(distance.toFixed(2), "km");
