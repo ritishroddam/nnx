@@ -201,8 +201,6 @@ async function renderVehicles() {
   countContainer.innerText = vehicleData.length;
   console.log(vehicleData.length);
   vehicleData.forEach((vehicle, imei) => {
-    console.log(imei);
-
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", vehicle.imei);
@@ -929,8 +927,6 @@ async function initMap() {
 
   geocoder = new google.maps.Geocoder();
   infoWindow = new google.maps.InfoWindow();
-
-  renderVehicles();
 }
 
 // Theme toggle functionality
