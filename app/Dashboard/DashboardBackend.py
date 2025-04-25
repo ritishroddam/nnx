@@ -1,6 +1,7 @@
 from flask import Blueprint, json, app, jsonify, render_template, Flask, request, redirect, url_for, session, flash, send_file
 from pymongo import MongoClient
 from datetime import datetime, timedelta
+from pytz import timezone
 from bson.objectid import ObjectId
 import bcrypt
 import os
@@ -135,13 +136,18 @@ def atlanta_distance_data():
 @jwt_required()
 def get_vehicle_distances():
     try:
-        today_str = datetime.now().strftime('%d%m%y')  # Format: DDMMYY
+        utc_now = datetime.now(timezone('UTC'))
+        start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
         vehicle_map_cursor = vehicle_inventory.find({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
         pipeline = [
-            {"$match": {"date": today_str}},
+            {"$match": {"date_time": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                }}},
             {"$project": {  
                 "imei": 1,
                 "odometer": {"$toDouble": "$odometer"} 

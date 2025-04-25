@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 from datetime import datetime, timedelta
+from pytz import timezone
 import os
 
 
@@ -23,10 +24,15 @@ vehicle_inventory_collection = db['vehicle_inventory']
 @jwt_required()
 def getVehicleDistances(imei):
     try:
-        today_str = datetime.now().strftime('%d%m%y')
+        utc_now = datetime.now(timezone('UTC'))
+        start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
         pipeline = [
             {"$match": {
-                "date": today_str,
+                "date_time": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                },
                 "imei": imei
             }},
             {"$project": {  
