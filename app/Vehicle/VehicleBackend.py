@@ -82,6 +82,7 @@ def get_vehicles():
                 vehicles.append(vehicleData)
         else:
             userCompany = claims.get('company')
+            print("user Data:", claims)
             print("User Company:", userCompany)
             inventory_data = list(vehicle_inventory_collection.find({'company': userCompany}))
             print()
