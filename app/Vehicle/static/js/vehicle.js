@@ -199,7 +199,6 @@ async function renderVehicles() {
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
   countContainer.innerText = vehicleData.length;
-  console.log(vehicleData.length);
   vehicleData.forEach((vehicle, imei) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
@@ -322,9 +321,6 @@ function updateMap() {
   const bounds = new google.maps.LatLngBounds();
   dataAvailable = true;
   countdownTimer = refreshInterval / 1000;
-
-  const countContainer = document.getElementById("countee");
-  countContainer.innerText = vehicleData.length;
 
   vehicleData.forEach((device, imei) => {
     if (
