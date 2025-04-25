@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.success) {
                 displayAlerts(data.alerts);
                 updateTotalAlerts(data.count);
-                updatePagination(data.count, currentPage, perPage, data.total_pages);  // Pass currentPage here
+                updatePagination(data.count, currentPage, perPage, data.total_pages);
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
             }
@@ -361,11 +361,63 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         paginationControls.appendChild(prevButton);
         
-        // Page info
-        const pageInfo = document.createElement("span");
-        pageInfo.className = "page-info";
-        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-        paginationControls.appendChild(pageInfo);
+        // Page numbers
+        const pageNumbers = document.createElement("div");
+        pageNumbers.className = "page-numbers";
+        
+        // Always show first page
+        if (currentPage > 2) {
+            const firstPage = document.createElement("button");
+            firstPage.textContent = "1";
+            firstPage.addEventListener("click", () => {
+                currentPage = 1;
+                loadAlerts();
+            });
+            pageNumbers.appendChild(firstPage);
+            
+            if (currentPage > 3) {
+                const ellipsis1 = document.createElement("span");
+                ellipsis1.textContent = "...";
+                pageNumbers.appendChild(ellipsis1);
+            }
+        }
+        
+        // Show pages around current page
+        const startPage = Math.max(1, currentPage - 1);
+        const endPage = Math.min(totalPages, currentPage + 1);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageButton = document.createElement("button");
+            pageButton.textContent = i;
+            if (i === currentPage) {
+                pageButton.classList.add("active");
+                pageButton.disabled = true;
+            }
+            pageButton.addEventListener("click", () => {
+                currentPage = i;
+                loadAlerts();
+            });
+            pageNumbers.appendChild(pageButton);
+        }
+        
+        // Always show last page
+        if (currentPage < totalPages - 1) {
+            if (currentPage < totalPages - 2) {
+                const ellipsis2 = document.createElement("span");
+                ellipsis2.textContent = "...";
+                pageNumbers.appendChild(ellipsis2);
+            }
+            
+            const lastPage = document.createElement("button");
+            lastPage.textContent = totalPages;
+            lastPage.addEventListener("click", () => {
+                currentPage = totalPages;
+                loadAlerts();
+            });
+            pageNumbers.appendChild(lastPage);
+        }
+        
+        paginationControls.appendChild(pageNumbers);
         
         // Next button
         const nextButton = document.createElement("button");
