@@ -76,7 +76,7 @@ def get_vehicles():
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
             
-            if vehicle['latitude'] is not "" and vehicle['longitude'] is not "":
+            if vehicle['latitude'] != "" and vehicle['longitude'] != "":
                 lat = nmea_to_decimal(vehicle['latitude'])
                 lng = nmea_to_decimal(vehicle['longitude'])
 
