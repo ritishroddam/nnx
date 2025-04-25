@@ -1,3 +1,5 @@
+let vehicleData = new Map();
+
 const socket = io(CONFIG.SOCKET_SERVER_URL, {
   transports: ["websocket"],
   reconnection: true,
@@ -71,8 +73,6 @@ async function fetchdistance(data) {
 
   return data;
 }
-
-let vehicleData = new Map();
 
 async function fetchVehicleData() {
   try {
