@@ -1168,8 +1168,8 @@ function addHoverListenersToCardsAndMarkers() {
 window.filterVehicles = filterVehicles;
 
 window.onload = async function () {
+  document.querySelector(".block-container").style.display = "none";
   await initMap();
   await fetchVehicleData();
   updateMap();
-  document.querySelector(".block-container").style.display = "none";
 };
