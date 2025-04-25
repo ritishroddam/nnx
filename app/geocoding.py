@@ -30,7 +30,7 @@ def calculate_bearing(coord1, coord2):
 
 def validate_coordinates(lat, lng):
     if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
-        raise ValueError("Invalid coordinates")
+        raise ValueError(f"Invalid coordinates {lat} and {lng}")
     
 def nmea_to_decimal(nmea_value):
     # Check if the string has a leading zero that should be removed
