@@ -1,12 +1,13 @@
 from flask import Flask, Blueprint, render_template, request, jsonify, flash
 from pymongo import MongoClient
+from datetime import datetime, timedelta
+import os
+from pytz import timezone
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
-from datetime import datetime, timedelta
-from pytz import timezone
-import os
+from app.geocoding import geocodeInternal
 
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
@@ -75,6 +76,10 @@ def get_vehicles():
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
             
+            if vehicle['lat'] is not "" and vehicle['lng'] is not "":
+                location = geocodeInternal(vehicle['lat'], vehicle['lng'])
+                vehicle['location'] = location
+
             # Match IMEI with vehicle_inventory collection
             inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('imei')})
             if inventory_data:

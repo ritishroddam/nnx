@@ -104,7 +104,7 @@ async function fetchVehicleData() {
         date: vehicle.date,
         time: vehicle.time,
         course: vehicle.course,
-        address: vehicle.address || "Location unknown",
+        address: vehicle.location || "Location unknown",
         status: vehicle.status,
         imei: vehicle.imei,
         ignition: vehicle.ignition,
@@ -166,6 +166,7 @@ function updateVehicleCard(data) {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
+        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           data.date,
           data.time
@@ -220,6 +221,7 @@ async function renderVehicles() {
         } <br>
         <strong>Lat:</strong> ${latitude} <br>
         <strong>Lon:</strong> ${longitude} <br>
+        <strong>Distance Travelled:</strong> ${vehicle.distance || "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           vehicle.date,
           vehicle.time
@@ -286,6 +288,9 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                     <p><strong>Speed:</strong> ${speed}</p>
                     <p><strong>Lat:</strong> ${lat}</p>
                     <p><strong>Lon:</strong> ${lon}</p>
+                    <strong>Distance Travelled:</strong> ${
+                      device.distance || "NA"
+                    } km <br>
                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
                       device.date,
                       device.time
@@ -712,6 +717,9 @@ function updateFloatingCard(vehicles, filterValue) {
           } <br>
           <strong>Lat:</strong> ${latitude} <br>
           <strong>Lon:</strong> ${longitude} <br>
+          <strong>Distance Travelled:</strong> ${
+            vehicle.distance || "NA"
+          } km <br>
           <strong>Last Update:</strong> ${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
