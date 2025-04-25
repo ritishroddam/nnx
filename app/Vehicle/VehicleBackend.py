@@ -7,7 +7,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
-from app.geocoding import geocodeInternal
+from app.geocoding import geocodeInternal, nmea_to_decimal
 
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
@@ -77,7 +77,10 @@ def get_vehicles():
             vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
             
             if vehicle['latitude'] is not "" and vehicle['longitude'] is not "":
-                location = geocodeInternal(vehicle['latitude'], vehicle['longitude'])
+                lat = nmea_to_decimal(vehicle['latitude'])
+                lng = nmea_to_decimal(vehicle['longitude'])
+
+                location = geocodeInternal(lat, lng)
                 vehicle['location'] = location
 
             # Match IMEI with vehicle_inventory collection

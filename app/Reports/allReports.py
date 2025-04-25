@@ -11,7 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 import pytz
-from app.geocoding import geocodeInternal
+from app.geocoding import geocodeInternal, nmea_to_decimal
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -30,25 +30,6 @@ FIELD_COLLECTION_MAP = {
                          'Location', 'OdometerReading', 'ServiceDueDate'],
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
-
-def nmea_to_decimal(nmea_value):
-    # Check if the string has a leading zero that should be removed
-    if nmea_value.startswith('0'):
-        nmea_value = nmea_value[1:]
-    
-    # Find where the minutes part starts
-    if len(nmea_value) >= 5:  # At least one digit for degrees + 4 for minutes
-        degrees = float(nmea_value[:-7])  # Everything before the last 7 characters
-        minutes = float(nmea_value[-7:])  # Last 7 characters
-    else:
-        # Handle potential formatting issues
-        parts = nmea_value.split('.')
-        degrees = float(parts[0][:-2])
-        minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
-    
-    # Convert to decimal degrees
-    decimal_degrees = degrees + (minutes / 60.0)
-    return decimal_degrees
 
 def get_date_range_filter(date_range):
     """Improved date range filter using datetime objects"""
@@ -522,9 +503,6 @@ def download_panic_report():
         if 'date_time' in df.columns:
             cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
             df = df[cols]
-
-
-        from app.geocoding import geocodeInternal
         
         df['latitude'] = df['latitude'].apply(
             lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x

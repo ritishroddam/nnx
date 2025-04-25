@@ -32,6 +32,25 @@ def validate_coordinates(lat, lng):
     if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
         raise ValueError("Invalid coordinates")
     
+def nmea_to_decimal(nmea_value):
+    # Check if the string has a leading zero that should be removed
+    if nmea_value.startswith('0'):
+        nmea_value = nmea_value[1:]
+    
+    # Find where the minutes part starts
+    if len(nmea_value) >= 5:  # At least one digit for degrees + 4 for minutes
+        degrees = float(nmea_value[:-7])  # Everything before the last 7 characters
+        minutes = float(nmea_value[-7:])  # Last 7 characters
+    else:
+        # Handle potential formatting issues
+        parts = nmea_value.split('.')
+        degrees = float(parts[0][:-2])
+        minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
+    
+    # Convert to decimal degrees
+    decimal_degrees = degrees + (minutes / 60.0)
+    return decimal_degrees
+    
 def geocodeInternal(lat,lng):
     try:
         lat = float(lat)
