@@ -69,9 +69,26 @@ def getVehicleDistances(imei):
 @jwt_required()
 def get_vehicles():
     try:
-        # Fetch data from the distinctAtlanta collection
-        vehicles = list(collection.find({},{'timestamp': 0}))
-        
+        claims = get_jwt()
+        user_roles = claims.get('roles', [])
+        vehicles = []
+        if 'admin' in user_roles:
+            # Fetch data from the distinctAtlanta collection
+            inventory_data = list(vehicle_inventory_collection.find())
+            for vehicle in inventory_data:
+                vehicleData = collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0})
+                vehicleData['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
+                vehicleData['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                vehicles.append(vehicleData)
+        else:
+            userCompany = claims.get('company')
+            inventory_data = list(vehicle_inventory_collection.find({'company': userCompany}))
+            for vehicle in inventory_data:
+                vehicleData = collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0})
+                vehicleData['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
+                vehicleData['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                vehicles.append(vehicleData)
+
         # Iterate through vehicles and fetch the LicensePlateNumber from vehicle_inventory
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
@@ -83,14 +100,6 @@ def get_vehicles():
                 location = geocodeInternal(lat, lng)
                 vehicle['location'] = location
 
-            # Match IMEI with vehicle_inventory collection
-            inventory_data = vehicle_inventory_collection.find_one({'IMEI': vehicle.get('imei')})
-            if inventory_data:
-                vehicle['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
-                vehicle['VehicleType'] = inventory_data.get('VehicleType', 'Unknown')   
-            else:
-                vehicle['LicensePlateNumber'] = 'Unknown'  # Default if no match is found
-                vehicle['VehicleType'] = 'Unknown'
         
         return jsonify(vehicles), 200
     except Exception as e:
