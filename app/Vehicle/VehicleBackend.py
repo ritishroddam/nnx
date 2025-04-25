@@ -77,20 +77,21 @@ def get_vehicles():
             inventory_data = list(vehicle_inventory_collection.find())
             for vehicle in inventory_data:
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
-                vehicleData['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
-                vehicleData['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                vehicles.append(vehicleData)
+                for data in vehicleData:  # Iterate over the list of documents
+                    data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
+                    data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                    vehicles.append(data)
         else:
             userCompany = claims.get('company')
             print("user Data:", claims)
             print("User Company:", userCompany)
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
             for vehicle in inventory_data:
-                vehicleData = (collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
-                print("Vehicle Data:", vehicleData)
-                vehicleData['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
-                vehicleData['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                vehicles.append(vehicleData)
+                vehicleData = list((collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0})))
+                for data in vehicleData:  # Iterate over the list of documents
+                    data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
+                    data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                    vehicles.append(data)
 
         # Iterate through vehicles and fetch the LicensePlateNumber from vehicle_inventory
         for vehicle in vehicles:
