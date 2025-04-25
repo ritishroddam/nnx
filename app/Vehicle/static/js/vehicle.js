@@ -198,7 +198,7 @@ async function renderVehicles() {
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
   countContainer.innerText = vehicleData.length;
-
+  console.log(vehicleData.length);
   vehicleData.forEach((vehicle) => {
     const imei = vehicle.imei;
 
