@@ -86,7 +86,7 @@ def get_vehicles():
             print("User Company:", userCompany)
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
             for vehicle in inventory_data:
-                vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
+                vehicleData = (collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
                 print("Vehicle Data:", vehicleData)
                 vehicleData['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                 vehicleData['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
