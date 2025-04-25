@@ -60,6 +60,15 @@ sos_logs_collection = db['sos_logs']
 distance_travelled_collection = db['distanceTravelled']
 vehicle_inventory_collection = db['vehicle_inventory']
 
+def ensure_socket_connection():
+    """Ensure the socket is connected, and reconnect if necessary."""
+    if not sio.connected:
+        try:
+            sio.connect(server_url, transports=['websocket'])
+            print("Reconnected to WebSocket server successfully!")
+        except Exception as e:
+            print(f"Failed to reconnect to WebSocket server: {e}")
+
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
 
@@ -244,6 +253,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def store_data_in_mongodb(self, json_data):
         try:
             result = collection.insert_one(json_data)
+
+            ensure_socket_connection()
             
             # sio.emit('vehicle_update', json_data, room="all_data")
             if json_data['gps'] == 'A' and MyTCPHandler.should_emit(json_data['imei'],json_data['date_time']):
@@ -272,9 +283,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 'timestamp': str(json_data['timestamp']),
             }
             sos_logs_collection.insert_one(sos_log)
-            # print("SOS alert logged in MongoDB:", sos_log)
+
+            ensure_socket_connection() 
+
             if json_data['gps'] == 'A' and MyTCPHandler.convert_to_datetime(json_data['date'],json_data['time']) > datetime.now() - timedelta(minutes = 5):
-                # sio.emit('sos_alert', json_data)
                 json_data['date_time'] = str(json_data['date_time'])
                 json_data['timestamp'] = str(json_data['timestamp'])
                 inventory_data = vehicle_inventory_collection.find_one({'IMEI': json_data.get('imei')})
