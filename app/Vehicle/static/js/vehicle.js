@@ -43,7 +43,7 @@ socket.on("disconnect", () => {
 socket.on("vehicle_update", async function (data) {
   try {
     // Wait for fetchdistance to resolve and return the updated data
-    const updatedData = await fetchdistance(data);
+    const updatedData = await updateData(data);
 
     // Proceed with the updated data
     updateVehicleData(updatedData);
@@ -61,17 +61,51 @@ socket.on("sos_alert", function (data) {
   }
 });
 
-async function fetchdistance(data) {
+async function updateData(data) {
   const oldData = vehicleData.get(data.imei);
 
   if (oldData) {
-    const distance = data.odometer - oldData.odometer + oldData.distance;
+    let distance = data.odometer - oldData.odometer;
+    distance = distance + oldData.distance;
 
-    data["distance"] = distance.toFixed(2);
-    console.log(distance.toFixed(2), "km");
+    if (data.latitude != "" && data.longitude != "") {
+      const latLng = parseCoordinates(data.latitude, data.longitude);
+
+      data["location"] = await getAddressFromCoordinates(
+        latLng.lat(),
+        latLng.lng()
+      );
+    }
+
+    data["distance"] = distance;
+
+    vehicleData.set(data.imei, data);
   }
 
   return data;
+}
+
+async function getAddressFromCoordinates(lat, lng) {
+  try {
+    const response = await fetch("/geocode", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify({ lat, lng }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.address; // Assuming the route returns an object with an 'address' field
+  } catch (error) {
+    console.error("Error fetching address:", error);
+    return null;
+  }
 }
 
 async function fetchVehicleData() {
@@ -309,16 +343,15 @@ function addMarkerClickListener(marker, latLng, device, coords) {
     latLng = new google.maps.LatLng(coords.lat, coords.lon);
   }
 
-  geocodeLatLng(latLng, function (address) {
-    marker.addListener("gmp-click", function () {
-      if (openMarker !== marker) {
-        setInfoWindowContent(infoWindow, marker, latLng, device, address);
-        infoWindow.open(map, marker);
-        openMarker = marker;
-      } else {
-        console.log("InfoWindow already open for this marker.");
-      }
-    });
+  const address = device.address || "Location unknown";
+  marker.addListener("gmp-click", function () {
+    if (openMarker !== marker) {
+      setInfoWindowContent(infoWindow, marker, latLng, device, address);
+      infoWindow.open(map, marker);
+      openMarker = marker;
+    } else {
+      console.log("InfoWindow already open for this marker.");
+    }
   });
 }
 
@@ -1049,16 +1082,15 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
 
-        geocodeLatLng(latLng, function (address) {
-          setInfoWindowContent(
-            infoWindow,
-            marker,
-            latLng,
-            marker.device,
-            address
-          );
-          infoWindow.open(map, marker);
-        });
+        const address = getAddressFromCoordinates(latLng.lat(), latLng.lng());
+        setInfoWindowContent(
+          infoWindow,
+          marker,
+          latLng,
+          marker.device,
+          address
+        );
+        infoWindow.open(map, marker);
       }
     });
 
