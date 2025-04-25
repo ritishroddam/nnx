@@ -34,7 +34,7 @@ def login():
             return redirect(url_for('auth.login'))
         
         if user['company'] != 'none':
-            company = User.get_company_by_company_id(user['company']),
+            company = User.get_company_by_company_id(user['company'])[0],
             print(f"Company: {company}")
         else:
             company = None
