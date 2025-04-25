@@ -76,8 +76,8 @@ def get_vehicles():
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
             
-            if vehicle['lat'] is not "" and vehicle['lng'] is not "":
-                location = geocodeInternal(vehicle['lat'], vehicle['lng'])
+            if vehicle['latitude'] is not "" and vehicle['longitude'] is not "":
+                location = geocodeInternal(vehicle['latitude'], vehicle['longitude'])
                 vehicle['location'] = location
 
             # Match IMEI with vehicle_inventory collection
