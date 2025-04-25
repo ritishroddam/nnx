@@ -326,7 +326,7 @@ function updateMap() {
   countdownTimer = refreshInterval / 1000;
 
   const countContainer = document.getElementById("countee");
-  countContainer.innerText = data.length;
+  countContainer.innerText = vehicleData.length;
 
   vehicleData.forEach((device, imei) => {
     if (
