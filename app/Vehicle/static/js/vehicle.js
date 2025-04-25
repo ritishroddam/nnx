@@ -68,7 +68,7 @@ async function fetchdistance(data) {
     const distance = data.odometer - oldData.odometer;
 
     data["distance"] = distance.toFixed(2);
-    print(distance.toFixed(2), "km");
+    console.log(distance.toFixed(2), "km");
   }
 
   return data;
