@@ -65,8 +65,8 @@ async function updateData(data) {
   const oldData = vehicleData.get(data.imei);
 
   if (oldData) {
-    let distance = float(data.odometer) - float(oldData.odometer);
-    distance = float(distance) + float(oldData.distance);
+    let distance = parseFloat(data.odometer) - parseFloat(oldData.odometer);
+    distance = parseFloat(distance) + parseFloat(oldData.distance);
 
     if (data.latitude != "" && data.longitude != "") {
       const latLng = parseCoordinates(data.latitude, data.longitude);
