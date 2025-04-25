@@ -45,7 +45,7 @@ def login():
             'user_id': str(user['_id']),
             'roles': str([user['role']]),
             'company_id': str(user['company']),
-            'company': str(company),
+            'company': company,
         }
         
         access_token = create_access_token(
