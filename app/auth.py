@@ -35,6 +35,7 @@ def login():
         
         if user['company'] != 'none':
             company = User.get_company_by_company_id(user['company']),
+            print(f"Company: {company}")
         else:
             company = None
 
