@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const alertCards = document.querySelectorAll(".alert-card");
     const tableContainer = document.querySelector(".alerts-table-container");
     const downloadBtn = document.getElementById("downloadAlerts");
+    const downloadPDFBtn = document.getElementById("downloadPDF");
     
     const paginationContainer = document.createElement("div");
     paginationContainer.className = "pagination-container";
@@ -53,43 +54,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    //////////////////Excel download
+    //////////////////  Excel download  /////////////////////
     downloadBtn.addEventListener("click", function() {
         downloadAlertsAsExcel();
     });
-
-    // function downloadAlertsAsExcel() {
-    //     const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
-
-    //     const wb = XLSX.utils.book_new();
-
-    //     const rows = [];
-    //     document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
-    //         if (row.classList.contains("loading-row")) return;
-            
-    //         const cells = row.querySelectorAll("td");
-    //         rows.push([
-    //             cells[0].textContent.trim(),
-    //             cells[1].textContent.trim(),
-    //             cells[2].textContent.trim(),
-    //             cells[3].textContent.trim(),
-    //             cells[4].textContent.trim(),
-    //             cells[5].textContent.trim()
-    //         ]);
-    //     });
-
-    //     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-
-    //     XLSX.utils.book_append_sheet(wb, ws, "Alerts");
-
-    //     const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
-    //     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-    //     let filename = `Alerts_${alertType}`;
-    //     if (vehicleNumber) filename += `_${vehicleNumber}`;
-    //     filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
-
-    //     XLSX.writeFile(wb, filename);
-    // }
 
     function downloadAlertsAsExcel() {
         const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Latitude & Longitude", "Location", "Status"];
@@ -127,6 +95,88 @@ document.addEventListener("DOMContentLoaded", function() {
         filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
     
         XLSX.writeFile(wb, filename);
+    }
+
+    ////////////////// Download PDF  /////////////////////
+
+    downloadPDFBtn.addEventListener("click", function() {
+        downloadAlertsAsPDF();
+    });
+    
+    function downloadAlertsAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const headers = [
+            "Vehicle Number", 
+            "Driver", 
+            "Alert Type", 
+            "Time", 
+            "Latitude & Longitude", 
+            "Location", 
+            "Status"
+        ];
+        
+        const rows = [];
+        document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
+            if (row.classList.contains("loading-row")) return;
+            
+            const cells = row.querySelectorAll("td");
+            const alertId = row.dataset.alertId;
+            const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+            const latLng = alertRow ? alertRow.dataset.latlng : "N/A";
+            
+            rows.push([
+                cells[0].textContent.trim(),
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim(),
+                cells[3].textContent.trim(),
+                latLng,
+                cells[4].textContent.trim(),
+                cells[5].textContent.trim()
+            ]);
+        });
+        
+        // Add title
+        const alertType = document.querySelector(".alert-card.active h3").textContent;
+        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        let title = `${alertType} Alerts`;
+        if (vehicleNumber) title += ` - ${vehicleNumber}`;
+        
+        doc.setFontSize(16);
+        doc.text(title, 14, 15);
+        
+        // Add date
+        const date = new Date().toLocaleString();
+        doc.setFontSize(10);
+        doc.text(`Generated on: ${date}`, 14, 22);
+        
+        // Add table
+        doc.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 30,
+            styles: {
+                fontSize: 8,
+                cellPadding: 2,
+                overflow: 'linebreak'
+            },
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: 255,
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
+            }
+        });
+        
+        // Save the PDF
+        let filename = `Alerts_${alertType.replace(" Alert", "").replace(/\s+/g, "_")}`;
+        if (vehicleNumber) filename += `_${vehicleNumber}`;
+        filename += `_${new Date().toISOString().slice(0,10)}.pdf`;
+        
+        doc.save(filename);
     }
 
     function fetchCountForEndpoint(endpoint) {
