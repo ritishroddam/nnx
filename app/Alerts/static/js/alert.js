@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialize elements
     const ackModal = document.getElementById("ackModal");
     const ackForm = document.getElementById("ackForm");
     const searchBtn = document.getElementById("searchAlerts");
@@ -10,8 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const paginationContainer = document.createElement("div");
     paginationContainer.className = "pagination-container";
     tableContainer.appendChild(paginationContainer);
-    
-    // Create total alerts display
+
     const totalAlertsSpan = document.createElement("span");
     totalAlertsSpan.className = "total-alerts";
     paginationContainer.appendChild(totalAlertsSpan);
@@ -19,9 +17,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let currentEndpoint = sessionStorage.getItem('currentAlertEndpoint') || "panic";
     let currentAlertId = null;
     let currentPage = 1;
-    const perPage = 100; // 100 rows per page
-    
-    // Initialize WebSocket connection
+    const perPage = 100;
+
     const socket = io({
         transports: ['websocket'],
         reconnection: true,
@@ -29,7 +26,6 @@ document.addEventListener("DOMContentLoaded", function() {
         reconnectionDelay: 1000
     });
 
-    // WebSocket event handlers
     socket.on('connect', () => {
         console.log('Connected to WebSocket server');
         socket.emit('join_alerts');
@@ -39,11 +35,10 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log('New alert received:', data);
         if (shouldDisplayAlert(data.alert)) {
             showToast('New alert received', 'info');
-            // Update the specific card count
+
             const endpoint = data.alert.alert_type.toLowerCase().replace(/\s+/g, '_');
             fetchCountForEndpoint(endpoint);
-            
-            // If this alert is of the current type being viewed, reload the table
+
             if (endpoint === currentEndpoint) {
                 loadAlerts();
             }
@@ -52,10 +47,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     socket.on('alert_updated', (data) => {
         console.log('Alert updated:', data);
-        // If this alert is in our current view, update it
         const row = document.querySelector(`tr[data-alert-id="${data.alert_id}"]`);
         if (row) {
-            loadAlerts(); // Reload the current view
+            loadAlerts();
         }
     });
 
@@ -64,42 +58,74 @@ document.addEventListener("DOMContentLoaded", function() {
         downloadAlertsAsExcel();
     });
 
+    // function downloadAlertsAsExcel() {
+    //     const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
+
+    //     const wb = XLSX.utils.book_new();
+
+    //     const rows = [];
+    //     document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
+    //         if (row.classList.contains("loading-row")) return;
+            
+    //         const cells = row.querySelectorAll("td");
+    //         rows.push([
+    //             cells[0].textContent.trim(),
+    //             cells[1].textContent.trim(),
+    //             cells[2].textContent.trim(),
+    //             cells[3].textContent.trim(),
+    //             cells[4].textContent.trim(),
+    //             cells[5].textContent.trim()
+    //         ]);
+    //     });
+
+    //     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    //     XLSX.utils.book_append_sheet(wb, ws, "Alerts");
+
+    //     const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
+    //     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+    //     let filename = `Alerts_${alertType}`;
+    //     if (vehicleNumber) filename += `_${vehicleNumber}`;
+    //     filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
+
+    //     XLSX.writeFile(wb, filename);
+    // }
+
     function downloadAlertsAsExcel() {
-        const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
-        
-        // Create workbook
+        const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Latitude & Longitude", "Location", "Status"];
+    
         const wb = XLSX.utils.book_new();
-        
-        // Get all visible rows from the table
+    
         const rows = [];
         document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
             if (row.classList.contains("loading-row")) return;
             
             const cells = row.querySelectorAll("td");
+            const alertId = row.dataset.alertId;
+            const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+            const latLng = alertRow ? alertRow.dataset.latlng : "N/A"; // Get the lat/lng from data attribute
+            
             rows.push([
                 cells[0].textContent.trim(),
                 cells[1].textContent.trim(),
                 cells[2].textContent.trim(),
                 cells[3].textContent.trim(),
-                cells[4].textContent.trim(), // Location as single column
+                latLng, // Add latitude and longitude
+                cells[4].textContent.trim(),
                 cells[5].textContent.trim()
             ]);
         });
-        
-        // Create worksheet
+    
         const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-        
-        // Add worksheet to workbook
+    
         XLSX.utils.book_append_sheet(wb, ws, "Alerts");
-        
-        // Generate filename
+    
         const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         let filename = `Alerts_${alertType}`;
         if (vehicleNumber) filename += `_${vehicleNumber}`;
         filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
-        
-        // Export to Excel
+    
         XLSX.writeFile(wb, filename);
     }
 
@@ -134,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Helper functions
     function shouldDisplayAlert(alert) {
         const currentStartDate = new Date(document.getElementById("startDate").value);
         const currentEndDate = new Date(document.getElementById("endDate").value);
@@ -152,7 +177,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return !!document.querySelector(`tr[data-alert-id="${alertId}"]`);
     }
 
-    // Initialize with today's data
     setDefaultDateRange();
     
     const activeCard = document.querySelector(`.alert-card[data-endpoint="${currentEndpoint}"]`);
@@ -160,7 +184,6 @@ document.addEventListener("DOMContentLoaded", function() {
         alertCards.forEach(c => c.classList.remove("active"));
         activeCard.classList.add("active");
     } else {
-        // Fallback to panic if stored endpoint doesn't exist
         currentEndpoint = "panic";
         document.querySelector('.alert-card[data-endpoint="panic"]').classList.add('active');
     }
@@ -172,7 +195,6 @@ document.addEventListener("DOMContentLoaded", function() {
             alertCards.forEach(c => c.classList.remove("active"));
             this.classList.add("active");
             currentEndpoint = this.dataset.endpoint;
-            // Store the selected endpoint
             sessionStorage.setItem('currentAlertEndpoint', currentEndpoint);
             currentPage = 1;
             loadAlerts();
@@ -184,8 +206,7 @@ document.addEventListener("DOMContentLoaded", function() {
         loadAllCounts();
         loadAlerts();
     });
-    
-    // Acknowledgment button handlers (delegated)
+
     document.addEventListener("click", function(e) {
         if (e.target.classList.contains("ack-btn")) {
             e.preventDefault();
@@ -193,22 +214,19 @@ document.addEventListener("DOMContentLoaded", function() {
             ackModal.style.display = "block";
         }
     });
-    
-    // Modal close handlers
+
     document.querySelectorAll(".close, .cancel-btn").forEach(btn => {
         btn.addEventListener("click", function() {
             ackModal.style.display = "none";
         });
     });
-    
-    // Window click handler to close modal
+
     window.addEventListener("click", function(event) {
         if (event.target == ackModal) {
             ackModal.style.display = "none";
         }
     });
-    
-    // Acknowledgment form submission
+
     ackForm.addEventListener("submit", function(e) {
         e.preventDefault();
         acknowledgeAlert();
@@ -220,7 +238,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const vehicleNumber = document.getElementById("alertVehicleNumber").value;
         
         try {
-            // First load panic count immediately
             const panicResponse = await fetch(`/alerts/panic_count`, {
                 method: "POST",
                 headers: {
@@ -245,8 +262,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 }
             }
-            
-            // Then load other counts in parallel
+
             const endpoints = ['speeding', 'harsh_break', 'harsh_acceleration', 
                              'gsm_low', 'internal_battery_low', 'main_power_off', 
                              'idle', 'ignition_off', 'ignition_on'];
@@ -312,7 +328,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber,
-                page: currentPage,  // Make sure this is being sent
+                page: currentPage, 
                 per_page: perPage
             }),
         })
@@ -338,18 +354,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     function updatePagination(totalItems, currentPage, perPage, totalPages) {
-        // Clear existing pagination
         while (paginationContainer.children.length > 1) {
             paginationContainer.removeChild(paginationContainer.lastChild);
         }
         
         if (totalItems <= perPage) return;
-        
-        // Create pagination controls
+
         const paginationControls = document.createElement("div");
         paginationControls.className = "pagination-controls";
-        
-        // Previous button
+
         const prevButton = document.createElement("button");
         prevButton.innerHTML = `<i class="fas fa-chevron-left"></i>`;
         prevButton.disabled = currentPage === 1;
@@ -360,12 +373,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         paginationControls.appendChild(prevButton);
-        
-        // Page numbers
+
         const pageNumbers = document.createElement("div");
         pageNumbers.className = "page-numbers";
-        
-        // Always show first page
+
         if (currentPage > 2) {
             const firstPage = document.createElement("button");
             firstPage.textContent = "1";
@@ -381,8 +392,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 pageNumbers.appendChild(ellipsis1);
             }
         }
-        
-        // Show pages around current page
+
         const startPage = Math.max(1, currentPage - 1);
         const endPage = Math.min(totalPages, currentPage + 1);
         
@@ -399,8 +409,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             pageNumbers.appendChild(pageButton);
         }
-        
-        // Always show last page
+
         if (currentPage < totalPages - 1) {
             if (currentPage < totalPages - 2) {
                 const ellipsis2 = document.createElement("span");
@@ -418,8 +427,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         paginationControls.appendChild(pageNumbers);
-        
-        // Next button
+
         const nextButton = document.createElement("button");
         nextButton.innerHTML = `<i class="fas fa-chevron-right"></i>`;
         nextButton.disabled = currentPage === totalPages;
@@ -430,11 +438,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         paginationControls.appendChild(nextButton);
-        
-        // Add to container
+
         paginationContainer.appendChild(paginationControls);
     }
-    
+
     function displayAlerts(alerts) {
         const tableBody = document.querySelector("#alertsTable tbody");
         tableBody.innerHTML = "";
@@ -447,6 +454,7 @@ document.addEventListener("DOMContentLoaded", function() {
         alerts.forEach(alert => {
             const row = document.createElement("tr");
             row.dataset.alertId = alert._id;
+            row.dataset.latlng = `${alert.latitude || 'N/A'}, ${alert.longitude || 'N/A'}`;
             
             if (alert.alert_type) {
                 const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, '-');
@@ -473,8 +481,7 @@ document.addEventListener("DOMContentLoaded", function() {
             tableBody.appendChild(row);
         });
     }
-    
-    // Function to acknowledge an alert
+
     function acknowledgeAlert() {
         const pressedFor = document.getElementById("pressedFor").value;
         const reason = document.getElementById("ackReason").value;
@@ -513,19 +520,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 showToast(data.message || "Alert acknowledged successfully", "success");
                 ackModal.style.display = "none";
                 ackForm.reset();
-                
-                // Update the specific row if we have the alert_id
+
                 if (data.alert_id) {
                     const row = document.querySelector(`tr[data-alert-id="${data.alert_id}"]`);
                     if (row) {
-                        // Update the status and action buttons
                         row.querySelector('.status-badge').textContent = 'Acknowledged';
                         row.querySelector('.status-badge').className = 'status-badge acknowledged';
                         row.querySelector('.action-btn').textContent = 'Acknowledged';
                         row.querySelector('.action-btn').disabled = true;
                     }
                 } else {
-                    // Fallback to reload if we don't have specific alert_id
                     loadAlerts();
                 }
             } else {
@@ -543,7 +547,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function showToast(message, type = "success") {
-        // Remove any existing toasts first
         document.querySelectorAll('.toast-notification').forEach(el => el.remove());
         
         const toast = document.createElement("div");
@@ -553,13 +556,11 @@ document.addEventListener("DOMContentLoaded", function() {
             <span>${message}</span>
         `;
         document.body.appendChild(toast);
-        
-        // Show the toast
+
         setTimeout(() => {
             toast.classList.add("show");
         }, 10);
-        
-        // Auto-remove after delay
+
         setTimeout(() => {
             toast.classList.remove("show");
             setTimeout(() => {
@@ -567,8 +568,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }, 300);
         }, 5000);
     }
-    
-    // Helper function to format date for display
+
     function formatDateTime(dateTimeString) {
         if (!dateTimeString) return "N/A";
         const date = new Date(dateTimeString);
@@ -582,8 +582,7 @@ document.addEventListener("DOMContentLoaded", function() {
             hour12: true
         });
     }
-    
-    // Set default date range (today)
+
     function setDefaultDateRange() {
         const now = new Date();
         const todayStart = new Date(now);
@@ -592,21 +591,18 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("startDate").value = formatDateForInput(todayStart);
         document.getElementById("endDate").value = formatDateForInput(now);
     }
-    
-    // Helper to format date for input fields
+
     function formatDateForInput(date) {
         const offset = date.getTimezoneOffset() * 60000;
         const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, 16);
         return localISOTime;
     }
-    
-    // Helper to get cookie value
+
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
-    
-    // Initialize default dates
+
     setDefaultDateRange();
 });
