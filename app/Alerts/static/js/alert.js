@@ -441,45 +441,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
         paginationContainer.appendChild(paginationControls);
     }
-    
-    // function displayAlerts(alerts) {
-    //     const tableBody = document.querySelector("#alertsTable tbody");
-    //     tableBody.innerHTML = "";
-        
-    //     if (alerts.length === 0) {
-    //         tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No alerts found</td></tr>`;
-    //         return;
-    //     }
-        
-    //     alerts.forEach(alert => {
-    //         const row = document.createElement("tr");
-    //         row.dataset.alertId = alert._id;
-            
-    //         if (alert.alert_type) {
-    //             const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, '-');
-    //             row.classList.add(`alert-type-${alertTypeClass}`);
-    //         }
-            
-    //         const statusBadge = alert.acknowledged ? 
-    //             `<span class="status-badge acknowledged">Acknowledged</span>` : 
-    //             `<span class="status-badge pending">Pending</span>`;
-            
-    //         const actionBtn = alert.acknowledged ?
-    //             `<button class="action-btn" disabled>Acknowledged</button>` :
-    //             `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
-            
-    //         row.innerHTML = `
-    //             <td>${alert.vehicle_number || "N/A"}</td>
-    //             <td>${alert.driver || "N/A"}</td>
-    //             <td>${alert.alert_type || "N/A"}</td>
-    //             <td>${formatDateTime(alert.date_time)}</td>
-    //             <td>${alert.location || "N/A"}</td>
-    //             <td>${statusBadge}</td>
-    //             <td>${actionBtn}</td>
-    //         `;
-    //         tableBody.appendChild(row);
-    //     });
-    // }
 
     function displayAlerts(alerts) {
         const tableBody = document.querySelector("#alertsTable tbody");
@@ -493,7 +454,6 @@ document.addEventListener("DOMContentLoaded", function() {
         alerts.forEach(alert => {
             const row = document.createElement("tr");
             row.dataset.alertId = alert._id;
-            // Store latitude and longitude in a data attribute
             row.dataset.latlng = `${alert.latitude || 'N/A'}, ${alert.longitude || 'N/A'}`;
             
             if (alert.alert_type) {
