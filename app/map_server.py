@@ -17,6 +17,7 @@ import eventlet.wsgi
 import time
 from pymongo import MongoClient
 import ssl
+from geocoding import geocodeInternal, nmea_to_decimal
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin", tz_aware=True)
 db = mongo_client["nnx"]
@@ -266,6 +267,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     json_data['LicensePlateNumber'] = inventory_data.get('LicensePlateNumber', 'Unknown')
                 else:
                     json_data['LicensePlateNumber'] = 'Unknown'
+                json_data['address'] = geocodeInternal(nmea_to_decimal(json_data['latitude']),nmea_to_decimal(json_data['longitude']))
                 sio.emit('vehicle_update', json_data)
         except Exception as e:
             print("Error storing data in MongoDB:", e)

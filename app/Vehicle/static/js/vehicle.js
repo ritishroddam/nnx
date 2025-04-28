@@ -68,16 +68,6 @@ async function updateData(data) {
     let distance = parseFloat(data.odometer) - parseFloat(oldData.odometer);
     distance = parseFloat(distance) + parseFloat(oldData.distance);
 
-    if (data.latitude != "" && data.longitude != "") {
-      const latLng = parseCoordinates(data.latitude, data.longitude);
-
-      data["address"] = await getAddressFromCoordinates(
-        latLng.lat(),
-        latLng.lng()
-      );
-      console.log(data["address"]);
-    }
-
     data["distance"] = String(distance);
 
     vehicleData.set(data.imei, data);
