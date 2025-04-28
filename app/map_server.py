@@ -17,15 +17,121 @@ import eventlet.wsgi
 import time
 from pymongo import MongoClient
 import ssl
-from geocoding import geocodeInternal, nmea_to_decimal
+from geopy.distance import geodesic
+from math import atan2, degrees, radians, sin, cos
+import googlemaps
+from pymongo import ASCENDING
 
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin", tz_aware=True)
 db = mongo_client["nnx"]
+
+collection = db['atlanta']
+sos_logs_collection = db['sos_logs']  
+distance_travelled_collection = db['distanceTravelled']
+vehicle_inventory_collection = db['vehicle_inventory']
+geoCodeCollection = db['geocoded_address']
 
 app = Flask(__name__)
 CORS(app)
 
 last_emit_time = {}
+
+gmaps = googlemaps.Client(key="AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0")
+
+# Create compound index for fast queries
+
+DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+BEARING_DEGREES = 360 / len(DIRECTIONS)
+
+def calculate_bearing(coord1, coord2):
+    lat1, lon1 = radians(coord1[0]), radians(coord1[1])
+    lat2, lon2 = radians(coord2[0]), radians(coord2[1])
+    d_lon = lon2 - lon1
+    x = sin(d_lon) * cos(lat2)
+    y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(d_lon)
+    bearing = (degrees(atan2(x, y)) + 360) % 360
+    return DIRECTIONS[int(((bearing + (BEARING_DEGREES/2)) % 360) // BEARING_DEGREES)]
+
+def validate_coordinates(lat, lng):
+    if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+        raise ValueError(f"Invalid coordinates {lat} and {lng}")
+    
+def nmea_to_decimal(nmea_value):
+    # Check if the string has a leading zero that should be removed
+    if nmea_value.startswith('0'):
+        nmea_value = nmea_value[1:]
+    
+    # Find where the minutes part starts
+    if len(nmea_value) >= 5:  # At least one digit for degrees + 4 for minutes
+        degrees = float(nmea_value[:-7])  # Everything before the last 7 characters
+        minutes = float(nmea_value[-7:])  # Last 7 characters
+    else:
+        # Handle potential formatting issues
+        parts = nmea_value.split('.')
+        degrees = float(parts[0][:-2])
+        minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
+    
+    # Convert to decimal degrees
+    decimal_degrees = degrees + (minutes / 60.0)
+    return decimal_degrees
+    
+def geocodeInternal(lat,lng):
+    try:
+        lat = float(lat)
+        lng = float(lng)
+        validate_coordinates(lat, lng)
+    except(ValueError, TypeError) as e:
+        print(f"Invalid input: {str(e)}")
+        return "Invalid coordinates"
+
+    try:
+        # Step 1: Fast bounding box filter (0.5km range)
+        nearby_entries = geoCodeCollection.find({
+            "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},
+            "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045}
+        })
+
+        # Step 2: Precise distance calculation
+        nearest_entry = None
+        min_distance = 0.5  # Max search radius in km
+        
+        for entry in nearby_entries:
+            saved_coord = (entry['lat'], entry['lng'])
+            current_coord = (lat, lng)
+            distance = geodesic(saved_coord, current_coord).km
+            
+            if distance <= min_distance:
+                nearest_entry = entry
+                min_distance = distance
+
+        if nearest_entry:
+            saved_coord = (nearest_entry['lat'], nearest_entry['lng'])
+            current_coord = (lat, lng)
+            bearing = calculate_bearing(saved_coord, current_coord)
+            
+            return (f"{min_distance:.2f} km {bearing} from {nearest_entry['address']}"
+                      if min_distance > 0 else nearest_entry['address'])
+
+        # Step 3: Geocode new coordinates
+        reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
+        if not reverse_geocode_result:
+            print("Geocoding API failed")
+            return "Address unavailable"
+
+        address = reverse_geocode_result[0]['formatted_address']
+        
+        # Step 4: Insert new entry
+        geoCodeCollection.insert_one({
+            'lat': lat,
+            'lng': lng,
+            'address': address
+        })
+
+        return address
+
+    except Exception as e:
+        print(f"Geocoding error: {str(e)}", exc_info=True)
+        return "Error retrieving address"
 
 def lastEmitInitial():
     all_documents = list(collection.aggregate([
@@ -55,11 +161,6 @@ try:
     print("Connected to WebSocket server successfully!")
 except Exception as e:
     print(f"Failed to connect to WebSocket server: {e}")
-
-collection = db['atlanta']
-sos_logs_collection = db['sos_logs']  
-distance_travelled_collection = db['distanceTravelled']
-vehicle_inventory_collection = db['vehicle_inventory']
 
 def ensure_socket_connection():
     """Ensure the socket is connected, and reconnect if necessary."""
