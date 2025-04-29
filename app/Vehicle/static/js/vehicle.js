@@ -202,6 +202,9 @@ function updateVehicleCard(data) {
     `;
     listContainer.appendChild(vehicleElement);
   }
+  filterVehicles();
+  addHoverListenersToCardsAndMarkers();
+  showHidecar();
 }
 
 function triggerSOS(imei, marker) {
@@ -644,6 +647,9 @@ function updateVehicleData(vehicle) {
   }
 
   lastDataReceivedTime[imei] = new Date();
+  filterVehicles();
+  addHoverListenersToCardsAndMarkers();
+  showHidecar();
 }
 
 function removeSOS(imei) {
