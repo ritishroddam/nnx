@@ -112,6 +112,7 @@ def show_vehicle_data(LicensePlateNumber):
                         "speed": entry["speed"]
                     }
                     for entry in vehicle_data
+                    print(f"mongo data{entry['time']} five_minutes_ago{five_minutes_ago}") ")
                     if entry['date_time'] >= five_minutes_ago
                 ]
 
