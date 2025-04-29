@@ -71,6 +71,7 @@ def page():
 def show_vehicle_data(LicensePlateNumber):
     try:
         # Fetch vehicle data for the given vehicle number
+        print(f"Request received for LicensePlateNumber: {LicensePlateNumber}")
         vehicleData = data_collection.find_one({"LicensePlateNumber": LicensePlateNumber})
         if not vehicleData:
             flash(f"Vehicle with License Plate Number '{LicensePlateNumber}' does not exist.", "warning")
@@ -78,17 +79,17 @@ def show_vehicle_data(LicensePlateNumber):
 
         processed_data = []
         recent_data = None
+        print(vehicleData['IMEI'])
+        now = datetime.now()
+        five_minutes_ago = now - timedelta(minutes=5)
 
         pipeline = [
-            {"$match": {"imei": vehicleData['IMEI']}},
+            {"$match": {"imei": vehicleData['IMEI'], "gps": "A", "date_time": {"$gte": five_minutes_ago}}},
             {"$sort": {"date_time": -1}},  
         ]
 
         vehicle_data = list(atlanta_collection.aggregate(pipeline))
-
-        # if not vehicle_data:
-        #     flash(f"No data found for vehicle with License Plate Number '{LicensePlateNumber}'.", "warning")
-        #     return render_template('vehicleMap.html')
+        print("history", vehicle_data)
 
         is_active = False
         most_recent_entry = None
@@ -104,10 +105,6 @@ def show_vehicle_data(LicensePlateNumber):
                 most_recent_entry = vehicle_data[0]
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
-
-                # Get data from the last 5 minutes
-                now = datetime.now()
-                five_minutes_ago = now - timedelta(minutes=5)
 
                 recent_data = [
                     {
