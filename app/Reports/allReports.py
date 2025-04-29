@@ -358,6 +358,8 @@ def download_custom_report():
                 lng_idx = cols.index('longitude')
                 cols.insert(lng_idx + 1, 'Location')
                 df = df[cols]
+    
+            print(f"DataFrame columns after processing: {df.columns}")  # Debugging line
 
             # Add vehicle number column
             df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
