@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const alertCards = document.querySelectorAll(".alert-card");
     const tableContainer = document.querySelector(".alerts-table-container");
     const downloadBtn = document.getElementById("downloadAlerts");
+    const downloadPDFBtn = document.getElementById("downloadPDF");
     
     const paginationContainer = document.createElement("div");
     paginationContainer.className = "pagination-container";
@@ -53,43 +54,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    //////////////////Excel download
+    //////////////////  Excel download  /////////////////////
     downloadBtn.addEventListener("click", function() {
         downloadAlertsAsExcel();
     });
-
-    // function downloadAlertsAsExcel() {
-    //     const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Location", "Status"];
-
-    //     const wb = XLSX.utils.book_new();
-
-    //     const rows = [];
-    //     document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
-    //         if (row.classList.contains("loading-row")) return;
-            
-    //         const cells = row.querySelectorAll("td");
-    //         rows.push([
-    //             cells[0].textContent.trim(),
-    //             cells[1].textContent.trim(),
-    //             cells[2].textContent.trim(),
-    //             cells[3].textContent.trim(),
-    //             cells[4].textContent.trim(),
-    //             cells[5].textContent.trim()
-    //         ]);
-    //     });
-
-    //     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-
-    //     XLSX.utils.book_append_sheet(wb, ws, "Alerts");
-
-    //     const alertType = document.querySelector(".alert-card.active h3").textContent.replace(" Alert", "").replace(/\s+/g, "_");
-    //     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-    //     let filename = `Alerts_${alertType}`;
-    //     if (vehicleNumber) filename += `_${vehicleNumber}`;
-    //     filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
-
-    //     XLSX.writeFile(wb, filename);
-    // }
 
     function downloadAlertsAsExcel() {
         const headers = ["Vehicle Number", "Driver", "Alert Type", "Time", "Latitude & Longitude", "Location", "Status"];
@@ -110,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 cells[1].textContent.trim(),
                 cells[2].textContent.trim(),
                 cells[3].textContent.trim(),
-                latLng, // Add latitude and longitude
+                latLng,
                 cells[4].textContent.trim(),
                 cells[5].textContent.trim()
             ]);
@@ -127,6 +95,88 @@ document.addEventListener("DOMContentLoaded", function() {
         filename += `_${new Date().toISOString().slice(0,10)}.xlsx`;
     
         XLSX.writeFile(wb, filename);
+    }
+
+    ////////////////// Download PDF  /////////////////////
+
+    downloadPDFBtn.addEventListener("click", function() {
+        downloadAlertsAsPDF();
+    });
+    
+    function downloadAlertsAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const headers = [
+            "Vehicle Number", 
+            "Driver", 
+            "Alert Type", 
+            "Time", 
+            "Latitude & Longitude", 
+            "Location", 
+            "Status"
+        ];
+        
+        const rows = [];
+        document.querySelectorAll("#alertsTable tbody tr").forEach(row => {
+            if (row.classList.contains("loading-row")) return;
+            
+            const cells = row.querySelectorAll("td");
+            const alertId = row.dataset.alertId;
+            const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+            const latLng = alertRow ? alertRow.dataset.latlng : "N/A";
+            
+            rows.push([
+                cells[0].textContent.trim(),
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim(),
+                cells[3].textContent.trim(),
+                latLng,
+                cells[4].textContent.trim(),
+                cells[5].textContent.trim()
+            ]);
+        });
+        
+        // Add title
+        const alertType = document.querySelector(".alert-card.active h3").textContent;
+        const vehicleNumber = document.getElementById("alertVehicleNumber").value;
+        let title = `${alertType} Alerts`;
+        if (vehicleNumber) title += ` - ${vehicleNumber}`;
+        
+        doc.setFontSize(16);
+        doc.text(title, 14, 15);
+        
+        // Add date
+        const date = new Date().toLocaleString();
+        doc.setFontSize(10);
+        doc.text(`Generated on: ${date}`, 14, 22);
+        
+        // Add table
+        doc.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 30,
+            styles: {
+                fontSize: 8,
+                cellPadding: 2,
+                overflow: 'linebreak'
+            },
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: 255,
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
+            }
+        });
+        
+        // Save the PDF
+        let filename = `Alerts_${alertType.replace(" Alert", "").replace(/\s+/g, "_")}`;
+        if (vehicleNumber) filename += `_${vehicleNumber}`;
+        filename += `_${new Date().toISOString().slice(0,10)}.pdf`;
+        
+        doc.save(filename);
     }
 
     function fetchCountForEndpoint(endpoint) {
@@ -442,6 +492,46 @@ document.addEventListener("DOMContentLoaded", function() {
         paginationContainer.appendChild(paginationControls);
     }
 
+    // function displayAlerts(alerts) {
+    //     const tableBody = document.querySelector("#alertsTable tbody");
+    //     tableBody.innerHTML = "";
+        
+    //     if (alerts.length === 0) {
+    //         tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No alerts found</td></tr>`;
+    //         return;
+    //     }
+        
+    //     alerts.forEach(alert => {
+    //         const row = document.createElement("tr");
+    //         row.dataset.alertId = alert._id;
+    //         row.dataset.latlng = `${alert.latitude || 'N/A'}, ${alert.longitude || 'N/A'}`;
+            
+    //         if (alert.alert_type) {
+    //             const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, '-');
+    //             row.classList.add(`alert-type-${alertTypeClass}`);
+    //         }
+            
+    //         const statusBadge = alert.acknowledged ? 
+    //             `<span class="status-badge acknowledged">Acknowledged</span>` : 
+    //             `<span class="status-badge pending">Pending</span>`;
+            
+    //         const actionBtn = alert.acknowledged ?
+    //             `<button class="action-btn" disabled>Acknowledged</button>` :
+    //             `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
+            
+    //         row.innerHTML = `
+    //             <td>${alert.vehicle_number || "N/A"}</td>
+    //             <td>${alert.driver || "N/A"}</td>
+    //             <td>${alert.alert_type || "N/A"}</td>
+    //             <td>${formatDateTime(alert.date_time)}</td>
+    //             <td>${alert.location || "N/A"}</td>
+    //             <td>${statusBadge}</td>
+    //             <td>${actionBtn}</td>
+    //         `;
+    //         tableBody.appendChild(row);
+    //     });
+    // }
+
     function displayAlerts(alerts) {
         const tableBody = document.querySelector("#alertsTable tbody");
         tableBody.innerHTML = "";
@@ -469,10 +559,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 `<button class="action-btn" disabled>Acknowledged</button>` :
                 `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
             
+            // Add speed to alert type if it's a speeding alert
+            let alertTypeDisplay = alert.alert_type || "N/A";
+            if (alert.alert_type === "Speeding Alert" && alert.speed) {
+                alertTypeDisplay += ` (${alert.speed} km/h)`;
+            }
+            
             row.innerHTML = `
                 <td>${alert.vehicle_number || "N/A"}</td>
                 <td>${alert.driver || "N/A"}</td>
-                <td>${alert.alert_type || "N/A"}</td>
+                <td>${alertTypeDisplay}</td>
                 <td>${formatDateTime(alert.date_time)}</td>
                 <td>${alert.location || "N/A"}</td>
                 <td>${statusBadge}</td>

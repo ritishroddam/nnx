@@ -39,12 +39,36 @@ def nmea_to_decimal(nmea_value):
     except:
         return None
 
+# def get_alert_type(record):
+#     """Determine the alert type based on record data"""
+#     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
+#         return "Panic Alert"
+#     elif float(record.get('speed', 0.0)) >= 60:
+#         return "Speeding Alert"
+#     elif record.get('harsh_break') == "1":
+#         return "Harsh Break Alert"
+#     elif record.get('harsh_speed') == "1":
+#         return "Harsh Acceleration Alert"
+#     elif record.get('internal_bat') == "0.0" or float(record.get('internal_bat', 3.7)) < 3.7:
+#         return "Internal Battery Low Alert"
+#     elif record.get('main_power') == "0":
+#         return "Main Supply Remove Alert"
+#     elif record.get('speed') == "0.0" and record.get('ignition') == "1":
+#         return "Idle Alert"
+#     elif record.get('ignition') == "1" and record.get('speed') != "0.0":
+#         return "Ignition On Alert"
+#     elif record.get('ignition') == "0":
+#         return "Ignition Off Alert"
+#     elif record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(float(record.get('gsm_sig'))) < 7):
+#         return "GSM Signal Low Alert"
+#     return "Unknown Alert"
+
 def get_alert_type(record):
     """Determine the alert type based on record data"""
     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
         return "Panic Alert"
     elif float(record.get('speed', 0.0)) >= 60:
-        return "Speeding Alert"
+        return f"Speeding Alert ({float(record.get('speed', 0.0))} km/h)"
     elif record.get('harsh_break') == "1":
         return "Harsh Break Alert"
     elif record.get('harsh_speed') == "1":
@@ -255,12 +279,24 @@ def alert_card_endpoint(alert_type):
                     alert_type_detected = get_alert_type(record)
                     acknowledged = db['Ack_alerts'].find_one({"alert_id": str(record["_id"])}) is not None
 
+                    # processed_records.append({
+                    #     "_id": str(record["_id"]),
+                    #     "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                    #     "driver": vehicle["DriverName"] if vehicle and "DriverName" in vehicle else "N/A",
+                    #     "date_time": record["date_time"],
+                    #     "alert_type": alert_type_detected,
+                    #     "latitude": latitude,
+                    #     "longitude": longitude,
+                    #     "location": location,
+                    #     "acknowledged": acknowledged
+                    # })
                     processed_records.append({
                         "_id": str(record["_id"]),
                         "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
                         "driver": vehicle["DriverName"] if vehicle and "DriverName" in vehicle else "N/A",
                         "date_time": record["date_time"],
                         "alert_type": alert_type_detected,
+                        "speed": float(record.get("speed", 0.0)) if alert_type == "speeding" else None,
                         "latitude": latitude,
                         "longitude": longitude,
                         "location": location,

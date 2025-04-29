@@ -580,3 +580,28 @@
     background-color: #f0f7ff;
     color: #333;
 }
+
+.download-btn {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.download-btn:hover {
+    background-color: #e9ecef;
+}
+
+.download-btn i {
+    margin-right: 5px;
+}
+
+#downloadAlerts {
+    color: #1d6f42; /* Excel green */
+}
+
+#downloadPDF {
+    color: #d23333; /* PDF red */
+}
