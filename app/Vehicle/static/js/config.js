@@ -1,3 +1,3 @@
 const CONFIG = {
-  SOCKET_SERVER_URL: "https://64.227.137.175:5000",
+  SOCKET_SERVER_URL: "https://143.110.250.3:5000",
 };
