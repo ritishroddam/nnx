@@ -21,7 +21,7 @@ Device Inventory
 
     <button id="downloadExcel" class="btn">Download Table</button>
 
-    <div id="manualEntryModal" class="modal">
+    <div id="manualEntryModal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
         <form id="manualForm" action="{{ url_for('DeviceInvy.manual_entry')}}" method="post">
@@ -85,7 +85,7 @@ Device Inventory
             </select>
           </div>
           <div class="button-container">
-            <button type="submit" id="submitBtn" class="btn success">Submit</button>
+            <button type="submit" class="btn success">Submit</button>
             <button type="button" id="cancelBtn" class="btn danger">
               Cancel
             </button>
@@ -93,8 +93,8 @@ Device Inventory
         </div>
       </form>
     </div>
-    <div id="uploadBox" class="hidden">
 
+    <div id="uploadBox" class="hidden">
       <form id="uploadForm" action="{{ url_for('DeviceInvy.upload_file')}}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="file" name="file" accept=".xls,.xlsx" required />
@@ -106,8 +106,8 @@ Device Inventory
         Cancel
       </button>
     </div>
+    
     <div id="errorBox" class="error-box hidden"></div>
-
     {% with messages = get_flashed_messages(with_categories=true) %} {%
     if messages %} {% for category, message in messages %}
     <div class="flash-box flash-{{ category }}">{{ message }}</div>

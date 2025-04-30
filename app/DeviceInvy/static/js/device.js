@@ -8,26 +8,26 @@ document.getElementById("DateIn").addEventListener("change", function () {
     .split("T")[0];
 });
 
-// Replace the manualEntryBtn event handler with this:
+// Show modal
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").style.display = "block";
+  document.getElementById("manualEntryModal").classList.remove("hidden");
   document.getElementById("IMEI").focus();
 });
 
-// Add this for closing the modal when clicking the X button
+// Close modal with X button
 document.querySelector(".close-btn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").style.display = "none";
+  document.getElementById("manualEntryModal").classList.add("hidden");
 });
 
-// Replace the cancelBtn event handler with this:
+// Close modal with Cancel button
 document.getElementById("cancelBtn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").style.display = "none";
+  document.getElementById("manualEntryModal").classList.add("hidden");
 });
 
-// Close modal when clicking outside of it
+// Close modal when clicking outside
 window.addEventListener("click", function(event) {
-  if (event.target == document.getElementById("manualEntryModal")) {
-    document.getElementById("manualEntryModal").style.display = "none";
+  if (event.target === document.getElementById("manualEntryModal")) {
+    document.getElementById("manualEntryModal").classList.add("hidden");
   }
 });
 
