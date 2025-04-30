@@ -1,14 +1,14 @@
-from flask import Blueprint, render_template, request, jsonify, url_for
-from pymongo import MongoClient
+from flask import Blueprint, render_template, request, jsonify, url_for # type: ignore
+from pymongo import MongoClient # type: ignore
 from datetime import datetime, timedelta
-from pytz import timezone
-import pytz
+from pytz import timezone # type: ignore
+import pytz # type: ignore
 from app.database import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity # type: ignore
 from app.geocoding import geocodeInternal
-from bson import ObjectId
+from bson import ObjectId # type: ignore
 from functools import wraps
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit # type: ignore
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 socketio = SocketIO()
@@ -38,30 +38,6 @@ def nmea_to_decimal(nmea_value):
         return decimal_degrees
     except:
         return None
-
-# def get_alert_type(record):
-#     """Determine the alert type based on record data"""
-#     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
-#         return "Panic Alert"
-#     elif float(record.get('speed', 0.0)) >= 60:
-#         return "Speeding Alert"
-#     elif record.get('harsh_break') == "1":
-#         return "Harsh Break Alert"
-#     elif record.get('harsh_speed') == "1":
-#         return "Harsh Acceleration Alert"
-#     elif record.get('internal_bat') == "0.0" or float(record.get('internal_bat', 3.7)) < 3.7:
-#         return "Internal Battery Low Alert"
-#     elif record.get('main_power') == "0":
-#         return "Main Supply Remove Alert"
-#     elif record.get('speed') == "0.0" and record.get('ignition') == "1":
-#         return "Idle Alert"
-#     elif record.get('ignition') == "1" and record.get('speed') != "0.0":
-#         return "Ignition On Alert"
-#     elif record.get('ignition') == "0":
-#         return "Ignition Off Alert"
-#     elif record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(float(record.get('gsm_sig'))) < 7):
-#         return "GSM Signal Low Alert"
-#     return "Unknown Alert"
 
 def get_alert_type(record):
     """Determine the alert type based on record data"""
@@ -97,17 +73,14 @@ def alert_card_endpoint(alert_type):
             vehicle_number = data.get("vehicleNumber")
             page = data.get("page", 1)
             per_page = data.get("per_page", 100)
-            
-            # Convert to datetime objects
+
             start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             end_date = datetime.fromisoformat(end_date) if end_date else datetime.now()
-            
-            # Convert to UTC
+
             tz = pytz.timezone('UTC')
             start_date = start_date.astimezone(tz)
             end_date = end_date.astimezone(tz)
-            
-            # Get vehicle IMEI if specified
+
             imei = None
             if vehicle_number:
                 vehicle = db['vehicle_inventory'].find_one(
@@ -116,8 +89,7 @@ def alert_card_endpoint(alert_type):
                 )
                 if vehicle:
                     imei = vehicle["IMEI"]
-            
-            # Common projection fields for all alert types
+
             base_projection = {
                 "date_time": 1,
                 "latitude": 1,
@@ -126,7 +98,6 @@ def alert_card_endpoint(alert_type):
                 "_id": 1
             }
 
-            # Special handling for panic alerts (from sos_logs)
             if alert_type == "panic":
                 panic_query = {
                     "date_time": {
@@ -152,7 +123,6 @@ def alert_card_endpoint(alert_type):
                         }
                     ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
             else:
-                # Base query for all other alerts (from atlanta collection)
                 query = {
                     "date_time": {
                         "$gte": start_date,
@@ -165,8 +135,7 @@ def alert_card_endpoint(alert_type):
                 
                 if imei:
                     query["imei"] = imei
-                
-                # Add specific conditions for each alert type
+
                 if alert_type == "speeding":
                     query["$expr"] = {
                         "$gte": [
@@ -278,18 +247,7 @@ def alert_card_endpoint(alert_type):
                 
                     alert_type_detected = get_alert_type(record)
                     acknowledged = db['Ack_alerts'].find_one({"alert_id": str(record["_id"])}) is not None
-
-                    # processed_records.append({
-                    #     "_id": str(record["_id"]),
-                    #     "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
-                    #     "driver": vehicle["DriverName"] if vehicle and "DriverName" in vehicle else "N/A",
-                    #     "date_time": record["date_time"],
-                    #     "alert_type": alert_type_detected,
-                    #     "latitude": latitude,
-                    #     "longitude": longitude,
-                    #     "location": location,
-                    #     "acknowledged": acknowledged
-                    # })
+                    
                     processed_records.append({
                         "_id": str(record["_id"]),
                         "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
@@ -320,7 +278,6 @@ def alert_card_endpoint(alert_type):
         return wrapper
     return decorator
 
-# WebSocket Events
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
@@ -438,19 +395,16 @@ def acknowledge_alert():
         if not alert_id or not pressed_for:
             return jsonify({"success": False, "message": "Missing required fields"}), 400
 
-        # Check if alert exists
         alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
         if not alert:
             alert = db['sos_logs'].find_one({"_id": ObjectId(alert_id)})
             if not alert:
                 return jsonify({"success": False, "message": "Alert not found"}), 404
 
-        # Check if already acknowledged
         existing_ack = db['Ack_alerts'].find_one({"alert_id": alert_id})
         if existing_ack:
             return jsonify({"success": False, "message": "Alert already acknowledged"}), 400
 
-        # Save acknowledgment
         ack_data = {
             "alert_id": alert_id,
             "pressed_for": pressed_for,
@@ -465,7 +419,6 @@ def acknowledge_alert():
         if not result.inserted_id:
             return jsonify({"success": False, "message": "Failed to save acknowledgment"}), 500
 
-        # Broadcast the update
         broadcast_alert_update(alert_id, 'acknowledged', user_id)
 
         return jsonify({
