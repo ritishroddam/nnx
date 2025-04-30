@@ -4,16 +4,18 @@ import traceback
 from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime
+import pytz
 from pytz import timezone
 from io import BytesIO
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
-import pytz
 from app.geocoding import geocodeInternal, nmea_to_decimal
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
+
+IST = timezone('Asia/Kolkata')
 
 # Define field to collection mapping
 FIELD_COLLECTION_MAP = {
@@ -208,7 +210,9 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
             # Process latitude and longitude if present
-            print(f"DataFrame columns: {df.columns}")
+            if 'date_time' in df.columns:
+                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['latitude'] = df['latitude'].apply(
                     lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
@@ -499,6 +503,9 @@ def download_panic_report():
 
         # Create DataFrame
         df = pd.DataFrame(records)
+
+        if 'date_time' in df.columns:
+            df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
         
         # Reorder columns - Vehicle Number first, then date_time
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
