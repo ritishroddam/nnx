@@ -327,6 +327,7 @@ def download_custom_report():
 
             # Merge with specific query for standard reports
             query.update(base_query)
+            print(query)
 
             # Fetch data
             cursor = db[collection].find(
