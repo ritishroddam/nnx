@@ -8,12 +8,27 @@ document.getElementById("DateIn").addEventListener("change", function () {
     .split("T")[0];
 });
 
-document
-  .getElementById("manualEntryBtn")
-  .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.toggle("hidden");
-    document.getElementById("IMEI").focus();
-  });
+// Show modal
+document.getElementById("manualEntryBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").style.display = "block";
+});
+
+// Close modal - shouldn't affect table visibility
+document.querySelector(".close-btn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").style.display = "none";
+});
+
+// Close modal with Cancel button
+document.getElementById("cancelBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").classList.add("hidden");
+});
+
+// Close modal when clicking outside
+window.addEventListener("click", function(event) {
+  if (event.target === document.getElementById("manualEntryModal")) {
+    document.getElementById("manualEntryModal").classList.add("hidden");
+  }
+});
 
 document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadBox").classList.toggle("hidden");

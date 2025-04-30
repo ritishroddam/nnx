@@ -1,7 +1,6 @@
-/* Main layout */
 .alerts-container {
     display: flex;
-    height: calc(100vh - 120px); /* Adjust based on your header height */
+    height: calc(100vh - 120px);
 }
 
 .alert-sidebar {
@@ -561,7 +560,6 @@
     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
-/* Selectize dropdown customization */
 .selectize-control.single .selectize-input {
     padding: 8px 12px;
     border: 1px solid #ddd;
@@ -604,4 +602,15 @@
 
 #downloadPDF {
     color: #d23333; /* PDF red */
+}
+
+.total-alerts {
+    display: block;
+    text-align: right;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+}
+.download-btn {
+    margin-left: 2px;
 }
