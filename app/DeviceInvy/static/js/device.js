@@ -8,12 +8,28 @@ document.getElementById("DateIn").addEventListener("change", function () {
     .split("T")[0];
 });
 
-document
-  .getElementById("manualEntryBtn")
-  .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.toggle("hidden");
-    document.getElementById("IMEI").focus();
-  });
+// Replace the manualEntryBtn event handler with this:
+document.getElementById("manualEntryBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").style.display = "block";
+  document.getElementById("IMEI").focus();
+});
+
+// Add this for closing the modal when clicking the X button
+document.querySelector(".close-btn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").style.display = "none";
+});
+
+// Replace the cancelBtn event handler with this:
+document.getElementById("cancelBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").style.display = "none";
+});
+
+// Close modal when clicking outside of it
+window.addEventListener("click", function(event) {
+  if (event.target == document.getElementById("manualEntryModal")) {
+    document.getElementById("manualEntryModal").style.display = "none";
+  }
+});
 
 document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadBox").classList.toggle("hidden");
