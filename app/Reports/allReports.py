@@ -339,6 +339,9 @@ def download_custom_report():
             if df.empty:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
+            if 'date_time' in df.columns:
+                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+
             # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['latitude'] = df['latitude'].apply(
