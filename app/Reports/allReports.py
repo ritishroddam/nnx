@@ -334,7 +334,7 @@ def download_custom_report():
                 query,
                 {field: 1 for field in fields}
             ).sort("date_time", 1)
-
+            print("Cursor fetched")  # Debugging line
             df = pd.DataFrame(list(cursor))
 
             if df.empty:
