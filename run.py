@@ -10,8 +10,8 @@ if __name__ == '__main__':
     os.makedirs('cert', exist_ok=True)
     
     # Check if certificates exist, if not generate them
-    cert_path = 'cert/cert.pem'
-    key_path = 'cert/key.pem'
+    cert_path = 'cert/fullchain.pem'
+    key_path = 'cert/privkey.pem'
     
     if not os.path.exists(cert_path) or not os.path.exists(key_path):
         print("Generating self-signed certificates...")
