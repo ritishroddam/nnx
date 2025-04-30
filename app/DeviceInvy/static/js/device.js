@@ -10,13 +10,12 @@ document.getElementById("DateIn").addEventListener("change", function () {
 
 // Show modal
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").classList.remove("hidden");
-  document.getElementById("IMEI").focus();
+  document.getElementById("manualEntryModal").style.display = "block";
 });
 
-// Close modal with X button
+// Close modal - shouldn't affect table visibility
 document.querySelector(".close-btn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").classList.add("hidden");
+  document.getElementById("manualEntryModal").style.display = "none";
 });
 
 // Close modal with Cancel button

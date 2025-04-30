@@ -21,6 +21,65 @@ Device Inventory
 
     <button id="downloadExcel" class="btn">Download Table</button>
 
+    {% with messages = get_flashed_messages(with_categories=true) %} {%
+      if messages %} {% for category, message in messages %}
+      <div class="flash-box flash-{{ category }}">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+  
+  
+      <table>
+        <thead>
+          <tr>
+            <th>IMEI</th>
+            <th>GL Number</th>
+            <th>Device Model</th>
+            <th>Device Make</th>
+            <th>Date In</th>
+            <th>Warranty</th>
+            <th>Sent By</th>
+            <th>Outward To</th>
+            <th>Package</th>
+            <th>Tenure</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="deviceTable">
+          {% for device in devices %}
+          <tr data-id="{{ device._id }}">
+            <td>{{ device.IMEI }}</td>
+            <!--                   <td>{{ device.GLNumber }}</td> -->
+            <td>{{ device.GLNumber if device.GLNumber else '' }}</td>
+            <td>{{ device['DeviceModel'] }}</td>
+            <td>{{ device['DeviceMake'] }}</td>
+            <td>{{ device['DateIn'] }}</td>
+            <td>{{ device.Warranty }}</td>
+            <td>{{ device['SentBy'] }}</td>
+            <td>{{ device['OutwardTo'] }}</td>
+            <td>{{ device.Package }}</td>
+            <td>{{ device.Tenure if device.Package == 'Package' else '' }}</td>
+            <td>
+              {% if device.Status == 'Active' %}
+              <button class="status-btn status-active" disabled>
+                {{ device.Status }}
+              </button>
+              {% elif device.Status == 'Inactive' %}
+              <button class="status-btn status-inactive" disabled>
+                {{ device.Status }}
+              </button>
+              {% else %}
+  
+              {% endif %}
+            </td>
+            <td>
+              <button class="icon-btn edit-icon" onclick="editDevice('{{ device._id }}')">✏️</button>
+              <button class="icon-btn delete-icon" onclick="deleteDevice('{{ device._id }}')">🗑️</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
     <div id="manualEntryModal" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
@@ -106,66 +165,9 @@ Device Inventory
         Cancel
       </button>
     </div>
-    
+
     <div id="errorBox" class="error-box hidden"></div>
-    {% with messages = get_flashed_messages(with_categories=true) %} {%
-    if messages %} {% for category, message in messages %}
-    <div class="flash-box flash-{{ category }}">{{ message }}</div>
-    {% endfor %} {% endif %} {% endwith %}
-
-
-    <table>
-      <thead>
-        <tr>
-          <th>IMEI</th>
-          <th>GL Number</th>
-          <th>Device Model</th>
-          <th>Device Make</th>
-          <th>Date In</th>
-          <th>Warranty</th>
-          <th>Sent By</th>
-          <th>Outward To</th>
-          <th>Package</th>
-          <th>Tenure</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="deviceTable">
-        {% for device in devices %}
-        <tr data-id="{{ device._id }}">
-          <td>{{ device.IMEI }}</td>
-          <!--                   <td>{{ device.GLNumber }}</td> -->
-          <td>{{ device.GLNumber if device.GLNumber else '' }}</td>
-          <td>{{ device['DeviceModel'] }}</td>
-          <td>{{ device['DeviceMake'] }}</td>
-          <td>{{ device['DateIn'] }}</td>
-          <td>{{ device.Warranty }}</td>
-          <td>{{ device['SentBy'] }}</td>
-          <td>{{ device['OutwardTo'] }}</td>
-          <td>{{ device.Package }}</td>
-          <td>{{ device.Tenure if device.Package == 'Package' else '' }}</td>
-          <td>
-            {% if device.Status == 'Active' %}
-            <button class="status-btn status-active" disabled>
-              {{ device.Status }}
-            </button>
-            {% elif device.Status == 'Inactive' %}
-            <button class="status-btn status-inactive" disabled>
-              {{ device.Status }}
-            </button>
-            {% else %}
-
-            {% endif %}
-          </td>
-          <td>
-            <button class="icon-btn edit-icon" onclick="editDevice('{{ device._id }}')">✏️</button>
-            <button class="icon-btn delete-icon" onclick="deleteDevice('{{ device._id }}')">🗑️</button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+   
 
   </div>
 
