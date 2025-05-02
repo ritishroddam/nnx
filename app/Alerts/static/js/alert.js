@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     let currentEndpoint = sessionStorage.getItem('currentAlertEndpoint') || "panic";
     let currentAlertId = null;
-    const ITEMS_PER_PAGE = 50; 
+    const ITEMS_PER_PAGE = 100; 
     let allAlerts = []; 
     let currentPage = 1;
 
