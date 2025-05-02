@@ -206,10 +206,10 @@ def register():
     claims = get_jwt()
     user_role = claims.get('roles', [])  # Assuming roles is a list and taking the first role
     print(f"User Role: {user_role}")
-    if user_role in ['admin']:
+    if 'admin' in user_role:
         companies = db.customers_list.find()
         return render_template('register_client_admin.html', companies=companies)
-    elif user_role in ['clientAdmin']:
+    elif 'clientAdmin' in user_role:
         return render_template('register.html')
     else:
         flash('Unauthorized access', 'danger')
