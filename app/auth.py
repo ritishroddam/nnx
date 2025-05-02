@@ -183,7 +183,8 @@ def refresh():
         return
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
-@roles_required('admin', 'clientAdmin')
+# @roles_required('admin', 'clientAdmin')
+@roles_required('admin')
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -294,5 +295,5 @@ def logout():
 
 @auth_bp.route('/unauthorized')
 def unauthorized():
-    flash('To access this page please login', 'danger')
+    flash('To access this page please login or login with an account that has access to the page', 'danger')
     return render_template('login.html'), 403
