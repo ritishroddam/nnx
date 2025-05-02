@@ -1,7 +1,7 @@
 from bson import ObjectId
 import eventlet
 from flask import Flask, redirect, url_for, flash, jsonify, request, g, render_template
-from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
+from flask_jwt_extended import decode_token, jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
 from config import config
@@ -219,8 +219,14 @@ def create_app(config_name='default'):
         print(f"Request endpoint: {request.endpoint}")
         if request.endpoint not in ['login', 'auth.login', 'auth.logout', 'static', 'auth.api_login', None]:
             try:
-                verify_jwt_in_request(optional=True)
-                claims = get_jwt()
+                token = request.headers.get("Authorization")
+                if token and token.startswith("Bearer "):
+                    token = token.split(" ")[1]  # Extract the token part
+                    claims = decode_token(token)
+                else:
+                    # If no Authorization header, fallback to cookies
+                    verify_jwt_in_request(optional=True)
+                    claims = get_jwt()
 
                 if claims:
                     # Check if the token is about to expire (e.g., within 30 seconds)
@@ -255,7 +261,12 @@ def create_app(config_name='default'):
     def set_refreshed_token(response):
         try:
             if hasattr(g, 'new_access_token'):
-                set_access_cookies(response, g.new_access_token)
+                if request.headers.get("Authorization"):
+                    # Return the new token in the response for apps
+                    response.headers["Authorization"] = f"Bearer {g.new_access_token}"
+                else:
+                    # Set the new token in cookies for web clients
+                    set_access_cookies(response, g.new_access_token)
         except Exception as e:
             print(f"Error setting refreshed token: {e}")
         return response
