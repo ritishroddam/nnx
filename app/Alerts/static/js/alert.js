@@ -17,8 +17,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     let currentEndpoint = sessionStorage.getItem('currentAlertEndpoint') || "panic";
     let currentAlertId = null;
+    const ITEMS_PER_PAGE = 100; // Number of items to show per page
+    let allAlerts = []; // To store all fetched alerts
     let currentPage = 1;
-    const perPage = 100;
 
     const socket = io({
         transports: ['websocket'],
@@ -373,17 +374,15 @@ document.addEventListener("DOMContentLoaded", function() {
             body: JSON.stringify({
                 startDate: startDate,
                 endDate: endDate,
-                vehicleNumber: vehicleNumber,
-                page: currentPage, 
-                per_page: perPage
+                vehicleNumber: vehicleNumber
             }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                displayAlerts(data.alerts);
-                updateTotalAlerts(data.count);
-                updatePagination(data.count, currentPage, perPage, data.total_pages);
+                allAlerts = data.alerts;
+                currentPage = 1;
+                updateTableAndPagination();
             } else {
                 throw new Error(data.message || "Failed to fetch alerts");
             }
@@ -395,97 +394,114 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
-    function updateTotalAlerts(count) {
-        totalAlertsSpan.textContent = `Total Alerts: ${count}`;
+    function updateTableAndPagination() {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const paginatedAlerts = allAlerts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+        
+        displayAlerts(paginatedAlerts);
+        updatePagination();
     }
     
-    function updatePagination(totalItems, currentPage, perPage, totalPages) {
-        while (paginationContainer.children.length > 1) {
-            paginationContainer.removeChild(paginationContainer.lastChild);
-        }
-        
-        if (totalItems <= perPage) return;
-
-        const paginationControls = document.createElement("div");
-        paginationControls.className = "pagination-controls";
-
-        const prevButton = document.createElement("button");
-        prevButton.innerHTML = `<i class="fas fa-chevron-left"></i>`;
-        prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage--;
-                loadAlerts();
-            }
-        });
-        paginationControls.appendChild(prevButton);
-
-        const pageNumbers = document.createElement("div");
-        pageNumbers.className = "page-numbers";
-
-        if (currentPage > 2) {
-            const firstPage = document.createElement("button");
-            firstPage.textContent = "1";
-            firstPage.addEventListener("click", () => {
-                currentPage = 1;
-                loadAlerts();
-            });
-            pageNumbers.appendChild(firstPage);
+    function updatePagination() {
+        // Clear existing pagination
+        const paginationContainers = document.querySelectorAll('.pagination-container');
+        paginationContainers.forEach(container => {
+            container.innerHTML = '';
             
-            if (currentPage > 3) {
-                const ellipsis1 = document.createElement("span");
-                ellipsis1.textContent = "...";
-                pageNumbers.appendChild(ellipsis1);
-            }
-        }
-
-        const startPage = Math.max(1, currentPage - 1);
-        const endPage = Math.min(totalPages, currentPage + 1);
-        
-        for (let i = startPage; i <= endPage; i++) {
-            const pageButton = document.createElement("button");
-            pageButton.textContent = i;
-            if (i === currentPage) {
-                pageButton.classList.add("active");
-                pageButton.disabled = true;
-            }
-            pageButton.addEventListener("click", () => {
-                currentPage = i;
-                loadAlerts();
+            // Add total alerts count
+            const totalAlertsSpan = document.createElement("span");
+            totalAlertsSpan.className = "total-alerts";
+            totalAlertsSpan.textContent = `Total Alerts: ${allAlerts.length}`;
+            container.appendChild(totalAlertsSpan);
+            
+            if (allAlerts.length <= ITEMS_PER_PAGE) return;
+            
+            const totalPages = Math.ceil(allAlerts.length / ITEMS_PER_PAGE);
+            
+            const paginationDiv = document.createElement("div");
+            paginationDiv.className = "pagination";
+            
+            // Previous button
+            const prevButton = document.createElement("button");
+            prevButton.innerHTML = "&laquo;";
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTableAndPagination();
+                }
             });
-            pageNumbers.appendChild(pageButton);
-        }
-
-        if (currentPage < totalPages - 1) {
-            if (currentPage < totalPages - 2) {
-                const ellipsis2 = document.createElement("span");
-                ellipsis2.textContent = "...";
-                pageNumbers.appendChild(ellipsis2);
+            paginationDiv.appendChild(prevButton);
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
             
-            const lastPage = document.createElement("button");
-            lastPage.textContent = totalPages;
-            lastPage.addEventListener("click", () => {
-                currentPage = totalPages;
-                loadAlerts();
-            });
-            pageNumbers.appendChild(lastPage);
-        }
-        
-        paginationControls.appendChild(pageNumbers);
-
-        const nextButton = document.createElement("button");
-        nextButton.innerHTML = `<i class="fas fa-chevron-right"></i>`;
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.addEventListener("click", () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadAlerts();
+            if (startPage > 1) {
+                const firstPageButton = document.createElement("button");
+                firstPageButton.textContent = "1";
+                firstPageButton.addEventListener("click", () => {
+                    currentPage = 1;
+                    updateTableAndPagination();
+                });
+                paginationDiv.appendChild(firstPageButton);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement("span");
+                    ellipsis.textContent = "...";
+                    paginationDiv.appendChild(ellipsis);
+                }
             }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement("button");
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.classList.add("active");
+                    pageButton.disabled = true;
+                }
+                pageButton.addEventListener("click", () => {
+                    currentPage = i;
+                    updateTableAndPagination();
+                });
+                paginationDiv.appendChild(pageButton);
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement("span");
+                    ellipsis.textContent = "...";
+                    paginationDiv.appendChild(ellipsis);
+                }
+                
+                const lastPageButton = document.createElement("button");
+                lastPageButton.textContent = totalPages;
+                lastPageButton.addEventListener("click", () => {
+                    currentPage = totalPages;
+                    updateTableAndPagination();
+                });
+                paginationDiv.appendChild(lastPageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement("button");
+            nextButton.innerHTML = "&raquo;";
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener("click", () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTableAndPagination();
+                }
+            });
+            paginationDiv.appendChild(nextButton);
+            
+            container.appendChild(paginationDiv);
         });
-        paginationControls.appendChild(nextButton);
-
-        paginationContainer.appendChild(paginationControls);
     }
 
     function displayAlerts(alerts) {
