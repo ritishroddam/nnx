@@ -62,10 +62,22 @@ def index():
     claims = get_jwt()
     user_roles = claims.get('roles', [])
 
-
-    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
-    reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1, "fields": 1}))
-    return render_template('allReport.html', vehicles=vehicles, reports=reports)
+    if 'admin' in user_roles:
+        vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
+        reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1, "fields": 1}))
+        return render_template('allReport.html', vehicles=vehicles, reports=reports)
+    if 'clientAdmin' in user_roles:
+        userCompany = claims.get('company')
+        userCompanyID = claims.get('company_id')
+        vehicles = list(db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0}))
+        reports = list(db['custom_reports'].find({"company_id": userCompanyID}, {"_id": 0, "report_name": 1, "fields": 1}))
+        return render_template('allReport.html', vehicles=vehicles, reports=reports)
+    else:
+        userCompany = claims.get('company')
+        userName = claims.get('username')
+        vehicles = list(db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0}))
+        reports = list(db['custom_reports'].find({"created_by": userName}, {"_id": 0, "report_name": 1, "fields": 1}))
+        return render_template('allReport.html', vehicles=vehicles, reports=reports)
 
 @reports_bp.route('/get_fields', methods=['GET'])
 @jwt_required()
