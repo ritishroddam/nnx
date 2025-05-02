@@ -23,8 +23,10 @@
 Dashboard
 {% endblock %}
 
+{% block block_container %}
 <section class="dashboard">
-  {% block block_container %}
+
+  {% if role == 'admin' %}
   <div class="cards">
     <div class="card" id="card1">
       <div class="card-content">
