@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_jwt_extended import (
-    get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
+    get_csrf_token, get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
     jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies,
     set_refresh_cookies, unset_refresh_cookies, decode_token
 )
@@ -108,7 +108,9 @@ def api_login():
     
     return jsonify({
         'access_token': access_token,
-        'refresh_token': refresh_token
+        'refresh_token': refresh_token,
+        'csrf_access_token': get_csrf_token(access_token),
+        'csrf_refresh_token': get_csrf_token(refresh_token)
     })
 
 @auth_bp.route('/api/refresh', methods=['POST'])
