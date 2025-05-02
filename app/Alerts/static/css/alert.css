@@ -414,13 +414,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 10px;
     margin: 10px 0;
+    background: #f5f5f5;
+    border-radius: 4px;
 }
 
 .pagination {
     display: flex;
     gap: 5px;
+    align-items: center;
 }
 
 .pagination button {
@@ -429,10 +432,13 @@
     background: white;
     cursor: pointer;
     border-radius: 4px;
+    transition: all 0.2s;
 }
 
 .pagination button:hover:not(:disabled) {
-    background: #eee;
+    background: #2980b9;
+    color: white;
+    border-color: #2980b9;
 }
 
 .pagination button.active {
@@ -454,6 +460,7 @@
 .total-alerts {
     font-weight: bold;
     color: #555;
+    margin-right: 10px;
 }
 
 .error-message {
