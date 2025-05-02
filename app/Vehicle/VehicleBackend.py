@@ -69,9 +69,10 @@ def get_vehicles():
         if 'admin' in user_roles:
             # Fetch data from the distinctAtlanta collection
             inventory_data = list(vehicle_inventory_collection.find())
+            imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
+            distances = getVehicleDistances(imei_list)
+            
             for vehicle in inventory_data:
-                imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-                distances = getVehicleDistances(imei_list)
                 print("Distances:", distances)
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
                 for data in vehicleData:  # Iterate over the list of documents
