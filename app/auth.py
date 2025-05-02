@@ -208,7 +208,7 @@ def register():
     print(f"User Role: {user_role}")
     if 'admin' in user_role:
         companies = db.customers_list.find()
-        return render_template('register_client_admin.html', companies=companies)
+        return render_template('register.html', companies=companies)
     elif 'clientAdmin' in user_role:
         return render_template('register.html')
     else:
