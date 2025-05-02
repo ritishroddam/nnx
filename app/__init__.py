@@ -1,7 +1,7 @@
 from bson import ObjectId
 import eventlet
 from flask import Flask, redirect, url_for, flash, jsonify, request, g, render_template
-from flask_jwt_extended import decode_token, jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
+from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
 from config import config
@@ -216,26 +216,18 @@ def create_app(config_name='default'):
 
     @app.before_request
     def refresh_token_if_needed():
-        print(f"Request endpoint: {request.endpoint}")
-        if request.endpoint not in ['login', 'auth.login', 'auth.logout', 'static', 'auth.api_login', None]:
+        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None]:
             try:
-                token = request.headers.get("Authorization")
-                if token and token.startswith("Bearer "):
-                    token = token.split(" ")[1]  # Extract the token part
-                    # Explicitly decode the token
-                    claims = decode_token(token)
-                else:
-                    # If no Authorization header, fallback to cookies
-                    verify_jwt_in_request(optional=True)
-                    claims = get_jwt()
-    
+                verify_jwt_in_request(optional=True)
+                claims = get_jwt()
+
                 if claims:
                     # Check if the token is about to expire (e.g., within 30 seconds)
                     exp_timestamp = claims["exp"]
                     now = datetime.now(timezone.utc)
-                    target_timestamp = datetime.timestamp(now + timedelta(days=1))
+                    target_timestamp = datetime.timestamp(now + timedelta(days = 1))
                     if exp_timestamp < target_timestamp:
-                        current_user = claims["sub"]  # Identity is stored in the "sub" claim
+                        current_user = get_jwt_identity()
                         additional_claims = {
                             'roles': claims.get('roles', []),
                             'company': claims.get('company'),
@@ -246,37 +238,23 @@ def create_app(config_name='default'):
                             identity=current_user,
                             additional_claims=additional_claims
                         )
-                        # Store the new token in the global context
+                        # Set the new token in cookies
                         g.new_access_token = new_access_token
                 else:
                     raise NoAuthorizationError("No JWT claims found")
             except NoAuthorizationError:
-                # Return a JSON response for API clients instead of redirecting
-                if request.headers.get("Authorization"):
-                    return jsonify({"error": "Unauthorized: Invalid or missing token"}), 401
-                else:
-                    return redirect(url_for('auth.logout'))
+                return redirect(url_for('auth.logout'))
             except JWTDecodeError:
-                # Return a JSON response for API clients instead of redirecting
-                if request.headers.get("Authorization"):
-                    return jsonify({"error": "Invalid token"}), 401
-                else:
-                    flash('Your session has expired. Please log in again.', 'warning')
-                    return redirect(url_for('auth.logout'))
-            except Exception as e:
-                print(f"Error in token refresh: {e}")
-                return jsonify({"error": "An error occurred"}), 500
+                flash('Your session has expired. Please log in again.', 'warning')
+                return redirect(url_for('auth.logout'))
+            except Exception:
+                pass
 
     @app.after_request
     def set_refreshed_token(response):
         try:
             if hasattr(g, 'new_access_token'):
-                if request.headers.get("Authorization"):
-                    # Return the new token in the response for apps
-                    response.headers["Authorization"] = f"Bearer {g.new_access_token}"
-                else:
-                    # Set the new token in cookies for web clients
-                    set_access_cookies(response, g.new_access_token)
+                set_access_cookies(response, g.new_access_token)
         except Exception as e:
             print(f"Error setting refreshed token: {e}")
         return response
