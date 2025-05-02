@@ -204,7 +204,7 @@ def register():
         return redirect(url_for('auth.login'))
 
     claims = get_jwt()
-    user_role = claims.get('roles', [])[0]  # Assuming roles is a list and taking the first role
+    user_role = claims.get('roles', [])  # Assuming roles is a list and taking the first role
     print(f"User Role: {user_role}")
     if user_role == 'admin':
         companies = db.customers_list.find()
