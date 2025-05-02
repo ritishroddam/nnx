@@ -72,11 +72,13 @@ def get_vehicles():
             for vehicle in inventory_data:
                 imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
                 distances = getVehicleDistances(imei_list)
+                print("Distances:", distances)
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
                 for data in vehicleData:  # Iterate over the list of documents
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = distances.get(vehicle.get('IMEI'), 0)  # Add distance to the data
+                    print(distances.get(vehicle.get('IMEI'), 0))
                     vehicles.append(data)
         else:
             userCompany = claims.get('company')
