@@ -105,18 +105,6 @@ async function fetchVehicleData() {
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
     // return await response.json();
 
-    const fetchedData = await fetch("/dashboard/get_vehicle_distances")
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Error fetching vehicle distances:", error);
-        return [];
-      });
-
-    const distanceMap = fetchedData.reduce((map, data) => {
-      map[data.registration] = data.distance.toFixed(2); // Limit to 2 decimal places
-      return map;
-    }, {});
-
     const data = await response.json();
 
     data.forEach((vehicle) => {
@@ -135,7 +123,7 @@ async function fetchVehicleData() {
         ignition: vehicle.ignition,
         gsm: vehicle.gsm_sig,
         sos: vehicle.sos,
-        distance: distanceMap[vehicle.LicensePlateNumber] || "N/A",
+        distance: vehicle.distance || 0,
         odometer: vehicle.odometer,
       });
     });
