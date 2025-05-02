@@ -8,7 +8,7 @@ import pytz
 from pytz import timezone
 from io import BytesIO
 from app.database import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal, nmea_to_decimal
@@ -59,6 +59,10 @@ def get_date_range_filter(date_range):
 @reports_bp.route('/')
 @jwt_required()
 def index():
+    claims = get_jwt()
+    user_roles = claims.get('roles', [])
+
+
     vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
     reports = list(db['custom_reports'].find({}, {"_id": 0, "report_name": 1, "fields": 1}))
     return render_template('allReport.html', vehicles=vehicles, reports=reports)
@@ -99,7 +103,8 @@ def save_custom_report():
             "report_name": report_name,
             "fields": fields,
             "created_at": datetime.now(),
-            "created_by": get_jwt_identity()
+            "created_by": get_jwt_identity(),
+            "company_id": get_jwt()['company_id']
         })
 
         return jsonify({"success": True, "message": "Report saved successfully!"}), 200
