@@ -233,7 +233,7 @@ def alert_card_endpoint(alert_type):
                     records = list(db['atlanta'].find(
                         query,
                         projection
-                    ).sort("date_time", -1).skip((page - 1) * per_page).limit(per_page))
+                    ).sort("date_time", -1))
                 else:
                     records = []
             

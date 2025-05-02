@@ -367,6 +367,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber
+                // Remove page and per_page parameters
             }),
         })
         .then(response => response.json())
@@ -398,31 +399,27 @@ document.addEventListener("DOMContentLoaded", function() {
         const paginationContainers = document.querySelectorAll('.pagination-container');
         const totalPages = Math.ceil(allAlerts.length / ITEMS_PER_PAGE);
         
-        // Only show total alerts in the top container
-        paginationContainers[0].innerHTML = '';
+        // Clear both containers
+        paginationContainers.forEach(container => {
+            container.innerHTML = '';
+        });
+        
+        // Add total alerts to top container
         const totalAlertsSpan = document.createElement("span");
         totalAlertsSpan.className = "total-alerts";
         totalAlertsSpan.textContent = `Total Alerts: ${allAlerts.length}`;
         paginationContainers[0].appendChild(totalAlertsSpan);
         
-        if (allAlerts.length <= ITEMS_PER_PAGE) {
-            paginationContainers[1].innerHTML = '';
-            return;
-        }
-            
-        paginationContainers.forEach((container, index) => {
-            if (index === 0 && allAlerts.length > ITEMS_PER_PAGE) {
-                // Only add pagination controls to the bottom container
-                const paginationDiv = createPaginationControls(totalPages);
-                container.appendChild(paginationDiv.cloneNode(true));
-            } else if (index === 1) {
-                container.innerHTML = '';
-                const paginationDiv = createPaginationControls(totalPages);
-                container.appendChild(paginationDiv);
-            }
-        });
+        if (allAlerts.length <= ITEMS_PER_PAGE) return;
+        
+        // Create pagination controls
+        const paginationDiv = createPaginationControls(totalPages);
+        
+        // Add to both containers
+        paginationContainers[0].appendChild(paginationDiv.cloneNode(true));
+        paginationContainers[1].appendChild(paginationDiv);
     }
-
+    
     function createPaginationControls(totalPages) {
         const paginationDiv = document.createElement("div");
         paginationDiv.className = "pagination";
