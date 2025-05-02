@@ -222,19 +222,20 @@ def create_app(config_name='default'):
                 token = request.headers.get("Authorization")
                 if token and token.startswith("Bearer "):
                     token = token.split(" ")[1]  # Extract the token part
+                    # Explicitly decode the token
                     claims = decode_token(token)
                 else:
                     # If no Authorization header, fallback to cookies
                     verify_jwt_in_request(optional=True)
                     claims = get_jwt()
-
+    
                 if claims:
                     # Check if the token is about to expire (e.g., within 30 seconds)
                     exp_timestamp = claims["exp"]
                     now = datetime.now(timezone.utc)
-                    target_timestamp = datetime.timestamp(now + timedelta(days = 1))
+                    target_timestamp = datetime.timestamp(now + timedelta(days=1))
                     if exp_timestamp < target_timestamp:
-                        current_user = get_jwt_identity()
+                        current_user = claims["sub"]  # Identity is stored in the "sub" claim
                         additional_claims = {
                             'roles': claims.get('roles', []),
                             'company': claims.get('company'),
@@ -245,17 +246,26 @@ def create_app(config_name='default'):
                             identity=current_user,
                             additional_claims=additional_claims
                         )
-                        # Set the new token in cookies
+                        # Store the new token in the global context
                         g.new_access_token = new_access_token
                 else:
                     raise NoAuthorizationError("No JWT claims found")
             except NoAuthorizationError:
-                return redirect(url_for('auth.logout'))
+                # Return a JSON response for API clients instead of redirecting
+                if request.headers.get("Authorization"):
+                    return jsonify({"error": "Unauthorized: Invalid or missing token"}), 401
+                else:
+                    return redirect(url_for('auth.logout'))
             except JWTDecodeError:
-                flash('Your session has expired. Please log in again.', 'warning')
-                return redirect(url_for('auth.logout'))
-            except Exception:
-                pass
+                # Return a JSON response for API clients instead of redirecting
+                if request.headers.get("Authorization"):
+                    return jsonify({"error": "Invalid token"}), 401
+                else:
+                    flash('Your session has expired. Please log in again.', 'warning')
+                    return redirect(url_for('auth.logout'))
+            except Exception as e:
+                print(f"Error in token refresh: {e}")
+                return jsonify({"error": "An error occurred"}), 500
 
     @app.after_request
     def set_refreshed_token(response):
