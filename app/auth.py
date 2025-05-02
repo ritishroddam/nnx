@@ -183,8 +183,7 @@ def refresh():
         return
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
-# @roles_required('admin', 'clientAdmin')
-@roles_required('admin')
+@roles_required('admin', 'clientAdmin')
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -206,7 +205,7 @@ def register():
 
     claims = get_jwt()
     user_role = claims.get('roles', [])[0]  # Assuming roles is a list and taking the first role
-
+    print(f"User Role: {user_role}")
     if user_role == 'admin':
         companies = db.customers_list.find()
         return render_template('register_client_admin.html', companies=companies)
