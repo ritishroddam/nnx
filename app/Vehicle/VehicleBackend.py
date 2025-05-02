@@ -53,7 +53,7 @@ def getVehicleDistances(imei):
 
         allDistances = {item['imei']: item['distance_traveled'] for item in distances}
 
-        return jsonify(allDistances), 200
+        return allDistances
     except Exception as e:
         print(f"Error fetching distances for IMEI {imei}: {e}")
         flash("Error fetching distances", "danger")
