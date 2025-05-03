@@ -21,8 +21,6 @@ collection = db['distinctAtlanta']
 atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
-@vehicle_bp.route('/getVehiclesDistances/<imei>', methods=['GET'])
-@jwt_required()
 def getVehicleDistances(imei):
     try:
         utc_now = datetime.now(timezone('UTC'))
@@ -34,7 +32,7 @@ def getVehicleDistances(imei):
                     "$gte": start_of_day,
                     "$lt": end_of_day
                 },
-                "imei": imei
+                "imei": {"$in":imei}
             }},
             {"$project": {  
                 "imei": 1,
@@ -53,13 +51,9 @@ def getVehicleDistances(imei):
 
         distances = list(atlanta_collection.aggregate(pipeline))
 
-        if distances:  # Check if the list is not empty
-            distance = distances[0]['distance_traveled']  # Access the first document
-            return jsonify({"distance_traveled": distance}), 200
-        else:
-            return jsonify({"distance_traveled": 0}), 200  # No data found
+        allDistances = {item['imei']: item['distance_traveled'] for item in distances}
 
-        return jsonify(distances), 200
+        return allDistances
     except Exception as e:
         print(f"Error fetching distances for IMEI {imei}: {e}")
         flash("Error fetching distances", "danger")
@@ -75,11 +69,17 @@ def get_vehicles():
         if 'admin' in user_roles:
             # Fetch data from the distinctAtlanta collection
             inventory_data = list(vehicle_inventory_collection.find())
+            imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
+            distances = getVehicleDistances(imei_list)
+            
             for vehicle in inventory_data:
+                print("Distances:", distances)
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
                 for data in vehicleData:  # Iterate over the list of documents
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)  # Add distance to the data
+                    print(distances.get(vehicle.get('IMEI'), 0))
                     vehicles.append(data)
         else:
             userCompany = claims.get('company')

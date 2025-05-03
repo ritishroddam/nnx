@@ -9,35 +9,10 @@ from app.geocoding import geocodeInternal
 from bson import ObjectId # type: ignore
 from functools import wraps
 from flask_socketio import SocketIO, emit # type: ignore
+from app.geocoding import geocodeInternal, nmea_to_decimal
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 socketio = SocketIO()
-
-def nmea_to_decimal(nmea_value):
-    if not nmea_value or str(nmea_value).strip() == "":
-        return None
-        
-    try:
-        nmea_value = str(nmea_value).strip()
-        
-        if '.' in nmea_value and len(nmea_value.split('.')[0]) <= 2:
-            return float(nmea_value)
-            
-        if nmea_value.startswith('0'):
-            nmea_value = nmea_value[1:]
-        
-        if len(nmea_value) >= 5:
-            degrees = float(nmea_value[:-7])
-            minutes = float(nmea_value[-7:])
-        else:
-            parts = nmea_value.split('.')
-            degrees = float(parts[0][:-2])
-            minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
-        
-        decimal_degrees = degrees + (minutes / 60.0)
-        return decimal_degrees
-    except:
-        return None
 
 def get_alert_type(record):
     """Determine the alert type based on record data"""
