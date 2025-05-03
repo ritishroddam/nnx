@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    //////////////////  Excel download  /////////////////////
+//////////////////  Excel download  /////////////////////
     downloadBtn.addEventListener("click", function() {
         downloadAlertsAsExcel();
     });
@@ -90,8 +90,8 @@ document.addEventListener("DOMContentLoaded", function() {
         XLSX.writeFile(wb, filename);
     }
 
-    ////////////////// Download PDF  /////////////////////
 
+////////////////// Download PDF  /////////////////////
     downloadPDFBtn.addEventListener("click", function() {
         downloadAlertsAsPDF();
     });
@@ -367,7 +367,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 startDate: startDate,
                 endDate: endDate,
                 vehicleNumber: vehicleNumber
-                // Remove page and per_page parameters
             }),
         })
         .then(response => response.json())
@@ -398,24 +397,20 @@ document.addEventListener("DOMContentLoaded", function() {
     function updatePagination() {
         const paginationContainers = document.querySelectorAll('.pagination-container');
         const totalPages = Math.ceil(allAlerts.length / ITEMS_PER_PAGE);
-        
-        // Clear both containers
+
         paginationContainers.forEach(container => {
             container.innerHTML = '';
         });
-        
-        // Add total alerts to top container
+
         const totalAlertsSpan = document.createElement("span");
         totalAlertsSpan.className = "total-alerts";
         totalAlertsSpan.textContent = `Total Alerts: ${allAlerts.length}`;
         paginationContainers[0].appendChild(totalAlertsSpan);
         
         if (allAlerts.length <= ITEMS_PER_PAGE) return;
-        
-        // Create pagination controls
+
         const paginationDiv = createPaginationControls(totalPages);
-        
-        // Add to both containers
+
         paginationContainers[0].appendChild(paginationDiv.cloneNode(true));
         paginationContainers[1].appendChild(paginationDiv);
     }
@@ -423,8 +418,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function createPaginationControls(totalPages) {
         const paginationDiv = document.createElement("div");
         paginationDiv.className = "pagination";
-        
-        // Previous button
+
         const prevButton = document.createElement("button");
         prevButton.innerHTML = "&laquo; Previous";
         prevButton.disabled = currentPage === 1;
@@ -435,8 +429,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         paginationDiv.appendChild(prevButton);
-        
-        // Page numbers
+
         const maxVisiblePages = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -490,8 +483,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             paginationDiv.appendChild(lastPageButton);
         }
-        
-        // Next button
+
         const nextButton = document.createElement("button");
         nextButton.innerHTML = "Next &raquo;";
         nextButton.disabled = currentPage === totalPages;

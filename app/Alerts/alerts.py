@@ -77,12 +77,11 @@ def alert_card_endpoint(alert_type):
             start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             end_date = datetime.fromisoformat(end_date) if end_date else datetime.now()
 
-            # Validate date ranges
-            if not vehicle_number:  # All vehicles selected - restrict to 24 hours
+            if not vehicle_number: 
                 max_allowed_end = start_date + timedelta(hours=24)
                 if end_date > max_allowed_end:
                     end_date = max_allowed_end
-            else:  # Specific vehicle selected - restrict to 30 days
+            else: 
                 max_allowed_start = end_date - timedelta(days=30)
                 if start_date < max_allowed_start:
                     start_date = max_allowed_start
