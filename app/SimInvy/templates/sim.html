@@ -104,7 +104,11 @@ Sim Inventory
   </thead>
   <tbody id="simTable">
     {% for sim in sims %}
-    <tr data-id="{{ sim._id }}" class="{% if sim.status === 'Available' and sim.isActive %}available{% elif sim.status === 'Allocated' %}allocated{% elif sim.status === 'SafeCustody' %}safecustody{% elif sim.status === 'Suspended' %}suspended{% endif %}">
+    <tr data-id="{{ sim._id }}" 
+    class="{% if sim.status == 'Available' and sim.isActive %}available
+    {% elif sim.status == 'Allocated' %}allocated
+    {% elif sim.status == 'SafeCustody' %}safecustody
+    {% elif sim.status == 'Suspended' %}suspended{% endif %}">
       <td>{{ sim.MobileNumber }}</td>
       <td>{{ sim.SimNumber }}</td>
       <td>{{ sim.status }}</td>

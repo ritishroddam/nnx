@@ -19,6 +19,9 @@ collection = db['sim_inventory']
 @jwt_required()
 def page():
     sims = list(collection.find({}))
+    for sim in sims:
+        sim.setdefault('status', 'Available')  # Default status
+        sim.setdefault('isActive', True)       # Default active state
     return render_template('sim.html', sims=sims)
 
 @sim_bp.route('/get_sims_by_status/<status>')
