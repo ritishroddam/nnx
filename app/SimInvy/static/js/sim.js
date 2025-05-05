@@ -181,39 +181,6 @@ function filterSimsByStatus() {
     });
 }
 
-// function editSim(simId) {
-//   const row = document.querySelector(`tr[data-id='${simId}']`);
-
-//   // Store original values in custom attributes before editing
-//   row.setAttribute("data-original-mobile", row.cells[0].innerText);
-//   row.setAttribute("data-original-sim", row.cells[1].innerText);
-//   row.setAttribute("data-original-date-in", row.cells[2].innerText);
-//   row.setAttribute("data-original-date-out", row.cells[3].innerText);
-//   row.setAttribute("data-original-vendor", row.cells[4].innerText);
-
-//   // Replace row data with input fields
-//   row.cells[0].innerHTML = `<input type="text" value="${row.getAttribute(
-//     "data-original-mobile"
-//   )}" />`;
-//   row.cells[1].innerHTML = `<input type="text" value="${row.getAttribute(
-//     "data-original-sim"
-//   )}" />`;
-//   row.cells[2].innerHTML = `<input type="date" value="${row.getAttribute(
-//     "data-original-date-in"
-//   )}" id="editDateIn" />`;
-//   row.cells[3].innerHTML = `<input type="date" value="${row.getAttribute(
-//     "data-original-date-out"
-//   )}" />`;
-//   row.cells[4].innerHTML = `<input type="text" value="${row.getAttribute(
-//     "data-original-vendor"
-//   )}" />`;
-
-//   row.cells[5].innerHTML = `
-//     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
-//     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
-//   `;
-// }
-
 // Add this helper function
 function formatDateForInput(dateStr) {
   if (!dateStr) return '';
@@ -327,86 +294,6 @@ function cancelEdit(simId) {
     <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
   `;
 }
-
-
-
-// function saveSim(simId) {
-//   const row = document.querySelector(`tr[data-id='${simId}']`);
-
-//   // Get updated data from input fields
-//   const mobileNumber = row.cells[0].querySelector("input").value.trim();
-//   const simNumber = row.cells[1].querySelector("input").value.trim();
-//   const dateIn = row.cells[2].querySelector("input").value.trim();
-//   const dateOut = row.cells[3].querySelector("input").value.trim();
-//   const vendor = row.cells[4].querySelector("input").value.trim();
-
-//   // Validation logic
-//   const errors = [];
-//   const indianMobileRegex = /^[6-9]\d{9}$/; // Validates 10-digit Indian mobile numbers
-
-//   if (!indianMobileRegex.test(mobileNumber)) {
-//     errors.push(
-//       "Invalid Mobile Number: Must be a valid 10-digit Indian number."
-//     );
-//   }
-//   if (simNumber.length !== 20 || isNaN(simNumber)) {
-//     errors.push("Invalid SIM Number: Must be exactly 20 digits.");
-//   }
-//   if (!dateIn) {
-//     errors.push("Date In is required.");
-//   }
-//   if (!vendor) {
-//     errors.push("Vendor is required.");
-//   }
-
-//   // Show errors and stop if validation fails
-//   if (errors.length > 0) {
-//     alert(errors.join("\n"));
-//     return;
-//   }
-
-//   // Create updated data object
-//   const updatedData = {
-//     MobileNumber: mobileNumber,
-//     SimNumber: simNumber,
-//     DateIn: dateIn,
-//     DateOut: dateOut,
-//     Vendor: vendor,
-//   };
-
-//   // Send the updated data to the server
-//   fetch(`/simInvy/edit_sim/${simId}`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//     },
-//     body: JSON.stringify(updatedData),
-//   })
-//     .then((response) => response.json())
-//     .then((data) => {
-//       if (data.success) {
-//         // Update the table row with the new values
-//         row.cells[0].innerText = updatedData.MobileNumber;
-//         row.cells[1].innerText = updatedData.SimNumber;
-//         row.cells[2].innerText = updatedData.DateIn;
-//         row.cells[3].innerText = updatedData.DateOut;
-//         row.cells[4].innerText = updatedData.Vendor;
-
-//         // Restore the action buttons
-//         row.cells[5].innerHTML = `
-//           <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
-//           <button class="icon-btn delete-icon" onclick="deleteSim('${simId}')">🗑️</button>
-//         `;
-//       } else {
-//         alert("Failed to save the changes. Please try again.");
-//       }
-//     })
-//     .catch((error) => {
-//       console.error("Error updating SIM:", error);
-//       alert("An error occurred. Please try again.");
-//     });
-// }
 
 function saveSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
