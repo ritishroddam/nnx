@@ -28,15 +28,6 @@ def convertDate(ddmmyy, hhmmss):
     
     return datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
 
-def convert_to_decimal(degrees_minutes, direction):
-    """Convert GPS coordinates from degrees-minutes to decimal format."""
-    degrees = int(float(degrees_minutes) / 100)
-    minutes = float(degrees_minutes) - (degrees * 100)
-    decimal = degrees + (minutes / 60)
-    if direction in ["S", "W"]:
-        decimal = -decimal
-    return decimal
-
 @route_bp.route("/page", methods=["GET"])
 @jwt_required()
 def page():
@@ -256,8 +247,8 @@ def get_vehicle_path():
             if not record['latitude'] or not record['longitude']:
                 continue
 
-            latitude = convert_to_decimal(record["latitude"], record["dir1"])
-            longitude = convert_to_decimal(record["longitude"], record["dir2"])
+            latitude = float(record["latitude"])
+            longitude = float(record["longitude"])
             path_data.append({
                 "LicensePlateNumber": data_record.get("LicensePlateNumber", "Unknown"),
                 "latitude": latitude,
