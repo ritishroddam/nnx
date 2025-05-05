@@ -89,29 +89,6 @@ async function updateData(data) {
   return data;
 }
 
-async function getAddressFromCoordinates(lat, lng) {
-  try {
-    const response = await fetch("/geocode", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify({ lat, lng }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.address; // Assuming the route returns an object with an 'address' field
-  } catch (error) {
-    console.error("Error fetching address:", error);
-    return null;
-  }
-}
-
 async function fetchVehicleData() {
   try {
     const response = await fetch("/vehicle/api/vehicles");
@@ -265,34 +242,6 @@ async function renderVehicles() {
   filterVehicles();
   addHoverListenersToCardsAndMarkers();
   showHidecar();
-}
-
-function geocodeLatLng(latLng, callback) {
-  const lat = latLng.lat();
-  const lon = latLng.lng();
-  const key = `${lat},${lon}`;
-
-  if (addressCache[key]) {
-    callback(addressCache[key]);
-  } else {
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=YOUR_API_KEY`;
-
-    fetch(geocodeUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "OK" && data.results[0]) {
-          const address = data.results[0].formatted_address;
-          addressCache[key] = address;
-          callback(address);
-        } else {
-          callback("No address found");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching geocode data:", error);
-        callback("Error fetching address");
-      });
-  }
 }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
@@ -1065,7 +1014,7 @@ function addHoverListenersToCardsAndMarkers() {
           infoWindow,
           marker,
           latLng,
-          marker.device,
+          marker,
           address
         );
         infoWindow.open(map, marker);
