@@ -6,7 +6,6 @@ var addressCache = {};
 var refreshInterval = 5000;
 var infoWindow;
 var countdownTimer = refreshInterval / 1000;
-var openMarker = null;
 var firstFit = true;
 var manualClose = false;
 var dataAvailable = true;
@@ -342,7 +341,6 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   marker.addListener("gmp-click", function () {
     setInfoWindowContent(infoWindow, marker, latLng, device, address);
     infoWindow.open(map, marker);
-    openMarker = marker;
   });
 }
 
