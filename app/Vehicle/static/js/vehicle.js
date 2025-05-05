@@ -1063,7 +1063,7 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
 
-        const address = getAddressFromCoordinates(latLng.lat(), latLng.lng());
+        const address = marker.address;
         setInfoWindowContent(
           infoWindow,
           marker,
