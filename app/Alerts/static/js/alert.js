@@ -437,29 +437,28 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updatePagination() {
-    const paginationContainers = document.querySelector(
-      ".pagination-container"
-    );
-
-    if (!paginationContainers) {
-      console.error("Pagination containers not found.");
+    const paginationContainer = document.querySelector(".pagination-container"); // Select only one container
+    if (!paginationContainer) {
+      console.error("No pagination container found in the DOM.");
       return;
     }
 
     const totalPages = Math.ceil(allAlerts.length / ITEMS_PER_PAGE);
 
-    paginationContainers.innerHTML = "";
+    // Clear existing content in the pagination container
+    paginationContainer.innerHTML = "";
 
     const totalAlertsSpan = document.createElement("span");
     totalAlertsSpan.className = "total-alerts";
     totalAlertsSpan.textContent = `Total Alerts: ${allAlerts.length}`;
-    paginationContainers[0].appendChild(totalAlertsSpan);
+    paginationContainer.appendChild(totalAlertsSpan);
 
     if (allAlerts.length <= ITEMS_PER_PAGE) return;
 
     const paginationDiv = createPaginationControls(totalPages);
 
-    paginationContainers.appendChild(paginationDiv);
+    // Append pagination controls to the container
+    paginationContainer.appendChild(paginationDiv);
   }
 
   function createPaginationControls(totalPages) {
