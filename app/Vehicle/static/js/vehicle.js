@@ -57,8 +57,6 @@ socket.on("vehicle_update", async function (data) {
     // Wait for fetchdistance to resolve and return the updated data
     const updatedData = await updateData(data);
 
-    // Proceed with the updated data
-    console.log("Vehicle update received:", updatedData.address);
     updateVehicleData(updatedData);
     updateVehicleCard(updatedData);
   } catch (error) {
@@ -1014,7 +1012,7 @@ function addHoverListenersToCardsAndMarkers() {
           infoWindow,
           marker,
           latLng,
-          marker,
+          marker.device,
           address
         );
         infoWindow.open(map, marker);
