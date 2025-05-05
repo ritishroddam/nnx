@@ -495,16 +495,13 @@ function filterVehicles() {
   updateFloatingCard(filteredVehicles, filterValue);
 }
 
-function parseCoordinates(lat, lon) {
-  const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
-  const parsedLon = parseFloat(lon.slice(0, 3)) + parseFloat(lon.slice(3)) / 60;
-
-  if (isNaN(parsedLat) || isNaN(parsedLon)) {
-    console.error("Invalid coordinates:", lat, lon);
+function parseCoordinates(lat, lng) {
+  if (isNaN(lat) || isNaN(lng)) {
+    console.error("Invalid coordinates:", lat, lng);
     return new google.maps.LatLng(0, 0); // Return a default LatLng object
   }
 
-  return new google.maps.LatLng(parsedLat, parsedLon);
+  return new google.maps.LatLng(lat, lng);
 }
 
 function convertSpeedToKmh(speedkmh) {
