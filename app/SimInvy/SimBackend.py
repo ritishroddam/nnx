@@ -18,26 +18,58 @@ collection = db['sim_inventory']
 @sim_bp.route('/page')
 @jwt_required()
 def page():
+    # Get all SIMs
     sims = list(collection.find({}))
+    
+    # Get all allocated SIM numbers from vehicle inventory
+    allocated_sims = set()
+    vehicle_collection = db['vehicle_inventory']
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1}))
+    for vehicle in vehicles:
+        if 'sim_number' in vehicle:
+            allocated_sims.add(vehicle['sim_number'])
+    
+    # Update SIM status
     for sim in sims:
-        sim.setdefault('status', 'Available')  # Default status
-        sim.setdefault('isActive', True)       # Default active state
+        if sim['SimNumber'] in allocated_sims:
+            sim['status'] = 'Allocated'
+            sim['isActive'] = True
+        else:
+            sim.setdefault('status', 'Available')
+            sim.setdefault('isActive', True)
+    
     return render_template('sim.html', sims=sims)
 
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
+    # First get all allocated SIMs from vehicle inventory
+    allocated_sims = set()
+    vehicle_collection = db['vehicle_inventory']
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1}))
+    for vehicle in vehicles:
+        if 'sim_number' in vehicle:
+            allocated_sims.add(vehicle['sim_number'])
+    
     query = {}
     if status == 'Available':
-        query = {'status': 'Available'}
+        query = {'SimNumber': {'$nin': list(allocated_sims)}}
     elif status == 'Allocated':
-        query = {'status': 'Allocated'}
+        query = {'SimNumber': {'$in': list(allocated_sims)}}
     elif status == 'SafeCustody':
         query = {'status': 'SafeCustody'}
     elif status == 'Suspended':
         query = {'status': 'Suspended'}
     
     sims = list(collection.find(query))
+    
+    # Set status for each SIM
+    for sim in sims:
+        if status == 'Available':
+            sim['status'] = 'Available'
+        elif status == 'Allocated':
+            sim['status'] = 'Allocated'
+    
     return jsonify(sims)
 
 @sim_bp.route('/manual_entry', methods=['POST'])

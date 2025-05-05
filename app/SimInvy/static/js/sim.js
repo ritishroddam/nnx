@@ -204,6 +204,16 @@ function filterSimsByStatus() {
 //   `;
 // }
 
+// Add this helper function
+function formatDateForInput(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+  }
+  return dateStr;
+}
+
 function editSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
@@ -237,10 +247,10 @@ function editSim(simId) {
       <option value="false" ${row.getAttribute("data-original-active") === 'false' ? 'selected' : ''}>Inactive</option>
     </select>
   `;
-  row.cells[4].innerHTML = `<input type="date" value="${row.getAttribute("data-original-status-date")}" id="editStatusDate" />`;
-  row.cells[5].innerHTML = `<input type="date" value="${row.getAttribute("data-original-reactivation-date")}" id="editReactivationDate" />`;
-  row.cells[6].innerHTML = `<input type="date" value="${row.getAttribute("data-original-date-in")}" />`;
-  row.cells[7].innerHTML = `<input type="date" value="${row.getAttribute("data-original-date-out")}" />`;
+  row.cells[4].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-status-date"))}" id="editStatusDate" />`;
+  row.cells[5].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-reactivation-date"))}" id="editReactivationDate" />`;
+  row.cells[6].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" />`;
+  row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
   row.cells[8].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
 
   row.cells[9].innerHTML = `
@@ -249,10 +259,24 @@ function editSim(simId) {
   `;
 
   // Add event listener for status change
-  document.getElementById('editStatus').addEventListener('change', function() {
-    const statusDateInput = document.getElementById('editStatusDate');
-    const reactivationDateInput = document.getElementById('editReactivationDate');
-    
+  const statusSelect = row.cells[2].querySelector('#editStatus');
+  const statusDateInput = row.cells[4].querySelector('#editStatusDate');
+  const reactivationDateInput = row.cells[5].querySelector('#editReactivationDate');
+  
+  // Set initial visibility
+  if (statusSelect.value === 'SafeCustody' || statusSelect.value === 'Suspended') {
+    statusDateInput.style.display = 'block';
+    if (statusSelect.value === 'SafeCustody') {
+      reactivationDateInput.style.display = 'block';
+    } else {
+      reactivationDateInput.style.display = 'none';
+    }
+  } else {
+    statusDateInput.style.display = 'none';
+    reactivationDateInput.style.display = 'none';
+  }
+  
+  statusSelect.addEventListener('change', function() {
     if (this.value === 'SafeCustody' || this.value === 'Suspended') {
       statusDateInput.style.display = 'block';
       if (this.value === 'SafeCustody') {
@@ -278,16 +302,21 @@ function cancelEdit(simId) {
   // Restore original values from stored attributes
   row.cells[0].innerText = row.getAttribute("data-original-mobile");
   row.cells[1].innerText = row.getAttribute("data-original-sim");
-  row.cells[2].innerText = row.getAttribute("data-original-date-in");
-  row.cells[3].innerText = row.getAttribute("data-original-date-out");
-  row.cells[4].innerText = row.getAttribute("data-original-vendor");
+  row.cells[2].innerText = row.getAttribute("data-original-status");
+  row.cells[3].innerText = row.getAttribute("data-original-active") === 'true' ? 'Active' : 'Inactive';
+  row.cells[4].innerText = row.getAttribute("data-original-status-date");
+  row.cells[5].innerText = row.getAttribute("data-original-reactivation-date");
+  row.cells[6].innerText = row.getAttribute("data-original-date-in");
+  row.cells[7].innerText = row.getAttribute("data-original-date-out");
+  row.cells[8].innerText = row.getAttribute("data-original-vendor");
 
   // Restore action buttons
-  row.cells[5].innerHTML = `
+  row.cells[9].innerHTML = `
     <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
-    <button class="icon-btn delete-icon" onclick="deleteSim('${simId}')">🗑️</button>
   `;
 }
+
+
 
 // function saveSim(simId) {
 //   const row = document.querySelector(`tr[data-id='${simId}']`);
