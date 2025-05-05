@@ -1016,7 +1016,7 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lon: latLng.lng(),
   };
 
-  addMarkerClickListener(marker, latLng, marker.device, coords);
+  addMarkerClickListener(marker, latLng, marker, coords);
 }
 
 function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
