@@ -18,20 +18,19 @@ collection = db['sim_inventory']
 @sim_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all SIMs
-    sims = list(collection.find({}))
-    
-    # Get all allocated SIM numbers from vehicle inventory
-    allocated_sims = set()
+    # Get all vehicles with SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'sim_number': 1}))
-    for vehicle in vehicles:
-        if 'sim_number' in vehicle:
-            allocated_sims.add(vehicle['sim_number'])
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
-    # Update SIM status
+    # Create mapping of SIM numbers to IMEIs
+    sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') 
+                  for v in vehicles if 'sim_number' in v}
+    
+    # Get all SIMs and add status/IMEI info
+    sims = list(collection.find({}))
     for sim in sims:
-        if sim['SimNumber'] in allocated_sims:
+        if sim['SimNumber'] in sim_to_imei:
+            sim['IMEI'] = sim_to_imei[sim['SimNumber']]
             sim['status'] = 'Allocated'
             sim['isActive'] = True
         else:
@@ -43,32 +42,34 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    # First get all allocated SIMs from vehicle inventory
-    allocated_sims = set()
+    # Get all vehicles with their SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'sim_number': 1}))
-    for vehicle in vehicles:
-        if 'sim_number' in vehicle:
-            allocated_sims.add(vehicle['sim_number'])
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
+    # Create mapping of SIM numbers to IMEIs
+    sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') 
+                  for v in vehicles if 'sim_number' in v}
+    
+    # Build query based on status
     query = {}
     if status == 'Available':
-        query = {'SimNumber': {'$nin': list(allocated_sims)}}
+        query = {'SimNumber': {'$nin': list(sim_to_imei.keys())}}
     elif status == 'Allocated':
-        query = {'SimNumber': {'$in': list(allocated_sims)}}
+        query = {'SimNumber': {'$in': list(sim_to_imei.keys())}}
     elif status == 'SafeCustody':
         query = {'status': 'SafeCustody'}
     elif status == 'Suspended':
         query = {'status': 'Suspended'}
     
+    # Get SIMs and add IMEI info
     sims = list(collection.find(query))
-    
-    # Set status for each SIM
     for sim in sims:
-        if status == 'Available':
-            sim['status'] = 'Available'
-        elif status == 'Allocated':
+        if sim['SimNumber'] in sim_to_imei:
+            sim['IMEI'] = sim_to_imei[sim['SimNumber']]
             sim['status'] = 'Allocated'
+        else:
+            sim.setdefault('status', 'Available')
+            sim.setdefault('isActive', True)
     
     return jsonify(sims)
 

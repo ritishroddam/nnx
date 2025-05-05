@@ -11,8 +11,6 @@
 Sim Inventory
 {% endblock %}
 
-{% block block_container %}
-
 <div class="filter-container mb-4">
   <label for="statusFilter">Filter by Status:</label>
   <select id="statusFilter" onchange="filterSimsByStatus()">
@@ -23,6 +21,8 @@ Sim Inventory
     <option value="Suspended">Suspended</option>
   </select>
 </div>
+
+{% block block_container %}
 
 <button id="manualEntryBtn" class="btn success mb-4">
   Add New SIM
@@ -92,6 +92,7 @@ Sim Inventory
     <tr>
       <th>Mobile Number</th>
       <th>SIM Number</th>
+      <th>IMEI Number</th>
       <th>Status</th>
       <th>Active</th>
       <th>Status Date</th>
@@ -104,19 +105,16 @@ Sim Inventory
   </thead>
   <tbody id="simTable">
     {% for sim in sims %}
-    <tr data-id="{{ sim._id }}" 
-    class="{% if sim.status == 'Available' and sim.isActive %}available
-    {% elif sim.status == 'Allocated' %}allocated
-    {% elif sim.status == 'SafeCustody' %}safecustody
-    {% elif sim.status == 'Suspended' %}suspended{% endif %}">
+    <tr data-id="{{ sim._id }}" class="{% if sim.status == 'Available' and sim.isActive %}available{% elif sim.status == 'Allocated' %}allocated{% elif sim.status == 'SafeCustody' %}safecustody{% elif sim.status == 'Suspended' %}suspended{% endif %}">
       <td>{{ sim.MobileNumber }}</td>
       <td>{{ sim.SimNumber }}</td>
+      <td>{{ sim.IMEI if 'IMEI' in sim else 'N/A' }}</td>
       <td>{{ sim.status }}</td>
       <td>{{ 'Active' if sim.isActive else 'Inactive' }}</td>
       <td>{{ sim.statusDate if sim.statusDate else '' }}</td>
       <td>{{ sim.reactivationDate if sim.reactivationDate else '' }}</td>
       <td>{{ sim.DateIn }}</td>
-      <td>{{ sim.DateOut }}</td>
+      <td>{{ sim.DateOut if sim.DateOut else '' }}</td>
       <td>{{ sim.Vendor }}</td>
       <td>
         <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
