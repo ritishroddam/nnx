@@ -340,6 +340,7 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 
   const address = device.address || "Location unknown";
   marker.addListener("gmp-click", function () {
+    console.log(marker.address, device.address);
     setInfoWindowContent(infoWindow, marker, latLng, device, address);
     infoWindow.open(map, marker);
   });
