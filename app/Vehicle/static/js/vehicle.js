@@ -1,4 +1,17 @@
 let vehicleData = new Map();
+var map;
+var markers = {};
+var geocoder;
+var addressCache = {};
+var refreshInterval = 5000;
+var infoWindow;
+var countdownTimer = refreshInterval / 1000;
+var openMarker = null;
+var firstFit = true;
+var manualClose = false;
+var dataAvailable = true;
+var sosActiveMarkers = {};
+var lastDataReceivedTime = {};
 
 const socket = io(CONFIG.SOCKET_SERVER_URL, {
   transports: ["websocket"],
@@ -485,20 +498,6 @@ function filterVehicles() {
   });
   updateFloatingCard(filteredVehicles, filterValue);
 }
-
-var map;
-var markers = {};
-var geocoder;
-var addressCache = {};
-var refreshInterval = 5000;
-var infoWindow;
-var countdownTimer = refreshInterval / 1000;
-var openMarker = null;
-var firstFit = true;
-var manualClose = false;
-var dataAvailable = true;
-var sosActiveMarkers = {};
-var lastDataReceivedTime = {};
 
 function parseCoordinates(lat, lon) {
   const parsedLat = parseFloat(lat.slice(0, 2)) + parseFloat(lat.slice(2)) / 60;
@@ -1022,6 +1021,13 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lon: latLng.lng(),
   };
   addMarkerClickListener(marker, latLng, marker.device, coords);
+  setInfoWindowContent(
+    infoWindow,
+    marker,
+    latLng,
+    marker.device,
+    marker.address
+  );
 }
 
 function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
