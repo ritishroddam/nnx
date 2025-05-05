@@ -58,6 +58,7 @@ socket.on("vehicle_update", async function (data) {
     const updatedData = await updateData(data);
 
     // Proceed with the updated data
+    console.log("Vehicle update received:", updatedData.address);
     updateVehicleData(updatedData);
     updateVehicleCard(updatedData);
   } catch (error) {
@@ -1014,8 +1015,6 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lat: latLng.lat(),
     lon: latLng.lng(),
   };
-
-  console.log("Marker position updated:", marker.address, latLng);
 
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
