@@ -287,7 +287,6 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 
   const address = device.address || "Location unknown";
   marker.addListener("gmp-click", function () {
-    console.log(marker.address, device.address);
     setInfoWindowContent(infoWindow, marker, latLng, device, address);
     infoWindow.open(map, marker);
   });
@@ -960,7 +959,6 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lat: latLng.lat(),
     lon: latLng.lng(),
   };
-
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
@@ -1007,7 +1005,7 @@ function addHoverListenersToCardsAndMarkers() {
           lon: marker.position.lng,
         };
 
-        const address = marker.address;
+        const address = marker.device.address || "Location unknown";
         setInfoWindowContent(
           infoWindow,
           marker,
