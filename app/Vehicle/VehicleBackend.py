@@ -7,7 +7,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
-from app.geocoding import geocodeInternal, nmea_to_decimal
+from app.geocoding import geocodeInternal
 
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')

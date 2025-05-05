@@ -11,7 +11,7 @@ from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
-from app.geocoding import geocodeInternal, nmea_to_decimal
+from app.geocoding import geocodeInternal
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -231,13 +231,6 @@ def download_custom_report():
                 df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
             if 'latitude' in df.columns and 'longitude' in df.columns:
-                df['latitude'] = df['latitude'].apply(
-                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-                )
-                df['longitude'] = df['longitude'].apply(
-                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-                )
-
                 df['Location'] = df.apply(
                     lambda row: geocodeInternal(row['latitude'], row['longitude'])
                     if pd.notnull(row['latitude']) and row['latitude'] != "" and
@@ -362,13 +355,6 @@ def download_custom_report():
 
             # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
-                df['latitude'] = df['latitude'].apply(
-                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-                )
-                df['longitude'] = df['longitude'].apply(
-                    lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-                )
-
                 df['Location'] = df.apply(
                     lambda row: geocodeInternal(row['latitude'], row['longitude'])
                     if pd.notnull(row['latitude']) and row['latitude'] != "" and
@@ -533,13 +519,6 @@ def download_panic_report():
         if 'date_time' in df.columns:
             cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
             df = df[cols]
-        
-        df['latitude'] = df['latitude'].apply(
-            lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-        )
-        df['longitude'] = df['longitude'].apply(
-            lambda x: nmea_to_decimal(x) if pd.notnull(x) and x != "" else x
-        )
 
         # Add Location column
         df['Location'] = df.apply(

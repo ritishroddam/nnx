@@ -9,7 +9,7 @@ from app.geocoding import geocodeInternal
 from bson import ObjectId # type: ignore
 from functools import wraps
 from flask_socketio import SocketIO, emit # type: ignore
-from app.geocoding import geocodeInternal, nmea_to_decimal
+from app.geocoding import geocodeInternal
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 socketio = SocketIO()
@@ -216,8 +216,8 @@ def alert_card_endpoint(alert_type):
                 if not record.get("latitude") or not record.get("longitude"):
                     continue
                 try:
-                    latitude = nmea_to_decimal(record["latitude"])
-                    longitude = nmea_to_decimal(record["longitude"])
+                    latitude = record["latitude"]
+                    longitude = record["longitude"]
                     
                     if latitude is None or longitude is None:
                         continue
