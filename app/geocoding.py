@@ -35,17 +35,20 @@ def validate_coordinates(lat, lng):
 def nmea_to_decimal(nmea_value):
     # Check if the string has a leading zero that should be removed
     nmea_value = str(nmea_value)
-
+    print (nmea_value)
     # Extract degrees and minutes
     if '.' in nmea_value:
         dot_index = nmea_value.index('.')
-        degrees = float(nmea_value[:dot_index - 2])  # All characters before the last two digits before the dot
+        degrees = float(nmea_value[:dot_index - 2])
+        print("2")
         minutes = float(nmea_value[dot_index - 2:])  # Last two digits before the dot and everything after
+        print("3")
     else:
         raise ValueError("Invalid NMEA format")
     
     # Convert to decimal degrees
     decimal_degrees = degrees + (minutes / 60.0)
+    print("4")
     return decimal_degrees
     
 def geocodeInternal(lat,lng):

@@ -91,24 +91,12 @@ def get_vehicles():
 
         # Iterate through vehicles and fetch the LicensePlateNumber from vehicle_inventory
         for vehicle in vehicles:
-            vehicle['_id'] = str(vehicle['_id'])  # Convert ObjectId to string
-        
-            # Ensure latitude and longitude are valid before processing
-            latitude = vehicle.get('latitude', "").strip()
-            longitude = vehicle.get('longitude', "").strip()
-        
-            if latitude and longitude:  # Check if both are non-empty
-                try:
-                    lat = nmea_to_decimal(latitude)
-                    lng = nmea_to_decimal(longitude)
-        
-                    location = geocodeInternal(lat, lng)
-                    vehicle['location'] = location
-                except ValueError as e:
-                    print(f"Error converting latitude/longitude for vehicle {vehicle['_id']}: {e}")
-                    vehicle['location'] = "Invalid coordinates"
-            else:
-                vehicle['location'] = "Coordinates not available"
+            vehicle['_id'] = str(vehicle['_id'])  
+
+            lat = vehicle.get('latitude')
+            lng = vehicle.get('longitude')
+            location = geocodeInternal(lat, lng)
+            vehicle['location'] = location
 
         
         return jsonify(vehicles), 200
