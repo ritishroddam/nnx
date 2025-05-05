@@ -6,7 +6,8 @@
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script defer src="{{ url_for('Alerts.static', filename='js/alert.js') }}"></script>
@@ -24,7 +25,7 @@ Alerts
     <div class="alert-sidebar">
         <div class="alert-cards">
             <div class="alert-type-header">ALERT TYPES</div>
-            
+
             <div class="alert-card active" data-alert="panic" data-endpoint="panic">
                 <h3>Panic Alert</h3>
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -95,7 +96,7 @@ Alerts
         </div>
 
         <div class="alerts-table-container">
-            <div class="pagination-container"></div>
+            <!-- <div class="pagination-container"></div> -->
             <table id="alertsTable" class="alerts-table">
                 <thead>
                     <tr>
