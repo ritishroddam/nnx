@@ -553,9 +553,9 @@ function updateVehicleData(vehicle) {
   const rotation = vehicle.course;
 
   if (markers[imei]) {
+    markers[imei].device = vehicle;
     animateMarker(markers[imei], latLng);
     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
-    markers[imei].device = vehicle;
 
     const markerContent = markers[imei].content;
     const markerImage = markerContent.querySelector("img");
@@ -961,7 +961,7 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lon: latLng.lng(),
   };
 
-  addMarkerClickListener(marker, latLng, marker, coords);
+  addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
 function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
