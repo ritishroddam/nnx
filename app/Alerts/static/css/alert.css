@@ -27,7 +27,6 @@
     color: #ccc
 }
 
-/* Alert cards */
 .alert-cards {
     display: flex;
     flex-direction: column;
@@ -90,7 +89,6 @@
     text-transform: uppercase;
 }
 
-/* Filter section */
 .alerts-filter {
     display: flex;
     gap: 15px;
@@ -137,7 +135,6 @@
     background-color: #34495e;
 }
 
-/* Table styles */
 .alerts-table-container {
     background-color: white;
     border-radius: 8px;
@@ -226,7 +223,6 @@
     cursor: not-allowed;
 }
 
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: space-between;
@@ -262,7 +258,6 @@
     opacity: 0.5;
 }
 
-/* Modal styles */
 .modal {
     display: none;
     position: fixed;

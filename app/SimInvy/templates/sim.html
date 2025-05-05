@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 
-
 {% block head %}
 <title>GPS Sim Inventory</title>
-
 <link rel="stylesheet" href="{{ url_for('SimInvy.static', filename='css/sim.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-
 <script defer src="{{ url_for('SimInvy.static', filename='js/sim.js') }}"></script>
 {% endblock %}
 
@@ -15,6 +12,17 @@ Sim Inventory
 {% endblock %}
 
 {% block block_container %}
+
+<div class="filter-container mb-4">
+  <label for="statusFilter">Filter by Status:</label>
+  <select id="statusFilter" onchange="filterSimsByStatus()">
+    <option value="All">All SIMs</option>
+    <option value="Available">Available</option>
+    <option value="Allocated">Allocated</option>
+    <option value="SafeCustody">Safe Custody</option>
+    <option value="Suspended">Suspended</option>
+  </select>
+</div>
 
 <button id="manualEntryBtn" class="btn success mb-4">
   Add New SIM
@@ -27,7 +35,7 @@ Sim Inventory
       <label for="MobileNumber">Mobile Number</label>
       <input type="text" name="MobileNumber" id="MobileNumber" required />
       <div id="mobileError" class="error hidden">
-        Mobile Number must be 13 digits long.
+        Mobile Number must be 10 digits long.
       </div>
     </div>
     <div class="mb-4">
@@ -56,12 +64,9 @@ Sim Inventory
   </form>
 </div>
 
-<!-- Upload Button -->
 <button id="uploadBtn" class="btn mb-4">Upload</button>
 <button id="downloadExcelBtn" class="btn">Download Excel</button>
 
-
-<!-- Hidden Upload Form Container -->
 <div id="uploadFormContainer" class="hidden">
   <form id="uploadForm" action="{{ url_for('SimInvy.upload_file') }}" method="post" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -74,16 +79,23 @@ Sim Inventory
 
 <div id="errorBox" class="error-box hidden"></div>
 
-<!-- Flash messages -->
-{% with messages = get_flashed_messages(with_categories=true) %} {%
-if messages %} {% for category, message in messages %}
-<div class="flash-box flash-{{ category }}">{{ message }}</div>
-{% endfor %} {% endif %} {% endwith %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-box flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 <table>
   <thead>
     <tr>
       <th>Mobile Number</th>
       <th>SIM Number</th>
+      <th>Status</th>
+      <th>Active</th>
+      <th>Status Date</th>
+      <th>Reactivation Date</th>
       <th>Date In</th>
       <th>Date Out</th>
       <th>Vendor</th>
@@ -92,15 +104,18 @@ if messages %} {% for category, message in messages %}
   </thead>
   <tbody id="simTable">
     {% for sim in sims %}
-    <tr data-id="{{ sim._id }}">
+    <tr data-id="{{ sim._id }}" class="{% if sim.status === 'Available' and sim.isActive %}available{% elif sim.status === 'Allocated' %}allocated{% elif sim.status === 'SafeCustody' %}safecustody{% elif sim.status === 'Suspended' %}suspended{% endif %}">
       <td>{{ sim.MobileNumber }}</td>
       <td>{{ sim.SimNumber }}</td>
+      <td>{{ sim.status }}</td>
+      <td>{{ 'Active' if sim.isActive else 'Inactive' }}</td>
+      <td>{{ sim.statusDate if sim.statusDate else '' }}</td>
+      <td>{{ sim.reactivationDate if sim.reactivationDate else '' }}</td>
       <td>{{ sim.DateIn }}</td>
       <td>{{ sim.DateOut }}</td>
       <td>{{ sim.Vendor }}</td>
       <td>
         <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
-        <button class="icon-btn delete-icon" onclick="deleteSim('{{ sim._id }}')">🗑️</button>
       </td>
     </tr>
     {% endfor %}

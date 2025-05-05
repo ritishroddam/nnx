@@ -140,3 +140,70 @@ tr:hover {
 .delete-icon {
   color: #dc3545;
 }
+
+/* Add these styles to your sim.css */
+
+.filter-container {
+  margin-bottom: 20px;
+}
+
+.filter-container label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.filter-container select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+/* Status-based row coloring */
+tr.available {
+  background-color: #e6f7e6; /* Light green for available */
+}
+
+tr.allocated {
+  background-color: #fff3e6; /* Light orange for allocated */
+}
+
+tr.safecustody {
+  background-color: #e6f3ff; /* Light blue for safe custody */
+}
+
+tr.suspended {
+  background-color: #ffe6e6; /* Light red for suspended */
+}
+
+/* Highlight recently available SIMs */
+tr.recently-available {
+  animation: pulse 2s infinite;
+  position: relative;
+}
+
+tr.recently-available::after {
+  content: "Recently Available";
+  position: absolute;
+  right: 10px;
+  background-color: #ffcc00;
+  color: #000;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+@keyframes pulse {
+  0% { background-color: #ffffcc; }
+  50% { background-color: #ffeb99; }
+  100% { background-color: #ffffcc; }
+}
+
+/* Status date input visibility */
+input[type="date"] {
+  display: none;
+}
+
+/* Make sure to show date inputs when needed */
+input#editStatusDate, input#editReactivationDate {
+  display: block;
+}

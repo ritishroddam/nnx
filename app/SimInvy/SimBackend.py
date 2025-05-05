@@ -21,6 +21,22 @@ def page():
     sims = list(collection.find({}))
     return render_template('sim.html', sims=sims)
 
+@sim_bp.route('/get_sims_by_status/<status>')
+@jwt_required()
+def get_sims_by_status(status):
+    query = {}
+    if status == 'Available':
+        query = {'status': 'Available'}
+    elif status == 'Allocated':
+        query = {'status': 'Allocated'}
+    elif status == 'SafeCustody':
+        query = {'status': 'SafeCustody'}
+    elif status == 'Suspended':
+        query = {'status': 'Suspended'}
+    
+    sims = list(collection.find(query))
+    return jsonify(sims)
+
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
 def manual_entry():
@@ -29,6 +45,8 @@ def manual_entry():
     # Strip any leading/trailing whitespace
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
+    data['status'] = 'Available'  # Default status
+    data['isActive'] = True  # Default active status
 
     # Validate alphanumeric and length
     if len(data['MobileNumber']) != 10 :
@@ -54,13 +72,40 @@ def manual_entry():
 
     if collection.find_one({"SimNumber": data['SimNumber']}):
         flash("SIM Number already exists", "danger")
-
         return redirect(url_for('SimInvy.page'))
 
     # Insert into MongoDB
     collection.insert_one(data)
     flash("SIM added successfully!", "success")
     return redirect(url_for('SimInvy.page'))
+
+@sim_bp.route('/update_sim_status/<sim_id>', methods=['POST'])
+@jwt_required()
+def update_sim_status(sim_id):
+    try:
+        updated_data = request.json
+        update_fields = {
+            "status": updated_data.get("status"),
+            "isActive": updated_data.get("isActive")
+        }
+        
+        if updated_data.get("status") in ['SafeCustody', 'Suspended']:
+            update_fields["statusDate"] = updated_data.get("statusDate")
+            if updated_data.get("status") == 'SafeCustody':
+                update_fields["reactivationDate"] = updated_data.get("reactivationDate")
+        
+        result = collection.update_one(
+            {'_id': ObjectId(sim_id)},
+            {'$set': update_fields}
+        )
+        
+        if result.modified_count > 0:
+            return jsonify({'success': True, 'message': 'SIM status updated successfully!'})
+        else:
+            return jsonify({'success': False, 'message': 'No changes made.'})
+    except Exception as e:
+        print(f"Error updating SIM status: {e}")
+        return jsonify({'success': False, 'message': 'Error updating SIM status.'}), 500
 
 @sim_bp.route('/upload_file', methods=['POST'])
 @jwt_required()
