@@ -340,13 +340,9 @@ function addMarkerClickListener(marker, latLng, device, coords) {
 
   const address = device.address || "Location unknown";
   marker.addListener("gmp-click", function () {
-    if (openMarker !== marker) {
-      setInfoWindowContent(infoWindow, marker, latLng, device, address);
-      infoWindow.open(map, marker);
-      openMarker = marker;
-    } else {
-      console.log("InfoWindow already open for this marker.");
-    }
+    setInfoWindowContent(infoWindow, marker, latLng, device, address);
+    infoWindow.open(map, marker);
+    openMarker = marker;
   });
 }
 
@@ -1020,14 +1016,10 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lat: latLng.lat(),
     lon: latLng.lng(),
   };
+
+  console.log("Marker position updated:", marker.address, latLng);
+
   addMarkerClickListener(marker, latLng, marker.device, coords);
-  setInfoWindowContent(
-    infoWindow,
-    marker,
-    latLng,
-    marker.device,
-    marker.address
-  );
 }
 
 function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
