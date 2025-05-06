@@ -120,12 +120,16 @@ def manual_entry():
 @jwt_required()
 def update_sim_status(sim_id):
     try:
-        current_user = get_jwt_identity()
         updated_data = request.json
         update_fields = {
+            "MobileNumber": updated_data.get("MobileNumber"),
+            "SimNumber": updated_data.get("SimNumber"),
             "status": updated_data.get("status"),
             "isActive": updated_data.get("isActive"),
-            "editedBy": current_user,  # Add editor info
+            "DateIn": updated_data.get("DateIn"),
+            "DateOut": updated_data.get("DateOut"),
+            "Vendor": updated_data.get("Vendor"),
+            "editedBy": updated_data.get("editedBy"),  # Add editor info
             "lastEdited": datetime.datetime.utcnow()  # Add edit timestamp
         }
         
@@ -140,7 +144,7 @@ def update_sim_status(sim_id):
         )
         
         if result.modified_count > 0:
-            return jsonify({'success': True, 'message': 'SIM status updated successfully!'})
+            return jsonify({'success': True, 'message': 'SIM updated successfully!'})
         else:
             return jsonify({'success': False, 'message': 'No changes made.'})
     except Exception as e:
