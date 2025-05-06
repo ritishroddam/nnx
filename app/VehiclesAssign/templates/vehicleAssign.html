@@ -17,7 +17,8 @@ Assign Vehicles to Users
 {% endblock %}
 
 {% block block_container %}
-<form id="assignForm" method="POST">
+<form id="assignForm" action="{{url_for('VehicleAssign.assign_vehicles')}}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div>
         <label for="vehicles">Select Vehicles:</label>
         <select id="vehicles" name="vehicles" multiple required>

@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, render_template, request, jsonify, flash
+from flask import Flask, Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from datetime import datetime, timedelta
 from pytz import timezone
 from bson.objectid import ObjectId 
@@ -31,7 +31,8 @@ def assign_vehicles():
         user_ids = data.get('user_ids', [])
 
         if not vehicle_ids or not user_ids:
-            return jsonify({"success": False, "message": "Vehicle IDs and User IDs are required."}), 400
+            flash("Vehicle IDs and User IDs are required.", "danger")
+            return redirect(url_for('VehicleAssign.assign_vehicles'))
 
         try:
             for vehicle_id in vehicle_ids:
@@ -40,11 +41,14 @@ def assign_vehicles():
                     {"$set": {"AssignedUsers": [ObjectId(user_id) for user_id in user_ids]}}
                 )
                 if result.matched_count == 0:
-                    return jsonify({"success": False, "message": f"Vehicle with ID {vehicle_id} not found."}), 404
+                    flash(f"Vehicle with ID {vehicle_id} not found.", "danger")
+                    return redirect(url_for('VehicleAssign.assign_vehicles'))
 
-            return jsonify({"success": True, "message": "Vehicles assigned successfully!"}), 200
+            flash("Vehicles assigned successfully!", "success")
+            return redirect(url_for('VehicleAssign.assign_vehicles'))
 
         except Exception as e:
             # Log the error for debugging purposes
             print(f"Error during vehicle assignment: {e}")
-            return jsonify({"success": False, "message": "An error occurred during the assignment operation."}), 500
+            flash("An error occurred during the assignment operation.", "danger")
+            return redirect(url_for('VehicleAssign.assign_vehicles'))
