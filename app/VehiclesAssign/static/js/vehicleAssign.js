@@ -30,7 +30,10 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         const response = await fetch("/vehicleAssign/assign_vehicles", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+          },
           body: JSON.stringify({ vehicle_ids: vehicleIds, user_ids: userIds }),
         });
 
