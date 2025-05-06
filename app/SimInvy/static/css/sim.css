@@ -226,13 +226,17 @@ input#editStatusDate, input#editReactivationDate {
 }
 
 .icon-btn {
+  cursor: pointer;
   background: none;
   border: none;
-  cursor: pointer;
-  font-size: 1.2em;
   padding: 0 5px;
+  font-size: 1.2em;
 }
 
-.save-icon { color: green; }
-.cancel-icon { color: red; }
-.edit-icon { color: blue; }
+.edit-icon { color: #2196F3; }
+.save-icon { color: #4CAF50; }
+.cancel-icon { color: #F44336; }
+
+.icon-btn:hover {
+  opacity: 0.8;
+}

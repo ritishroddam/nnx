@@ -133,18 +133,13 @@ function filterSimsByStatus() {
   const status = document.getElementById('statusFilter').value;
   
   fetch(`/simInvy/get_sims_by_status/${status}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
-      return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
       const tableBody = document.getElementById('simTable');
       tableBody.innerHTML = '';
       
       if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="10" class="no-results">No SIMs found with this status</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12" class="no-results">No SIMs found with this status</td></tr>';
         return;
       }
       
@@ -166,9 +161,10 @@ function filterSimsByStatus() {
           <td>${sim.Vendor}</td>
           <td>${sim.editedBy || ''}</td>
           <td>
-        <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
-      </td>
+            <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
+          </td>
         `;
+        
         tableBody.appendChild(row);
       });
     })
@@ -193,8 +189,8 @@ function formatDateForInput(dateStr) {
 
 function editSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
-
-  // Store original values (including editedBy)
+  
+  // Store original values with correct indexes
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
   row.setAttribute("data-original-sim", row.cells[1].innerText);
   row.setAttribute("data-original-imei", row.cells[2].innerText);
@@ -240,15 +236,20 @@ function editSim(simId) {
   `;
 
   // Add event listener for status change
-  const statusSelect = row.cells[2].querySelector('#editStatus');
-  const statusDateInput = row.cells[4].querySelector('#editStatusDate');
-  const reactivationDateInput = row.cells[5].querySelector('#editReactivationDate');
+  const statusSelect = row.querySelector('#editStatus');
+  const statusDateInput = row.querySelector('#editStatusDate');
+  const reactivationDateInput = row.querySelector('#editReactivationDate');
   
   // Set initial visibility
   if (statusSelect.value === 'SafeCustody' || statusSelect.value === 'Suspended') {
     statusDateInput.style.display = 'block';
     if (statusSelect.value === 'SafeCustody') {
       reactivationDateInput.style.display = 'block';
+      // Calculate 90 days from now for reactivation date
+      const today = new Date();
+      const reactivationDate = new Date();
+      reactivationDate.setDate(today.getDate() + 90);
+      reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
     } else {
       reactivationDateInput.style.display = 'none';
     }
@@ -256,6 +257,24 @@ function editSim(simId) {
     statusDateInput.style.display = 'none';
     reactivationDateInput.style.display = 'none';
   }
+  
+  statusSelect.addEventListener('change', function() {
+    if (this.value === 'SafeCustody' || this.value === 'Suspended') {
+      statusDateInput.style.display = 'block';
+      if (this.value === 'SafeCustody') {
+        reactivationDateInput.style.display = 'block';
+        const today = new Date();
+        const reactivationDate = new Date();
+        reactivationDate.setDate(today.getDate() + 90);
+        reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
+      } else {
+        reactivationDateInput.style.display = 'none';
+      }
+    } else {
+      statusDateInput.style.display = 'none';
+      reactivationDateInput.style.display = 'none';
+    }
+  });
   
   statusSelect.addEventListener('change', function() {
     if (this.value === 'SafeCustody' || this.value === 'Suspended') {
