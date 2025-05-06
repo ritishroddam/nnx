@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  initMap();
+  await initMap();
 
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
   let centerColor = "#2f2f2f";
@@ -428,9 +428,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 let map, trafficLayer;
 
 const themeToggle = document.getElementById("theme-toggle");
-themeToggle.addEventListener("click", function () {
-  setTimeout(() => {
-    initMap();
+themeToggle.addEventListener("click", async function () {
+  setTimeout(async () => {
+    await initMap();
   }, 100);
 });
 
@@ -439,6 +439,7 @@ async function initMap() {
     zoom: 12,
     disableDefaultUI: true,
   };
+  const Map = await google.maps.importLibrary("maps");
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -452,7 +453,7 @@ async function initMap() {
 
         const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
 
-        map = new google.maps.Map(document.getElementById("map"), {
+        map = new Map(document.getElementById("map"), {
           ...mapOptions,
           center: userLocation,
           zoomControl: true,

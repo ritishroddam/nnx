@@ -7,9 +7,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- prettier-ignore -->
-<script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
-    ({ key: "AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0", v: "weekly" });</script>
+
 {% endblock %}
 
 {% block h1 %}
@@ -18,143 +16,144 @@ Vehicle Data
 
 {% block block_container %}
 <div class="main">
-<div class="header">
-  <span class="back-arrow">&larr;</span>
-  <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
-</div>
+  <div class="header">
+    <span class="back-arrow">&larr;</span>
+    <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
+  </div>
 
-<div class="dashboard-container">
+  <div class="dashboard-container">
 
-  <div class="left-column">
+    <div class="left-column">
 
-    <div class="map-section">
-      <h3>Route history</h3>
+      <div class="map-section">
+        <h3>Route history</h3>
 
-      <div id="map"></div>
+        <div id="map"></div>
 
-      <div class="accuracy-option">
-        <label>
-          <input type="checkbox" id="enhance-accuracy"> Snap to Roads
-        </label>
-      </div>
-
-      <form id="vehicle-form">
-        <input type="hidden" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}">
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" required>
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" name="end_date" required>
-        <button type="submit">
-          <i class="fas fa-search"></i> Get Path
-        </button>
-      </form>
-
-      <div id="controls-container">
-        <div class="timeline-container">
-          <input type="range" id="timeline-slider" min="0" max="100" value="0" class="slider">
-          <div id="slider-time"></div>
+        <div class="accuracy-option">
+          <label>
+            <input type="checkbox" id="enhance-accuracy"> Snap to Roads
+          </label>
         </div>
-        
-        <button id="play-button" class="control-button">
-          <i class="fas fa-play"></i>
-        </button>
-        <button id="resume-button" class="control-button">
-          <i class="fas fa-play"></i>
-        </button>
-        <button id="stop-button" class="control-button">
-          <i class="fas fa-stop"></i>
-        </button>
-        <button id="speed-2x-button" class="control-button">
-          <i class="fas fa-forward"></i> 2X
-        </button>
-        <button id="speed-4x-button" class="control-button">
-          <i class="fas fa-forward"></i> 4X
-        </button>
-        <button id="speed-8x-button" class="control-button">
-          <i class="fas fa-forward"></i> 8X
-        </button>
 
+        <form id="vehicle-form">
+          <input type="hidden" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}">
+          <label for="start_date">Start Date:</label>
+          <input type="date" id="start_date" name="start_date" required>
+          <label for="end_date">End Date:</label>
+          <input type="date" id="end_date" name="end_date" required>
+          <button type="submit">
+            <i class="fas fa-search"></i> Get Path
+          </button>
+        </form>
+
+        <div id="controls-container">
+          <div class="timeline-container">
+            <input type="range" id="timeline-slider" min="0" max="100" value="0" class="slider">
+            <div id="slider-time"></div>
+          </div>
+
+          <button id="play-button" class="control-button">
+            <i class="fas fa-play"></i>
+          </button>
+          <button id="resume-button" class="control-button">
+            <i class="fas fa-play"></i>
+          </button>
+          <button id="stop-button" class="control-button">
+            <i class="fas fa-stop"></i>
+          </button>
+          <button id="speed-2x-button" class="control-button">
+            <i class="fas fa-forward"></i> 2X
+          </button>
+          <button id="speed-4x-button" class="control-button">
+            <i class="fas fa-forward"></i> 4X
+          </button>
+          <button id="speed-8x-button" class="control-button">
+            <i class="fas fa-forward"></i> 8X
+          </button>
+
+
+        </div>
 
       </div>
+    </div>
 
+    <div class="right-column">
+      <div class="info-box">
+        <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
+        <div class="info-row">
+          <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
+            Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
+            Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
+            Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
+            Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
+        </div>
+        <div class="info-row">
+          <span>Odometer:</span><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data
+            Available'}}</strong>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <h3>Realtime - last 5 minutes</h3>
+        {% if recent_data %}
+        <canvas id="speedChart"></canvas>
+        {% else %}
+        <p>No current/latest data</p>
+        {% endif %}
+      </div>
+
+      <div class="alarm-section">
+        <h3>
+          {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Location</th>
+              <th>Severity</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if alerts %}
+            {% for alert in alerts %}
+            <tr>
+              <td>{{ alert["timestamp"] }}</td>
+              <td>{{ alert["location"] }}</td>
+              <td>{{ alert["severity"] }}</td>
+              <td>{{ alert["status"] }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="4">No alerts found for the selected IMEI.</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
-  <div class="right-column">
-    <div class="info-box">
-      <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
-      <div class="info-row">
-        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
-          Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
-          Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
-          Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
-          Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-      <div class="info-row">
-        <span>Odometer:</span><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data Available'}}</strong>
-      </div>
-    </div>
-
-    <div class="chart-section">
-      <h3>Realtime - last 5 minutes</h3>
-      {% if recent_data %}
-      <canvas id="speedChart"></canvas>
-      {% else %}
-      <p>No current/latest data</p>
-      {% endif %}
-    </div>
-
-    <div class="alarm-section">
-      <h3>
-        {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
-      </h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Location</th>
-            <th>Severity</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if alerts %}
-          {% for alert in alerts %}
-          <tr>
-            <td>{{ alert["timestamp"] }}</td>
-            <td>{{ alert["location"] }}</td>
-            <td>{{ alert["severity"] }}</td>
-            <td>{{ alert["status"] }}</td>
-          </tr>
-          {% endfor %}
-          {% else %}
-          <tr>
-            <td colspan="4">No alerts found for the selected IMEI.</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
 </div>
 
 <script id="vehicle-data" type="application/json">

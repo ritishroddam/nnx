@@ -36,7 +36,7 @@ CORS(app)
 
 last_emit_time = {}
 
-gmaps = googlemaps.Client(key="AIzaSyDEFA1-1dlca1C2BbUNKpQEf-icQAJAfX0")
+gmaps = googlemaps.Client(key="AIzaSyBR5HGnPOjkg9PHCQZMfi7KbU2PppAIIB4")
 
 # Create compound index for fast queries
 
