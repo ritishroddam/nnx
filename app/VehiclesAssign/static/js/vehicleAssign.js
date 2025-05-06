@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ).map((option) => option.value);
 
       try {
-        const response = await fetch("/vehicleAssign/assign_vehicles", {
+        await fetch("/vehicleAssign/assign_vehicles", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -37,16 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           body: JSON.stringify({ vehicle_ids: vehicleIds, user_ids: userIds }),
         });
-
-        const result = await response.json();
-        const messageDiv = document.getElementById("responseMessage");
-        if (result.success) {
-          messageDiv.textContent = "Vehicles assigned successfully!";
-          messageDiv.style.color = "green";
-        } else {
-          messageDiv.textContent = `Error: ${result.message}`;
-          messageDiv.style.color = "red";
-        }
       } catch (error) {
         console.error("Error assigning vehicles:", error);
       }
