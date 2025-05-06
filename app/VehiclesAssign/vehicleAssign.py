@@ -14,7 +14,7 @@ vehicle_collection = db['vehicle_inventory']
 
 @vehicleAssign_bp.route('/assign_vehicles', methods=['GET', 'POST'])
 @jwt_required()
-@roles_required(['clientAdmin'])  # Restrict access to client admins
+@roles_required('clientAdmin')  # Restrict access to client admins
 def assign_vehicles():
     if request.method == 'GET':
         # Fetch vehicles and users belonging to the same company
