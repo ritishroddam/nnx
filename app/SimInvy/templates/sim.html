@@ -100,13 +100,12 @@ Sim Inventory
       <th>Date In</th>
       <th>Date Out</th>
       <th>Vendor</th>
-      <th>Edited By</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody id="simTable">
     {% for sim in sims %}
-    <tr data-id="{{ sim._id }}" class="{% if sim.status == 'Available' and sim.isActive %}available{% elif sim.status == 'Allocated' %}allocated{% elif sim.status == 'SafeCustody' %}safecustody{% elif sim.status == 'Suspended' %}suspended{% endif %}"></tr>
+    <tr data-id="{{ sim._id }}" class="{% if sim.status == 'Available' and sim.isActive %}available{% elif sim.status == 'Allocated' %}allocated{% elif sim.status == 'SafeCustody' %}safecustody{% elif sim.status == 'Suspended' %}suspended{% endif %}">
       <td>{{ sim.MobileNumber }}</td>
       <td>{{ sim.SimNumber }}</td>
       <td>{{ sim.IMEI if 'IMEI' in sim else 'N/A' }}</td>
@@ -117,7 +116,6 @@ Sim Inventory
       <td>{{ sim.DateIn }}</td>
       <td>{{ sim.DateOut if sim.DateOut else '' }}</td>
       <td>{{ sim.Vendor }}</td>
-      <td>{{ sim.editedBy if 'editedBy' in sim else '' }}</td>
       <td>
         <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
       </td>
