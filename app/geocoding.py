@@ -106,7 +106,7 @@ def geocodeInternal(lat,lng):
         return address
 
     except Exception as e:
-        print(f"Geocoding error: {str(e)}", exc_info=True)
+        print(f"Geocoding error: {str(e)}")
         return "Error retrieving address"
 
 @gecoding_bp.route('/geocode', methods=['POST'])
@@ -169,5 +169,5 @@ def geocode():
         return jsonify({'address': address})
 
     except Exception as e:
-        print(f"Geocoding error: {str(e)}", exc_info=True)
+        print(f"Geocoding error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
