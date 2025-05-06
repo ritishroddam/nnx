@@ -1,4 +1,3 @@
-import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, send_file, Response, Blueprint
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -122,15 +121,8 @@ def update_sim_status(sim_id):
     try:
         updated_data = request.json
         update_fields = {
-            "MobileNumber": updated_data.get("MobileNumber"),
-            "SimNumber": updated_data.get("SimNumber"),
             "status": updated_data.get("status"),
-            "isActive": updated_data.get("isActive"),
-            "DateIn": updated_data.get("DateIn"),
-            "DateOut": updated_data.get("DateOut"),
-            "Vendor": updated_data.get("Vendor"),
-            "editedBy": updated_data.get("editedBy"),  # Add editor info
-            "lastEdited": datetime.datetime.utcnow()  # Add edit timestamp
+            "isActive": updated_data.get("isActive")
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
@@ -144,7 +136,7 @@ def update_sim_status(sim_id):
         )
         
         if result.modified_count > 0:
-            return jsonify({'success': True, 'message': 'SIM updated successfully!'})
+            return jsonify({'success': True, 'message': 'SIM status updated successfully!'})
         else:
             return jsonify({'success': False, 'message': 'No changes made.'})
     except Exception as e:
