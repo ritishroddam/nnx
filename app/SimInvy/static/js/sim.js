@@ -164,11 +164,11 @@ function filterSimsByStatus() {
           <td>${sim.DateIn}</td>
           <td>${sim.DateOut || ''}</td>
           <td>${sim.Vendor}</td>
+          <td>${sim.editedBy || 'N/A'}</td>
           <td>
             <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
           </td>
         `;
-        
         tableBody.appendChild(row);
       });
     })
@@ -194,7 +194,7 @@ function formatDateForInput(dateStr) {
 function editSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
-  // Store original values in custom attributes before editing
+  // Store original values (correct cell indexes)
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
   row.setAttribute("data-original-sim", row.cells[1].innerText);
   row.setAttribute("data-original-imei", row.cells[2].innerText);
@@ -206,31 +206,30 @@ function editSim(simId) {
   row.setAttribute("data-original-date-out", row.cells[8].innerText);
   row.setAttribute("data-original-vendor", row.cells[9].innerText);
 
-  // Status dropdown options
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
-    .map(opt => `<option value="${opt}" ${row.cells[2].innerText === opt ? 'selected' : ''}>${opt}</option>`)
+    .map(opt => `<option value="${opt}" ${row.cells[3].innerText === opt ? 'selected' : ''}>${opt}</option>`)
     .join('');
 
-  // Replace row data with input fields
-  row.cells[0].innerHTML = `<input type="text" value="${row.getAttribute("data-original-mobile")}" />`;
-  row.cells[1].innerHTML = `<input type="text" value="${row.getAttribute("data-original-sim")}" />`;
+  // Replace row data with input fields (correct cell indexes)
+  row.cells[0].innerHTML = `<input type="text" value="${row.getAttribute("data-original-mobile")}" class="form-input" />`;
+  row.cells[1].innerHTML = `<input type="text" value="${row.getAttribute("data-original-sim")}" class="form-input" />`;
   row.cells[2].innerHTML = `<span>${row.getAttribute("data-original-imei")}</span>`;
   row.cells[3].innerHTML = `
-    <select id="editStatus">
+    <select id="editStatus" class="form-select">
       ${statusOptions}
     </select>
   `;
   row.cells[4].innerHTML = `
-    <select id="editActive">
+    <select id="editActive" class="form-select">
       <option value="true" ${row.getAttribute("data-original-active") === 'true' ? 'selected' : ''}>Active</option>
       <option value="false" ${row.getAttribute("data-original-active") === 'false' ? 'selected' : ''}>Inactive</option>
     </select>
   `;
-  row.cells[5].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-status-date"))}" id="editStatusDate" />`;
-  row.cells[6].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-reactivation-date"))}" id="editReactivationDate" />`;
-  row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" />`;
-  row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
-  row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
+  row.cells[5].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-status-date"))}" id="editStatusDate" class="form-input" />`;
+  row.cells[6].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-reactivation-date"))}" id="editReactivationDate" class="form-input" />`;
+  row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" class="form-input" />`;
+  row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" class="form-input" />`;
+  row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" class="form-input" />`;
 
   row.cells[10].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
@@ -265,6 +264,8 @@ function editSim(simId) {
         const reactivationDate = new Date();
         reactivationDate.setDate(today.getDate() + 90);
         reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
+        // Set status date to today
+        statusDateInput.value = today.toISOString().split('T')[0];
       } else {
         reactivationDateInput.style.display = 'none';
       }
@@ -302,13 +303,13 @@ function saveSim(simId) {
   const updatedData = {
     MobileNumber: row.cells[0].querySelector("input").value.trim(),
     SimNumber: row.cells[1].querySelector("input").value.trim(),
-    status: row.cells[2].querySelector("select").value,
-    isActive: row.cells[3].querySelector("select").value === 'true',
-    statusDate: row.cells[4].querySelector("input")?.value.trim() || null,
-    reactivationDate: row.cells[5].querySelector("input")?.value.trim() || null,
-    DateIn: row.cells[6].querySelector("input").value.trim(),
-    DateOut: row.cells[7].querySelector("input").value.trim(),
-    Vendor: row.cells[8].querySelector("input").value.trim()
+    status: row.cells[3].querySelector("select").value,
+    isActive: row.cells[4].querySelector("select").value === 'true',
+    statusDate: row.cells[5].querySelector("input")?.value.trim() || null,
+    reactivationDate: row.cells[6].querySelector("input")?.value.trim() || null,
+    DateIn: row.cells[7].querySelector("input").value.trim(),
+    DateOut: row.cells[8].querySelector("input").value.trim(),
+    Vendor: row.cells[9].querySelector("input").value.trim()
   };
 
   // Validation logic

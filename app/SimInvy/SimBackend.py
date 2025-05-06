@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, send_file, Response, Blueprint
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -119,10 +120,13 @@ def manual_entry():
 @jwt_required()
 def update_sim_status(sim_id):
     try:
+        current_user = get_jwt_identity()
         updated_data = request.json
         update_fields = {
             "status": updated_data.get("status"),
-            "isActive": updated_data.get("isActive")
+            "isActive": updated_data.get("isActive"),
+            "editedBy": current_user,  # Add editor info
+            "lastEdited": datetime.datetime.utcnow()  # Add edit timestamp
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
