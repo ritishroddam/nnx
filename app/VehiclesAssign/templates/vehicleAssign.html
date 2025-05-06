@@ -2,7 +2,12 @@
 
 {% block head %}
 <title>Assign Vehicles</title>
+<link rel="stylesheet" href="{{ url_for('VehicleAssign.static', filename='css/main.css') }}">
 <script defer src="{{ url_for('VehicleAssign.static', filename='js/vehicleAssign.js') }}"></script>
+
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" />
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
 {% endblock %}
 
 {% block h1 %}
@@ -11,19 +16,23 @@ Assign Vehicles to Users
 
 {% block block_container %}
 <form id="assignForm">
-    <label for="vehicle">Select Vehicle:</label>
-    <select id="vehicle" name="vehicle" required>
-        {% for vehicle in vehicles %}
-        <option value="{{ vehicle['_id'] }}">{{ vehicle['LicensePlateNumber'] }}</option>
-        {% endfor %}
-    </select>
+    <div>
+        <label for="vehicles">Select Vehicles:</label>
+        <select id="vehicles" name="vehicles" multiple required>
+            {% for vehicle in vehicles %}
+            <option value="{{ vehicle['_id'] }}">{{ vehicle['LicensePlateNumber'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-    <label for="users">Select Users:</label>
-    <select id="users" name="users" multiple required>
-        {% for user in users %}
-        <option value="{{ user['_id'] }}">{{ user['username'] }}</option>
-        {% endfor %}
-    </select>
+    <div>
+        <label for="users">Select Users:</label>
+        <select id="users" name="users" multiple required>
+            {% for user in users %}
+            <option value="{{ user['_id'] }}">{{ user['username'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
     <button type="submit">Assign</button>
 </form>
