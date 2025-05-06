@@ -435,8 +435,7 @@ themeToggle.addEventListener("click", async function () {
 });
 
 async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
-  const { TrafficLayer } = await google.maps.importLibrary("traffic");
+  const { Map, TrafficLayer } = await google.maps.importLibrary("maps");
 
   const mapOptions = {
     zoom: 12,
@@ -476,8 +475,7 @@ async function initMap() {
 
 async function fallbackToDefaultLocation() {
   try {
-    const { Map } = await google.maps.importLibrary("maps");
-    const { TrafficLayer } = await google.maps.importLibrary("traffic");
+    const { Map, TrafficLayer } = await google.maps.importLibrary("maps");
     console.log("Using fallback location: Bangalore");
     const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
     const darkMode = document.body.classList.contains("dark-mode");
