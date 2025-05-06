@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ).map((option) => option.value);
 
       try {
-        await fetch("/vehicleAssign/assign_vehicles", {
+        const response = await fetch("/vehicleAssign/assign_vehicles", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -37,6 +37,16 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           body: JSON.stringify({ vehicle_ids: vehicleIds, user_ids: userIds }),
         });
+
+        if (response.redirected) {
+          // Handle redirection manually
+          window.location.href = response.url;
+        } else if (!response.ok) {
+          // Handle errors
+          console.error("Error assigning vehicles:", response.statusText);
+        } else {
+          console.log("Vehicles assigned successfully");
+        }
       } catch (error) {
         console.error("Error assigning vehicles:", error);
       }
