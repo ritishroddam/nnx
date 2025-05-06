@@ -26,9 +26,8 @@ def assign_vehicles():
         return render_template('vehicleAssign.html', vehicles=vehicles, users=users)
 
     elif request.method == 'POST':
-        data = request.json
-        vehicle_ids = data.get('vehicle_ids')
-        user_ids = data.get('user_ids', [])
+        vehicle_ids = request.form.getlist('vehicle_ids')
+        user_ids = request.form.getlist('user_ids')
 
         if not vehicle_ids or not user_ids:
             flash("Vehicle IDs and User IDs are required.", "danger")
