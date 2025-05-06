@@ -21,7 +21,7 @@ def assign_vehicles():
         company_id = get_jwt().get('company_id')
         companyName = get_jwt().get('company')
         vehicles = list(vehicle_collection.find({"CompanyName": companyName}))
-        users = list(db['users'].find({"company": company_id}, {"_id": 1, "username": 1}))
+        users = list(db['users'].find({"company": company_id, "role": "user"}, {"_id": 1, "username": 1}))
 
         return render_template('vehicleAssign.html', vehicles=vehicles, users=users)
 
