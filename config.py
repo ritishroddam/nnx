@@ -17,7 +17,7 @@ class Config:
     JWT_CSRF_IN_COOKIES = True
     JWT_REFRESH_CSRF_PROTECT = True    
     
-    GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY') or 'AIzaSyBR5HGnPOjkg9PHCQZMfi7KbU2PppAIIB4'
+    GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY') or 'AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84'
     MONGO_URI = "mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin"
     
     @staticmethod

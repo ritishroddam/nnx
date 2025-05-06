@@ -451,7 +451,7 @@ async function initMap() {
 
         const darkMode = document.body.classList.contains("dark-mode");
 
-        const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
+        const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
         map = new Map(document.getElementById("map"), {
           ...mapOptions,
@@ -480,7 +480,7 @@ async function fallbackToDefaultLocation() {
     const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
     const darkMode = document.body.classList.contains("dark-mode");
 
-    const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
+    const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
     map = new google.maps.Map(document.getElementById("map"), {
       center: defaultLocation,
       zoom: 12,

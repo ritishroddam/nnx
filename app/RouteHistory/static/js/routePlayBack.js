@@ -114,7 +114,7 @@ async function initMap() {
 
   const darkMode = document.body.classList.contains("dark-mode");
 
-  const mapId = darkMode ? "8faa2d4ac644c8a2" : "44775ccfe2c0bd88";
+  const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
   map = new Map(document.getElementById("map"), {
     zoom: 10,
