@@ -139,7 +139,7 @@ function filterSimsByStatus() {
       tableBody.innerHTML = '';
       
       if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="12" class="no-results">No SIMs found with this status</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12">No SIMs found</td></tr>';
         return;
       }
       
@@ -149,16 +149,16 @@ function filterSimsByStatus() {
         row.className = sim.status.toLowerCase();
         
         row.innerHTML = `
-          <td>${sim.MobileNumber}</td>
-          <td>${sim.SimNumber}</td>
+          <td>${sim.MobileNumber || ''}</td>
+          <td>${sim.SimNumber || ''}</td>
           <td>${sim.IMEI || 'N/A'}</td>
-          <td>${sim.status}</td>
+          <td>${sim.status || ''}</td>
           <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
           <td>${sim.statusDate || ''}</td>
           <td>${sim.reactivationDate || ''}</td>
-          <td>${sim.DateIn}</td>
+          <td>${sim.DateIn || ''}</td>
           <td>${sim.DateOut || ''}</td>
-          <td>${sim.Vendor}</td>
+          <td>${sim.Vendor || ''}</td>
           <td>${sim.editedBy || ''}</td>
           <td>
             <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
@@ -190,81 +190,71 @@ function formatDateForInput(dateStr) {
 function editSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
   
-  // Store original values with correct indexes
-  row.setAttribute("data-original-mobile", row.cells[0].innerText);
-  row.setAttribute("data-original-sim", row.cells[1].innerText);
-  row.setAttribute("data-original-imei", row.cells[2].innerText);
-  row.setAttribute("data-original-status", row.cells[3].innerText);
-  row.setAttribute("data-original-active", row.cells[4].innerText === 'Active');
-  row.setAttribute("data-original-status-date", row.cells[5].innerText);
-  row.setAttribute("data-original-reactivation-date", row.cells[6].innerText);
-  row.setAttribute("data-original-date-in", row.cells[7].innerText);
-  row.setAttribute("data-original-date-out", row.cells[8].innerText);
-  row.setAttribute("data-original-vendor", row.cells[9].innerText);
-  row.setAttribute("data-original-edited-by", row.cells[10].innerText);
+  if (!row || !row.cells || row.cells.length < 12) {
+    console.error("Row or cells not found, or incorrect number of columns");
+    return;
+  }
+
+  // Store original values with proper null checks
+  const getCellText = (index) => row.cells[index] ? row.cells[index].innerText : '';
+  
+  row.setAttribute("data-original-mobile", getCellText(0));
+  row.setAttribute("data-original-sim", getCellText(1));
+  row.setAttribute("data-original-imei", getCellText(2));
+  row.setAttribute("data-original-status", getCellText(3));
+  row.setAttribute("data-original-active", getCellText(4) === 'Active');
+  row.setAttribute("data-original-status-date", getCellText(5));
+  row.setAttribute("data-original-reactivation-date", getCellText(6));
+  row.setAttribute("data-original-date-in", getCellText(7));
+  row.setAttribute("data-original-date-out", getCellText(8));
+  row.setAttribute("data-original-vendor", getCellText(9));
+  row.setAttribute("data-original-edited-by", getCellText(10));
 
   // Status dropdown options
+  const currentStatus = getCellText(3);
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
-    .map(opt => `<option value="${opt}" ${row.cells[3].innerText === opt ? 'selected' : ''}>${opt}</option>`)
+    .map(opt => `<option value="${opt}" ${currentStatus === opt ? 'selected' : ''}>${opt}</option>`)
     .join('');
 
   // Replace row data with input fields
-  row.cells[0].innerHTML = `<input type="text" value="${row.getAttribute("data-original-mobile")}" class="form-input" />`;
-  row.cells[1].innerHTML = `<input type="text" value="${row.getAttribute("data-original-sim")}" class="form-input" />`;
-  row.cells[2].innerHTML = `<span>${row.getAttribute("data-original-imei")}</span>`;
-  row.cells[3].innerHTML = `
-    <select id="editStatus" class="form-select">
-      ${statusOptions}
-    </select>
-  `;
+  const createInput = (value, type = 'text', cls = 'form-input') => 
+    `<input type="${type}" value="${value}" class="${cls}" />`;
+
+  row.cells[0].innerHTML = createInput(getCellText(0));
+  row.cells[1].innerHTML = createInput(getCellText(1));
+  row.cells[2].innerHTML = `<span>${getCellText(2)}</span>`;
+  row.cells[3].innerHTML = `<select class="form-select">${statusOptions}</select>`;
   row.cells[4].innerHTML = `
-    <select id="editActive" class="form-select">
-      <option value="true" ${row.getAttribute("data-original-active") === 'true' ? 'selected' : ''}>Active</option>
-      <option value="false" ${row.getAttribute("data-original-active") === 'false' ? 'selected' : ''}>Inactive</option>
+    <select class="form-select">
+      <option value="true" ${getCellText(4) === 'Active' ? 'selected' : ''}>Active</option>
+      <option value="false" ${getCellText(4) === 'Inactive' ? 'selected' : ''}>Inactive</option>
     </select>
   `;
-  row.cells[5].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-status-date"))}" id="editStatusDate" class="form-input" />`;
-  row.cells[6].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-reactivation-date"))}" id="editReactivationDate" class="form-input" />`;
-  row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" class="form-input" />`;
-  row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" class="form-input" />`;
-  row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" class="form-input" />`;
-  row.cells[10].innerHTML = `<input type="text" value="${row.getAttribute("data-original-edited-by")}" class="form-input" placeholder="Enter editor name" />`;
+  row.cells[5].innerHTML = createInput(getCellText(5), 'date');
+  row.cells[6].innerHTML = createInput(getCellText(6), 'date');
+  row.cells[7].innerHTML = createInput(getCellText(7), 'date');
+  row.cells[8].innerHTML = createInput(getCellText(8), 'date');
+  row.cells[9].innerHTML = createInput(getCellText(9));
+  row.cells[10].innerHTML = createInput(getCellText(10));
 
   row.cells[11].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
   `;
 
-  // Add event listener for status change
-  const statusSelect = row.querySelector('#editStatus');
-  const statusDateInput = row.querySelector('#editStatusDate');
-  const reactivationDateInput = row.querySelector('#editReactivationDate');
-  
-  // Set initial visibility
-  if (statusSelect.value === 'SafeCustody' || statusSelect.value === 'Suspended') {
-    statusDateInput.style.display = 'block';
-    if (statusSelect.value === 'SafeCustody') {
-      reactivationDateInput.style.display = 'block';
-      // Calculate 90 days from now for reactivation date
-      const today = new Date();
-      const reactivationDate = new Date();
-      reactivationDate.setDate(today.getDate() + 90);
-      reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
-    } else {
-      reactivationDateInput.style.display = 'none';
-    }
-  } else {
-    statusDateInput.style.display = 'none';
-    reactivationDateInput.style.display = 'none';
-  }
-  
-  statusSelect.addEventListener('change', function() {
-    if (this.value === 'SafeCustody' || this.value === 'Suspended') {
+  // Set up status change handler
+  const statusSelect = row.cells[3].querySelector('select');
+  const statusDateInput = row.cells[5].querySelector('input');
+  const reactivationDateInput = row.cells[6].querySelector('input');
+
+  const updateDateVisibility = () => {
+    if (statusSelect.value === 'SafeCustody' || statusSelect.value === 'Suspended') {
       statusDateInput.style.display = 'block';
-      if (this.value === 'SafeCustody') {
+      if (statusSelect.value === 'SafeCustody') {
         reactivationDateInput.style.display = 'block';
+        // Set reactivation date to 90 days from now
         const today = new Date();
-        const reactivationDate = new Date();
+        const reactivationDate = new Date(today);
         reactivationDate.setDate(today.getDate() + 90);
         reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
       } else {
@@ -274,28 +264,13 @@ function editSim(simId) {
       statusDateInput.style.display = 'none';
       reactivationDateInput.style.display = 'none';
     }
-  });
+  };
+
+  // Initialize visibility
+  updateDateVisibility();
   
-  statusSelect.addEventListener('change', function() {
-    if (this.value === 'SafeCustody' || this.value === 'Suspended') {
-      statusDateInput.style.display = 'block';
-      if (this.value === 'SafeCustody') {
-        reactivationDateInput.style.display = 'block';
-        // Calculate 90 days from now for reactivation date
-        const today = new Date();
-        const reactivationDate = new Date();
-        reactivationDate.setDate(today.getDate() + 90);
-        reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
-        // Set status date to today
-        statusDateInput.value = today.toISOString().split('T')[0];
-      } else {
-        reactivationDateInput.style.display = 'none';
-      }
-    } else {
-      statusDateInput.style.display = 'none';
-      reactivationDateInput.style.display = 'none';
-    }
-  });
+  // Add change listener
+  statusSelect.addEventListener('change', updateDateVisibility);
 }
 
 function cancelEdit(simId) {
