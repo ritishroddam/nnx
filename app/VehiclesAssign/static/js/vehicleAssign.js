@@ -13,42 +13,4 @@ document.addEventListener("DOMContentLoaded", function () {
     searchField: "text",
     create: false,
   });
-
-  // Handle form submission
-  document
-    .getElementById("assignForm")
-    .addEventListener("submit", async function (event) {
-      console.log("Form submission event triggered");
-      event.preventDefault();
-
-      const vehicleIds = Array.from(
-        document.getElementById("vehicles").selectedOptions
-      ).map((option) => option.value);
-      const userIds = Array.from(
-        document.getElementById("users").selectedOptions
-      ).map((option) => option.value);
-
-      try {
-        const response = await fetch("/vehicleAssign/assign_vehicles", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-          },
-          body: JSON.stringify({ vehicle_ids: vehicleIds, user_ids: userIds }),
-        });
-
-        if (response.redirected) {
-          // Handle redirection manually
-          window.location.href = response.url;
-        } else if (!response.ok) {
-          // Handle errors
-          console.error("Error assigning vehicles:", response.statusText);
-        } else {
-          console.log("Vehicles assigned successfully");
-        }
-      } catch (error) {
-        console.error("Error assigning vehicles:", error);
-      }
-    });
 });

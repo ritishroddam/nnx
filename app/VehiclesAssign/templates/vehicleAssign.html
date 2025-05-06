@@ -17,10 +17,11 @@ Assign Vehicles to Users
 {% endblock %}
 
 {% block block_container %}
-<form id="assignForm">
+<form id="assignForm" action="{{ url_for('VehicleAssign.assign_vehicles') }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div>
         <label for="vehicles">Select Vehicles:</label>
-        <select id="vehicles" name="vehicles" multiple required>
+        <select id="vehicles" name="vehicle_ids" multiple required>
             {% for vehicle in vehicles %}
             <option value="{{ vehicle['_id'] }}">{{ vehicle['LicensePlateNumber'] }}</option>
             {% endfor %}
@@ -29,7 +30,7 @@ Assign Vehicles to Users
 
     <div>
         <label for="users">Select Users:</label>
-        <select id="users" name="users" multiple required>
+        <select id="users" name="user_ids" multiple required>
             {% for user in users %}
             <option value="{{ user['_id'] }}">{{ user['username'] }}</option>
             {% endfor %}
