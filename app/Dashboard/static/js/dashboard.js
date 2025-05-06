@@ -521,9 +521,6 @@ function fetchStatusData() {
       document.getElementById(
         "disconnected-vehicles-count"
       ).textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
-      document.getElementById(
-        "no-gps-vehicles-count"
-      ).textContent = `${data.noGpsVehicles} / ${data.totalVehicles}`;
     })
     .catch((error) => console.error("Error fetching status data:", error));
 }
