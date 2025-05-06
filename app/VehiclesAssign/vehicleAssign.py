@@ -18,9 +18,10 @@ vehicle_collection = db['vehicle_inventory']
 def assign_vehicles():
     if request.method == 'GET':
         # Fetch vehicles and users belonging to the same company
-        company_id = get_jwt_identity().get('company_id')
-        vehicles = list(vehicle_collection.find({"CompanyID": company_id}))
-        users = list(db['users'].find({"CompanyID": company_id}, {"_id": 1, "username": 1}))
+        company_id = get_jwt().get('company_id')
+        companyName = get_jwt().get('company')
+        vehicles = list(vehicle_collection.find({"CompanyName": companyName}))
+        users = list(db['users'].find({"company": company_id}, {"_id": 1, "username": 1}))
 
         return render_template('vehicleAssign.html', vehicles=vehicles, users=users)
 
