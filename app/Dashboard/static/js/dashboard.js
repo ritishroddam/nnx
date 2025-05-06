@@ -435,11 +435,13 @@ themeToggle.addEventListener("click", async function () {
 });
 
 async function initMap() {
+  const { Map } = await google.maps.importLibrary("maps");
+  const { TrafficLayer } = await google.maps.importLibrary("traffic");
+
   const mapOptions = {
     zoom: 12,
     disableDefaultUI: true,
   };
-  const Map = await google.maps.importLibrary("maps");
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -460,9 +462,7 @@ async function initMap() {
           mapId: mapId,
         });
 
-        infoWindow = new google.maps.InfoWindow();
-
-        trafficLayer = new google.maps.TrafficLayer();
+        trafficLayer = new TrafficLayer();
         trafficLayer.setMap(map);
       },
       () => {
@@ -476,19 +476,21 @@ async function initMap() {
 
 async function fallbackToDefaultLocation() {
   try {
+    const { Map } = await google.maps.importLibrary("maps");
+    const { TrafficLayer } = await google.maps.importLibrary("traffic");
     console.log("Using fallback location: Bangalore");
     const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
     const darkMode = document.body.classList.contains("dark-mode");
 
     const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
-    map = new google.maps.Map(document.getElementById("map"), {
+    map = new Map(document.getElementById("map"), {
       center: defaultLocation,
       zoom: 12,
       disableDefaultUI: true,
       mapId: mapId,
     });
 
-    trafficLayer = new google.maps.TrafficLayer();
+    trafficLayer = new TrafficLayer();
     trafficLayer.setMap(map);
   } catch (error) {
     console.error("Error initializing fallback location:", error);
