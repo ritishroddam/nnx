@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("assignForm")
     .addEventListener("submit", async function (event) {
+      console.log("Form submission event triggered");
       event.preventDefault();
 
       const vehicleIds = Array.from(
