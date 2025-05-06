@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Assign Vehicles</title>
+<script defer src="{{ url_for('VehicleAssign.static', filename='js/vehicleAssign.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}
+Assign Vehicles to Users
+{% endblock %}
+
+{% block block_container %}
+<form id="assignForm">
+    <label for="vehicle">Select Vehicle:</label>
+    <select id="vehicle" name="vehicle" required>
+        {% for vehicle in vehicles %}
+        <option value="{{ vehicle['_id'] }}">{{ vehicle['LicensePlateNumber'] }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="users">Select Users:</label>
+    <select id="users" name="users" multiple required>
+        {% for user in users %}
+        <option value="{{ user['_id'] }}">{{ user['username'] }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Assign</button>
+</form>
+<div id="responseMessage"></div>
+{% endblock %}

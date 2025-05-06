@@ -1,7 +1,5 @@
 from flask import Flask, Blueprint, render_template, request, jsonify, flash
-from pymongo import MongoClient
 from datetime import datetime, timedelta
-import os
 from pytz import timezone
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
