@@ -10,7 +10,7 @@ import pandas as pd
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
-from app.utils import roles_required
+from app.utils import roles_required, get_filtered_results
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -27,6 +27,7 @@ vehicle_inventory = db["vehicle_inventory"]
 
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
 @jwt_required()
+@roles_required('admin')  # Restrict access to admin and client admins
 def dashboard_data():
     try:
         num_devices = db["device_inventory"].count_documents({})
@@ -46,9 +47,10 @@ def dashboard_data():
 
 @dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
 @jwt_required()
+@roles_required('admin', 'clientAdmin', 'user')
 def atlanta_pie_data():
     try:
-        results = list(collection.find())
+        results = list(get_filtered_results("distinctAtlanta"))
 
         # If results are empty, return a default response
         if not results:
@@ -89,44 +91,30 @@ def atlanta_pie_data():
 
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 @jwt_required()
+@roles_required('admin', 'clientAdmin', 'user')
 def atlanta_distance_data():
     try:
-        now = datetime.now()
-        seven_days_ago = now - timedelta(days=7)
+        today = datetime.now().strftime('%d%m%y')
 
-        results = list(distance_travelled_collection.find())
+        distances = {}
 
-        total_distance_per_day = {}
+        for i in range(7):
+            date = (datetime.now() - timedelta(days=(i+1))).strftime('%d%m%y')
+            if date:
+                imei_data = get_filtered_results("atlanta", collection_query = {'date': date}).distinct('imei')
+                total_distance = 0
 
-        for record in results:
-            date_str = record['date']
-            total_distance = record.get('totalDistance', 0)
-
-            try:
-                date_obj = datetime.strptime(date_str, '%d%m%y')
+                for imei in imei_data:
+                    records = list(atlanta_collection.find({'date': date, 'imei': imei}).sort('time'))
+                    if len(records) >= 2:
+                        start_odometer = float(records[0].get('odometer', 0))
+                        end_odometer = float(records[-1].get('odometer', 0))
+                        distance = end_odometer - start_odometer
+                        total_distance += distance
                 
-                # Only include dates within the last 7 days
-                if date_obj >= seven_days_ago and date_obj <= now:
-                    # Use consistent date string as key
-                    date_key = date_obj.strftime('%d%m%y')
-                    total_distance_per_day[date_key] = total_distance
-            except ValueError:
-                continue  # skip invalid date formats
+                distances[date] = total_distance
 
-        # Sort by date
-        sorted_dates = sorted(
-            total_distance_per_day.keys(),
-            key=lambda x: datetime.strptime(x, '%d%m%y')
-        )
-        
-        # Prepare data for chart
-        labels = [datetime.strptime(date_str, '%d%m%y').strftime('%d %b') for date_str in sorted_dates]
-        distances = [total_distance_per_day[date_str] for date_str in sorted_dates]
-
-        return jsonify({
-            "labels": labels,
-            "distances": distances
-        }), 200
+        return jsonify(distances), 200
 
     except Exception as e:
         print(f"🚨 Error fetching distance data: {e}")
@@ -134,6 +122,7 @@ def atlanta_distance_data():
 
 @dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
 @jwt_required()
+@roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_distances():
     try:
         utc_now = datetime.now(timezone('UTC'))
@@ -183,6 +172,7 @@ def get_vehicle_distances():
 
 @dashboard_bp.route('/get_status_data', methods=['GET'])
 @jwt_required()
+@roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
         now = datetime.now()
