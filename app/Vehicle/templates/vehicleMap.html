@@ -86,6 +86,8 @@ Vehicle Map
         <th>Vehicle Type</th>
         <th>Last Updated</th>
         <th>Location</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
         <th>Speed</th>
         <th>Distance Traveled Today</th>
         <th>Odometer Reading</th>
@@ -96,20 +98,7 @@ Vehicle Map
 
       </tr>
     </thead>
-    <tbody id="simTable">
-      {% for sim in sims %}
-      <tr data-id="{{ sim._id }}">
-        <td>{{ sim.MobileNumber }}</td>
-        <td>{{ sim.SimNumber }}</td>
-        <td>{{ sim.DateIn }}</td>
-        <td>{{ sim.DateOut }}</td>
-        <td>{{ sim.Vendor }}</td>
-        <td>
-          <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteSim('{{ sim._id }}')">🗑️</button>
-        </td>
-      </tr>
-      {% endfor %}
+    <tbody>
     </tbody>
   </table>
 

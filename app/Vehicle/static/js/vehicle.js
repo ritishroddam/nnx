@@ -787,23 +787,24 @@ async function populateVehicleTable() {
       vehicle.date,
       vehicle.time
     );
-    row.insertCell(3).innerText = `${latitude.toFixed(6)}, ${longitude.toFixed(
-      6
-    )}`;
 
-    const speedCell = row.insertCell(4);
+    row.insertCell(3).innerText = `${vehicle.location}`;
+    row.insertCell(4).innerText = `${latitude.toFixed(4)}`;
+    row.insertCell(5).innerText = `${longitude.toFixed(4)}`;
+
+    const speedCell = row.insertCell(6);
     speedCell.innerText = speed;
     if (speedValue !== null && parseFloat(speedValue) > 60) {
       speedCell.style.border = "2px solid red";
     }
 
-    row.insertCell(5).innerText = vehicle.distance || "N/A"; // Assuming odometer is the distance traveled today
-    row.insertCell(6).innerText = vehicle.odometer; // Assuming odometer reading
-    row.insertCell(7).innerText = vehicle.ignition;
-    row.insertCell(8).innerText = vehicle.gsm;
-    row.insertCell(9).innerText = vehicle.sos;
+    row.insertCell(7).innerText = vehicle.distance || "N/A"; // Assuming odometer is the distance traveled today
+    row.insertCell(8).innerText = vehicle.odometer; // Assuming odometer reading
+    row.insertCell(9).innerText = vehicle.ignition;
+    row.insertCell(10).innerText = vehicle.gsm;
+    row.insertCell(11).innerText = vehicle.sos;
     row.insertCell(
-      10
+      12
     ).innerHTML = `<a href="${url}" target="_blank">View Data</a>`;
   });
   showHidecar();

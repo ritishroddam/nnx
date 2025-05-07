@@ -76,7 +76,7 @@ def get_vehicles():
                 for data in vehicleData:
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)
+                    data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
                     vehicles.append(data)
         elif 'user' in user_roles:
             userID = claims.get('user_id')
@@ -94,7 +94,7 @@ def get_vehicles():
                 for data in vehicleData:
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)
+                    data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
         else:
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
@@ -107,7 +107,7 @@ def get_vehicles():
                 for data in vehicleData:  # Iterate over the list of documents
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)
+                    data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
                     vehicles.append(data)
 
         for vehicle in vehicles:
