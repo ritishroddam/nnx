@@ -69,6 +69,10 @@ def get_unassigned_vehicles(user_id):
             },
             {"_id": 1, "LicensePlateNumber": 1}
         ))
+        for vehicle in unassigned_vehicles:
+            vehicle["_id"] = str(vehicle["_id"])
+
+
         return jsonify({"vehicles": unassigned_vehicles}), 200
     except Exception as e:
         print(f"Error fetching unassigned vehicles: {e}")
