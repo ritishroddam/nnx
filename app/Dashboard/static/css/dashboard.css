@@ -121,6 +121,11 @@
   backdrop-filter: blur(10px);
   transition: background 0.5s ease;
   font-size: 12px;
+  font-weight: 550;
+}
+
+.weather-container h1{
+  font-size: 18px;
   font-weight: 600;
 }
 
