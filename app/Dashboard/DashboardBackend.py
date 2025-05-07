@@ -115,8 +115,8 @@ def atlanta_distance_data():
                 distances[date] = total_distance
 
         distancesJson = {
-            "labels": list(distances.keys()),
-            "distances": list(distances.values())
+            "labels": list(distances.keys())[::-1],
+            "distances": list(distances.values())[::-1]
         }
 
         return jsonify(distancesJson), 200
