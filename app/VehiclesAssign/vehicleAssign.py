@@ -51,3 +51,25 @@ def assign_vehicles():
             print(f"Error during vehicle assignment: {e}")
             flash("An error occurred during the assignment operation.", "danger")
             return redirect(url_for('VehicleAssign.assign_vehicles'))
+        
+@vehicleAssign_bp.route('/get_unassigned_vehicles/<user_id>', methods=['GET'])
+@jwt_required()
+@roles_required('clientAdmin')  # Restrict access to client admins
+def get_unassigned_vehicles(user_id):
+    try:
+        companyName = get_jwt().get('company')
+        # Fetch vehicles that are either unassigned or not assigned to the selected user
+        unassigned_vehicles = list(vehicle_collection.find(
+            {
+                "CompanyName": companyName,
+                "$or": [
+                    {"AssignedUsers": {"$exists": False}},
+                    {"AssignedUsers": {"$not": {"$elemMatch": {"$eq": ObjectId(user_id)}}}}
+                ]
+            },
+            {"_id": 1, "LicensePlateNumber": 1}
+        ))
+        return jsonify({"vehicles": unassigned_vehicles}), 200
+    except Exception as e:
+        print(f"Error fetching unassigned vehicles: {e}")
+        return jsonify({"error": "Failed to fetch unassigned vehicles"}), 500
