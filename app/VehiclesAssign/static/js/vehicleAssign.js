@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
   const userSelect = $("#users").selectize({
-    plugins: ["remove_button"],
     placeholder: "Select users...",
     searchField: "text",
     create: false,
