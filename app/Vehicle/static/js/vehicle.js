@@ -788,7 +788,7 @@ async function populateVehicleTable() {
       vehicle.time
     );
 
-    row.insertCell(3).innerText = `${vehicle.location}`;
+    row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
     row.insertCell(4).innerText = `${latitude.toFixed(4)}`;
     row.insertCell(5).innerText = `${longitude.toFixed(4)}`;
 
