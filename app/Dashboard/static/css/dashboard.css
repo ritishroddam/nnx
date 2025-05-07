@@ -93,6 +93,7 @@
 }
 .weather-container #weather p{
   color: black;
+  font-weight: 500;
 }
 .dark-mode .weather-section #weather{
   color: #ccc;
