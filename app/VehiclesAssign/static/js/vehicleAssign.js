@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     create: false,
     onChange: function (userId) {
       if (userId) {
-        fetch(`/VehicleAssign/get_unassigned_vehicles/${userId}`)
+        fetch(`/vehicleAssign/get_unassigned_vehicles/${userId}`)
           .then((response) => response.json())
           .then((data) => {
             if (data.vehicles) {
