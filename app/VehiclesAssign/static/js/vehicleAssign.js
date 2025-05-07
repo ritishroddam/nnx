@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const userSelect = $("#users").selectize({
+    plugins: ["auto_select_on_type", "clear_button", "restore_on_backspace"],
     placeholder: "Select users...",
     searchField: "text",
     create: false,
