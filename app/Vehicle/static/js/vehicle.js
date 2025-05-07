@@ -80,7 +80,7 @@ async function updateData(data) {
     distance = parseFloat(distance) + parseFloat(oldData.distance);
 
     data["distance"] = String(distance);
-
+    data["gsm"] = String(data.gsm_sig);
     vehicleData.set(data.imei, data);
   }
 
@@ -91,7 +91,6 @@ async function fetchVehicleData() {
   try {
     const response = await fetch("/vehicle/api/vehicles");
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
-    // return await response.json();
 
     const data = await response.json();
 
