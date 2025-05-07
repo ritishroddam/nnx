@@ -77,9 +77,13 @@ async function updateData(data) {
 
   if (oldData) {
     let distance = parseFloat(data.odometer) - parseFloat(oldData.odometer);
-    distance = parseFloat(distance) + parseFloat(oldData.distance);
+    distance = (parseFloat(distance) + parseFloat(oldData.distance)).toFixed(2);
 
     data["distance"] = String(distance);
+    data["gsm"] = String(data.gsm_sig);
+    vehicleData.set(data.imei, data);
+  } else {
+    data["distance"] = "0.00";
     data["gsm"] = String(data.gsm_sig);
     vehicleData.set(data.imei, data);
   }
