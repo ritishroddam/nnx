@@ -22,7 +22,7 @@ Assign Vehicles to Users
 
     <div>
         <label for="users">Select Users:</label>
-        <select id="users" name="user_ids" multiple required>
+        <select id="users" name="user_ids" required>
             {% for user in users %}
             <option value="{{ user['_id'] }}">{{ user['username'] }}</option>
             {% endfor %}
