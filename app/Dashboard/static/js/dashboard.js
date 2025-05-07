@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const iconCode = data.weather[0].icon;
     const weatherHTML = `
                     <div class="weather-info">
-                        <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon" style="width: 40px; height: 40px;" />
+                        <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon" style="width: 50px; height: 50px;" />
                         <p><strong>${data.name}</strong></p>
                         <p>${data.weather[0].description}</p>
                         <p>Temperature: ${data.main.temp} °C</p>
