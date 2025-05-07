@@ -59,6 +59,7 @@ def getVehicleDistances(imei):
 
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
 @jwt_required()
+@roles_required('admin', 'user', 'clientAdmin')
 def get_vehicles():
     try:
         claims = get_jwt()
@@ -72,22 +73,43 @@ def get_vehicles():
             
             for vehicle in inventory_data:
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
-                for data in vehicleData:  # Iterate over the list of documents
+                for data in vehicleData:
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)  # Add distance to the data
+                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)
                     vehicles.append(data)
+        elif 'user' in user_roles:
+            userID = claims.get('user_id')
+            userCompany = claims.get('company')
+            inventory_data = list(vehicle_inventory_collection.find({
+                'CompanyName': userCompany,
+                'AssignedUsers': {'$in': [userID]}
+            }))
+
+            imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
+            distances = getVehicleDistances(imei_list)
+            
+            for vehicle in inventory_data:
+                vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
+                for data in vehicleData:
+                    data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
+                    data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)
         else:
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
             for vehicle in inventory_data:
                 vehicleData = list((collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0})))
+
+                imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
+                distances = getVehicleDistances(imei_list)
+
                 for data in vehicleData:  # Iterate over the list of documents
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+                    data['distance'] = distances.get(vehicle.get('IMEI'), 0)
                     vehicles.append(data)
 
-        # Iterate through vehicles and fetch the LicensePlateNumber from vehicle_inventory
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])  
 
