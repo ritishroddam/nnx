@@ -6,7 +6,6 @@
 <script defer src="{{ url_for('VehicleAssign.static', filename='js/vehicleAssign.js') }}"></script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
 <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" />
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
@@ -23,6 +22,7 @@ Assign Vehicles to Users
     <div>
         <label for="users">Select Users:</label>
         <select id="users" name="user_ids" required>
+            <option value="" disabled selected>Select a user</option>
             {% for user in users %}
             <option value="{{ user['_id'] }}">{{ user['username'] }}</option>
             {% endfor %}
