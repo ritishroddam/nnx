@@ -114,7 +114,12 @@ def atlanta_distance_data():
                 
                 distances[date] = total_distance
 
-        return jsonify(distances), 200
+        distancesJson = {
+            "labels": list(distances.keys()),
+            "distances": list(distances.values())
+        }
+
+        return jsonify(distancesJson), 200
 
     except Exception as e:
         print(f"🚨 Error fetching distance data: {e}")
