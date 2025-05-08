@@ -134,9 +134,7 @@ def get_vehicle_distances():
         start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-        imeisData = list(get_filtered_results("atlanta"))
-        print(f"IMEIs: {imeisData}")
-        imeis = [imeiData["imei"] for imeiData in imeisData if imeiData["imei"]]
+        imeis = list(get_filtered_results("atlanta").distinct("imei"))
 
         vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
