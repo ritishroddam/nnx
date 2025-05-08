@@ -221,7 +221,6 @@ def register():
 def register_client_admin():
     
     if request.method == 'POST':
-        # Rest of registration logic similar to regular register
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
