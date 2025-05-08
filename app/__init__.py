@@ -56,7 +56,7 @@ def create_app(config_name='default'):
             print(f"Error subscribing to vehicle updates: {e}")
             socketio.emit('subscription_error', {'status': 'error', 'message': str(e)}, room=sid)
 
-    @socketio.event('vehicle_live_update')
+    @socketio.on('vehicle_live_update')
     def emit_vehicle_update(vehicle_data):
         """
         Emit new data for a specific vehicle to its subscribed clients.
