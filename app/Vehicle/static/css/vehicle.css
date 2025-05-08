@@ -357,6 +357,11 @@ input:checked + .slider:before {
   color: #333;
 }
 
+.dark-mode .vehicle-table th {
+  background-color: #333;
+  color: #ccc;
+}
+
 .vehicle-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
@@ -365,8 +370,16 @@ input:checked + .slider:before {
   background-color: #fff;
 }
 
+.dark-mode .vehicle-table tr:nth-child(even) {
+  background-color: #444;
+}
+
 .vehicle-table tr:hover {
   background-color: #f1f1f1;
+}
+
+.dark-mode .vehicle-table tr:nth-child(odd) {
+  background-color: #555;
 }
 
 .vehicle-table-container {
