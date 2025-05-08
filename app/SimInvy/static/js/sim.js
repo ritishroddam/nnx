@@ -309,10 +309,6 @@ function updateStatusFieldsVisibility(status, statusDateInput, reactivationDateI
 function cancelEdit(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
-  for (let i = 0; i < 11; i++) {
-    row.cells[i].innerText = row.getAttribute(`data-original-${i}`);
-  }
-
   // Restore original values from stored attributes
   row.cells[0].innerText = row.getAttribute("data-original-mobile");
   row.cells[1].innerText = row.getAttribute("data-original-sim");
