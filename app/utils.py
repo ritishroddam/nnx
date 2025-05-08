@@ -19,17 +19,18 @@ def roles_required(*required_roles):
         return decorator
     return wrapper
 
-def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_inventory", collection_query=None):
+def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_inventory", collection_query=None, projection=None):
     """
-    Fetch results from a collection based on the user's role and company, with an optional query.
+    Fetch results from a collection based on the user's role and company, with an optional query and projection.
     
     Args:
         collection_name (str): The name of the collection to query.
         vehicle_inventory_name (str): The name of the vehicle inventory collection (default: "vehicle_inventory").
-        collection_query (dict): Additional query to filter the collection (default: None).
+        collection_query (dict): Query to filter the collection (default: None).
+        projection (dict): Projection to specify fields to include or exclude (default: None).
     
     Returns:
-        list: A list of results filtered based on the user's role and company.
+        pymongo.cursor.Cursor: A cursor to the filtered results.
     """
     claims = get_jwt()
     user_roles = claims.get('roles', [])
@@ -41,10 +42,11 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
 
     # Default query is an empty dictionary if no query is provided
     collection_query = collection_query or {}
+    projection = projection or {}
 
     if 'admin' in user_roles:
         # Admins can access all data
-        results = collection.find(collection_query)
+        results = collection.find(collection_query, projection)
     elif 'user' in user_roles:
         # Users can only access data for vehicles assigned to them
         inventory_data = list(vehicle_inventory.find({
@@ -52,14 +54,13 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
             'AssignedUsers': {'$in': [userID]}
         }))
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-        results = collection.find({"imei": {"$in": imei_list}, **collection_query})
+        results = collection.find({"imei": {"$in": imei_list}, **collection_query}, projection)
     else:
         # Client admins can access data for all vehicles in their company
         inventory_data = list(vehicle_inventory.find({'CompanyName': userCompany}))
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-        results = collection.find({"imei": {"$in": imei_list}, **collection_query})
+        results = collection.find({"imei": {"$in": imei_list}, **collection_query}, projection)
 
     return results
-
 def admin_required(fn):
     return roles_required('admin')(fn)
