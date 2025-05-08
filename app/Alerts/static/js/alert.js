@@ -385,11 +385,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const endDate = document.getElementById("endDate").value;
     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
 
-    if (vehicleNumber === "") {
-      console.log("Vehicle number is empty");
-      return;
-    }
-
     const tableBody = document.querySelector("#alertsTable tbody");
     tableBody.innerHTML = `
             <tr class="loading-row">
