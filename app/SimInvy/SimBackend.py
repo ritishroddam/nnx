@@ -75,10 +75,6 @@ def get_sims_by_status(status):
         if sim['SimNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['SimNumber']]
             sim['status'] = 'Allocated'
-            sim['DateIn'] = format_date(sim.get('DateIn'))
-            sim['DateOut'] = format_date(sim.get('DateOut'))
-            sim['statusDate'] = format_date(sim.get('statusDate'))
-            sim['reactivationDate'] = format_date(sim.get('reactivationDate'))
         else:
             sim.setdefault('status', 'Available')
             sim.setdefault('isActive', True)
