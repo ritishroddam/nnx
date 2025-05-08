@@ -35,6 +35,41 @@ def create_app(config_name='default'):
         print(f"Client connected: {sid}")
 
     @socketio.event
+    def subscribe_vehicle_updates(data):
+        """
+        Subscribe a client to live updates for a specific vehicle.
+        Expected data: {LicensePlateNumber: string}
+        """
+        try:
+            sid = request.sid
+            license_plate_number = data.get('LicensePlateNumber')
+
+            if not license_plate_number:
+                socketio.emit('subscription_error', {'status': 'error', 'message': 'LicensePlateNumber is required'}, room=sid)
+                return
+
+            # Add the client to a room specific to the vehicle's LicensePlateNumber
+            join_room(f"vehicle_{license_plate_number}")
+            print(f"Client {sid} subscribed to updates for vehicle LicensePlateNumber {license_plate_number}")
+            socketio.emit('subscription_success', {'status': 'success', 'LicensePlateNumber': license_plate_number}, room=sid)
+        except Exception as e:
+            print(f"Error subscribing to vehicle updates: {e}")
+            socketio.emit('subscription_error', {'status': 'error', 'message': str(e)}, room=sid)
+
+    @socketio.event('vehicle_live_update')
+    def emit_vehicle_update(vehicle_data):
+        """
+        Emit new data for a specific vehicle to its subscribed clients.
+        """
+        try:
+            license_plate_number = vehicle_data.get('LicensePlateNumber')
+            if license_plate_number:
+                socketio.emit('vehicle_live_update', vehicle_data, room=f"vehicle_{license_plate_number}")
+                print(f"Emitted live update for vehicle LicensePlateNumber {license_plate_number}")
+        except Exception as e:
+            print(f"Error emitting vehicle live update: {e}")
+
+    @socketio.event
     def authenticate(data):
         """
         Handle user authentication and room assignment
@@ -289,14 +324,5 @@ def create_app(config_name='default'):
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(gecoding_bp)
-
-    # map_server_path = os.path.join(os.path.dirname(__file__), 'map_server.py')
-    # subprocess.Popen(['python', map_server_path])
-    
-    # run_distinct_vehicle_data_store_path = os.path.join(os.path.dirname(__file__), 'distinctVehicleDataStore.py')
-    # subprocess.Popen(['python', run_distinct_vehicle_data_store_path])
-    
-    # run_calculate_past_distances_path = os.path.join(os.path.dirname(__file__), 'calculate_past_distances.py')
-    # subprocess.Popen(['python', run_calculate_past_distances_path])
     
     return app
