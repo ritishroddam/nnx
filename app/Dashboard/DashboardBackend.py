@@ -140,12 +140,13 @@ def get_vehicle_distances():
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
         pipeline = [
-            {"$match": {"date_time": {
-                            "$gte": start_of_day,
-                            "$lt": end_of_day
-                        }},
-                        "imei": {"$in": imeis}
-            },
+            {"$match": {
+                "date_time": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                },
+                "imei": {"$in": imeis}
+            }},
             {"$project": {  
                 "imei": 1,
                 "odometer": {"$toDouble": "$odometer"} 
