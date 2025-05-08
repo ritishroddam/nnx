@@ -44,6 +44,7 @@ def page():
         else:
             sim.setdefault('status', 'Available')
             sim.setdefault('isActive', True)
+            sim.setdefault('lastEditedBy', 'N/A')
     
     return render_template('sim.html', sims=sims)
 
