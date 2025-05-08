@@ -214,7 +214,14 @@ def upload_file():
 @jwt_required()
 def edit_sim(sim_id):
     try:
+        current_user = get_jwt_identity()
         updated_data = request.json
+        
+        # Convert string boolean to actual boolean
+        is_active = updated_data.get('isActive')
+        if isinstance(is_active, str):
+            is_active = is_active.lower() == 'true'
+        
         update_fields = {
             "MobileNumber": updated_data.get("MobileNumber"),
             "SimNumber": updated_data.get("SimNumber"),
@@ -222,9 +229,9 @@ def edit_sim(sim_id):
             "DateOut": updated_data.get("DateOut"),
             "Vendor": updated_data.get("Vendor"),
             "status": updated_data.get("status"),
-            "isActive": updated_data.get("isActive"),
+            "isActive": is_active,
             "lastEditedBy": updated_data.get("lastEditedBy"),
-            "lastEditedAt": datetime.datetime.utcnow()
+            "lastEditedAt": datetime.utcnow()
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
@@ -243,7 +250,7 @@ def edit_sim(sim_id):
             return jsonify({'success': False, 'message': 'No changes made.'})
     except Exception as e:
         print(f"Error editing SIM: {e}")
-        return jsonify({'success': False, 'message': 'Error editing SIM.'}), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @sim_bp.route('/delete_sim/<sim_id>', methods=['DELETE'])
 @jwt_required()
