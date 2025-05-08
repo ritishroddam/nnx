@@ -8,7 +8,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity # type: ignore
 from app.geocoding import geocodeInternal
 from bson import ObjectId # type: ignore
 from functools import wraps
-from app.utils import roles_required, get_filtered_results
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
@@ -44,7 +43,6 @@ def alert_card_endpoint(alert_type):
             start_date = data.get("startDate")
             end_date = data.get("endDate")
             vehicle_number = data.get("vehicleNumber")
-            print(f"Vehicle Number: {vehicle_number}")
             page = data.get("page", 1)
             per_page = data.get("per_page", 100)
 
@@ -264,8 +262,7 @@ def alert_card_endpoint(alert_type):
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    imeis = list(get_filtered_results("atlanta").distinct("imei"))
-    vehicles = list(db['vehicle_inventory'].find({"IMEI": {"$in": imeis}}, {"LicensePlateNumber": 1, "_id": 0}))
+    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now
