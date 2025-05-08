@@ -119,10 +119,13 @@ def manual_entry():
 @jwt_required()
 def update_sim_status(sim_id):
     try:
+        current_user = get_jwt_identity()
         updated_data = request.json
         update_fields = {
             "status": updated_data.get("status"),
-            "isActive": updated_data.get("isActive")
+            "isActive": updated_data.get("isActive"),
+            "lastEditedBy": current_user,
+            "lastEditedAt": datetime.datetime.utcnow()
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
