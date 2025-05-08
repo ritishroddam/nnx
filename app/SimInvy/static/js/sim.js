@@ -335,7 +335,7 @@ function saveSim(simId) {
     MobileNumber: row.cells[0].querySelector("input").value.trim(),
     SimNumber: row.cells[1].querySelector("input").value.trim(),
     status: row.cells[3].querySelector("select").value,
-    isActive: row.cells[4].querySelector("select").value === 'true',
+    isActive: row.cells[4].querySelector("select").value,
     statusDate: row.cells[5].querySelector("input")?.value.trim() || null,
     reactivationDate: row.cells[6].querySelector("input")?.value.trim() || null,
     DateIn: row.cells[7].querySelector("input").value.trim(),
@@ -363,14 +363,7 @@ function saveSim(simId) {
   if (!updatedData.lastEditedBy) {
     errors.push("Editor name is required.");
   }
-  if (updatedData.status === 'SafeCustody' && !updatedData.statusDate) {
-    errors.push("Status Date is required for Safe Custody.");
-  }
-  if (updatedData.status === 'Suspended' && !updatedData.statusDate) {
-    errors.push("Status Date is required for Suspended.");
-  }
 
-  // Show errors and stop if validation fails
   if (errors.length > 0) {
     alert(errors.join("\n"));
     return;
@@ -385,7 +378,12 @@ function saveSim(simId) {
     },
     body: JSON.stringify(updatedData),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then(err => { throw err; });
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.success) {
         // Update the table row with the new values
@@ -393,7 +391,7 @@ function saveSim(simId) {
         row.cells[1].innerText = updatedData.SimNumber;
         row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
         row.cells[3].innerText = updatedData.status;
-        row.cells[4].innerText = updatedData.isActive ? 'Active' : 'Inactive';
+        row.cells[4].innerText = updatedData.isActive === 'true' ? 'Active' : 'Inactive';
         row.cells[5].innerText = updatedData.statusDate || '';
         row.cells[6].innerText = updatedData.reactivationDate || '';
         row.cells[7].innerText = updatedData.DateIn;
@@ -401,20 +399,18 @@ function saveSim(simId) {
         row.cells[9].innerText = updatedData.Vendor;
         row.cells[10].innerText = updatedData.lastEditedBy;
 
-        // Restore the action buttons
         row.cells[11].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
         `;
         
-        // Apply status class to row
         row.className = updatedData.status.toLowerCase();
       } else {
-        alert("Failed to save the changes. Please try again.");
+        alert(data.message || "Failed to save the changes. Please try again.");
       }
     })
     .catch((error) => {
       console.error("Error updating SIM:", error);
-      alert("An error occurred. Please try again.");
+      alert(error.message || "An error occurred. Please try again.");
     });
 }
 

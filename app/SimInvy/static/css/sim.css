@@ -25,37 +25,44 @@ input[type="text"] {
   border-radius: 5px;
   box-sizing: border-box;
 }
+
+/* Add this to your CSS file or style tag */
 table {
+  table-layout: fixed;
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background-color: #fff;
 }
+
 th, td {
   padding: 8px 12px;
-  text-align: left;
-  border: 1px solid #ddd;
+  overflow: visible;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
 }
 
-th {
-  background-color: #f2f2f2;
-  position: sticky;
-  top: 0;
+/* Specific column widths */
+th:nth-child(1), td:nth-child(1) { width: 120px; } /* Mobile Number */
+th:nth-child(2), td:nth-child(2) { width: 180px; } /* SIM Number */
+th:nth-child(3), td:nth-child(3) { width: 120px; } /* IMEI Number */
+th:nth-child(4), td:nth-child(4) { width: 100px; } /* Status */
+th:nth-child(5), td:nth-child(5) { width: 80px; }  /* Active */
+th:nth-child(6), td:nth-child(6) { width: 100px; } /* Status Date */
+th:nth-child(7), td:nth-child(7) { width: 120px; } /* Reactivation Date */
+th:nth-child(8), td:nth-child(8) { width: 100px; } /* Date In */
+th:nth-child(9), td:nth-child(9) { width: 100px; } /* Date Out */
+th:nth-child(10), td:nth-child(10) { width: 100px; } /* Vendor */
+th:nth-child(11), td:nth-child(11) { width: 120px; } /* Last Edited By */
+th:nth-child(12), td:nth-child(12) { width: 80px; } /* Actions */
+
+/* Ensure dropdowns are fully visible */
+select {
+  width: 100%;
+  min-width: 80px; /* Adjust as needed */
 }
 
-td:nth-child(1), th:nth-child(1) { width: 120px; } /* Mobile Number */
-td:nth-child(2), th:nth-child(2) { width: 180px; } /* SIM Number */
-td:nth-child(10), th:nth-child(10) { width: 150px; } /* Last Edited By */
-td:nth-child(11), th:nth-child(11) { width: 80px; } /* Actions */
-
 /* Input fields in edit mode */
-input[type="text"], input[type="date"], select {
+input[type="text"], input[type="date"] {
   width: 100%;
   box-sizing: border-box;
-  padding: 4px;
 }
 
 tr:hover {
