@@ -3,17 +3,25 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import pandas as pd
 import os
-import sys
 from io import BytesIO
-from app.database import db
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from app.models import User
-from app.utils import roles_required
+from app.database import db # type: ignore
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
+from app.models import User # type: ignore
+from app.utils import roles_required # type: ignore
+from datetime import datetime
 
 
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
 
 collection = db['sim_inventory']
+
+def format_date(date_str):
+    if not date_str:
+        return ""
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d-%m-%Y")
+    except:
+        return date_str
 
 @sim_bp.route('/page')
 @jwt_required()
@@ -67,6 +75,10 @@ def get_sims_by_status(status):
         if sim['SimNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['SimNumber']]
             sim['status'] = 'Allocated'
+            sim['DateIn'] = format_date(sim.get('DateIn'))
+            sim['DateOut'] = format_date(sim.get('DateOut'))
+            sim['statusDate'] = format_date(sim.get('statusDate'))
+            sim['reactivationDate'] = format_date(sim.get('reactivationDate'))
         else:
             sim.setdefault('status', 'Available')
             sim.setdefault('isActive', True)

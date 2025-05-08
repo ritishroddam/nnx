@@ -133,12 +133,7 @@ function filterSimsByStatus() {
   const status = document.getElementById('statusFilter').value;
   
   fetch(`/simInvy/get_sims_by_status/${status}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
-      return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
       const tableBody = document.getElementById('simTable');
       tableBody.innerHTML = '';
@@ -153,16 +148,24 @@ function filterSimsByStatus() {
         row.setAttribute('data-id', sim._id);
         row.className = sim.status.toLowerCase();
         
+        // Format dates properly
+        const formatDate = (dateStr) => {
+          if (!dateStr) return '';
+          const date = new Date(dateStr);
+          return isNaN(date.getTime()) ? '' : 
+            `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+        };
+        
         row.innerHTML = `
           <td>${sim.MobileNumber}</td>
           <td>${sim.SimNumber}</td>
           <td>${sim.IMEI || 'N/A'}</td>
           <td>${sim.status}</td>
           <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
-          <td>${sim.statusDate || ''}</td>
-          <td>${sim.reactivationDate || ''}</td>
-          <td>${sim.DateIn}</td>
-          <td>${sim.DateOut || ''}</td>
+          <td>${formatDate(sim.statusDate)}</td>
+          <td>${formatDate(sim.reactivationDate)}</td>
+          <td>${formatDate(sim.DateIn)}</td>
+          <td>${formatDate(sim.DateOut)}</td>
           <td>${sim.Vendor}</td>
           <td>${sim.lastEditedBy || 'N/A'}</td>
           <td>
@@ -233,7 +236,14 @@ function editSim(simId) {
   row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" />`;
   row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
   row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
-  row.cells[10].innerHTML = `<input type="text" id="editorName" required placeholder="Enter your name" />`;
+  row.cells[10].innerHTML = `
+    <input type="text" 
+           id="editorName" 
+           required 
+           placeholder="Your name" 
+           style="width: 100%; box-sizing: border-box;"
+           value="${row.getAttribute("data-original-editor") || ''}" />
+  `;
 
   row.cells[11].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>

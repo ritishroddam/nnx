@@ -31,20 +31,33 @@ table {
   margin-top: 20px;
   background-color: #fff;
 }
-td,
-th {
-  padding: 12px;
-  color: #000;
-  border: 1px solid #ccc;
+th, td {
+  padding: 8px 12px;
   text-align: left;
+  border: 1px solid #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 th {
-  background-color: #e2e8f0;
-  color: #333;
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
 }
-tr:nth-child(even) {
-  background-color: #f4f4f4;
+
+td:nth-child(1), th:nth-child(1) { width: 120px; } /* Mobile Number */
+td:nth-child(2), th:nth-child(2) { width: 180px; } /* SIM Number */
+td:nth-child(10), th:nth-child(10) { width: 150px; } /* Last Edited By */
+td:nth-child(11), th:nth-child(11) { width: 80px; } /* Actions */
+
+/* Input fields in edit mode */
+input[type="text"], input[type="date"], select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
 }
+
 tr:hover {
   background-color: #e2e8f0;
 }
