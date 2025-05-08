@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from pytz import timezone # type: ignore
 import pytz # type: ignore
 from app.database import db
-from flask_jwt_extended import jwt_required, get_jwt_identity # type: ignore
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
 from app.geocoding import geocodeInternal
 from bson import ObjectId # type: ignore
 from functools import wraps
@@ -53,6 +53,26 @@ def alert_card_endpoint(alert_type):
                 max_allowed_end = start_date + timedelta(hours=24)
                 if end_date > max_allowed_end:
                     end_date = max_allowed_end
+
+                claims = get_jwt()
+                user_roles = claims.get('roles', [])
+                userID = claims.get('user_id')
+                userCompany = claims.get('company')
+                vehicle_inventory = db["vehicle_inventory"]
+
+                if 'admin' in user_roles:
+                    # Admins can access all data
+                    vehicle_numbers = list((vehicle_inventory.find({},{"LicensePlateNumber": 1, "_id": 0})).distinct("LicensePlateNumber"))
+                elif 'user' in user_roles:
+                    # Users can only access data for vehicles assigned to them
+                    vehicle_numbers = list((vehicle_inventory.find({
+                        'CompanyName': userCompany,
+                        'AssignedUsers': {'$in': [userID]}
+                    },{"VehicleLicenseNumber": 1, "_id": 0})).distinct("VehicleLicenseNumber"))
+                else:
+                    # Client admins can access data for all vehicles in their company
+                    vehicle_numbers = list((vehicle_inventory.find({'CompanyName': userCompany}, {"VehicleLicenseNumber": 1, "_id": 0})).distinct("VehicleLicenseNumber"))
+                
             else: 
                 max_allowed_start = end_date - timedelta(days=30)
                 if start_date < max_allowed_start:
