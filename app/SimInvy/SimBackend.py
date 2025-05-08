@@ -205,7 +205,6 @@ def upload_file():
 @jwt_required()
 def edit_sim(sim_id):
     try:
-        current_user = get_jwt_identity()
         updated_data = request.json
         update_fields = {
             "MobileNumber": updated_data.get("MobileNumber"),
@@ -215,7 +214,7 @@ def edit_sim(sim_id):
             "Vendor": updated_data.get("Vendor"),
             "status": updated_data.get("status"),
             "isActive": updated_data.get("isActive"),
-            "lastEditedBy": current_user,
+            "lastEditedBy": updated_data.get("lastEditedBy"),
             "lastEditedAt": datetime.datetime.utcnow()
         }
         

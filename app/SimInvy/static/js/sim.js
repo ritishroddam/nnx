@@ -233,7 +233,7 @@ function editSim(simId) {
   row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" />`;
   row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
   row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
-  row.cells[10].innerHTML = `<span>${row.getAttribute("data-original-editor") || 'N/A'}</span>`;
+  row.cells[10].innerHTML = `<input type="text" id="editorName" required placeholder="Enter your name" />`;
 
   row.cells[11].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
@@ -286,16 +286,16 @@ function cancelEdit(simId) {
   row.cells[7].innerText = row.getAttribute("data-original-date-in");
   row.cells[8].innerText = row.getAttribute("data-original-date-out");
   row.cells[9].innerText = row.getAttribute("data-original-vendor");
+  row.cells[10].innerText = row.getAttribute("data-original-editor") || 'N/A';
 
   // Restore action buttons
-  row.cells[10].innerHTML = `
+  row.cells[11].innerHTML = `
     <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
   `;
 }
 
 function saveSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
-  const currentUser = "{{ current_user.username }}"; // Make sure this is passed from your template
 
   // Get updated data from input fields
   const updatedData = {
@@ -308,7 +308,7 @@ function saveSim(simId) {
     DateIn: row.cells[7].querySelector("input").value.trim(),
     DateOut: row.cells[8].querySelector("input").value.trim(),
     Vendor: row.cells[9].querySelector("input").value.trim(),
-    lastEditedBy: currentUser
+    lastEditedBy: row.cells[10].querySelector("input").value.trim()
   };
 
   // Validation logic
@@ -326,6 +326,9 @@ function saveSim(simId) {
   }
   if (!updatedData.Vendor) {
     errors.push("Vendor is required.");
+  }
+  if (!updatedData.lastEditedBy) {
+    errors.push("Editor name is required.");
   }
   if (updatedData.status === 'SafeCustody' && !updatedData.statusDate) {
     errors.push("Status Date is required for Safe Custody.");
