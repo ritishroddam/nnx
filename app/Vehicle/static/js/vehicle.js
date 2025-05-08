@@ -52,6 +52,21 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
+socket.on("authentication_success", (data) => {
+  console.log("Authentication successful");
+  socket.emit("get_rooms");
+
+  // Subscribe to vehicle updates for a specific LicensePlateNumber
+  const licensePlateNumber = "KA73BB6459";
+  socket.emit("subscribe_vehicle_updates", {
+    LicensePlateNumber: licensePlateNumber,
+  });
+});
+
+socket.on("vehicle_live_update", (data) => {
+  console.log("Live update received for vehicle KA73BB6459:", data);
+});
+
 socket.on("vehicle_update", async function (data) {
   try {
     // Wait for fetchdistance to resolve and return the updated data
