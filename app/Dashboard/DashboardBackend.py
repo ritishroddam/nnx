@@ -217,7 +217,7 @@ def get_status_data():
             if (now - record_datetime).total_seconds() > 5 * 60:
                 parked_vehicles += 1
 
-        speed_vehicles = get_filtered_results(
+        speed_vehicles = len(list(get_filtered_results(
             "distinctAtlanta",
             collection_query={
                 "$expr": {
@@ -227,11 +227,10 @@ def get_status_data():
                     ]
                 }
             }
-        ).count()
-        
+        )))
 
 
-        overspeed_vehicles = get_filtered_results(
+        overspeed_vehicles = len(list(get_filtered_results(
             "distinctAtlanta",
             collection_query={
                 "$expr": {
@@ -240,17 +239,17 @@ def get_status_data():
                     ]
                 }
             }
-        ).count()
+        )))
 
-        disconnected_vehicles = get_filtered_results(
+        disconnected_vehicles = len(list(get_filtered_results(
             "distinctAtlanta",
             collection_query={"main_power": "0"}
-        ).count()
+        )))
  
-        no_gps_vehicles = get_filtered_results(
+        no_gps_vehicles = len(list(get_filtered_results(
             "distinctAtlanta",
             collection_query={"gps": False}
-        ).count()
+        )))
  
         return jsonify({
             'runningVehicles': running_vehicles,
