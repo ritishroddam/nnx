@@ -8,11 +8,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity # type: ignore
 from app.geocoding import geocodeInternal
 from bson import ObjectId # type: ignore
 from functools import wraps
-from flask_socketio import SocketIO, emit # type: ignore
-from app.geocoding import geocodeInternal
+from app.utils import roles_required, get_filtered_results
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
-socketio = SocketIO()
 
 def get_alert_type(record):
     """Determine the alert type based on record data"""
@@ -262,38 +260,11 @@ def alert_card_endpoint(alert_type):
         return wrapper
     return decorator
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-    emit('connected', {'data': 'Connected to alerts updates'})
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-
-@socketio.on('join_alerts')
-def handle_join_alerts():
-    print('Client joined alerts room')
-    emit('alerts_joined', {'data': 'Joined alerts updates'})
-
-def broadcast_new_alert(alert_data):
-    socketio.emit('new_alert', {
-        'alert': alert_data,
-        'timestamp': datetime.now(pytz.utc).isoformat()
-    })
-
-def broadcast_alert_update(alert_id, action, user_id):
-    socketio.emit('alert_updated', {
-        'alert_id': alert_id,
-        'action': action,
-        'by': user_id,
-        'timestamp': datetime.now(pytz.utc).isoformat()
-    })
-
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    imeis = list(get_filtered_results("atlanta").distinct("imei"))
+    vehicles = list(db['vehicle_inventory'].find({"IMEI": {"$in": imeis}}, {"LicensePlateNumber": 1, "_id": 0}))
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now
@@ -402,8 +373,6 @@ def acknowledge_alert():
         
         if not result.inserted_id:
             return jsonify({"success": False, "message": "Failed to save acknowledgment"}), 500
-
-        broadcast_alert_update(alert_id, 'acknowledged', user_id)
 
         return jsonify({
             "success": True,
