@@ -28,7 +28,7 @@ input[type="text"] {
 
 /* Add this to your CSS file or style tag */
 table {
-  table-layout: fixed;
+  table-layout:auto;
   width: 100%;
 }
 
@@ -38,20 +38,6 @@ th, td {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-/* Specific column widths */
-th:nth-child(1), td:nth-child(1) { width: 120px; } /* Mobile Number */
-th:nth-child(2), td:nth-child(2) { width: 180px; } /* SIM Number */
-th:nth-child(3), td:nth-child(3) { width: 120px; } /* IMEI Number */
-th:nth-child(4), td:nth-child(4) { width: 100px; } /* Status */
-th:nth-child(5), td:nth-child(5) { width: 80px; }  /* Active */
-th:nth-child(6), td:nth-child(6) { width: 100px; } /* Status Date */
-th:nth-child(7), td:nth-child(7) { width: 120px; } /* Reactivation Date */
-th:nth-child(8), td:nth-child(8) { width: 100px; } /* Date In */
-th:nth-child(9), td:nth-child(9) { width: 100px; } /* Date Out */
-th:nth-child(10), td:nth-child(10) { width: 100px; } /* Vendor */
-th:nth-child(11), td:nth-child(11) { width: 120px; } /* Last Edited By */
-th:nth-child(12), td:nth-child(12) { width: 80px; } /* Actions */
 
 /* Ensure dropdowns are fully visible */
 select {
