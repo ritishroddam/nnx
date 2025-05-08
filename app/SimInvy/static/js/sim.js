@@ -144,7 +144,7 @@ function filterSimsByStatus() {
       tableBody.innerHTML = '';
       
       if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="11" class="no-results">No SIMs found with this status</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="12" class="no-results">No SIMs found with this status</td></tr>';
         return;
       }
       
@@ -206,6 +206,7 @@ function editSim(simId) {
   row.setAttribute("data-original-date-in", row.cells[7].innerText);
   row.setAttribute("data-original-date-out", row.cells[8].innerText);
   row.setAttribute("data-original-vendor", row.cells[9].innerText);
+  row.setAttribute("data-original-editor", row.cells[10].innerText);
 
   // Status dropdown options
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
@@ -232,8 +233,9 @@ function editSim(simId) {
   row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" />`;
   row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
   row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
+  row.cells[10].innerHTML = `<span>${row.getAttribute("data-original-editor") || 'N/A'}</span>`;
 
-  row.cells[10].innerHTML = `
+  row.cells[11].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
   `;
@@ -293,18 +295,20 @@ function cancelEdit(simId) {
 
 function saveSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
+  const currentUser = "{{ current_user.username }}"; // Make sure this is passed from your template
 
   // Get updated data from input fields
   const updatedData = {
     MobileNumber: row.cells[0].querySelector("input").value.trim(),
     SimNumber: row.cells[1].querySelector("input").value.trim(),
-    status: row.cells[2].querySelector("select").value,
-    isActive: row.cells[3].querySelector("select").value === 'true',
-    statusDate: row.cells[4].querySelector("input")?.value.trim() || null,
-    reactivationDate: row.cells[5].querySelector("input")?.value.trim() || null,
-    DateIn: row.cells[6].querySelector("input").value.trim(),
-    DateOut: row.cells[7].querySelector("input").value.trim(),
-    Vendor: row.cells[8].querySelector("input").value.trim()
+    status: row.cells[3].querySelector("select").value,
+    isActive: row.cells[4].querySelector("select").value === 'true',
+    statusDate: row.cells[5].querySelector("input")?.value.trim() || null,
+    reactivationDate: row.cells[6].querySelector("input")?.value.trim() || null,
+    DateIn: row.cells[7].querySelector("input").value.trim(),
+    DateOut: row.cells[8].querySelector("input").value.trim(),
+    Vendor: row.cells[9].querySelector("input").value.trim(),
+    lastEditedBy: currentUser
   };
 
   // Validation logic
@@ -337,7 +341,7 @@ function saveSim(simId) {
   }
 
   // Send the updated data to the server
-  fetch(`/simInvy/update_sim_status/${simId}`, {
+  fetch(`/simInvy/edit_sim/${simId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -351,16 +355,18 @@ function saveSim(simId) {
         // Update the table row with the new values
         row.cells[0].innerText = updatedData.MobileNumber;
         row.cells[1].innerText = updatedData.SimNumber;
-        row.cells[2].innerText = updatedData.status;
-        row.cells[3].innerText = updatedData.isActive ? 'Active' : 'Inactive';
-        row.cells[4].innerText = updatedData.statusDate || '';
-        row.cells[5].innerText = updatedData.reactivationDate || '';
-        row.cells[6].innerText = updatedData.DateIn;
-        row.cells[7].innerText = updatedData.DateOut || '';
-        row.cells[8].innerText = updatedData.Vendor;
+        row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
+        row.cells[3].innerText = updatedData.status;
+        row.cells[4].innerText = updatedData.isActive ? 'Active' : 'Inactive';
+        row.cells[5].innerText = updatedData.statusDate || '';
+        row.cells[6].innerText = updatedData.reactivationDate || '';
+        row.cells[7].innerText = updatedData.DateIn;
+        row.cells[8].innerText = updatedData.DateOut || '';
+        row.cells[9].innerText = updatedData.Vendor;
+        row.cells[10].innerText = updatedData.lastEditedBy;
 
         // Restore the action buttons
-        row.cells[9].innerHTML = `
+        row.cells[11].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
         `;
         
@@ -375,5 +381,4 @@ function saveSim(simId) {
       alert("An error occurred. Please try again.");
     });
 }
-
 

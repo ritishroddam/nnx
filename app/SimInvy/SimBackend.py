@@ -205,17 +205,30 @@ def upload_file():
 @jwt_required()
 def edit_sim(sim_id):
     try:
+        current_user = get_jwt_identity()
         updated_data = request.json
+        update_fields = {
+            "MobileNumber": updated_data.get("MobileNumber"),
+            "SimNumber": updated_data.get("SimNumber"),
+            "DateIn": updated_data.get("DateIn"),
+            "DateOut": updated_data.get("DateOut"),
+            "Vendor": updated_data.get("Vendor"),
+            "status": updated_data.get("status"),
+            "isActive": updated_data.get("isActive"),
+            "lastEditedBy": current_user,
+            "lastEditedAt": datetime.datetime.utcnow()
+        }
+        
+        if updated_data.get("status") in ['SafeCustody', 'Suspended']:
+            update_fields["statusDate"] = updated_data.get("statusDate")
+            if updated_data.get("status") == 'SafeCustody':
+                update_fields["reactivationDate"] = updated_data.get("reactivationDate")
+        
         result = collection.update_one(
             {'_id': ObjectId(sim_id)},
-            {'$set': {
-                "MobileNumber": updated_data.get("MobileNumber"),
-                "SimNumber": updated_data.get("SimNumber"),
-                "DateIn": updated_data.get("DateIn"),
-                "DateOut": updated_data.get("DateOut"),
-                "Vendor": updated_data.get("Vendor")
-            }}
+            {'$set': update_fields}
         )
+        
         if result.modified_count > 0:
             return jsonify({'success': True, 'message': 'SIM updated successfully!'})
         else:
