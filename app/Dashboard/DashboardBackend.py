@@ -141,10 +141,11 @@ def get_vehicle_distances():
 
         pipeline = [
             {"$match": {"date_time": {
-                    "$gte": start_of_day,
-                    "$lt": end_of_day
-                }},
-                "imei": {"$in": imeis}},
+                            "$gte": start_of_day,
+                            "$lt": end_of_day
+                        }},
+                        "imei": {"$in": imeis}
+            },
             {"$project": {  
                 "imei": 1,
                 "odometer": {"$toDouble": "$odometer"} 
