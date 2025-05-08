@@ -186,7 +186,7 @@ def get_vehicle_distances():
 def get_status_data():
     try:
         now = datetime.now()
-        total_vehicles = collection.count_documents({})
+        total_vehicles = len(list(get_filtered_results("distinctAtlanta")))
 
         response_data, statusCode = atlanta_pie_data()
         if statusCode != 200:
@@ -198,14 +198,17 @@ def get_status_data():
  
         idle_vehicles = data.get('idle_vehicles', 0)
  
-        parked_vehicles = 0
-        results = list(collection.find({
-            "$and": [
-                {"speed": "0.0"},
-                {"ignition": "0"}
-            ]
-        }))
+        results = list(get_filtered_results(
+            "distinctAtlanta",
+            collection_query={
+                "$and": [
+                    {"speed": "0.0"},
+                    {"ignition": "0"}
+                ]
+            }
+        ))
 
+        parked_vehicles = 0
         for record in results:
             date_str = record["date"]
             time_str = record["time"]
@@ -214,32 +217,40 @@ def get_status_data():
             if (now - record_datetime).total_seconds() > 5 * 60:
                 parked_vehicles += 1
 
-        speed_vehicles = collection.count_documents({
-            "$expr": {
-                "$and": [
-                    {"$gte": [{"$toDouble": "$speed"}, 40]},
-                    {"$lt": [{"$toDouble": "$speed"}, 60]}
-                ]
+        speed_vehicles = get_filtered_results(
+            "distinctAtlanta",
+            collection_query={
+                "$expr": {
+                    "$and": [
+                        {"$gte": [{"$toDouble": "$speed"}, 40]},
+                        {"$lt": [{"$toDouble": "$speed"}, 60]}
+                    ]
+                }
             }
-        })
+        ).count()
         
 
 
-        overspeed_vehicles = collection.count_documents({
-            "$expr": {
-                "$and": [
-                    {"$gte": [{"$toDouble": "$speed"}, 60]}
-                ]
+        overspeed_vehicles = get_filtered_results(
+            "distinctAtlanta",
+            collection_query={
+                "$expr": {
+                    "$and": [
+                        {"$gte": [{"$toDouble": "$speed"}, 60]}
+                    ]
+                }
             }
-        })
+        ).count()
 
-        disconnected_vehicles = collection.count_documents({
-           "main_power": "0"
-        })
+        disconnected_vehicles = get_filtered_results(
+            "distinctAtlanta",
+            collection_query={"main_power": "0"}
+        ).count()
  
-        no_gps_vehicles = collection.count_documents({
-            "gps": False
-        })
+        no_gps_vehicles = get_filtered_results(
+            "distinctAtlanta",
+            collection_query={"gps": False}
+        ).count()
  
         return jsonify({
             'runningVehicles': running_vehicles,
