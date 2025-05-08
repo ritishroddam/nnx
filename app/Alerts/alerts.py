@@ -8,6 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: i
 from app.geocoding import geocodeInternal
 from bson import ObjectId # type: ignore
 from functools import wraps
+from app.utils import roles_required, get_filtered_results
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
@@ -53,26 +54,6 @@ def alert_card_endpoint(alert_type):
                 max_allowed_end = start_date + timedelta(hours=24)
                 if end_date > max_allowed_end:
                     end_date = max_allowed_end
-
-                claims = get_jwt()
-                user_roles = claims.get('roles', [])
-                userID = claims.get('user_id')
-                userCompany = claims.get('company')
-                vehicle_inventory = db["vehicle_inventory"]
-
-                if 'admin' in user_roles:
-                    # Admins can access all data
-                    vehicle_numbers = list((vehicle_inventory.find({},{"LicensePlateNumber": 1, "_id": 0})).distinct("LicensePlateNumber"))
-                elif 'user' in user_roles:
-                    # Users can only access data for vehicles assigned to them
-                    vehicle_numbers = list((vehicle_inventory.find({
-                        'CompanyName': userCompany,
-                        'AssignedUsers': {'$in': [userID]}
-                    },{"VehicleLicenseNumber": 1, "_id": 0})).distinct("VehicleLicenseNumber"))
-                else:
-                    # Client admins can access data for all vehicles in their company
-                    vehicle_numbers = list((vehicle_inventory.find({'CompanyName': userCompany}, {"VehicleLicenseNumber": 1, "_id": 0})).distinct("VehicleLicenseNumber"))
-                
             else: 
                 max_allowed_start = end_date - timedelta(days=30)
                 if start_date < max_allowed_start:
@@ -90,6 +71,25 @@ def alert_card_endpoint(alert_type):
                 )
                 if vehicle:
                     imei = vehicle["IMEI"]
+            else:
+                claims = get_jwt()
+                user_roles = claims.get('roles', [])
+                userID = claims.get('user_id')
+                userCompany = claims.get('company')
+                vehicle_inventory = db["vehicle_inventory"]
+
+                if 'admin' in user_roles:
+                    # Admins can access all data
+                    imeis = list((vehicle_inventory.find({},{"IMEI": 1, "_id": 0})).distinct("IMEI"))
+                elif 'user' in user_roles:
+                    # Users can only access data for vehicles assigned to them
+                    imeis = list((vehicle_inventory.find({
+                        'CompanyName': userCompany,
+                        'AssignedUsers': {'$in': [userID]}
+                    },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
+                else:
+                    # Client admins can access data for all vehicles in their company
+                    imeis = list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
 
             base_projection = {
                 "date_time": 1,
@@ -134,8 +134,12 @@ def alert_card_endpoint(alert_type):
                     "longitude": {"$exists": True, "$ne": None, "$ne": ""}
                 }
                 
-                if imei:
-                    query["imei"] = imei
+                if vehicle_number:
+                    if imei:
+                        query["imei"] = imei
+                else:
+                    if imeis:
+                        query["imei"] = {"$in": imeis}
 
                 if alert_type == "speeding":
                     query["$expr"] = {
@@ -282,7 +286,8 @@ def alert_card_endpoint(alert_type):
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
+    imeis = list(get_filtered_results("atlanta").distinct("imei"))
+    vehicles = list(db['vehicle_inventory'].find({"IMEI": {"$in": imeis}}, {"LicensePlateNumber": 1, "_id": 0}))
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now
