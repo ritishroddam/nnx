@@ -61,6 +61,7 @@ def create_app(config_name='default'):
         """
         Emit new data for a specific vehicle to its subscribed clients.
         """
+        print("hi")
         try:
             license_plate_number = vehicle_data.get('LicensePlateNumber')
             if license_plate_number:
