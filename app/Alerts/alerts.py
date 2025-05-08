@@ -44,6 +44,7 @@ def alert_card_endpoint(alert_type):
             start_date = data.get("startDate")
             end_date = data.get("endDate")
             vehicle_number = data.get("vehicleNumber")
+            print(f"Vehicle Number: {vehicle_number}")
             page = data.get("page", 1)
             per_page = data.get("per_page", 100)
 
@@ -387,6 +388,3 @@ def acknowledge_alert():
             "success": False,
             "message": f"Server error: {str(e)}"
         }), 500
-        
-def init_socketio(app):
-    socketio.init_app(app)
