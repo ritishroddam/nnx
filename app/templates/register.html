@@ -42,6 +42,7 @@ Register Sub Account
             <div class="form-group">
                 <label for="company">Company</label>
                 <select id="company" name="company" required>
+                    <option value="" disabled selected>Select Company</option>
                     {% for company in companies %}
                     <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
                     {% endfor %}

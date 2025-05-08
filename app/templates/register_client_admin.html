@@ -22,7 +22,7 @@ Register Client Admin
 <div class="container">
     <div class="register-container">
         <h2>Register</h2>
-        <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
+        <form method="POST" action="{{ url_for('register-client-admin') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -39,6 +39,7 @@ Register Client Admin
             <div class="form-group">
                 <label for="company">Company</label>
                 <select id="company" name="company" required>
+                    <option value="" disabled selected>Select Company</option>
                     {% for company in companies %}
                     <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
                     {% endfor %}

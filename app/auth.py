@@ -201,7 +201,7 @@ def register():
         
         User.create_user(username, email, password, company, role = 'user')
         flash('Registration successful. Please login.', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(request.referrer or url_for('auth.login'))
 
     claims = get_jwt()
     user_role = claims.get('roles', [])  # Assuming roles is a list and taking the first role
@@ -240,7 +240,7 @@ def register_client_admin():
         
         User.create_user(username, email, password, company, role='clientAdmin')
         flash('Admin registration successful. Please login.', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(request.referrer or url_for('auth.login'))
 
     companies = db.customers_list.find()
     
@@ -275,7 +275,34 @@ def register_admin():
         flash('Admin registration successful. Please login.', 'success')
         return redirect(url_for('auth.login'))
     
-    return render_template('register_admin.html')  # You'll need to create this template
+    return render_template('register_admin.html') 
+
+@auth_bp.route('/register-inventory', methods=['GET', 'POST'])
+@roles_required('admin')
+def register_inventory():
+    if request.method == 'POST':
+        # Rest of registration logic similar to regular register
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        role = request.form.get('role')
+
+        existing_user = User.find_by_username(username)
+        existing_email = User.find_by_email(email)
+
+        if existing_user:
+            flash('Username already exists', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
+            
+        if existing_email:
+            flash('Email already registered', 'danger')
+            return redirect(url_for('auth.register_client_admin'))
+        
+        User.create_user(username, email, password, role)
+        flash('Admin registration successful. Please login.', 'success')
+        return redirect(request.referrer or url_for('auth.login'))
+    
+    return render_template('register_inventory.html') 
 
 @auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():

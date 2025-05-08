@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Register Inventory Accounts</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
+    integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
+    integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+{% endblock %}
+
+{% block h1 %}
+Register Client Admin
+{% endblock %}
+
+{% block block_container %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+<div class="register-container">
+    <h2>Register</h2>
+    <form method="POST" action="{{ url_for('auth.register_inventory') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Select Role</label>
+            <select id="role" name="role" required>
+                <option value="" disabled selected>Select Role</option>
+                <option value="device">Device Inventory User</option>
+                <option value="sim">Sim Inventory User</option>
+                <option value="vehicle">Vehicle Inventory User</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Register</button>
+    </form>
+</div>
+{% endblock %}
