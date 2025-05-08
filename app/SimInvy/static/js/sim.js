@@ -237,7 +237,7 @@ function editSim(simId) {
            placeholder="Your name"
            style="width: 100%"
     />
-  `;
+`;
 
   // Actions column (column 11) - ONLY place buttons here
   row.cells[11].innerHTML = `
