@@ -68,7 +68,15 @@ def login():
         refresh_token_max_age = int(refresh_token_exp - current_time)
 
         # Wrap the rendered template in a Response object
-        response = redirect(url_for('auth.login'))
+        if user['role'] == 'admin' or user['role'] == 'clientAdmin' or user['role'] == 'user':
+            response = redirect(url_for('Vehicle.map'))
+        elif user['role'] == 'sim':
+            response = redirect(url_for('SimInvy.page'))
+        elif user['role'] == 'device':
+            response = redirect(url_for('DeviceInvy.page'))
+        elif user['role'] == 'vehicle':
+            response = redirect(url_for('VehicleInvy.page'))
+
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
 
@@ -298,7 +306,7 @@ def register_inventory():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
-        User.create_user(username, email, password, role = role)
+        User.create_user(username, email, password, "none", role)
         flash('Admin registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
     
