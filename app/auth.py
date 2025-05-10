@@ -76,6 +76,9 @@ def login():
             response = redirect(url_for('DeviceInvy.page'))
         elif user['role'] == 'vehicle':
             response = redirect(url_for('VehicleInvy.page'))
+        else:
+            flash('Unauthorized role', 'danger')
+            return redirect(url_for('auth.login'))
 
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
