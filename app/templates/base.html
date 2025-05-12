@@ -71,12 +71,12 @@
                     {% if role == 'admin' or role == 'clientAdmin' or role == 'user' %}
                     <li>
                         <a href="{{url_for('Dashboard.page')}}" class="menu-item">
-                            <i class="fa-solid fa-chart-bar"></i> <span class="sidebar-text">Dashboard</span>
+                            <i class="fa-solid fa-chart-bar"></i> <span class="sidebar-text">Fleet Analytics</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{url_for('Vehicle.map')}}" class="menu-item nav-link">
-                            <i class="fa-solid fa-map-location-dot"></i> <span class="sidebar-text">Vehicles</span>
+                            <i class="fa-solid fa-map-location-dot"></i> <span class="sidebar-text">Live Vehicles</span>
                         </a>
                     </li>
                     <li>
