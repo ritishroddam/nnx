@@ -3,12 +3,12 @@ from pymongo import MongoClient # type: ignore
 from datetime import datetime, timedelta
 from pytz import timezone # type: ignore
 import pytz # type: ignore
-from app.database import db
+from app.database import db # type: ignore
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
-from app.geocoding import geocodeInternal
+from app.geocoding import geocodeInternal # type: ignore
 from bson import ObjectId # type: ignore
 from functools import wraps
-from app.utils import roles_required, get_filtered_results
+from app.utils import roles_required, get_filtered_results # type: ignore
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
