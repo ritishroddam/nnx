@@ -79,16 +79,13 @@ def alert_card_endpoint(alert_type):
                 vehicle_inventory = db["vehicle_inventory"]
 
                 if 'admin' in user_roles:
-                    # Admins can access all data
                     imeis = list((vehicle_inventory.find({},{"IMEI": 1, "_id": 0})).distinct("IMEI"))
                 elif 'user' in user_roles:
-                    # Users can only access data for vehicles assigned to them
                     imeis = list((vehicle_inventory.find({
                         'CompanyName': userCompany,
                         'AssignedUsers': {'$in': [userID]}
                     },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
                 else:
-                    # Client admins can access data for all vehicles in their company
                     imeis = list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
 
             base_projection = {
