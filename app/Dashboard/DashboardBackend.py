@@ -159,7 +159,8 @@ def get_vehicle_distances():
             {"$project": {
                 "imei": "$_id",
                 "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
-            }}
+            }},
+            {"$sort": {"distance_traveled": -1}}  # Sort by distance_traveled in descending order
         ]
 
         results = list(atlanta_collection.aggregate(pipeline))
