@@ -10,7 +10,7 @@ import pandas as pd
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
-from app.utils import roles_required, get_filtered_results
+from app.utils import roles_required, get_filtered_results, get_vehicle_data
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -101,7 +101,7 @@ def atlanta_distance_data():
         for i in range(7):
             date = (datetime.now() - timedelta(days=(i+1))).strftime('%d%m%y')
             if date:
-                imei_data = get_filtered_results("atlanta", collection_query = {'date': date}).distinct('imei')
+                imei_data = get_vehicle_data().distinct('IMEI')
                 total_distance = 0
 
                 for imei in imei_data:
@@ -134,7 +134,7 @@ def get_vehicle_distances():
         start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-        imeis = list(get_filtered_results("atlanta").distinct("imei"))
+        imeis = list(get_vehicle_data().distinct("IMEI"))
 
         vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
@@ -186,71 +186,103 @@ def get_vehicle_distances():
 def get_status_data():
     try:
         now = datetime.now()
-        total_vehicles = len(list(get_filtered_results("distinctAtlanta")))
+        imeis = list(get_vehicle_data().distinct("IMEI"))  # Get the list of IMEIs to filter by
 
-        response_data, statusCode = atlanta_pie_data()
-        if statusCode != 200:
-            return jsonify({"error": "Failed to fetch vehicle data"}), 500
-        
-        data = json.loads(response_data.get_data(as_text=True))
- 
-        running_vehicles = data.get('moving_vehicles', 0)
- 
-        idle_vehicles = data.get('idle_vehicles', 0)
- 
-        results = list(get_filtered_results(
-            "distinctAtlanta",
-            collection_query={
-                "$and": [
-                    {"speed": "0.0"},
-                    {"ignition": "0"}
-                ]
-            }
-        ))
-
-        parked_vehicles = 0
-        for record in results:
-            date_str = record["date"]
-            time_str = record["time"]
-            datetime_str = date_str + time_str
-            record_datetime = datetime.strptime(datetime_str, '%d%m%y%H%M%S')
-            if (now - record_datetime).total_seconds() > 5 * 60:
-                parked_vehicles += 1
-
-        speed_vehicles = len(list(get_filtered_results(
-            "distinctAtlanta",
-            collection_query={
-                "$expr": {
-                    "$and": [
-                        {"$gte": [{"$toDouble": "$speed"}, 40]},
-                        {"$lt": [{"$toDouble": "$speed"}, 60]}
+        # Aggregation pipeline
+        pipeline = [
+            {"$match": {"imei": {"$in": imeis}}},  # Filter by IMEIs
+            {
+                "$facet": {
+                    "totalVehicles": [
+                        {"$count": "count"}
+                    ],
+                    "runningVehicles": [
+                        {"$match": {"speed": {"$ne": "0.0"}}},
+                        {"$count": "count"}
+                    ],
+                    "idleVehicles": [
+                        {"$match": {"speed": "0.0", "ignition": "1"}},
+                        {"$count": "count"}
+                    ],
+                    "parkedVehicles": [
+                        {
+                            "$match": {
+                                "speed": "0.0",
+                                "ignition": "0",
+                                "date": {"$exists": True},
+                                "time": {"$exists": True}
+                            }
+                        },
+                        {
+                            "$addFields": {
+                                "record_datetime": {
+                                    "$dateFromString": {
+                                        "dateString": {
+                                            "$concat": ["$date", "$time"]
+                                        },
+                                        "format": "%d%m%y%H%M%S"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "$match": {
+                                "record_datetime": {
+                                    "$lt": now - timedelta(minutes=5)
+                                }
+                            }
+                        },
+                        {"$count": "count"}
+                    ],
+                    "speedVehicles": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {"$gte": [{"$toDouble": "$speed"}, 40]},
+                                        {"$lt": [{"$toDouble": "$speed"}, 60]}
+                                    ]
+                                }
+                            }
+                        },
+                        {"$count": "count"}
+                    ],
+                    "overspeedVehicles": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$gte": [{"$toDouble": "$speed"}, 60]
+                                }
+                            }
+                        },
+                        {"$count": "count"}
+                    ],
+                    "disconnectedVehicles": [
+                        {"$match": {"main_power": "0"}},
+                        {"$count": "count"}
+                    ],
+                    "noGpsVehicles": [
+                        {"$match": {"gps": False}},
+                        {"$count": "count"}
                     ]
                 }
             }
-        )))
+        ]
 
+        # Execute the query
+        results = list(db["distinctAtlanta"].aggregate(pipeline))[0]
 
-        overspeed_vehicles = len(list(get_filtered_results(
-            "distinctAtlanta",
-            collection_query={
-                "$expr": {
-                    "$and": [
-                        {"$gte": [{"$toDouble": "$speed"}, 60]}
-                    ]
-                }
-            }
-        )))
+        # Extract counts or default to 0 if not present
+        total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0)
+        running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0)
+        idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0)
+        parked_vehicles = results.get("parkedVehicles", [{}])[0].get("count", 0)
+        speed_vehicles = results.get("speedVehicles", [{}])[0].get("count", 0)
+        overspeed_vehicles = results.get("overspeedVehicles", [{}])[0].get("count", 0)
+        disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0)
+        no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0)
 
-        disconnected_vehicles = len(list(get_filtered_results(
-            "distinctAtlanta",
-            collection_query={"main_power": "0"}
-        )))
- 
-        no_gps_vehicles = len(list(get_filtered_results(
-            "distinctAtlanta",
-            collection_query={"gps": False}
-        )))
- 
+        # Return the consolidated response
         return jsonify({
             'runningVehicles': running_vehicles,
             'idleVehicles': idle_vehicles,
@@ -261,6 +293,7 @@ def get_status_data():
             'noGpsVehicles': no_gps_vehicles,
             'totalVehicles': total_vehicles
         }), 200
+
     except Exception as e:
         print(f"Error fetching status data: {e}")
         return jsonify({"error": "Failed to fetch status data"}), 500

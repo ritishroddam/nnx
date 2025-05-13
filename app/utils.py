@@ -61,5 +61,43 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
 
     return results
 
+def get_vehicle_data():
+    """
+    Fetch results from a collection based on the user's role and company, with an optional query.
+    
+    Args:
+        collection_name (str): The name of the collection to query.
+        vehicle_inventory_name (str): The name of the vehicle inventory collection (default: "vehicle_inventory").
+        collection_query (dict): Additional query to filter the collection (default: None).
+    
+    Returns:
+        list: A list of results filtered based on the user's role and company.
+    """
+    claims = get_jwt()
+    user_roles = claims.get('roles', [])
+    userID = claims.get('user_id')
+    userCompany = claims.get('company')
+
+    vehicle_inventory = db["vehicle_inventory"]
+
+    # Default query is an empty dictionary if no query is provided
+    collection_query = collection_query or {}
+
+    if 'admin' in user_roles:
+        # Admins can access all data
+        results = vehicle_inventory.find(collection_query)
+    elif 'user' in user_roles:
+        # Users can only access data for vehicles assigned to them
+        results = list(vehicle_inventory.find({
+            'CompanyName': userCompany,
+            'AssignedUsers': {'$in': [userID]}
+        }))
+    else:
+        # Client admins can access data for all vehicles in their company
+        results = list(vehicle_inventory.find({'CompanyName': userCompany}))
+
+
+    return results
+
 def admin_required(fn):
     return roles_required('admin')(fn)
