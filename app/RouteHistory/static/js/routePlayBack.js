@@ -33,13 +33,20 @@ socket.on("vehicle_live_update", (data) => {
 });
 
 async function liveTracking() {
-  const { LatLng } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  // Import the required libraries
+  await google.maps.importLibrary("maps");
+  await google.maps.importLibrary("marker");
+
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
 
-  const coords = new LatLng(vehicleData.latitude, vehicleData.longitude);
+  // Use google.maps.LatLng to create coordinates
+  const coords = new google.maps.LatLng(
+    vehicleData.latitude,
+    vehicleData.longitude
+  );
 
+  // Create the car marker content
   const carContent = document.createElement("img");
   carContent.src = "/static/images/car_green.png";
   carContent.style.width = "18px";
@@ -47,7 +54,8 @@ async function liveTracking() {
   carContent.style.position = "absolute";
   carContent.alt = "Car";
 
-  const markerLive = new AdvancedMarkerElement({
+  // Create the marker using google.maps.marker.AdvancedMarkerElement
+  const markerLive = new google.maps.marker.AdvancedMarkerElement({
     position: coords,
     map: liveMaps,
     title: "Start",
