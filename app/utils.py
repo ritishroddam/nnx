@@ -65,11 +65,6 @@ def get_vehicle_data():
     """
     Fetch results from a collection based on the user's role and company, with an optional query.
     
-    Args:
-        collection_name (str): The name of the collection to query.
-        vehicle_inventory_name (str): The name of the vehicle inventory collection (default: "vehicle_inventory").
-        collection_query (dict): Additional query to filter the collection (default: None).
-    
     Returns:
         list: A list of results filtered based on the user's role and company.
     """
@@ -79,9 +74,6 @@ def get_vehicle_data():
     userCompany = claims.get('company')
 
     vehicle_inventory = db["vehicle_inventory"]
-
-    # Default query is an empty dictionary if no query is provided
-    collection_query = collection_query or {}
 
     if 'admin' in user_roles:
         # Admins can access all data
