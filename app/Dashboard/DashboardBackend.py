@@ -281,14 +281,15 @@ def get_status_data():
         # Extract counts or default to 0 if not present
         results = results[0]
         print(results)
-        total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0)
-        running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0)
-        idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0)
-        parked_vehicles = results.get("parkedVehicles", [{}])[0].get("count", 0)
-        speed_vehicles = results.get("speedVehicles", [{}])[0].get("count", 0)
-        overspeed_vehicles = results.get("overspeedVehicles", [{}])[0].get("count", 0)
-        disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0)
-        no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0)
+        # Extract counts or default to 0 if not present or the list is empty
+        total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0) if results.get("totalVehicles") else 0
+        running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0) if results.get("runningVehicles") else 0
+        idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0) if results.get("idleVehicles") else 0
+        parked_vehicles = results.get("parkedVehicles", [{}])[0].get("count", 0) if results.get("parkedVehicles") else 0
+        speed_vehicles = results.get("speedVehicles", [{}])[0].get("count", 0) if results.get("speedVehicles") else 0
+        overspeed_vehicles = results.get("overspeedVehicles", [{}])[0].get("count", 0) if results.get("overspeedVehicles") else 0
+        disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0) if results.get("disconnectedVehicles") else 0
+        no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0) if results.get("noGpsVehicles") else 0
 
         # Return the consolidated response
         return jsonify({
