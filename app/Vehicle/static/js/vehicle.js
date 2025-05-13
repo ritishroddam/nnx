@@ -55,12 +55,6 @@ socket.on("disconnect", () => {
 socket.on("authentication_success", (data) => {
   console.log("Authentication successful");
   socket.emit("get_rooms");
-
-  // Subscribe to vehicle updates for a specific LicensePlateNumber
-  const licensePlateNumber = "KA73BB6459";
-  socket.emit("subscribe_vehicle_updates", {
-    LicensePlateNumber: licensePlateNumber,
-  });
 });
 
 socket.on("vehicle_live_update", (data) => {

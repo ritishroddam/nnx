@@ -34,7 +34,7 @@ Vehicle Data
       <div id="live-map-container" class="live-map-container">
         <div id="live-map"></div>
       </div>
-      <div class="route-history-container">
+      <div id="route-history-container" class="route-history-container">
         <h3>Route history</h3>
 
         <div id="map"></div>
@@ -102,6 +102,10 @@ Vehicle Data
       <div class="info-row">
         <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
           Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Location: </span><strong>{{ vehicle_data[0]['Address'] if vehicle_data else 'No Data
+          Available' }}</strong>
       </div>
       <div class="info-row">
         <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data

@@ -3,6 +3,35 @@ window.onload = initMap;
 const dataElement = document.getElementById("vehicle-data");
 const vehicleData = JSON.parse(dataElement.textContent);
 
+const socket = io(CONFIG.SOCKET_SERVER_URL, {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+});
+
+socket.on("connect", () => {
+  console.log("Connected to the socket server");
+  const licensePlateNumber = vehicleData["License Plate Number"] || none;
+  console.log(vehicleData);
+  socket.emit("subscribe_vehicle_updates", {
+    LicensePlateNumber: licensePlateNumber,
+  });
+});
+
+socket.on("subscription_success", (data) => {
+  console.log("Subscription successful:", data);
+});
+
+socket.on("subscription_error", (error) => {
+  console.error("Subscription error:", error);
+});
+
+socket.on("vehicle_live_update", (data) => {
+  console.log("Vehicle live update:", data);
+});
+
 function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
@@ -52,6 +81,7 @@ themeToggle.addEventListener("click", function () {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  liveTracking();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
   const labels = recentData.map((data) => data.time); // Extract times for X-axis

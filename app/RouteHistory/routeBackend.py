@@ -8,6 +8,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
+from app.geocoding import geocodeInternal
 from config import config
 
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
@@ -76,8 +77,14 @@ def show_vehicle_data(LicensePlateNumber):
                     for entry in vehicle_data
                 ]
 
+        if vehicleData.get("latitude") and vehicleData.get("longitude"):
+            latitude = vehicleData["latitude"]
+            longitude = vehicleData["longitude"]
+            addres = geocodeInternal(latitude, longitude)
+
         processed_data.append({
             "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
+            "Address": addres if vehicleData.get("latitude") and vehicleData.get("longitude") else "Unknown",
             "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
             "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
             "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
