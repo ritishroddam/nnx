@@ -158,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let map;
+let liveMaps;
 let pathCoordinates = [];
 let coords = []; // Coordinates for the path
 let carMarker;
