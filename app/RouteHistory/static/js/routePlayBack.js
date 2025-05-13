@@ -43,6 +43,11 @@ async function liveTracking() {
   const latitude = parseFloat(vehicleData.latitude);
   const longitude = parseFloat(vehicleData.longitude);
 
+  if (isNaN(latitude) || isNaN(longitude)) {
+    console.error("Invalid latitude or longitude:", latitude, longitude);
+    alert("Vehicle location is not available.");
+  }
+
   const coords = new google.maps.LatLng(latitude, longitude);
 
   // Create the car marker content
