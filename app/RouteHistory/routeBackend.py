@@ -77,14 +77,14 @@ def show_vehicle_data(LicensePlateNumber):
                     for entry in vehicle_data
                 ]
 
-        if vehicleData.get("latitude") and vehicleData.get("longitude"):
-            latitude = vehicleData["latitude"]
-            longitude = vehicleData["longitude"]
-            addres = geocodeInternal(latitude, longitude)
+        if most_recent_entry.get("latitude") and most_recent_entry.get("longitude"):
+            latitude = most_recent_entry["latitude"]
+            longitude = most_recent_entry["longitude"]
+            address = geocodeInternal(latitude, longitude)
 
         processed_data.append({
             "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
-            "Address": addres if vehicleData.get("latitude") and vehicleData.get("longitude") else "Unknown",
+            "Address": address if address else "Unknown",
             "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
             "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
             "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
