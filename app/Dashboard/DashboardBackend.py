@@ -94,29 +94,54 @@ def atlanta_pie_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def atlanta_distance_data():
     try:
-        today = datetime.now().strftime('%d%m%y')
+        imeis = list(get_vehicle_data().distinct("IMEI"))
 
-        distances = {}
+        pipeline = [
+            {
+                "$match": {
+                    "date_time": {
+                        "$gte": datetime.now() - timedelta(days=7),
+                        "$lt": datetime.now()
+                    },
+                    "imei": {"$in": imeis}
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "date": {"$dateToString": {"format": "%d%m%y", "date": "$date_time"}},
+                        "imei": "$imei"
+                    },
+                    "start_odometer": {"$min": {"$toDouble": "$odometer"}},
+                    "end_odometer": {"$max": {"$toDouble": "$odometer"}}
+                }
+            },
+            {
+                "$project": {
+                    "date": "$_id.date",
+                    "imei": "$_id.imei",
+                    "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$date",
+                    "total_distance": {"$sum": "$distance_traveled"}
+                }
+            },
+            {
+                "$sort": {"_id": 1}  # Sort by date in ascending order
+            }
+        ]
 
-        for i in range(7):
-            date = (datetime.now() - timedelta(days=(i+1))).strftime('%d%m%y')
-            if date:
-                imei_data = get_vehicle_data().distinct('IMEI')
-                total_distance = 0
+        results = list(atlanta_collection.aggregate(pipeline))
 
-                for imei in imei_data:
-                    records = list(atlanta_collection.find({'date': date, 'imei': imei}).sort('time'))
-                    if len(records) >= 2:
-                        start_odometer = float(records[0].get('odometer', 0))
-                        end_odometer = float(records[-1].get('odometer', 0))
-                        distance = end_odometer - start_odometer
-                        total_distance += distance
-                
-                distances[date] = total_distance
+        # Convert results to the required format
+        distances = {result["_id"]: result["total_distance"] for result in results}
 
         distancesJson = {
-            "labels": list(distances.keys())[::-1],
-            "distances": list(distances.values())[::-1]
+            "labels": list(distances.keys()),
+            "distances": list(distances.values())
         }
 
         return jsonify(distancesJson), 200
