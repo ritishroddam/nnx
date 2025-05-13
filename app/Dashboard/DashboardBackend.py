@@ -188,6 +188,19 @@ def get_status_data():
         now = datetime.now()
         imeis = list(get_vehicle_data().distinct("IMEI"))  # Get the list of IMEIs to filter by
 
+        # If no IMEIs are found, return default response
+        if not imeis:
+            return jsonify({
+                'runningVehicles': 0,
+                'idleVehicles': 0,
+                'parkedVehicles': 0,
+                'speedVehicles': 0,
+                'overspeedVehicles': 0,
+                'disconnectedVehicles': 0,
+                'noGpsVehicles': 0,
+                'totalVehicles': 0
+            }), 200
+
         # Aggregation pipeline
         pipeline = [
             {"$match": {"imei": {"$in": imeis}}},  # Filter by IMEIs
@@ -251,10 +264,22 @@ def get_status_data():
 
         # Execute the query
         results = list(db["distinctAtlanta"].aggregate(pipeline))
-        print(f"🚨 Results: {results}")
-        print(f"🚨 Results[0]: {results[0]}")
+
+        # If results are empty, return default response
+        if not results or not results[0]:
+            return jsonify({
+                'runningVehicles': 0,
+                'idleVehicles': 0,
+                'parkedVehicles': 0,
+                'speedVehicles': 0,
+                'overspeedVehicles': 0,
+                'disconnectedVehicles': 0,
+                'noGpsVehicles': 0,
+                'totalVehicles': 0
+            }), 200
 
         # Extract counts or default to 0 if not present
+        results = results[0]  # Access the first element of the results list
         total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0)
         running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0)
         idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0)
