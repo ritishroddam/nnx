@@ -97,10 +97,22 @@
     flex-wrap: wrap;
 }
 
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 10px; /* Adds space between the two rows */
+}
+
 .filter-group {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px; /* Adds space between buttons */
 }
 
 .filter-group label {

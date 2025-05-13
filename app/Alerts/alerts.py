@@ -3,12 +3,12 @@ from pymongo import MongoClient # type: ignore
 from datetime import datetime, timedelta
 from pytz import timezone # type: ignore
 import pytz # type: ignore
-from app.database import db
+from app.database import db # type: ignore
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
-from app.geocoding import geocodeInternal
+from app.geocoding import geocodeInternal # type: ignore
 from bson import ObjectId # type: ignore
 from functools import wraps
-from app.utils import roles_required, get_filtered_results
+from app.utils import roles_required, get_filtered_results # type: ignore
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
@@ -79,16 +79,13 @@ def alert_card_endpoint(alert_type):
                 vehicle_inventory = db["vehicle_inventory"]
 
                 if 'admin' in user_roles:
-                    # Admins can access all data
                     imeis = list((vehicle_inventory.find({},{"IMEI": 1, "_id": 0})).distinct("IMEI"))
                 elif 'user' in user_roles:
-                    # Users can only access data for vehicles assigned to them
                     imeis = list((vehicle_inventory.find({
                         'CompanyName': userCompany,
                         'AssignedUsers': {'$in': [userID]}
                     },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
                 else:
-                    # Client admins can access data for all vehicles in their company
                     imeis = list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
 
             base_projection = {
