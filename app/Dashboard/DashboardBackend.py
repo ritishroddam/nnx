@@ -209,27 +209,7 @@ def get_status_data():
                             "$match": {
                                 "speed": "0.0",
                                 "ignition": "0",
-                                "date": {"$exists": True},
-                                "time": {"$exists": True}
-                            }
-                        },
-                        {
-                            "$addFields": {
-                                "record_datetime": {
-                                    "$dateFromString": {
-                                        "dateString": {
-                                            "$concat": ["$date", "$time"]
-                                        },
-                                        "format": "%d%m%y%H%M%S"
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "$match": {
-                                "record_datetime": {
-                                    "$lt": now - timedelta(minutes=5)
-                                }
+                                "date_time": {"$lt": now - timedelta(minutes=5)}
                             }
                         },
                         {"$count": "count"}
