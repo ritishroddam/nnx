@@ -85,7 +85,7 @@ def get_vehicle_data():
 
     if 'admin' in user_roles:
         # Admins can access all data
-        results = vehicle_inventory.find(collection_query)
+        results = vehicle_inventory.find()
     elif 'user' in user_roles:
         # Users can only access data for vehicles assigned to them
         results = list(vehicle_inventory.find({
