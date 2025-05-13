@@ -109,7 +109,7 @@ def atlanta_distance_data():
             {
                 "$group": {
                     "_id": {
-                        "date": {"$dateToString": {"format": "%d%m%y", "date": "$date_time"}},
+                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date_time"}},  # Use %Y-%m-%d for ISO date format
                         "imei": "$imei"
                     },
                     "start_odometer": {"$min": {"$toDouble": "$odometer"}},
