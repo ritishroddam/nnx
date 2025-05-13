@@ -36,7 +36,7 @@ function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
 
-  const coords = new google.maps.latLng(
+  const coords = new google.maps.LatLng(
     vehicleData.latitude,
     vehicleData.longitude
   );
