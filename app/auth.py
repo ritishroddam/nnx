@@ -22,6 +22,20 @@ def login():
         if current_user:
             return redirect(url_for('Vehicle.map'))
     except NoAuthorizationError:
+        # Handle expired or invalid tokens gracefully
+        response = redirect(url_for('auth.login'))
+        unset_jwt_cookies(response)
+        unset_refresh_cookies(response)
+        flash('Your session has expired. Please log in again.', 'warning')
+        return response
+    except JWTDecodeError:
+        # Handle invalid token format
+        response = redirect(url_for('auth.login'))
+        unset_jwt_cookies(response)
+        unset_refresh_cookies(response)
+        flash('Invalid session. Please log in again.', 'danger')
+        return response
+    except NoAuthorizationError:
         pass
 
     if request.method == 'POST':
