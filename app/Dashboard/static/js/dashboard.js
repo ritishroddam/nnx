@@ -377,8 +377,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch("/dashboard/get_vehicle_distances");
       const data = await response.json();
 
-      data.sort((a, b) => b.distance - a.distance);
-
       let tableBody = document.getElementById("vehicleTable");
       tableBody.innerHTML = "";
 
