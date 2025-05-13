@@ -80,13 +80,13 @@ def get_vehicle_data():
         results = vehicle_inventory.find()
     elif 'user' in user_roles:
         # Users can only access data for vehicles assigned to them
-        results = list(vehicle_inventory.find({
+        results = vehicle_inventory.find({
             'CompanyName': userCompany,
             'AssignedUsers': {'$in': [userID]}
-        }))
+        })
     else:
         # Client admins can access data for all vehicles in their company
-        results = list(vehicle_inventory.find({'CompanyName': userCompany}))
+        results = vehicle_inventory.find({'CompanyName': userCompany})
 
 
     return results
