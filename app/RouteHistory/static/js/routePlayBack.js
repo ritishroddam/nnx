@@ -164,7 +164,7 @@ let timelineSlider;
 let sliderTimeDisplay;
 
 async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
+  const { Map, LatLng } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   await google.maps.importLibrary("geometry");
 
