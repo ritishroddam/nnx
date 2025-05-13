@@ -32,14 +32,13 @@ socket.on("vehicle_live_update", (data) => {
   console.log("Vehicle live update:", data);
 });
 
-function liveTracking() {
+async function liveTracking() {
+  const { LatLng } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
 
-  const coords = new google.maps.LatLng(
-    vehicleData.latitude,
-    vehicleData.longitude
-  );
+  const coords = new LatLng(vehicleData.latitude, vehicleData.longitude);
 
   const carContent = document.createElement("img");
   carContent.src = "/static/images/car_green.png";
@@ -48,7 +47,7 @@ function liveTracking() {
   carContent.style.position = "absolute";
   carContent.alt = "Car";
 
-  const markerLive = new google.maps.marker.AdvancedMarkerElement({
+  const markerLive = new AdvancedMarkerElement({
     position: coords,
     map: liveMaps,
     title: "Start",
