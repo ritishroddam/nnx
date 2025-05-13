@@ -40,11 +40,10 @@ async function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
 
-  // Use google.maps.LatLng to create coordinates
-  const coords = new google.maps.LatLng(
-    vehicleData.latitude,
-    vehicleData.longitude
-  );
+  const latitude = parseFloat(vehicleData.latitude);
+  const longitude = parseFloat(vehicleData.longitude);
+
+  const coords = new google.maps.LatLng(latitude, longitude);
 
   // Create the car marker content
   const carContent = document.createElement("img");
