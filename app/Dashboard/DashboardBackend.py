@@ -279,7 +279,8 @@ def get_status_data():
             }), 200
 
         # Extract counts or default to 0 if not present
-        results = results[0]  # Access the first element of the results list
+        results = results[0]
+        print(results)
         total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0)
         running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0)
         idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0)
