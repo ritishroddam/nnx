@@ -45,7 +45,6 @@ async function liveTracking() {
 
   if (isNaN(latitude) || isNaN(longitude)) {
     console.error("Invalid latitude or longitude:", latitude, longitude);
-    alert("Vehicle location is not available.");
   }
 
   const coords = new google.maps.LatLng(latitude, longitude);
