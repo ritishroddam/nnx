@@ -28,6 +28,10 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
+        if not username or not password:
+            flash('Username and password are required', 'danger')
+            return redirect(url_for('auth.login'))
+
         user = User.find_by_username(username)
         if not user or not User.verify_password(user, password):
             flash('Invalid username or password', 'danger')
@@ -35,7 +39,7 @@ def login():
         
         if user['company'] != 'none':
             company = User.get_company_by_company_id(user['company'])
-            print(f"Companyyy: {company}")
+            print(f"Company: {company}")
         else:
             company = None
 
