@@ -63,7 +63,7 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
 
 def get_vehicle_data():
     """
-    Fetch results from a collection based on the user's role and company, with an optional query.
+    Fetch results from a collection based on the user's role and company
     
     Returns:
         list: A list of results filtered based on the user's role and company.
