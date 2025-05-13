@@ -41,11 +41,18 @@ async function liveTracking() {
     vehicleData.longitude
   );
 
+  const carContent = document.createElement("img");
+  carContent.src = "/static/images/car_green.png";
+  carContent.style.width = "18px";
+  carContent.style.height = "32px";
+  carContent.style.position = "absolute";
+  carContent.alt = "Car";
+
   const markerLive = new google.maps.marker.AdvancedMarkerElement({
     position: coords,
     map: liveMaps,
     title: "Start",
-    content: startContent, // Pass the DOM element
+    content: carContent,
   });
 }
 
