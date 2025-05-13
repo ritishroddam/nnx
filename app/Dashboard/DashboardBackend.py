@@ -250,7 +250,8 @@ def get_status_data():
         ]
 
         # Execute the query
-        results = list(db["distinctAtlanta"].aggregate(pipeline))[0]
+        results = db["distinctAtlanta"].aggregate(pipeline)
+        print(f"🚨 Results: {results}")
 
         # Extract counts or default to 0 if not present
         total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0)
