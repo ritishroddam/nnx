@@ -32,9 +32,21 @@ socket.on("vehicle_live_update", (data) => {
   console.log("Vehicle live update:", data);
 });
 
-function liveTracking() {
+async function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
+
+  const coords = await google.maps.latLng(
+    vehicleData.latitude,
+    vehicleData.longitude
+  );
+
+  const markerLive = new google.maps.marker.AdvancedMarkerElement({
+    position: coords,
+    map: liveMaps,
+    title: "Start",
+    content: startContent, // Pass the DOM element
+  });
 }
 
 function routeHistory() {
@@ -552,7 +564,8 @@ function moveCar() {
         carMarker.content = carContent; // Set the DOM element as content
         carMarker.position = { lat, lng };
 
-        if (!map.getBounds().contains(carMarker.position)) map.panTo(end);
+        if (!map.getBounds().contains(carMarker.position))
+          map.panTo(carMarker.position);
 
         stepIndex++;
       } else {
