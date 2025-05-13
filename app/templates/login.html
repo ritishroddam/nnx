@@ -4,6 +4,7 @@
 <div class="login-container">
     <h2>Login</h2>
     <form method="POST" action="{{ url_for('auth.login') }}">
+        <a href="{{url_for('auth.login')}}">login</a>
         <div class="form-group">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" required>

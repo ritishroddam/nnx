@@ -47,7 +47,6 @@
                                 {% endif %}
                                 <p><strong>Role:</strong> {{ role }}</p>
                             </div>
-                            <a href="{{url_for('auth.login')}}">login</a>
 
                             <form action="{{ url_for('auth.logout') }}" method="POST">
                                 {% if csrf_token %}
