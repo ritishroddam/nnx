@@ -68,17 +68,14 @@ def login():
         refresh_token_max_age = int(refresh_token_exp - current_time)
 
         # Wrap the rendered template in a Response object
-        if user['role'] == 'admin' or user['role'] == 'clientAdmin' or user['role'] == 'user':
-            response = redirect(url_for('Vehicle.map'))
-        elif user['role'] == 'sim':
+        if user['role'] == 'sim':
             response = redirect(url_for('SimInvy.page'))
         elif user['role'] == 'device':
             response = redirect(url_for('DeviceInvy.page'))
         elif user['role'] == 'vehicle':
             response = redirect(url_for('VehicleInvy.page'))
         else:
-            flash('Unauthorized role', 'danger')
-            return redirect(url_for('auth.login'))
+            response = redirect(url_for('Vehicle.map'))
 
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
