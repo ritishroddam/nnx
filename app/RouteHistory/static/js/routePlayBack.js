@@ -3,6 +3,16 @@ window.onload = initMap;
 const dataElement = document.getElementById("vehicle-data");
 const vehicleData = JSON.parse(dataElement.textContent);
 
+function liveTracking() {
+  document.getElementById("live-map-container").style.display = "block";
+  document.getElementById("route-history-container").style.display = "none";
+}
+
+function routeHistory() {
+  document.getElementById("live-map-container").style.display = "none";
+  document.getElementById("route-history-container").style.display = "block";
+}
+
 async function getAddressFromCoordinates(lat, lng) {
   try {
     const response = await fetch("/geocode", {
@@ -116,9 +126,26 @@ async function initMap() {
 
   const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
+  liveMaps = new Map(document.getElementById("live-map"), {
+    zoom: 8,
+    center: { lat: 12.9716, lng: 77.5946 },
+    mapId: mapId,
+    gestureHandling: "greedy",
+    zoomControl: true,
+    mapTypeControl: false, // Disable default map type buttons
+    clickableIcons: false, // Disable POI icons
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
+    fullscreenControl: true,
+    fullscreenControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
+  });
+
   map = new Map(document.getElementById("map"), {
-    zoom: 10,
-    center: { lat: 0, lng: 0 },
+    zoom: 8,
+    center: { lat: 12.9716, lng: 77.5946 },
     mapId: mapId,
     gestureHandling: "greedy",
     zoomControl: true,

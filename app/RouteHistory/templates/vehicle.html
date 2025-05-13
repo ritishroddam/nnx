@@ -15,17 +15,26 @@ Vehicle Data
 {% endblock %}
 
 {% block block_container %}
-<div class="main">
-  <div class="header">
-    <span class="back-arrow">&larr;</span>
-    <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
-  </div>
 
-  <div class="dashboard-container">
+<div class="header">
+  <span class="back-arrow">&larr;</span>
+  <h2>{{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}}</h2>
+</div>
 
-    <div class="left-column">
+<div class="dashboard-container">
 
-      <div class="map-section">
+  <div class="left-column">
+
+    <div class="map-section">
+      <div class="section-selector">
+        <a href="#" id="live-data-link" class="live-data-link" onclick="liveTracking()">Live Tracking</a>
+        <span class="lineDiff"></span>
+        <a href="#" id="route-history-link" class="route-history-link" onclick="routeHistory()">Route History</a>
+      </div>
+      <div id="live-map-container" class="live-map-container">
+        <div id="live-map"></div>
+      </div>
+      <div class="route-history-container">
         <h3>Route history</h3>
 
         <div id="map"></div>
@@ -71,90 +80,91 @@ Vehicle Data
           <button id="speed-8x-button" class="control-button">
             <i class="fas fa-forward"></i> 8X
           </button>
-
-
         </div>
 
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="right-column">
+    <div class="info-box">
+      <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
+      <div class="info-row">
+        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
+          Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
+      </div>
+      <div class="info-row">
+        <span>Odometer:</span><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data
+          Available'}}</strong>
       </div>
     </div>
 
-    <div class="right-column">
-      <div class="info-box">
-        <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
-        <div class="info-row">
-          <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
-            Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
-            Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
-            Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
-            Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Time:</span><strong>{{ vehicle_data[0]['Time'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Date:</span><strong>{{ vehicle_data[0]['Date'] if vehicle_data else 'No Data Available'}}</strong>
-        </div>
-        <div class="info-row">
-          <span>Odometer:</span><strong>{{ vehicle_data[0]['Odometer'] if vehicle_data else 'No Data
-            Available'}}</strong>
-        </div>
-      </div>
+    <div class="chart-section">
+      <h3>Realtime - last 5 minutes</h3>
+      {% if recent_data %}
+      <canvas id="speedChart"></canvas>
+      {% else %}
+      <p>No current/latest data</p>
+      {% endif %}
+    </div>
 
-      <div class="chart-section">
-        <h3>Realtime - last 5 minutes</h3>
-        {% if recent_data %}
-        <canvas id="speedChart"></canvas>
-        {% else %}
-        <p>No current/latest data</p>
-        {% endif %}
-      </div>
-
-      <div class="alarm-section">
-        <h3>
-          {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
-        </h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Location</th>
-              <th>Severity</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if alerts %}
-            {% for alert in alerts %}
-            <tr>
-              <td>{{ alert["timestamp"] }}</td>
-              <td>{{ alert["location"] }}</td>
-              <td>{{ alert["severity"] }}</td>
-              <td>{{ alert["status"] }}</td>
-            </tr>
-            {% endfor %}
-            {% else %}
-            <tr>
-              <td colspan="4">No alerts found for the selected IMEI.</td>
-            </tr>
-            {% endif %}
-          </tbody>
-        </table>
-      </div>
+    <div class="alarm-section">
+      <h3>
+        {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
+      </h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Location</th>
+            <th>Severity</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if alerts %}
+          {% for alert in alerts %}
+          <tr>
+            <td>{{ alert["timestamp"] }}</td>
+            <td>{{ alert["location"] }}</td>
+            <td>{{ alert["severity"] }}</td>
+            <td>{{ alert["status"] }}</td>
+          </tr>
+          {% endfor %}
+          {% else %}
+          <tr>
+            <td colspan="4">No alerts found for the selected IMEI.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
+
 
 <script id="vehicle-data" type="application/json">
     {{ vehicle_data[0] | tojson if vehicle_data else 'No Data Available'}}
