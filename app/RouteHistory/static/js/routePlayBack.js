@@ -40,8 +40,8 @@ async function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
 
-  const latitude = parseFloat(vehicleData.latitude);
-  const longitude = parseFloat(vehicleData.longitude);
+  const latitude = parseFloat(vehicleData.Latitude);
+  const longitude = parseFloat(vehicleData.Longitude);
 
   if (isNaN(latitude) || isNaN(longitude)) {
     console.error("Invalid latitude or longitude:", latitude, longitude);
