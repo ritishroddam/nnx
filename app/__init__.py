@@ -245,7 +245,7 @@ def create_app(config_name='default'):
     @jwt.expired_token_loader
     def handle_expired_token(jwt_header, jwt_payload):
         """Handle requests with expired JWTs."""
-        if request.endpoint not in ['auth.logout', 'static', None]:
+        if request.endpoint not in ['login', 'auth.login', 'auth.logout', 'static', None]:
             flash("Your session has expired. Please log in again.", "warning")
             return redirect(url_for('auth.logout'))
 
