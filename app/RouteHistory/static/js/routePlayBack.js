@@ -32,11 +32,11 @@ socket.on("vehicle_live_update", (data) => {
   console.log("Vehicle live update:", data);
 });
 
-async function liveTracking() {
+function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
 
-  const coords = await google.maps.latLng(
+  const coords = new google.maps.latLng(
     vehicleData.latitude,
     vehicleData.longitude
   );
