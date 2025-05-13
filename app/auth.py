@@ -38,7 +38,9 @@ def login():
     except NoAuthorizationError:
         pass
 
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
         username = request.form.get('username')
         password = request.form.get('password')
 
@@ -99,8 +101,6 @@ def login():
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
 
         return response
-
-    return render_template('login.html')
 
 @auth_bp.route('/api/login', methods=['POST'])
 def api_login():
