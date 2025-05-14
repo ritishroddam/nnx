@@ -146,14 +146,10 @@ function updateVehicleCard(data) {
   if (vehicleCard) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
-      <strong>Speed:</strong> ${
-        data.speed
-          ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
-          : "Unknown"
-      } <br>
-      <strong>Lat:</strong> ${latitude} <br>
-      <strong>Lon:</strong> ${longitude} <br>
-      <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
+      <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
+  <strong>Lat:</strong> ${latitude ? latitude.toFixed(2) : "N/A"} <br>
+  <strong>Lon:</strong> ${longitude ? longitude.toFixed(2) : "N/A"} <br>
+  <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(
         data.date,
         data.time
@@ -235,9 +231,9 @@ async function renderVehicles() {
             ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
-        <strong>Lat:</strong> ${latitude} <br>
-        <strong>Lon:</strong> ${longitude} <br>
-        <strong>Distance Travelled:</strong> ${vehicle.distance || "NA"} km <br>
+        <strong>Lat:</strong> ${latitude ? latitude.toFixed(2) : "N/A"} <br>
+        <strong>Lon:</strong> ${longitude ? longitude.toFixed(2) : "N/A"} <br>
+        <strong>Distance Travelled:</strong> ${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           vehicle.date,
           vehicle.time
@@ -801,8 +797,8 @@ async function populateVehicleTable() {
     );
 
     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
-    row.insertCell(4).innerText = `${latitude.toFixed(4)}`;
-    row.insertCell(5).innerText = `${longitude.toFixed(4)}`;
+    row.insertCell(4).innerText = latitude ? latitude.toFixed(2) : "N/A";
+    row.insertCell(5).innerText = longitude ? longitude.toFixed(2) : "N/A";
 
     const speedCell = row.insertCell(6);
     speedCell.innerText = speed;
@@ -810,7 +806,7 @@ async function populateVehicleTable() {
       speedCell.style.border = "2px solid red";
     }
 
-    row.insertCell(7).innerText = vehicle.distance || "N/A"; // Assuming odometer is the distance traveled today
+    row.insertCell(7).innerText = vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "N/A";
     row.insertCell(8).innerText = vehicle.odometer; // Assuming odometer reading
     row.insertCell(9).innerText = vehicle.ignition;
     row.insertCell(10).innerText = vehicle.gsm;
@@ -974,6 +970,58 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   };
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
+
+// Add this function to handle vehicle search
+function searchVehicle() {
+  const searchTerm = document.getElementById('vehicle-search').value.trim().toLowerCase();
+  if (!searchTerm) return;
+
+  let foundVehicle = null;
+  
+  // Search through vehicleData
+  vehicleData.forEach((vehicle, imei) => {
+    const plateNumber = vehicle.LicensePlateNumber ? vehicle.LicensePlateNumber.toLowerCase() : '';
+    // Check full number or last 4 digits
+    if (plateNumber.includes(searchTerm)) {
+      foundVehicle = vehicle;
+    }
+  });
+
+  if (foundVehicle) {
+    // Zoom to the vehicle
+    const latLng = new google.maps.LatLng(
+      parseFloat(foundVehicle.latitude),
+      parseFloat(foundVehicle.longitude)
+    );
+    map.setZoom(18);
+    map.panTo(latLng);
+    
+    // Highlight the vehicle
+    const marker = markers[foundVehicle.imei];
+    if (marker) {
+      setInfoWindowContent(infoWindow, marker, latLng, foundVehicle, foundVehicle.address || "Location unknown");
+      infoWindow.open(map, marker);
+    }
+    
+    // Scroll to the vehicle card
+    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${foundVehicle.imei}"]`);
+    if (vehicleCard) {
+      vehicleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      vehicleCard.classList.add('highlight');
+      setTimeout(() => vehicleCard.classList.remove('highlight'), 2000);
+    }
+  } else {
+    alert('Vehicle not found');
+  }
+}
+
+// Add event listeners for search
+document.getElementById('search-button').addEventListener('click', searchVehicle);
+document.getElementById('vehicle-search').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    searchVehicle();
+  }
+});
 
 function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
   // Get the current map projection
