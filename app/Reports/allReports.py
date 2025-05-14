@@ -25,7 +25,8 @@ FIELD_COLLECTION_MAP = {
                 'timestamp', 'course', 'checksum', 'reserve1', 'reserve2',
                 'ac', 'reserve3', 'harsh_break', 'arm', 'sleep', 'reserve4',
                 'status_accelerometer', 'adc_voltage', 'one_wire_temp', 'i_btn',
-                'onBoard_temp', 'mobCountryCode', 'mobNetworkCode', 'localAreaCode'],
+                'onBoard_temp', 'mobCountryCode', 'mobNetworkCode', 'localAreaCode',
+                'Average Speed', 'Maximum Speed'],
     'vehicle_inventory': ['LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 
                          'VehicleMake', 'YearOfManufacture', 'DateOfPurchase',
                          'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType'
@@ -55,6 +56,36 @@ def get_date_range_filter(date_range):
         # You'll need to implement custom date range handling
         return {}
     return {}
+
+# Add this helper function near the top with other helper functions
+def add_speed_metrics(df):
+    """Add average and maximum speed columns to DataFrame"""
+    try:
+        if 'speed' in df.columns:
+            df = add_speed_metrics(df)
+            # Convert speed to numeric if it's not already
+            df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
+            
+            # Calculate average and max speed
+            avg_speed = df['speed'].mean()
+            max_speed = df['speed'].max()
+            
+            # Add columns to DataFrame
+            df['Average Speed'] = avg_speed
+            df['Maximum Speed'] = max_speed
+            
+            # Move these columns next to the speed column if it exists
+            if 'speed' in df.columns:
+                cols = df.columns.tolist()
+                speed_idx = cols.index('speed')
+                cols.remove('Average Speed')
+                cols.remove('Maximum Speed')
+                cols.insert(speed_idx + 1, 'Average Speed')
+                cols.insert(speed_idx + 2, 'Maximum Speed')
+                df = df[cols]
+    except Exception as e:
+        print(f"Error adding speed metrics: {str(e)}")
+    return df
 
 @reports_bp.route('/')
 @jwt_required()

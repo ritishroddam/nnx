@@ -17,6 +17,8 @@ const allowedFields = [
   "temp",
   "MobileNumber",
   "VechicleType",
+  "Average Speed",
+  "Maximum Speed"
 ];
 
 document.addEventListener("DOMContentLoaded", function () {
