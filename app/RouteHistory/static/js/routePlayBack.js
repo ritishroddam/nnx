@@ -109,8 +109,8 @@ themeToggle.addEventListener("click", function () {
   }, 100);
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  liveTracking();
+document.addEventListener("DOMContentLoaded", async () => {
+  await liveTracking();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
   const labels = recentData.map((data) => data.time); // Extract times for X-axis
