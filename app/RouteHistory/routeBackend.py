@@ -72,16 +72,18 @@ def show_vehicle_data(LicensePlateNumber):
 
                 for entry in vehicle_data:
                     if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo=pytz.UTC):
-                        recent_data = [
+                        if recent_data is None:
+                            recent_data = []
+                        recent_data.append(
                             {
                                 "time": entry["time"],
                                 "speed": entry["speed"]
                             }
-                        ]
+                        )
 
-        if recent_data and vehicleData:
+        if recent_data and vehicle_data:
             print(f"Recent data for vehicle {LicensePlateNumber}: {recent_data}")
-            print(f"Vehicle data for vehicle {LicensePlateNumber}: {vehicleData}")
+            print(f"Vehicle data for vehicle {LicensePlateNumber}: {vehicle_data}")
             
 
         if most_recent_entry.get("latitude") and most_recent_entry.get("longitude"):
