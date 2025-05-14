@@ -79,6 +79,9 @@ def show_vehicle_data(LicensePlateNumber):
                             }
                         ]
 
+        if recent_data:
+            print(f"Recent data for vehicle {LicensePlateNumber}: {recent_data}")
+
         if most_recent_entry.get("latitude") and most_recent_entry.get("longitude"):
             latitude = most_recent_entry["latitude"]
             longitude = most_recent_entry["longitude"]
