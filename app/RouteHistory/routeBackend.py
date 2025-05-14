@@ -70,7 +70,7 @@ def show_vehicle_data(LicensePlateNumber):
                     is_active = True
 
                 for entry in vehicle_data:
-                    if entry.get("date_time") and entry.get("date_time") > five_minutes_ago:
+                    if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo=pytz.UTC):
                         recent_data = [
                             {
                                 "time": entry["time"],
