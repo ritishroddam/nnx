@@ -171,16 +171,21 @@ def fetch_live_data(imei):
         liveData = list(atlanta_collection.aggregate(pipeline))
 
         if not liveData:
-            data = list(atlanta_collection.find(
-                {"imei": imei, "gps": "A"},
-                {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1}
-            ).sort("date_time", -1).limit(1))
-            status_time_delta = now - data[0]["date_time"]
-            status_time = deltaTimeString(status_time_delta)
-            
-            data[0]["status"] = "inactive"
-            data[0]["status_time"] = status_time
-            return jsonify(data), 200
+            pipeline = [
+                {"$match": {"imei": imei, "gps": "A"}},
+                {"$sort": {"date_time": -1}},
+                {"$project": {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1}}
+            ]
+            data = list(atlanta_collection.aggregate(pipeline))
+            if data:
+                status_time_delta = now - data[0]["date_time"]
+                status_time = deltaTimeString(status_time_delta)
+
+                data[0]["status"] = "inactive"
+                data[0]["status_time"] = status_time
+                return jsonify(data), 200
+            else:
+                return jsonify({"error": "No data found for the specified vehicle"}), 404
         else:
             if liveData[-1]["ignition"] == "0" and liveData[-1]["speed"] == "0.0":
                 index = len(liveData) - 1
@@ -225,7 +230,6 @@ def fetch_live_data(imei):
             
     except Exception as e:
         print(f"Error fetching live data for IMEI {imei}: {e}")
-        flash(f"Error fetching live data for IMEI {imei}: {e}", "danger")
         return jsonify({"error": "Error fetching live data"}), 500
 
 @route_bp.route("/vehicle/<imei>/alerts", methods=["GET"])
