@@ -18,7 +18,7 @@ socket.on("connect", () => {
   console.log("Connected to the socket server");
   const licensePlateNumber = vehicleData["License Plate Number"] || null;
   console.log(vehicleData);
-  if (liscensePlateNumber) {
+  if (licensePlateNumber) {
     socket.emit("subscribe_vehicle_updates", {
       LicensePlateNumber: licensePlateNumber,
     });
