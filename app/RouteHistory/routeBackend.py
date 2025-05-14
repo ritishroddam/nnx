@@ -182,7 +182,7 @@ def fetch_live_data(imei):
                 status_time_delta = now - data[0]["date_time"]
                 status_time = deltaTimeString(status_time_delta)
 
-                data[0]["status"] = "inactive"
+                data[0]["status"] = "Inactive"
                 data[0]["status_time"] = status_time
                 return jsonify(data), 200
             else:
@@ -202,7 +202,7 @@ def fetch_live_data(imei):
                 status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
                 status_time = deltaTimeString(status_time_delta)
 
-                liveData[-1]["status"] = "stopped"
+                liveData[-1]["status"] = "Stopped"
                 liveData[-1]["status_time"] = status_time
                 return jsonify(liveData), 200
             elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] != "0.0":
@@ -214,7 +214,7 @@ def fetch_live_data(imei):
                 status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
                 status_time = deltaTimeString(status_time_delta)
 
-                liveData[-1]["status"] = "moving"
+                liveData[-1]["status"] = "Moving"
                 liveData[-1]["status_time"] = status_time
                 return jsonify(liveData), 200
             elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] == "0.0":
@@ -226,7 +226,7 @@ def fetch_live_data(imei):
                 status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
                 status_time = deltaTimeString(status_time_delta)
 
-                liveData[-1]["status"] = "idle"
+                liveData[-1]["status"] = "Idle"
                 liveData[-1]["status_time"] = status_time
                 return jsonify(liveData), 200
             else:
