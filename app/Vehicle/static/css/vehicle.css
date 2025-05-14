@@ -395,11 +395,32 @@ input:checked + .slider:before {
   text-decoration: underline;
 }
 
+.sticky-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+}
+
 .search-container {
   display: flex;
   padding: 8px;
   background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
+}
+
+#vehicle-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px;
+}
+
+.dark-mode .sticky-search-container {
+  background-color: #2d2d2d;
+}
+
+.dark-mode .search-container {
+  background-color: #1a1a1a;
 }
 
 #vehicle-search {
@@ -420,4 +441,19 @@ input:checked + .slider:before {
 
 #search-button:hover {
   background-color: #45a049;
+}
+
+@media (max-width: 768px) {
+  .floating-card {
+    height: 50vh;
+  }
+  
+  .search-container {
+    padding: 6px;
+  }
+  
+  #vehicle-search {
+    padding: 6px;
+    font-size: 14px;
+  }
 }

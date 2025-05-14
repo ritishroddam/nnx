@@ -906,6 +906,12 @@ themeToggle.addEventListener("click", function () {
   }, 100);
 });
 
+function adjustFloatingCardHeight() {
+  const floatingCard = document.querySelector('.floating-card');
+  const mapHeight = document.getElementById('map').offsetHeight;
+  floatingCard.style.height = `${mapHeight * 0.6}px`; // 60% of map height
+}
+
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   // Ensure latLng is a google.maps.LatLng instance
   if (!(latLng instanceof google.maps.LatLng)) {
