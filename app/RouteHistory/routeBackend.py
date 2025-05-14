@@ -188,6 +188,11 @@ def fetch_live_data(imei):
             else:
                 return jsonify({"error": "No data found for the specified vehicle"}), 404
         else:
+            address = geocodeInternal(liveData[-1]["latitude"], liveData[-1]["longitude"])
+
+            if address:
+                liveData[-1]["address"] = address
+                
             if liveData[-1]["ignition"] == "0" and liveData[-1]["speed"] == "0.0":
                 index = len(liveData) - 1
                 for entry in reversed(liveData):

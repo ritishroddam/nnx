@@ -45,38 +45,89 @@ function routeHistory() {
   document.getElementById("route-history-container").style.display = "block";
 }
 
+async function plotPolyLineLiveMap(liveData) {
+  if (liveData.length > 0) {
+    liveCoords = pathCoordinates.map((item) => ({
+      lat: item.latitude,
+      lng: item.longitude,
+    }));
+
+    const liveData = data[data.length - 1];
+
+    const status = liveData.status;
+    const statusTime = liveData.status_time;
+    const address = liveData.address;
+
+    pathPolyline = new google.maps.Polyline({
+      path: liveCoords,
+      geodesic: true,
+      strokeColor: "#505050",
+      strokeOpacity: 0.9,
+      strokeWeight: 3,
+      map: liveMaps,
+    });
+
+    // Create the car marker content
+    const carContent = document.createElement("img");
+    carContent.src = "/static/images/car_green.png";
+    carContent.style.width = "18px";
+    carContent.style.height = "32px";
+    carContent.style.position = "absolute";
+    carContent.alt = "Car";
+
+    // Create the marker using google.maps.marker.AdvancedMarkerElement
+    const markerLive = new google.maps.marker.AdvancedMarkerElement({
+      position: liveCoords[liveCoords.length - 1],
+      map: liveMaps,
+      title: "Start",
+      content: carContent,
+    });
+
+    const speed = none;
+
+    if (status === "Moving") {
+      speed = `<p><strong>Speed:</strong> ${liveData.speed}</p>`;
+    }
+
+    const startMarkerInfo = new google.maps.InfoWindow({
+      content: `<div>
+              <h3>${vehicleData["License Plate Number"] || none}</h3>
+              ${speed}
+              <p><strong>Location:</strong> ${address}</p>
+              <p>${status} since ${statusTime}</p>
+            </div>`,
+    });
+
+    markerLive.addListener("gmp-click", () => {
+      startMarkerInfo.open({
+        anchor: markerLive,
+        map: liveMaps,
+      });
+    });
+  }
+}
+
 async function initialLiveMap() {
   await google.maps.importLibrary("maps");
   await google.maps.importLibrary("marker");
-  const latitude = parseFloat(vehicleData.Latitude);
-  const longitude = parseFloat(vehicleData.Longitude);
 
-  const liveData = await fetch(
-    `/routeHistory/vehicle/${vehicleData.IMEI}/liveData`
-  );
+  const liveDataURl = `/routeHistory/vehicle/${vehicleData.IMEI}/liveData`;
+
+  fetch(liveDataURl)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(async (data) => {
+      await plotPolyLineLiveMap(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching live data:", error);
+    });
+
   console.log("Live data:", liveData);
-
-  if (isNaN(latitude) || isNaN(longitude)) {
-    console.error("Invalid latitude or longitude:", latitude, longitude);
-  }
-
-  const coords = new google.maps.LatLng(latitude, longitude);
-
-  // Create the car marker content
-  const carContent = document.createElement("img");
-  carContent.src = "/static/images/car_green.png";
-  carContent.style.width = "18px";
-  carContent.style.height = "32px";
-  carContent.style.position = "absolute";
-  carContent.alt = "Car";
-
-  // Create the marker using google.maps.marker.AdvancedMarkerElement
-  const markerLive = new google.maps.marker.AdvancedMarkerElement({
-    position: coords,
-    map: liveMaps,
-    title: "Start",
-    content: carContent,
-  });
 }
 
 async function getAddressFromCoordinates(lat, lng) {
@@ -171,7 +222,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 let map;
 let liveMaps;
 let pathCoordinates = [];
-let coords = []; // Coordinates for the path
+let coords = [];
+let liveCoords = [];
 let carMarker;
 let pathPolyline;
 let startMarker;
