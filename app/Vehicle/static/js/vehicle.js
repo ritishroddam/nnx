@@ -147,8 +147,8 @@ function updateVehicleCard(data) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
-  <strong>Lat:</strong> ${latitude ? latitude.toFixed(2) : "N/A"} <br>
-  <strong>Lon:</strong> ${longitude ? longitude.toFixed(2) : "N/A"} <br>
+  <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
+  <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
   <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(
         data.date,
@@ -173,9 +173,9 @@ function updateVehicleCard(data) {
             ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
-        <strong>Lat:</strong> ${latitude} <br>
-        <strong>Lon:</strong> ${longitude} <br>
-        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
+        <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
+        <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
+        <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           data.date,
           data.time
@@ -231,8 +231,8 @@ async function renderVehicles() {
             ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
-        <strong>Lat:</strong> ${latitude ? latitude.toFixed(2) : "N/A"} <br>
-        <strong>Lon:</strong> ${longitude ? longitude.toFixed(2) : "N/A"} <br>
+        <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
+        <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
         <strong>Distance Travelled:</strong> ${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           vehicle.date,
@@ -270,11 +270,9 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
-                    <p><strong>Lat:</strong> ${lat}</p>
-                    <p><strong>Lon:</strong> ${lon}</p>
-                    <strong>Distance Travelled:</strong> ${
-                      device.distance || "NA"
-                    } km <br>
+                    <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
+                    <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
+                    <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
                       device.date,
                       device.time
@@ -679,11 +677,9 @@ function updateFloatingCard(vehicles, filterValue) {
               ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
               : "Unknown"
           } <br>
-          <strong>Lat:</strong> ${latitude} <br>
-          <strong>Lon:</strong> ${longitude} <br>
-          <strong>Distance Travelled:</strong> ${
-            vehicle.distance || "NA"
-          } km <br>
+          <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
+          <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
+          <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
           <strong>Last Update:</strong> ${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
@@ -797,8 +793,8 @@ async function populateVehicleTable() {
     );
 
     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
-    row.insertCell(4).innerText = latitude ? latitude.toFixed(2) : "N/A";
-    row.insertCell(5).innerText = longitude ? longitude.toFixed(2) : "N/A";
+    row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
+    row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
 
     const speedCell = row.insertCell(6);
     speedCell.innerText = speed;
