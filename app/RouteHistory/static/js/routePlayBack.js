@@ -1,4 +1,7 @@
-window.onload = initMap;
+window.onload = async () => {
+  await initMap();
+  await initialLiveMap();
+};
 
 const dataElement = document.getElementById("vehicle-data");
 const vehicleData = JSON.parse(dataElement.textContent);
@@ -111,7 +114,6 @@ themeToggle.addEventListener("click", function () {
 
 document.addEventListener("DOMContentLoaded", async () => {
   liveTracking();
-  await initialLiveMap();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
   const labels = recentData.map((data) => data.time); // Extract times for X-axis
