@@ -59,6 +59,7 @@ body {
 .vehicle-header {
   font-weight: bold;
   color: #333;
+  font-size: 14px;
 }
 
 .vehicle-info {
