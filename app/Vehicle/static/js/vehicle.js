@@ -173,9 +173,9 @@ function updateVehicleCard(data) {
             ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
-        <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
-        <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
-        <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
+        <strong>Lat:</strong> ${latitude} <br>
+        <strong>Lon:</strong> ${longitude} <br>
+        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           data.date,
           data.time
@@ -270,9 +270,11 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
                     <hr>
                     <p><strong>Speed:</strong> ${speed}</p>
-                    <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
-                    <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
-                    <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
+                    <p><strong>Lat:</strong> ${lat}</p>
+                    <p><strong>Lon:</strong> ${lon}</p>
+                    <strong>Distance Travelled:</strong> ${
+                      device.distance || "NA"
+                    } km <br>
                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
                       device.date,
                       device.time
@@ -677,9 +679,11 @@ function updateFloatingCard(vehicles, filterValue) {
               ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
               : "Unknown"
           } <br>
-          <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
-          <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
-          <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
+          <strong>Lat:</strong> ${latitude} <br>
+          <strong>Lon:</strong> ${longitude} <br>
+          <strong>Distance Travelled:</strong> ${
+            vehicle.distance || "NA"
+          } km <br>
           <strong>Last Update:</strong> ${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
