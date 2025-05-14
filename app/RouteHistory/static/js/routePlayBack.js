@@ -50,8 +50,8 @@ function routeHistory() {
 async function plotPolyLineLiveMap(liveData) {
   if (liveData.length > 0) {
     liveCoords = liveData.map((item) => ({
-      lat: item.latitude,
-      lng: item.longitude,
+      lat: parseFloat(item.latitude),
+      lng: parseFloat(item.longitude),
     }));
 
     const recentData = liveData[liveData.length - 1];
@@ -59,7 +59,7 @@ async function plotPolyLineLiveMap(liveData) {
     const status = recentData.status;
     const statusTime = recentData.status_time;
     const address = recentData.address;
-    const speed = none;
+    const speed = null;
 
     if (status === "Moving") {
       speed = `<p><strong>Speed:</strong> ${recentData.speed}</p>`;

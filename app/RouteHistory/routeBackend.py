@@ -192,7 +192,7 @@ def fetch_live_data(imei):
 
             if address:
                 liveData[-1]["address"] = address
-                
+
             if liveData[-1]["ignition"] == "0" and liveData[-1]["speed"] == "0.0":
                 index = len(liveData) - 1
                 for entry in reversed(liveData):
