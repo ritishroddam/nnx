@@ -70,7 +70,7 @@ def show_vehicle_data(LicensePlateNumber):
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
 
-                if vehicle_data[-1]["date_time"] > five_minutes_ago:
+                if vehicle_data[-1]["date_time"] > five_minutes_ago.replace(tzinfo=pytz.UTC):
                     recent_data = [
                         {
                             "time": entry["time"],
