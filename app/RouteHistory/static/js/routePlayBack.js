@@ -274,7 +274,6 @@ document
     const end_date = formatDateToDB(document.getElementById("end_date").value);
 
     const fetchUrl = `/routeHistory/get_vehicle_path?imei=${userEnteredImei}&start_date=${start_date}&end_date=${end_date}`;
-    console.log("Fetch URL:", fetchUrl);
 
     fetch(fetchUrl)
       .then((response) => {
