@@ -49,11 +49,10 @@ def show_vehicle_data(LicensePlateNumber):
         pipeline = [
             {"$match": {"imei": vehicleData['IMEI'], "gps": "A" }},
             {"$sort": {"date_time": -1}},
-            {"$limit": 1}
+            {"$limit": 10}
         ]
 
         vehicle_data = list(atlanta_collection.aggregate(pipeline))
-        print("history", vehicle_data)
 
         is_active = False
         most_recent_entry = None
@@ -78,8 +77,6 @@ def show_vehicle_data(LicensePlateNumber):
                         }
                         for entry in vehicle_data
                     ]
-        
-        print("recent_data", recent_data)
 
         if most_recent_entry.get("latitude") and most_recent_entry.get("longitude"):
             latitude = most_recent_entry["latitude"]
