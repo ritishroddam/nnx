@@ -43,8 +43,6 @@ def show_vehicle_data(LicensePlateNumber):
         processed_data = []
         recent_data = None
         print(vehicleData['IMEI'])
-        now = datetime.now()
-        five_minutes_ago = now - timedelta(minutes=5)
 
         pipeline = [
             {"$match": {"imei": vehicleData['IMEI'], "gps": "A" }},
@@ -68,6 +66,9 @@ def show_vehicle_data(LicensePlateNumber):
                 most_recent_entry = vehicle_data[0]
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
+
+                now = datetime.now()
+                five_minutes_ago = now - timedelta(minutes=5)
 
                 for entry in vehicle_data:
                     if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo=pytz.UTC):
