@@ -164,7 +164,7 @@ def fetch_live_data(imei):
 
         pipeline = [
             {"$match": {"imei": imei, "gps": "A", "date_time": {"$gte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}}},
-            {"$sort": {"date_time": -1}},
+            {"$sort": {"date_time": 1}},
             {"$project": {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1}}
         ]
 
