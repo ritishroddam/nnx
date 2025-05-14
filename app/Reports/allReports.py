@@ -25,7 +25,8 @@ FIELD_COLLECTION_MAP = {
                 'timestamp', 'course', 'checksum', 'reserve1', 'reserve2',
                 'ac', 'reserve3', 'harsh_break', 'arm', 'sleep', 'reserve4',
                 'status_accelerometer', 'adc_voltage', 'one_wire_temp', 'i_btn',
-                'onBoard_temp', 'mobCountryCode', 'mobNetworkCode', 'localAreaCode'],
+                'onBoard_temp', 'mobCountryCode', 'mobNetworkCode', 'localAreaCode',
+                'Average Speed', 'Maximum Speed'],
     'vehicle_inventory': ['LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 
                          'VehicleMake', 'YearOfManufacture', 'DateOfPurchase',
                          'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType'
@@ -55,6 +56,75 @@ def get_date_range_filter(date_range):
         # You'll need to implement custom date range handling
         return {}
     return {}
+
+def process_distance_report(df, vehicle_number):
+    """Calculate total distance traveled"""
+    try:
+        # Convert odometer to numeric and calculate differences
+        df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+        df['Distance (km)'] = df['odometer'].diff().fillna(0)
+        
+        # Calculate total distance
+        total_distance = df['Distance (km)'].sum()
+        
+        # Add summary row
+        summary_df = pd.DataFrame({
+            'Vehicle Number': [vehicle_number],
+            'Total Distance (km)': [total_distance],
+            'Start Odometer': [df['odometer'].iloc[0]],
+            'End Odometer': [df['odometer'].iloc[-1]]
+        })
+        
+        # Combine with original data
+        return pd.concat([df, summary_df], ignore_index=True)
+    except Exception:
+        return df
+
+def process_duration_report(df, duration_col_name):
+    """Calculate duration between records in minutes"""
+    try:
+        # Convert to datetime if not already
+        df['date_time'] = pd.to_datetime(df['date_time'])
+        
+        # Calculate time differences in minutes
+        df['time_diff'] = df['date_time'].diff().dt.total_seconds().div(60).fillna(0)
+        df[duration_col_name] = df['time_diff'].cumsum()
+        
+        # Drop intermediate column
+        df.drop('time_diff', axis=1, inplace=True)
+        return df
+    except Exception:
+        return df   
+
+def add_speed_metrics(df):
+    """Add average and maximum speed columns to DataFrame"""
+    try:
+        if 'speed' in df.columns:
+            # Convert speed to numeric if it's not already
+            df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
+            
+            # Calculate average and max speed
+            avg_speed = df['speed'].mean()
+            max_speed = df['speed'].max()
+            
+            # Add columns to DataFrame
+            df['Average Speed'] = avg_speed
+            df['Maximum Speed'] = max_speed
+            
+            # Move these columns next to the speed column if it exists
+            if 'speed' in df.columns:
+                cols = df.columns.tolist()
+                speed_idx = cols.index('speed')
+                if 'Average Speed' in cols:
+                    cols.remove('Average Speed')
+                if 'Maximum Speed' in cols:
+                    cols.remove('Maximum Speed')
+                cols.insert(speed_idx + 1, 'Average Speed')
+                cols.insert(speed_idx + 2, 'Maximum Speed')
+                df = df[cols]
+    except Exception as e:
+        print(f"Error adding speed metrics: {str(e)}")
+    return df
 
 @reports_bp.route('/')
 @jwt_required()
@@ -184,8 +254,7 @@ def download_custom_report():
 
             # Separate fields by collection
             atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
-            vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]
-            print(f"ATLANTA FIELDS: {atlanta_fields}, VEHICLE INVENTORY FIELDS: {vehicle_inventory_fields}")  # Debugging line
+            vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]    
             
             # Fetch data from vehicle_inventory
             vehicle_inventory_data = None
@@ -251,10 +320,12 @@ def download_custom_report():
             # Remove MongoDB _id if present
             if '_id' in df.columns:
                 df.drop('_id', axis=1, inplace=True)
-            print(f"DataFrame columns: {df.columns}")
 
             if "ignition" in fields:
                 df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+                
+            if 'speed' in df.columns:
+                df = add_speed_metrics(df)
 
             # Generate Excel
             output = BytesIO()
@@ -344,7 +415,6 @@ def download_custom_report():
                 query,
                 {field: 1 for field in fields}
             ).sort("date_time", 1)
-            print("Cursor fetched")  # Debugging line
             df = pd.DataFrame(list(cursor))
 
             if df.empty:
@@ -369,8 +439,6 @@ def download_custom_report():
                 lng_idx = cols.index('longitude')
                 cols.insert(lng_idx + 1, 'Location')
                 df = df[cols]
-    
-            print(f"DataFrame columns after processing: {df.columns}")  # Debugging line
 
             # Add vehicle number column
             df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
@@ -385,6 +453,9 @@ def download_custom_report():
 
             if "ignition" in fields:
                 df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+                
+            if 'speed' in df.columns:
+                df = add_speed_metrics(df)
 
             # Generate Excel
             output = BytesIO()
@@ -400,46 +471,7 @@ def download_custom_report():
             )
 
     except Exception as e:
-        return jsonify({"success": False, "message": str(e), "category": "danger"}), 500
-
-def process_distance_report(df, vehicle_number):
-    """Calculate total distance traveled"""
-    try:
-        # Convert odometer to numeric and calculate differences
-        df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-        df['Distance (km)'] = df['odometer'].diff().fillna(0)
-        
-        # Calculate total distance
-        total_distance = df['Distance (km)'].sum()
-        
-        # Add summary row
-        summary_df = pd.DataFrame({
-            'Vehicle Number': [vehicle_number],
-            'Total Distance (km)': [total_distance],
-            'Start Odometer': [df['odometer'].iloc[0]],
-            'End Odometer': [df['odometer'].iloc[-1]]
-        })
-        
-        # Combine with original data
-        return pd.concat([df, summary_df], ignore_index=True)
-    except Exception:
-        return df
-
-def process_duration_report(df, duration_col_name):
-    """Calculate duration between records in minutes"""
-    try:
-        # Convert to datetime if not already
-        df['date_time'] = pd.to_datetime(df['date_time'])
-        
-        # Calculate time differences in minutes
-        df['time_diff'] = df['date_time'].diff().dt.total_seconds().div(60).fillna(0)
-        df[duration_col_name] = df['time_diff'].cumsum()
-        
-        # Drop intermediate column
-        df.drop('time_diff', axis=1, inplace=True)
-        return df
-    except Exception:
-        return df    
+        return jsonify({"success": False, "message": str(e), "category": "danger"}), 500 
 
 @reports_bp.route('/download_panic_report', methods=['POST'])
 @jwt_required()
@@ -448,7 +480,6 @@ def download_panic_report():
         data = request.get_json()
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
-        print(f"Received vehicle_number: {vehicle_number}, date_range: {date_range}")  # Debugging line
 
         if not vehicle_number:
             return jsonify({"success": False, "message": "Please select a vehicle", "category": "danger"}), 400
@@ -535,6 +566,9 @@ def download_panic_report():
         lng_idx = cols.index('longitude')
         cols.insert(lng_idx + 1, 'Location')
         df = df[cols]
+        
+        if 'speed' in df.columns:
+            df = add_speed_metrics(df)
 
         # Generate Excel
         output = BytesIO()

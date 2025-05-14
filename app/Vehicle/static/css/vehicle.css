@@ -394,3 +394,66 @@ input:checked + .slider:before {
 .vehicle-table a:hover {
   text-decoration: underline;
 }
+
+.sticky-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.search-container {
+  display: flex;
+  padding: 8px;
+  background-color: #f5f5f5;
+}
+
+#vehicle-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px;
+}
+
+.dark-mode .sticky-search-container {
+  background-color: #2d2d2d;
+}
+
+.dark-mode .search-container {
+  background-color: #1a1a1a;
+}
+
+#vehicle-search {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px;
+}
+
+#search-button {
+  padding: 8px 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+
+#search-button:hover {
+  background-color: #45a049;
+}
+
+@media (max-width: 768px) {
+  .floating-card {
+    height: 50vh;
+  }
+  
+  .search-container {
+    padding: 6px;
+  }
+  
+  #vehicle-search {
+    padding: 6px;
+    font-size: 14px;
+  }
+}
