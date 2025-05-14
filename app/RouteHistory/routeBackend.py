@@ -162,10 +162,13 @@ def fetch_live_data(imei):
         now = datetime.now()
         thirty_minutes_ago = now - timedelta(minutes=30)
 
-        liveData = list(atlanta_collection.find(
-            {"imei": imei, "gps": "A", "date_time": {"$lte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}},
-            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1}
-        ).sort("date_time", 1))
+        pipeline = [
+            {"$match": {"imei": imei, "gps": "A", "date_time": {"$gte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}}},
+            {"$sort": {"date_time": -1}},
+            {"$project": {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1}}
+        ]
+
+        liveData = list(atlanta_collection.aggregate(pipeline))
 
         if not liveData:
             data = list(atlanta_collection.find(
@@ -221,6 +224,7 @@ def fetch_live_data(imei):
                 return jsonify(liveData), 200
             
     except Exception as e:
+        print(f"Error fetching live data for IMEI {imei}: {e}")
         flash(f"Error fetching live data for IMEI {imei}: {e}", "danger")
         return jsonify({"error": "Error fetching live data"}), 500
 
