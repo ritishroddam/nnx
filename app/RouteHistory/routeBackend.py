@@ -47,8 +47,9 @@ def show_vehicle_data(LicensePlateNumber):
         five_minutes_ago = now - timedelta(minutes=5)
 
         pipeline = [
-            {"$match": {"imei": vehicleData['IMEI'], "gps": "A", "date_time": {"$gte": five_minutes_ago}}},
-            {"$sort": {"date_time": -1}},  
+            {"$match": {"imei": vehicleData['IMEI'], "gps": "A" }},
+            {"$sort": {"date_time": -1}},
+            {"$limit": 1}
         ]
 
         vehicle_data = list(atlanta_collection.aggregate(pipeline))
@@ -69,38 +70,60 @@ def show_vehicle_data(LicensePlateNumber):
                 if float(most_recent_entry.get("speed","0.0")) > 0:
                     is_active = True
 
-                recent_data = [
-                    {
-                        "time": entry["time"],
-                        "speed": entry["speed"]
-                    }
-                    for entry in vehicle_data
-                ]
+                if vehicle_data[-1]["date_time"] > five_minutes_ago:
+                    recent_data = [
+                        {
+                            "time": entry["time"],
+                            "speed": entry["speed"]
+                        }
+                        for entry in vehicle_data
+                    ]
 
         if most_recent_entry.get("latitude") and most_recent_entry.get("longitude"):
             latitude = most_recent_entry["latitude"]
             longitude = most_recent_entry["longitude"]
             address = geocodeInternal(latitude, longitude)
 
-        processed_data.append({
-            "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
-            "Address": address if address else "Unknown",
-            "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
-            "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
-            "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
-            "Driver Name": vehicleData.get("DriverName", "Unknown"),
-            "Current Status": "Active" if is_active else "Inactive",
-            "Time": most_recent_entry.get("time", "N/A") if most_recent_entry else "N/A",
-            "Latitude": most_recent_entry.get("latitude", "N/A") if most_recent_entry else "N/A",
-            "Longitude": most_recent_entry.get("longitude", "N/A") if most_recent_entry else "N/A",
-            "Speed": most_recent_entry.get("speed", "N/A") if most_recent_entry else "N/A",
-            "Date": most_recent_entry.get("date", "N/A") if most_recent_entry else "N/A",
-            "Ignition": most_recent_entry.get("ignition", "Unknown") if most_recent_entry else "Unknown",
-            "Door": most_recent_entry.get("door", "Unknown") if most_recent_entry else "Unknown",
-            "SOS": most_recent_entry.get("sos", "Unknown") if most_recent_entry else "Unknown",
-            "Odometer": most_recent_entry.get("odometer", "Unknown") if most_recent_entry else "Unknown",
-            "IMEI": vehicleData.get("IMEI", "Unknown"),
-        })
+        if vehicleData and most_recent_entry:
+            processed_data.append({
+                "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
+                "Address": address if address else "Unknown",
+                "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
+                "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
+                "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
+                "Driver Name": vehicleData.get("DriverName", "Unknown"),
+                "Current Status": "Active" if is_active else "Inactive",
+                "Time": most_recent_entry.get("time", "N/A") if most_recent_entry else "N/A",
+                "Latitude": most_recent_entry.get("latitude", "N/A") if most_recent_entry else "N/A",
+                "Longitude": most_recent_entry.get("longitude", "N/A") if most_recent_entry else "N/A",
+                "Speed": most_recent_entry.get("speed", "N/A") if most_recent_entry else "N/A",
+                "Date": most_recent_entry.get("date", "N/A") if most_recent_entry else "N/A",
+                "Ignition": most_recent_entry.get("ignition", "Unknown") if most_recent_entry else "Unknown",
+                "Door": most_recent_entry.get("door", "Unknown") if most_recent_entry else "Unknown",
+                "SOS": most_recent_entry.get("sos", "Unknown") if most_recent_entry else "Unknown",
+                "Odometer": most_recent_entry.get("odometer", "Unknown") if most_recent_entry else "Unknown",
+                "IMEI": vehicleData.get("IMEI", "Unknown"),
+            })
+        else:
+            processed_data.append({
+                "License Plate Number": vehicleData.get("LicensePlateNumber", "Unknown"),
+                "Address": "Unknown",
+                "Vehicle Type": vehicleData.get("VehicleType", "Unknown"),
+                "Vehicle Model": vehicleData.get("VehicleModel", "Unknown"),
+                "Vehicle Make": vehicleData.get("VehicleMake", "Unknown"),
+                "Driver Name": vehicleData.get("DriverName", "Unknown"),
+                "Current Status": "Inactive",
+                "Time": "N/A",
+                "Latitude": "N/A",
+                "Longitude": "N/A",
+                "Speed": "N/A",
+                "Date": "N/A",
+                "Ignition": vehicleData.get("ignition", "Unknown"),
+                "Door": vehicleData.get("door", "Unknown"),
+                "SOS": vehicleData.get("sos", "Unknown"),
+                "Odometer": vehicleData.get("odometer", "Unknown"),
+                "IMEI": vehicleData.get("IMEI", "Unknown"),
+            })
 
         # Fetch alerts for the vehicle
         alerts = list(db['sos_logs'].find({"imei": vehicleData['IMEI']}))
