@@ -63,7 +63,7 @@ async function plotPolyLineLiveMap(liveData) {
     const status = recentData.status;
     const statusTime = recentData.status_time;
     const address = recentData.address;
-    const speed = null;
+    let speed = null;
 
     if (status === "Moving") {
       speed = `<p><strong>Speed:</strong> ${recentData.speed}</p>`;
