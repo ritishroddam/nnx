@@ -16,11 +16,13 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
 
 socket.on("connect", () => {
   console.log("Connected to the socket server");
-  const licensePlateNumber = vehicleData["License Plate Number"] || none;
+  const licensePlateNumber = vehicleData["License Plate Number"] || null;
   console.log(vehicleData);
-  socket.emit("subscribe_vehicle_updates", {
-    LicensePlateNumber: licensePlateNumber,
-  });
+  if (liscensePlateNumber) {
+    socket.emit("subscribe_vehicle_updates", {
+      LicensePlateNumber: licensePlateNumber,
+    });
+  }
 });
 
 socket.on("subscription_success", (data) => {
@@ -47,18 +49,23 @@ function routeHistory() {
 
 async function plotPolyLineLiveMap(liveData) {
   if (liveData.length > 0) {
-    liveCoords = pathCoordinates.map((item) => ({
+    liveCoords = liveData.map((item) => ({
       lat: item.latitude,
       lng: item.longitude,
     }));
 
-    const liveData = data[data.length - 1];
+    const recentData = liveData[liveData.length - 1];
 
-    const status = liveData.status;
-    const statusTime = liveData.status_time;
-    const address = liveData.address;
+    const status = recentData.status;
+    const statusTime = recentData.status_time;
+    const address = recentData.address;
+    const speed = none;
 
-    pathPolyline = new google.maps.Polyline({
+    if (status === "Moving") {
+      speed = `<p><strong>Speed:</strong> ${recentData.speed}</p>`;
+    }
+
+    livePathPolyline = new google.maps.Polyline({
       path: liveCoords,
       geodesic: true,
       strokeColor: "#505050",
@@ -83,15 +90,9 @@ async function plotPolyLineLiveMap(liveData) {
       content: carContent,
     });
 
-    const speed = none;
-
-    if (status === "Moving") {
-      speed = `<p><strong>Speed:</strong> ${liveData.speed}</p>`;
-    }
-
     const startMarkerInfo = new google.maps.InfoWindow({
       content: `<div>
-              <h3>${vehicleData["License Plate Number"] || none}</h3>
+              <h3>${vehicleData["License Plate Number"] || null}</h3>
               ${speed}
               <p><strong>Location:</strong> ${address}</p>
               <p>${status} since ${statusTime}</p>
@@ -104,6 +105,8 @@ async function plotPolyLineLiveMap(liveData) {
         map: liveMaps,
       });
     });
+  } else {
+    console.log("No live data available");
   }
 }
 
@@ -126,8 +129,6 @@ async function initialLiveMap() {
     .catch((error) => {
       console.error("Error fetching live data:", error);
     });
-
-  console.log("Live data:", liveData);
 }
 
 async function getAddressFromCoordinates(lat, lng) {
@@ -226,6 +227,7 @@ let coords = [];
 let liveCoords = [];
 let carMarker;
 let pathPolyline;
+let livePathPolyline;
 let startMarker;
 let endMarker;
 let currentIndex = 0;
