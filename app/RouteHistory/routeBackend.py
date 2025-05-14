@@ -28,6 +28,21 @@ def convertDate(ddmmyy, hhmmss):
     second = int(hhmmss[4:6])
     
     return datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
+
+def deltaTimeString(status_time_delta):
+    days = status_time_delta.days
+    seconds = status_time_delta.seconds
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    if days > 0:
+        return f"{days} days, {hours} hours"
+    elif hours > 0:
+        return f"{hours} hours, {minutes} minutes"
+    elif minutes > 0:
+        return f"{minutes} minutes, {seconds} seconds"
+    else:
+        return f"{seconds} seconds"
     
 @route_bp.route("/vehicle/<LicensePlateNumber>", methods=["GET"])
 @jwt_required()
@@ -140,7 +155,74 @@ def show_vehicle_data(LicensePlateNumber):
         print(f"Error processing vehicle data for {LicensePlateNumber}: {e}")
         return "An error occurred while processing vehicle data.", 500
 
-    
+@route_bp.route("/vehicle/<imei>/liveData", methods=["GET"])
+@jwt_required()
+def fetch_live_data(imei):
+    try:
+        now = datetime.now()
+        thirty_minutes_ago = now - timedelta(minutes=30)
+
+        liveData = list(atlanta_collection.find(
+            {"imei": imei, "gps": "A", "date_time": {"$lte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}},
+            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1}
+        ).sort("date_time", 1))
+
+        if not liveData:
+            data = list(atlanta_collection.find(
+                {"imei": imei, "gps": "A"},
+                {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1}
+            ).sort("date_time", -1).limit(1))
+            status_time_delta = now - data[0]["date_time"]
+            status_time = deltaTimeString(status_time_delta)
+            
+            data[0]["status"] = "inactive"
+            data[0]["status_time"] = status_time
+            return jsonify(data), 200
+        else:
+            if liveData[-1]["ignition"] == "0" and liveData[-1]["speed"] == "0.0":
+                index = len(liveData) - 1
+                for entry in reversed(liveData):
+                    if entry["ignition"] != "1" or entry["speed"] != "0.0":
+                        index = liveData.index(entry)
+                        break
+                status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
+                status_time = deltaTimeString(status_time_delta)
+
+                liveData[-1]["status"] = "stopped"
+                liveData[-1]["status_time"] = status_time
+                return jsonify(liveData), 200
+            elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] != "0.0":
+                index = len(liveData) - 1
+                for entry in reversed(liveData):
+                    if entry["ignition"] != "1" or entry["speed"] == "0.0":
+                        index = liveData.index(entry)
+                        break
+                status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
+                status_time = deltaTimeString(status_time_delta)
+
+                liveData[-1]["status"] = "moving"
+                liveData[-1]["status_time"] = status_time
+                return jsonify(liveData), 200
+            elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] == "0.0":
+                index = len(liveData) - 1
+                for entry in reversed(liveData):
+                    if entry["ignition"] != "1" or entry["speed"] != "0.0":
+                        index = liveData.index(entry)
+                        break
+                status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
+                status_time = deltaTimeString(status_time_delta)
+
+                liveData[-1]["status"] = "idle"
+                liveData[-1]["status_time"] = status_time
+                return jsonify(liveData), 200
+            else:
+                liveData[-1]["status"] = "unknown"
+                liveData[-1]["status_time"] = "unknown"
+                return jsonify(liveData), 200
+            
+    except Exception as e:
+        flash(f"Error fetching live data for IMEI {imei}: {e}", "danger")
+        return jsonify({"error": "Error fetching live data"}), 500
 
 @route_bp.route("/vehicle/<imei>/alerts", methods=["GET"])
 @jwt_required()

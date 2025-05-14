@@ -51,6 +51,11 @@ async function initialLiveMap() {
   const latitude = parseFloat(vehicleData.Latitude);
   const longitude = parseFloat(vehicleData.Longitude);
 
+  const liveData = await fetch(
+    `/routeHistory/vehicle/${vehicleData.IMEI}/liveData`
+  );
+  console.log("Live data:", liveData);
+
   if (isNaN(latitude) || isNaN(longitude)) {
     console.error("Invalid latitude or longitude:", latitude, longitude);
   }
