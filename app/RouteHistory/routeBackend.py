@@ -159,7 +159,7 @@ def show_vehicle_data(LicensePlateNumber):
 @jwt_required()
 def fetch_live_data(imei):
     try:
-        now = datetime.now()
+        now = datetime.now().astimezone(pytz.UTC)
         thirty_minutes_ago = now - timedelta(minutes=30)
 
         pipeline = [
