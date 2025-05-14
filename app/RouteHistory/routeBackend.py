@@ -47,7 +47,7 @@ def show_vehicle_data(LicensePlateNumber):
         pipeline = [
             {"$match": {"imei": vehicleData['IMEI'], "gps": "A" }},
             {"$sort": {"date_time": -1}},
-            {"$limit": 10}
+            {"$limit": 50}
         ]
 
         vehicle_data = list(atlanta_collection.aggregate(pipeline))
