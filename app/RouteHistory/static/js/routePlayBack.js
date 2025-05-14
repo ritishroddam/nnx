@@ -32,14 +32,19 @@ socket.on("vehicle_live_update", (data) => {
   console.log("Vehicle live update:", data);
 });
 
-async function liveTracking() {
-  // Import the required libraries
-  await google.maps.importLibrary("maps");
-  await google.maps.importLibrary("marker");
-
+function liveTracking() {
   document.getElementById("live-map-container").style.display = "block";
   document.getElementById("route-history-container").style.display = "none";
+}
 
+function routeHistory() {
+  document.getElementById("live-map-container").style.display = "none";
+  document.getElementById("route-history-container").style.display = "block";
+}
+
+async function initialLiveMap() {
+  await google.maps.importLibrary("maps");
+  await google.maps.importLibrary("marker");
   const latitude = parseFloat(vehicleData.Latitude);
   const longitude = parseFloat(vehicleData.Longitude);
 
@@ -64,11 +69,6 @@ async function liveTracking() {
     title: "Start",
     content: carContent,
   });
-}
-
-function routeHistory() {
-  document.getElementById("live-map-container").style.display = "none";
-  document.getElementById("route-history-container").style.display = "block";
 }
 
 async function getAddressFromCoordinates(lat, lng) {
@@ -110,7 +110,8 @@ themeToggle.addEventListener("click", function () {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await liveTracking();
+  liveTracking();
+  await initialLiveMap();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
   const labels = recentData.map((data) => data.time); // Extract times for X-axis
