@@ -154,6 +154,11 @@ document.addEventListener("DOMContentLoaded", function () {
             dateRange: dateRange,
           };
 
+          if (dateRange === "custom") {
+            body.fromDate = document.getElementById("fromDate").value;
+            body.toDate = document.getElementById("toDate").value;
+          }
+
           const response = await fetch(endpoint, {
             method: "POST",
             headers: {
@@ -191,6 +196,65 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
     });
+
+    // Add this near the top with other event listeners
+document.getElementById("dateRange").addEventListener("change", function() {
+    const customDateRange = document.getElementById("customDateRange");
+    if (this.value === "custom") {
+        customDateRange.style.display = "block";
+        
+        // Set max date to today and min date to 3 months ago
+        const now = new Date();
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        
+        // Format for datetime-local input
+        const formatDate = (date) => {
+            return date.toISOString().slice(0, 16);
+        };
+        
+        document.getElementById("fromDate").max = formatDate(now);
+        document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
+        document.getElementById("toDate").max = formatDate(now);
+        document.getElementById("toDate").min = formatDate(threeMonthsAgo);
+        
+        // Set default values
+        document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
+        document.getElementById("toDate").value = formatDate(now);
+    } else {
+        customDateRange.style.display = "none";
+    }
+});
+
+// Add validation for custom date range
+document.getElementById("reportForm").addEventListener("submit", function(e) {
+    const dateRange = document.getElementById("dateRange").value;
+    if (dateRange === "custom") {
+        const fromDate = new Date(document.getElementById("fromDate").value);
+        const toDate = new Date(document.getElementById("toDate").value);
+        
+        if (!fromDate || !toDate) {
+            e.preventDefault();
+            alert("Please select both from and to dates");
+            return;
+        }
+        
+        if (fromDate > toDate) {
+            e.preventDefault();
+            alert("From date cannot be after To date");
+            return;
+        }
+        
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        
+        if (fromDate < threeMonthsAgo || toDate < threeMonthsAgo) {
+            e.preventDefault();
+            alert("Date range cannot be older than 3 months");
+            return;
+        }
+    }
+});
 
   // Custom report form submission
   customReportForm.addEventListener("submit", function (e) {
