@@ -117,6 +117,18 @@
   padding-top: 60px;
 }
 
+.form-control[type="datetime-local"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: calc(2.25rem + 2px);
+    padding: 0.375rem 0.75rem;
+}
+
+#customDateRange {
+    transition: all 0.3s ease;
+}
+
 .modal-content {
   background-color: #fff;
   margin: 5% auto;
@@ -125,6 +137,8 @@
   border-radius: 8px;
   width: 50%;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  min-height: 400px;
+  overflow-y: auto;
 }
 
 .close {

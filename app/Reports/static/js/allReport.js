@@ -21,7 +21,7 @@ const allowedFields = [
   "Maximum Speed"
 ];
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   // Initialize elements
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
@@ -66,34 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
       customReportModal.style.display = "none";
     }
   });
-
-  document.getElementById("dateRange").addEventListener("change", function() {
-    const customDateRange = document.getElementById("customDateRange");
-    if (this.value === "custom") {
-        customDateRange.style.display = "block";
-        
-        // Set max date to today and min date to 3 months ago
-        const now = new Date();
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        
-        // Format for datetime-local input
-        const formatDate = (date) => {
-            return date.toISOString().slice(0, 16);
-        };
-        
-        document.getElementById("fromDate").max = formatDate(now);
-        document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
-        document.getElementById("toDate").max = formatDate(now);
-        document.getElementById("toDate").min = formatDate(threeMonthsAgo);
-        
-        // Set default values
-        document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
-        document.getElementById("toDate").value = formatDate(now);
-    } else {
-        customDateRange.style.display = "none";
-    }
-});
 
   // Report card click handlers
   document.querySelectorAll(".report-card").forEach((card) => {
@@ -157,6 +129,38 @@ document.addEventListener("DOMContentLoaded", function () {
       const reportName = this.dataset.reportName;
       const vehicleNumber = document.getElementById("vehicleNumber").value;
       const dateRange = document.getElementById("dateRange").value;
+      const dateRangeSelect = document.getElementById("dateRange");
+
+      if (dateRangeSelect) {
+        dateRangeSelect.addEventListener("change", function() {
+            const customDateRange = document.getElementById("customDateRange");
+            if (this.value === "custom") {
+                customDateRange.style.display = "block";
+                
+                // Set date limits
+                const now = new Date();
+                const threeMonthsAgo = new Date();
+                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+                
+                // Format for datetime-local input
+                const formatDate = (date) => {
+                    return date.toISOString().slice(0, 16);
+                };
+                
+                // Set min/max dates
+                document.getElementById("fromDate").max = formatDate(now);
+                document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
+                document.getElementById("toDate").max = formatDate(now);
+                document.getElementById("toDate").min = formatDate(threeMonthsAgo);
+                
+                // Set default values
+                document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
+                document.getElementById("toDate").value = formatDate(now);
+            } else {
+                customDateRange.style.display = "none";
+            }
+        });
+    }
 
       if (!vehicleNumber) {
         alert("Please select a vehicle number");
