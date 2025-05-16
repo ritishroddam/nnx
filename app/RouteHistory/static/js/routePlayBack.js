@@ -144,7 +144,7 @@ function updateLiveMapVehicleData(updatedData) {
 
   markerLive.content = carContent;
 
-  const startMarkerInfo = new google.maps.InfoWindow({
+  startMarkerInfo = new google.maps.InfoWindow({
     content: `<div>
             <h3>${vehicleData["License Plate Number"] || null}</h3>
             ${speed || ""}
@@ -227,7 +227,7 @@ async function plotPolyLineLiveMap(liveData) {
       content: carContent,
     });
 
-    const startMarkerInfo = new google.maps.InfoWindow({
+    startMarkerInfo = new google.maps.InfoWindow({
       content: `<div>
               <h3>${vehicleData["License Plate Number"] || null}</h3>
               ${speed || ""}
@@ -362,6 +362,7 @@ let liveMaps;
 let pathCoordinates = [];
 let coords = [];
 let liveCoords = [];
+let startMarkerInfo = null;
 let carMarker;
 let markerLive;
 let pathPolyline;
