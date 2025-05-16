@@ -34,6 +34,8 @@ socket.on("subscription_error", (error) => {
 });
 
 socket.on("vehicle_live_update", (data) => {
+  updateLiveMapPolyline(data);
+  updateLiveMapVehicleData(data);
   console.log("Vehicle live update:", data);
 });
 
@@ -45,6 +47,126 @@ function liveTracking() {
 function routeHistory() {
   document.getElementById("live-map-container").style.display = "none";
   document.getElementById("route-history-container").style.display = "block";
+}
+
+function animateMarker(newPosition, duration = 60000, marker = markerLive) {
+  let startPosition = liveCoords[liveCoords.length - 1];
+
+  if (!startPosition) {
+    console.error("Marker's start position is not defined.");
+    return;
+  }
+  const startTime = performance.now();
+
+  function moveMarker(currentTime) {
+    const elapsedTime = currentTime - startTime;
+    const progress = Math.min(elapsedTime / duration, 1);
+    const lat =
+      startPosition.lat() +
+      (newPosition.lat() - startPosition.lat()) * progress;
+    const lng =
+      startPosition.lng() +
+      (newPosition.lng() - startPosition.lng()) * progress;
+
+    marker.position = new google.maps.LatLng(lat, lng);
+
+    if (progress < 1) {
+      requestAnimationFrame(moveMarker);
+    }
+  }
+
+  requestAnimationFrame(moveMarker);
+}
+
+function getStatus(ignition, speed) {
+  if (ignition === "1") {
+    if (speed > 0) {
+      return "Moving";
+    } else {
+      return "Idle";
+    }
+  } else {
+    return "Stopped";
+  }
+}
+
+function getStatusTime(timeDelta) {
+  // status_time_delta should be in milliseconds
+  let totalSeconds = Math.floor(status_time_delta / 1000);
+  const days = Math.floor(totalSeconds / (24 * 3600));
+  totalSeconds %= 24 * 3600;
+  const hours = Math.floor(totalSeconds / 3600);
+  const remainder = totalSeconds % 3600;
+  const minutes = Math.floor(remainder / 60);
+  const seconds = remainder % 60;
+
+  if (days > 0) {
+    return `${days} days, ${hours} hours`;
+  } else if (hours > 0) {
+    return `${hours} hours, ${minutes} minutes`;
+  } else if (minutes > 0) {
+    return `${minutes} minutes, ${seconds} seconds`;
+  } else {
+    return `${seconds} seconds`;
+  }
+}
+
+function updateLiveMapVehicleData(updatedData) {
+  const updateCoords = {
+    lat: parseFloat(updatedData.latitude),
+    lng: parseFloat(updatedData.longitude),
+  };
+
+  const status = getStatus(updatedData.ignition, updatedData.speed);
+  const oldData = liveCoords[liveCoords.length - 1];
+
+  let statusTime;
+  if (oldData.status === status) {
+    const timeDelta =
+      new Date(updatedData.date_time) - new Date(oldData.date_time);
+    statusTime = getStatusTime(timeDelta);
+  } else {
+    statusTime = `0 seconds`;
+  }
+  const address = updatedData.address;
+  let speed = null;
+
+  if (status === "Moving") {
+    speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
+  }
+
+  const startMarkerInfo = new google.maps.InfoWindow({
+    content: `<div>
+            <h3>${vehicleData["License Plate Number"] || null}</h3>
+            ${speed || ""}
+            <p><strong>Location:</strong> ${address}</p>
+            <p>${status} since ${statusTime}</p>
+          </div>`,
+  });
+
+  markerLive.addListener("gmp-click", () => {
+    startMarkerInfo.open({
+      anchor: markerLive,
+      map: liveMaps,
+    });
+  });
+
+  animateMarker(updateCoords);
+}
+
+function updateLiveMapPolyline(updatedData) {
+  const updateCoords = {
+    lat: parseFloat(updatedData.latitude),
+    lng: parseFloat(updatedData.longitude),
+  };
+  liveCoords.push(updateCoords);
+
+  const bounds = new google.maps.LatLngBounds();
+  liveCoords.forEach((coord) => bounds.extend(coord));
+  liveMaps.fitBounds(bounds);
+  liveMaps.setCenter(updateCoords);
+
+  livePathPolyline.setPath(liveCoords);
 }
 
 async function plotPolyLineLiveMap(liveData) {
@@ -87,7 +209,7 @@ async function plotPolyLineLiveMap(liveData) {
     carContent.alt = "Car";
 
     // Create the marker using google.maps.marker.AdvancedMarkerElement
-    const markerLive = new google.maps.marker.AdvancedMarkerElement({
+    markerLive = new google.maps.marker.AdvancedMarkerElement({
       position: liveCoords[liveCoords.length - 1],
       map: liveMaps,
       title: "Start",
@@ -230,6 +352,7 @@ let pathCoordinates = [];
 let coords = [];
 let liveCoords = [];
 let carMarker;
+let markerLive;
 let pathPolyline;
 let livePathPolyline;
 let startMarker;
