@@ -278,7 +278,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
                       device.time
                     )}</p>
                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+                    <p><a href="${url}" target="_blank">VIEW IN DETAIL</a>
                     </p>
                 </div>`;
 

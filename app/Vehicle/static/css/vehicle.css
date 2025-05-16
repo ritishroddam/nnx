@@ -462,3 +462,11 @@ input:checked + .slider:before {
     font-size: 14px;
   }
 }
+
+.info-window a{
+  color: #336699;
+  text-decoration: none;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: bold;
+}
