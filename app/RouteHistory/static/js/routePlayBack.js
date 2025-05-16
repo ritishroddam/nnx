@@ -293,8 +293,9 @@ async function getAddressFromCoordinates(lat, lng) {
 
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function () {
-  setTimeout(() => {
-    initMap();
+  setTimeout(async () => {
+    await initMap();
+    await initialLiveMap();
     if (coords.length > 0) {
       const form = document.getElementById("vehicle-form");
       const submitEvent = new Event("submit", {
@@ -522,7 +523,7 @@ function interpolateSpeed(index, originalData) {
 async function plotPathOnMap(pathCoordinates) {
   // Clear all markers from the map before plotting new ones
   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
-    window.__allMapMarkers.forEach(marker => {
+    window.__allMapMarkers.forEach((marker) => {
       if (marker && marker.map) marker.map = null;
     });
     window.__allMapMarkers = [];
