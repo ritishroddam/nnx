@@ -34,8 +34,8 @@ socket.on("subscription_error", (error) => {
 });
 
 socket.on("vehicle_live_update", (data) => {
-  updateLiveMapPolyline(data);
   updateLiveMapVehicleData(data);
+  updateLiveMapPolyline(data);
   console.log("Vehicle live update:", data);
 });
 
