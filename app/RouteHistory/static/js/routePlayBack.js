@@ -520,6 +520,16 @@ function interpolateSpeed(index, originalData) {
 }
 
 async function plotPathOnMap(pathCoordinates) {
+  // Clear all markers from the map before plotting new ones
+  if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
+    window.__allMapMarkers.forEach(marker => {
+      if (marker && marker.map) marker.map = null;
+    });
+    window.__allMapMarkers = [];
+  } else {
+    window.__allMapMarkers = [];
+  }
+
   timelineSlider.addEventListener("input", handleSliderInput);
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
@@ -571,6 +581,7 @@ async function plotPathOnMap(pathCoordinates) {
       title: "Start",
       content: startContent, // Pass the DOM element
     });
+    window.__allMapMarkers.push(startMarker);
 
     const startIgnition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
     const startLocation = await getAddressFromCoordinates(
@@ -601,6 +612,7 @@ async function plotPathOnMap(pathCoordinates) {
       title: "End",
       content: endContent, // Pass the DOM element
     });
+    window.__allMapMarkers.push(endMarker);
 
     const endIgnition =
       pathCoordinates[pathCoordinates.length - 1].ignition === "1"
@@ -647,6 +659,7 @@ async function plotPathOnMap(pathCoordinates) {
       title: "Car",
       content: carContent, // Pass the DOM element
     });
+    window.__allMapMarkers.push(carMarker);
 
     for (let index = 0; index < coords.length - 1; index++) {
       const coord = coords[index];
@@ -673,6 +686,7 @@ async function plotPathOnMap(pathCoordinates) {
         title: "Arrow",
         content: arrowContent, // Pass the DOM element
       });
+      window.__allMapMarkers.push(marker);
 
       const ignition = pathCoord.ignition === "1" ? "On" : "Off";
 
