@@ -551,6 +551,7 @@ async function plotPathOnMap(pathCoordinates) {
           speed: interpolateSpeed(point.originalIndex, pathCoordinates),
         }));
       }
+      console.log("Snapped data:", snappedData);
     } catch (error) {
       console.error("Snap to Roads failed:", error);
     }
