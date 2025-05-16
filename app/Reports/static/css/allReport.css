@@ -117,6 +117,18 @@
   padding-top: 60px;
 }
 
+.form-control[type="datetime-local"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: calc(2.25rem + 2px);
+    padding: 0.375rem 0.75rem;
+}
+
+#customDateRange {
+    transition: all 0.3s ease;
+}
+
 .modal-content {
   background-color: #fff;
   margin: 5% auto;
@@ -125,6 +137,8 @@
   border-radius: 8px;
   width: 50%;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  min-height: 400px;
+  overflow-y: auto;
 }
 
 .close {
@@ -214,4 +228,33 @@
 
 .modal-content form .form-actions .cancel-btn:hover {
   background-color: #ccc;
+}
+
+/* .form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+} */
+
+.form-control {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="datetime-local"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: calc(2.25rem + 2px);
 }

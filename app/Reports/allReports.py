@@ -34,7 +34,30 @@ FIELD_COLLECTION_MAP = {
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
 
-def get_date_range_filter(date_range):
+# def get_date_range_filter(date_range):
+#     """Improved date range filter using datetime objects"""
+#     tz = pytz.timezone('UTC')
+#     now = datetime.now(tz)
+    
+#     if date_range == "last24hours":
+#         return {'date_time': {'$gte': now - timedelta(hours=24)}}
+#     elif date_range == "today":
+#         today_start = datetime(now.year, now.month, now.day, tzinfo=tz)
+#         return {'date_time': {'$gte': today_start}}
+#     elif date_range == "yesterday":
+#         yesterday_start = datetime(now.year, now.month, now.day, tzinfo=tz) - timedelta(days=1)
+#         yesterday_end = datetime(now.year, now.month, now.day, tzinfo=tz)
+#         return {'date_time': {'$gte': yesterday_start, '$lt': yesterday_end}}
+#     elif date_range == "last7days":
+#         return {'date_time': {'$gte': now - timedelta(days=7)}}
+#     elif date_range == "last30days":
+#         return {'date_time': {'$gte': now - timedelta(days=30)}}
+#     elif date_range == "custom":
+#         # You'll need to implement custom date range handling
+#         return {}
+#     return {}
+
+def get_date_range_filter(date_range, from_date=None, to_date=None):
     """Improved date range filter using datetime objects"""
     tz = pytz.timezone('UTC')
     now = datetime.now(tz)
@@ -52,9 +75,28 @@ def get_date_range_filter(date_range):
         return {'date_time': {'$gte': now - timedelta(days=7)}}
     elif date_range == "last30days":
         return {'date_time': {'$gte': now - timedelta(days=30)}}
-    elif date_range == "custom":
-        # You'll need to implement custom date range handling
-        return {}
+    elif date_range == "custom" and from_date and to_date:
+        try:
+            # Parse the datetime strings from the frontend
+            from_datetime = datetime.strptime(from_date, "%Y-%m-%dT%H:%M")
+            to_datetime = datetime.strptime(to_date, "%Y-%m-%dT%H:%M")
+            
+            # Localize to IST and convert to UTC
+            ist = timezone('Asia/Kolkata')
+            from_datetime = ist.localize(from_datetime).astimezone(pytz.UTC)
+            to_datetime = ist.localize(to_datetime).astimezone(pytz.UTC)
+            
+            # Validate date range is within 3 months
+            three_months_ago = now - timedelta(days=90)
+            if from_datetime < three_months_ago or to_datetime < three_months_ago:
+                raise ValueError("Date range cannot be older than 3 months")
+                
+            if from_datetime > to_datetime:
+                raise ValueError("From date cannot be after To date")
+                
+            return {'date_time': {'$gte': from_datetime, '$lte': to_datetime}}
+        except ValueError as e:
+            raise ValueError(f"Invalid custom date range: {str(e)}")
     return {}
 
 def process_distance_report(df, vehicle_number):
@@ -226,6 +268,8 @@ def download_custom_report():
         report_type = data.get("reportType")
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
+        from_date = data.get("fromDate")
+        to_date = data.get("toDate")
 
         # Get vehicle details including IMEI and LicensePlateNumber
         vehicle = db['vehicle_inventory'].find_one(
@@ -265,7 +309,7 @@ def download_custom_report():
                 )
 
             # Fetch data from atlanta
-            date_filter = get_date_range_filter(date_range)
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
             atlanta_query = {"imei": imei}
             if date_filter:
                 atlanta_query.update(date_filter)

@@ -119,7 +119,7 @@ All Reports
 <div id="reportModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Custom Vehicle Report</h2>
+        <h2>Travel Path Report</h2>
         <form id="reportForm">
             <div class="form-group">
                 <label for="dateRange">Date Range*</label>
@@ -132,13 +132,26 @@ All Reports
                     <option value="custom">Custom</option>
                 </select>
             </div>
+            
+            <!-- Custom Date Range Fields -->
+            <div id="customDateRange" style="display: none; margin-top: 15px;">
+    <div class="form-group">
+        <label for="fromDate">From Date & Time</label>
+        <input type="datetime-local" id="fromDate" name="fromDate" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="toDate">To Date & Time</label>
+        <input type="datetime-local" id="toDate" name="toDate" class="form-control">
+    </div>
+</div>
+            
             <div class="form-group">
                 <label for="subUserName">Sub User Name*</label>
                 <select id="subUserName" name="subUserName">
                     <option value="all">All sub users</option>
-                    <!-- Add more options as needed -->
                 </select>
             </div>
+            
             <div class="form-group">
                 <label for="vehicleNumber">Vehicle Number</label>
                 <select id="vehicleNumber" name="vehicleNumber">
@@ -148,6 +161,7 @@ All Reports
                     {% endfor %}
                 </select>
             </div>
+            
             <div class="form-actions">
                 <button type="button" class="cancel-btn">Cancel</button>
                 <button type="submit" id="generateReport">Generate Report</button>

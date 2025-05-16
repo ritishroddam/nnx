@@ -775,9 +775,3 @@ function setSpeed(multiplier) {
     moveCar();
   }
 }
-
-// Add a click event listener to the back button
-document.querySelector(".back-arrow").addEventListener("click", () => {
-  // Navigate to the previous page in the browser's history
-  window.history.back();
-});

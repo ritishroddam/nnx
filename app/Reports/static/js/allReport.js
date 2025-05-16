@@ -21,13 +21,46 @@ const allowedFields = [
   "Maximum Speed"
 ];
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   // Initialize elements
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
   const customReportForm = document.getElementById("customReportForm");
+  const dateRangeSelect = document.getElementById("dateRange");
+  const customDateRange = document.getElementById("customDateRange");
+
+   function handleDateRangeChange() {
+        if (dateRangeSelect.value === "custom") {
+            // Show the custom date range fields
+            customDateRange.style.display = "block";
+            
+            // Set default values (optional)
+            const now = new Date();
+            const threeMonthsAgo = new Date();
+            threeMonthsAgo.setMonth(now.getMonth() - 3);
+            
+            // Format as YYYY-MM-DDTHH:MM for datetime-local inputs
+            function formatDate(date) {
+                const pad = num => num.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            }
+            
+            // Set values
+            document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
+            document.getElementById("toDate").value = formatDate(now);
+        } else {
+            // Hide the custom date range fields
+            customDateRange.style.display = "none";
+        }
+    }
+    
+    // Add event listener for changes
+    dateRangeSelect.addEventListener("change", handleDateRangeChange);
+    
+    // Initialize on page load (in case custom is already selected)
+    handleDateRangeChange();
 
   // Initialize Selectize for dropdowns
   $("select").selectize({
@@ -121,6 +154,35 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  document.getElementById("dateRange").addEventListener("change", function() {
+    const customDateRange = document.getElementById("customDateRange");
+    if (this.value === "custom") {
+        customDateRange.style.display = "block";
+        
+        // Set date limits
+        const now = new Date();
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        
+        // Format for datetime-local input
+        const formatDate = (date) => {
+            return date.toISOString().slice(0, 16);
+        };
+        
+        // Set min/max dates
+        document.getElementById("fromDate").max = formatDate(now);
+        document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
+        document.getElementById("toDate").max = formatDate(now);
+        document.getElementById("toDate").min = formatDate(threeMonthsAgo);
+        
+        // Set default values
+        document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
+        document.getElementById("toDate").value = formatDate(now);
+    } else {
+        customDateRange.style.display = "none";
+    }
+});
+
   // Generate report button handler
   document
     .getElementById("generateReport")
@@ -153,6 +215,11 @@ document.addEventListener("DOMContentLoaded", function () {
             reportName: reportName,
             dateRange: dateRange,
           };
+
+          if (dateRange === "custom") {
+            body.fromDate = document.getElementById("fromDate").value;
+            body.toDate = document.getElementById("toDate").value;
+          }
 
           const response = await fetch(endpoint, {
             method: "POST",
@@ -191,6 +258,36 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
     });
+
+// Add validation for custom date range
+document.getElementById("reportForm").addEventListener("submit", function(e) {
+    const dateRange = document.getElementById("dateRange").value;
+    if (dateRange === "custom") {
+        const fromDate = new Date(document.getElementById("fromDate").value);
+        const toDate = new Date(document.getElementById("toDate").value);
+        
+        if (!fromDate || !toDate) {
+            e.preventDefault();
+            alert("Please select both from and to dates");
+            return;
+        }
+        
+        if (fromDate > toDate) {
+            e.preventDefault();
+            alert("From date cannot be after To date");
+            return;
+        }
+        
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        
+        if (fromDate < threeMonthsAgo || toDate < threeMonthsAgo) {
+            e.preventDefault();
+            alert("Date range cannot be older than 3 months");
+            return;
+        }
+    }
+});
 
   // Custom report form submission
   customReportForm.addEventListener("submit", function (e) {

@@ -147,8 +147,7 @@ function updateVehicleCard(data) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
-  <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
-  <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
+  <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
   <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(
         data.date,
@@ -231,8 +230,7 @@ async function renderVehicles() {
             ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
-        <strong>Lat:</strong> ${latitude ? latitude.toFixed(4) : "N/A"} <br>
-        <strong>Lon:</strong> ${longitude ? longitude.toFixed(4) : "N/A"} <br>
+        <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
         <strong>Distance Travelled:</strong> ${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(
           vehicle.date,
@@ -679,8 +677,7 @@ function updateFloatingCard(vehicles, filterValue) {
               ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
               : "Unknown"
           } <br>
-          <strong>Lat:</strong> ${latitude} <br>
-          <strong>Lon:</strong> ${longitude} <br>
+          <strong>Lat&Lon:</strong> ${latitude && longitude ? `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}` : "N/A"} <br>
           <strong>Distance Travelled:</strong> ${
             vehicle.distance || "NA"
           } km <br>
