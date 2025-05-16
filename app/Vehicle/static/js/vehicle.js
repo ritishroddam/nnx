@@ -688,7 +688,7 @@ function updateFloatingCard(vehicles, filterValue) {
           <strong>Location:</strong> ${
             vehicle.address || "Location unknown"
           } <br>
-          <a href="${url}" target="_blank">View In Detail</a>
+          <a href="${url}" target="_blank">VIEW IN DETAIL</a>
         </div>`;
 
       vehicleList.appendChild(vehicleElement);
