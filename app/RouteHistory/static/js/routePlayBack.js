@@ -97,7 +97,7 @@ async function plotPolyLineLiveMap(liveData) {
     const startMarkerInfo = new google.maps.InfoWindow({
       content: `<div>
               <h3>${vehicleData["License Plate Number"] || null}</h3>
-              ${speed}
+              ${speed || ""}
               <p><strong>Location:</strong> ${address}</p>
               <p>${status} since ${statusTime}</p>
             </div>`,
