@@ -22,39 +22,6 @@ const allowedFields = [
 ];
 
 document.addEventListener("DOMContentLoaded", function() {
-
-        const dateRangeSelect = document.getElementById("dateRange");
-
-      if (dateRangeSelect) {
-        dateRangeSelect.addEventListener("change", function() {
-            const customDateRange = document.getElementById("customDateRange");
-            if (this.value === "custom") {
-                customDateRange.style.display = "block";
-                
-                // Set date limits
-                const now = new Date();
-                const threeMonthsAgo = new Date();
-                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-                
-                // Format for datetime-local input
-                const formatDate = (date) => {
-                    return date.toISOString().slice(0, 16);
-                };
-                
-                // Set min/max dates
-                document.getElementById("fromDate").max = formatDate(now);
-                document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
-                document.getElementById("toDate").max = formatDate(now);
-                document.getElementById("toDate").min = formatDate(threeMonthsAgo);
-                
-                // Set default values
-                document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
-                document.getElementById("toDate").value = formatDate(now);
-            } else {
-                customDateRange.style.display = "none";
-            }
-        });
-    }
   // Initialize elements
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
@@ -154,7 +121,36 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
+  const dateRangeSelect = document.getElementById("dateRange");
 
+  document.getElementById("dateRange").addEventListener("change", function() {
+    const customDateRange = document.getElementById("customDateRange");
+    if (this.value === "custom") {
+        customDateRange.style.display = "block";
+        
+        // Set date limits
+        const now = new Date();
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        
+        // Format for datetime-local input
+        const formatDate = (date) => {
+            return date.toISOString().slice(0, 16);
+        };
+        
+        // Set min/max dates
+        document.getElementById("fromDate").max = formatDate(now);
+        document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
+        document.getElementById("toDate").max = formatDate(now);
+        document.getElementById("toDate").min = formatDate(threeMonthsAgo);
+        
+        // Set default values
+        document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
+        document.getElementById("toDate").value = formatDate(now);
+    } else {
+        customDateRange.style.display = "none";
+    }
+});
 
   // Generate report button handler
   document
