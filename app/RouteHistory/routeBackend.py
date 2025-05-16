@@ -377,7 +377,8 @@ def snap_to_roads():
     try:
         response = requests.get(url)
         result = response.json()
-        print(f"Snap to roads response: {result.get('snappedPoints', [])}")
+        print(f"Snap to roads response full: {result}")
+        print(f"Snap to roads response snappedPoints: {result.get('snappedPoints', [])}")
         return jsonify(result.get('snappedPoints', []))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
