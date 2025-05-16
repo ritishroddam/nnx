@@ -525,37 +525,6 @@ async function plotPathOnMap(pathCoordinates) {
   if (startMarker) startMarker.map = null;
   if (endMarker) endMarker.map = null;
   if (carMarker) carMarker.map = null; // Clear the previous car marker
-  const enhanceAccuracy = document.getElementById("enhance-accuracy").checked;
-
-  if (enhanceAccuracy) {
-    try {
-      const encodedPoints = pathCoordinates
-        .map((p) => `${p.lat},${p.lng}`)
-        .join("|");
-
-      const response = await fetch("/routeHistory/snap-to-roads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-        body: JSON.stringify({ points: encodedPoints }),
-      });
-
-      const snappedData = await response.json();
-
-      if (snappedData.length > 0) {
-        pathCoordinates = snappedData.map((point) => ({
-          ...point.location,
-          time: interpolateTime(point.originalIndex, pathCoordinates),
-          speed: interpolateSpeed(point.originalIndex, pathCoordinates),
-        }));
-      }
-      console.log("Snapped data:", snappedData);
-    } catch (error) {
-      console.error("Snap to Roads failed:", error);
-    }
-  }
 
   coords = pathCoordinates.map((item) => ({
     lat: item.lat,

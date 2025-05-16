@@ -367,19 +367,3 @@ def get_vehicle_path():
     except Exception as e:
         print(f"Error fetching path data: {str(e)}")
         return jsonify({"error": "Error fetching path data"}), 500
-
-@route_bp.route('/snap-to-roads', methods=['POST'])
-def snap_to_roads():
-    points = request.json['points']
-    print(f"Length of points: {len(points)}")
-    api_key = config['development']().GMAPS_API_KEY
-    url = f'https://roads.googleapis.com/v1/snapToRoads?path={points}&interpolate=true&key={api_key}'
-    
-    try:
-        response = requests.get(url)
-        result = response.json()
-        print(f"Snap to roads response full: {result}")
-        print(f"Snap to roads response snappedPoints: {result.get('snappedPoints', [])}")
-        return jsonify(result.get('snappedPoints', []))
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500

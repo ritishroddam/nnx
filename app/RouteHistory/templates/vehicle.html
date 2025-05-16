@@ -38,12 +38,6 @@ Vehicle Data
 
         <div id="map"></div>
 
-        <div class="accuracy-option">
-          <label>
-            <input type="checkbox" id="enhance-accuracy"> Snap to Roads
-          </label>
-        </div>
-
         <form id="vehicle-form">
           <input type="hidden" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}">
           <label for="start_date">Start Date:</label>
@@ -91,19 +85,24 @@ Vehicle Data
     <div class="info-box">
       <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
       <div class="info-row">
-        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data Available'}}</strong>
+        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
+          Available'}}</strong>
       </div>
       <div class="info-row">
-        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data Available'}}</strong>
+        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
+          Available'}}</strong>
       </div>
       <div class="info-row">
-        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data Available'}}</strong>
+        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
+          Available'}}</strong>
       </div>
       <div class="info-row">
-        <span>Location: </span><strong>{{ vehicle_data[0]['Address'] if vehicle_data else 'No Data Available' }}</strong>
+        <span>Location: </span><strong>{{ vehicle_data[0]['Address'] if vehicle_data else 'No Data Available'
+          }}</strong>
       </div>
       <div class="info-row">
-        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
+        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
+          Available'}}</strong>
       </div>
       <div class="info-row">
         <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
