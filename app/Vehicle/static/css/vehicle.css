@@ -77,7 +77,7 @@ body {
 .vehicle-info a {
   color:#336699;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
 }
 .dark-mode .vehicle-info a {
