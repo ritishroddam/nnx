@@ -31,40 +31,36 @@ document.addEventListener("DOMContentLoaded", function() {
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
 
-   function toggleCustomDateRange() {
+   function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
+            // Show the custom date range fields
             customDateRange.style.display = "block";
             
-            // Set date limits
+            // Set default values (optional)
             const now = new Date();
             const threeMonthsAgo = new Date();
-            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            threeMonthsAgo.setMonth(now.getMonth() - 3);
             
-            // Format for datetime-local input (YYYY-MM-DDTHH:MM)
-            const formatDate = (date) => {
+            // Format as YYYY-MM-DDTHH:MM for datetime-local inputs
+            function formatDate(date) {
                 const pad = num => num.toString().padStart(2, '0');
                 return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-            };
+            }
             
-            // Set min/max dates
-            document.getElementById("fromDate").max = formatDate(now);
-            document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
-            document.getElementById("toDate").max = formatDate(now);
-            document.getElementById("toDate").min = formatDate(threeMonthsAgo);
-            
-            // Set default values
+            // Set values
             document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
             document.getElementById("toDate").value = formatDate(now);
         } else {
+            // Hide the custom date range fields
             customDateRange.style.display = "none";
         }
     }
     
-    // Initialize on page load
-    toggleCustomDateRange();
-    
     // Add event listener for changes
-    dateRangeSelect.addEventListener("change", toggleCustomDateRange);
+    dateRangeSelect.addEventListener("change", handleDateRangeChange);
+    
+    // Initialize on page load (in case custom is already selected)
+    handleDateRangeChange();
 
   // Initialize Selectize for dropdowns
   $("select").selectize({
