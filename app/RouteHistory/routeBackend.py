@@ -371,6 +371,7 @@ def get_vehicle_path():
 @route_bp.route('/snap-to-roads', methods=['POST'])
 def snap_to_roads():
     points = request.json['points']
+    print(f"Length of points: {len(points)}")
     api_key = config['development']().GMAPS_API_KEY
     url = f'https://roads.googleapis.com/v1/snapToRoads?path={points}&interpolate=true&key={api_key}'
     
