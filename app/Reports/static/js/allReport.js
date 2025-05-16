@@ -28,6 +28,43 @@ document.addEventListener("DOMContentLoaded", function() {
   const fieldSelection = document.getElementById("fieldSelection");
   const selectedFields = document.getElementById("selectedFields");
   const customReportForm = document.getElementById("customReportForm");
+  const dateRangeSelect = document.getElementById("dateRange");
+  const customDateRange = document.getElementById("customDateRange");
+
+   function toggleCustomDateRange() {
+        if (dateRangeSelect.value === "custom") {
+            customDateRange.style.display = "block";
+            
+            // Set date limits
+            const now = new Date();
+            const threeMonthsAgo = new Date();
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            
+            // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+            const formatDate = (date) => {
+                const pad = num => num.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            };
+            
+            // Set min/max dates
+            document.getElementById("fromDate").max = formatDate(now);
+            document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
+            document.getElementById("toDate").max = formatDate(now);
+            document.getElementById("toDate").min = formatDate(threeMonthsAgo);
+            
+            // Set default values
+            document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
+            document.getElementById("toDate").value = formatDate(now);
+        } else {
+            customDateRange.style.display = "none";
+        }
+    }
+    
+    // Initialize on page load
+    toggleCustomDateRange();
+    
+    // Add event listener for changes
+    dateRangeSelect.addEventListener("change", toggleCustomDateRange);
 
   // Initialize Selectize for dropdowns
   $("select").selectize({
@@ -120,8 +157,6 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
-
-  const dateRangeSelect = document.getElementById("dateRange");
 
   document.getElementById("dateRange").addEventListener("change", function() {
     const customDateRange = document.getElementById("customDateRange");
