@@ -117,6 +117,7 @@ function updateLiveMapVehicleData(updatedData) {
 
   const status = getStatus(updatedData.ignition, updatedData.speed);
   const oldData = liveCoords[liveCoords.length - 1];
+  const rotation = updatedData.course;
 
   let statusTime;
   if (oldData.status === status) {
@@ -132,6 +133,16 @@ function updateLiveMapVehicleData(updatedData) {
   if (status === "Moving") {
     speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
   }
+
+  const carContent = document.createElement("img");
+  carContent.src = "/static/images/car_green.png";
+  carContent.style.width = "18px";
+  carContent.style.height = "32px";
+  carContent.style.position = "absolute";
+  carContent.alt = "Car";
+  carContent.style.transform = `rotate(${rotation}deg)`;
+
+  markerLive.content = carContent;
 
   const startMarkerInfo = new google.maps.InfoWindow({
     content: `<div>
@@ -183,6 +194,7 @@ async function plotPolyLineLiveMap(liveData) {
     const status = recentData.status;
     const statusTime = recentData.status_time;
     const address = recentData.address;
+    const rotation = recentData.course;
     let speed = null;
 
     if (status === "Moving") {
@@ -205,6 +217,7 @@ async function plotPolyLineLiveMap(liveData) {
     carContent.style.height = "32px";
     carContent.style.position = "absolute";
     carContent.alt = "Car";
+    carContent.style.transform = `rotate(${rotation}deg)`;
 
     // Create the marker using google.maps.marker.AdvancedMarkerElement
     markerLive = new google.maps.marker.AdvancedMarkerElement({
