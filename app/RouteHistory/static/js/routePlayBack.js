@@ -56,7 +56,7 @@ async function plotPolyLineLiveMap(liveData) {
 
     const bounds = new google.maps.LatLngBounds();
     liveCoords.forEach((coord) => bounds.extend(coord));
-    map.fitBounds(bounds);
+    liveMaps.fitBounds(bounds);
 
     const recentData = liveData[liveData.length - 1];
 
