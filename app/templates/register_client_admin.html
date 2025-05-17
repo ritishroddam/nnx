@@ -22,7 +22,7 @@ Register Client Admin
 <div class="container">
     <div class="register-container">
         <h2>Register</h2>
-        <form method="POST" action="{{ url_for('auth.register-client-admin') }}">
+        <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
                 <label for="username">Username</label>
