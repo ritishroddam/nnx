@@ -470,3 +470,40 @@ input:checked + .slider:before {
   font-style: italic;
   font-weight: bold;
 }
+
+.table-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-header-container h3 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+/* If you want the search container in the table to match the floating card */
+#vehicle-table-container .search-container {
+  display: flex;
+  margin: 0;
+}
+
+#vehicle-table-container .search-container input {
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px 0 0 4px;
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+
+#vehicle-table-container .search-container button {
+  padding: 8px 12px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
