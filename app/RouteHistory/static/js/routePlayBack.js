@@ -122,7 +122,9 @@ function updateLiveMapVehicleData(updatedData) {
   let statusTime;
   if (oldData.status === status) {
     const timeDelta =
-      new Date(updatedData.date_time) - new Date(oldData.date_time);
+      updatedData.status_time_delta +
+      new Date(updatedData.date_time) -
+      new Date(oldData.date_time);
     statusTime = getStatusTime(timeDelta);
   } else {
     statusTime = `0 seconds`;
