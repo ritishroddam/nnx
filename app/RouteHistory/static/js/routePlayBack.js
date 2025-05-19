@@ -90,7 +90,7 @@ function getStatus(ignition, speed) {
 
 function getStatusTime(timeDelta) {
   // status_time_delta should be in milliseconds
-  let totalSeconds = Math.floor(status_time_delta / 1000);
+  let totalSeconds = Math.floor(timeDelta / 1000);
   const days = Math.floor(totalSeconds / (24 * 3600));
   totalSeconds %= 24 * 3600;
   const hours = Math.floor(totalSeconds / 3600);
