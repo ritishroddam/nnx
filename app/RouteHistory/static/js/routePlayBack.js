@@ -127,8 +127,7 @@ function updateLiveMapVehicleData(updatedData) {
     console.log(oldData.status_time_delta);
     const timeDelta =
       oldData.status_time_delta +
-      new Date(updatedData.date_time) -
-      new Date(oldData.date_time);
+      (new Date(updatedData.date_time) - new Date(oldData.date_time));
     console.log(timeDelta);
     statusTime = getStatusTime(timeDelta);
     updatedData.status_time = statusTime;
