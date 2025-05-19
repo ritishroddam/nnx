@@ -118,6 +118,7 @@ function updateLiveMapVehicleData(updatedData) {
   const status = getStatus(updatedData.ignition, updatedData.speed);
   const oldData = liveCoords[liveCoords.length - 1];
   const rotation = updatedData.course;
+  updatedData[status] = status;
 
   let statusTime;
   console.log(oldData.status === status, status);
@@ -127,8 +128,10 @@ function updateLiveMapVehicleData(updatedData) {
       new Date(updatedData.date_time) - new Date(oldData.date_time);
     console.log(timeDelta);
     statusTime = getStatusTime(timeDelta);
+    updatedData.status_time = statusTime;
   } else {
     statusTime = `0 seconds`;
+    updatedData.status_time = statusTime;
   }
   const address = updatedData.address;
   let speed = null;
@@ -163,6 +166,8 @@ function updateLiveMapVehicleData(updatedData) {
     });
   });
 
+  liveCoords.push(updatedData);
+
   animateMarker(updateCoords);
 }
 
@@ -171,7 +176,6 @@ function updateLiveMapPolyline(updatedData) {
     lat: parseFloat(updatedData.latitude),
     lng: parseFloat(updatedData.longitude),
   };
-  liveCoords.push(updateCoords);
 
   const bounds = new google.maps.LatLngBounds();
   liveCoords.forEach((coord) => bounds.extend(coord));
