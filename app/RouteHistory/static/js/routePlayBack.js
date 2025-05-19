@@ -118,7 +118,7 @@ function updateLiveMapVehicleData(updatedData) {
   const status = getStatus(updatedData.ignition, updatedData.speed);
   const oldData = liveData[liveCoords.length - 1];
   const rotation = updatedData.course;
-  updatedData[status] = status;
+  updatedData["status"] = status;
 
   let statusTime;
   console.log("Old Data:", oldData);
