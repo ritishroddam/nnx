@@ -974,6 +974,20 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
+function searchTable() {
+  const searchTerm = document.getElementById('table-vehicle-search').value.trim().toLowerCase();
+  const tableRows = document.querySelectorAll('#vehicle-table tbody tr');
+  
+  tableRows.forEach(row => {
+    const plateNumber = row.cells[0].textContent.toLowerCase();
+    if (plateNumber.includes(searchTerm)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
 // Add this function to handle vehicle search
 function searchVehicle() {
   const searchTerm = document.getElementById('vehicle-search').value.trim().toLowerCase();
@@ -1191,4 +1205,11 @@ window.onload = async function () {
   await initMap();
   await fetchVehicleData();
   updateMap();
+
+  document.getElementById('table-search-button').addEventListener('click', searchTable);
+  document.getElementById('table-vehicle-search').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      searchTable();
+    }
+  });
 };
