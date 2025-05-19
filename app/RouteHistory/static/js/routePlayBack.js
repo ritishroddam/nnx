@@ -116,11 +116,12 @@ function updateLiveMapVehicleData(updatedData) {
   };
 
   const status = getStatus(updatedData.ignition, updatedData.speed);
-  const oldData = liveCoords[liveCoords.length - 1];
+  const oldData = liveData[liveCoords.length - 1];
   const rotation = updatedData.course;
   updatedData[status] = status;
 
   let statusTime;
+  console.log("Old Data:", oldData);
   console.log(oldData.status === status, status, oldData.status);
   if (oldData.status === status) {
     console.log(updatedData.status_time_delta);
@@ -177,8 +178,7 @@ function updateLiveMapPolyline(updatedData) {
     lng: parseFloat(updatedData.longitude),
   };
 
-  liveCoords[liveCoords.length - 1]["lat"] = updateCoords.lat;
-  liveCoords[liveCoords.length - 1]["lng"] = updateCoords.lng;
+  liveCoords.push(updateCoords);
 
   const bounds = new google.maps.LatLngBounds();
   liveCoords.forEach((coord) => bounds.extend(coord));
@@ -271,7 +271,8 @@ async function initialLiveMap() {
       return response.json();
     })
     .then(async (data) => {
-      await plotPolyLineLiveMap(data);
+      liveData = data;
+      await plotPolyLineLiveMap(liveData);
     })
     .catch((error) => {
       console.error("Error fetching live data:", error);
@@ -373,6 +374,7 @@ let liveMaps;
 let pathCoordinates = [];
 let coords = [];
 let liveCoords = [];
+let liveData = [];
 let startMarkerInfo = null;
 let carMarker;
 let markerLive;
