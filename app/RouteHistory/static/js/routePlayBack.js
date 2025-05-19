@@ -177,6 +177,9 @@ function updateLiveMapPolyline(updatedData) {
     lng: parseFloat(updatedData.longitude),
   };
 
+  liveCoords[liveCoords.length - 1]["lat"] = updateCoords.lat;
+  liveCoords[liveCoords.length - 1]["lng"] = updateCoords.lng;
+
   const bounds = new google.maps.LatLngBounds();
   liveCoords.forEach((coord) => bounds.extend(coord));
   liveMaps.fitBounds(bounds);
