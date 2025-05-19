@@ -167,7 +167,7 @@ function updateLiveMapVehicleData(updatedData) {
     });
   });
 
-  liveCoords.push(updatedData);
+  liveData.push(updatedData);
 
   animateMarker(updateCoords);
 }
