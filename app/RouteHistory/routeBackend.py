@@ -184,7 +184,7 @@ def fetch_live_data(imei):
 
                 data[0]["status"] = "Inactive"
                 data[0]["status_time"] = status_time
-                data[0]["status_time_delta"] = str(status_time_delta)
+                data[0]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
                 return jsonify(data), 200
             else:
                 return jsonify({"error": "No data found for the specified vehicle"}), 404
@@ -205,7 +205,7 @@ def fetch_live_data(imei):
 
                 liveData[-1]["status"] = "Stopped"
                 liveData[-1]["status_time"] = status_time
-                liveData[-1]["status_time_delta"] = str(status_time_delta)
+                liveData[-1]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
                 return jsonify(liveData), 200
             elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] != "0.0":
                 index = len(liveData) - 1
@@ -218,7 +218,7 @@ def fetch_live_data(imei):
 
                 liveData[-1]["status"] = "Moving"
                 liveData[-1]["status_time"] = status_time
-                liveData[-1]["status_time_delta"] = str(status_time_delta)
+                liveData[-1]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
                 return jsonify(liveData), 200
             elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] == "0.0":
                 index = len(liveData) - 1
@@ -231,7 +231,7 @@ def fetch_live_data(imei):
 
                 liveData[-1]["status"] = "Idle"
                 liveData[-1]["status_time"] = status_time
-                liveData[-1]["status_time_delta"] = str(status_time_delta)
+                liveData[-1]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
                 return jsonify(liveData), 200
             else:
                 liveData[-1]["status"] = "unknown"
