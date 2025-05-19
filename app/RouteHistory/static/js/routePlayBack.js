@@ -121,7 +121,7 @@ function updateLiveMapVehicleData(updatedData) {
   updatedData[status] = status;
 
   let statusTime;
-  console.log(oldData.status === status, status);
+  console.log(oldData.status === status, status, oldData.status);
   if (oldData.status === status) {
     console.log(updatedData.status_time_delta);
     const timeDelta =
