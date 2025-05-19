@@ -120,6 +120,7 @@ function updateLiveMapVehicleData(updatedData) {
   const rotation = updatedData.course;
 
   let statusTime;
+  console.log(oldData.status === status);
   if (oldData.status === status) {
     console.log(updatedData.status_time_delta);
     const timeDelta =
