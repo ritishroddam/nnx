@@ -121,10 +121,10 @@ function updateLiveMapVehicleData(updatedData) {
 
   let statusTime;
   if (oldData.status === status) {
+    console.log(updatedData.status_time_delta);
     const timeDelta =
-      updatedData.status_time_delta +
-      new Date(updatedData.date_time) -
-      new Date(oldData.date_time);
+      new Date(updatedData.date_time) - new Date(oldData.date_time);
+    console.log(timeDelta);
     statusTime = getStatusTime(timeDelta);
   } else {
     statusTime = `0 seconds`;
