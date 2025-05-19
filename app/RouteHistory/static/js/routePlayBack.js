@@ -130,9 +130,11 @@ function updateLiveMapVehicleData(updatedData) {
     console.log(timeDelta);
     statusTime = getStatusTime(timeDelta);
     updatedData.status_time = statusTime;
+    updatedData.status_time_delta = timeDelta;
   } else {
     statusTime = `0 seconds`;
     updatedData.status_time = statusTime;
+    updatedData.status_time_delta = "0";
   }
   const address = updatedData.address;
   let speed = null;
