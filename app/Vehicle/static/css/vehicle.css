@@ -520,6 +520,7 @@ input:checked + .slider:before {
 .last-updated-text{
   font-family: Arial, sans-serif;
   font-size: 12px;
+  margin-top: 5px;
 }
 
 .last-updated-sub{
