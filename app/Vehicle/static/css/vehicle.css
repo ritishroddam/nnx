@@ -528,3 +528,54 @@ input:checked + .slider:before {
   font-size: 12px;
   margin-left: 25px;
 }
+
+/* Vehicle status styles */
+.vehicle-status {
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+.status-moving {
+  color: #2ecc71; /* Green for moving */
+  background-color: rgba(46, 204, 113, 0.1);
+}
+
+.status-stopped {
+  color: #e67e22; /* Orange for stopped */
+  background-color: rgba(230, 126, 34, 0.1);
+}
+
+.status-offline {
+  color: #e74c3c; /* Red for offline */
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+/* Warning icon */
+.warning-icon {
+  color: #f39c12;
+  margin-left: 5px;
+  cursor: help;
+}
+
+/* Vehicle card styling */
+.vehicle-card {
+  border-left: 3px solid #ddd;
+  transition: border-color 0.3s;
+}
+
+.vehicle-card:hover {
+  border-left-color: #3498db;
+}
+
+.vehicle-header {
+  font-weight: bold;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
