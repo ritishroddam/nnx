@@ -507,3 +507,9 @@ input:checked + .slider:before {
   border-radius: 0 4px 4px 0;
   cursor: pointer;
 }
+
+.location-text {
+    font-family: Arial, sans-serif;
+    color: #ccc;
+    font-size: 12px;
+  }
