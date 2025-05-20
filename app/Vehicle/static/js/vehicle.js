@@ -672,18 +672,18 @@ function updateFloatingCard(vehicles, filterValue) {
         vehicle.status || "Unknown"
       }</div>
         <div class="vehicle-info">
-          Last Update: ${formatLastUpdatedText(
+          Last Update : ${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
           )} <br>
-          Speed: ${
+          Speed : ${
             vehicle.speed
               ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
               : "Unknown"
           } <br>
-          Lat-Lon:${latitude && longitude ? `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}` : "N/A"} <br>
+          Lat-Lon : ${latitude && longitude ? `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}` : "N/A"} <br>
           <span class="location-text">
-          Location: ${
+          Location : ${
             vehicle.address || "Location unknown"
           } 
           </span> <br>
@@ -693,7 +693,9 @@ function updateFloatingCard(vehicles, filterValue) {
           } km
            </span>
            </span> <br>
+           <span class="View-in-detail">
           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
+          </span>
         </div>`;
 
       vehicleList.appendChild(vehicleElement);
