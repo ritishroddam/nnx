@@ -670,7 +670,7 @@ function updateFloatingCard(vehicles, filterValue) {
       vehicleElement.innerHTML = `
         <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
         vehicle.status || "Unknown"
-      }</div><br>
+      }</div>
         <div class="vehicle-info">
           Last Update : ${formatLastUpdatedText(
             vehicle.date,
