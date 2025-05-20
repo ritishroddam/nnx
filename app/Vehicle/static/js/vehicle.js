@@ -193,50 +193,40 @@ async function fetchVehicleData() {
 function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
   const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
   
   // Calculate time since last update
-  const lastUpdated = convertToDate(data.date, data.time);
+  const lastUpdated = data.date && data.time ? convertToDate(data.date, data.time) : new Date(0);
   const now = new Date();
-  const timeDiff = Math.abs(now - lastUpdated);
+  const timeDiff = now - lastUpdated;
   const minutesDiff = Math.floor(timeDiff / (1000 * 60));
   const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
   const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   
   // Determine status
-  let statusText, statusClass;
-  const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
+  let statusText, statusClass, statusDisplay;
+  const speed = data.speed ? parseFloat(data.speed) : 0;
   
   if (timeDiff > 2 * 60 * 1000) { // More than 2 minutes since last update
     statusText = 'Offline';
     statusClass = 'status-offline';
+    statusDisplay = `${statusText}: since ${formatTimeSince(hoursDiff, minutesDiff, daysDiff)}`;
   } else if (speed === 0) {
     statusText = 'Stopped';
     statusClass = 'status-stopped';
+    statusDisplay = `${statusText}: 0.00 km/h, since ${formatTimeSince(hoursDiff, minutesDiff, daysDiff)}`;
   } else {
     statusText = 'Moving';
     statusClass = 'status-moving';
-  }
-  
-  // Format time text
-  let timeText;
-  if (daysDiff > 0) {
-    timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
-  } else if (hoursDiff > 0) {
-    timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
-  } else {
-    timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+    statusDisplay = `${statusText}: ${speed.toFixed(2)} km/h, since ${formatTimeSince(hoursDiff, minutesDiff, daysDiff)}`;
   }
 
   if (vehicleCard) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
-      <div class="vehicle-status ${statusClass}">
-        ${statusText}: ${speed.toFixed(2)} km/h, ${timeText}
-      </div>
+      <div class="vehicle-status ${statusClass}">${statusDisplay}</div>
       <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
       <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
@@ -244,39 +234,23 @@ function updateVehicleCard(data) {
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
     
-    // Add warning icon if data is stale (more than 2 minutes old)
-    const header = vehicleCard.querySelector(".vehicle-header");
-    const existingIcon = header.querySelector(".warning-icon");
-    if (timeDiff > 2 * 60 * 1000) {
-      if (!existingIcon) {
-        const warningIcon = document.createElement("span");
-        warningIcon.className = "warning-icon";
-        warningIcon.innerHTML = ' ⚠️';
-        warningIcon.title = "No recent data update";
-        header.appendChild(warningIcon);
-      }
-    } else if (existingIcon) {
-      existingIcon.remove();
-    }
+    updateWarningIcon(vehicleCard, timeDiff);
   } else {
-    // Create a new vehicle card
+    // Create new vehicle card
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
     
-    // Add warning icon if needed
-    const warningIcon = timeDiff > 2 * 60 * 1000 ? '<span class="warning-icon" title="No recent data update"> ⚠️</span>' : '';
-    
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}${warningIcon}</div>
+      <div class="vehicle-header">
+        ${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}
+        ${timeDiff > 2 * 60 * 1000 ? '<span class="warning-icon" title="No recent data update">⚠️</span>' : ''}
+      </div>
       <div class="vehicle-info">
-        <div class="vehicle-status ${statusClass}">
-          ${statusText}: ${speed.toFixed(2)} km/h, ${timeText}
-        </div>
-        <strong>Lat:</strong> ${latitude} <br>
-        <strong>Lon:</strong> ${longitude} <br>
-        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
+        <div class="vehicle-status ${statusClass}">${statusDisplay}</div>
+        <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
+        <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
@@ -287,6 +261,35 @@ function updateVehicleCard(data) {
   filterVehicles();
   addHoverListenersToCardsAndMarkers();
   showHidecar();
+}
+
+// Helper function to format time since
+function formatTimeSince(hoursDiff, minutesDiff, daysDiff) {
+  if (daysDiff > 0) {
+    return `${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+  } else if (hoursDiff > 0) {
+    return `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+  } else {
+    return `${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+  }
+}
+
+// Helper function to update warning icon
+function updateWarningIcon(vehicleCard, timeDiff) {
+  const header = vehicleCard.querySelector(".vehicle-header");
+  const existingIcon = header.querySelector(".warning-icon");
+  
+  if (timeDiff > 2 * 60 * 1000) {
+    if (!existingIcon) {
+      const warningIcon = document.createElement("span");
+      warningIcon.className = "warning-icon";
+      warningIcon.innerHTML = '⚠️';
+      warningIcon.title = "No recent data update";
+      header.appendChild(warningIcon);
+    }
+  } else if (existingIcon) {
+    existingIcon.remove();
+  }
 }
 
 function triggerSOS(imei, marker) {
