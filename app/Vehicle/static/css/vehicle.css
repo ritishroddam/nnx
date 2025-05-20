@@ -64,7 +64,7 @@ body {
 
 .vehicle-info {
   font-family: Arial, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   color: #000000d0;
 }
 
@@ -81,7 +81,7 @@ body {
   font-size: 12px;
   font-style:oblique;
   font-weight: bold;
-  margin-left: 80px;
+  margin-left: 100px;
 }
 .dark-mode .vehicle-info a {
   color: #ccc;
@@ -513,7 +513,7 @@ input:checked + .slider:before {
 .location-text {
     font-family: Arial, sans-serif;
     color: #777;
-    font-size: 12px;
+    font-size: 10px;
   }
 
 .last-updated-text{
