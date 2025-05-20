@@ -528,3 +528,9 @@ input:checked + .slider:before {
   font-size: 12px;
   margin-left: 25px;
 }
+
+.distance-tavel-header{
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  margin-top: 10px;
+}
