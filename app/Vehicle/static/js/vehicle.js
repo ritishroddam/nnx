@@ -670,7 +670,7 @@ function updateFloatingCard(vehicles, filterValue) {
       vehicleElement.innerHTML = `
         <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
         vehicle.status || "Unknown"
-      }</div>
+      }</div><br>
         <div class="vehicle-info">
           Last Update : ${formatLastUpdatedText(
             vehicle.date,
@@ -692,7 +692,7 @@ function updateFloatingCard(vehicles, filterValue) {
             vehicle.distance || "NA"
           } km
            </span>
-           </span> <br>
+           </span> <br><br>
           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
         </div>`;
 
