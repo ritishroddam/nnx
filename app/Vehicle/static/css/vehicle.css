@@ -79,9 +79,9 @@ body {
   color:#336699;
   text-decoration: none;
   font-size: 12px;
-  font-style: italic;
+  font-style:oblique;
   font-weight: bold;
-  text-align: center;
+  margin-left: 50px;
 }
 .dark-mode .vehicle-info a {
   color: #ccc;
