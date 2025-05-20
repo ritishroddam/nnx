@@ -507,3 +507,22 @@ input:checked + .slider:before {
   border-radius: 0 4px 4px 0;
   cursor: pointer;
 }
+
+.vehicle-card-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.vehicle-icon {
+  flex: 0 0 auto;
+  margin-right: 10px;
+}
+
+.vehicle-icon img {
+  width: 32px;
+  height: 32px;
+}
+
+.vehicle-details {
+  flex: 1;
+}
