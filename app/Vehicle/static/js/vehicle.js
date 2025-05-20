@@ -177,7 +177,7 @@ function updateVehicleCard(data) {
             : "Unknown"
         } <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
+        <strong>Distance Today:</strong><br> ${data.distance || "NA"} km <br>
         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
     `;
@@ -680,7 +680,7 @@ function updateFloatingCard(vehicles, filterValue) {
            <strong>Location:</strong> ${
             vehicle.address || "Location unknown"
           } <br>
-          <strong>Distance Travelled:</strong> ${
+          <strong>Distance Today:</strong><br> ${
             vehicle.distance || "NA"
           } km <br>
           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
