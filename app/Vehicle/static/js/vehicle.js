@@ -672,7 +672,7 @@ function updateFloatingCard(vehicles, filterValue) {
         vehicle.status || "Unknown"
       }</div>
         <div class="vehicle-info">
-          <strong>Last Update:</strong> ${formatLastUpdatedText(
+          Last Update: ${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
           )} <br>
