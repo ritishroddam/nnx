@@ -693,9 +693,7 @@ function updateFloatingCard(vehicles, filterValue) {
           } km
            </span>
            </span> <br>
-           <span class="View-in-detail">
           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
-          </span>
         </div>`;
 
       vehicleList.appendChild(vehicleElement);
