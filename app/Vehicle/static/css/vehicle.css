@@ -515,7 +515,6 @@ input:checked + .slider:before {
     font-family: Arial, sans-serif;
     color: #777;
     font-size: 12px;
-    padding-bottom: 10px;
   }
 
 .last-updated-text{
