@@ -672,22 +672,22 @@ function updateFloatingCard(vehicles, filterValue) {
         vehicle.status || "Unknown"
       }</div>
         <div class="vehicle-info">
-          <strong>Speed:</strong> ${
-            vehicle.speed
-              ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
-              : "Unknown"
-          } <br>
-          <strong>Lat&Lon:</strong> ${latitude && longitude ? `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}` : "N/A"} <br>
-          <strong>Distance Travelled:</strong> ${
-            vehicle.distance || "NA"
-          } km <br>
           <strong>Last Update:</strong> ${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
           )} <br>
-          <strong>Location:</strong> ${
+          Speed: ${
+            vehicle.speed
+              ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
+              : "Unknown"
+          } <br>
+          Lat&Lon:${latitude && longitude ? `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}` : "N/A"} <br>
+          Location: ${
             vehicle.address || "Location unknown"
           } <br>
+          <strong>Distance Travelled:</strong> <br> ${
+            vehicle.distance || "NA"
+          } km <br>
           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
         </div>`;
 
