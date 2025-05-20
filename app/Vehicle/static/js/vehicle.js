@@ -167,17 +167,19 @@ function updateVehicleCard(data) {
       data.status || "Unknown"
     }</div>
       <div class="vehicle-info">
-      <strong>Last Update:</strong> ${formatLastUpdatedText(
-          data.date,
-          data.time
-        )} <br>
         <strong>Speed:</strong> ${
           data.speed
             ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
+        <strong>Lat:</strong> ${latitude} <br>
+        <strong>Lon:</strong> ${longitude} <br>
+        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          data.date,
+          data.time
+        )} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Distance Today:</strong><br> ${data.distance || "NA"} km <br>
         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
     `;
@@ -223,15 +225,17 @@ async function renderVehicles() {
       vehicle.status || "Unknown"
     }</div>
       <div class="vehicle-info">
-      <strong>Last Update:</strong> ${formatLastUpdatedText(
-          vehicle.date,
-          vehicle.time
-        )} <br>
         <strong>Speed:</strong> ${
           vehicle.speed
             ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
             : "Unknown"
         } <br>
+        <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
+        <strong>Distance Travelled:</strong> ${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"} km <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          vehicle.date,
+          vehicle.time
+        )} <br>
         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
@@ -668,21 +672,22 @@ function updateFloatingCard(vehicles, filterValue) {
         vehicle.status || "Unknown"
       }</div>
         <div class="vehicle-info">
-                  <strong>Last Update:</strong> ${formatLastUpdatedText(
-            vehicle.date,
-            vehicle.time
-          )} <br>
           <strong>Speed:</strong> ${
             vehicle.speed
               ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
               : "Unknown"
           } <br>
-           <strong>Location:</strong> ${
-            vehicle.address || "Location unknown"
-          } <br>
-          <strong>Distance Today:</strong><br> ${
+          <strong>Lat&Lon:</strong> ${latitude && longitude ? `${parseFloat(latitude).toFixed(4)},${parseFloat(longitude).toFixed(4)}` : "N/A"} <br>
+          <strong>Distance Travelled:</strong> ${
             vehicle.distance || "NA"
           } km <br>
+          <strong>Last Update:</strong> ${formatLastUpdatedText(
+            vehicle.date,
+            vehicle.time
+          )} <br>
+          <strong>Location:</strong> ${
+            vehicle.address || "Location unknown"
+          } <br>
           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
         </div>`;
 
