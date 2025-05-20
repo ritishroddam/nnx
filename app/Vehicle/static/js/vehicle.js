@@ -686,8 +686,7 @@ function updateFloatingCard(vehicles, filterValue) {
             vehicle.address || "Location unknown"
           } 
           </span> <br>
-          <span class="last-updated-text">
-          <strong>Distance-Travelled:</strong></span> <br> <span class="last-updated-sub"> ${
+          <strong style:"margin-top='10px'">Distance-Travelled:</strong> <br> <span class="last-updated-sub"> ${
             vehicle.distance || "NA"
           } km
           </span> <br>
