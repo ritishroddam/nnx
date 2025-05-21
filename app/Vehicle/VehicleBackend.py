@@ -20,7 +20,7 @@ atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
 def format_seconds(seconds):
-    seconds = int(seconds)
+    seconds = int(seconds/1000)
     if seconds >= 3600:
         hours = seconds // 3600
         minutes = (seconds % 3600) // 60
@@ -55,7 +55,6 @@ def getStopTimeToday(imei):
             {"$project": {
                 "imei": "$_id",
                 "total_stoppage_seconds": {
-                    # Calculate total stoppage time in seconds
                     "$reduce": {
                         "input": "$stoppages",
                         "initialValue": {"total": 0, "prev": None},
