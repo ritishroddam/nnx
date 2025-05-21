@@ -357,7 +357,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconRed = "color:#d32f2f;";
     const iconRow = `
       <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
+      // <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
       <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
       <span class="material-symbols-outlined" style="${
         iconStyle + iconRed
@@ -366,7 +366,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     `;
 
     vehicleElement.innerHTML = `
-    <div style="display:flex;align-items:stretch;justify-content:space-between;">
+    <div style="display:flex;align-item s:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
           <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
@@ -407,7 +407,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
           </div>
         </div>
       </div>
-      <div class="vertical-divider" style="width:1px;background:#eee;margin:0 16px;"></div>
+      <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
       <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
         <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">refresh</span>
         <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">note</span>
