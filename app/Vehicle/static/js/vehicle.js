@@ -125,6 +125,10 @@ async function fetchVehicleData() {
         sos: vehicle.sos,
         distance: vehicle.distance || 0,
         odometer: vehicle.odometer,
+        stoppage_time: vehicle.stoppage_time,
+        stoppage_time_delta: vehicle.stoppage_time_delta,
+        status_time_delta: vehicle.status_time_delta,
+        status_time_str: vehicle.status_time_str,
       });
     });
   } catch (error) {
@@ -377,7 +381,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       ignitionIcon = "key";
     }
 
-    const ASUgsmValue = parseInt(vehicle.gsm_sig);
+    const ASUgsmValue = parseInt(vehicle.gsm);
 
     if (ASUgsmValue == 0) {
       gsmIcon = "signal_cellular_null";
