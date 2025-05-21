@@ -223,7 +223,6 @@ function updateVehicleCard(data) {
     statusClass = "vehicle-status-moving";
   }
 
-
   let timeText;
   if (daysDiff > 0) {
     timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
@@ -934,7 +933,6 @@ function updateFloatingCard(vehicles, filterValue) {
     hideCard();
 
     const vehicleCounter = document.getElementById("vehicle-counter");
-
     const vehicleCount = document.getElementById("vehicle-count");
     vehicleCount.innerText = vehicles.length;
 
@@ -978,71 +976,89 @@ function updateFloatingCard(vehicles, filterValue) {
       vehicleElement.classList.add("vehicle-card");
       vehicleElement.setAttribute("data-imei", vehicle.imei);
 
-      const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-      const longitude = vehicle.longitude
-        ? parseFloat(vehicle.longitude)
-        : null;
-      const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
-
-      // Calculate time since last update
+      // Status logic
       const lastUpdated = convertToDate(vehicle.date, vehicle.time);
       const now = new Date();
       const timeDiff = Math.abs(now - lastUpdated);
+      const secondsDiff = Math.floor(timeDiff / 1000);
       const minutesDiff = Math.floor(timeDiff / (1000 * 60));
       const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-
-      // Determine status and class
-      let statusText, statusClass;
+      let statusText, statusColor;
       const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-
       if (timeDiff > 2 * 60 * 1000) {
         statusText = "Offline";
-        statusClass = "vehicle-status-offline";
+        statusColor = "#616161";
       } else if (speed === 0) {
         statusText = "Stopped";
-        statusClass = "vehicle-status-stopped";
+        statusColor = "#d32f2f";
       } else {
         statusText = "Moving";
-        statusClass = "vehicle-status-moving";
+        statusColor = "#2e7d32";
       }
 
-      let timeText;
-      if (daysDiff > 0) {
-        timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
-      } else if (hoursDiff > 0) {
-        timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
+      // Time since status
+      let sinceText = "";
+      if (hoursDiff > 0) {
+        sinceText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
+      } else if (minutesDiff > 0) {
+        sinceText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
       } else {
-        timeText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
+        sinceText = `since ${secondsDiff} sec`;
       }
+
+      // Icons row
+      const iconStyle =
+        "font-size:22px;vertical-align:middle;margin-right:2px;";
+      const iconRed = "color:#d32f2f;";
+      const iconRow = `
+        <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
+        <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
+        <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
+        <span class="material-symbols-outlined" style="${
+          iconStyle + iconRed
+        }">sos</span>
+        <span class="material-symbols-outlined" style="${iconStyle}">local_gas_station</span>
+      `;
 
       vehicleElement.innerHTML = `
-        <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
-        vehicle.status || "Unknown"
-      }</div>
-        <div class="vehicle-info">
-          Last Update : ${formatLastUpdatedText(
+        <div class="vehicle-card-row" style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
+            <span class="vehicle-number" style="font-weight:700;font-size:20px;">${
+              vehicle.LicensePlateNumber || vehicle.imei
+            }</span>
+            <span style="margin-left:4px;">${iconRow}</span>
+          </div>
+        </div>
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
+          Last Update : <span class="last-updated-text">${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
-          )} <br>
-          <div class="vehicle-status ${statusClass}">
-            ${statusText}: ${speed.toFixed(2)} km/h${
-        speed === 0 ? `, ${timeText}` : ""
-      }
+          )}</span>
+        </div>
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
+          ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
+        </div>
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:13px;color:#aaa;">
+          Location : ${vehicle.address || "Location unknown"}
+        </div>
+        <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
+          <div>
+            <div style="font-size:13px;color:#888;">Distance Today</div>
+            <div style="font-weight:600;">${
+              vehicle.distance ? parseFloat(vehicle.distance).toFixed(1) : "0"
+            } km</div>
           </div>
-          <span class="location-text">
-          Location : ${vehicle.address || "Location unknown"} 
-          </span> <br><br>
-          <strong>Today's Distance:</strong> <br> <span class="last-updated-sub"> ${
-            vehicle.distance || "NA"
-          } km
-          </span> <br>
-          <a href="${url}" target="_blank">VIEW MORE</a>
+          <div>
+            <div style="font-size:13px;color:#888;">Stoppage Today</div>
+            <div style="font-weight:600;">${vehicle.stoppage_time || "--"}</div>
+          </div>
+          <div>
+            <div style="font-size:13px;color:#888;">Battery</div>
+            <div style="font-weight:600;">${vehicle.battery || "--"} V</div>
+          </div>
         </div>
-        <div class="vehicle-footer">
-
-        </div>
-        `;
+      `;
 
       vehicleList.appendChild(vehicleElement);
     });
