@@ -206,20 +206,36 @@ function updateVehicleCard(data) {
   const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
   const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   
-  // Format speed display
+  // Determine status and class
+  let statusText, statusClass;
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
-  let speedDisplay;
   
-  if (speed === 0) {
-    speedDisplay = `Stopped: 0.0 km/h, since ${minutesDiff} min${minutesDiff !== 1 ? 's' : ''}`;
+  if (timeDiff > 2 * 60 * 1000) {
+    statusText = 'Offline';
+    statusClass = 'vehicle-status-offline';
+  } else if (speed === 0) {
+    statusText = 'Stopped';
+    statusClass = 'vehicle-status-stopped';
   } else {
-    speedDisplay = `Moving: ${speed.toFixed(2)} km/h`;
+    statusText = 'Moving';
+    statusClass = 'vehicle-status-moving';
+  }
+  
+  let timeText;
+  if (daysDiff > 0) {
+    timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+  } else if (hoursDiff > 0) {
+    timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+  } else {
+    timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
   }
 
   if (vehicleCard) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
-      <div class="vehicle-status">${speedDisplay}</div>
+      <div class="vehicle-status ${statusClass}">
+        ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+      </div>
       <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
       <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
       <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
@@ -235,7 +251,9 @@ function updateVehicleCard(data) {
     vehicleElement.innerHTML = `
       <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}</div>
       <div class="vehicle-info">
-        <div class="vehicle-status">${speedDisplay}</div>
+        <div class="vehicle-status ${statusClass}">
+          ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+        </div>
         <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
         <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
         <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
@@ -915,21 +933,37 @@ function updateFloatingCard(vehicles, filterValue) {
       const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
       const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
       
-      // Format speed display
+      // Determine status and class
+      let statusText, statusClass;
       const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-      let speedDisplay;
       
-      if (speed === 0) {
-        speedDisplay = `Stopped: 0.0 km/h, since ${minutesDiff} min${minutesDiff !== 1 ? 's' : ''}`;
+      if (timeDiff > 2 * 60 * 1000) {
+        statusText = 'Offline';
+        statusClass = 'vehicle-status-offline';
+      } else if (speed === 0) {
+        statusText = 'Stopped';
+        statusClass = 'vehicle-status-stopped';
       } else {
-        speedDisplay = `Moving: ${speed.toFixed(2)} km/h`;
+        statusText = 'Moving';
+        statusClass = 'vehicle-status-moving';
+      }
+      
+      let timeText;
+      if (daysDiff > 0) {
+        timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+      } else if (hoursDiff > 0) {
+        timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+      } else {
+        timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
       }
 
       vehicleElement.innerHTML = `
         <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${vehicle.status || "Unknown"}</div>
         <div class="vehicle-info">
           Last Update : ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
-          <div class="vehicle-status">${speedDisplay}</div>
+          <div class="vehicle-status ${statusClass}">
+            ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+          </div>
           <span class="location-text">
           Location : ${vehicle.address || "Location unknown"} 
           </span> <br><br>
