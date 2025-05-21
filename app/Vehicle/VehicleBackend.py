@@ -166,9 +166,7 @@ def getStopTimeToday(imei):
             seconds = item.get('total_stoppage_seconds', 0)
             item['stoppage_time_str'] = format_seconds(seconds)
 
-        allStoppageTimes = {item['imei']: item['stoppage_time_str'] for item in result}
-
-        return allStoppageTimes
+        return result
 
     except Exception as e:
         print(f"Error calculating stoppage times: {e}")
