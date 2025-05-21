@@ -13,7 +13,7 @@ body {
   position: absolute;
   top: 11%;
   left: 5.5%;
-  width: 350px;
+  width: 420px;
   max-height: 88vh;
   overflow-y: auto;
   background: white;
@@ -42,12 +42,11 @@ body {
 }
 
 .vehicle-card {
-  position: relative;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 15px;
-  margin-bottom: 10px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 18px 22px 14px 18px;
+  margin-bottom: 18px;
+  background: #fff;
   font-family: Arial, sans-serif;
 }
 
@@ -67,9 +66,8 @@ body {
 
 .dark-mode .vehicle-card {
   box-shadow: 0px 0px 4px #cccccc90;
-} */
-
-.vehicle-card {
+}
+*/ .vehicle-card {
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 8px #0001;
@@ -83,12 +81,16 @@ body {
 }
 
 .vehicle-card-row {
-  width: 100%;
   margin-bottom: 2px;
+}
+
+.vehicle-card-row:last-child {
+  margin-bottom: 0;
 }
 
 .vehicle-card .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-size: 22px;
   vertical-align: middle;
 }
 
@@ -601,13 +603,16 @@ input:checked + .slider:before {
 }
 
 .vehicle-status-moving {
-  color: #2e7d32; /* Green for moving */
+  color: #2e7d32;
+  font-weight: 600;
 }
 
 .vehicle-status-stopped {
-  color: #d32f2f; /* Red for stopped */
+  color: #d32f2f;
+  font-weight: 600;
 }
 
 .vehicle-status-offline {
-  color: #616161; /* Gray for offline */
+  color: #616161;
+  font-weight: 600;
 }

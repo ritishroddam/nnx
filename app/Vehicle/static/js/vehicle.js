@@ -366,14 +366,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     `;
 
     vehicleElement.innerHTML = `
-      <div class="vehicle-card-row" style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
-          <span class="vehicle-number" style="font-weight:700;font-size:20px;">${
-            vehicle.LicensePlateNumber || vehicle.imei
-          }</span>
-          <span style="margin-left:4px;">${iconRow}</span>
-        </div>
+      <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
+        <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
+        <span class="vehicle-number" style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;">${
+          vehicle.LicensePlateNumber || vehicle.imei
+        }</span>
+        <span style="margin-left:4px;">${iconRow}</span>
       </div>
       <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
         Last Update : <span class="last-updated-text">${formatLastUpdatedText(
@@ -384,7 +382,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
         ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
       </div>
-      <div class="vehicle-card-row" style="margin-top:2px;font-size:13px;color:#aaa;">
+      <div class="vehicle-card-row" style="margin-top:2px;font-size:13px;color:#aaa;line-height:1.2;">
         Location : ${vehicle.address || "Location unknown"}
       </div>
       <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
@@ -404,7 +402,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         </div>
       </div>
     `;
-
     listContainer.appendChild(vehicleElement);
   });
 
