@@ -306,27 +306,21 @@ function renderVehicles() {
     const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
     const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     
-    let statusText, statusClass;
+    let statusText, statusClass, statusDisplay;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
     
     if (timeDiff > 2 * 60 * 1000) {
       statusText = 'Offline';
       statusClass = 'status-offline';
+      statusDisplay = `${statusText}: since ${formatTimeSince(hoursDiff, minutesDiff, daysDiff)}`;
     } else if (speed === 0) {
       statusText = 'Stopped';
       statusClass = 'status-stopped';
+      statusDisplay = `${statusText}: 0.00, since ${formatTimeSince(hoursDiff, minutesDiff, daysDiff)}`;
     } else {
       statusText = 'Moving';
       statusClass = 'status-moving';
-    }
-    
-    let timeText;
-    if (daysDiff > 0) {
-      timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
-    } else if (hoursDiff > 0) {
-      timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
-    } else {
-      timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+      statusDisplay = `${statusText}: ${speed.toFixed(2)}, since ${formatTimeSince(hoursDiff, minutesDiff, daysDiff)}`;
     }
     
     const warningIcon = timeDiff > 2 * 60 * 1000 ? '<span class="warning-icon" title="No recent data update">⚠️</span>' : '';
@@ -336,9 +330,7 @@ function renderVehicles() {
         ${vehicle.LicensePlateNumber || "Unknown"}${warningIcon}
       </div>
       <div class="vehicle-info">
-        <div class="vehicle-status ${statusClass}">
-          ${statusText}: ${speed.toFixed(2)}, ${timeText}
-        </div>
+        <div class="vehicle-status ${statusClass}">${statusDisplay}</div>
         <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
         <span class="location-text">
           Location: ${vehicle.address || "Location unknown"}
