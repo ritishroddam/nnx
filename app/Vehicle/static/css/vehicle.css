@@ -513,9 +513,13 @@ input:checked + .slider:before {
 
 .location-text {
     font-family: Arial, sans-serif;
-    color: #777;
+    color: #555;
     font-size: 12px;
   }
+
+.dark-mode .location-text {
+    color: #ccc;
+  }  
 
 .last-updated-text{
   font-family: Arial, sans-serif;
