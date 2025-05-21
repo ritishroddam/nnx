@@ -408,7 +408,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     listContainer.appendChild(vehicleElement);
   });
 
-  filterVehicles();
   addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
