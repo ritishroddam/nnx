@@ -110,7 +110,7 @@ body {
 }
 
 .dark-mode .vehicle-card .material-symbols-outlined {
-  color: #ccc; /* Light icon color */
+  color: #ccc !important;
 }
 
 .vehicle-card-content {
@@ -652,13 +652,22 @@ input:checked + .slider:before {
   color: #2e7d32;
   font-weight: 600;
 }
+.dark-mode .vehicle-status-moving {
+  color: #4caf50;
+}
 
 .vehicle-status-stopped {
   color: #d32f2f;
   font-weight: 600;
 }
+.dark-mode .vehicle-status-stopped {
+  color: #ff5252;
+}
 
 .vehicle-status-offline {
   color: #616161;
   font-weight: 600;
+}
+.dark-mode .vehicle-status-offline {
+  color: #b0b0b0;
 }
