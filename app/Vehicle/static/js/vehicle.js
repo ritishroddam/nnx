@@ -394,10 +394,6 @@ function renderVehicles() {
     </div>
     <div class="vehicle-stats-section">
       <div class="stat-item">
-        <span class="stat-value">${vehicle.distance || "NA"} km</span>
-        <span>Distance</span>
-      </div>
-      <div class="stat-item">
         <span class="stat-value">${vehicle.stoppage || "N/A"}</span>
         <span>Stoppage</span>
       </div>
