@@ -19,6 +19,81 @@ collection = db['distinctAtlanta']
 atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
+def format_seconds(seconds):
+    seconds = int(seconds)
+    if seconds >= 3600:
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return f"{hours} hours, {minutes} minutes"
+    elif seconds >= 60:
+        minutes = seconds // 60
+        sec = seconds % 60
+        return f"{minutes} minutes, {sec} seconds"
+    else:
+        return f"{seconds} seconds"
+
+def getStopTimeToday(imei):
+    try:
+        utc_now = datetime.now(timezone('UTC'))
+        start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
+        pipeline = [
+            {"$match": {
+                "imei": {"$in": imei},
+                "ignition": "0",
+                "speed": "0.0",
+                "date_time": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                },
+            }},
+            {"$sort": {"imei": 1, "date_time": 1}},
+            {"$group": {
+                "_id": "$imei",
+                "stoppages": {"$push": "$date_time"}
+            }},
+            {"$project": {
+                "imei": "$_id",
+                "total_stoppage_seconds": {
+                    # Calculate total stoppage time in seconds
+                    "$reduce": {
+                        "input": "$stoppages",
+                        "initialValue": {"total": 0, "prev": None},
+                        "in": {
+                            "total": {
+                                "$cond": [
+                                    {"$eq": ["$$value.prev", None]},
+                                    0,
+                                    {"$add": [
+                                        "$$value.total",
+                                        {"$subtract": ["$$this", "$$value.prev"]}
+                                    ]}
+                                ]
+                            },
+                            "prev": "$$this"
+                        }
+                    }
+                }
+            }},
+            {"$project": {
+                "imei": 1,
+                "total_stoppage_seconds": "$total_stoppage_seconds.total"
+            }}
+        ]
+
+        result = list(atlanta_collection.aggregate(pipeline))
+        for item in result:
+            seconds = item.get('total_stoppage_seconds', 0)
+            item['stoppage_time_str'] = format_seconds(seconds)
+
+        allStoppageTimes = {item['imei']: item['stoppage_time_str'] for item in result}
+
+        return allStoppageTimes
+
+    except Exception as e:
+        print(f"Error calculating stoppage times: {e}")
+        return []
+
 def getVehicleDistances(imei):
     try:
         utc_now = datetime.now(timezone('UTC'))
