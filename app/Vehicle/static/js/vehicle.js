@@ -354,7 +354,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     if (statusText === "Offline") {
       gpsIcon = "location_disabled";
-    } else if (statusText === "Stopped") {
+    } else {
       gpsIcon = "my_location";
     }
 
