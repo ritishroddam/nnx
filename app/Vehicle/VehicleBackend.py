@@ -214,6 +214,30 @@ def getVehicleDistances(imei):
         flash("Error fetching distances", "danger")
         return jsonify({"error": str(e)}), 500
 
+def build_vehicle_data(inventory_data, distances, stoppage_times, statuses):
+    vehicles = []
+    for vehicle in inventory_data:
+        imei = vehicle.get('IMEI')
+        if not imei:
+            continue
+        vehicleDataList = list(collection.find({"imei": imei}, {'timestamp': 0}))
+        for data in vehicleDataList:
+            data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
+            data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
+            data['distance'] = round(distances.get(imei, 0), 2)
+
+            stoppage_time_item = next((item for item in stoppage_times if item['imei'] == imei), {})
+            data['stoppage_time'] = stoppage_time_item.get('stoppage_time_str', '0 seconds')
+            data['stoppage_time_delta'] = stoppage_time_item.get('total_stoppage_seconds', 0)
+
+            status_item = next((item for item in statuses if item['imei'] == imei), {})
+            data['status'] = status_item.get('status', 'unknown')
+            data['status_time_str'] = status_item.get('status_time_str', '0 seconds')
+            data['status_time_delta'] = status_item.get('status_time_delta', 0)
+
+            vehicles.append(data)
+    return vehicles
+
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'user', 'clientAdmin')
@@ -222,34 +246,10 @@ def get_vehicles():
         claims = get_jwt()
         user_roles = claims.get('roles', [])
         vehicles = []
+
+        # Determine inventory_data and imei_list based on role
         if 'admin' in user_roles:
-            # Fetch data from the distinctAtlanta collection
             inventory_data = list(vehicle_inventory_collection.find())
-            imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-            distances = getVehicleDistances(imei_list)
-            stoppage_times = getStopTimeToday(imei_list)
-            statuses = getVehicleStatus(imei_list)
-            
-            for vehicle in inventory_data:
-                vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
-                for data in vehicleData:
-                    data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
-                    data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
-
-                    stoppage_time = next((item['stoppage_time_str'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    data['stoppage_time'] = stoppage_time
-                    stoppage_time_delta = next((item['total_stoppage_seconds'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), 0)
-                    data['stoppage_time_delta'] = stoppage_time_delta
-
-                    status = next((item['status'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 'unknown')
-                    data['status'] = status
-                    status_time_str = next((item['status_time_str'] for item in statuses if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    data['status_time_str'] = status_time_str
-                    status_time_delta = next((item['status_time_delta'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 0)
-                    data['status_time_delta'] = status_time_delta
-
-                    vehicles.append(data)
         elif 'user' in user_roles:
             userID = claims.get('user_id')
             userCompany = claims.get('company')
@@ -257,71 +257,27 @@ def get_vehicles():
                 'CompanyName': userCompany,
                 'AssignedUsers': {'$in': [userID]}
             }))
-
-            imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-            distances = getVehicleDistances(imei_list)
-            stoppage_times = getStopTimeToday(imei_list)
-            statuses = getVehicleStatus(imei_list)
-            
-            for vehicle in inventory_data:
-                vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
-                for data in vehicleData:
-                    data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
-                    data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
-
-                    stoppage_time = next((item['stoppage_time_str'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    data['stoppage_time'] = stoppage_time
-                    stoppage_time_delta = next((item['total_stoppage_seconds'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), 0)
-                    data['stoppage_time_delta'] = stoppage_time_delta
-
-                    status = next((item['status'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 'unknown')
-                    data['status'] = status
-                    status_time_str = next((item['status_time_str'] for item in statuses if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    data['status_time_str'] = status_time_str
-                    status_time_delta = next((item['status_time_delta'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 0)
-                    data['status_time_delta'] = status_time_delta
-
-                    vehicles.append(data)
         else:
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
-            for vehicle in inventory_data:
-                vehicleData = list((collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0})))
 
-                imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-                distances = getVehicleDistances(imei_list)
-                stoppage_times = getStopTimeToday(imei_list)
-                statuses = getVehicleStatus(imei_list)
+        imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
+        if not imei_list:
+            return jsonify([]), 200
 
-                for data in vehicleData:  # Iterate over the list of documents
-                    data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
-                    data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-                    data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
-                    
-                    stoppage_time = next((item['stoppage_time_str'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    data['stoppage_time'] = stoppage_time
-                    stoppage_time_delta = next((item['total_stoppage_seconds'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), 0)
-                    data['stoppage_time_delta'] = stoppage_time_delta
+        # Fetch all required data in batch
+        distances = getVehicleDistances(imei_list)
+        stoppage_times = getStopTimeToday(imei_list)
+        statuses = getVehicleStatus(imei_list)
 
-                    status = next((item['status'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 'unknown')
-                    data['status'] = status
-                    status_time_str = next((item['status_time_str'] for item in statuses if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    data['status_time_str'] = status_time_str
-                    status_time_delta = next((item['status_time_delta'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 0)
-                    data['status_time_delta'] = status_time_delta
-
-                    vehicles.append(data)
+        vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses)
 
         for vehicle in vehicles:
-            vehicle['_id'] = str(vehicle['_id'])  
-
+            vehicle['_id'] = str(vehicle['_id'])
             lat = vehicle.get('latitude')
             lng = vehicle.get('longitude')
-            location = geocodeInternal(lat, lng)
-            vehicle['location'] = location
+            vehicle['location'] = geocodeInternal(lat, lng)
 
-        
         return jsonify(vehicles), 200
     except Exception as e:
         print("Error fetching vehicle data:", e)
