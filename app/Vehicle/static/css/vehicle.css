@@ -537,9 +537,9 @@ input:checked + .slider:before {
 
 .location-text {
     font-family: Arial, sans-serif;
-    color: #777;
-    font-size: 12px;
-    font-weight: 500;
+    color: #555;
+    font-size: 13px;
+    font-weight: 900;
   }
 
 .dark-mode .location-text {
