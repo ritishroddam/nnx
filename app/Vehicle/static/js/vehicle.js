@@ -329,7 +329,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const secondsDiff = Math.floor(timeDiff / 1000);
     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
     const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-    let statusText, statusColor;
+    let statusText, statusColor, gpsIcon;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
     if (timeDiff > 2 * 60 * 1000) {
       statusText = "Offline";
@@ -352,6 +352,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       sinceText = `since ${secondsDiff} sec`;
     }
 
+    if (statusText === "Offline") {
+      gpsIcon = "location_disabled";
+    } else if (statusText === "Stopped") {
+      gpsIcon = "my_location";
+    }
+
     // Icons row
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
@@ -362,14 +368,13 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       <span class="material-symbols-outlined" style="${
         iconStyle + iconRed
       }">sos</span>
-      <span class="material-symbols-outlined" style="${iconStyle}">local_gas_station</span>
     `;
 
     vehicleElement.innerHTML = `
     <div style="display:flex;align-items:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
+          <span class="material-symbols-outlined" style="font-size:22px;">${gpsIcon}</span>
           <span class="vehicle-number" style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;">
             ${vehicle.LicensePlateNumber || vehicle.imei}
           </span>
@@ -399,7 +404,9 @@ function renderVehicleCards(vehicles, filterValue = "all") {
           </div>
           <div>
             <div style="font-size:13px;color:#888;">Stoppage Today</div>
-            <div style="font-weight:600;">${vehicle.stoppage_time || "--"}</div>
+            <div style="font-weight:600;">${
+              vehicle.status_time_str || "--"
+            }</div>
           </div>
           <div>
             <div style="font-size:13px;color:#888;">Battery</div>
