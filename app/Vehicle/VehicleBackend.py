@@ -83,7 +83,9 @@ def getStopTimeToday(imei):
             seconds = item.get('total_stoppage_seconds', 0)
             item['stoppage_time_str'] = format_seconds(seconds)
 
-        return result
+        allStoppageTimes = {item['imei']: item['stoppage_time_str'] for item in result}
+
+        return allStoppageTimes
 
     except Exception as e:
         print(f"Error calculating stoppage times: {e}")
@@ -148,7 +150,7 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
-                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), {}).get('stoppage_time_str', '0 seconds')
+                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), 0)
                     vehicles.append(data)
         elif 'user' in user_roles:
             userID = claims.get('user_id')
@@ -168,7 +170,7 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
-                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), {}).get('stoppage_time_str', '0 seconds')
+                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), 0)
         else:
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
@@ -183,7 +185,7 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
-                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), {}).get('stoppage_time_str', '0 seconds')
+                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), 0)
                     vehicles.append(data)
 
         for vehicle in vehicles:
