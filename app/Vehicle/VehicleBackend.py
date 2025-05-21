@@ -21,7 +21,11 @@ vehicle_inventory_collection = db['vehicle_inventory']
 
 def format_seconds(seconds):
     seconds = int(seconds/1000)
-    if seconds >= 3600:
+    if seconds >= 86400:
+        days = seconds // 86400
+        hours = (seconds % 86400) // 3600
+        return f"{days} days, {hours} hours"
+    elif seconds >= 3600:
         hours = seconds // 3600
         minutes = (seconds % 3600) // 60
         return f"{hours} hours, {minutes} minutes"
