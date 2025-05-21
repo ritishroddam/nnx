@@ -529,66 +529,94 @@ input:checked + .slider:before {
   margin-left: 25px;
 }
 
-/* Vehicle card styling */
+/* Vehicle Card Styling */
 .vehicle-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  margin: 8px 0;
   background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px 0;
+  overflow: hidden;
   transition: all 0.3s ease;
+  border-left: 4px solid #4CAF50; /* Default green border for moving vehicles */
 }
 
 .vehicle-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
 .vehicle-header {
-  padding: 12px 16px;
   background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 16px;
   font-weight: 600;
+  font-size: 16px;
+  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 8px 8px 0 0;
 }
 
 .vehicle-info {
-  padding: 12px 16px;
+  padding: 16px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* Status styles */
 .vehicle-status {
-  padding: 4px 8px;
-  border-radius: 4px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 4px;
   display: inline-block;
 }
 
 .status-moving {
-  color: #27ae60;
-  background-color: rgba(39, 174, 96, 0.1);
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2E7D32;
 }
 
 .status-stopped {
-  color: #f39c12;
-  background-color: rgba(243, 156, 18, 0.1);
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #EF6C00;
 }
 
 .status-offline {
-  color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.1);
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #C62828;
 }
 
-/* Warning icon */
 .warning-icon {
-  color: #f39c12;
+  color: #FFA000;
   margin-left: 8px;
   font-size: 16px;
-  cursor: help;
+}
+
+.location-text {
+  color: #555;
+  margin: 8px 0;
+  display: block;
+}
+
+.last-updated-sub {
+  color: #333;
+  font-weight: 500;
+}
+
+.vehicle-card a {
+  color: #1976D2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.vehicle-card a:hover {
+  text-decoration: underline;
+}
+
+/* Status-specific border colors */
+.vehicle-card.status-stopped {
+  border-left-color: #FF9800;
+}
+
+.vehicle-card.status-offline {
+  border-left-color: #F44336;
 }
