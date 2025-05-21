@@ -83,7 +83,6 @@ def getStopTimeToday(imei):
         result = list(atlanta_collection.aggregate(pipeline))
         for item in result:
             seconds = item.get('total_stoppage_seconds', 0)
-            print(f"IMEI: {item['imei']}, Stoppage Time (seconds): {seconds}")
             item['stoppage_time_str'] = format_seconds(seconds)
 
         allStoppageTimes = {item['imei']: item['stoppage_time_str'] for item in result}
