@@ -42,7 +42,10 @@ def getStopTimeToday(imei):
                 "imei": {"$in": imei},
                 "ignition": "0",
                 "speed": "0.0",
-                "date_time": {"$gte": start_of_day, "$lte": end_of_day}
+                "date_time": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                },
             }},
             {"$sort": {"imei": 1, "date_time": 1}},
             {"$group": {
