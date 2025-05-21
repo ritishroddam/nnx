@@ -194,19 +194,13 @@ function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
 
-  const latitude = data.latitude ? parseFloat(data.latitude) : null;
-  const longitude = data.longitude ? parseFloat(data.longitude) : null;
-  const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
-  
-  // Calculate time since last update
+  // Calculate status and time
   const lastUpdated = convertToDate(data.date, data.time);
   const now = new Date();
   const timeDiff = Math.abs(now - lastUpdated);
   const minutesDiff = Math.floor(timeDiff / (1000 * 60));
   const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-  const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   
-  // Determine status and class
   let statusText, statusClass;
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
   
@@ -220,52 +214,50 @@ function updateVehicleCard(data) {
     statusText = 'Moving';
     statusClass = 'vehicle-status-moving';
   }
-  
+
   let timeText;
-  if (daysDiff > 0) {
-    timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
-  } else if (hoursDiff > 0) {
-    timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+  if (hoursDiff > 0) {
+    timeText = `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ${minutesDiff % 60} min`;
   } else {
-    timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+    timeText = `${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
   }
 
-  if (vehicleCard) {
-    // Update existing vehicle card
-    vehicleCard.querySelector(".vehicle-info").innerHTML = `
-      <div class="vehicle-status ${statusClass}">
-        ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+  const cardHTML = `
+    <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"}</div>
+    <div class="vehicle-status ${statusClass}">
+      Last Update: ${formatLastUpdatedText(data.date, data.time)}<br>
+      ${statusText}: ${speed.toFixed(0)} km/h, since ${timeText}
+    </div>
+    <div class="location-text">
+      ${data.address || "Location unknown"}
+    </div>
+    <div class="divider"></div>
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-title">Distance Today</div>
+        <div class="stat-value">${data.distance ? parseFloat(data.distance).toFixed(1) : "N/A"} km</div>
       </div>
-      <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
-      <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
-      <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-      <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-    `;
+      <div class="stat-item">
+        <div class="stat-title">Stoppage Today</div>
+        <div class="stat-value">${data.stoppage || "N/A"}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-title">Battery</div>
+        <div class="stat-value">${data.battery || "N/A"} V</div>
+      </div>
+    </div>
+  `;
+
+  if (vehicleCard) {
+    vehicleCard.innerHTML = cardHTML;
   } else {
-    // Create a new vehicle card
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
-    vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}</div>
-      <div class="vehicle-info">
-        <div class="vehicle-status ${statusClass}">
-          ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
-        </div>
-        <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
-        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
-        <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-      </div>
-    `;
+    vehicleElement.innerHTML = cardHTML;
     listContainer.appendChild(vehicleElement);
   }
-  filterVehicles();
-  addHoverListenersToCardsAndMarkers();
-  showHidecar();
 }
 
 
@@ -970,7 +962,11 @@ function updateFloatingCard(vehicles, filterValue) {
           <strong>Today's Distance:</strong> <br> <span class="last-updated-sub"> ${vehicle.distance || "NA"} km
           </span> <br>
           <a href="${url}" target="_blank">VIEW MORE</a>
-        </div>`;
+        </div>
+        <div class="vehicle-footer">
+
+        </div>
+        `;
 
       vehicleList.appendChild(vehicleElement);
     });
