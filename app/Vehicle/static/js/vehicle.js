@@ -969,9 +969,15 @@ function updateFloatingCard(vehicles, filterValue) {
           </span> <br><br>
           <strong>Today's Distance:</strong> <br> <span class="last-updated-sub"> ${vehicle.distance || "NA"} km
           </span> <br>
-          <hr>
           <a href="${url}" target="_blank">VIEW MORE</a>
-        </div>`;
+        </div>
+        <div class="vehicle-card-stats">
+      <div class="last-updated-text">Last Update: ${formatLastUpdatedText(vehicle.date, vehicle.time)}</div>
+      <div class="distance-today"><strong>Distance Today:</strong><br>${vehicle.distance || "NA"} km</div>
+      <div class="stoppage-today"><strong>Stoppage Today:</strong><br>${vehicle.stoppage || "N/A"}</div>
+      <div class="battery"><strong>Battery:</strong><br>${vehicle.battery || "N/A"} V</div>
+    </div>
+  </div> `;
 
       vehicleList.appendChild(vehicleElement);
     });
