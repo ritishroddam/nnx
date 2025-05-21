@@ -41,13 +41,13 @@ body {
   left: 14.5%;
 }
 
-.vehicle-card {
+/* .vehicle-card {
   box-shadow: 0px 0px 2px #ccc;
   padding: 10px;
   border-radius: 10px;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
   margin-bottom: 7px;
-}
+} */
 
 .dark-mode .vehicle-card {
   box-shadow: 0px 0px 4px #cccccc90;
@@ -56,18 +56,19 @@ body {
 .vehicle-card:last-child {
   border-bottom: none;
 }
-.vehicle-header {
+
+/* .vehicle-header {
   font-weight: bold;
   color: #333;
   font-size: 16px;
   margin-bottom: 5px;
-}
+} */
 
-.vehicle-info {
+/* .vehicle-info {
   font-family: Arial, sans-serif;
   font-size: 14px;
   color: #000000d0;
-}
+} */
 
 .vehicle-info strong {
   color: #000000d0;
@@ -511,11 +512,11 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
-.location-text {
+/* .location-text {
     font-family: Arial, sans-serif;
     color: #777;
     font-size: 12px;
-  }
+  } */
 
 .last-updated-text{
   font-family: Arial, sans-serif;
@@ -529,6 +530,8 @@ input:checked + .slider:before {
   margin-left: 25px;
 }
 
+
+
 /* Vehicle Card Styling */
 .vehicle-card {
   background: white;
@@ -537,12 +540,7 @@ input:checked + .slider:before {
   margin: 10px 0;
   overflow: hidden;
   transition: all 0.3s ease;
-  border-left: 4px solid #4CAF50; /* Default green border for moving vehicles */
-}
-
-.vehicle-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  padding: 0;
 }
 
 .vehicle-header {
@@ -564,25 +562,19 @@ input:checked + .slider:before {
 
 .vehicle-status {
   font-weight: 600;
-  margin-bottom: 12px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  display: inline-block;
+  margin-bottom: 8px;
 }
 
 .status-moving {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #2E7D32;
+  color: #2E7D32; /* Green for moving */
 }
 
 .status-stopped {
-  background-color: rgba(255, 152, 0, 0.1);
-  color: #EF6C00;
+  color: #000; /* Black for stopped */
 }
 
 .status-offline {
-  background-color: rgba(244, 67, 54, 0.1);
-  color: #C62828;
+  color: #C62828; /* Red for offline */
 }
 
 .warning-icon {
@@ -597,26 +589,20 @@ input:checked + .slider:before {
   display: block;
 }
 
-.last-updated-sub {
-  color: #333;
-  font-weight: 500;
+.distance-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
 }
 
 .vehicle-card a {
   color: #1976D2;
   text-decoration: none;
   font-weight: 500;
+  display: inline-block;
+  margin-top: 8px;
 }
 
 .vehicle-card a:hover {
   text-decoration: underline;
-}
-
-/* Status-specific border colors */
-.vehicle-card.status-stopped {
-  border-left-color: #FF9800;
-}
-
-.vehicle-card.status-offline {
-  border-left-color: #F44336;
 }
