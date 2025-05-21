@@ -405,6 +405,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
       <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
       <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}">${gsmIcon}</span>
       ${sosIcon || ""}
     `;
 
