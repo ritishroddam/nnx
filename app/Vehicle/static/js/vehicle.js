@@ -443,9 +443,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
           </div>
           <div>
             <div style="font-size:13px;color:#888;">Stoppage Today</div>
-            <div style="font-weight:600;">${
-              vehicle.status_time_str || "--"
-            }</div>
+            <div style="font-weight:600;">${vehicle.stoppage_time || "--"}</div>
           </div>
           <div>
             <div style="font-size:13px;color:#888;">Battery</div>
