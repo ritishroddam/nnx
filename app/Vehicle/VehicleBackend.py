@@ -145,6 +145,7 @@ def get_vehicles():
             inventory_data = list(vehicle_inventory_collection.find())
             imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
             distances = getVehicleDistances(imei_list)
+            stoppage_times = getStopTimeToday(imei_list)
             
             for vehicle in inventory_data:
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
@@ -152,6 +153,7 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    data['stoppage_time'] = stoppage_times.get(vehicle.get('IMEI'), '0 seconds')
                     vehicles.append(data)
         elif 'user' in user_roles:
             userID = claims.get('user_id')
@@ -163,6 +165,7 @@ def get_vehicles():
 
             imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
             distances = getVehicleDistances(imei_list)
+            stoppage_times = getStopTimeToday(imei_list)
             
             for vehicle in inventory_data:
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
@@ -170,6 +173,8 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    data['stoppage_time'] = stoppage_times.get(vehicle.get('IMEI'), '0 seconds')
+                    vehicles.append(data)
         else:
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
@@ -178,11 +183,13 @@ def get_vehicles():
 
                 imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
                 distances = getVehicleDistances(imei_list)
+                stoppage_times = getStopTimeToday(imei_list)
 
                 for data in vehicleData:  # Iterate over the list of documents
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    data['stoppage_time'] = stoppage_times.get(vehicle.get('IMEI'), '0 seconds')
                     vehicles.append(data)
 
         for vehicle in vehicles:
