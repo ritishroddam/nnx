@@ -57,17 +57,28 @@ body {
 
 .dark-mode .location-text,
 .dark-mode .stat-title {
-  color: #aaa;
+  color: #888;
 }
 
 .dark-mode .divider {
   background-color: #444;
 }
 
-.dark-mode .vehicle-card {
-  box-shadow: 0px 0px 4px #cccccc90;
+.dark-mode .divider {
+  background-color: #444; /* Darker divider color */
 }
-*/ .vehicle-card {
+
+.dark-mode .vehicle-card-actions span {
+  color: #ccc; /* Light icon color for actions */
+}
+
+.dark-mode .vehicle-card {
+  background: #1e1e1e; /* Dark background */
+  color: #ccc; /* Light text color */
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1); /* Softer shadow */
+}
+
+.vehicle-card {
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 8px #0001;
@@ -84,6 +95,10 @@ body {
   margin-bottom: 2px;
 }
 
+.dark-mode .vehicle-card-row {
+  color: #ccc; /* Light text color */
+}
+
 .vehicle-card-row:last-child {
   margin-bottom: 0;
 }
@@ -92,6 +107,10 @@ body {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   font-size: 22px;
   vertical-align: middle;
+}
+
+.dark-mode .vehicle-card .material-symbols-outlined {
+  color: #ccc; /* Light icon color */
 }
 
 .vehicle-card-content {
@@ -106,6 +125,10 @@ body {
   letter-spacing: 1px;
 }
 
+.dark-mode .vehicle-number {
+  color: #fff; /* Bright text for vehicle number */
+}
+
 .vehicle-card-stats {
   width: 120px;
   padding-left: 15px;
@@ -114,6 +137,10 @@ body {
 
 .dark-mode .vehicle-card-stats {
   border-left-color: #ccc;
+}
+
+.dark-mode .vehicle-card-stats div {
+  color: #ccc; /* Light text color for stats */
 }
 
 .vehicle-card:last-child {
@@ -589,6 +616,10 @@ input:checked + .slider:before {
 .last-updated-text {
   color: #222;
   font-size: 13px;
+}
+
+.dark-mode .last-updated-text {
+  color: #aaa; /* Subtle text color for last updated */
 }
 
 .last-updated-sub {
