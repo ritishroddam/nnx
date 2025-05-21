@@ -236,20 +236,19 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+
                     stoppage_time = next((item['stoppage_time_str'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), '0 seconds')
                     data['stoppage_time'] = stoppage_time
                     stoppage_time_delta = next((item['total_stoppage_seconds'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), 0)
                     data['stoppage_time_delta'] = stoppage_time_delta
-                    print("stoppage_time_delta", stoppage_time_delta)
+
                     status = next((item['status'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 'unknown')
-                    print("status", status)
                     data['status'] = status
                     status_time_str = next((item['status_time_str'] for item in statuses if item['imei'] == vehicle.get('IMEI')), '0 seconds')
-                    print("status_time_str", status_time_str)
                     data['status_time_str'] = status_time_str
                     status_time_delta = next((item['status_time_delta'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 0)
-                    print("status_time_delta", status_time_delta)
                     data['status_time_delta'] = status_time_delta
+
                     vehicles.append(data)
         elif 'user' in user_roles:
             userID = claims.get('user_id')
@@ -270,16 +269,19 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+
                     stoppage_time = next((item['stoppage_time_str'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), '0 seconds')
                     data['stoppage_time'] = stoppage_time
                     stoppage_time_delta = next((item['total_stoppage_seconds'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), 0)
                     data['stoppage_time_delta'] = stoppage_time_delta
+
                     status = next((item['status'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 'unknown')
                     data['status'] = status
                     status_time_str = next((item['status_time_str'] for item in statuses if item['imei'] == vehicle.get('IMEI')), '0 seconds')
                     data['status_time_str'] = status_time_str
                     status_time_delta = next((item['status_time_delta'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 0)
                     data['status_time_delta'] = status_time_delta
+
                     vehicles.append(data)
         else:
             userCompany = claims.get('company')
@@ -296,16 +298,19 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    
                     stoppage_time = next((item['stoppage_time_str'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), '0 seconds')
                     data['stoppage_time'] = stoppage_time
                     stoppage_time_delta = next((item['total_stoppage_seconds'] for item in stoppage_times if item['imei'] == vehicle.get('IMEI')), 0)
                     data['stoppage_time_delta'] = stoppage_time_delta
+
                     status = next((item['status'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 'unknown')
                     data['status'] = status
                     status_time_str = next((item['status_time_str'] for item in statuses if item['imei'] == vehicle.get('IMEI')), '0 seconds')
                     data['status_time_str'] = status_time_str
                     status_time_delta = next((item['status_time_delta'] for item in statuses if item['imei'] == vehicle.get('IMEI')), 0)
                     data['status_time_delta'] = status_time_delta
+
                     vehicles.append(data)
 
         for vehicle in vehicles:
