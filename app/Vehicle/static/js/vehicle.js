@@ -321,6 +321,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", vehicle.imei);
+    const isDarkMode = document.body.classList.contains("dark-mode");
 
     // Status logic
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
@@ -329,7 +330,13 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const secondsDiff = Math.floor(timeDiff / 1000);
     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
     const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-    let statusText, statusColor, gpsIcon;
+    let statusText,
+      statusColor,
+      gpsIcon,
+      sosIcon,
+      ignitionIcon,
+      gsmIcon,
+      gsmColor;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
     if (timeDiff > 2 * 60 * 1000) {
       statusText = "Offline";
@@ -358,16 +365,47 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       gpsIcon = "my_location";
     }
 
-    // Icons row
+    if (vehicle.sos === "1") {
+      sosIcon = `      <span class="material-symbols-outlined" style="${
+        iconStyle + iconRed
+      }">sos</span>`;
+    }
+
+    if (vehicle.ignition === "0") {
+      ignitionIcon = "key_off";
+    } else {
+      ignitionIcon = "key";
+    }
+
+    ASUgsmValue = parseInt(vehicle.gsm_sig);
+
+    if (ASUgsmValue == 0) {
+      gsmIcon = "signal_cellular_null";
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red in dark mode
+    } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+      gsmIcon = "signal_cellular_1_bar";
+      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; // Brighter orange in dark mode
+    } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+      gsmIcon = "signal_cellular_2_bar";
+      gsmColor = isDarkMode ? "#ffe082" : "#ffc107"; // Brighter yellow in dark mode
+    } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+      gsmIcon = "signal_cellular_3_bar";
+      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; // Brighter light green in dark mode
+    } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+      gsmIcon = "signal_cellular_4_bar";
+      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; // Brighter green in dark mode
+    } else {
+      gsmIcon = "signal_cellular_off";
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red for unknown state
+    }
+
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
     const iconRow = `
       <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
       <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
       <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
-      <span class="material-symbols-outlined" style="${
-        iconStyle + iconRed
-      }">sos</span>
+      ${sosIcon || ""}
     `;
 
     vehicleElement.innerHTML = `
