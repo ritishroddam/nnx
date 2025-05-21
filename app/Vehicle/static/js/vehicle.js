@@ -357,7 +357,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconRed = "color:#d32f2f;";
     const iconRow = `
       <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
-      // <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
+      <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
       <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
       <span class="material-symbols-outlined" style="${
         iconStyle + iconRed
