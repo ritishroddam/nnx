@@ -223,6 +223,7 @@ function updateVehicleCard(data) {
     statusClass = "vehicle-status-moving";
   }
 
+
   let timeText;
   if (daysDiff > 0) {
     timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
@@ -256,7 +257,6 @@ function updateVehicleCard(data) {
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
   } else {
-    // Create a new vehicle card
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
@@ -287,9 +287,6 @@ function updateVehicleCard(data) {
     `;
     listContainer.appendChild(vehicleElement);
   }
-  filterVehicles();
-  addHoverListenersToCardsAndMarkers();
-  showHidecar();
 }
 
 function triggerSOS(imei, marker) {
@@ -1041,7 +1038,11 @@ function updateFloatingCard(vehicles, filterValue) {
           } km
           </span> <br>
           <a href="${url}" target="_blank">VIEW MORE</a>
-        </div>`;
+        </div>
+        <div class="vehicle-footer">
+
+        </div>
+        `;
 
       vehicleList.appendChild(vehicleElement);
     });
