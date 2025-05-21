@@ -528,3 +528,20 @@ input:checked + .slider:before {
   font-size: 12px;
   margin-left: 25px;
 }
+
+.vehicle-status {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.vehicle-status-moving {
+  color: #2e7d32; /* Green for moving */
+}
+
+.vehicle-status-stopped {
+  color: #d32f2f; /* Red for stopped */
+}
+
+.vehicle-status-offline {
+  color: #616161; /* Gray for offline */
+}
