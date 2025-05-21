@@ -133,63 +133,6 @@ async function fetchVehicleData() {
   }
 }
 
-// function updateVehicleCard(data) {
-//   const imei = data.imei;
-//   const vehicleCard = document.querySelector(
-//     `.vehicle-card[data-imei="${imei}"]`
-//   );
-
-//   const latitude = data.latitude ? parseFloat(data.latitude) : null;
-//   const longitude = data.longitude ? parseFloat(data.longitude) : null;
-//   const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
-
-//   if (vehicleCard) {
-//     // Update existing vehicle card
-//     vehicleCard.querySelector(".vehicle-info").innerHTML = `
-//       <strong>Speed:</strong> ${data.speed ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h" : "Unknown"} <br>
-//   <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
-//   <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
-//       <strong>Last Update:</strong> ${formatLastUpdatedText(
-//         data.date,
-//         data.time
-//       )} <br>
-//       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-//       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-//     `;
-//   } else {
-//     // Create a new vehicle card
-//     const listContainer = document.getElementById("vehicle-list");
-//     const vehicleElement = document.createElement("div");
-//     vehicleElement.classList.add("vehicle-card");
-//     vehicleElement.setAttribute("data-imei", data.imei);
-//     vehicleElement.innerHTML = `
-//       <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
-//       data.status || "Unknown"
-//     }</div>
-//       <div class="vehicle-info">
-//         <strong>Speed:</strong> ${
-//           data.speed
-//             ? convertSpeedToKmh(data.speed).toFixed(2) + " km/h"
-//             : "Unknown"
-//         } <br>
-//         <strong>Lat:</strong> ${latitude} <br>
-//         <strong>Lon:</strong> ${longitude} <br>
-//         <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
-//         <strong>Last Update:</strong> ${formatLastUpdatedText(
-//           data.date,
-//           data.time
-//         )} <br>
-//         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-//         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-//       </div>
-//     `;
-//     listContainer.appendChild(vehicleElement);
-//   }
-//   filterVehicles();
-//   addHoverListenersToCardsAndMarkers();
-//   showHidecar();
-// }
-
 function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(
@@ -583,7 +526,7 @@ function updateMap() {
     });
   }
 
-  renderVehicleCards(Array.from(vehicleData.values()));
+  renderVehicleCards(vehicleData);
   filterVehicles();
 }
 
