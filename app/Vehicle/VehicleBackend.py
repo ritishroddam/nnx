@@ -24,15 +24,15 @@ def format_seconds(seconds):
     if seconds >= 86400:
         days = seconds // 86400
         hours = (seconds % 86400) // 3600
-        return f"{days} days, {hours} hours"
+        return f"{days} days"
     elif seconds >= 3600:
         hours = seconds // 3600
         minutes = (seconds % 3600) // 60
-        return f"{hours} hours, {minutes} minutes"
+        return f"{hours} hours"
     elif seconds >= 60:
         minutes = seconds // 60
         sec = seconds % 60
-        return f"{minutes} minutes, {sec} seconds"
+        return f"{minutes} minutes"
     else:
         return f"{seconds} seconds"
     
