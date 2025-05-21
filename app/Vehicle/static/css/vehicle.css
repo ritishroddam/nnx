@@ -54,17 +54,38 @@ body {
 } */
 
 .vehicle-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px #0001;
+  margin-bottom: 14px;
+  padding: 14px 18px 10px 14px;
   display: flex;
-  position: relative;
-  box-shadow: 0px 0px 2px #ccc;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 7px;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vehicle-card-row {
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.vehicle-card .material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  vertical-align: middle;
 }
 
 .vehicle-card-content {
   flex: 1;
   padding-right: 15px;
+}
+
+.vehicle-number {
+  font-family: "Roboto Mono", monospace;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .vehicle-card-stats {
@@ -101,10 +122,10 @@ body {
 }
 
 .vehicle-info a {
-  color:#336699;
+  color: #336699;
   text-decoration: none;
   font-size: 12px;
-  font-style:oblique;
+  font-style: oblique;
   font-weight: bold;
   margin-left: 105px;
 }
@@ -464,7 +485,7 @@ input:checked + .slider:before {
 
 #search-button {
   padding: 8px 12px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 0 4px 4px 0;
@@ -479,18 +500,18 @@ input:checked + .slider:before {
   .floating-card {
     height: 50vh;
   }
-  
+
   .search-container {
     padding: 6px;
   }
-  
+
   #vehicle-search {
     padding: 6px;
     font-size: 14px;
   }
 }
 
-.info-window a{
+.info-window a {
   color: #336699;
   text-decoration: none;
   font-size: 12px;
@@ -536,23 +557,22 @@ input:checked + .slider:before {
 }
 
 .location-text {
-    font-family: Arial, sans-serif;
-    color: #777;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-.dark-mode .location-text {
-    color: #ccc;
-  }  
-
-.last-updated-text{
   font-family: Arial, sans-serif;
+  color: #777;
   font-size: 12px;
-  margin-top: 10px;
+  font-weight: 500;
 }
 
-.last-updated-sub{
+.dark-mode .location-text {
+  color: #ccc;
+}
+
+.last-updated-text {
+  color: #222;
+  font-size: 13px;
+}
+
+.last-updated-sub {
   font-family: Arial, sans-serif;
   font-size: 12px;
   margin-left: 25px;
