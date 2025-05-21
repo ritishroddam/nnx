@@ -192,12 +192,14 @@ async function fetchVehicleData() {
 
 function updateVehicleCard(data) {
   const imei = data.imei;
-  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+  const vehicleCard = document.querySelector(
+    `.vehicle-card[data-imei="${imei}"]`
+  );
 
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
   const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
-  
+
   // Calculate time since last update
   const lastUpdated = convertToDate(data.date, data.time);
   const now = new Date();
@@ -205,40 +207,51 @@ function updateVehicleCard(data) {
   const minutesDiff = Math.floor(timeDiff / (1000 * 60));
   const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
   const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  
+
   // Determine status and class
   let statusText, statusClass;
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
-  
+
   if (timeDiff > 2 * 60 * 1000) {
-    statusText = 'Offline';
-    statusClass = 'vehicle-status-offline';
+    statusText = "Offline";
+    statusClass = "vehicle-status-offline";
   } else if (speed === 0) {
-    statusText = 'Stopped';
-    statusClass = 'vehicle-status-stopped';
+    statusText = "Stopped";
+    statusClass = "vehicle-status-stopped";
   } else {
-    statusText = 'Moving';
-    statusClass = 'vehicle-status-moving';
+    statusText = "Moving";
+    statusClass = "vehicle-status-moving";
   }
-  
+
   let timeText;
   if (daysDiff > 0) {
-    timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+    timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
   } else if (hoursDiff > 0) {
-    timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+    timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
   } else {
-    timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+    timeText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
   }
 
   if (vehicleCard) {
     // Update existing vehicle card
     vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <div class="vehicle-status ${statusClass}">
-        ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+        ${statusText}: ${speed.toFixed(2)} km/h${
+      speed === 0 ? `, ${timeText}` : ""
+    }
       </div>
-      <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
-      <strong>Distance Travelled:</strong> ${data.distance ? parseFloat(data.distance).toFixed(2) : "NA"} km <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
+      <strong>Lat&Lon:</strong> ${
+        latitude && longitude
+          ? `${latitude.toFixed(4)},${longitude.toFixed(4)}`
+          : "N/A"
+      } <br>
+      <strong>Distance Travelled:</strong> ${
+        data.distance ? parseFloat(data.distance).toFixed(2) : "NA"
+      } km <br>
+      <strong>Last Update:</strong> ${formatLastUpdatedText(
+        data.date,
+        data.time
+      )} <br>
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
@@ -249,14 +262,25 @@ function updateVehicleCard(data) {
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${data.status || "Unknown"}</div>
+      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
+      data.status || "Unknown"
+    }</div>
       <div class="vehicle-info">
         <div class="vehicle-status ${statusClass}">
-          ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+          ${statusText}: ${speed.toFixed(2)} km/h${
+      speed === 0 ? `, ${timeText}` : ""
+    }
         </div>
-        <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
+        <strong>Lat&Lon:</strong> ${
+          latitude && longitude
+            ? `${latitude.toFixed(4)},${longitude.toFixed(4)}`
+            : "N/A"
+        } <br>
         <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(data.date, data.time)} <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          data.date,
+          data.time
+        )} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
@@ -267,7 +291,6 @@ function updateVehicleCard(data) {
   addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
-
 
 function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
@@ -284,13 +307,86 @@ function triggerSOS(imei, marker) {
   }
 }
 
+<<<<<<< HEAD
+=======
+// async function renderVehicles() {
+//   showHidecar();
+//   const listContainer = document.getElementById("vehicle-list");
+//   const countContainer = document.getElementById("vehicle-count");
+//   listContainer.innerHTML = "";
+//   countContainer.innerText = vehicleData.size;
+
+//   vehicleData.forEach((vehicle, imei) => {
+//     const vehicleElement = document.createElement("div");
+//     vehicleElement.classList.add("vehicle-card");
+//     vehicleElement.setAttribute("data-imei", vehicle.imei);
+
+//     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+//     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+//     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
+
+//     // Calculate status (same as in updateVehicleCard)
+//     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+//     const now = new Date();
+//     const timeDiff = Math.abs(now - lastUpdated);
+//     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+//     const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
+//     const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+//     let statusText, statusClass;
+//     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
+
+//     if (timeDiff > 2 * 60 * 1000) {
+//       statusText = 'Offline';
+//       statusClass = 'status-offline';
+//     } else if (speed === 0) {
+//       statusText = 'Stopped';
+//       statusClass = 'status-stopped';
+//     } else {
+//       statusText = 'Moving';
+//       statusClass = 'status-moving';
+//     }
+
+//     let timeText;
+//     if (daysDiff > 0) {
+//       timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+//     } else if (hoursDiff > 0) {
+//       timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+//     } else {
+//       timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+//     }
+
+//     const warningIcon = timeDiff > 2 * 60 * 1000 ? '<span class="warning-icon" title="No recent data update"> ⚠️</span>' : '';
+
+//     vehicleElement.innerHTML = `
+//       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${vehicle.status || "Unknown"}${warningIcon}</div>
+//       <div class="vehicle-info">
+//         <div class="vehicle-status ${statusClass}">
+//           ${statusText}: ${speed.toFixed(2)} km/h, ${timeText}
+//         </div>
+//         <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
+//         <strong>Distance Travelled:</strong> ${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"} km <br>
+//         <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
+//         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
+//         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+//       </div>
+//     `;
+//     listContainer.appendChild(vehicleElement);
+//   });
+
+//   filterVehicles();
+//   addHoverListenersToCardsAndMarkers();
+//   showHidecar();
+// }
+
+>>>>>>> 084adee3d4b9f500d341ada9a42215d8651e46e9
 function renderVehicles() {
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
   countContainer.innerText = vehicleData.size;
-  
+
   vehicleData.forEach((vehicle, imei) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
@@ -299,7 +395,7 @@ function renderVehicles() {
     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
-    
+
     // Calculate status
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const now = new Date();
@@ -307,41 +403,66 @@ function renderVehicles() {
     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
     const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
     const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    
+
     let statusText, statusClass;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-    
+
     if (timeDiff > 2 * 60 * 1000) {
-      statusText = 'Offline';
-      statusClass = 'status-offline';
+      statusText = "Offline";
+      statusClass = "status-offline";
     } else if (speed === 0) {
-      statusText = 'Stopped';
-      statusClass = 'status-stopped';
+      statusText = "Stopped";
+      statusClass = "status-stopped";
     } else {
-      statusText = 'Moving';
-      statusClass = 'status-moving';
+      statusText = "Moving";
+      statusClass = "status-moving";
     }
-    
+
     let timeText;
     if (daysDiff > 0) {
-      timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+      timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
     } else if (hoursDiff > 0) {
-      timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+      timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
     } else {
-      timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+      timeText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
     }
 
     vehicleElement.innerHTML = `
+<<<<<<< HEAD
   <div class="vehicle-card">
     <div class="vehicle-main-content">
       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${vehicle.status || "Unknown"}</div>
+=======
+      <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
+      vehicle.status || "Unknown"
+    }</div>
+>>>>>>> 084adee3d4b9f500d341ada9a42215d8651e46e9
       <div class="vehicle-info">
         <div class="vehicle-status ${statusClass}">
-          ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+          ${statusText}: ${speed.toFixed(2)} km/h${
+      speed === 0 ? `, ${timeText}` : ""
+    }
         </div>
+<<<<<<< HEAD
         <div class="location-text">
           <strong>Location:</strong> ${vehicle.address || "Location unknown"}
         </div>
+=======
+        <strong>Lat&Lon:</strong> ${
+          latitude && longitude
+            ? `${latitude.toFixed(4)},${longitude.toFixed(4)}`
+            : "N/A"
+        } <br>
+        <strong>Distance Travelled:</strong> ${
+          vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"
+        } km <br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          vehicle.date,
+          vehicle.time
+        )} <br>
+        <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
+        <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
+>>>>>>> 084adee3d4b9f500d341ada9a42215d8651e46e9
       </div>
     </div>
     <div class="vehicle-stats-section">
@@ -804,7 +925,7 @@ function formatDateTime(dateString, timeString) {
 //           <span class="location-text">
 //           Location : ${
 //             vehicle.address || "Location unknown"
-//           } 
+//           }
 //           </span> <br><br>
 //           <strong>Distance-Travelled:</strong> <br> <span class="last-updated-sub"> ${
 //             vehicle.distance || "NA"
@@ -868,9 +989,11 @@ function updateFloatingCard(vehicles, filterValue) {
       vehicleElement.setAttribute("data-imei", vehicle.imei);
 
       const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-      const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+      const longitude = vehicle.longitude
+        ? parseFloat(vehicle.longitude)
+        : null;
       const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
-      
+
       // Calculate time since last update
       const lastUpdated = convertToDate(vehicle.date, vehicle.time);
       const now = new Date();
@@ -878,42 +1001,51 @@ function updateFloatingCard(vehicles, filterValue) {
       const minutesDiff = Math.floor(timeDiff / (1000 * 60));
       const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
       const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      
+
       // Determine status and class
       let statusText, statusClass;
       const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-      
+
       if (timeDiff > 2 * 60 * 1000) {
-        statusText = 'Offline';
-        statusClass = 'vehicle-status-offline';
+        statusText = "Offline";
+        statusClass = "vehicle-status-offline";
       } else if (speed === 0) {
-        statusText = 'Stopped';
-        statusClass = 'vehicle-status-stopped';
+        statusText = "Stopped";
+        statusClass = "vehicle-status-stopped";
       } else {
-        statusText = 'Moving';
-        statusClass = 'vehicle-status-moving';
+        statusText = "Moving";
+        statusClass = "vehicle-status-moving";
       }
-      
+
       let timeText;
       if (daysDiff > 0) {
-        timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+        timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
       } else if (hoursDiff > 0) {
-        timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
+        timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
       } else {
-        timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
+        timeText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
       }
 
       vehicleElement.innerHTML = `
-        <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${vehicle.status || "Unknown"}</div>
+        <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
+        vehicle.status || "Unknown"
+      }</div>
         <div class="vehicle-info">
-          Last Update : ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
+          Last Update : ${formatLastUpdatedText(
+            vehicle.date,
+            vehicle.time
+          )} <br>
           <div class="vehicle-status ${statusClass}">
-            ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
+            ${statusText}: ${speed.toFixed(2)} km/h${
+        speed === 0 ? `, ${timeText}` : ""
+      }
           </div>
           <span class="location-text">
           Location : ${vehicle.address || "Location unknown"} 
           </span> <br><br>
-          <strong>Today's Distance:</strong> <br> <span class="last-updated-sub"> ${vehicle.distance || "NA"} km
+          <strong>Today's Distance:</strong> <br> <span class="last-updated-sub"> ${
+            vehicle.distance || "NA"
+          } km
           </span> <br>
           <a href="${url}" target="_blank">VIEW MORE</a>
         </div>
@@ -1037,7 +1169,9 @@ async function populateVehicleTable() {
       speedCell.style.border = "2px solid red";
     }
 
-    row.insertCell(7).innerText = vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "N/A";
+    row.insertCell(7).innerText = vehicle.distance
+      ? parseFloat(vehicle.distance).toFixed(2)
+      : "N/A";
     row.insertCell(8).innerText = vehicle.odometer; // Assuming odometer reading
     row.insertCell(9).innerText = vehicle.ignition;
     row.insertCell(10).innerText = vehicle.gsm;
@@ -1138,8 +1272,8 @@ themeToggle.addEventListener("click", function () {
 });
 
 function adjustFloatingCardHeight() {
-  const floatingCard = document.querySelector('.floating-card');
-  const mapHeight = document.getElementById('map').offsetHeight;
+  const floatingCard = document.querySelector(".floating-card");
+  const mapHeight = document.getElementById("map").offsetHeight;
   floatingCard.style.height = `${mapHeight * 0.6}px`; // 60% of map height
 }
 
@@ -1209,29 +1343,37 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 }
 
 function searchTable() {
-  const searchTerm = document.getElementById('table-vehicle-search').value.trim().toLowerCase();
-  const tableRows = document.querySelectorAll('#vehicle-table tbody tr');
-  
-  tableRows.forEach(row => {
+  const searchTerm = document
+    .getElementById("table-vehicle-search")
+    .value.trim()
+    .toLowerCase();
+  const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
+
+  tableRows.forEach((row) => {
     const plateNumber = row.cells[0].textContent.toLowerCase();
     if (plateNumber.includes(searchTerm)) {
-      row.style.display = '';
+      row.style.display = "";
     } else {
-      row.style.display = 'none';
+      row.style.display = "none";
     }
   });
 }
 
 // Add this function to handle vehicle search
 function searchVehicle() {
-  const searchTerm = document.getElementById('vehicle-search').value.trim().toLowerCase();
+  const searchTerm = document
+    .getElementById("vehicle-search")
+    .value.trim()
+    .toLowerCase();
   if (!searchTerm) return;
 
   let foundVehicle = null;
-  
+
   // Search through vehicleData
   vehicleData.forEach((vehicle, imei) => {
-    const plateNumber = vehicle.LicensePlateNumber ? vehicle.LicensePlateNumber.toLowerCase() : '';
+    const plateNumber = vehicle.LicensePlateNumber
+      ? vehicle.LicensePlateNumber.toLowerCase()
+      : "";
     // Check full number or last 4 digits
     if (plateNumber.includes(searchTerm)) {
       foundVehicle = vehicle;
@@ -1246,30 +1388,40 @@ function searchVehicle() {
     );
     map.setZoom(18);
     map.panTo(latLng);
-    
+
     // Highlight the vehicle
     const marker = markers[foundVehicle.imei];
     if (marker) {
-      setInfoWindowContent(infoWindow, marker, latLng, foundVehicle, foundVehicle.address || "Location unknown");
+      setInfoWindowContent(
+        infoWindow,
+        marker,
+        latLng,
+        foundVehicle,
+        foundVehicle.address || "Location unknown"
+      );
       infoWindow.open(map, marker);
     }
-    
+
     // Scroll to the vehicle card
-    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${foundVehicle.imei}"]`);
+    const vehicleCard = document.querySelector(
+      `.vehicle-card[data-imei="${foundVehicle.imei}"]`
+    );
     if (vehicleCard) {
-      vehicleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      vehicleCard.classList.add('highlight');
-      setTimeout(() => vehicleCard.classList.remove('highlight'), 2000);
+      vehicleCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      vehicleCard.classList.add("highlight");
+      setTimeout(() => vehicleCard.classList.remove("highlight"), 2000);
     }
   } else {
-    alert('Vehicle not found');
+    alert("Vehicle not found");
   }
 }
 
 // Add event listeners for search
-document.getElementById('search-button').addEventListener('click', searchVehicle);
-document.getElementById('vehicle-search').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
+document
+  .getElementById("search-button")
+  .addEventListener("click", searchVehicle);
+document.getElementById("vehicle-search").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
     searchVehicle();
   }
 });
@@ -1440,10 +1592,14 @@ window.onload = async function () {
   await fetchVehicleData();
   updateMap();
 
-  document.getElementById('table-search-button').addEventListener('click', searchTable);
-  document.getElementById('table-vehicle-search').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      searchTable();
-    }
-  });
+  document
+    .getElementById("table-search-button")
+    .addEventListener("click", searchTable);
+  document
+    .getElementById("table-vehicle-search")
+    .addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchTable();
+      }
+    });
 };
