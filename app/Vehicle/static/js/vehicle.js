@@ -377,7 +377,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       ignitionIcon = "key";
     }
 
-    ASUgsmValue = parseInt(vehicle.gsm_sig);
+    const ASUgsmValue = parseInt(vehicle.gsm_sig);
 
     if (ASUgsmValue == 0) {
       gsmIcon = "signal_cellular_null";
