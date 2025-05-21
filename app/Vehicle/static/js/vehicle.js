@@ -366,7 +366,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     `;
 
     vehicleElement.innerHTML = `
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+    <div style="display:flex;align-items:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
           <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
@@ -377,6 +377,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
             ${iconRow}
           </span>
         </div>
+        <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
         <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
           Last Update : <span class="last-updated-text">${formatLastUpdatedText(
             vehicle.date,
@@ -406,7 +407,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
           </div>
         </div>
       </div>
-      <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-left:10px;">
+      <div class="vertical-divider" style="width:1px;background:#eee;margin:0 16px;"></div>
+      <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
         <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">refresh</span>
         <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">note</span>
         <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">directions_car</span>
