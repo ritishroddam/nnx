@@ -19,6 +19,76 @@ collection = db['distinctAtlanta']
 atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 
+def format_seconds(seconds):
+    seconds = int(seconds)
+    if seconds >= 3600:
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return f"{hours} hours, {minutes} minutes"
+    elif seconds >= 60:
+        minutes = seconds // 60
+        sec = seconds % 60
+        return f"{minutes} minutes, {sec} seconds"
+    else:
+        return f"{seconds} seconds"
+
+def getStopTimeToday(imei):
+    try:
+        utc_now = datetime.now(timezone('UTC'))
+        start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
+        pipeline = [
+            {"$match": {
+                "imei": {"$in": imei},
+                "ignition": "0",
+                "speed": "0.0",
+                "date_time": {"$gte": start_of_day, "$lte": end_of_day}
+            }},
+            {"$sort": {"imei": 1, "date_time": 1}},
+            {"$group": {
+                "_id": "$imei",
+                "stoppages": {"$push": "$date_time"}
+            }},
+            {"$project": {
+                "imei": "$_id",
+                "total_stoppage_seconds": {
+                    # Calculate total stoppage time in seconds
+                    "$reduce": {
+                        "input": "$stoppages",
+                        "initialValue": {"total": 0, "prev": None},
+                        "in": {
+                            "total": {
+                                "$cond": [
+                                    {"$eq": ["$$value.prev", None]},
+                                    0,
+                                    {"$add": [
+                                        "$$value.total",
+                                        {"$subtract": ["$$this", "$$value.prev"]}
+                                    ]}
+                                ]
+                            },
+                            "prev": "$$this"
+                        }
+                    }
+                }
+            }},
+            {"$project": {
+                "imei": 1,
+                "total_stoppage_seconds": "$total_stoppage_seconds.total"
+            }}
+        ]
+
+        result = list(atlanta_collection.aggregate(pipeline))
+        for item in result:
+            seconds = item.get('total_stoppage_seconds', 0)
+            item['stoppage_time_str'] = format_seconds(seconds)
+
+        return result
+
+    except Exception as e:
+        print(f"Error calculating stoppage times: {e}")
+        return []
+
 def getVehicleDistances(imei):
     try:
         utc_now = datetime.now(timezone('UTC'))
@@ -70,6 +140,7 @@ def get_vehicles():
             inventory_data = list(vehicle_inventory_collection.find())
             imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
             distances = getVehicleDistances(imei_list)
+            stoppageTimes = getStopTimeToday(imei_list)
             
             for vehicle in inventory_data:
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
@@ -77,6 +148,7 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), {}).get('stoppage_time_str', '0 seconds')
                     vehicles.append(data)
         elif 'user' in user_roles:
             userID = claims.get('user_id')
@@ -88,6 +160,7 @@ def get_vehicles():
 
             imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
             distances = getVehicleDistances(imei_list)
+            stoppageTimes = getStopTimeToday(imei_list)
             
             for vehicle in inventory_data:
                 vehicleData = list(collection.find({"imei": vehicle.get('IMEI')}, {'timestamp': 0}))
@@ -95,6 +168,7 @@ def get_vehicles():
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), {}).get('stoppage_time_str', '0 seconds')
         else:
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
@@ -103,11 +177,13 @@ def get_vehicles():
 
                 imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
                 distances = getVehicleDistances(imei_list)
+                stoppageTimes = getStopTimeToday(imei_list)
 
                 for data in vehicleData:  # Iterate over the list of documents
                     data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
                     data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
                     data['distance'] = round(distances.get(vehicle.get('IMEI'), 0), 2)
+                    data['stoppageTime'] = stoppageTimes.get(vehicle.get('IMEI'), {}).get('stoppage_time_str', '0 seconds')
                     vehicles.append(data)
 
         for vehicle in vehicles:
