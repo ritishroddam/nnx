@@ -970,7 +970,7 @@ function updateFloatingCard(vehicles, filterValue) {
           <strong>Today's Distance:</strong> <br> <span class="last-updated-sub"> ${vehicle.distance || "NA"} km
           </span> <br>
           <hr>
-          <a href="${url}" target="_blank">MORE</a>
+          <a href="${url}" target="_blank">VIEW MORE</a>
         </div>`;
 
       vehicleList.appendChild(vehicleElement);
