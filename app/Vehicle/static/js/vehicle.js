@@ -303,82 +303,78 @@ function triggerSOS(imei, marker) {
   }
 }
 
-// async function renderVehicles() {
-//   showHidecar();
-//   const listContainer = document.getElementById("vehicle-list");
-//   const countContainer = document.getElementById("vehicle-count");
-//   listContainer.innerHTML = "";
-//   countContainer.innerText = vehicleData.size;
+function renderVehicleCards(vehicles, filterValue = "all") {
+  // If toggle-card-switch is off, hide cards and update counter
+  if (document.getElementById("toggle-card-switch").checked === false) {
+    hideCard();
 
-//   vehicleData.forEach((vehicle, imei) => {
-//     const vehicleElement = document.createElement("div");
-//     vehicleElement.classList.add("vehicle-card");
-//     vehicleElement.setAttribute("data-imei", vehicle.imei);
+    const vehicleCounter = document.getElementById("vehicle-counter");
+    const vehicleCount = document.getElementById("vehicle-count");
+    vehicleCount.innerText = vehicles.length;
 
-//     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-//     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-//     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
+    let headingText = "All Vehicles";
+    switch (filterValue) {
+      case "0":
+        headingText = "Stationary Vehicles";
+        break;
+      case "0-40":
+        headingText = "Slow Speed Vehicles";
+        break;
+      case "40-60":
+        headingText = "Moderate Speed Vehicles";
+        break;
+      case "60+":
+        headingText = "High Speed Vehicles";
+        break;
+      case "sos":
+        headingText = "SOS Alert Vehicles";
+        break;
+      case "offline":
+        headingText = "Offline Vehicles";
+        break;
+      default:
+        headingText = "All Vehicles";
+        break;
+    }
+    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+    return;
+  }
 
-//     // Calculate status
-//     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-//     const now = new Date();
-//     const timeDiff = Math.abs(now - lastUpdated);
-//     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-//     const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-//     const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-
-//     let statusText, statusClass;
-//     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-
-//     if (timeDiff > 2 * 60 * 1000) {
-//       statusText = 'Offline';
-//       statusClass = 'status-offline';
-//     } else if (speed === 0) {
-//       statusText = 'Stopped';
-//       statusClass = 'status-stopped';
-//     } else {
-//       statusText = 'Moving';
-//       statusClass = 'status-moving';
-//     }
-
-//     let timeText;
-//     if (daysDiff > 0) {
-//       timeText = `since ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
-//     } else if (hoursDiff > 0) {
-//       timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? 's' : ''}`;
-//     } else {
-//       timeText = `since ${minutesDiff} min${minutesDiff > 1 ? 's' : ''}`;
-//     }
-
-//     vehicleElement.innerHTML = `
-//       <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${vehicle.status || "Unknown"}</div>
-//       <div class="vehicle-info">
-//         <div class="vehicle-status ${statusClass}">
-//           ${statusText}: ${speed.toFixed(2)} km/h${speed === 0 ? `, ${timeText}` : ''}
-//         </div>
-//         <strong>Lat&Lon:</strong> ${latitude && longitude ? `${latitude.toFixed(4)},${longitude.toFixed(4)}` : "N/A"} <br>
-//         <strong>Distance Travelled:</strong> ${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "NA"} km <br>
-//         <strong>Last Update:</strong> ${formatLastUpdatedText(vehicle.date, vehicle.time)} <br>
-//         <strong>Location:</strong> ${vehicle.address || "Location unknown"} <br>
-//         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-//       </div>
-//     `;
-//     listContainer.appendChild(vehicleElement);
-//   });
-
-//   filterVehicles();
-//   addHoverListenersToCardsAndMarkers();
-//   showHidecar();
-// }
-
-async function renderVehicles() {
-  showHidecar();
+  // Otherwise, render the cards
   const listContainer = document.getElementById("vehicle-list");
-  const countContainer = document.getElementById("vehicle-count");
-  listContainer.innerHTML = "";
-  countContainer.innerText = vehicleData.size;
+  const vehicleCounter = document.getElementById("vehicle-counter");
+  const vehicleCount = document.getElementById("vehicle-count");
 
-  vehicleData.forEach((vehicle, imei) => {
+  listContainer.innerHTML = "";
+  vehicleCount.innerText = vehicles.length;
+
+  let headingText = "All Vehicles";
+  switch (filterValue) {
+    case "0":
+      headingText = "Stationary Vehicles";
+      break;
+    case "0-40":
+      headingText = "Slow Speed Vehicles";
+      break;
+    case "40-60":
+      headingText = "Moderate Speed Vehicles";
+      break;
+    case "60+":
+      headingText = "High Speed Vehicles";
+      break;
+    case "sos":
+      headingText = "SOS Alert Vehicles";
+      break;
+    case "offline":
+      headingText = "Offline Vehicles";
+      break;
+    default:
+      headingText = "All Vehicles";
+      break;
+  }
+  vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+
+  vehicles.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", vehicle.imei);
@@ -413,20 +409,19 @@ async function renderVehicles() {
       sinceText = `since ${secondsDiff} sec`;
     }
 
-    // Icons (replace with your logic for each icon)
+    // Icons row
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
     const iconRow = `
-      <span class="material-symbols-outlined" style="${iconStyle}">do_not_disturb_on</span>
       <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
       <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
+      <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
       <span class="material-symbols-outlined" style="${
         iconStyle + iconRed
       }">sos</span>
       <span class="material-symbols-outlined" style="${iconStyle}">local_gas_station</span>
     `;
 
-    // Card HTML
     vehicleElement.innerHTML = `
       <div class="vehicle-card-row" style="display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:8px;">
@@ -435,9 +430,6 @@ async function renderVehicles() {
             vehicle.LicensePlateNumber || vehicle.imei
           }</span>
           <span style="margin-left:4px;">${iconRow}</span>
-        </div>
-        <div>
-          <!-- Add any right-side icon if needed -->
         </div>
       </div>
       <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
@@ -591,7 +583,7 @@ function updateMap() {
     });
   }
 
-  renderVehicles();
+  renderVehicleCards(Array.from(vehicleData.values()));
   filterVehicles();
 }
 
@@ -674,7 +666,7 @@ function filterVehicles() {
       filteredVehicles.push(marker.device);
     }
   });
-  updateFloatingCard(filteredVehicles, filterValue);
+  renderVehicleCards(filteredVehicles, filterValue);
 }
 
 function parseCoordinates(lat, lng) {
@@ -839,230 +831,6 @@ function formatDateTime(dateString, timeString) {
   const formattedDate = `${day}/${month}/${year}`;
   const formattedTime = `${hour}:${minute}:${second} ${ampm}`;
   return { formattedDate, formattedTime };
-}
-
-// function updateFloatingCard(vehicles, filterValue) {
-//   if (document.getElementById("toggle-card-switch").checked === false) {
-//     hideCard();
-
-//     const vehicleCounter = document.getElementById("vehicle-counter");
-
-//     const vehicleCount = document.getElementById("vehicle-count");
-//     vehicleCount.innerText = vehicles.length;
-
-//     vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
-//   } else {
-//     const vehicleList = document.getElementById("vehicle-list");
-//     const vehicleCounter = document.getElementById("vehicle-counter");
-//     const vehicleCount = document.getElementById("vehicle-count");
-
-//     vehicleList.innerHTML = "";
-//     vehicleCount.innerText = vehicles.length;
-
-//     let headingText = "All Vehicles";
-//     switch (filterValue) {
-//       case "0":
-//         headingText = "Stationary Vehicles";
-//         break;
-//       case "0-40":
-//         headingText = "Slow Speed Vehicles";
-//         break;
-//       case "40-60":
-//         headingText = "Moderate Speed Vehicles";
-//         break;
-//       case "60+":
-//         headingText = "High Speed Vehicles";
-//         break;
-//       case "sos":
-//         headingText = "SOS Alert Vehicles";
-//         break;
-//       case "offline":
-//         headingText = "Offline Vehicles";
-//         break;
-//       default:
-//         headingText = "All Vehicles";
-//         break;
-//     }
-//     vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
-
-//     vehicles.forEach((vehicle) => {
-//       const vehicleElement = document.createElement("div");
-//       vehicleElement.classList.add("vehicle-card");
-//       vehicleElement.setAttribute("data-imei", vehicle.imei);
-
-//       const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-//       const longitude = vehicle.longitude
-//         ? parseFloat(vehicle.longitude)
-//         : null;
-
-//       const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
-
-//       vehicleElement.innerHTML = `
-//         <div class="vehicle-header">${vehicle.LicensePlateNumber} - ${
-//         vehicle.status || "Unknown"
-//       }</div>
-//         <div class="vehicle-info">
-//           Last Update : ${formatLastUpdatedText(
-//             vehicle.date,
-//             vehicle.time
-//           )} <br>
-//           Speed : ${
-//             vehicle.speed
-//               ? convertSpeedToKmh(vehicle.speed).toFixed(2) + " km/h"
-//               : "Unknown"
-//           } <br>
-//           <span class="location-text">
-//           Location : ${
-//             vehicle.address || "Location unknown"
-//           }
-//           </span> <br><br>
-//           <strong>Distance-Travelled:</strong> <br> <span class="last-updated-sub"> ${
-//             vehicle.distance || "NA"
-//           } km
-//           </span> <br>
-//           <a href="${url}" target="_blank">VIEW IN DETAIL</a>
-//         </div>`;
-
-//       vehicleList.appendChild(vehicleElement);
-//     });
-//   }
-// }
-
-function updateFloatingCard(vehicles, filterValue) {
-  if (document.getElementById("toggle-card-switch").checked === false) {
-    hideCard();
-
-    const vehicleCounter = document.getElementById("vehicle-counter");
-    const vehicleCount = document.getElementById("vehicle-count");
-    vehicleCount.innerText = vehicles.length;
-
-    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
-  } else {
-    const vehicleList = document.getElementById("vehicle-list");
-    const vehicleCounter = document.getElementById("vehicle-counter");
-    const vehicleCount = document.getElementById("vehicle-count");
-
-    vehicleList.innerHTML = "";
-    vehicleCount.innerText = vehicles.length;
-
-    let headingText = "All Vehicles";
-    switch (filterValue) {
-      case "0":
-        headingText = "Stationary Vehicles";
-        break;
-      case "0-40":
-        headingText = "Slow Speed Vehicles";
-        break;
-      case "40-60":
-        headingText = "Moderate Speed Vehicles";
-        break;
-      case "60+":
-        headingText = "High Speed Vehicles";
-        break;
-      case "sos":
-        headingText = "SOS Alert Vehicles";
-        break;
-      case "offline":
-        headingText = "Offline Vehicles";
-        break;
-      default:
-        headingText = "All Vehicles";
-        break;
-    }
-    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
-
-    vehicles.forEach((vehicle) => {
-      const vehicleElement = document.createElement("div");
-      vehicleElement.classList.add("vehicle-card");
-      vehicleElement.setAttribute("data-imei", vehicle.imei);
-
-      // Status logic
-      const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-      const now = new Date();
-      const timeDiff = Math.abs(now - lastUpdated);
-      const secondsDiff = Math.floor(timeDiff / 1000);
-      const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-      const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-      let statusText, statusColor;
-      const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-      if (timeDiff > 2 * 60 * 1000) {
-        statusText = "Offline";
-        statusColor = "#616161";
-      } else if (speed === 0) {
-        statusText = "Stopped";
-        statusColor = "#d32f2f";
-      } else {
-        statusText = "Moving";
-        statusColor = "#2e7d32";
-      }
-
-      // Time since status
-      let sinceText = "";
-      if (hoursDiff > 0) {
-        sinceText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
-      } else if (minutesDiff > 0) {
-        sinceText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
-      } else {
-        sinceText = `since ${secondsDiff} sec`;
-      }
-
-      // Icons row
-      const iconStyle =
-        "font-size:22px;vertical-align:middle;margin-right:2px;";
-      const iconRed = "color:#d32f2f;";
-      const iconRow = `
-        <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
-        <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
-        <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
-        <span class="material-symbols-outlined" style="${
-          iconStyle + iconRed
-        }">sos</span>
-        <span class="material-symbols-outlined" style="${iconStyle}">local_gas_station</span>
-      `;
-
-      vehicleElement.innerHTML = `
-        <div class="vehicle-card-row" style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="material-symbols-outlined" style="font-size:22px;">do_not_disturb_on</span>
-            <span class="vehicle-number" style="font-weight:700;font-size:20px;">${
-              vehicle.LicensePlateNumber || vehicle.imei
-            }</span>
-            <span style="margin-left:4px;">${iconRow}</span>
-          </div>
-        </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
-          Last Update : <span class="last-updated-text">${formatLastUpdatedText(
-            vehicle.date,
-            vehicle.time
-          )}</span>
-        </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
-          ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
-        </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:13px;color:#aaa;">
-          Location : ${vehicle.address || "Location unknown"}
-        </div>
-        <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
-          <div>
-            <div style="font-size:13px;color:#888;">Distance Today</div>
-            <div style="font-weight:600;">${
-              vehicle.distance ? parseFloat(vehicle.distance).toFixed(1) : "0"
-            } km</div>
-          </div>
-          <div>
-            <div style="font-size:13px;color:#888;">Stoppage Today</div>
-            <div style="font-weight:600;">${vehicle.stoppage_time || "--"}</div>
-          </div>
-          <div>
-            <div style="font-size:13px;color:#888;">Battery</div>
-            <div style="font-weight:600;">${vehicle.battery || "--"} V</div>
-          </div>
-        </div>
-      `;
-
-      vehicleList.appendChild(vehicleElement);
-    });
-  }
 }
 
 document.querySelector(".toggle-slider").addEventListener("click", function () {
