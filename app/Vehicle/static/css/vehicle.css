@@ -689,6 +689,17 @@ input:checked + .slider:before {
   position: relative;
 }
 
+.info-header-bar {
+  background: #e3f0fc;
+  padding: 0 0 0 12px;
+  margin: -18px -18px 8px -18px; /* negative margin to fill the top */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
 .info-header-row {
   display: flex;
   align-items: center;      /* Vertically center all items */
