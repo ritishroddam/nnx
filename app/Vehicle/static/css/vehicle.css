@@ -673,6 +673,7 @@ input:checked + .slider:before {
 }
 
 .info-window-show {
+  padding: 2px;
   min-width: 320px;
   max-width: 400px;
   font-family: 'Roboto', Arial, sans-serif;
