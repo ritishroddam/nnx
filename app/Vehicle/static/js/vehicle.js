@@ -585,7 +585,8 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const battery = device.battery || "--";
   const stoppage = device.stoppage_time || "--";
 
-  const headerContent = `
+  const headerContent = document.createElement("div");
+  headerContent.innerHTML = `
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
       <span class="info-plate">${LicensePlateNumber}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
