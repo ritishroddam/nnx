@@ -683,11 +683,14 @@ input:checked + .slider:before {
 
 .info-header-row {
   display: flex;
-  align-items: center;
+  align-items: center;      /* Vertically center all items */
   gap: 4px;
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 4px;
+  margin-top: 0;            /* Remove any top margin */
+  padding-top: 0;           /* Remove any top padding */
+  line-height: 1.1;         /* Tighter line height */
 }
 
 .info-plate {
@@ -695,6 +698,8 @@ input:checked + .slider:before {
   font-size: 22px;
   font-weight: 700;
   margin: 0 4px;
+  line-height: 1;           /* Remove extra vertical space */
+  padding: 0;               /* Remove extra padding */
 }
 
 .info-icon {
