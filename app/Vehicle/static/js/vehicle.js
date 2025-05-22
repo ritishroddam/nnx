@@ -594,51 +594,49 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const battery = device.battery || "--";
   const stoppage = device.stoppage_time || "--";
 
-  // HTML
-  const content = `
-    <div class="info-window-show">
-      <div class="info-header-row">
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
-        <span class="info-plate">${LicensePlateNumber}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
-        ${sosIcon}
-      </div>
-      <div class="info-update-row">
-        <span class="info-update-label">Last Update :</span>
-        <span class="info-update-value">${formatLastUpdatedText(
-          device.date,
-          device.time
-        )}</span>
-      </div>
-      <div class="info-status-row" style="color:${statusColor};">
-        ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
-      </div>
-      <div class="info-location-row">${addressText}</div>
-      <div class="info-bottom-row">
-        <div class="info-bottom-item">
-          <span class="info-bottom-value">${distance}km</span>
-          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
-        </div>
-        <div class="info-bottom-item">
-          <span class="info-bottom-value">${battery}V</span>
-          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">battery_full</span></span>
-        </div>
-        <div class="info-bottom-item">
-          <span class="info-bottom-value">${stoppage}</span>
-          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
-        </div>
-        <div class="info-bottom-actions">
-          <span class="material-symbols-outlined info-bottom-action">share_location</span>
-          <span class="material-symbols-outlined info-bottom-action">description</span>
-          <span class="material-symbols-outlined info-bottom-action">directions_car</span>
-        </div>
-      </div>
-    </div>
+  const headerContent = `
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
+      <span class="info-plate">${LicensePlateNumber}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
   `;
 
+  // HTML
+  const content = `
+  <div class="info-window-show">
+    <div class="info-update-row">
+      <span class="info-update-label">Last Update :</span>
+      <span class="info-update-value">${formatLastUpdatedText(device.date, device.time)}</span>
+    </div>
+    <div class="info-status-row" style="color:${statusColor};">
+      ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
+    </div>
+    <div class="info-location-row">${addressText}</div>
+    <div class="info-bottom-row">
+      <div class="info-bottom-item">
+        <span class="info-bottom-value">${distance}km</span>
+        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+      </div>
+      <div class="info-bottom-item">
+        <span class="info-bottom-value">${battery}V</span>
+        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">battery_full</span></span>
+      </div>
+      <div class="info-bottom-item">
+        <span class="info-bottom-value">${stoppage}</span>
+        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+      </div>
+      <div class="info-bottom-actions">
+        <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+        <span class="material-symbols-outlined info-bottom-action">description</span>
+        <span class="material-symbols-outlined info-bottom-action">directions_car</span>
+      </div>
+    </div>
+  </div>
+`;
+
+  infoWindow.setHeaderContent(headerContent);
   infoWindow.setContent(content);
   infoWindow.setPosition(latLng);
 }
