@@ -599,6 +599,7 @@ async function plotPathOnMap(pathCoordinates) {
     data: [
       {
         position: coords[0],
+        size: 48,
         icon: "car",
         angle: 0,
       },
