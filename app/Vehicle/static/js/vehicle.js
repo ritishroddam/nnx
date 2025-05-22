@@ -709,6 +709,7 @@ function showShareLocationPopup(imei, plate) {
     input.style.display = "block";
   }
 };
+}
 
 function addMarkerClickListener(marker, latLng, device, coords) {
   if (!(latLng instanceof google.maps.LatLng)) {
