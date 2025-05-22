@@ -672,6 +672,15 @@ input:checked + .slider:before {
   color: #b0b0b0;
 }
 
+/* Remove top padding from Google Maps InfoWindow */
+.gm-style-iw-ch {
+  padding-top: 0 !important;
+}
+.info-window-show {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
 .info-window-show {
   min-width: 320px;
   max-width: 400px;
@@ -696,9 +705,9 @@ input:checked + .slider:before {
   font-family: 'Roboto Mono', monospace;
   font-size: 22px;
   font-weight: 700;
-  margin: 0 4px;
-  line-height: 1;           /* Remove extra vertical space */
-  padding: 0;               /* Remove extra padding */
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  line-height: 1 !important;               /* Remove extra padding */
 }
 
 .info-icon {
