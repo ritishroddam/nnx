@@ -618,7 +618,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       <span class="info-plate">${LicensePlateNumber}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
   `;
 
@@ -651,8 +650,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       </div>
       <div class="info-bottom-actions">
         <span class="material-symbols-outlined info-bottom-action">moved_location</span>
-        <span class="material-symbols-outlined info-bottom-action">description</span>
-        <span class="material-symbols-outlined info-bottom-action">directions_car</span>
       </div>
     </div>
   </div>
