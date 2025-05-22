@@ -672,37 +672,12 @@ input:checked + .slider:before {
   color: #b0b0b0;
 }
 
-/* Remove top padding from Google Maps InfoWindow */
-.gm-style-iw-ch {
-  padding-top: 0 !important;
-}
-
-.gm-style-iw.gm-style-iw-c {
-  padding: 0 !important;
-}
-
-.info-window-show {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
 .info-window-show {
   min-width: 320px;
   max-width: 400px;
   font-family: 'Roboto', Arial, sans-serif;
   color: #222;
   position: relative;
-}
-
-.info-header-bar {
-  background: #e3f0fc;
-  padding: 0 0 0 12px;
-  margin: -18px -24px 8px -24px; /* Increase negative margin if needed */
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  min-height: 36px;
-  display: flex;
-  align-items: center;
 }
 
 .info-header-row {
@@ -721,9 +696,9 @@ input:checked + .slider:before {
   font-family: 'Roboto Mono', monospace;
   font-size: 22px;
   font-weight: 700;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  line-height: 1 !important;               /* Remove extra padding */
+  margin: 0 4px;
+  line-height: 1;           /* Remove extra vertical space */
+  padding: 0;               /* Remove extra padding */
 }
 
 .info-icon {
