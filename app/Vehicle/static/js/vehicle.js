@@ -471,9 +471,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       </div>
       <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
       <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
-        <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">refresh</span>
-        <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">note</span>
-        <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">directions_car</span>
+       <span class="material-symbols-outlined info-bottom-action">moved_location</span>
       </div>
     </div>
   `;
