@@ -339,6 +339,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       gpsIcon,
       sosIcon,
       ignitionIcon,
+      ignitionColor,
       gsmIcon,
       gsmColor;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
@@ -377,8 +378,10 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     if (vehicle.ignition === "0") {
       ignitionIcon = "key_off";
+      ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
     } else {
       ignitionIcon = "key";
+      ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
     }
 
     const ASUgsmValue = parseInt(vehicle.gsm);
@@ -407,7 +410,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconRed = "color:#d32f2f;";
     const iconRow = `
       <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle}">visibility_off</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}">${ignitionIcon}</span>
       <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
       <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}">${gsmIcon}</span>
       ${sosIcon || ""}
