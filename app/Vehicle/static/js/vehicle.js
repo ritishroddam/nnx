@@ -685,7 +685,6 @@ document.body.addEventListener("click", function (e) {
   }
 });
 
-// Popup HTML and logic
 function showShareLocationPopup(imei, plate) {
   // Remove existing popup if any
   const oldPopup = document.getElementById("share-location-popup");
@@ -694,26 +693,26 @@ function showShareLocationPopup(imei, plate) {
   const popup = document.createElement("div");
   popup.id = "share-location-popup";
   popup.innerHTML = `
-  <div class="share-popup-content">
-    <h3>Share Live Location</h3>
-    <div>
-      <label for="share-expiry">Expiry:</label>
-      <select id="share-expiry">
-        <option value="5">5 mins</option>
-        <option value="15">15 mins</option>
-        <option value="30">30 mins</option>
-        <option value="60">1 hour</option>
-        <option value="360">6 hours</option>
-        <option value="720">12 hours</option>
-        <option value="1440">24 hours</option>
-      </select>
+    <div class="share-popup-content">
+      <h3>Share Live Location</h3>
+      <div>
+        <label for="share-expiry">Expiry:</label>
+        <select id="share-expiry">
+          <option value="5">5 mins</option>
+          <option value="15">15 mins</option>
+          <option value="30">30 mins</option>
+          <option value="60">1 hour</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+          <option value="1440">24 hours</option>
+        </select>
+      </div>
+      <button id="generate-share-link">Generate Link</button>
+      <div style="margin-top:10px;">
+        <input id="share-link-input" type="text" value="" readonly style="width:90%;">
+      </div>
+      <button id="close-share-popup" style="margin-top:10px;">Close</button>
     </div>
-    <button id="generate-share-link">Generate Link</button>
-    <div style="margin-top:10px;">
-      <input id="share-link-input" type="text" value="" readonly style="width:90%;display:none;">
-    </div>
-    <button id="close-share-popup" style="margin-top:10px;">Close</button>
-  </div>
   `;
   document.body.appendChild(popup);
 
@@ -728,19 +727,22 @@ function showShareLocationPopup(imei, plate) {
 
   document.getElementById("generate-share-link").onclick = async function () {
     const mins = document.getElementById("share-expiry").value;
-    const res = await fetch(`/api/share-location`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imei, expiry: mins }),
-    });
-    const data = await res.json();
     const input = document.getElementById("share-link-input");
-    if (data.link) {
-      input.value = data.link;
-      input.style.display = "block";
-    } else {
+    input.value = "Generating link...";
+    try {
+      const res = await fetch(`/api/share-location`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imei, expiry: mins }),
+      });
+      const data = await res.json();
+      if (data.link) {
+        input.value = data.link;
+      } else {
+        input.value = "Failed to generate link.";
+      }
+    } catch (e) {
       input.value = "Failed to generate link.";
-      input.style.display = "block";
     }
   };
 }
