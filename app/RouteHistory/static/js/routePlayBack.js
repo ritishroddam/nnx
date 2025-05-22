@@ -611,7 +611,7 @@ async function plotPathOnMap(pathCoordinates) {
     getAngle: (d) => d.angle,
     iconAtlas: carIconUrl,
     iconMapping: {
-      car: { x: 0, y: 0, width: 18, height: 32, anchorY: 32, mask: false },
+      car: { x: 0, y: 0, width: 87, height: 155, anchorY: 155, mask: false },
     },
     sizeScale: 1,
     pickable: false,
@@ -849,9 +849,9 @@ function moveCar() {
             car: {
               x: 0,
               y: 0,
-              width: 18,
-              height: 32,
-              anchorY: 32,
+              width: 87,
+              height: 155,
+              anchorY: 155,
               mask: false,
             },
           },
