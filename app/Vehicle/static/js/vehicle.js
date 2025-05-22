@@ -664,37 +664,26 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 }
 
 // location sharing
-document.getElementById("generate-share-link").onclick = async function () {
-  const mins = document.getElementById("share-expiry").value;
-  const input = document.getElementById("share-link-input");
 
-  // Calculate from_datetime and to_datetime in "YYYY-MM-DDTHH:mm" format
-  const now = new Date();
-  const from_datetime = now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
-  const to = new Date(now.getTime() + mins * 60000);
-  const to_datetime = to.toISOString().slice(0, 16);
+document.body.addEventListener("click", function (e) {
+  if (
+    e.target.classList.contains("info-bottom-action") &&
+    e.target.textContent.trim() === "share_location"
+  ) {
+    const infoWindowDiv = e.target.closest(".info-window-show");
+    if (!infoWindowDiv) return;
 
-  input.value = "Generating link...";
-  try {
-    const res = await fetch(`/api/share-location`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        LicensePlateNumber: plate, // Use the vehicle number
-        from_datetime,
-        to_datetime,
-      }),
-    });
-    const data = await res.json();
-    if (data.link) {
-      input.value = data.link;
-    } else {
-      input.value = "Failed to generate link.";
-    }
-  } catch (e) {
-    input.value = "Failed to generate link.";
+    // Get the vehicle number from the info window
+    const plate = infoWindowDiv
+      .querySelector(".info-plate")
+      ?.textContent.trim();
+    const imei = Object.values(vehicleData).find(
+      (v) => v.LicensePlateNumber === plate
+    )?.imei;
+
+    showShareLocationPopup(imei, plate);
   }
-};
+});
 
 function showShareLocationPopup(imei, plate) {
   // Remove existing popup if any
