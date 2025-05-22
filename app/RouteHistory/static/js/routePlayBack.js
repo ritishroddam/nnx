@@ -535,6 +535,201 @@ function interpolateSpeed(index, originalData) {
   return originalData[originalData.length - 1].speed;
 }
 
+// async function plotPathOnMap(pathCoordinates) {
+//   // Clear all markers from the map before plotting new ones
+//   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
+//     window.__allMapMarkers.forEach((marker) => {
+//       if (marker && marker.map) marker.map = null;
+//     });
+//     window.__allMapMarkers = [];
+//   } else {
+//     window.__allMapMarkers = [];
+//   }
+
+//   timelineSlider.addEventListener("input", handleSliderInput);
+//   if (pathPolyline) pathPolyline.setMap(null);
+//   if (startMarker) startMarker.map = null;
+//   if (endMarker) endMarker.map = null;
+//   if (carMarker) carMarker.map = null; // Clear the previous car marker
+
+//   coords = pathCoordinates.map((item) => ({
+//     lat: item.lat,
+//     lng: item.lng,
+//   }));
+
+//   if (coords.length > 0) {
+//     timelineSlider.min = 0;
+//     timelineSlider.max = coords.length - 1;
+//     timelineSlider.value = 0;
+//     sliderTimeDisplay.textContent = pathCoordinates[0].time;
+
+//     const bounds = new google.maps.LatLngBounds();
+//     coords.forEach((coord) => bounds.extend(coord));
+//     map.fitBounds(bounds);
+
+//     pathPolyline = new google.maps.Polyline({
+//       path: coords,
+//       geodesic: true,
+//       strokeColor: "#505050",
+//       strokeOpacity: 0.9,
+//       strokeWeight: 3,
+//       map: map,
+//     });
+
+//     const startContent = document.createElement("div");
+//     startContent.style.backgroundColor = "green";
+//     startContent.style.color = "white";
+//     startContent.style.padding = "5px";
+//     startContent.style.borderRadius = "5px";
+//     startContent.textContent = "Start";
+
+//     const endContent = document.createElement("div");
+//     endContent.style.backgroundColor = "red";
+//     endContent.style.color = "white";
+//     endContent.style.padding = "5px";
+//     endContent.style.borderRadius = "5px";
+//     endContent.textContent = "End";
+
+//     // Markers for start and end points using AdvancedMarkerElement
+//     startMarker = new google.maps.marker.AdvancedMarkerElement({
+//       position: coords[0],
+//       map: map,
+//       title: "Start",
+//       content: startContent, // Pass the DOM element
+//     });
+//     window.__allMapMarkers.push(startMarker);
+
+//     const startIgnition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
+//     const startLocation = await getAddressFromCoordinates(
+//       pathCoordinates[0].lat,
+//       pathCoordinates[0].lng
+//     );
+
+//     const startMarkerInfo = new google.maps.InfoWindow({
+//       content: `<div>
+//                 <h3>${pathCoordinates[0].LicensePlateNumber}</h3>
+//                 <p><strong>Location:</strong> ${startLocation}</p>
+//                 <p><strong>Timestamp:</strong> ${pathCoordinates[0].time}</p>
+//                 <p><strong>Speed:</strong> ${pathCoordinates[0].speed}</p>
+//                 <p><strong>Ignition:</strong> ${startIgnition}</p>
+//               </div>`,
+//     });
+
+//     startMarker.addListener("gmp-click", () => {
+//       startMarkerInfo.open({
+//         anchor: startMarker,
+//         map: map,
+//       });
+//     });
+
+//     endMarker = new google.maps.marker.AdvancedMarkerElement({
+//       position: coords[coords.length - 1],
+//       map: map,
+//       title: "End",
+//       content: endContent, // Pass the DOM element
+//     });
+//     window.__allMapMarkers.push(endMarker);
+
+//     const endIgnition =
+//       pathCoordinates[pathCoordinates.length - 1].ignition === "1"
+//         ? "On"
+//         : "Off";
+//     const endLocation = await getAddressFromCoordinates(
+//       pathCoordinates[pathCoordinates.length - 1].lat,
+//       pathCoordinates[pathCoordinates.length - 1].lng
+//     );
+
+//     const endMarkerInfo = new google.maps.InfoWindow({
+//       content: `<div>
+//                 <h3>${
+//                   pathCoordinates[pathCoordinates.length - 1].LicensePlateNumber
+//                 }</h3>
+//                 <p><strong>Location:</strong> ${endLocation}</p>
+//                 <p><strong>Timestamp:</strong> ${
+//                   pathCoordinates[pathCoordinates.length - 1].time
+//                 }</p>
+//                 <p><strong>Speed:</strong> ${
+//                   pathCoordinates[pathCoordinates.length - 1].speed
+//                 }</p>
+//                 <p><strong>Ignition:</strong> ${endIgnition}</p>
+//               </div>`,
+//     });
+
+//     endMarker.addListener("gmp-click", () => {
+//       endMarkerInfo.open({
+//         anchor: endMarker,
+//         map: map,
+//       });
+//     });
+
+//     const carContent = document.createElement("img");
+//     carContent.src = "/static/images/car_green.png";
+//     carContent.style.width = "18px";
+//     carContent.style.height = "32px";
+//     carContent.style.position = "absolute";
+//     carContent.alt = "Car";
+
+//     carMarker = new google.maps.marker.AdvancedMarkerElement({
+//       position: coords[0],
+//       map: map,
+//       title: "Car",
+//       content: carContent, // Pass the DOM element
+//     });
+//     window.__allMapMarkers.push(carMarker);
+
+//     for (let index = 0; index < coords.length - 1; index++) {
+//       const coord = coords[index];
+//       const nextCoord = coords[index + 1];
+//       const pathCoord = pathCoordinates[index];
+//       const nextPathCoord = pathCoordinates[index + 1];
+
+//       const arrowContent = document.createElement("div");
+//       arrowContent.style.width = "10px";
+//       arrowContent.style.height = "10px";
+//       arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
+//       arrowContent.style.borderTop = "10px solid #2a2a2a";
+//       arrowContent.style.borderLeft = "5px solid transparent";
+//       arrowContent.style.borderRight = "5px solid transparent";
+//       arrowContent.style.position = "absolute";
+//       arrowContent.style.transform = `rotate(${calculateBearing(
+//         nextCoord,
+//         coord
+//       )}deg)`;
+
+//       const marker = new google.maps.marker.AdvancedMarkerElement({
+//         position: coord,
+//         map: map,
+//         title: "Arrow",
+//         content: arrowContent, // Pass the DOM element
+//       });
+//       window.__allMapMarkers.push(marker);
+
+//       const ignition = pathCoord.ignition === "1" ? "On" : "Off";
+
+//       const infoWindow = new google.maps.InfoWindow({
+//         content: `<div>
+//                 <h3>${pathCoord.LicensePlateNumber}</h3>
+//                 <p><strong>Timestamp:</strong> ${pathCoord.time}</p>
+//                 <p><strong>Speed:</strong> ${pathCoord.speed}</p>
+//                 <p><strong>Ignition:</strong> ${ignition}</p>
+//               </div>`,
+//       });
+
+//       marker.addListener("gmp-click", () => {
+//         infoWindow.open({
+//           anchor: marker,
+//           map: map,
+//         });
+//       });
+//     }
+//   }
+// }
+
+let deckOverlay;
+let deckLayers = [];
+let deckInitialized = false;
+let carIconUrl = "/static/images/car_green.png";
+
 async function plotPathOnMap(pathCoordinates) {
   // Clear all markers from the map before plotting new ones
   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
@@ -546,101 +741,146 @@ async function plotPathOnMap(pathCoordinates) {
     window.__allMapMarkers = [];
   }
 
+  // Remove old deck.gl overlay if present
+  if (deckOverlay) {
+    deckOverlay.setProps({ layers: [] });
+    deckOverlay.setMap(null);
+    deckOverlay = null;
+  }
+
   timelineSlider.addEventListener("input", handleSliderInput);
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
   if (endMarker) endMarker.map = null;
   if (carMarker) carMarker.map = null; // Clear the previous car marker
 
-  coords = pathCoordinates.map((item) => ({
-    lat: item.lat,
-    lng: item.lng,
-  }));
+  coords = pathCoordinates.map((item) => [item.lng, item.lat]);
+  if (coords.length === 0) return;
 
-  if (coords.length > 0) {
-    timelineSlider.min = 0;
-    timelineSlider.max = coords.length - 1;
-    timelineSlider.value = 0;
-    sliderTimeDisplay.textContent = pathCoordinates[0].time;
+  // Fit map to bounds
+  const bounds = new google.maps.LatLngBounds();
+  coords.forEach(([lng, lat]) =>
+    bounds.extend(new google.maps.LatLng(lat, lng))
+  );
+  map.fitBounds(bounds);
 
-    const bounds = new google.maps.LatLngBounds();
-    coords.forEach((coord) => bounds.extend(coord));
-    map.fitBounds(bounds);
+  // Set up timeline slider as before
+  timelineSlider.min = 0;
+  timelineSlider.max = coords.length - 1;
+  timelineSlider.value = 0;
+  sliderTimeDisplay.textContent = pathCoordinates[0].time;
 
-    pathPolyline = new google.maps.Polyline({
-      path: coords,
-      geodesic: true,
-      strokeColor: "#505050",
-      strokeOpacity: 0.9,
-      strokeWeight: 3,
-      map: map,
-    });
+  // --- deck.gl PathLayer and IconLayer ---
+  const pathLayer = new deck.PathLayer({
+    id: "route-path",
+    data: [{ path: coords }],
+    getPath: (d) => d.path,
+    getWidth: 6,
+    getColor: [80, 80, 80, 230],
+    widthMinPixels: 3,
+    widthMaxPixels: 8,
+    rounded: true,
+    pickable: false,
+  });
 
-    const startContent = document.createElement("div");
-    startContent.style.backgroundColor = "green";
-    startContent.style.color = "white";
-    startContent.style.padding = "5px";
-    startContent.style.borderRadius = "5px";
-    startContent.textContent = "Start";
+  // Car icon at the first point
+  const iconLayer = new deck.IconLayer({
+    id: "car-icon",
+    data: [
+      {
+        position: coords[0],
+        icon: "car",
+        size: 48,
+        angle: 0,
+      },
+    ],
+    getIcon: (d) => "car",
+    getPosition: (d) => d.position,
+    getSize: (d) => d.size,
+    getAngle: (d) => d.angle,
+    iconAtlas: carIconUrl,
+    iconMapping: {
+      car: { x: 0, y: 0, width: 48, height: 48, mask: false },
+    },
+    sizeScale: 1,
+    pickable: false,
+  });
 
-    const endContent = document.createElement("div");
-    endContent.style.backgroundColor = "red";
-    endContent.style.color = "white";
-    endContent.style.padding = "5px";
-    endContent.style.borderRadius = "5px";
-    endContent.textContent = "End";
+  deckOverlay = new deck.GoogleMapsOverlay({
+    layers: [pathLayer, iconLayer],
+  });
+  deckOverlay.setMap(map);
 
-    // Markers for start and end points using AdvancedMarkerElement
-    startMarker = new google.maps.marker.AdvancedMarkerElement({
-      position: coords[0],
-      map: map,
-      title: "Start",
-      content: startContent, // Pass the DOM element
-    });
-    window.__allMapMarkers.push(startMarker);
+  deckLayers = [pathLayer, iconLayer];
+  deckInitialized = true;
 
-    const startIgnition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
-    const startLocation = await getAddressFromCoordinates(
-      pathCoordinates[0].lat,
-      pathCoordinates[0].lng
-    );
+  // --- InfoWindows and Markers for Start/End/Intermediate Points ---
+  const startContent = document.createElement("div");
+  startContent.style.backgroundColor = "green";
+  startContent.style.color = "white";
+  startContent.style.padding = "5px";
+  startContent.style.borderRadius = "5px";
+  startContent.textContent = "Start";
 
-    const startMarkerInfo = new google.maps.InfoWindow({
-      content: `<div>
+  const endContent = document.createElement("div");
+  endContent.style.backgroundColor = "red";
+  endContent.style.color = "white";
+  endContent.style.padding = "5px";
+  endContent.style.borderRadius = "5px";
+  endContent.textContent = "End";
+
+  // Markers for start and end points using AdvancedMarkerElement
+  startMarker = new google.maps.marker.AdvancedMarkerElement({
+    position: { lat: coords[0][1], lng: coords[0][0] },
+    map: map,
+    title: "Start",
+    content: startContent,
+  });
+  window.__allMapMarkers.push(startMarker);
+
+  const startIgnition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
+  const startLocation = await getAddressFromCoordinates(
+    pathCoordinates[0].lat,
+    pathCoordinates[0].lng
+  );
+
+  const startMarkerInfo = new google.maps.InfoWindow({
+    content: `<div>
                 <h3>${pathCoordinates[0].LicensePlateNumber}</h3>
                 <p><strong>Location:</strong> ${startLocation}</p>
                 <p><strong>Timestamp:</strong> ${pathCoordinates[0].time}</p>
                 <p><strong>Speed:</strong> ${pathCoordinates[0].speed}</p>
                 <p><strong>Ignition:</strong> ${startIgnition}</p>
               </div>`,
-    });
+  });
 
-    startMarker.addListener("gmp-click", () => {
-      startMarkerInfo.open({
-        anchor: startMarker,
-        map: map,
-      });
-    });
-
-    endMarker = new google.maps.marker.AdvancedMarkerElement({
-      position: coords[coords.length - 1],
+  startMarker.addListener("gmp-click", () => {
+    startMarkerInfo.open({
+      anchor: startMarker,
       map: map,
-      title: "End",
-      content: endContent, // Pass the DOM element
     });
-    window.__allMapMarkers.push(endMarker);
+  });
 
-    const endIgnition =
-      pathCoordinates[pathCoordinates.length - 1].ignition === "1"
-        ? "On"
-        : "Off";
-    const endLocation = await getAddressFromCoordinates(
-      pathCoordinates[pathCoordinates.length - 1].lat,
-      pathCoordinates[pathCoordinates.length - 1].lng
-    );
+  endMarker = new google.maps.marker.AdvancedMarkerElement({
+    position: {
+      lat: coords[coords.length - 1][1],
+      lng: coords[coords.length - 1][0],
+    },
+    map: map,
+    title: "End",
+    content: endContent,
+  });
+  window.__allMapMarkers.push(endMarker);
 
-    const endMarkerInfo = new google.maps.InfoWindow({
-      content: `<div>
+  const endIgnition =
+    pathCoordinates[pathCoordinates.length - 1].ignition === "1" ? "On" : "Off";
+  const endLocation = await getAddressFromCoordinates(
+    pathCoordinates[pathCoordinates.length - 1].lat,
+    pathCoordinates[pathCoordinates.length - 1].lng
+  );
+
+  const endMarkerInfo = new google.maps.InfoWindow({
+    content: `<div>
                 <h3>${
                   pathCoordinates[pathCoordinates.length - 1].LicensePlateNumber
                 }</h3>
@@ -653,97 +893,172 @@ async function plotPathOnMap(pathCoordinates) {
                 }</p>
                 <p><strong>Ignition:</strong> ${endIgnition}</p>
               </div>`,
-    });
+  });
 
-    endMarker.addListener("gmp-click", () => {
-      endMarkerInfo.open({
-        anchor: endMarker,
-        map: map,
-      });
-    });
-
-    const carContent = document.createElement("img");
-    carContent.src = "/static/images/car_green.png";
-    carContent.style.width = "18px";
-    carContent.style.height = "32px";
-    carContent.style.position = "absolute";
-    carContent.alt = "Car";
-
-    carMarker = new google.maps.marker.AdvancedMarkerElement({
-      position: coords[0],
+  endMarker.addListener("gmp-click", () => {
+    endMarkerInfo.open({
+      anchor: endMarker,
       map: map,
-      title: "Car",
-      content: carContent, // Pass the DOM element
     });
-    window.__allMapMarkers.push(carMarker);
+  });
 
-    for (let index = 0; index < coords.length - 1; index++) {
-      const coord = coords[index];
-      const nextCoord = coords[index + 1];
-      const pathCoord = pathCoordinates[index];
-      const nextPathCoord = pathCoordinates[index + 1];
+  // Optionally, add intermediate arrow markers with info windows (optional, can be commented out)
+  for (let index = 0; index < coords.length - 1; index++) {
+    const coord = coords[index];
+    const nextCoord = coords[index + 1];
+    const pathCoord = pathCoordinates[index];
 
-      const arrowContent = document.createElement("div");
-      arrowContent.style.width = "10px";
-      arrowContent.style.height = "10px";
-      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-      arrowContent.style.borderTop = "10px solid #2a2a2a";
-      arrowContent.style.borderLeft = "5px solid transparent";
-      arrowContent.style.borderRight = "5px solid transparent";
-      arrowContent.style.position = "absolute";
-      arrowContent.style.transform = `rotate(${calculateBearing(
-        nextCoord,
-        coord
-      )}deg)`;
+    const arrowContent = document.createElement("div");
+    arrowContent.style.width = "10px";
+    arrowContent.style.height = "10px";
+    arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
+    arrowContent.style.borderTop = "10px solid #2a2a2a";
+    arrowContent.style.borderLeft = "5px solid transparent";
+    arrowContent.style.borderRight = "5px solid transparent";
+    arrowContent.style.position = "absolute";
+    arrowContent.style.transform = `rotate(${calculateBearing(
+      { lat: nextCoord[1], lng: nextCoord[0] },
+      { lat: coord[1], lng: coord[0] }
+    )}deg)`;
 
-      const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: coord,
-        map: map,
-        title: "Arrow",
-        content: arrowContent, // Pass the DOM element
-      });
-      window.__allMapMarkers.push(marker);
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      position: { lat: coord[1], lng: coord[0] },
+      map: map,
+      title: "Arrow",
+      content: arrowContent,
+    });
+    window.__allMapMarkers.push(marker);
 
-      const ignition = pathCoord.ignition === "1" ? "On" : "Off";
+    const ignition = pathCoord.ignition === "1" ? "On" : "Off";
 
-      const infoWindow = new google.maps.InfoWindow({
-        content: `<div>
+    const infoWindow = new google.maps.InfoWindow({
+      content: `<div>
                 <h3>${pathCoord.LicensePlateNumber}</h3>
                 <p><strong>Timestamp:</strong> ${pathCoord.time}</p>
                 <p><strong>Speed:</strong> ${pathCoord.speed}</p>
                 <p><strong>Ignition:</strong> ${ignition}</p>
               </div>`,
-      });
+    });
 
-      marker.addListener("gmp-click", () => {
-        infoWindow.open({
-          anchor: marker,
-          map: map,
-        });
+    marker.addListener("gmp-click", () => {
+      infoWindow.open({
+        anchor: marker,
+        map: map,
       });
-    }
+    });
   }
 }
 
+// function updateCarPosition(index) {
+//   const point = pathCoordinates[index];
+//   const bearing = calculateBearing(
+//     pathCoordinates[Math.max(0, index - 1)],
+//     point
+//   );
+
+//   const carContent = document.createElement("img");
+//   carContent.src = "/static/images/car_green.png";
+//   carContent.style.transform = `rotate(${bearing}deg)`;
+//   carContent.style.width = "18px";
+//   carContent.style.height = "32px";
+
+//   carMarker.content = carContent;
+//   carMarker.position = { lat: point.lat, lng: point.lng };
+//   map.panTo(carMarker.position);
+
+//   // Update time display
+//   sliderTimeDisplay.textContent = point.time;
+// }
+
+// function moveCar() {
+//   if (currentIndex < pathCoordinates.length - 1) {
+//     timelineSlider.value = currentIndex;
+//     sliderTimeDisplay.textContent = pathCoordinates[currentIndex].time;
+
+//     const start = pathCoordinates[currentIndex];
+//     const end = pathCoordinates[currentIndex + 1];
+//     const stepDuration = 20 / speedMultiplier;
+//     const steps = Math.floor(
+//       google.maps.geometry.spherical.computeDistanceBetween(
+//         new google.maps.LatLng(start.lat, start.lng),
+//         new google.maps.LatLng(end.lat, end.lng)
+//       ) / 10
+//     ); // Number of steps based on distance
+//     let stepIndex = 0;
+//     const latDiff = (end.lat - start.lat) / steps;
+//     const lngDiff = (end.lng - start.lng) / steps;
+
+//     const bearing = calculateBearing(start, end);
+
+//     animationInterval = setInterval(() => {
+//       if (stepIndex < steps) {
+//         const lat = start.lat + latDiff * stepIndex;
+//         const lng = start.lng + lngDiff * stepIndex;
+
+//         const carContent = document.createElement("img");
+//         carContent.src = "/static/images/car_green.png";
+//         carContent.style.position = "absolute";
+//         carContent.style.width = "18px";
+//         carContent.style.height = "32px";
+//         carContent.style.transform = `rotate(${bearing}deg)`;
+//         carContent.alt = "Car";
+
+//         carMarker.content = carContent; // Set the DOM element as content
+//         carMarker.position = { lat, lng };
+
+//         if (!map.getBounds().contains(carMarker.position))
+//           map.panTo(carMarker.position);
+
+//         stepIndex++;
+//       } else {
+//         currentIndex++;
+//         clearInterval(animationInterval);
+//         moveCar();
+//       }
+//     }, stepDuration);
+//   }
+// }
+
 function updateCarPosition(index) {
-  const point = pathCoordinates[index];
-  const bearing = calculateBearing(
-    pathCoordinates[Math.max(0, index - 1)],
-    point
-  );
+  if (!deckInitialized || !coords.length) return;
+  const point = coords[index];
+  const bearing =
+    index > 0
+      ? calculateBearing(
+          { lat: coords[index - 1][1], lng: coords[index - 1][0] },
+          { lat: point[1], lng: point[0] }
+        )
+      : 0;
 
-  const carContent = document.createElement("img");
-  carContent.src = "/static/images/car_green.png";
-  carContent.style.transform = `rotate(${bearing}deg)`;
-  carContent.style.width = "18px";
-  carContent.style.height = "32px";
+  // Update IconLayer data for the car
+  const iconLayer = new deck.IconLayer({
+    id: "car-icon",
+    data: [
+      {
+        position: point,
+        icon: "car",
+        size: 48,
+        angle: bearing,
+      },
+    ],
+    getIcon: (d) => "car",
+    getPosition: (d) => d.position,
+    getSize: (d) => d.size,
+    getAngle: (d) => d.angle,
+    iconAtlas: "/static/images/car_green.png",
+    iconMapping: {
+      car: { x: 0, y: 0, width: 48, height: 48, mask: false },
+    },
+    sizeScale: 1,
+    pickable: false,
+  });
 
-  carMarker.content = carContent;
-  carMarker.position = { lat: point.lat, lng: point.lng };
-  map.panTo(carMarker.position);
+  deckOverlay.setProps({
+    layers: [deckLayers[0], iconLayer],
+  });
 
-  // Update time display
-  sliderTimeDisplay.textContent = point.time;
+  map.panTo({ lat: point[1], lng: point[0] });
+  sliderTimeDisplay.textContent = pathCoordinates[index].time;
 }
 
 function moveCar() {
@@ -751,47 +1066,65 @@ function moveCar() {
     timelineSlider.value = currentIndex;
     sliderTimeDisplay.textContent = pathCoordinates[currentIndex].time;
 
-    const start = pathCoordinates[currentIndex];
-    const end = pathCoordinates[currentIndex + 1];
+    const start = coords[currentIndex];
+    const end = coords[currentIndex + 1];
     const stepDuration = 20 / speedMultiplier;
     const steps = Math.floor(
       google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(start.lat, start.lng),
-        new google.maps.LatLng(end.lat, end.lng)
+        new google.maps.LatLng(start[1], start[0]),
+        new google.maps.LatLng(end[1], end[0])
       ) / 10
-    ); // Number of steps based on distance
+    );
     let stepIndex = 0;
-    const latDiff = (end.lat - start.lat) / steps;
-    const lngDiff = (end.lng - start.lng) / steps;
+    const latDiff = (end[1] - start[1]) / steps;
+    const lngDiff = (end[0] - start[0]) / steps;
+    const bearing = calculateBearing(
+      { lat: start[1], lng: start[0] },
+      { lat: end[1], lng: end[0] }
+    );
 
-    const bearing = calculateBearing(start, end);
-
-    animationInterval = setInterval(() => {
+    function animateStep() {
       if (stepIndex < steps) {
-        const lat = start.lat + latDiff * stepIndex;
-        const lng = start.lng + lngDiff * stepIndex;
+        const lat = start[1] + latDiff * stepIndex;
+        const lng = start[0] + lngDiff * stepIndex;
 
-        const carContent = document.createElement("img");
-        carContent.src = "/static/images/car_green.png";
-        carContent.style.position = "absolute";
-        carContent.style.width = "18px";
-        carContent.style.height = "32px";
-        carContent.style.transform = `rotate(${bearing}deg)`;
-        carContent.alt = "Car";
+        // Update IconLayer for the car
+        const iconLayer = new deck.IconLayer({
+          id: "car-icon",
+          data: [
+            {
+              position: [lng, lat],
+              icon: "car",
+              size: 48,
+              angle: bearing,
+            },
+          ],
+          getIcon: (d) => "car",
+          getPosition: (d) => d.position,
+          getSize: (d) => d.size,
+          getAngle: (d) => d.angle,
+          iconAtlas: "/static/images/car_green.png",
+          iconMapping: {
+            car: { x: 0, y: 0, width: 48, height: 48, mask: false },
+          },
+          sizeScale: 1,
+          pickable: false,
+        });
 
-        carMarker.content = carContent; // Set the DOM element as content
-        carMarker.position = { lat, lng };
+        deckOverlay.setProps({
+          layers: [deckLayers[0], iconLayer],
+        });
 
-        if (!map.getBounds().contains(carMarker.position))
-          map.panTo(carMarker.position);
-
+        map.panTo({ lat, lng });
         stepIndex++;
+        animationInterval = setTimeout(animateStep, stepDuration);
       } else {
         currentIndex++;
-        clearInterval(animationInterval);
+        clearTimeout(animationInterval);
         moveCar();
       }
-    }, stepDuration);
+    }
+    animateStep();
   }
 }
 
@@ -889,12 +1222,12 @@ function startCarAnimation() {
   moveCar();
 }
 
-function stopCarAnimation() {
-  if (animationInterval) {
-    clearInterval(animationInterval); // Pause the animation
-    animationInterval = null; // Mark the animation as paused
-  }
-}
+// function stopCarAnimation() {
+//   if (animationInterval) {
+//     clearInterval(animationInterval); // Pause the animation
+//     animationInterval = null; // Mark the animation as paused
+//   }
+// }
 
 function resumeCarAnimation() {
   if (!animationInterval && currentIndex < pathCoordinates.length - 1) {
@@ -902,11 +1235,27 @@ function resumeCarAnimation() {
   }
 }
 
+// function setSpeed(multiplier) {
+//   speedMultiplier = multiplier;
+
+//   if (animationInterval) {
+//     clearInterval(animationInterval);
+//     moveCar();
+//   }
+// }
+
+function stopCarAnimation() {
+  if (animationInterval) {
+    clearTimeout(animationInterval); // Use clearTimeout for setTimeout-based animation
+    animationInterval = null;
+  }
+}
+
 function setSpeed(multiplier) {
   speedMultiplier = multiplier;
 
   if (animationInterval) {
-    clearInterval(animationInterval);
+    clearTimeout(animationInterval); // Use clearTimeout for setTimeout-based animation
     moveCar();
   }
 }
