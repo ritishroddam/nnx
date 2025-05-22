@@ -471,39 +471,161 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   showHidecar();
 }
 
+// function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
+//   const imei = device.imei || '<span class="missing-data">N/A</span>';
+//   const LicensePlateNumber =
+//     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
+//   const speed =
+//     device.speed !== null && device.speed !== undefined
+//       ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
+//       : '<span class="missing-data">Unknown</span>';
+//   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
+//   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
+//   const date = device.date || "N/A";
+//   const time = device.time || "N/A";
+//   const addressText =
+//     address || '<span class="missing-data">Location unknown</span>';
+//   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
+
+//   const content = `<div class="info-window show">
+//                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
+//                     <hr>
+//                     <p><strong>Speed:</strong> ${speed}</p>
+//                     <p><strong>Lat:</strong> ${lat}</p>
+//                     <p><strong>Lon:</strong> ${lon}</p>
+//                     <strong>Distance Travelled:</strong> ${
+//                       device.distance || "NA"
+//                     } km <br>
+//                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
+//                       device.date,
+//                       device.time
+//                     )}</p>
+//                     <p class="address"><strong>Location:</strong> ${addressText}</p>
+//                     <p><a href="${url}" target="_blank">VIEW IN DETAIL</a>
+//                     </p>
+//                 </div>`;
+
+//   infoWindow.setContent(content);
+//   infoWindow.setPosition(latLng);
+// }
+
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
-  const LicensePlateNumber =
-    device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
-  const speed =
-    device.speed !== null && device.speed !== undefined
-      ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-      : '<span class="missing-data">Unknown</span>';
+  const LicensePlateNumber = device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
+  const speed = device.speed !== null && device.speed !== undefined
+    ? `${convertSpeedToKmh(device.speed).toFixed(0)} kmph`
+    : '<span class="missing-data">Unknown</span>';
   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
   const date = device.date || "N/A";
   const time = device.time || "N/A";
-  const addressText =
-    address || '<span class="missing-data">Location unknown</span>';
+  const addressText = address || '<span class="missing-data">Location unknown</span>';
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
-  const content = `<div class="info-window show">
-                    <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
-                    <hr>
-                    <p><strong>Speed:</strong> ${speed}</p>
-                    <p><strong>Lat:</strong> ${lat}</p>
-                    <p><strong>Lon:</strong> ${lon}</p>
-                    <strong>Distance Travelled:</strong> ${
-                      device.distance || "NA"
-                    } km <br>
-                    <p><strong>Last Update:</strong> ${formatLastUpdatedText(
-                      device.date,
-                      device.time
-                    )}</p>
-                    <p class="address"><strong>Location:</strong> ${addressText}</p>
-                    <p><a href="${url}" target="_blank">VIEW IN DETAIL</a>
-                    </p>
-                </div>`;
+  // Status and icons
+  const now = new Date();
+  const lastUpdated = convertToDate(device.date, device.time);
+  const timeDiff = Math.abs(now - lastUpdated);
+  const secondsAgo = Math.floor(timeDiff / 1000);
+  const minutesAgo = Math.floor(timeDiff / (1000 * 60));
+  const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
+  let sinceText = "";
+  if (hoursAgo > 0) {
+    sinceText = `since ${hoursAgo} min`;
+  } else if (minutesAgo > 0) {
+    sinceText = `since ${minutesAgo} min`;
+  } else {
+    sinceText = `since ${secondsAgo} sec`;
+  }
+
+  let statusText = "Moving";
+  let statusColor = "#2e7d32";
+  if (timeDiff > 2 * 60 * 1000) {
+    statusText = "Offline";
+    statusColor = "#616161";
+  } else if (parseFloat(device.speed) === 0) {
+    statusText = "Stopped";
+    statusColor = "#d32f2f";
+  }
+
+  // Icons
+  const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+  const iconRed = "color:#d32f2f;";
+  const gpsIcon = statusText === "Offline" ? "location_disabled" : "my_location";
+  const ignitionIcon = device.ignition === "0" ? "key_off" : "key";
+  const acIcon = "ac_unit";
+  const sosIcon = device.sos === "1"
+    ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>`
+    : "";
+  const arrowIcon = "arrow_forward";
+
+  // GSM
+  const ASUgsmValue = parseInt(device.gsm);
+  let gsmIcon = "signal_cellular_null";
+  let gsmColor = "#d32f2f";
+  if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+    gsmIcon = "signal_cellular_1_bar";
+    gsmColor = "#ff9800";
+  } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+    gsmIcon = "signal_cellular_2_bar";
+    gsmColor = "#ffc107";
+  } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+    gsmIcon = "signal_cellular_3_bar";
+    gsmColor = "#cddc39";
+  } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+    gsmIcon = "signal_cellular_4_bar";
+    gsmColor = "#4caf50";
+  } else if (ASUgsmValue === 0) {
+    gsmIcon = "signal_cellular_null";
+    gsmColor = "#d32f2f";
+  }
+
+  // Bottom stats
+  const distance = device.distance ? parseFloat(device.distance).toFixed(1) : "--";
+  const battery = device.battery || "--";
+  const stoppage = device.stoppage_time || "--";
+
+  // HTML
+  const content = `
+    <div class="info-window-show">
+      <div class="info-header-row">
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
+        <span class="info-plate">${LicensePlateNumber}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
+        ${sosIcon}
+      </div>
+      <div class="info-update-row">
+        <span class="info-update-label">Last Update :</span>
+        <span class="info-update-value">${formatLastUpdatedText(device.date, device.time).replace("ago", "seconds ago")}</span>
+      </div>
+      <div class="info-status-row" style="color:${statusColor};">
+        ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
+      </div>
+      <div class="info-location-row">${addressText}</div>
+      <div class="info-bottom-row">
+        <div class="info-bottom-item">
+          <span class="info-bottom-value">${distance}km</span>
+          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+        </div>
+        <div class="info-bottom-item">
+          <span class="info-bottom-value">${battery}V</span>
+          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">battery_full</span></span>
+        </div>
+        <div class="info-bottom-item">
+          <span class="info-bottom-value">${stoppage}</span>
+          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+        </div>
+        <div class="info-bottom-actions">
+          <span class="material-symbols-outlined info-bottom-action">favorite</span>
+          <span class="material-symbols-outlined info-bottom-action">description</span>
+          <span class="material-symbols-outlined info-bottom-action">directions_car</span>
+        </div>
+      </div>
+    </div>
+  `;
 
   infoWindow.setContent(content);
   infoWindow.setPosition(latLng);
