@@ -599,7 +599,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       </div>
       <div class="info-update-row">
         <span class="info-update-label">Last Update :</span>
-        <span class="info-update-value">${formatLastUpdatedText(device.date, device.time).replace("ago", "seconds ago")}</span>
+        <span class="info-update-value">${formatLastUpdatedText(device.date, device.time)}</span>
       </div>
       <div class="info-status-row" style="color:${statusColor};">
         ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
