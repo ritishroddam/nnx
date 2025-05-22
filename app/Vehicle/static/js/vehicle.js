@@ -432,8 +432,11 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
           <span class="material-symbols-outlined" style="font-size:22px;">${gpsIcon}</span>
-          <span class="vehicle-number" style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;
-                onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')"">
+          <span class="vehicle-number"
+                style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
+                onclick="vehicleInfoPage('${
+                  vehicle.LicensePlateNumber || vehicle.imei
+                }')">
             ${vehicle.LicensePlateNumber || vehicle.imei}
           </span>
           <span style="margin-left:4px;">
