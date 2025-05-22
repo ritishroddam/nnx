@@ -586,14 +586,12 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const stoppage = device.stoppage_time || "--";
 
   const headerContent = `
-    <div class="info-header-row">
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
       <span class="info-plate">${LicensePlateNumber}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
-    </div>
   `;
 
   // HTML
