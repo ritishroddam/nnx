@@ -660,24 +660,26 @@ function showShareLocationPopup(imei, plate) {
   const popup = document.createElement("div");
   popup.id = "share-location-popup";
   popup.innerHTML = `
-    <div class="share-popup-content">
-      <h3>Share Live Location</h3>
-      <div>
-        <label for="share-expiry">Expiry:</label>
-        <select id="share-expiry">
-          <option value="5">5 mins</option>
-          <option value="15">15 mins</option>
-          <option value="30">30 mins</option>
-          <option value="60">1 hour</option>
-          <option value="360">6 hours</option>
-          <option value="720">12 hours</option>
-          <option value="1440">24 hours</option>
-        </select>
-      </div>
-      <button id="generate-share-link">Generate Link</button>
-      <div id="share-link-result" style="margin-top:10px;"></div>
-      <button id="close-share-popup" style="margin-top:10px;">Close</button>
+  <div class="share-popup-content">
+    <h3>Share Live Location</h3>
+    <div>
+      <label for="share-expiry">Expiry:</label>
+      <select id="share-expiry">
+        <option value="5">5 mins</option>
+        <option value="15">15 mins</option>
+        <option value="30">30 mins</option>
+        <option value="60">1 hour</option>
+        <option value="360">6 hours</option>
+        <option value="720">12 hours</option>
+        <option value="1440">24 hours</option>
+      </select>
     </div>
+    <button id="generate-share-link">Generate Link</button>
+    <div style="margin-top:10px;">
+      <input id="share-link-input" type="text" value="" readonly style="width:90%;display:none;">
+    </div>
+    <button id="close-share-popup" style="margin-top:10px;">Close</button>
+  </div>
   `;
   document.body.appendChild(popup);
 
@@ -691,22 +693,22 @@ function showShareLocationPopup(imei, plate) {
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
   document.getElementById("generate-share-link").onclick = async function () {
-    const mins = document.getElementById("share-expiry").value;
-    // Call your backend to generate a secure, time-limited token
-    const res = await fetch(`/api/share-location`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imei, expiry: mins }),
-    });
-    const data = await res.json();
-    if (data.link) {
-      document.getElementById("share-link-result").innerHTML =
-        `<input type="text" value="${data.link}" readonly style="width:90%;">`;
-    } else {
-      document.getElementById("share-link-result").textContent = "Failed to generate link.";
-    }
-  };
-}
+  const mins = document.getElementById("share-expiry").value;
+  const res = await fetch(`/api/share-location`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imei, expiry: mins }),
+  });
+  const data = await res.json();
+  const input = document.getElementById("share-link-input");
+  if (data.link) {
+    input.value = data.link;
+    input.style.display = "block";
+  } else {
+    input.value = "Failed to generate link.";
+    input.style.display = "block";
+  }
+};
 
 function addMarkerClickListener(marker, latLng, device, coords) {
   if (!(latLng instanceof google.maps.LatLng)) {
