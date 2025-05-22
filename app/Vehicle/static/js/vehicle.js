@@ -664,11 +664,10 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 }
 
 // location sharing
-
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
-    e.target.textContent.trim() === "share_location"
+    e.target.textContent.trim() === "moved_location"
   ) {
     const infoWindowDiv = e.target.closest(".info-window-show");
     if (!infoWindowDiv) return;
@@ -677,11 +676,17 @@ document.body.addEventListener("click", function (e) {
     const plate = infoWindowDiv
       .querySelector(".info-plate")
       ?.textContent.trim();
-    const imei = Object.values(vehicleData).find(
-      (v) => v.LicensePlateNumber === plate
-    )?.imei;
+    // Find the IMEI from your data (adjust as needed)
+    let imei = null;
+    vehicleData.forEach((v) => {
+      if (v.LicensePlateNumber === plate) imei = v.imei;
+    });
 
-    showShareLocationPopup(imei, plate);
+    if (imei) {
+      showShareLocationPopup(imei, plate);
+    } else {
+      alert("Could not find vehicle IMEI.");
+    }
   }
 });
 
