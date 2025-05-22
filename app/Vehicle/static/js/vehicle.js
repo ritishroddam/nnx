@@ -619,7 +619,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
           <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
         </div>
         <div class="info-bottom-actions">
-          <span class="material-symbols-outlined info-bottom-action">favorite</span>
+          <span class="material-symbols-outlined info-bottom-action">share_location</span>
           <span class="material-symbols-outlined info-bottom-action">description</span>
           <span class="material-symbols-outlined info-bottom-action">directions_car</span>
         </div>
