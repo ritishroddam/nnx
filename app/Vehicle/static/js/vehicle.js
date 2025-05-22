@@ -511,15 +511,18 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
-  const LicensePlateNumber = device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
-  const speed = device.speed !== null && device.speed !== undefined
-    ? `${convertSpeedToKmh(device.speed).toFixed(0)} kmph`
-    : '<span class="missing-data">Unknown</span>';
+  const LicensePlateNumber =
+    device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
+  const speed =
+    device.speed !== null && device.speed !== undefined
+      ? `${convertSpeedToKmh(device.speed).toFixed(0)} kmph`
+      : '<span class="missing-data">Unknown</span>';
   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
   const date = device.date || "N/A";
   const time = device.time || "N/A";
-  const addressText = address || '<span class="missing-data">Location unknown</span>';
+  const addressText =
+    address || '<span class="missing-data">Location unknown</span>';
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
   // Status and icons
@@ -551,12 +554,16 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   // Icons
   const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
   const iconRed = "color:#d32f2f;";
-  const gpsIcon = statusText === "Offline" ? "location_disabled" : "my_location";
+  const gpsIcon =
+    statusText === "Offline" ? "location_disabled" : "my_location";
   const ignitionIcon = device.ignition === "0" ? "key_off" : "key";
   const acIcon = "ac_unit";
-  const sosIcon = device.sos === "1"
-    ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>`
-    : "";
+  const sosIcon =
+    device.sos === "1"
+      ? `<span class="material-symbols-outlined" style="${
+          iconStyle + iconRed
+        }">sos</span>`
+      : "";
   const arrowIcon = "arrow_forward";
 
   // GSM
@@ -581,7 +588,9 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   }
 
   // Bottom stats
-  const distance = device.distance ? parseFloat(device.distance).toFixed(1) : "--";
+  const distance = device.distance
+    ? parseFloat(device.distance).toFixed(1)
+    : "--";
   const battery = device.battery || "--";
   const stoppage = device.stoppage_time || "--";
 
@@ -644,9 +653,11 @@ document.body.addEventListener("click", function (e) {
     if (!infoWindowDiv) return;
 
     // Get the vehicle number from the info window
-    const plate = infoWindowDiv.querySelector(".info-plate")?.textContent.trim();
+    const plate = infoWindowDiv
+      .querySelector(".info-plate")
+      ?.textContent.trim();
     const imei = Object.values(vehicleData).find(
-      v => v.LicensePlateNumber === plate
+      (v) => v.LicensePlateNumber === plate
     )?.imei;
 
     showShareLocationPopup(imei, plate);
@@ -695,22 +706,22 @@ function showShareLocationPopup(imei, plate) {
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
   document.getElementById("generate-share-link").onclick = async function () {
-  const mins = document.getElementById("share-expiry").value;
-  const res = await fetch(`/api/share-location`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imei, expiry: mins }),
-  });
-  const data = await res.json();
-  const input = document.getElementById("share-link-input");
-  if (data.link) {
-    input.value = data.link;
-    input.style.display = "block";
-  } else {
-    input.value = "Failed to generate link.";
-    input.style.display = "block";
-  }
-};
+    const mins = document.getElementById("share-expiry").value;
+    const res = await fetch(`/api/share-location`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imei, expiry: mins }),
+    });
+    const data = await res.json();
+    const input = document.getElementById("share-link-input");
+    if (data.link) {
+      input.value = data.link;
+      input.style.display = "block";
+    } else {
+      input.value = "Failed to generate link.";
+      input.style.display = "block";
+    }
+  };
 }
 
 function addMarkerClickListener(marker, latLng, device, coords) {
