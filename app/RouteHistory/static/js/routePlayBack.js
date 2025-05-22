@@ -600,7 +600,6 @@ async function plotPathOnMap(pathCoordinates) {
       {
         position: coords[0],
         icon: "car",
-        size: 32,
         angle: 0,
       },
     ],
