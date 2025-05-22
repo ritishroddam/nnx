@@ -255,6 +255,8 @@ function vehicleInfoPage(licensePlateNumber) {
   window.open(url, "_blank");
 }
 
+window.vehicleInfoPage = vehicleInfoPage;
+
 function renderVehicleCards(vehicles, filterValue = "all") {
   // If toggle-card-switch is off, hide cards and update counter
   if (document.getElementById("toggle-card-switch").checked === false) {
