@@ -631,6 +631,83 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   infoWindow.setPosition(latLng);
 }
 
+// location sharing
+
+document.body.addEventListener("click", function (e) {
+  if (
+    e.target.classList.contains("info-bottom-action") &&
+    e.target.textContent.trim() === "share_location"
+  ) {
+    const infoWindowDiv = e.target.closest(".info-window-show");
+    if (!infoWindowDiv) return;
+
+    // Get the vehicle number from the info window
+    const plate = infoWindowDiv.querySelector(".info-plate")?.textContent.trim();
+    const imei = Object.values(vehicleData).find(
+      v => v.LicensePlateNumber === plate
+    )?.imei;
+
+    showShareLocationPopup(imei, plate);
+  }
+});
+
+// Popup HTML and logic
+function showShareLocationPopup(imei, plate) {
+  // Remove existing popup if any
+  const oldPopup = document.getElementById("share-location-popup");
+  if (oldPopup) oldPopup.remove();
+
+  const popup = document.createElement("div");
+  popup.id = "share-location-popup";
+  popup.innerHTML = `
+    <div class="share-popup-content">
+      <h3>Share Live Location</h3>
+      <div>
+        <label for="share-expiry">Expiry:</label>
+        <select id="share-expiry">
+          <option value="5">5 mins</option>
+          <option value="15">15 mins</option>
+          <option value="30">30 mins</option>
+          <option value="60">1 hour</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+          <option value="1440">24 hours</option>
+        </select>
+      </div>
+      <button id="generate-share-link">Generate Link</button>
+      <div id="share-link-result" style="margin-top:10px;"></div>
+      <button id="close-share-popup" style="margin-top:10px;">Close</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // Center the popup
+  popup.style.position = "fixed";
+  popup.style.left = "50%";
+  popup.style.top = "50%";
+  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.zIndex = 9999;
+
+  document.getElementById("close-share-popup").onclick = () => popup.remove();
+
+  document.getElementById("generate-share-link").onclick = async function () {
+    const mins = document.getElementById("share-expiry").value;
+    // Call your backend to generate a secure, time-limited token
+    const res = await fetch(`/api/share-location`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imei, expiry: mins }),
+    });
+    const data = await res.json();
+    if (data.link) {
+      document.getElementById("share-link-result").innerHTML =
+        `<input type="text" value="${data.link}" readonly style="width:90%;">`;
+    } else {
+      document.getElementById("share-link-result").textContent = "Failed to generate link.";
+    }
+  };
+}
+
 function addMarkerClickListener(marker, latLng, device, coords) {
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(coords.lat, coords.lon);

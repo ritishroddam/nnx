@@ -798,3 +798,40 @@ input:checked + .slider:before {
     padding: 10px 8px 8px 8px;
   }
 }
+
+/* share location */
+
+#share-location-popup {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px #0003;
+  padding: 24px 28px;
+  min-width: 320px;
+  max-width: 90vw;
+}
+.share-popup-content h3 {
+  margin-top: 0;
+  font-size: 20px;
+}
+.share-popup-content label {
+  font-weight: 500;
+  margin-right: 8px;
+}
+.share-popup-content select, .share-popup-content input {
+  font-size: 15px;
+  padding: 4px 8px;
+  margin-top: 6px;
+}
+.share-popup-content button {
+  margin-top: 12px;
+  padding: 6px 18px;
+  font-size: 15px;
+  border-radius: 4px;
+  border: none;
+  background: #2e7d32;
+  color: #fff;
+  cursor: pointer;
+}
+.share-popup-content button#close-share-popup {
+  background: #888;
+}
