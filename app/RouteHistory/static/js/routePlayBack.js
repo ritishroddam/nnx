@@ -949,76 +949,6 @@ async function plotPathOnMap(pathCoordinates) {
   }
 }
 
-// function updateCarPosition(index) {
-//   const point = pathCoordinates[index];
-//   const bearing = calculateBearing(
-//     pathCoordinates[Math.max(0, index - 1)],
-//     point
-//   );
-
-//   const carContent = document.createElement("img");
-//   carContent.src = "/static/images/car_green.png";
-//   carContent.style.transform = `rotate(${bearing}deg)`;
-//   carContent.style.width = "18px";
-//   carContent.style.height = "32px";
-
-//   carMarker.content = carContent;
-//   carMarker.position = { lat: point.lat, lng: point.lng };
-//   map.panTo(carMarker.position);
-
-//   // Update time display
-//   sliderTimeDisplay.textContent = point.time;
-// }
-
-// function moveCar() {
-//   if (currentIndex < pathCoordinates.length - 1) {
-//     timelineSlider.value = currentIndex;
-//     sliderTimeDisplay.textContent = pathCoordinates[currentIndex].time;
-
-//     const start = pathCoordinates[currentIndex];
-//     const end = pathCoordinates[currentIndex + 1];
-//     const stepDuration = 20 / speedMultiplier;
-//     const steps = Math.floor(
-//       google.maps.geometry.spherical.computeDistanceBetween(
-//         new google.maps.LatLng(start.lat, start.lng),
-//         new google.maps.LatLng(end.lat, end.lng)
-//       ) / 10
-//     ); // Number of steps based on distance
-//     let stepIndex = 0;
-//     const latDiff = (end.lat - start.lat) / steps;
-//     const lngDiff = (end.lng - start.lng) / steps;
-
-//     const bearing = calculateBearing(start, end);
-
-//     animationInterval = setInterval(() => {
-//       if (stepIndex < steps) {
-//         const lat = start.lat + latDiff * stepIndex;
-//         const lng = start.lng + lngDiff * stepIndex;
-
-//         const carContent = document.createElement("img");
-//         carContent.src = "/static/images/car_green.png";
-//         carContent.style.position = "absolute";
-//         carContent.style.width = "18px";
-//         carContent.style.height = "32px";
-//         carContent.style.transform = `rotate(${bearing}deg)`;
-//         carContent.alt = "Car";
-
-//         carMarker.content = carContent; // Set the DOM element as content
-//         carMarker.position = { lat, lng };
-
-//         if (!map.getBounds().contains(carMarker.position))
-//           map.panTo(carMarker.position);
-
-//         stepIndex++;
-//       } else {
-//         currentIndex++;
-//         clearInterval(animationInterval);
-//         moveCar();
-//       }
-//     }, stepDuration);
-//   }
-// }
-
 function updateCarPosition(index) {
   if (!deckInitialized || !coords.length) return;
   const point = coords[index];
@@ -1222,27 +1152,11 @@ function startCarAnimation() {
   moveCar();
 }
 
-// function stopCarAnimation() {
-//   if (animationInterval) {
-//     clearInterval(animationInterval); // Pause the animation
-//     animationInterval = null; // Mark the animation as paused
-//   }
-// }
-
 function resumeCarAnimation() {
   if (!animationInterval && currentIndex < pathCoordinates.length - 1) {
     moveCar(); // Resume the animation from the current state
   }
 }
-
-// function setSpeed(multiplier) {
-//   speedMultiplier = multiplier;
-
-//   if (animationInterval) {
-//     clearInterval(animationInterval);
-//     moveCar();
-//   }
-// }
 
 function stopCarAnimation() {
   if (animationInterval) {
