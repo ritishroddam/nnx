@@ -445,7 +445,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         </div>
         <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
         <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
-          Last Update : <span class="last-updated-text">${formatLastUpdatedText(
+          <strong> Last Update : </strong> <span class="last-updated-text">${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
           )}</span>
@@ -458,26 +458,20 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         </div>
         <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
           <div>
-            <div style="font-size:13px;color:#888;">Distance Today</div>
-            <div style="font-weight:600;">${
+            <div style="font-size:13px;color:#777; font-weight:600;">Distance Today</div>
+            <div style="font-weight:300;">${
               vehicle.distance ? parseFloat(vehicle.distance).toFixed(1) : "0"
             } km</div>
           </div>
           <div>
-            <div style="font-size:13px;color:#888;">Stoppage Today</div>
-            <div style="font-weight:600;">${vehicle.stoppage_time || "--"}</div>
-          </div>
-          <div>
-            <div style="font-size:13px;color:#888;">Battery</div>
-            <div style="font-weight:600;">${vehicle.battery || "--"} V</div>
+            <div style="font-size:13px;color:#777; font-weight:600;">Stoppage Today</div>
+            <div style="font-weight:300;">${vehicle.stoppage_time || "--"}</div>
           </div>
         </div>
       </div>
       <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
       <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
-        <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">refresh</span>
-        <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">note</span>
-        <span class="material-symbols-outlined" style="font-size:26px;color:#222;cursor:pointer;">directions_car</span>
+       <span class="material-symbols-outlined info-bottom-action">moved_location</span>
       </div>
     </div>
   `;
@@ -488,44 +482,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
-
-// function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
-//   const imei = device.imei || '<span class="missing-data">N/A</span>';
-//   const LicensePlateNumber =
-//     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
-//   const speed =
-//     device.speed !== null && device.speed !== undefined
-//       ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-//       : '<span class="missing-data">Unknown</span>';
-//   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
-//   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
-//   const date = device.date || "N/A";
-//   const time = device.time || "N/A";
-//   const addressText =
-//     address || '<span class="missing-data">Location unknown</span>';
-//   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
-
-//   const content = `<div class="info-window show">
-//                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
-//                     <hr>
-//                     <p><strong>Speed:</strong> ${speed}</p>
-//                     <p><strong>Lat:</strong> ${lat}</p>
-//                     <p><strong>Lon:</strong> ${lon}</p>
-//                     <strong>Distance Travelled:</strong> ${
-//                       device.distance || "NA"
-//                     } km <br>
-//                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
-//                       device.date,
-//                       device.time
-//                     )}</p>
-//                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-//                     <p><a href="${url}" target="_blank">VIEW IN DETAIL</a>
-//                     </p>
-//                 </div>`;
-
-//   infoWindow.setContent(content);
-//   infoWindow.setPosition(latLng);
-// }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
@@ -618,7 +574,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       <span class="info-plate">${LicensePlateNumber}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
       <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
   `;
 
@@ -642,17 +597,11 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
         <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
       </div>
       <div class="info-bottom-item">
-        <span class="info-bottom-value">${battery}V</span>
-        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">battery_full</span></span>
-      </div>
-      <div class="info-bottom-item">
         <span class="info-bottom-value">${stoppage}</span>
         <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
       </div>
       <div class="info-bottom-actions">
         <span class="material-symbols-outlined info-bottom-action">moved_location</span>
-        <span class="material-symbols-outlined info-bottom-action">description</span>
-        <span class="material-symbols-outlined info-bottom-action">directions_car</span>
       </div>
     </div>
   </div>
@@ -685,7 +634,6 @@ document.body.addEventListener("click", function (e) {
   }
 });
 
-// Popup HTML and logic
 function showShareLocationPopup(imei, plate) {
   // Remove existing popup if any
   const oldPopup = document.getElementById("share-location-popup");
@@ -694,26 +642,26 @@ function showShareLocationPopup(imei, plate) {
   const popup = document.createElement("div");
   popup.id = "share-location-popup";
   popup.innerHTML = `
-  <div class="share-popup-content">
-    <h3>Share Live Location</h3>
-    <div>
-      <label for="share-expiry">Expiry:</label>
-      <select id="share-expiry">
-        <option value="5">5 mins</option>
-        <option value="15">15 mins</option>
-        <option value="30">30 mins</option>
-        <option value="60">1 hour</option>
-        <option value="360">6 hours</option>
-        <option value="720">12 hours</option>
-        <option value="1440">24 hours</option>
-      </select>
+    <div class="share-popup-content">
+      <h3>Share Live Location</h3>
+      <div>
+        <label for="share-expiry">Expiry:</label>
+        <select id="share-expiry">
+          <option value="5">5 mins</option>
+          <option value="15">15 mins</option>
+          <option value="30">30 mins</option>
+          <option value="60">1 hour</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+          <option value="1440">24 hours</option>
+        </select>
+      </div>
+      <button id="generate-share-link">Generate Link</button>
+      <div style="margin-top:10px;">
+        <input id="share-link-input" type="text" value="" readonly style="width:90%;">
+      </div>
+      <button id="close-share-popup" style="margin-top:10px;">Close</button>
     </div>
-    <button id="generate-share-link">Generate Link</button>
-    <div style="margin-top:10px;">
-      <input id="share-link-input" type="text" value="" readonly style="width:90%;display:none;">
-    </div>
-    <button id="close-share-popup" style="margin-top:10px;">Close</button>
-  </div>
   `;
   document.body.appendChild(popup);
 
@@ -728,19 +676,22 @@ function showShareLocationPopup(imei, plate) {
 
   document.getElementById("generate-share-link").onclick = async function () {
     const mins = document.getElementById("share-expiry").value;
-    const res = await fetch(`/api/share-location`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imei, expiry: mins }),
-    });
-    const data = await res.json();
     const input = document.getElementById("share-link-input");
-    if (data.link) {
-      input.value = data.link;
-      input.style.display = "block";
-    } else {
+    input.value = "Generating link...";
+    try {
+      const res = await fetch(`/api/share-location`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imei, expiry: mins }),
+      });
+      const data = await res.json();
+      if (data.link) {
+        input.value = data.link;
+      } else {
+        input.value = "Failed to generate link.";
+      }
+    } catch (e) {
       input.value = "Failed to generate link.";
-      input.style.display = "block";
     }
   };
 }
