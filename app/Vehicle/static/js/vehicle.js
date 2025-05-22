@@ -580,23 +580,38 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     gsmColor = "#d32f2f";
   }
 
+  function setHeaderContent({ gpsIcon, LicensePlateNumber, arrowIcon, ignitionIcon, acIcon, gsmIcon, gsmColor }) {
+  return `
+    <div class="info-header-row">
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
+      <span class="info-plate">${LicensePlateNumber}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
+      <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
+    </div>
+  `;
+}
+
   // Bottom stats
   const distance = device.distance ? parseFloat(device.distance).toFixed(1) : "--";
   const battery = device.battery || "--";
   const stoppage = device.stoppage_time || "--";
 
+  const headerHtml = setHeaderContent({
+  gpsIcon,
+  LicensePlateNumber,
+  arrowIcon,
+  ignitionIcon,
+  acIcon,
+  gsmIcon,
+  gsmColor
+});
+
   // HTML
   const content = `
     <div class="info-window-show">
-      <div class="info-header-row">
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
-        <span class="info-plate">${LicensePlateNumber}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${acIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
-        ${sosIcon}
-      </div>
+      ${headerHtml}
       <div class="info-update-row">
         <span class="info-update-label">Last Update :</span>
         <span class="info-update-value">${formatLastUpdatedText(device.date, device.time)}</span>
