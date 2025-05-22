@@ -467,10 +467,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
             <div style="font-size:13px;color:#888;">Stoppage Today</div>
             <div style="font-weight:600;">${vehicle.stoppage_time || "--"}</div>
           </div>
-          <div>
-            <div style="font-size:13px;color:#888;">Battery</div>
-            <div style="font-weight:600;">${vehicle.battery || "--"} V</div>
-          </div>
         </div>
       </div>
       <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
@@ -488,44 +484,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
-
-// function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
-//   const imei = device.imei || '<span class="missing-data">N/A</span>';
-//   const LicensePlateNumber =
-//     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
-//   const speed =
-//     device.speed !== null && device.speed !== undefined
-//       ? `${convertSpeedToKmh(device.speed).toFixed(2)} km/h`
-//       : '<span class="missing-data">Unknown</span>';
-//   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
-//   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
-//   const date = device.date || "N/A";
-//   const time = device.time || "N/A";
-//   const addressText =
-//     address || '<span class="missing-data">Location unknown</span>';
-//   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
-
-//   const content = `<div class="info-window show">
-//                     <strong><span style="color: #336699;">${LicensePlateNumber}:</span></strong> <br>
-//                     <hr>
-//                     <p><strong>Speed:</strong> ${speed}</p>
-//                     <p><strong>Lat:</strong> ${lat}</p>
-//                     <p><strong>Lon:</strong> ${lon}</p>
-//                     <strong>Distance Travelled:</strong> ${
-//                       device.distance || "NA"
-//                     } km <br>
-//                     <p><strong>Last Update:</strong> ${formatLastUpdatedText(
-//                       device.date,
-//                       device.time
-//                     )}</p>
-//                     <p class="address"><strong>Location:</strong> ${addressText}</p>
-//                     <p><a href="${url}" target="_blank">VIEW IN DETAIL</a>
-//                     </p>
-//                 </div>`;
-
-//   infoWindow.setContent(content);
-//   infoWindow.setPosition(latLng);
-// }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const imei = device.imei || '<span class="missing-data">N/A</span>';
@@ -639,10 +597,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       <div class="info-bottom-item">
         <span class="info-bottom-value">${distance}km</span>
         <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
-      </div>
-      <div class="info-bottom-item">
-        <span class="info-bottom-value">${battery}V</span>
-        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">battery_full</span></span>
       </div>
       <div class="info-bottom-item">
         <span class="info-bottom-value">${stoppage}</span>
