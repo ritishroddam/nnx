@@ -608,7 +608,10 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   <div class="info-window-show">
     <div class="info-update-row">
       <span class="info-update-label">Last Update :</span>
-      <span class="info-update-value">${formatLastUpdatedText(device.date, device.time)}</span>
+      <span class="info-update-value">${formatLastUpdatedText(
+        device.date,
+        device.time
+      )}</span>
     </div>
     <div class="info-status-row" style="color:${statusColor};">
       ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
@@ -1252,8 +1255,9 @@ async function initMap() {
 // Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function () {
-  setTimeout(() => {
-    initMap();
+  setTimeout(async () => {
+    await initMap();
+    updateMap();
   }, 100);
 });
 
