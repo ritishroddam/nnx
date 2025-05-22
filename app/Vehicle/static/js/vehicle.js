@@ -250,6 +250,11 @@ function triggerSOS(imei, marker) {
   }
 }
 
+function vehicleInfoPage(licensePlateNumber) {
+  const url = `/routeHistory/vehicle/${licensePlateNumber}`;
+  window.open(url, "_blank");
+}
+
 function renderVehicleCards(vehicles, filterValue = "all") {
   // If toggle-card-switch is off, hide cards and update counter
   if (document.getElementById("toggle-card-switch").checked === false) {
@@ -409,9 +414,10 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
     const iconRow = `
-      <span class="material-symbols-outlined" style="${iconStyle}">arrow_forward</span>
+      <span class="material-symbols-outlined" style="${iconStyle}" onClick = "vehicleInfoPage(${
+      vehicle.LicensePlateNumber
+    })" >arrow_forward</span>
       <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}">${ignitionIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle}">ac_unit</span>
       <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}">${gsmIcon}</span>
       ${sosIcon || ""}
     `;
