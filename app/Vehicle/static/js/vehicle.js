@@ -445,7 +445,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         </div>
         <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
         <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
-          Last Update : <span class="last-updated-text">${formatLastUpdatedText(
+          <strong> Last Update : </strong> <span class="last-updated-text">${formatLastUpdatedText(
             vehicle.date,
             vehicle.time
           )}</span>
