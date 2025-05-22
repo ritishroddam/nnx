@@ -500,6 +500,7 @@ document
             time: item.time,
             speed: item.speed,
             ignition: item.ignition,
+            course: item.course,
           }));
           plotPathOnMap(pathCoordinates);
         } else {
@@ -599,9 +600,9 @@ async function plotPathOnMap(pathCoordinates) {
     data: [
       {
         position: coords[0],
-        size: 48,
+        size: 32,
         icon: "car",
-        angle: 0,
+        angle: pathCoordinates[0].course,
       },
     ],
     getIcon: (d) => "car",
@@ -610,7 +611,7 @@ async function plotPathOnMap(pathCoordinates) {
     getAngle: (d) => d.angle,
     iconAtlas: carIconUrl,
     iconMapping: {
-      car: { x: 0, y: 0, width: 18, height: 32, mask: false },
+      car: { x: 0, y: 0, width: 18, height: 32, anchorY: 32, mask: false },
     },
     sizeScale: 1,
     pickable: false,
@@ -835,7 +836,7 @@ function moveCar() {
             {
               position: [lng, lat],
               icon: "car",
-              size: 48,
+              size: 32,
               angle: bearing,
             },
           ],
@@ -845,7 +846,14 @@ function moveCar() {
           getAngle: (d) => d.angle,
           iconAtlas: "/static/images/car_green.png",
           iconMapping: {
-            car: { x: 0, y: 0, width: 48, height: 48, mask: false },
+            car: {
+              x: 0,
+              y: 0,
+              width: 18,
+              height: 32,
+              anchorY: 32,
+              mask: false,
+            },
           },
           sizeScale: 1,
           pickable: false,

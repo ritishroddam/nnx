@@ -336,9 +336,8 @@ def get_vehicle_path():
                     "longitude": 1,
                     "speed": 1,
                     "ignition": 1,
-                    "dir1": 1,
-                    "dir2": 1,
-                    "date_time": 1
+                    "date_time": 1,
+                    "course": 1,
                 }
             }
         ]
@@ -364,7 +363,8 @@ def get_vehicle_path():
                 "longitude": longitude,
                 "speed": record["speed"],
                 "ignition": record["ignition"],
-                "time": record["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p")
+                "time": record["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p"),
+                "course": record["course"],
             })
 
         return jsonify(path_data)
