@@ -535,196 +535,6 @@ function interpolateSpeed(index, originalData) {
   return originalData[originalData.length - 1].speed;
 }
 
-// async function plotPathOnMap(pathCoordinates) {
-//   // Clear all markers from the map before plotting new ones
-//   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
-//     window.__allMapMarkers.forEach((marker) => {
-//       if (marker && marker.map) marker.map = null;
-//     });
-//     window.__allMapMarkers = [];
-//   } else {
-//     window.__allMapMarkers = [];
-//   }
-
-//   timelineSlider.addEventListener("input", handleSliderInput);
-//   if (pathPolyline) pathPolyline.setMap(null);
-//   if (startMarker) startMarker.map = null;
-//   if (endMarker) endMarker.map = null;
-//   if (carMarker) carMarker.map = null; // Clear the previous car marker
-
-//   coords = pathCoordinates.map((item) => ({
-//     lat: item.lat,
-//     lng: item.lng,
-//   }));
-
-//   if (coords.length > 0) {
-//     timelineSlider.min = 0;
-//     timelineSlider.max = coords.length - 1;
-//     timelineSlider.value = 0;
-//     sliderTimeDisplay.textContent = pathCoordinates[0].time;
-
-//     const bounds = new google.maps.LatLngBounds();
-//     coords.forEach((coord) => bounds.extend(coord));
-//     map.fitBounds(bounds);
-
-//     pathPolyline = new google.maps.Polyline({
-//       path: coords,
-//       geodesic: true,
-//       strokeColor: "#505050",
-//       strokeOpacity: 0.9,
-//       strokeWeight: 3,
-//       map: map,
-//     });
-
-//     const startContent = document.createElement("div");
-//     startContent.style.backgroundColor = "green";
-//     startContent.style.color = "white";
-//     startContent.style.padding = "5px";
-//     startContent.style.borderRadius = "5px";
-//     startContent.textContent = "Start";
-
-//     const endContent = document.createElement("div");
-//     endContent.style.backgroundColor = "red";
-//     endContent.style.color = "white";
-//     endContent.style.padding = "5px";
-//     endContent.style.borderRadius = "5px";
-//     endContent.textContent = "End";
-
-//     // Markers for start and end points using AdvancedMarkerElement
-//     startMarker = new google.maps.marker.AdvancedMarkerElement({
-//       position: coords[0],
-//       map: map,
-//       title: "Start",
-//       content: startContent, // Pass the DOM element
-//     });
-//     window.__allMapMarkers.push(startMarker);
-
-//     const startIgnition = pathCoordinates[0].ignition === "1" ? "On" : "Off";
-//     const startLocation = await getAddressFromCoordinates(
-//       pathCoordinates[0].lat,
-//       pathCoordinates[0].lng
-//     );
-
-//     const startMarkerInfo = new google.maps.InfoWindow({
-//       content: `<div>
-//                 <h3>${pathCoordinates[0].LicensePlateNumber}</h3>
-//                 <p><strong>Location:</strong> ${startLocation}</p>
-//                 <p><strong>Timestamp:</strong> ${pathCoordinates[0].time}</p>
-//                 <p><strong>Speed:</strong> ${pathCoordinates[0].speed}</p>
-//                 <p><strong>Ignition:</strong> ${startIgnition}</p>
-//               </div>`,
-//     });
-
-//     startMarker.addListener("gmp-click", () => {
-//       startMarkerInfo.open({
-//         anchor: startMarker,
-//         map: map,
-//       });
-//     });
-
-//     endMarker = new google.maps.marker.AdvancedMarkerElement({
-//       position: coords[coords.length - 1],
-//       map: map,
-//       title: "End",
-//       content: endContent, // Pass the DOM element
-//     });
-//     window.__allMapMarkers.push(endMarker);
-
-//     const endIgnition =
-//       pathCoordinates[pathCoordinates.length - 1].ignition === "1"
-//         ? "On"
-//         : "Off";
-//     const endLocation = await getAddressFromCoordinates(
-//       pathCoordinates[pathCoordinates.length - 1].lat,
-//       pathCoordinates[pathCoordinates.length - 1].lng
-//     );
-
-//     const endMarkerInfo = new google.maps.InfoWindow({
-//       content: `<div>
-//                 <h3>${
-//                   pathCoordinates[pathCoordinates.length - 1].LicensePlateNumber
-//                 }</h3>
-//                 <p><strong>Location:</strong> ${endLocation}</p>
-//                 <p><strong>Timestamp:</strong> ${
-//                   pathCoordinates[pathCoordinates.length - 1].time
-//                 }</p>
-//                 <p><strong>Speed:</strong> ${
-//                   pathCoordinates[pathCoordinates.length - 1].speed
-//                 }</p>
-//                 <p><strong>Ignition:</strong> ${endIgnition}</p>
-//               </div>`,
-//     });
-
-//     endMarker.addListener("gmp-click", () => {
-//       endMarkerInfo.open({
-//         anchor: endMarker,
-//         map: map,
-//       });
-//     });
-
-//     const carContent = document.createElement("img");
-//     carContent.src = "/static/images/car_green.png";
-//     carContent.style.width = "18px";
-//     carContent.style.height = "32px";
-//     carContent.style.position = "absolute";
-//     carContent.alt = "Car";
-
-//     carMarker = new google.maps.marker.AdvancedMarkerElement({
-//       position: coords[0],
-//       map: map,
-//       title: "Car",
-//       content: carContent, // Pass the DOM element
-//     });
-//     window.__allMapMarkers.push(carMarker);
-
-//     for (let index = 0; index < coords.length - 1; index++) {
-//       const coord = coords[index];
-//       const nextCoord = coords[index + 1];
-//       const pathCoord = pathCoordinates[index];
-//       const nextPathCoord = pathCoordinates[index + 1];
-
-//       const arrowContent = document.createElement("div");
-//       arrowContent.style.width = "10px";
-//       arrowContent.style.height = "10px";
-//       arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-//       arrowContent.style.borderTop = "10px solid #2a2a2a";
-//       arrowContent.style.borderLeft = "5px solid transparent";
-//       arrowContent.style.borderRight = "5px solid transparent";
-//       arrowContent.style.position = "absolute";
-//       arrowContent.style.transform = `rotate(${calculateBearing(
-//         nextCoord,
-//         coord
-//       )}deg)`;
-
-//       const marker = new google.maps.marker.AdvancedMarkerElement({
-//         position: coord,
-//         map: map,
-//         title: "Arrow",
-//         content: arrowContent, // Pass the DOM element
-//       });
-//       window.__allMapMarkers.push(marker);
-
-//       const ignition = pathCoord.ignition === "1" ? "On" : "Off";
-
-//       const infoWindow = new google.maps.InfoWindow({
-//         content: `<div>
-//                 <h3>${pathCoord.LicensePlateNumber}</h3>
-//                 <p><strong>Timestamp:</strong> ${pathCoord.time}</p>
-//                 <p><strong>Speed:</strong> ${pathCoord.speed}</p>
-//                 <p><strong>Ignition:</strong> ${ignition}</p>
-//               </div>`,
-//       });
-
-//       marker.addListener("gmp-click", () => {
-//         infoWindow.open({
-//           anchor: marker,
-//           map: map,
-//         });
-//       });
-//     }
-//   }
-// }
-
 let deckOverlay;
 let deckLayers = [];
 let deckInitialized = false;
@@ -790,7 +600,7 @@ async function plotPathOnMap(pathCoordinates) {
       {
         position: coords[0],
         icon: "car",
-        size: 48,
+        size: 32,
         angle: 0,
       },
     ],
@@ -800,7 +610,7 @@ async function plotPathOnMap(pathCoordinates) {
     getAngle: (d) => d.angle,
     iconAtlas: carIconUrl,
     iconMapping: {
-      car: { x: 0, y: 0, width: 48, height: 48, mask: false },
+      car: { x: 0, y: 0, width: 18, height: 32, mask: false },
     },
     sizeScale: 1,
     pickable: false,
