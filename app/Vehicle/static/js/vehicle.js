@@ -458,8 +458,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         </div>
         <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
           <div>
-            <div style="font-size:13px;color:#888;">Distance Today</div>
-            <div style="font-weight:600;">${
+            <div style="font-size:13px;color:#888; font-weight:600;">Distance Today</div>
+            <div style="font-weight:300;">${
               vehicle.distance ? parseFloat(vehicle.distance).toFixed(1) : "0"
             } km</div>
           </div>
