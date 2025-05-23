@@ -1522,7 +1522,7 @@ function addHoverListenersToCardsAndMarkers() {
               }
             }
           } else {
-            vehicleCard.style.backgroundColor = "#999"; // Dark background for light mode
+            vehicleCard.style.backgroundColor = "#ccc"; // Dark background for light mode
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
               vehicleHeader.style.color = "#ccc"; // Light font color for light mode
