@@ -11,7 +11,6 @@ import os
 import signal
 from datetime import datetime, timezone, timedelta
 from functools import wraps
-from flask import socketio
 
 jwt = JWTManager()
 mongo_client = None
