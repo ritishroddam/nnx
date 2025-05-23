@@ -455,8 +455,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
           ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
         </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:13px;color:#555;line-height:1.2;">
-          Location : ${vehicle.address || "Location unknown"}
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:12px;color:#666;line-height:1.2;">
+         <strong> Location : </strong> ${vehicle.address || "Location unknown"}
         </div>
         <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
           <div>
