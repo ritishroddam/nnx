@@ -634,6 +634,7 @@ document.body.addEventListener("click", function (e) {
   }
 });
 
+// ...existing code...
 function showShareLocationPopup(imei, plate) {
   // Remove existing popup if any
   const oldPopup = document.getElementById("share-location-popup");
@@ -647,14 +648,17 @@ function showShareLocationPopup(imei, plate) {
       <div>
         <label for="share-expiry">Expiry:</label>
         <select id="share-expiry">
-          <option value="5">5 mins</option>
           <option value="15">15 mins</option>
           <option value="30">30 mins</option>
           <option value="60">1 hour</option>
           <option value="360">6 hours</option>
           <option value="720">12 hours</option>
-          <option value="1440">24 hours</option>
+          <option value="custom">Custom</option>
         </select>
+      </div>
+      <div id="custom-datetime-range" style="display:none;margin-top:8px;">
+        <label>From: <input type="datetime-local" id="from-datetime"></label>
+        <label>To: <input type="datetime-local" id="to-datetime"></label>
       </div>
       <button id="generate-share-link">Generate Link</button>
       <div style="margin-top:10px;">
@@ -674,21 +678,52 @@ function showShareLocationPopup(imei, plate) {
 
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
+  // Show/hide custom date range
+  document.getElementById("share-expiry").onchange = function () {
+    const customDiv = document.getElementById("custom-datetime-range");
+    if (this.value === "custom") {
+      customDiv.style.display = "block";
+    } else {
+      customDiv.style.display = "none";
+    }
+  };
+
   document.getElementById("generate-share-link").onclick = async function () {
-    const mins = document.getElementById("share-expiry").value;
+    const expiry = document.getElementById("share-expiry").value;
     const input = document.getElementById("share-link-input");
     input.value = "Generating link...";
+
+    let from_datetime, to_datetime;
+    if (expiry === "custom") {
+      from_datetime = document.getElementById("from-datetime").value;
+      to_datetime = document.getElementById("to-datetime").value;
+      if (!from_datetime || !to_datetime) {
+        input.value = "Please select both from and to date/time.";
+        return;
+      }
+    } else {
+      // Use current time as from, and add expiry minutes for to
+      const now = new Date();
+      from_datetime = now.toISOString().slice(0, 16);
+      const to = new Date(now.getTime() + parseInt(expiry) * 60000);
+      to_datetime = to.toISOString().slice(0, 16);
+    }
+
     try {
       const res = await fetch(`/api/share-location`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imei, expiry: mins }),
+        body: JSON.stringify({
+          LicensePlateNumber: plate,
+          from_datetime,
+          to_datetime,
+        }),
       });
       const data = await res.json();
       if (data.link) {
         input.value = data.link;
       } else {
-        input.value = "Failed to generate link.";
+        input.value = data.error || "Failed to generate link.";
       }
     } catch (e) {
       input.value = "Failed to generate link.";
