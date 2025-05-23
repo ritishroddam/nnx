@@ -310,7 +310,7 @@ def create_app(config_name='default'):
     from app.VehicleDetails.vehicleDetails import vehicleDetails_bp
     from app.Alerts.alerts import alerts_bp
     from app.VehiclesAssign.vehicleAssign import vehicleAssign_bp
-    from app.Vehicle.share_location import share_location_bp
+    from app.ShareLocation.share_location import share_location_bp
 
     app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
