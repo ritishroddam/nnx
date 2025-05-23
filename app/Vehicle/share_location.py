@@ -54,7 +54,6 @@ def view_share_location_json(token):
         return jsonify({"error": "Link expired"}), 410
 
     licensePlateNumber = info['imei']
-    from app.database import db
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
     if not vehicle:
         return jsonify({"error": "Vehicle not found"}), 404
@@ -66,7 +65,6 @@ def view_share_location_json(token):
     })
     
 def emit_vehicle_location(token, licensePlateNumber):
-    from app.database import db
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
     if vehicle:
         socketio.emit(
