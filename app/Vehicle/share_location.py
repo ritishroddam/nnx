@@ -6,7 +6,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
-from flask_socketio import SocketIO, emit, join_room
+from flask_socketio import emit, join_room
+from app import socketio
 
 share_location_bp = Blueprint('share_location', __name__, template_folder='../templates')
 
