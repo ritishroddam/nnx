@@ -613,20 +613,18 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 }
 
 // location sharing
-
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
-    e.target.textContent.trim() === "share_location"
+    e.target.textContent.trim() === "moved_location" 
   ) {
     const infoWindowDiv = e.target.closest(".info-window-show");
     if (!infoWindowDiv) return;
 
-    // Get the vehicle number from the info window
     const plate = infoWindowDiv
       .querySelector(".info-plate")
       ?.textContent.trim();
-    const imei = Object.values(vehicleData).find(
+    const imei = Array.from(vehicleData.values()).find(
       (v) => v.LicensePlateNumber === plate
     )?.imei;
 
@@ -634,9 +632,7 @@ document.body.addEventListener("click", function (e) {
   }
 });
 
-// ...existing code...
 function showShareLocationPopup(imei, plate) {
-  // Remove existing popup if any
   const oldPopup = document.getElementById("share-location-popup");
   if (oldPopup) oldPopup.remove();
 
