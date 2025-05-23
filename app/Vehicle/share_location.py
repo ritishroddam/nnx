@@ -9,7 +9,6 @@ from app.geocoding import geocodeInternal
 from flask_socketio import SocketIO, emit, join_room
 
 share_location_bp = Blueprint('share_location', __name__, template_folder='../templates')
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 # In-memory store for demo; use DB in production
 share_links = {}
