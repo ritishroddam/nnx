@@ -716,6 +716,7 @@ function showShareLocationPopup(imei, plate) {
           from_datetime,
           to_datetime,
         }),
+        credentials: "include"
       });
       const data = await res.json();
       if (data.link) {
