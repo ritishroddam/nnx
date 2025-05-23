@@ -2,10 +2,10 @@ from flask import Blueprint, app, request, jsonify, render_template, abort, url_
 from datetime import datetime
 import secrets
 from ..database import db
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from app.models import User
-from app.utils import roles_required
-from app.geocoding import geocodeInternal
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
+from app.models import User # type: ignore
+from app.utils import roles_required # type: ignore
+from app.geocoding import geocodeInternal # type: ignore
 from flask_socketio import emit, join_room
 from app import socketio
 
