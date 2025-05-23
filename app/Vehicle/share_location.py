@@ -1,7 +1,7 @@
 from flask import Blueprint, app, request, jsonify, render_template, abort, url_for
 from datetime import datetime
 import secrets
-from app.database import db
+from ..database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required

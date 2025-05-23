@@ -140,8 +140,8 @@ async function fetchVehicleData() {
 function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(
-    `.vehicle-card[data-imei="${imei}"]`
-  );
+  `.vehicle-card[data-imei="${imei}"]`
+);
 
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
@@ -181,7 +181,8 @@ function updateVehicleCard(data) {
 
   if (vehicleCard) {
     // Update existing vehicle card
-    vehicleCard.querySelector(".vehicle-info").innerHTML = `
+    if (vehicleCard && vehicleCard.querySelector(".vehicle-info")) {
+      vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <div class="vehicle-status ${statusClass}">
         ${statusText}: ${speed.toFixed(2)} km/h${
       speed === 0 ? `, ${timeText}` : ""
@@ -202,6 +203,7 @@ function updateVehicleCard(data) {
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
+    }
   } else {
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
@@ -706,7 +708,7 @@ function showShareLocationPopup(imei, plate) {
     }
 
     try {
-      const res = await fetch(`/api/share-location`, {
+      const res = await fetch(`/vehicle/api/share-location`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
