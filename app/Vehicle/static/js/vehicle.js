@@ -645,21 +645,17 @@ function showShareLocationPopup(plate) {
       <h3>Share Live Location</h3>
       <div>
         <label for="from-datetime">From:</label>
-        <input type="datetime-local" id="from-datetime" style="margin-bottom:8px;">
+        <input type="text" id="from-datetime" placeholder="dd/mm/yy hh:mm" style="margin-bottom:8px;">
       </div>
       <div>
         <label for="to-datetime">To:</label>
-        <input type="datetime-local" id="to-datetime" style="margin-bottom:8px;">
+        <input type="text" id="to-datetime" placeholder="dd/mm/yy hh:mm" style="margin-bottom:8px;">
       </div>
-      <div id="custom-datetime-range" style="display:none;margin-top:8px;">
-        <label>From: <input type="datetime-local" id="from-datetime"></label>
-        <label>To: <input type="datetime-local" id="to-datetime"></label>
-      </div>
-      <button id="generate-share-link">Generate Link</button>
+      <button id="generate-share-link" style="background:#388e3c;color:#fff;">Generate Link</button>
       <div style="margin-top:10px;">
         <input id="share-link-input" type="text" value="" readonly style="width:90%;">
       </div>
-      <button id="close-share-popup" style="margin-top:10px;">Close</button>
+      <button id="close-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
     </div>
   `;
   document.body.appendChild(popup);
@@ -671,38 +667,31 @@ function showShareLocationPopup(plate) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
-  // Set default values for datetime fields
+  // Set default values for datetime fields in dd/mm/yy hh:mm
+  function formatDDMMYY_HHMM(date) {
+    const pad = (n) => n.toString().padStart(2, "0");
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date
+      .getFullYear()
+      .toString()
+      .slice(-2)} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
   const now = new Date();
-  const pad = (n) => n.toString().padStart(2, "0");
-  const toISOStringLocal = (d) =>
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-      d.getHours()
-    )}:${pad(d.getMinutes())}`;
-
-  document.getElementById("from-datetime").value = toISOStringLocal(now);
-  const toDate = new Date(now.getTime() + 15 * 60000); // Default to 15 mins later
-  document.getElementById("to-datetime").value = toISOStringLocal(toDate);
+  document.getElementById("from-datetime").value = formatDDMMYY_HHMM(now);
+  const toDate = new Date(now.getTime() + 15 * 60000);
+  document.getElementById("to-datetime").value = formatDDMMYY_HHMM(toDate);
 
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
-  // Show/hide custom date range
-  document.getElementById("share-expiry").onchange = function () {
-    const customDiv = document.getElementById("custom-datetime-range");
-    if (this.value === "custom") {
-      customDiv.style.display = "block";
-    } else {
-      customDiv.style.display = "none";
-    }
-  };
-
   document.getElementById("generate-share-link").onclick = async function () {
-    const from_datetime = document.getElementById("from-datetime").value;
-    const to_datetime = document.getElementById("to-datetime").value;
+    const from_datetime = document.getElementById("from-datetime").value.trim();
+    const to_datetime = document.getElementById("to-datetime").value.trim();
     const input = document.getElementById("share-link-input");
     input.value = "Generating link...";
 
-    if (!from_datetime || !to_datetime) {
-      input.value = "Please select both date and time.";
+    // Simple dd/mm/yy hh:mm validation
+    const dtRegex = /^\d{2}\/\d{2}\/\d{2} \d{2}:\d{2}$/;
+    if (!dtRegex.test(from_datetime) || !dtRegex.test(to_datetime)) {
+      input.value = "Please use dd/mm/yy hh:mm format.";
       return;
     }
 
