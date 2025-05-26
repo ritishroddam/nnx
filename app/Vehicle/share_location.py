@@ -57,7 +57,7 @@ def view_share_location_json(token):
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
         return jsonify({"error": "Link expired"}), 410
 
-    licensePlateNumber = info['imei']
+    licensePlateNumber = info['licensePlateNumber']
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
     if not vehicle:
         return jsonify({"error": "Vehicle not found"}), 404
