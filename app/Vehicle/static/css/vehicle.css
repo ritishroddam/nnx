@@ -276,11 +276,12 @@ body {
   padding: 6px 8px;
   border-radius: 7px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  min-width: 120px;
-  max-width: 170px;
+  min-width: 200px;
+  max-width: 200px;
   font-size: 11px;
   white-space: normal;
   line-height: 1.2;
+  height: 110px;
 }
 
 .icon-legend1 div {
@@ -293,7 +294,7 @@ body {
   margin-bottom: 0;
 }
 .icon-legend1 img {
-  width: 18px;
+  width: 10px;
   height: auto;
   margin-right: 1px;
 }
@@ -720,14 +721,14 @@ input:checked + .slider:before {
 
 .info-header-row {
   display: flex;
-  align-items: center;      /* Vertically center all items */
+  align-items: center;      
   gap: 4px;
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 4px;
-  margin-top: 0;            /* Remove any top margin */
-  padding-top: 0;           /* Remove any top padding */
-  line-height: 1.1;         /* Tighter line height */
+  margin-top: 0;            
+  padding-top: 0;           
+  line-height: 1.1;         
 }
 
 .info-plate {
@@ -735,60 +736,9 @@ input:checked + .slider:before {
   font-size: 22px;
   font-weight: 700;
   margin: 0 4px;
-  line-height: 1;           /* Remove extra vertical space */
-  padding: 0;               /* Remove extra padding */
+  line-height: 1;           
+  padding: 0;              
 }
-
-/*
-.info-icon {
-  position: relative;
-  cursor: pointer;
-  color: #333;
-  font-size: 22px;
-  display: inline-block;
-  background: #fff;
-  border-radius: 50%;
-  padding: 2px 4px;
-  box-shadow: 0 2px 6px #0002;
-}
- 
-.icon-legend {
-  display: none;
-  position: absolute;
-  top: 28px;
-  right: 0;
-  left: auto;
-  background: rgba(40, 40, 40, 0.97);
-  color: #fff;
-  padding: 6px 8px;
-  border-radius: 7px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  min-width: 120px;
-  max-width: 170px;
-  font-size: 11px;
-  white-space: normal;
-  line-height: 1.2;
-}
-
-.icon-legend div {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 3px;
-}
-.icon-legend div:last-child {
-  margin-bottom: 0;
-}
-.icon-legend img {
-  width: 18px;
-  height: auto;
-  margin-right: 1px;
-}
-
-.info-icon:hover .icon-legend,
-.info-icon:focus .icon-legend {
-  display: block;
-} */
 
 .info-update-row {
   font-size: 14px;
