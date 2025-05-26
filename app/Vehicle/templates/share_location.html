@@ -15,7 +15,7 @@
 
 <body>
     <div class="container">
-        <h2>Vehicle Location: {{ vehicle.LicensePlateNumber or vehicle.imei }}</h2>
+        <h2>Vehicle Location: {{ vehicle.LicensePlateNumber }}</h2>
         <div id="map"></div>
         <div class="info">
             <p><strong>Expires at:</strong> {{ expires_at }}</p>

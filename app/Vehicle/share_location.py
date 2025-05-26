@@ -75,12 +75,14 @@ def view_share_location_json(token):
     if not location:
         return jsonify({"error": "Geocoding failed"}), 500
     
-    return jsonify({
+    vehicleDetails =  jsonify({
         "latitude": latestLocation.get("latitude"),
         "longitude": latestLocation.get("longitude"),
         "LicensePlateNumber": licensePlateNumber,
         "location": location,
     })
+    
+    return render_template('share_location.html', vehicle=vehicleDetails)
     
 def emit_vehicle_location(token, licensePlateNumber):
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
