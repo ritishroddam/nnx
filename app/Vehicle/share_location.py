@@ -75,12 +75,12 @@ def view_share_location_json(token):
     if not location:
         return jsonify({"error": "Geocoding failed"}), 500
     
-    vehicleDetails =  jsonify({
+    vehicleDetails =  {
         "latitude": latestLocation.get("latitude"),
         "longitude": latestLocation.get("longitude"),
         "LicensePlateNumber": licensePlateNumber,
         "location": location,
-    })
+    }
     
     print(f"Vehicle Details: {vehicleDetails}")
     
