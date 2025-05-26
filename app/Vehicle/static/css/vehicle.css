@@ -539,7 +539,7 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   background: transparent;
-  padding: 10px 10px 10px 10px;
+  padding: 20px 10px 10px 10px;
   border-radius: 12px;
   position: relative;
   width: 389px;
