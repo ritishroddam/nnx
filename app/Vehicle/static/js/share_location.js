@@ -1,6 +1,6 @@
-window.onload =  initMap;
-
 let marker;
+
+window.onload =  initMap;
 
 const socket = io("https://cordonnx.com:5000", {
   transports: ["websocket"],
