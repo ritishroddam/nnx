@@ -162,10 +162,14 @@ function updateVehicleCard(data) {
   if (timeDiff > 24 * 60 * 60 * 1000) {
     statusText = "Offline";
     statusClass = "vehicle-status-offline";
-  } else if (data.ignition === "0" || speed === 0) {
+  } else if (data.ignition === "0" && speed === 0) {
     statusText = "Stopped";
     statusClass = "vehicle-status-stopped";
-  } else {
+  } else if (data.ignition === "1" && speed === 0) {
+    statusText = "Idle";
+    statusClass = "vehicle-status-idle";
+  }
+  else{
     statusText = "Moving";
     statusClass = "vehicle-status-moving";
   }
@@ -354,15 +358,19 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       gsmIcon,
       gsmColor;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
+
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "Offline";
-      statusColor = "#616161";
-    } else if (speed === 0) {
+      statusColor = isDarkMode ? "#616161" : "#9e9e9e"; // Grey for offline in dark mode
+    } else if (speed === 0 && vehicle.ignition === "0") {
       statusText = "Stopped";
-      statusColor = "#d32f2f";
-    } else {
+      statusColor = isDarkMode ? "#d32f2f" : "#f44336"; // Red for stopped in dark mode
+    } else if (speed === 0 && vehicle.ignition === "1") {
+      statusText = "Idle";
+      statusColor = isDarkMode ? "#ff9800" : "#f57c00"; // Orange for idle in dark mode
+    }else{
       statusText = "Moving";
-      statusColor = "#2e7d32";
+      statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; // Green for moving in dark mode
     }
 
     // Time since status
@@ -524,13 +532,16 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   }
 
   let statusText = "Moving";
-  let statusColor = "#2e7d32";
+  let statusColor = "#4caf50"; // Default green for moving
   if (timeDiff > 24 * 60 * 60 * 1000) {
     statusText = "Offline";
     statusColor = "#616161";
-  } else if (parseFloat(device.speed) === 0) {
+  } else if (parseFloat(device.speed) === 0 && device.ignition === "0") {
     statusText = "Stopped";
     statusColor = "#d32f2f";
+  } else if (parseFloat(device.speed) === 0 && device.ignition === "1") {
+    statusText = "Idle";
+    statusColor = "#ff9800";
   }
 
   // Icons
