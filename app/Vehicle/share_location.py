@@ -82,6 +82,8 @@ def view_share_location_json(token):
         "location": location,
     })
     
+    print(f"Vehicle Details: {vehicleDetails}")
+    
     return render_template('share_location.html', vehicle=vehicleDetails, token=token)
     
 def emit_vehicle_location(token, licensePlateNumber):
