@@ -709,7 +709,7 @@ function showShareLocationPopup(plate) {
     }
 
     try {
-      const res = await fetch(`/api/share-location`, {
+      const res = await fetch(`/vehicle/api/share-location`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
