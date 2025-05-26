@@ -63,7 +63,7 @@ def view_share_location_json(token):
         return jsonify({"error": "Vehicle not found"}), 404
     
     latestLocation = db['distinctAtlanta'].find_one(
-        {"IMEI": vehicle.get("IMEI")},
+        {"imei": vehicle.get("IMEI")},
         {"_id": 0, "latitude": 1, "longitude": 1},
     )
     
