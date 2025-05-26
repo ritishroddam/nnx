@@ -750,7 +750,7 @@ input:checked + .slider:before {
   padding: 2px 4px;
   box-shadow: 0 2px 6px #0002;
 }
-
+/* 
 .icon-legend {
   display: none;
   position: absolute;
@@ -787,7 +787,7 @@ input:checked + .slider:before {
 .info-icon:hover .icon-legend,
 .info-icon:focus .icon-legend {
   display: block;
-}
+} */
 
 .info-update-row {
   font-size: 14px;
