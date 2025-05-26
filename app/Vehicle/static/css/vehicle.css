@@ -718,10 +718,6 @@ input:checked + .slider:before {
   padding-top: 0 !important;
 }
 
-.gm-style-iw-ch {
-  padding-top: 0 !important;
-}
-
 .info-header-row {
   display: flex;
   align-items: center;      /* Vertically center all items */
