@@ -437,7 +437,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     <div style="display:flex;align-item s:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:22px;">${gpsIcon}</span>
+          <span class="material-symbols-outlined" style="font-size:22px;" title="GPS Status">${gpsIcon}</span>
           <span class="vehicle-number"
                 style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
                 onclick="vehicleInfoPage('${
@@ -446,7 +446,9 @@ function renderVehicleCards(vehicles, filterValue = "all") {
             ${vehicle.LicensePlateNumber || vehicle.imei}
           </span>
           <span style="margin-left:4px;">
-            ${iconRow}
+            <span class="material-symbols-outlined" style="font-size:22px;" title="Direction">${arrowIcon}</span>
+            <span class="material-symbols-outlined" style="font-size:22px;" title="Ignition">${ignitionIcon}</span>
+            <span class="material-symbols-outlined" style="font-size:22px;color:${gsmColor};" title="Network">${gsmIcon}</span>
           </span>
         </div>
         <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
