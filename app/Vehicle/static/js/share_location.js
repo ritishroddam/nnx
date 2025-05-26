@@ -13,7 +13,7 @@ const socket = io("https://cordonnx.com:5000", {
 socket.on("connect", () => {
   console.log("Connected to the socket server");
   const licensePlateNumber = window.licensePlateNumber || null;
-  console.log(vehicleData);
+  console.log(licensePlateNumber);
   if (licensePlateNumber) {
     socket.emit("subscribe_vehicle_updates", {
       LicensePlateNumber: licensePlateNumber,
