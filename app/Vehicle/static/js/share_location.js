@@ -12,12 +12,12 @@ async function initMap() {
 
   const map = new Map(document.getElementById("map"), {
     mapId: "e426c1ad17485d79",
-    center: { lat, lng },
+    center: latLng,
     zoom: 16,
   });
 
   let marker = new AdvancedMarkerElement({
-    position: { lat, lng },
+    position: latLng,
     map: map,
     title: "Vehicle Location",
   });
