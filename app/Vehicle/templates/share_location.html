@@ -20,14 +20,14 @@
         <h2>Vehicle Location: {{ vehicle.LicensePlateNumber }}</h2>
         <div id="map"></div>
         <div class="info">
-            <p><strong>Expires at:</strong> {{ expires_at }}</p>
-            <p><strong>Location:</strong> {{ vehicle.location or "Unknown" }}</p>
-            <p><strong>Latitude:</strong> {{ vehicle.latitude }}</p>
-            <p><strong>Longitude:</strong> {{ vehicle.longitude }}</p>
+            <p><strong>Expires at:</strong> <span id="expires-at">{{ info.to_datetime }}</span></p>
+            <p><strong>Location:</strong> <span id="location"></span>{{ vehicle.location or "Unknown Location" }} km/h</p>
+            <p><strong>Speed:</strong> <span id="speed">{{ vehicle.speed or "Unknown Speed" }}</span></p>
             <button id="route-btn">Open in Google Maps</button>
         </div>
     </div>
     <script>
+        window.licensePlateNumber = "{{ vehicle.LicensePlateNumber }}";
         window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
         window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
         window.shareToken = "{{ token }}";

@@ -64,7 +64,7 @@ def view_share_location_json(token):
     
     latestLocation = db['distinctAtlanta'].find_one(
         {"imei": vehicle.get("IMEI")},
-        {"_id": 0, "latitude": 1, "longitude": 1},
+        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1},
     )
     
     if not latestLocation:
@@ -75,16 +75,25 @@ def view_share_location_json(token):
     if not location:
         return jsonify({"error": "Geocoding failed"}), 500
     
+    # Convert UTC datetime to IST (Asia/Kolkata)
+    utc_dt = latestLocation.get("date_time")
+    if utc_dt and utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    ist_tz = pytz.timezone("Asia/Kolkata")
+    ist_dt = utc_dt.astimezone(ist_tz) if utc_dt else None
+
     vehicleDetails =  {
         "latitude": latestLocation.get("latitude"),
         "longitude": latestLocation.get("longitude"),
         "LicensePlateNumber": licensePlateNumber,
         "location": location,
+        "speed": latestLocation.get("speed"),
+        "date_time": str(ist_dt.strftime("%Y-%m-%d %H:%M:%S")) if ist_dt else None,
     }
     
     print(f"Vehicle Details: {vehicleDetails}")
     
-    return render_template('share_location.html', vehicle=vehicleDetails, token=token)
+    return render_template('share_location.html', vehicle=vehicleDetails, token=token, info=info)
     
 def emit_vehicle_location(token, licensePlateNumber):
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
