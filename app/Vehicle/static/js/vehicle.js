@@ -619,6 +619,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     </div>
   `;
 
+  infoWindow.setContent(headerContent);
   infoWindow.setContent(content);
   infoWindow.setPosition(latLng);
 }
