@@ -268,34 +268,34 @@ body {
 .icon-legend {
   display: none;
   position: absolute;
-  top: 30px;
-  right: 0;         /* Align to right of icon */
+  top: 28px;
+  right: 0;
   left: auto;
   background: rgba(40, 40, 40, 0.97);
   color: #fff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  min-width: 170px;
-  max-width: 220px;
-  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  min-width: 120px;
+  max-width: 170px;
+  font-size: 11px;
   white-space: normal;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .icon-legend div {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 5px;
+  gap: 4px;
+  margin-bottom: 3px;
 }
 .icon-legend div:last-child {
   margin-bottom: 0;
 }
 .icon-legend img {
-  width: 26px;
+  width: 18px;
   height: auto;
-  margin-right: 2px;
+  margin-right: 1px;
 }
 
 .info-icon:hover .icon-legend,
@@ -749,34 +749,34 @@ input:checked + .slider:before {
 .icon-legend {
   display: none;
   position: absolute;
-  top: 30px;
-  right: 0;         /* Align to right of icon */
+  top: 28px;
+  right: 0;
   left: auto;
   background: rgba(40, 40, 40, 0.97);
   color: #fff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  min-width: 170px;
-  max-width: 220px;
-  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  min-width: 120px;
+  max-width: 170px;
+  font-size: 11px;
   white-space: normal;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .icon-legend div {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 5px;
+  gap: 4px;
+  margin-bottom: 3px;
 }
 .icon-legend div:last-child {
   margin-bottom: 0;
 }
 .icon-legend img {
-  width: 26px;
+  width: 18px;
   height: auto;
-  margin-right: 2px;
+  margin-right: 1px;
 }
 
 .info-icon:hover .icon-legend,
