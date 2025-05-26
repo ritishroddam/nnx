@@ -77,10 +77,10 @@ def view_share_location_json(token):
     
     # Convert UTC datetime to IST (Asia/Kolkata)
     utc_dt = latestLocation.get("date_time")
-    if utc_dt and utc_dt.tzinfo is None:
-        utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    print(f"UTC DateTime: {utc_dt}")
     ist_tz = pytz.timezone("Asia/Kolkata")
     ist_dt = utc_dt.astimezone(ist_tz) if utc_dt else None
+    print(f"IST DateTime: {ist_dt}")
 
     vehicleDetails =  {
         "latitude": latestLocation.get("latitude"),
