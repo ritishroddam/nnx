@@ -636,7 +636,7 @@ document.body.addEventListener("click", function (e) {
       return;
     }
 
-    showShareLocationPopup(plate);
+    showShareLocationPopup(plateText);
   }
 });
 
