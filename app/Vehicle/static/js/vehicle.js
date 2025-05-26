@@ -617,7 +617,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
-    e.target.textContent.trim() === "share_location"
+    e.target.textContent.trim() === "moved_location"
   ) {
     const infoWindowDiv = e.target.closest(".info-window-show");
     if (!infoWindowDiv) return;
@@ -626,15 +626,12 @@ document.body.addEventListener("click", function (e) {
     const plate = infoWindowDiv
       .querySelector(".info-plate")
       ?.textContent.trim();
-    const imei = Object.values(vehicleData).find(
-      (v) => v.LicensePlateNumber === plate
-    )?.imei;
 
-    showShareLocationPopup(imei, plate);
+    showShareLocationPopup(plate);
   }
 });
 
-function showShareLocationPopup(imei, plate) {
+function showShareLocationPopup(plate) {
   // Remove existing popup if any
   const oldPopup = document.getElementById("share-location-popup");
   if (oldPopup) oldPopup.remove();
@@ -645,16 +642,12 @@ function showShareLocationPopup(imei, plate) {
     <div class="share-popup-content">
       <h3>Share Live Location</h3>
       <div>
-        <label for="share-expiry">Expiry:</label>
-        <select id="share-expiry">
-          <option value="5">5 mins</option>
-          <option value="15">15 mins</option>
-          <option value="30">30 mins</option>
-          <option value="60">1 hour</option>
-          <option value="360">6 hours</option>
-          <option value="720">12 hours</option>
-          <option value="1440">24 hours</option>
-        </select>
+        <label for="from-datetime">From:</label>
+        <input type="datetime-local" id="from-datetime" style="margin-bottom:8px;">
+      </div>
+      <div>
+        <label for="to-datetime">To:</label>
+        <input type="datetime-local" id="to-datetime" style="margin-bottom:8px;">
       </div>
       <button id="generate-share-link">Generate Link</button>
       <div style="margin-top:10px;">
@@ -672,17 +665,40 @@ function showShareLocationPopup(imei, plate) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
+  // Set default values for datetime fields
+  const now = new Date();
+  const pad = (n) => n.toString().padStart(2, "0");
+  const toISOStringLocal = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}`;
+
+  document.getElementById("from-datetime").value = toISOStringLocal(now);
+  const toDate = new Date(now.getTime() + 15 * 60000); // Default to 15 mins later
+  document.getElementById("to-datetime").value = toISOStringLocal(toDate);
+
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
   document.getElementById("generate-share-link").onclick = async function () {
-    const mins = document.getElementById("share-expiry").value;
+    const from_datetime = document.getElementById("from-datetime").value;
+    const to_datetime = document.getElementById("to-datetime").value;
     const input = document.getElementById("share-link-input");
     input.value = "Generating link...";
+
+    if (!from_datetime || !to_datetime) {
+      input.value = "Please select both date and time.";
+      return;
+    }
+
     try {
       const res = await fetch(`/api/share-location`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imei, expiry: mins }),
+        body: JSON.stringify({
+          LicensePlateNumber: plate,
+          from_datetime,
+          to_datetime,
+        }),
       });
       const data = await res.json();
       if (data.link) {
