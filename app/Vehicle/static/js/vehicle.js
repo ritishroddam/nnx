@@ -140,8 +140,8 @@ async function fetchVehicleData() {
 function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(
-    `.vehicle-card[data-imei="${imei}"]`
-  );
+  `.vehicle-card[data-imei="${imei}"]`
+);
 
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
@@ -160,15 +160,15 @@ function updateVehicleCard(data) {
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
 
   if (timeDiff > 2 * 60 * 1000) {
-    statusText = "Offline";
-    statusClass = "vehicle-status-offline";
-  } else if (data.ignition === "0" || speed === 0) {
-    statusText = "Stopped";
-    statusClass = "vehicle-status-stopped";
-  } else {
-    statusText = "Moving";
-    statusClass = "vehicle-status-moving";
-  }
+  statusText = "Offline";
+  statusClass = "vehicle-status-offline";
+} else if (data.ignition === "0" || speed === 0) {
+  statusText = "Stopped";
+  statusClass = "vehicle-status-stopped";
+} else {
+  statusText = "Moving";
+  statusClass = "vehicle-status-moving";
+}
 
   let timeText;
   if (data.status_time_str) {
@@ -187,8 +187,8 @@ function updateVehicleCard(data) {
       vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <div class="vehicle-status ${statusClass}">
         ${statusText}: ${speed.toFixed(2)} km/h${
-        speed === 0 ? `, ${timeText}` : ""
-      }
+      speed === 0 ? `, ${timeText}` : ""
+    }
       </div>
       <strong>Lat&Lon:</strong> ${
         latitude && longitude
@@ -588,10 +588,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const content = `
       <div class="info-update-row">
         <span class="info-update-label">Last Update :</span>
-        <span class="info-update-value">${formatLastUpdatedText(
-          device.date,
-          device.time
-        )}</span>
+        <span class="info-update-value">${formatLastUpdatedText(device.date, device.time)}</span>
       </div>
       <div class="info-status-row" style="color:${statusColor};">
         ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
@@ -622,19 +619,23 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
-    e.target.textContent.trim() === "moved_location"
+    e.target.textContent.trim() === "moved_location" 
   ) {
-    const infoWindow = document.querySelector(".info-plate");
-    if (!infoWindow) return;
-    const plate = infoWindow.textContent.trim();
-    if (!plate) return;
+    const infoWindowDiv = e.target.closest(".info-window-show");
+    if (!infoWindowDiv) return;
 
-    showShareLocationPopup(plate);
+    const plate = infoWindowDiv
+      .querySelector(".info-plate")
+      ?.textContent.trim();
+    const imei = Array.from(vehicleData.values()).find(
+      (v) => v.LicensePlateNumber === plate
+    )?.imei;
+
+    showShareLocationPopup(imei, plate);
   }
 });
 
-function showShareLocationPopup(plate) {
-  // Remove existing popup if any
+function showShareLocationPopup(imei, plate) {
   const oldPopup = document.getElementById("share-location-popup");
   if (oldPopup) oldPopup.remove();
 
@@ -704,6 +705,7 @@ function showShareLocationPopup(plate) {
           from_datetime,
           to_datetime,
         }),
+        credentials: "include"
       });
       const data = await res.json();
       if (data.link) {
