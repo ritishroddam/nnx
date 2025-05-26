@@ -160,15 +160,15 @@ function updateVehicleCard(data) {
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
 
   if (timeDiff > 2 * 60 * 1000) {
-    statusText = "Offline";
-    statusClass = "vehicle-status-offline";
-  } else if (speed === 0) {
-    statusText = "Stopped";
-    statusClass = "vehicle-status-stopped";
-  } else {
-    statusText = "Moving";
-    statusClass = "vehicle-status-moving";
-  }
+  statusText = "Offline";
+  statusClass = "vehicle-status-offline";
+} else if (data.ignition === "0" || speed === 0) {
+  statusText = "Stopped";
+  statusClass = "vehicle-status-stopped";
+} else {
+  statusText = "Moving";
+  statusClass = "vehicle-status-moving";
+}
 
   let timeText;
   if (data.status_time_str) {
