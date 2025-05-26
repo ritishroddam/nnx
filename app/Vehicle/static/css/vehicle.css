@@ -252,7 +252,7 @@ body {
   z-index: 100;
 }
 
-.info-icon {
+.info-icon1 {
   position: relative;
   cursor: pointer;
   color: #333;
@@ -298,8 +298,8 @@ body {
   margin-right: 1px;
 }
 
-.info-icon:hover .icon-legend,
-.info-icon:focus .icon-legend {
+.info-icon1:hover .icon-legend,
+.info-icon1:focus .icon-legend {
   display: block;
 }
 
