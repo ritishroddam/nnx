@@ -265,7 +265,7 @@ body {
   margin-top: 60px;
 }
 
-.icon-legend {
+.icon-legend1 {
   display: none;
   position: absolute;
   top: 28px;
@@ -283,23 +283,23 @@ body {
   line-height: 1.2;
 }
 
-.icon-legend div {
+.icon-legend1 div {
   display: flex;
   align-items: center;
   gap: 4px;
   margin-bottom: 3px;
 }
-.icon-legend div:last-child {
+.icon-legend1 div:last-child {
   margin-bottom: 0;
 }
-.icon-legend img {
+.icon-legend1 img {
   width: 18px;
   height: auto;
   margin-right: 1px;
 }
 
-.info-icon1:hover .icon-legend,
-.info-icon1:focus .icon-legend {
+.info-icon1:hover .icon-legend1,
+.info-icon1:focus .icon-legend1 {
   display: block;
 }
 
