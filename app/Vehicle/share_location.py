@@ -82,7 +82,7 @@ def view_share_location_json(token):
         "location": location,
     })
     
-    return render_template('share_location.html', vehicle=vehicleDetails)
+    return render_template('share_location.html', vehicle=vehicleDetails, token=token)
     
 def emit_vehicle_location(token, licensePlateNumber):
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})

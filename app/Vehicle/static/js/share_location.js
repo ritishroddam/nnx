@@ -1,12 +1,22 @@
-window.onload = function () {
+window.onload =  initMap;
+
+const token = window.shareToken; 
+
+async function initMap() {
+  const { Map } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   const lat = window.vehicleLat;
   const lng = window.vehicleLng;
-  const token = window.shareToken; // Set this variable in your template
-  const map = new google.maps.Map(document.getElementById("map"), {
+
+  const latLng = new google.maps.LatLng(lat, lng);
+
+  const map = new Map(document.getElementById("map"), {
+    mapId: "e426c1ad17485d79",
     center: { lat, lng },
     zoom: 16,
   });
-  let marker = new google.maps.Marker({
+
+  let marker = new AdvancedMarkerElement({
     position: { lat, lng },
     map: map,
     title: "Vehicle Location",
