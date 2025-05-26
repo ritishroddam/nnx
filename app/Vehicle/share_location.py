@@ -43,7 +43,7 @@ def api_share_location():
         return jsonify({"error": "Invalid datetime format"}), 400
 
     token = create_share_link(licensePlateNumber, from_datetime, to_datetime, user_id)
-    link = url_for('Share_location.view_share_location_json', token=token, _external=True)
+    link = url_for('ShareLocation.view_share_location_json', token=token, _external=True)
     return jsonify({"link": link})
 
 @share_location_bp.route('/share-location/<token>/json')
