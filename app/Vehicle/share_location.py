@@ -78,7 +78,7 @@ def view_share_location_json(token):
     return jsonify({
         "latitude": latestLocation.get("latitude"),
         "longitude": latestLocation.get("longitude"),
-        "LicensePlateNumber": vehicle.get("LicensePlateNumber"),
+        "LicensePlateNumber": licensePlateNumber,
         "location": location,
     })
     
