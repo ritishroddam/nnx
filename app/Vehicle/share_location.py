@@ -1,7 +1,7 @@
 from flask import Blueprint, app, request, jsonify, render_template, abort, url_for
 from datetime import datetime
 import secrets
-from ..database import db
+from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
 from app.models import User # type: ignore
 from app.utils import roles_required # type: ignore
@@ -9,7 +9,7 @@ from app.geocoding import geocodeInternal # type: ignore
 from flask_socketio import emit, join_room
 from app import socketio
 
-share_location_bp = Blueprint('share_location', __name__, template_folder='../templates')
+share_location_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
 # In-memory store for demo; use DB in production
 share_links = {}
@@ -83,6 +83,3 @@ def emit_vehicle_location(token, licensePlateNumber):
 def on_join(data):
     token = data.get('token')
     join_room(token)
-
-if __name__ == "__main__":
-    socketio.run(app, debug=True)
