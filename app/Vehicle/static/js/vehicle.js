@@ -626,12 +626,10 @@ document.body.addEventListener("click", function (e) {
     e.target.classList.contains("info-bottom-action") &&
     e.target.textContent.trim() === "moved_location"
   ) {
-    const infoWindowDiv = e.target.closest(".info-window-show");
-    if (!infoWindowDiv) return;
-
-    const plate = infoWindowDiv
-      .querySelector(".info-plate")
-      ?.textContent.trim();
+    const infoWindow = document.querySelector(".info-plate");
+    if (!infoWindow) return;
+    const plate = infoWindow.textContent.trim();
+    if (!plate) return;
 
     showShareLocationPopup(plate);
   }
