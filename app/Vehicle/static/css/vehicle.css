@@ -739,6 +739,7 @@ input:checked + .slider:before {
   padding: 0;               /* Remove extra padding */
 }
 
+/*
 .info-icon {
   position: relative;
   cursor: pointer;
@@ -750,7 +751,7 @@ input:checked + .slider:before {
   padding: 2px 4px;
   box-shadow: 0 2px 6px #0002;
 }
-/* 
+ 
 .icon-legend {
   display: none;
   position: absolute;
