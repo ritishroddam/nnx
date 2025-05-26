@@ -1,5 +1,6 @@
 from flask import Blueprint, app, request, jsonify, render_template, abort, url_for
 from datetime import datetime
+import pytz
 import secrets
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
@@ -37,8 +38,11 @@ def api_share_location():
         return jsonify({"error": "LicensePlateNumber, from_datetime, and to_datetime required"}), 400
 
     try:
-        from_datetime = datetime.strptime(from_str, "%Y-%m-%dT%H:%M")
-        to_datetime = datetime.strptime(to_str, "%Y-%m-%dT%H:%M")
+        local_tz = pytz.timezone("Asia/Kolkata")  # or your local timezone
+        from_naive = datetime.strptime(from_str, "%Y-%m-%dT%H:%M")
+        to_naive = datetime.strptime(to_str, "%Y-%m-%dT%H:%M")
+        from_datetime = local_tz.localize(from_naive).astimezone(pytz.UTC)
+        to_datetime = local_tz.localize(to_naive).astimezone(pytz.UTC)
     except Exception:
         return jsonify({"error": "Invalid datetime format"}), 400
 
