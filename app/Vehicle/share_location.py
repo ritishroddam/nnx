@@ -9,7 +9,7 @@ from app.geocoding import geocodeInternal # type: ignore
 from flask_socketio import emit, join_room
 from app import socketio
 
-share_location_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
+share_location_bp = Blueprint('ShareLocation', __name__, static_folder='static', template_folder='templates')
 
 # In-memory store for demo; use DB in production
 share_links = {}

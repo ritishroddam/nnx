@@ -322,7 +322,7 @@ def create_app(config_name='default'):
     app.register_blueprint(vehicleDetails_bp, url_prefix='/vehicleDetails')
     app.register_blueprint(alerts_bp, url_prefix='/alerts')
     app.register_blueprint(vehicleAssign_bp, url_prefix='/vehicleAssign')
-    app.register_blueprint(share_location_bp, url_prefix='/vehicle')
+    app.register_blueprint(share_location_bp, url_prefix='/shareLocation')
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
