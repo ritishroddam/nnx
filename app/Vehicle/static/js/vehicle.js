@@ -159,7 +159,7 @@ function updateVehicleCard(data) {
   let statusText, statusClass;
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
 
-  if (timeDiff > 2 * 60 * 1000) {
+  if (timeDiff > 24 * 60 * 60 * 1000) {
     statusText = "Offline";
     statusClass = "vehicle-status-offline";
   } else if (data.ignition === "0" || speed === 0) {
@@ -354,7 +354,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       gsmIcon,
       gsmColor;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-    if (timeDiff > 2 * 60 * 1000) {
+    if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "Offline";
       statusColor = "#616161";
     } else if (speed === 0) {
@@ -525,7 +525,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   let statusText = "Moving";
   let statusColor = "#2e7d32";
-  if (timeDiff > 2 * 60 * 1000) {
+  if (timeDiff > 24 * 60 * 60 * 1000) {
     statusText = "Offline";
     statusColor = "#616161";
   } else if (parseFloat(device.speed) === 0) {
