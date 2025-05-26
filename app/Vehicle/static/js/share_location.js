@@ -1,4 +1,4 @@
-let marker;
+let vehicleMarker;
 let url;
 
 window.onload =  initMap;
@@ -52,7 +52,7 @@ socket.on("vehicle_live_update", (data) => {
 });
 
 function updateMarkerPostion(latitude, longitude) {
-  if (!marker) {
+  if (!vehicleMarker) {
     console.warn("Marker is not initialized yet.");
     return;
   }
@@ -60,7 +60,7 @@ function updateMarkerPostion(latitude, longitude) {
   url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
 
   const latLng = new google.maps.LatLng(latitude, longitude);
-  marker.setPosition(latLng);
+  vehicleMarker.setPosition(latLng);
 }
 
 function updateVehicleData(vehicleData) {
@@ -90,7 +90,7 @@ async function initMap() {
   carContent.style.position = "absolute";
   carContent.alt = "Car";
 
-  marker = new AdvancedMarkerElement({
+  vehicleMarker = new AdvancedMarkerElement({
     position: latLng,
     map: map,
     title: "Vehicle Location",
