@@ -246,9 +246,10 @@ body {
 
 .icon-legend-container {
   position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 10;
+  top: 18px;
+  right: 24px;      /* Move to right */
+  left: auto;       /* Remove left positioning */
+  z-index: 100;
 }
 
 .info-icon {
@@ -257,21 +258,43 @@ body {
   color: #333;
   font-size: 22px;
   display: inline-block;
+  background: #fff;
+  border-radius: 50%;
+  padding: 2px 4px;
+  box-shadow: 0 2px 6px #0002;
 }
 
 .icon-legend {
   display: none;
   position: absolute;
-  top: 28px;
-  left: 0;
-  background: rgba(40, 40, 40, 0.95);
+  top: 30px;
+  right: 0;         /* Align to right of icon */
+  left: auto;
+  background: rgba(40, 40, 40, 0.97);
   color: #fff;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  min-width: 220px;
-  font-size: 15px;
-  white-space: nowrap;
+  min-width: 170px;
+  max-width: 220px;
+  font-size: 13px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.icon-legend div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+.icon-legend div:last-child {
+  margin-bottom: 0;
+}
+.icon-legend img {
+  width: 26px;
+  height: auto;
+  margin-right: 2px;
 }
 
 .info-icon:hover .icon-legend,
@@ -716,21 +739,43 @@ input:checked + .slider:before {
   color: #333;
   font-size: 22px;
   display: inline-block;
+  background: #fff;
+  border-radius: 50%;
+  padding: 2px 4px;
+  box-shadow: 0 2px 6px #0002;
 }
 
 .icon-legend {
   display: none;
   position: absolute;
-  top: 28px;
-  left: 0;
-  background: rgba(40, 40, 40, 0.95);
+  top: 30px;
+  right: 0;         /* Align to right of icon */
+  left: auto;
+  background: rgba(40, 40, 40, 0.97);
   color: #fff;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  min-width: 220px;
-  font-size: 15px;
-  white-space: nowrap;
+  min-width: 170px;
+  max-width: 220px;
+  font-size: 13px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.icon-legend div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+.icon-legend div:last-child {
+  margin-bottom: 0;
+}
+.icon-legend img {
+  width: 26px;
+  height: auto;
+  margin-right: 2px;
 }
 
 .info-icon:hover .icon-legend,
