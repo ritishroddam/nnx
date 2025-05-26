@@ -1,4 +1,5 @@
 let marker;
+let url;
 
 window.onload =  initMap;
 
@@ -56,6 +57,8 @@ function updateMarkerPostion(latitude, longitude) {
     return;
   }
 
+  url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+
   const latLng = new google.maps.LatLng(latitude, longitude);
   marker.setPosition(latLng);
 }
@@ -94,8 +97,10 @@ async function initMap() {
     content: carContent,
   });
 
-  document.getElementById("route-btn").onclick = function () {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-    window.open(url, "_blank");
-  };
+  url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
+
+
+document.getElementById("route-btn").onclick = function () {
+  window.open(url, "_blank");
+};
