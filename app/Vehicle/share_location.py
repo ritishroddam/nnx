@@ -14,15 +14,19 @@ share_location_bp = Blueprint('ShareLocation', __name__, static_folder='static',
 
 # In-memory store for demo; use DB in production
 share_links = {}
-
+links_collection = db['share_links']
 def create_share_link(licensePlateNumber, from_datetime, to_datetime, created_by):
     token = secrets.token_urlsafe(16)
-    share_links[token] = {
+    share_link = {
+        "token": token,
         "licensePlateNumber": licensePlateNumber,
         "from_datetime": from_datetime,
         "to_datetime": to_datetime,
         "created_by": created_by
     }
+    
+    links_collection.insert_one(share_link)
+    
     return token
 
 @share_location_bp.route('/share-location', methods=['POST'])
@@ -52,8 +56,9 @@ def api_share_location():
 
 @share_location_bp.route('/share-location/<token>/json')
 def view_share_location_json(token):
-    info = share_links.get(token)
+    info = links_collection.find_one({"token": token})
     now = datetime.now(timezone.utc)  # Make now timezone-aware (UTC)
+    
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
         return jsonify({"error": "Link expired"}), 410
 
@@ -77,10 +82,19 @@ def view_share_location_json(token):
     
     # Convert UTC datetime to IST (Asia/Kolkata)
     utc_dt = latestLocation.get("date_time")
-    print(f"UTC DateTime: {utc_dt}")
     ist_tz = pytz.timezone("Asia/Kolkata")
     ist_dt = utc_dt.astimezone(ist_tz) if utc_dt else None
-    print(f"IST DateTime: {ist_dt}")
+    
+    from_datetime = info.get("from_datetime").astimezone(ist_tz) if info.get("from_datetime") else None
+    to_datetime = info.get("to_datetime").astimezone(ist_tz) if info.get("to_datetime") else None
+    created_by = info.get("created_by")
+    
+    userInfo ={
+        "licensePlateNumber": licensePlateNumber,
+        "from_datetime": from_datetime,
+        "to_datetime": to_datetime,
+        "created_by": created_by
+    }
 
     vehicleDetails =  {
         "latitude": latestLocation.get("latitude"),
@@ -93,24 +107,4 @@ def view_share_location_json(token):
     
     print(f"Vehicle Details: {vehicleDetails}")
     
-    return render_template('share_location.html', vehicle=vehicleDetails, token=token, info=info)
-    
-def emit_vehicle_location(token, licensePlateNumber):
-    vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
-    if vehicle:
-        socketio.emit(
-            "location_update",
-            {
-                "latitude": vehicle.get("latitude"),
-                "longitude": vehicle.get("longitude"),
-                "LicensePlateNumber": vehicle.get("LicensePlateNumber"),
-                "location": vehicle.get("location"),
-            },
-            room=token
-        )
-
-# When a client connects, join the room for their token
-@socketio.on('join')
-def on_join(data):
-    token = data.get('token')
-    join_room(token)
+    return render_template('share_location.html', vehicle=vehicleDetails, token=token, info=userInfo)
