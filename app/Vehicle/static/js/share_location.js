@@ -9,7 +9,7 @@ async function initMap() {
   const latLng = new google.maps.LatLng(lat, lng);
 
   const map = new Map(document.getElementById("map"), {
-    mapId: "e426c1ad17485d79",
+    mapId: "dc4a8996aab2cac9",
     center: latLng,
     zoom: 16,
   });
