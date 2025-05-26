@@ -3,8 +3,8 @@ window.onload =  initMap;
 async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-  const lat = window.vehicleLat;
-  const lng = window.vehicleLng;
+  const lat = parseFloat(window.vehicleLat);
+  const lng = parseFloat(window.vehicleLng);
 
   const latLng = new google.maps.LatLng(lat, lng);
 
