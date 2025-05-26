@@ -542,6 +542,7 @@ input:checked + .slider:before {
   padding: 10px 10px 10px 10px;
   border-radius: 12px;
   position: relative;
+  width: 380px;
 }
 
 #vehicle-list {
