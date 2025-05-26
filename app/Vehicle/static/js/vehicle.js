@@ -652,11 +652,11 @@ function showShareLocationPopup(plate) {
       <h3>Share Live Location</h3>
       <div>
         <label for="from-datetime">From:</label>
-        <input type="text" id="from-datetime" placeholder="dd/mm/yy hh:mm" style="margin-bottom:8px;">
+        <input type="datetime-local" id="from-datetime" style="margin-bottom:8px;">
       </div>
       <div>
         <label for="to-datetime">To:</label>
-        <input type="text" id="to-datetime" placeholder="dd/mm/yy hh:mm" style="margin-bottom:8px;">
+        <input type="datetime-local" id="to-datetime" style="margin-bottom:8px;">
       </div>
       <button id="generate-share-link" style="background:#388e3c;color:#fff;">Generate Link</button>
       <div style="margin-top:10px;">
@@ -674,40 +674,33 @@ function showShareLocationPopup(plate) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
-  // Set default values for datetime fields in dd/mm/yy hh:mm
-  function formatDDMMYY_HHMM(date) {
-    const pad = (n) => n.toString().padStart(2, "0");
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date
-      .getFullYear()
-      .toString()
-      .slice(-2)} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  }
+  // Set default values for datetime fields in YYYY-MM-DDTHH:mm
   const now = new Date();
-  document.getElementById("from-datetime").value = formatDDMMYY_HHMM(now);
+  const pad = (n) => n.toString().padStart(2, "0");
+  const toISOStringLocal = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+  document.getElementById("from-datetime").value = toISOStringLocal(now);
   const toDate = new Date(now.getTime() + 15 * 60000);
-  document.getElementById("to-datetime").value = formatDDMMYY_HHMM(toDate);
+  document.getElementById("to-datetime").value = toISOStringLocal(toDate);
 
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
   document.getElementById("generate-share-link").onclick = async function () {
-    const from_datetime = document.getElementById("from-datetime").value.trim();
-    const to_datetime = document.getElementById("to-datetime").value.trim();
+    const from_datetime = document.getElementById("from-datetime").value;
+    const to_datetime = document.getElementById("to-datetime").value;
     const input = document.getElementById("share-link-input");
     input.value = "Generating link...";
 
-    // Simple dd/mm/yy hh:mm validation
-    const dtRegex = /^\d{2}\/\d{2}\/\d{2} \d{2}:\d{2}$/;
-    if (!dtRegex.test(from_datetime) || !dtRegex.test(to_datetime)) {
-      input.value = "Please use dd/mm/yy hh:mm format.";
+    if (!from_datetime || !to_datetime) {
+      input.value = "Please select both date and time.";
       return;
     }
 
     try {
-      const res = await fetch(`/shareLocation/api/share-location`, {
+      const res = await fetch(`/api/share-location`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-         },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           LicensePlateNumber: plate,
           from_datetime,
