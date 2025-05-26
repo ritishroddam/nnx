@@ -171,7 +171,9 @@ function updateVehicleCard(data) {
   }
 
   let timeText;
-  if (daysDiff > 0) {
+  if (data.status_time_str) {
+    timeText = `since ${data.status_time_str}`;
+  } else if (daysDiff > 0) {
     timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
   } else if (hoursDiff > 0) {
     timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
@@ -365,10 +367,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     // Time since status
     let sinceText = "";
-    if (hoursDiff > 0) {
-      sinceText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
+    if (vehicle.status_time_str) {
+      sinceText = `since ${vehicle.status_time_str}`;
+    } else if (hoursDiff > 0) {
+      sinceText = `since ${hoursDiff} min`;
     } else if (minutesDiff > 0) {
-      sinceText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
+      sinceText = `since ${minutesDiff} min`;
     } else {
       sinceText = `since ${secondsDiff} sec`;
     }
@@ -509,7 +513,9 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const minutesAgo = Math.floor(timeDiff / (1000 * 60));
   const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
   let sinceText = "";
-  if (hoursAgo > 0) {
+  if (device.status_time_str) {
+    sinceText = `since ${device.status_time_str}`;
+  } else if (hoursAgo > 0) {
     sinceText = `since ${hoursAgo} min`;
   } else if (minutesAgo > 0) {
     sinceText = `since ${minutesAgo} min`;
@@ -809,7 +815,7 @@ function updateMap() {
   filterVehicles();
 }
 
-function animateMarker(marker, newPosition, duration = 6000) {
+function animateMarker(marker, newPosition, duration = 9000) {
   let startPosition = new google.maps.LatLng(
     marker.position.lat,
     marker.position.lng
