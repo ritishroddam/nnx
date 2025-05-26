@@ -80,10 +80,18 @@ async function initMap() {
     zoom: 16,
   });
 
+  const carContent = document.createElement("img");
+  carContent.src = "/static/images/car_green.png";
+  carContent.style.width = "18px";
+  carContent.style.height = "32px";
+  carContent.style.position = "absolute";
+  carContent.alt = "Car";
+
   marker = new AdvancedMarkerElement({
     position: latLng,
     map: map,
     title: "Vehicle Location",
+    content: carContent,
   });
 
   document.getElementById("route-btn").onclick = function () {
