@@ -624,9 +624,17 @@ document.body.addEventListener("click", function (e) {
     e.target.classList.contains("info-bottom-action") &&
     e.target.textContent.trim() === "moved_location"
   ) {
-    const plate = infoWindowDiv
-      .querySelector(".info-plate")
-      ?.textContent.trim();
+    const plate = document.querySelector(".info-plate");
+
+    if (!plate) {
+      console.error("License plate element not found in info window.");
+      return;
+    }
+    const plateText = plate.textContent.trim();
+    if (!plateText) {
+      console.error("License plate text is empty.");
+      return;
+    }
 
     showShareLocationPopup(plate);
   }
