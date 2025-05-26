@@ -22,14 +22,16 @@
         <div class="info">
             <p><strong>Expires at:</strong> {{ expires_at }}</p>
             <p><strong>Location:</strong> {{ vehicle.location or "Unknown" }}</p>
+            <p><strong>Latitude:</strong> {{ vehicle.latitude }}</p>
+            <p><strong>Longitude:</strong> {{ vehicle.longitude }}</p>
             <button id="route-btn">Open in Google Maps</button>
         </div>
     </div>
     <script>
-  window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
-  window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
-  window.shareToken = "{{ token }}";
-</script>
+        window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
+        window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
+        window.shareToken = "{{ token }}";
+    </script>
 </body>
 
 </html>
