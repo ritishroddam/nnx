@@ -698,7 +698,7 @@ function showShareLocationPopup(plate) {
     }
 
     try {
-      const res = await fetch(`/shareLocation/api/share-location`, {
+      const res = await fetch(`/shareLocation/share-location`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
           "X-CSRF-TOKEN": getCookie("csrf_access_token"),

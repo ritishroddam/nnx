@@ -24,7 +24,7 @@ def create_share_link(imei, from_datetime, to_datetime, created_by):
     }
     return token
 
-@share_location_bp.route('/api/share-location', methods=['POST'])
+@share_location_bp.route('/share-location', methods=['POST'])
 @jwt_required()
 def api_share_location():
     claims = get_jwt()
