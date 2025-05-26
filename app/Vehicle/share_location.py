@@ -15,10 +15,10 @@ share_location_bp = Blueprint('ShareLocation', __name__, static_folder='static',
 # In-memory store for demo; use DB in production
 share_links = {}
 
-def create_share_link(imei, from_datetime, to_datetime, created_by):
+def create_share_link(licensePlateNumber, from_datetime, to_datetime, created_by):
     token = secrets.token_urlsafe(16)
     share_links[token] = {
-        "imei": imei,
+        "licensePlateNumber": licensePlateNumber,
         "from_datetime": from_datetime,
         "to_datetime": to_datetime,
         "created_by": created_by
@@ -58,14 +58,28 @@ def view_share_location_json(token):
         return jsonify({"error": "Link expired"}), 410
 
     licensePlateNumber = info['licensePlateNumber']
-    vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber})
+    vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber},{"_id": 0, "IMEI":1})
     if not vehicle:
         return jsonify({"error": "Vehicle not found"}), 404
+    
+    latestLocation = db['distinctAtlanta'].find_one(
+        {"IMEI": vehicle.get("IMEI")},
+        {"_id": 0, "latitude": 1, "longitude": 1},
+    )
+    
+    if not latestLocation:
+        return jsonify({"error": "No location data found for this vehicle"}), 404
+    
+    location = geocodeInternal(latestLocation.get("latitude"), latestLocation.get("longitude"))
+    
+    if not location:
+        return jsonify({"error": "Geocoding failed"}), 500
+    
     return jsonify({
-        "latitude": vehicle.get("latitude"),
-        "longitude": vehicle.get("longitude"),
+        "latitude": latestLocation.get("latitude"),
+        "longitude": latestLocation.get("longitude"),
         "LicensePlateNumber": vehicle.get("LicensePlateNumber"),
-        "location": vehicle.get("location"),
+        "location": location,
     })
     
 def emit_vehicle_location(token, licensePlateNumber):
