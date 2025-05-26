@@ -162,7 +162,7 @@ function updateVehicleCard(data) {
   if (timeDiff > 2 * 60 * 1000) {
     statusText = "Offline";
     statusClass = "vehicle-status-offline";
-  } else if (speed === 0) {
+  } else if (data.ignition === "0" || speed === 0) {
     statusText = "Stopped";
     statusClass = "vehicle-status-stopped";
   } else {
@@ -171,7 +171,9 @@ function updateVehicleCard(data) {
   }
 
   let timeText;
-  if (daysDiff > 0) {
+  if (data.status_time_str) {
+    timeText = `since ${data.status_time_str}`;
+  } else if (daysDiff > 0) {
     timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
   } else if (hoursDiff > 0) {
     timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
@@ -181,11 +183,12 @@ function updateVehicleCard(data) {
 
   if (vehicleCard) {
     // Update existing vehicle card
-    vehicleCard.querySelector(".vehicle-info").innerHTML = `
+    if (vehicleCard && vehicleCard.querySelector(".vehicle-info")) {
+      vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <div class="vehicle-status ${statusClass}">
         ${statusText}: ${speed.toFixed(2)} km/h${
-      speed === 0 ? `, ${timeText}` : ""
-    }
+        speed === 0 ? `, ${timeText}` : ""
+      }
       </div>
       <strong>Lat&Lon:</strong> ${
         latitude && longitude
@@ -202,6 +205,7 @@ function updateVehicleCard(data) {
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
+    }
   } else {
     const listContainer = document.getElementById("vehicle-list");
     const vehicleElement = document.createElement("div");
@@ -363,10 +367,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     // Time since status
     let sinceText = "";
-    if (hoursDiff > 0) {
-      sinceText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
+    if (vehicle.status_time_str) {
+      sinceText = `since ${vehicle.status_time_str}`;
+    } else if (hoursDiff > 0) {
+      sinceText = `since ${hoursDiff} min`;
     } else if (minutesDiff > 0) {
-      sinceText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
+      sinceText = `since ${minutesDiff} min`;
     } else {
       sinceText = `since ${secondsDiff} sec`;
     }
@@ -453,8 +459,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
           ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
         </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:13px;color:#aaa;line-height:1.2;">
-          Location : ${vehicle.address || "Location unknown"}
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:12px;color:#666;line-height:1.2;">
+         <strong> Location : </strong> ${vehicle.address || "Location unknown"}
         </div>
         <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
           <div>
@@ -507,7 +513,9 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const minutesAgo = Math.floor(timeDiff / (1000 * 60));
   const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
   let sinceText = "";
-  if (hoursAgo > 0) {
+  if (device.status_time_str) {
+    sinceText = `since ${device.status_time_str}`;
+  } else if (hoursAgo > 0) {
     sinceText = `since ${hoursAgo} min`;
   } else if (minutesAgo > 0) {
     sinceText = `since ${minutesAgo} min`;
@@ -565,7 +573,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const distance = device.distance
     ? parseFloat(device.distance).toFixed(1)
     : "--";
-  const battery = device.battery || "--";
   const stoppage = device.stoppage_time || "--";
 
   const headerContent = document.createElement("div");
@@ -579,33 +586,32 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   // HTML
   const content = `
-  <div class="info-window-show">
-    <div class="info-update-row">
-      <span class="info-update-label">Last Update :</span>
-      <span class="info-update-value">${formatLastUpdatedText(
-        device.date,
-        device.time
-      )}</span>
-    </div>
-    <div class="info-status-row" style="color:${statusColor};">
-      ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
-    </div>
-    <div class="info-location-row">${addressText}</div>
-    <div class="info-bottom-row">
-      <div class="info-bottom-item">
-        <span class="info-bottom-value">${distance}km</span>
-        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+      <div class="info-update-row">
+        <span class="info-update-label">Last Update :</span>
+        <span class="info-update-value">${formatLastUpdatedText(
+          device.date,
+          device.time
+        )}</span>
       </div>
-      <div class="info-bottom-item">
-        <span class="info-bottom-value">${stoppage}</span>
-        <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+      <div class="info-status-row" style="color:${statusColor};">
+        ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
       </div>
-      <div class="info-bottom-actions">
-        <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+      <div class="info-location-row">${addressText}</div>
+      <div class="info-bottom-row">
+        <div class="info-bottom-item">
+          <span class="info-bottom-value">${distance}km</span>
+          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+        </div>
+        <div class="info-bottom-item">
+          <span class="info-bottom-value">${stoppage}</span>
+          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+        </div>
+        <div class="info-bottom-actions">
+          <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+        </div>
       </div>
     </div>
-  </div>
-`;
+  `;
 
   infoWindow.setHeaderContent(headerContent);
   infoWindow.setContent(content);
@@ -613,7 +619,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 }
 
 // location sharing
-
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
@@ -622,7 +627,6 @@ document.body.addEventListener("click", function (e) {
     const infoWindowDiv = e.target.closest(".info-window-show");
     if (!infoWindowDiv) return;
 
-    // Get the vehicle number from the info window
     const plate = infoWindowDiv
       .querySelector(".info-plate")
       ?.textContent.trim();
@@ -648,6 +652,10 @@ function showShareLocationPopup(plate) {
       <div>
         <label for="to-datetime">To:</label>
         <input type="datetime-local" id="to-datetime" style="margin-bottom:8px;">
+      </div>
+      <div id="custom-datetime-range" style="display:none;margin-top:8px;">
+        <label>From: <input type="datetime-local" id="from-datetime"></label>
+        <label>To: <input type="datetime-local" id="to-datetime"></label>
       </div>
       <button id="generate-share-link">Generate Link</button>
       <div style="margin-top:10px;">
@@ -679,6 +687,16 @@ function showShareLocationPopup(plate) {
 
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
+  // Show/hide custom date range
+  document.getElementById("share-expiry").onchange = function () {
+    const customDiv = document.getElementById("custom-datetime-range");
+    if (this.value === "custom") {
+      customDiv.style.display = "block";
+    } else {
+      customDiv.style.display = "none";
+    }
+  };
+
   document.getElementById("generate-share-link").onclick = async function () {
     const from_datetime = document.getElementById("from-datetime").value;
     const to_datetime = document.getElementById("to-datetime").value;
@@ -704,7 +722,7 @@ function showShareLocationPopup(plate) {
       if (data.link) {
         input.value = data.link;
       } else {
-        input.value = "Failed to generate link.";
+        input.value = data.error || "Failed to generate link.";
       }
     } catch (e) {
       input.value = "Failed to generate link.";
@@ -791,7 +809,7 @@ function updateMap() {
   filterVehicles();
 }
 
-function animateMarker(marker, newPosition, duration = 6000) {
+function animateMarker(marker, newPosition, duration = 9000) {
   let startPosition = new google.maps.LatLng(
     marker.position.lat,
     marker.position.lng
@@ -1504,7 +1522,7 @@ function addHoverListenersToCardsAndMarkers() {
               }
             }
           } else {
-            vehicleCard.style.backgroundColor = "#000000d0"; // Dark background for light mode
+            vehicleCard.style.backgroundColor = "#ccc"; // Dark background for light mode
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
               vehicleHeader.style.color = "#ccc"; // Light font color for light mode

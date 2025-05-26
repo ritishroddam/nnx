@@ -8,6 +8,9 @@
     <script defer src="{{ url_for('Vehicle.static', filename='js/share_location.js') }}"></script>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="{{ url_for('Vehicle.static', filename='js/share_location.js') }}"></script>
 </head>
 
 <body>
@@ -21,9 +24,10 @@
         </div>
     </div>
     <script>
-        window.vehicleLat = {{ vehicle.latitude }};
-        window.vehicleLng = {{ vehicle.longitude }};
-    </script>
+  window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
+  window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
+  window.shareToken = "{{ token }}";
+</script>
 </body>
 
 </html>
