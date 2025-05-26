@@ -713,6 +713,11 @@ input:checked + .slider:before {
   position: relative;
 }
 
+.info-window-show > div:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
 .info-header-row {
   display: flex;
   align-items: center;      /* Vertically center all items */

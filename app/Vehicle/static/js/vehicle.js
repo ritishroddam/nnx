@@ -573,7 +573,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const distance = device.distance
     ? parseFloat(device.distance).toFixed(1)
     : "--";
-  const battery = device.battery || "--";
   const stoppage = device.stoppage_time || "--";
 
   const headerContent = document.createElement("div");
