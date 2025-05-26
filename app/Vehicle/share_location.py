@@ -1,5 +1,5 @@
 from flask import Blueprint, app, request, jsonify, render_template, abort, url_for
-from datetime import datetime
+from datetime import datetime, timezone
 import pytz
 import secrets
 from app.database import db
@@ -53,7 +53,7 @@ def api_share_location():
 @share_location_bp.route('/share-location/<token>/json')
 def view_share_location_json(token):
     info = share_links.get(token)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)  # Make now timezone-aware (UTC)
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
         return jsonify({"error": "Link expired"}), 410
 
