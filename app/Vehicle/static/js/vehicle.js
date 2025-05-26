@@ -140,8 +140,8 @@ async function fetchVehicleData() {
 function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(
-    `.vehicle-card[data-imei="${imei}"]`
-  );
+  `.vehicle-card[data-imei="${imei}"]`
+);
 
   const latitude = data.latitude ? parseFloat(data.latitude) : null;
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
@@ -160,15 +160,15 @@ function updateVehicleCard(data) {
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
 
   if (timeDiff > 2 * 60 * 1000) {
-    statusText = "Offline";
-    statusClass = "vehicle-status-offline";
-  } else if (data.ignition === "0" || speed === 0) {
-    statusText = "Stopped";
-    statusClass = "vehicle-status-stopped";
-  } else {
-    statusText = "Moving";
-    statusClass = "vehicle-status-moving";
-  }
+  statusText = "Offline";
+  statusClass = "vehicle-status-offline";
+} else if (data.ignition === "0" || speed === 0) {
+  statusText = "Stopped";
+  statusClass = "vehicle-status-stopped";
+} else {
+  statusText = "Moving";
+  statusClass = "vehicle-status-moving";
+}
 
   let timeText;
   if (data.status_time_str) {
@@ -187,8 +187,8 @@ function updateVehicleCard(data) {
       vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <div class="vehicle-status ${statusClass}">
         ${statusText}: ${speed.toFixed(2)} km/h${
-        speed === 0 ? `, ${timeText}` : ""
-      }
+      speed === 0 ? `, ${timeText}` : ""
+    }
       </div>
       <strong>Lat&Lon:</strong> ${
         latitude && longitude
@@ -437,7 +437,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     <div style="display:flex;align-item s:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:22px;" title="GPS Status">${gpsIcon}</span>
+          <span class="material-symbols-outlined" style="font-size:22px;">${gpsIcon}</span>
           <span class="vehicle-number"
                 style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
                 onclick="vehicleInfoPage('${
@@ -446,9 +446,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
             ${vehicle.LicensePlateNumber || vehicle.imei}
           </span>
           <span style="margin-left:4px;">
-            <span class="material-symbols-outlined" style="font-size:22px;" title="Direction">${arrowIcon}</span>
-            <span class="material-symbols-outlined" style="font-size:22px;" title="Ignition">${ignitionIcon}</span>
-            <span class="material-symbols-outlined" style="font-size:22px;color:${gsmColor};" title="Network">${gsmIcon}</span>
+            ${iconRow}
           </span>
         </div>
         <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
@@ -590,10 +588,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const content = `
       <div class="info-update-row">
         <span class="info-update-label">Last Update :</span>
-        <span class="info-update-value">${formatLastUpdatedText(
-          device.date,
-          device.time
-        )}</span>
+        <span class="info-update-value">${formatLastUpdatedText(device.date, device.time)}</span>
       </div>
       <div class="info-status-row" style="color:${statusColor};">
         ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
@@ -624,19 +619,23 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
-    e.target.textContent.trim() === "moved_location"
+    e.target.textContent.trim() === "moved_location" 
   ) {
-    const infoWindow = document.querySelector(".info-plate");
-    if (!infoWindow) return;
-    const plate = infoWindow.textContent.trim();
-    if (!plate) return;
+    const infoWindowDiv = e.target.closest(".info-window-show");
+    if (!infoWindowDiv) return;
 
-    showShareLocationPopup(plate);
+    const plate = infoWindowDiv
+      .querySelector(".info-plate")
+      ?.textContent.trim();
+    const imei = Array.from(vehicleData.values()).find(
+      (v) => v.LicensePlateNumber === plate
+    )?.imei;
+
+    showShareLocationPopup(imei, plate);
   }
 });
 
-function showShareLocationPopup(plate) {
-  // Remove existing popup if any
+function showShareLocationPopup(imei, plate) {
   const oldPopup = document.getElementById("share-location-popup");
   if (oldPopup) oldPopup.remove();
 
@@ -646,12 +645,15 @@ function showShareLocationPopup(plate) {
     <div class="share-popup-content">
       <h3>Share Live Location</h3>
       <div>
-        <label for="from-datetime">From:</label>
-        <input type="datetime-local" id="from-datetime" style="margin-bottom:8px;">
-      </div>
-      <div>
-        <label for="to-datetime">To:</label>
-        <input type="datetime-local" id="to-datetime" style="margin-bottom:8px;">
+        <label for="share-expiry">Expiry:</label>
+        <select id="share-expiry">
+          <option value="15">15 mins</option>
+          <option value="30">30 mins</option>
+          <option value="60">1 hour</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+          <option value="custom">Custom</option>
+        </select>
       </div>
       <div id="custom-datetime-range" style="display:none;margin-top:8px;">
         <label>From: <input type="datetime-local" id="from-datetime"></label>
@@ -673,18 +675,6 @@ function showShareLocationPopup(plate) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
-  // Set default values for datetime fields
-  const now = new Date();
-  const pad = (n) => n.toString().padStart(2, "0");
-  const toISOStringLocal = (d) =>
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-      d.getHours()
-    )}:${pad(d.getMinutes())}`;
-
-  document.getElementById("from-datetime").value = toISOStringLocal(now);
-  const toDate = new Date(now.getTime() + 15 * 60000); // Default to 15 mins later
-  document.getElementById("to-datetime").value = toISOStringLocal(toDate);
-
   document.getElementById("close-share-popup").onclick = () => popup.remove();
 
   // Show/hide custom date range
@@ -698,14 +688,24 @@ function showShareLocationPopup(plate) {
   };
 
   document.getElementById("generate-share-link").onclick = async function () {
-    const from_datetime = document.getElementById("from-datetime").value;
-    const to_datetime = document.getElementById("to-datetime").value;
+    const expiry = document.getElementById("share-expiry").value;
     const input = document.getElementById("share-link-input");
     input.value = "Generating link...";
 
-    if (!from_datetime || !to_datetime) {
-      input.value = "Please select both date and time.";
-      return;
+    let from_datetime, to_datetime;
+    if (expiry === "custom") {
+      from_datetime = document.getElementById("from-datetime").value;
+      to_datetime = document.getElementById("to-datetime").value;
+      if (!from_datetime || !to_datetime) {
+        input.value = "Please select both from and to date/time.";
+        return;
+      }
+    } else {
+      // Use current time as from, and add expiry minutes for to
+      const now = new Date();
+      from_datetime = now.toISOString().slice(0, 16);
+      const to = new Date(now.getTime() + parseInt(expiry) * 60000);
+      to_datetime = to.toISOString().slice(0, 16);
     }
 
     try {
@@ -717,6 +717,7 @@ function showShareLocationPopup(plate) {
           from_datetime,
           to_datetime,
         }),
+        credentials: "include"
       });
       const data = await res.json();
       if (data.link) {
