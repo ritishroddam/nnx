@@ -2,7 +2,7 @@ window.onload =  initMap;
 
 let marker;
 
-const socket = io(CONFIG.SOCKET_SERVER_URL, {
+const socket = io("https://cordonnx.com:5000", {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: Infinity,

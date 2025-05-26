@@ -21,8 +21,8 @@
         <div id="map"></div>
         <div class="info">
             <p><strong>Expires at:</strong> <span id="expires-at">{{ info.to_datetime }}</span></p>
-            <p><strong>Location:</strong> <span id="location"></span>{{ vehicle.location or "Unknown Location" }} km/h</p>
-            <p><strong>Speed:</strong> <span id="speed">{{ vehicle.speed or "Unknown Speed" }}</span></p>
+            <p><strong>Location:</strong> <span id="location"></span>{{ vehicle.location or "Unknown Location" }}</p>
+            <p><strong>Speed:</strong> <span id="speed">{{ vehicle.speed or "Unknown Speed" }} km/h</span></p>
             <button id="route-btn">Open in Google Maps</button>
         </div>
     </div>
