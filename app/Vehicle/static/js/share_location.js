@@ -1,5 +1,3 @@
-let url;
-
 window.onload =  initMap;
 
 const socket = io("https://cordonnx.com:5000", {
