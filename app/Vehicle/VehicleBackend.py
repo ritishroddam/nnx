@@ -214,28 +214,34 @@ def getVehicleDistances(imei):
         flash("Error fetching distances", "danger")
         return jsonify({"error": str(e)}), 500
 
-def build_vehicle_data(inventory_data, distances, stoppage_times, statuses):
+def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list):
     vehicles = []
-    for vehicle in inventory_data:
-        imei = vehicle.get('IMEI')
+    # Build lookup dicts for O(1) access
+    inventory_lookup = {v.get('IMEI'): v for v in inventory_data}
+    stoppage_lookup = {item['imei']: item for item in stoppage_times}
+    status_lookup = {item['imei']: item for item in statuses}
+
+    vehicleData = list(collection.find({"imei": {"$in": imei_list}}, {'timestamp': 0}))
+    for vehicle in vehicleData:
+        imei = vehicle.get('imei')
         if not imei:
             continue
-        vehicleDataList = list(collection.find({"imei": imei}, {'timestamp': 0}))
-        for data in vehicleDataList:
-            data['LicensePlateNumber'] = vehicle.get('LicensePlateNumber', 'Unknown')
-            data['VehicleType'] = vehicle.get('VehicleType', 'Unknown')
-            data['distance'] = round(distances.get(imei, 0), 2)
 
-            stoppage_time_item = next((item for item in stoppage_times if item['imei'] == imei), {})
-            data['stoppage_time'] = stoppage_time_item.get('stoppage_time_str', '0 seconds')
-            data['stoppage_time_delta'] = stoppage_time_item.get('total_stoppage_seconds', 0)
+        inventory = inventory_lookup.get(imei, {})
+        vehicle["LicensePlateNumber"] = inventory.get('LicensePlateNumber', 'Unknown')
+        vehicle["VehicleType"] = inventory.get('VehicleType', 'Unknown')
+        vehicle["distance"] = round(distances.get(imei, 0), 2)
 
-            status_item = next((item for item in statuses if item['imei'] == imei), {})
-            data['status'] = status_item.get('status', 'unknown')
-            data['status_time_str'] = status_item.get('status_time_str', '0 seconds')
-            data['status_time_delta'] = status_item.get('status_time_delta', 0)
+        stoppage_time_item = stoppage_lookup.get(imei, {})
+        vehicle['stoppage_time'] = stoppage_time_item.get('stoppage_time_str', '0 seconds')
+        vehicle['stoppage_time_delta'] = stoppage_time_item.get('total_stoppage_seconds', 0)
 
-            vehicles.append(data)
+        status_item = status_lookup.get(imei, {})
+        vehicle['status'] = status_item.get('status', 'unknown')
+        vehicle['status_time_str'] = status_item.get('status_time_str', '0 seconds')
+        vehicle['status_time_delta'] = status_item.get('status_time_delta', 0)
+
+        vehicles.append(vehicle)
     return vehicles
 
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
@@ -270,7 +276,7 @@ def get_vehicles():
         stoppage_times = getStopTimeToday(imei_list)
         statuses = getVehicleStatus(imei_list)
 
-        vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses)
+        vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list)
 
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])
