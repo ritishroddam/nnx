@@ -316,7 +316,7 @@ body {
 }
 
 .notification i.fa-bell {
-  font-size: 24px;           /* Large bell */
+  font-size: 22px;           /* Large bell */
   color: #fff;            /* Bold black */
   filter: none;
   font-weight: 900;
@@ -330,8 +330,8 @@ body {
   background: #7c3aed;       /* Purple */
   color: #fff;
   font-size: 32px;
-  width: 56px;
-  height: 56px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
