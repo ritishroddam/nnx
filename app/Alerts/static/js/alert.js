@@ -549,47 +549,51 @@ document.addEventListener("DOMContentLoaded", function () {
     tableBody.innerHTML = "";
 
     if (alerts.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No alerts found</td></tr>`;
-      return;
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No alerts found</td></tr>`;
+        return;
     }
 
     alerts.forEach((alert) => {
-      const row = document.createElement("tr");
-      row.dataset.alertId = alert._id;
-      row.dataset.latlng = `${alert.latitude || "N/A"}, ${
-        alert.longitude || "N/A"
-      }`;
+        const row = document.createElement("tr");
+        row.dataset.alertId = alert._id;
+        row.dataset.latlng = `${alert.latitude || "N/A"}, ${alert.longitude || "N/A"}`;
 
-      if (alert.alert_type) {
-        const alertTypeClass = alert.alert_type
-          .toLowerCase()
-          .replace(/\s+/g, "-");
-        row.classList.add(`alert-type-${alertTypeClass}`);
-      }
+        if (alert.alert_type) {
+            const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, "-");
+            row.classList.add(`alert-type-${alertTypeClass}`);
+        }
 
-      const statusBadge = alert.acknowledged
-        ? `<span class="status-badge acknowledged">Acknowledged</span>`
-        : `<span class="status-badge pending">Pending</span>`;
+        const statusBadge = alert.acknowledged
+            ? `<span class="status-badge acknowledged">Acknowledged</span>`
+            : `<span class="status-badge pending">Pending</span>`;
 
-      const actionBtn = alert.acknowledged
-        ? `<button class="action-btn" disabled>Acknowledged</button>`
-        : `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
+        // Only show acknowledge button for these alert types
+        const showAcknowledgeBtn = (
+            alert.alert_type === "Panic Alert" ||
+            alert.alert_type.startsWith("Speeding Alert") ||
+            alert.alert_type === "Main Power Discontinue Alert" ||
+            alert.alert_type === "Main Supply Remove Alert" // in case your backend uses this label
+        );
 
-      let alertTypeDisplay = alert.alert_type || "N/A";
-      if (alert.alert_type === "Speeding Alert" && alert.speed) {
-        alertTypeDisplay += ` (${alert.speed} km/h)`;
-      }
+        const actionBtn = (alert.acknowledged || !showAcknowledgeBtn)
+            ? `<button class="action-btn" disabled>${alert.acknowledged ? "Acknowledged" : ""}</button>`
+            : `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
 
-      row.innerHTML = `
-                <td>${alert.vehicle_number || "N/A"}</td>
-                <td>${alert.driver || "N/A"}</td>
-                <td>${alertTypeDisplay}</td>
-                <td>${formatDateTime(alert.date_time)}</td>
-                <td>${alert.location || "N/A"}</td>
-                <td>${statusBadge}</td>
-                <td>${actionBtn}</td>
-            `;
-      tableBody.appendChild(row);
+        let alertTypeDisplay = alert.alert_type || "N/A";
+        if (alert.alert_type && alert.alert_type.startsWith("Speeding Alert") && alert.speed) {
+            alertTypeDisplay += ` (${alert.speed} km/h)`;
+        }
+
+        row.innerHTML = `
+            <td>${alert.vehicle_number || "N/A"}</td>
+            <td>${alert.driver || "N/A"}</td>
+            <td>${alertTypeDisplay}</td>
+            <td>${formatDateTime(alert.date_time)}</td>
+            <td>${alert.location || "N/A"}</td>
+            <td>${statusBadge}</td>
+            <td>${actionBtn}</td>
+        `;
+        tableBody.appendChild(row);
     });
   }
 

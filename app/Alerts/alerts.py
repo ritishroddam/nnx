@@ -333,8 +333,11 @@ def notification_alerts():
             enriched.append({
                 "id": str(alert["_id"]),
                 "type": alert_type,
+                "alert_type": alert_type,  # <-- Add this line
                 "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",  # for frontend
                 "date_time": alert["date_time"].isoformat() if alert.get("date_time") else "",
+                "acknowledged": False  # or set based on your logic
             })
         return enriched
 
