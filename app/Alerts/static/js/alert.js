@@ -252,6 +252,23 @@ document.addEventListener("DOMContentLoaded", function () {
       .classList.add("active");
   }
 
+  // --- Add this block before loadAlerts() ---
+  // Check for alert_type in URL and activate the correct tab
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlAlertType = urlParams.get("alert_type");
+  if (urlAlertType) {
+    // Convert alert_type to endpoint format (e.g., "Speeding Alert" -> "speeding")
+    const endpoint = urlAlertType.toLowerCase().replace(/\s+/g, "_").replace(/_alert$/, "");
+    const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+    if (card) {
+      alertCards.forEach((c) => c.classList.remove("active"));
+      card.classList.add("active");
+      currentEndpoint = endpoint;
+      sessionStorage.setItem("currentAlertEndpoint", currentEndpoint);
+    }
+  }
+  // --- End block ---
+
   loadAlerts();
 
   alertCards.forEach((card) => {
