@@ -477,7 +477,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
           ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
         </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:12px;color:#666;line-height:1.2;">
+        <div class="vehicle-card-row location-text" style="margin-top:2px;font-size:12px;line-height:1.2;">
          <strong> Location : </strong> ${vehicle.address || "Location unknown"}
         </div>
         <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
@@ -598,40 +598,44 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   const headerContent = document.createElement("div");
   headerContent.innerHTML = `
-      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
-      <span class="info-plate">${LicensePlateNumber}</span>
-      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
-      <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-      <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
+      <div class="info-header">
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
+        <span class="info-plate">${LicensePlateNumber}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
+        <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
+      </div>
   `;
 
   // HTML
   const content = `
-      <div class="info-update-row">
-        <span class="info-update-label">Last Update :</span>
-        <span class="info-update-value">${formatLastUpdatedText(
-          device.date,
-          device.time
-        )}</span>
-      </div>
-      <div class="info-status-row" style="color:${statusColor};">
-        ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
-      </div>
-      <div class="info-location-row">${addressText}</div>
-      <div class="info-bottom-row">
-        <div class="info-bottom-item">
-          <span class="info-bottom-value">${distance}km</span>
-          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+      <div class="info-content">
+        <div class="info-update-row">
+          <span class="info-update-label">Last Update :</span>
+          <span class="info-update-value">${formatLastUpdatedText(
+            device.date,
+            device.time
+          )}</span>
         </div>
-        <div class="info-bottom-item">
-          <span class="info-bottom-value">${stoppage}</span>
-          <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+        <div class="info-status-row" style="color:${statusColor};">
+          ${statusText} : ${speed}, <span class="info-since">${sinceText}</span>
         </div>
-        <div class="info-bottom-actions">
-          <span class="material-symbols-outlined info-bottom-action vertical-bar">moved_location</span>
+        <div class="info-location-row">${addressText}</div>
+          <div class="info-bottom-row">
+            <div class="info-bottom-item">
+              <span class="info-bottom-value">${distance}km</span>
+              <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+            </div>
+            <div class="info-bottom-item">
+              <span class="info-bottom-value">${stoppage}</span>
+              <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+            </div>
+            <div class="info-bottom-actions">
+              <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   `;
 
   infoWindow.setHeaderContent(headerContent);
