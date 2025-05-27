@@ -467,6 +467,10 @@ body {
   padding: 0;
 }
 
+#notification-list li:hover {
+  background-color: #ccc;
+}
+
 #notification-list li {
   padding: 10px;
   border-bottom: 1px solid #f5f5f5;
