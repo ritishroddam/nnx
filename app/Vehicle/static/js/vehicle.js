@@ -1519,7 +1519,7 @@ function addHoverListenersToCardsAndMarkers() {
           const isDarkMode = document.body.classList.contains("dark-mode");
 
           if (isDarkMode) {
-            vehicleCard.style.backgroundColor = "#ccc"; // Light background for dark mode
+            vehicleCard.style.backgroundColor = "black"; // Light background for dark mode
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
               vehicleHeader.style.color = "#000000d0"; // Dark font color for dark mode
@@ -1538,7 +1538,7 @@ function addHoverListenersToCardsAndMarkers() {
               }
             }
           } else {
-            vehicleCard.style.backgroundColor = "black"; // Dark background for light mode
+            vehicleCard.style.backgroundColor = "#ccc"; // Dark background for light mode
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
               vehicleHeader.style.color = "#ccc"; // Light font color for light mode
