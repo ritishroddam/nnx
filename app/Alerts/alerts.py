@@ -280,6 +280,79 @@ def alert_card_endpoint(alert_type):
         return wrapper
     return decorator
 
+@alerts_bp.route('/notification_alerts', methods=['GET'])
+@jwt_required()
+def notification_alerts():
+    from datetime import datetime, timedelta
+    import pytz
+
+    tz = pytz.timezone('UTC')
+    now = datetime.now(tz)
+    start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    # Only unacknowledged alerts
+    acknowledged_ids = set(
+        ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
+    )
+
+    # Panic Alerts
+    panic_alerts = list(db['sos_logs'].find({
+        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "longitude": {"$exists": True, "$ne": None, "$ne": ""}
+    }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+
+    # Speeding Alerts
+    speeding_alerts = list(db['atlanta'].find({
+        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+        "gps": "A",
+        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "$expr": {"$gte": [{"$toDouble": {"$ifNull": ["$speed", 0]}}, 60]}
+    }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+
+    # Main Power Discontinue Alerts
+    main_power_alerts = list(db['atlanta'].find({
+        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+        "gps": "A",
+        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "main_power": "0"
+    }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+
+    def enrich(alerts, alert_type):
+        enriched = []
+        for alert in alerts:
+            if str(alert["_id"]) in acknowledged_ids:
+                continue
+            vehicle = db['vehicle_inventory'].find_one(
+                {"IMEI": alert.get("imei")},
+                {"LicensePlateNumber": 1, "_id": 0}
+            )
+            enriched.append({
+                "id": str(alert["_id"]),
+                "type": alert_type,
+                "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                "date_time": alert["date_time"].isoformat() if alert.get("date_time") else "",
+            })
+        return enriched
+
+    notifications = (
+        enrich(panic_alerts, "Panic Alert") +
+        enrich(speeding_alerts, "Speeding Alert") +
+        enrich(main_power_alerts, "Main Power Discontinue Alert")
+    )
+
+    # Sort by date_time descending
+    notifications.sort(key=lambda x: x["date_time"], reverse=True)
+
+    return jsonify({
+        "success": True,
+        "count": len(notifications),
+        "alerts": notifications
+    })
+
 @alerts_bp.route('/')
 @jwt_required()
 def page():

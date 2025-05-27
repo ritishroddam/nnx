@@ -40,9 +40,16 @@
                 <div class="theme-toggle" id="theme-toggle">
                     <i class="fa-solid fa-sun"></i>
                 </div>
-                <div class="notification">
+                <div class="notification" id="notification-bell">
                     <i class="fa-solid fa-bell"></i>
-                    <span class="badge">3</span>
+                    <span class="badge" id="notification-count">0</span>
+                    <div class="notification-dropdown" id="notification-dropdown" style="display:none;">
+                        <div class="notification-header">New Alerts</div>
+                        <ul id="notification-list"></ul>
+                        <div class="notification-footer">
+                            <a href="{{ url_for('Alerts.page') }}">View All Alerts</a>
+                        </div>
+                    </div>
                 </div>
                 <div class="profile" id="profile">
                     <img src="user.png" alt="User">
