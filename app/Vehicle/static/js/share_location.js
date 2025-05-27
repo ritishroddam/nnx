@@ -59,6 +59,7 @@ function updateMarkerPostion(latitude, longitude) {
   
   const latLng = new google.maps.LatLng(latitude, longitude);
   vehicleMarker.position = latLng;
+  map.setCenter(latLng);
 }
 
 function updateVehicleData(vehicleData) {
@@ -75,7 +76,7 @@ async function initMap() {
 
   const latLng = new google.maps.LatLng(lat, lng);
 
-  const map = new Map(document.getElementById("map"), {
+  map = new Map(document.getElementById("map"), {
     mapId: "dc4a8996aab2cac9",
     center: latLng,
     zoom: 16,

@@ -28,7 +28,7 @@
         </div>
     </div>
     <script>
-        let vehicleMarker, url;
+        let vehicleMarker, url, map;
         window.licensePlateNumber = "{{ vehicle.LicensePlateNumber }}";
         window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
         window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
