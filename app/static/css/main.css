@@ -317,7 +317,7 @@ body {
 
 .notification i.fa-bell {
   font-size: 64px;           /* Large bell */
-  color: #181c32;            /* Bold black */
+  color: #fff;            /* Bold black */
   filter: none;
   font-weight: 900;
   position: relative;
