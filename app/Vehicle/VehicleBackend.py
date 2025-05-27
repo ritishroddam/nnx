@@ -216,7 +216,7 @@ def getVehicleDistances(imei):
 
 def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list):
     vehicles = []
-    # Build lookup dicts for O(1) access
+
     inventory_lookup = {v.get('IMEI'): v for v in inventory_data}
     stoppage_lookup = {item['imei']: item for item in stoppage_times}
     status_lookup = {item['imei']: item for item in statuses}
