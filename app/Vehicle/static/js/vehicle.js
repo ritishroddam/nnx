@@ -495,7 +495,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       </div>
       <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
       <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
-       <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+       <span class="material-symbols-outlined info-bottom-action vertical-bar">moved_location</span>
       </div>
     </div>
   `;
@@ -628,7 +628,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
           <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
         </div>
         <div class="info-bottom-actions">
-          <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+          <span class="material-symbols-outlined info-bottom-action vertical-bar">moved_location</span>
         </div>
       </div>
     </div>

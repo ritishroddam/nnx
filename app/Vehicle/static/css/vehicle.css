@@ -109,7 +109,11 @@ body {
   vertical-align: middle;
 }
 
-.dark-mode .vehicle-card .material-symbols-outlined {
+/* .dark-mode .vehicle-card .material-symbols-outlined {
+  color: #ccc !important;
+} */
+
+.vertical-bar{
   color: #ccc !important;
 }
 
@@ -552,24 +556,28 @@ input:checked + .slider:before {
 }
 
 .dark-mode .sticky-search-container {
-  background-color: #2d2d2d;
+  background-color: black;
 }
 
 .dark-mode .search-container {
-  background-color: #1a1a1a;
+  background-color: black;
 }
 
 #vehicle-search {
   flex: 1;
   background: transparent;
   border: none;
-  border-bottom: 2.5px solid #fff;
   color: #000;
   font-size: 16px;
   font-family: 'Roboto', Arial, sans-serif;
   outline: none;
   padding: 0 8px 4px 0;
   transition: border-color 0.2s;
+  border-radius: 1vh;
+}
+
+.dark-mode #vehicle-search {
+  background: #1e1e1e;
 }
 
 #vehicle-search::placeholder {
