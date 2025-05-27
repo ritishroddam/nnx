@@ -252,6 +252,23 @@ document.addEventListener("DOMContentLoaded", function () {
       .classList.add("active");
   }
 
+  // --- Add this block before loadAlerts() ---
+  // Check for alert_type in URL and activate the correct tab
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlAlertType = urlParams.get("alert_type");
+  if (urlAlertType) {
+    // Convert alert_type to endpoint format (e.g., "Speeding Alert" -> "speeding")
+    const endpoint = urlAlertType.toLowerCase().replace(/\s+/g, "_").replace(/_alert$/, "");
+    const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+    if (card) {
+      alertCards.forEach((c) => c.classList.remove("active"));
+      card.classList.add("active");
+      currentEndpoint = endpoint;
+      sessionStorage.setItem("currentAlertEndpoint", currentEndpoint);
+    }
+  }
+  // --- End block ---
+
   loadAlerts();
 
   alertCards.forEach((card) => {
@@ -597,6 +614,9 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
         tableBody.appendChild(row);
     });
+
+    // Call this after table is rendered
+    highlightAlertFromURL();
   }
 
   function acknowledgeAlert() {
@@ -742,16 +762,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     const alertId = params.get("alert_id");
     if (alertId) {
-      // Wait for table to render
-      setTimeout(() => {
-        const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
-        if (row) {
-          row.style.background = "#ffe082";
-          row.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 500);
+        setTimeout(() => {
+            const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+            if (row) {
+                row.style.background = "#ffe082";
+                row.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }, 200); // Adjust timeout if needed
     }
-  }
+}
 
   // Call after table is updated
   const originalDisplayAlerts = displayAlerts;
