@@ -316,7 +316,7 @@ body {
 }
 
 .notification i.fa-bell {
-  font-size: 22px;           /* Large bell */
+  font-size: 24px;           /* Large bell */
   color: #fff;            /* Bold black */
   filter: none;
   font-weight: 900;
@@ -329,9 +329,9 @@ body {
   right: -10px;
   background: #7c3aed;       /* Purple */
   color: #fff;
-  font-size: 16px;           /* Smaller number */
-  width: 32px;               /* Smaller badge */
-  height: 32px;
+  font-size: 8px;           /* Smaller number */
+  width: 22px;               /* Smaller badge */
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
