@@ -274,7 +274,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const vehicleCount = document.getElementById("vehicle-count");
     vehicleCount.innerText = vehicles.length;
 
-    let headingText = "All Vehicles";
+    let headingText = "TOTAL VEHICLE'S";
     switch (filterValue) {
       case "0":
         headingText = "Stationary Vehicles";
@@ -295,7 +295,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         headingText = "Offline Vehicles";
         break;
       default:
-        headingText = "All Vehicles";
+        headingText = "TOTAL VEHICLE'S";
         break;
     }
     vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
@@ -310,7 +310,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   listContainer.innerHTML = "";
   vehicleCount.innerText = vehicles.length;
 
-  let headingText = "All Vehicles";
+  let headingText = "TOTAL VEHICLE'S";
   switch (filterValue) {
     case "0":
       headingText = "Stationary Vehicles";
@@ -331,7 +331,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       headingText = "Offline Vehicles";
       break;
     default:
-      headingText = "All Vehicles";
+      headingText = "TOTAL VEHICLE'S";
       break;
   }
   vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
