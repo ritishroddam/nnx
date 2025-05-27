@@ -20,7 +20,7 @@ async function refreshToken() {
   try {
     const response = await fetch("/refresh", {
       method: "POST",
-      credentials: "include", // Include cookies in the request
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
@@ -41,7 +41,6 @@ async function refreshToken() {
   }
 }
 
-// Refresh the token every 4 minutes (adjust based on your token expiration time)
 setInterval(refreshToken, 2 * 60 * 60 * 1000);
 
 function getCookie(name) {
@@ -95,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const profileHover = document.getElementById("profile-hover");
 
   profile.addEventListener("click", (event) => {
-    event.stopPropagation(); // Prevent click from propagating to the document
+    event.stopPropagation(); 
     const isVisible = window.getComputedStyle(profileHover).display === "block";
     profileHover.style.display = isVisible ? "none" : "block";
   });
@@ -126,7 +125,6 @@ document.addEventListener("DOMContentLoaded", function () {
             li.dataset.alertId = alert.id;
             li.dataset.alertType = alert.type;
             li.addEventListener("click", function () {
-              // Redirect to alerts page with query params
               window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
                 alert.type
               )}`;
@@ -141,7 +139,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Show/hide dropdown on bell click
   bell.addEventListener("click", function (e) {
     e.stopPropagation();
     dropdown.style.display =
@@ -151,12 +148,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Hide dropdown when clicking outside
   document.addEventListener("click", function () {
     dropdown.style.display = "none";
   });
 
-  // Optionally, refresh notifications every minute
   setInterval(loadNotifications, 60000);
   loadNotifications();
 });
@@ -174,7 +169,6 @@ function displayFlashMessage(message, category = "danger") {
     `;
     flashMessagesContainer.appendChild(flashMessage);
 
-    // Optionally, remove the message after a few seconds
     setTimeout(() => flashMessage.remove(), 5000);
   } else {
     console.error("Flash messages container not found");

@@ -252,12 +252,9 @@ document.addEventListener("DOMContentLoaded", function () {
       .classList.add("active");
   }
 
-  // --- Add this block before loadAlerts() ---
-  // Check for alert_type in URL and activate the correct tab
   const urlParams = new URLSearchParams(window.location.search);
   const urlAlertType = urlParams.get("alert_type");
   if (urlAlertType) {
-    // Convert alert_type to endpoint format (e.g., "Speeding Alert" -> "speeding")
     const endpoint = urlAlertType.toLowerCase().replace(/\s+/g, "_").replace(/_alert$/, "");
     const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
     if (card) {
@@ -267,7 +264,6 @@ document.addEventListener("DOMContentLoaded", function () {
       sessionStorage.setItem("currentAlertEndpoint", currentEndpoint);
     }
   }
-  // --- End block ---
 
   loadAlerts();
 
@@ -462,7 +458,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const totalPages = Math.ceil(allAlerts.length / ITEMS_PER_PAGE);
 
-    // Clear existing content in the pagination container
     paginationContainer.innerHTML = "";
 
     const totalAlertsSpan = document.createElement("span");
@@ -474,7 +469,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const paginationDiv = createPaginationControls(totalPages);
 
-    // Append pagination controls to the container
     paginationContainer.appendChild(paginationDiv);
   }
 
@@ -584,14 +578,12 @@ document.addEventListener("DOMContentLoaded", function () {
             ? `<span class="status-badge acknowledged">Acknowledged</span>`
             : `<span class="status-badge pending">Pending</span>`;
 
-        // Only show acknowledge button for these alert types
         const alertType = alert.alert_type || alert.type || "Unknown Alert";
         let alertTypeDisplay = alertType;
         if (alertType.startsWith("Speeding Alert") && alert.speed) {
             alertTypeDisplay += ` (${alert.speed} km/h)`;
         }
 
-        // Only show acknowledge button for these alert types
         const showAcknowledgeBtn = (
             alertType === "Panic Alert" ||
             alertType.startsWith("Speeding Alert") ||
@@ -615,7 +607,6 @@ document.addEventListener("DOMContentLoaded", function () {
         tableBody.appendChild(row);
     });
 
-    // Call this after table is rendered
     highlightAlertFromURL();
   }
 
@@ -756,8 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   setDefaultDateRange();
-
-  // After alerts are loaded, check for alert_id in URL
+  
   function highlightAlertFromURL() {
     const params = new URLSearchParams(window.location.search);
     const alertId = params.get("alert_id");
@@ -768,11 +758,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 row.style.background = "#ffe082";
                 row.scrollIntoView({ behavior: "smooth", block: "center" });
             }
-        }, 200); // Adjust timeout if needed
+        }, 200); 
     }
 }
 
-  // Call after table is updated
   const originalDisplayAlerts = displayAlerts;
   displayAlerts = function (alerts) {
     originalDisplayAlerts(alerts);

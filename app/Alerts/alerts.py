@@ -13,7 +13,6 @@ from app.utils import roles_required, get_filtered_results # type: ignore
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
 def get_alert_type(record):
-    # If this record is from sos_logs, treat as Panic Alert
     if record.get('source') == 'sos_logs':
         return "Panic Alert"
     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
@@ -122,7 +121,6 @@ def alert_card_endpoint(alert_type):
                             "sos": 1
                         }
                     ).sort("date_time", -1))
-                    # Add source field to each record
                     for rec in records:
                         rec['source'] = 'sos_logs'
             else:
@@ -352,7 +350,6 @@ def notification_alerts():
         enrich(main_power_alerts, "Main Power Discontinue Alert")
     )
 
-    # Sort by date_time descending
     notifications.sort(key=lambda x: x["date_time"], reverse=True)
 
     return jsonify({

@@ -69,56 +69,6 @@ Alerts
         </div>
     </div>
 
-    <!-- <div class="alerts-main-content">
-        <div class="alerts-filter">
-            <div class="filter-group">
-                <label for="alertDateRange">Showing Alerts from:</label>
-                <input type="datetime-local" id="startDate" value="{{ default_start_date }}">
-                <span>to</span>
-                <input type="datetime-local" id="endDate" value="{{ default_end_date }}">
-            </div>
-
-            <div class="filter-group">
-                <label for="alertVehicleNumber">Vehicle:</label>
-                <select id="alertVehicleNumber" name="vehicleNumber">
-                    <option value="">All Vehicles</option>
-                    {% for vehicle in vehicles %}
-                    <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button id="searchAlerts" class="search-btn">Search</button>
-            <button id="downloadAlerts" class="download-btn" title="Download Excel">
-                <i class="fas fa-file-excel"></i>
-            </button>
-            <button id="downloadPDF" class="download-btn" title="Download PDF">
-                <i class="fas fa-file-pdf"></i>
-            </button>
-        </div>
-
-        <div class="pagination-container"></div>
-
-        <div class="alerts-table-container">
-            <table id="alertsTable" class="alerts-table">
-                <thead>
-                    <tr>
-                        <th>Vehicle Number</th>
-                        <th>Driver</th>
-                        <th>Alert Type</th>
-                        <th>Time</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div> -->
-
 <div class="alerts-main-content">
     <div class="alerts-filter">
         <div class="filter-group">
@@ -170,7 +120,6 @@ Alerts
             </tbody>
         </table>
     </div>
-    <!-- <div class="pagination-container"></div> -->
 </div>
 
 <div id="ackModal" class="modal">

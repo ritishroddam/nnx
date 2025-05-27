@@ -255,7 +255,7 @@ body {
   position: fixed;
   top: 2%;
   left: 1%;
-  width: 98%; /* Adjusted to leave space for the sidebar */
+  width: 98%;
   background: black;
   backdrop-filter: blur(10px);
   display: flex;
@@ -265,13 +265,13 @@ body {
   border-radius: 15px;
   color: #ccc;
   margin-bottom: 50px;
-  z-index: 2; /* Ensure the topbar is above the map */
+  z-index: 2; 
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 
 .sidebar:hover ~ .topbar {
-  left: 14.5%; /* Adjusted to leave space for the expanded sidebar */
-  width: 84%; /* Adjusted to leave space for the expanded sidebar */
+  left: 14.5%; 
+  width: 84%; 
 }
 
 .topbar h1 {

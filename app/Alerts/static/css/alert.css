@@ -101,7 +101,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    margin-top: 10px; /* Adds space between the two rows */
+    margin-top: 10px; /
 }
 
 .filter-group {
@@ -112,7 +112,7 @@
 
 .filter-buttons {
     display: flex;
-    gap: 10px; /* Adds space between buttons */
+    gap: 10px; 
 }
 
 .filter-group label {
