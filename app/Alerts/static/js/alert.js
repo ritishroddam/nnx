@@ -597,6 +597,9 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
         tableBody.appendChild(row);
     });
+
+    // Call this after table is rendered
+    highlightAlertFromURL();
   }
 
   function acknowledgeAlert() {
@@ -742,16 +745,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     const alertId = params.get("alert_id");
     if (alertId) {
-      // Wait for table to render
-      setTimeout(() => {
-        const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
-        if (row) {
-          row.style.background = "#ffe082";
-          row.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 500);
+        setTimeout(() => {
+            const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+            if (row) {
+                row.style.background = "#ffe082";
+                row.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }, 200); // Adjust timeout if needed
     }
-  }
+}
 
   // Call after table is updated
   const originalDisplayAlerts = displayAlerts;
