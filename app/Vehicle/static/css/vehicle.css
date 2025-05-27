@@ -11,8 +11,8 @@ body {
 
 .floating-card {
   position: absolute;
-  top: 11%;
-  left: 5.5%;
+  top: 11vh;
+  left: 11vh;
   width: 420px;
   max-height: 88vh;
   overflow-y: auto;
@@ -37,7 +37,7 @@ body {
   color: #ccc;
 }
 
-.sidebar:hover ~ .floating-card {
+.floating-card.sidebar-hovered {
   left: 14.5%;
 }
 

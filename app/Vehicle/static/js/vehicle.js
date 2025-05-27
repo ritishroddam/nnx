@@ -1,3 +1,13 @@
+const sidebar = document.querySelector('.sidebar');
+const floatingCard = document.querySelector('.floating-card');
+
+sidebar.addEventListener('mouseenter', () => {
+  floatingCard.classList.add('sidebar-hovered');
+});
+sidebar.addEventListener('mouseleave', () => {
+  floatingCard.classList.remove('sidebar-hovered');
+});
+
 let vehicleData = new Map();
 var map;
 var markers = {};
