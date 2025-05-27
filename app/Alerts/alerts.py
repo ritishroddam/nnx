@@ -13,31 +13,28 @@ from app.utils import roles_required, get_filtered_results # type: ignore
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
 def get_alert_type(record):
-    print("DEBUG get_alert_type:", record)
-    """Determine the alert type based on record data"""
     # If this record is from sos_logs, treat as Panic Alert
+    if record.get('source') == 'sos_logs':
+        return "Panic Alert"
     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
         return "Panic Alert"
-    # Fallback: If the collection is sos_logs, treat as Panic Alert
-    if record.get('source') == 'sos_logs' or record.get('imei') and record.get('speed') is None:
-        return "Panic Alert"
-    elif float(record.get('speed', 0.0)) >= 60:
+    if float(record.get('speed', 0.0)) >= 60:
         return f"Speeding Alert ({float(record.get('speed', 0.0))} km/h)"
-    elif record.get('harsh_break') == "1":
+    if record.get('harsh_break') == "1":
         return "Harsh Break Alert"
-    elif record.get('harsh_speed') == "1":
+    if record.get('harsh_speed') == "1":
         return "Harsh Acceleration Alert"
-    elif record.get('internal_bat') == "0.0" or float(record.get('internal_bat', 3.7)) < 3.7:
+    if record.get('internal_bat') == "0.0" or float(record.get('internal_bat', 3.7)) < 3.7:
         return "Internal Battery Low Alert"
-    elif record.get('main_power') == "0":
+    if record.get('main_power') == "0":
         return "Main Supply Remove Alert"
-    elif record.get('speed') == "0.0" and record.get('ignition') == "1":
+    if record.get('speed') == "0.0" and record.get('ignition') == "1":
         return "Idle Alert"
-    elif record.get('ignition') == "1" and record.get('speed') != "0.0":
+    if record.get('ignition') == "1" and record.get('speed') != "0.0":
         return "Ignition On Alert"
-    elif record.get('ignition') == "0":
+    if record.get('ignition') == "0":
         return "Ignition Off Alert"
-    elif record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(float(record.get('gsm_sig'))) < 7):
+    if record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(float(record.get('gsm_sig'))) < 7):
         return "GSM Signal Low Alert"
     return "Unknown Alert"
 
