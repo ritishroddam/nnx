@@ -132,10 +132,6 @@ body {
   z-index: 2;
 }
 
-.sidebar-hovered {
-  left: 29vh;
-}
-
 .sidebar::after {
   content: "";
   height: 5px;

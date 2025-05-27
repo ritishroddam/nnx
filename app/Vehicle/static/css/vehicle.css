@@ -37,6 +37,10 @@ body {
   color: #ccc;
 }
 
+.floating-card .sidebar-hovered {
+  left: 29vh;
+}
+
 .vehicle-card {
   border-radius: 16px;
   box-shadow: 0 2px 8px #0001;
