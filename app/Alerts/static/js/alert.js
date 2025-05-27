@@ -730,4 +730,27 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   setDefaultDateRange();
+
+  // After alerts are loaded, check for alert_id in URL
+  function highlightAlertFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const alertId = params.get("alert_id");
+    if (alertId) {
+      // Wait for table to render
+      setTimeout(() => {
+        const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+        if (row) {
+          row.style.background = "#ffe082";
+          row.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 500);
+    }
+  }
+
+  // Call after table is updated
+  const originalDisplayAlerts = displayAlerts;
+  displayAlerts = function (alerts) {
+    originalDisplayAlerts(alerts);
+    highlightAlertFromURL();
+  };
 });
