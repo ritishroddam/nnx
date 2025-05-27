@@ -361,7 +361,7 @@ body {
 }
 
 .dark-mode .floating-card {
-  background: #000000d0;
+  background: black;
   color: #ccc;
 }
 
