@@ -37,7 +37,11 @@ body {
   color: #ccc;
 }
 
-.floating-card.sidebar-hovered {
+.floating-card .sidebar-hovered {
+  left: 29vh;
+}
+
+.vehicle-table-container .sidebar-hovered {
   left: 29vh;
 }
 

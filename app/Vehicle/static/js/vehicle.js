@@ -1,11 +1,14 @@
 const sidebar = document.querySelector('.sidebar');
 const floatingCard = document.querySelector('.floating-card');
+const vehicleList = document.getElementById('vehicle-table-container');
 
 sidebar.addEventListener('mouseenter', () => {
   floatingCard.classList.add('sidebar-hovered');
+  vehicleList.classList.add('sidebar-hovered');
 });
 sidebar.addEventListener('mouseleave', () => {
   floatingCard.classList.remove('sidebar-hovered');
+  vehicleList.classList.remove('sidebar-hovered');
 });
 
 let vehicleData = new Map();
