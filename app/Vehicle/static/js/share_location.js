@@ -60,7 +60,7 @@ function updateMarkerPostion(latitude, longitude) {
   url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
 
   const latLng = new google.maps.LatLng(latitude, longitude);
-  vehicleMarker.setPosition(latLng);
+  vehicleMarker.position = latLng;
 }
 
 function updateVehicleData(vehicleData) {
