@@ -58,7 +58,8 @@ function updateMarkerPostion(latitude, longitude) {
   }
 
   url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-
+  openMap();
+  
   const latLng = new google.maps.LatLng(latitude, longitude);
   vehicleMarker.position = latLng;
 }
@@ -98,9 +99,16 @@ async function initMap() {
   });
 
   url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  openMap();
 }
 
 
-document.getElementById("route-btn").onclick = function () {
-  window.open(url, "_blank");
-};
+function openMap() {
+  if (!url) {
+    console.warn("URL is not set yet.");
+    return;
+  }
+  document.getElementById("route-btn").onclick = function () {
+    window.open(url, "_blank");
+  }
+}
