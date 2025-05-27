@@ -568,21 +568,23 @@ document.addEventListener("DOMContentLoaded", function () {
             : `<span class="status-badge pending">Pending</span>`;
 
         // Only show acknowledge button for these alert types
+        const alertType = alert.alert_type || alert.type || "Unknown Alert";
+        let alertTypeDisplay = alertType;
+        if (alertType.startsWith("Speeding Alert") && alert.speed) {
+            alertTypeDisplay += ` (${alert.speed} km/h)`;
+        }
+
+        // Only show acknowledge button for these alert types
         const showAcknowledgeBtn = (
-            alert.alert_type === "Panic Alert" ||
-            alert.alert_type.startsWith("Speeding Alert") ||
-            alert.alert_type === "Main Power Discontinue Alert" ||
-            alert.alert_type === "Main Supply Remove Alert" // in case your backend uses this label
+            alertType === "Panic Alert" ||
+            alertType.startsWith("Speeding Alert") ||
+            alertType === "Main Power Discontinue Alert" ||
+            alertType === "Main Supply Remove Alert"
         );
 
         const actionBtn = (alert.acknowledged || !showAcknowledgeBtn)
             ? `<button class="action-btn" disabled>${alert.acknowledged ? "Acknowledged" : ""}</button>`
             : `<button class="action-btn ack-btn" data-alert-id="${alert._id}">Acknowledge</button>`;
-
-        let alertTypeDisplay = alert.alert_type || "N/A";
-        if (alert.alert_type && alert.alert_type.startsWith("Speeding Alert") && alert.speed) {
-            alertTypeDisplay += ` (${alert.speed} km/h)`;
-        }
 
         row.innerHTML = `
             <td>${alert.vehicle_number || "N/A"}</td>
