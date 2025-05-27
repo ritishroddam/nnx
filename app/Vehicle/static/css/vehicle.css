@@ -41,10 +41,6 @@ body {
   left: 29vh;
 }
 
-.vehicle-table-container .sidebar-hovered {
-  left: 29vh;
-}
-
 .vehicle-card {
   border-radius: 16px;
   box-shadow: 0 2px 8px #0001;
@@ -474,11 +470,11 @@ input:checked + .slider:before {
 }
 
 .vehicle-table-container {
-  position: fixed;
-  top: 11%;
-  left: 5.5%;
-  bottom: 1%;
-  right: 1%;
+  position: absolute;
+  top: 11vh;
+  left: 11vh;
+  bottom: 1vh;
+  right: 1vh;
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
@@ -487,12 +483,12 @@ input:checked + .slider:before {
   border-radius: 20px;
 }
 
-.dark-mode .vehicle-table-container {
-  background-color: #000000d0;
+.vehicle-table-container .sidebar-hovered {
+  left: 29vh;
 }
 
-.sidebar:hover ~ .vehicle-table-container {
-  left: 14.5%;
+.dark-mode .vehicle-table-container {
+  background-color: #000000d0;
 }
 
 .vehicle-table {
