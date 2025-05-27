@@ -132,6 +132,10 @@ body {
   z-index: 2;
 }
 
+.sidebar-hovered {
+  left: 29vh;
+}
+
 .sidebar::after {
   content: "";
   height: 5px;
@@ -267,11 +271,6 @@ body {
   margin-bottom: 50px;
   z-index: 2; 
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
-}
-
-.sidebar:hover ~ .topbar {
-  left: 14.5%; 
-  width: 84%; 
 }
 
 .topbar h1 {
