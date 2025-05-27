@@ -13,8 +13,13 @@ from app.utils import roles_required, get_filtered_results # type: ignore
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
 def get_alert_type(record):
+    print("DEBUG get_alert_type:", record)
     """Determine the alert type based on record data"""
+    # If this record is from sos_logs, treat as Panic Alert
     if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
+        return "Panic Alert"
+    # Fallback: If the collection is sos_logs, treat as Panic Alert
+    if record.get('source') == 'sos_logs' or record.get('imei') and record.get('speed') is None:
         return "Panic Alert"
     elif float(record.get('speed', 0.0)) >= 60:
         return f"Speeding Alert ({float(record.get('speed', 0.0))} km/h)"
@@ -120,6 +125,9 @@ def alert_card_endpoint(alert_type):
                             "sos": 1
                         }
                     ).sort("date_time", -1))
+                    # Add source field to each record
+                    for rec in records:
+                        rec['source'] = 'sos_logs'
             else:
                 query = {
                     "date_time": {
