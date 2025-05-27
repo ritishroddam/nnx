@@ -31,7 +31,7 @@ socket.on("subscription_error", (error) => {
 });
 
 socket.on("vehicle_live_update", (data) => {
-  if (!data || !data.Latitude || !data.Longitude) {
+  if (!data || !data.latitude || !data.longitude) {
     console.warn("Invalid vehicle data received:", data);
     return;
   }
@@ -39,8 +39,8 @@ socket.on("vehicle_live_update", (data) => {
   console.log("Received vehicle live update:", data);
 
   const vehicleData = {
-    latitude: data.Latitude,
-    longitude: data.Longitude,
+    latitude: data.latitude,
+    longitude: data.longitude,
     location: data.address || "",
     speed: data.Speed || 0,
     date_time: data.date_time || ""
