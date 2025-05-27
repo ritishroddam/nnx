@@ -42,7 +42,7 @@ socket.on("vehicle_live_update", (data) => {
     latitude: data.latitude,
     longitude: data.longitude,
     location: data.address || "",
-    speed: data.Speed || 0,
+    speed: data.speed || 0,
     date_time: data.date_time || ""
   }
 
