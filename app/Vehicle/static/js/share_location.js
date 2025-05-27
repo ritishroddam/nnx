@@ -1,4 +1,3 @@
-let vehicleMarker;
 let url;
 
 window.onload =  initMap;
