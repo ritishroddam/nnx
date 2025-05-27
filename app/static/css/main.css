@@ -286,8 +286,12 @@ body {
 }
 
 .notification {
+  min-width: 90px;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  cursor: pointer;
 }
 
 .notification i {
@@ -311,15 +315,31 @@ body {
   font-weight: bold;
 }
 
+.notification i.fa-bell {
+  font-size: 64px;           /* Large bell */
+  color: #181c32;            /* Bold black */
+  filter: none;
+  font-weight: 900;
+  position: relative;
+}
+
 .notification .badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #e74c3c;
+  top: -10px;
+  right: -10px;
+  background: #7c3aed;       /* Purple */
   color: #fff;
+  font-size: 32px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  padding: 2px 7px;
-  font-size: 12px;
+  font-weight: bold;
+  border: 4px solid #fff;    /* White border for separation */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 2;
 }
 
 .profile img {
