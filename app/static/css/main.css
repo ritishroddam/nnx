@@ -435,7 +435,7 @@ body {
 }
 
 .sidebar:hover ~ .block-container {
-  left: 14.5%;
+  left: 29vh;
 }
 
 .notification-dropdown {
