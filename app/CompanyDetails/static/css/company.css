@@ -1,8 +1,9 @@
 input[type="date"],
 input[type="file"],
-input[type="text"] {
+input[type="text"],
+input[type="email"],
+input[type="number"] {
   width: 100%;
-  max-width: 300px;
   padding: 10px;
   margin-bottom: 20px;
   border: 1px solid #ccc;
@@ -28,10 +29,6 @@ th {
 th {
   background-color: #e2e8f0;
   color: #333;
-}
-
-tr:nth-child(even) {
-  background-color: #f4f4f4;
 }
 
 tr:hover {
@@ -136,38 +133,93 @@ tr:hover {
   color: #dc3545;
 }
 
-/* --- Modern Table Styling (matches inventory modules) --- */
+/* --- Modern Table Styling (matches DeviceInvy) --- */
 .company-table-container {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    max-height: calc(100vh - 250px);
+    margin-top: 10px;
     position: relative;
+    overflow-x: auto;
 }
 
 .company-table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+    margin-bottom: 20px;
     width: 100%;
     border-collapse: collapse;
-    background-color: white;
     color: #333;
+    table-layout: fixed;
 }
 
-.company-table th, .company-table td {
+.company-table thead{
+  padding-right: 15px;
+}
+
+.company-table thead,
+.company-table tbody {
+    display: block;
+    width: 100%;
+}
+
+.company-table tbody {
+    max-height: 480px; 
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.company-table th,
+.company-table td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
+    box-sizing: border-box;
+    word-break: break-word;
 }
+
+/* Set explicit widths for each column */
+.company-table th:nth-child(1), .company-table td:nth-child(1) { width: 140px; }
+.company-table th:nth-child(2), .company-table td:nth-child(2) { width: 120px; }
+.company-table th:nth-child(3), .company-table td:nth-child(3) { width: 200px; }
+.company-table th:nth-child(4), .company-table td:nth-child(4) { width: 130px; }
+.company-table th:nth-child(5), .company-table td:nth-child(5) { width: 180px; }
+.company-table th:nth-child(6), .company-table td:nth-child(6) { width: 100px; }
+.company-table th:nth-child(7), .company-table td:nth-child(7) { width: 120px; }
+.company-table th:nth-child(8), .company-table td:nth-child(8) { width: 120px; }
+.company-table th:nth-child(9), .company-table td:nth-child(9) { width: 120px; }
+.company-table th:nth-child(10), .company-table td:nth-child(10) { width: 140px; }
+.company-table th:nth-child(11), .company-table td:nth-child(11) { width: 120px; }
+.company-table th:nth-child(12), .company-table td:nth-child(12) { width: 100px; }
 
 .company-table th {
     background-color: #f5f5f5;
     font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .company-table tr:hover {
     background-color: #f9f9f9;
+}
+
+/* Optional: dark mode support if you want to match DeviceInvy dark mode */
+.dark-mode .company-table {
+    background-color: #000;
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
+}
+
+.dark-mode .company-table th {
+    background-color: #333;
+    color: #ccc;
+}
+
+.dark-mode .company-table tr:hover {
+    background-color: #444;
 }
 
 /* --- Modal/Popup Styling (match DeviceInvy) --- */
