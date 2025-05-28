@@ -1240,15 +1240,21 @@ async function populateVehicleTable() {
     row.insertCell(8).innerText = vehicle.odometer; // Assuming odometer reading
 
     const icons = `
-      ${sosIcon}
-      <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+      <div class="vehicle-table-icons">
+        ${sosIcon}
+        <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+        <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
+        <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+      </div>
     `;
     row.insertCell(9).innerHTML = icons;
-    row.insertCell(
-      10
-    ).innerHTML = `<a href="${url}" target="_blank">View Data</a>`;
+
+    row.style.cursor = "pointer";
+    row.addEventListener("click", function (e) {
+      // Prevent double action if user clicks the actual link
+      if (e.target.tagName.toLowerCase() === "a") return;
+      window.open(url, "_blank");
+    });
   });
   showHidecar();
 }
