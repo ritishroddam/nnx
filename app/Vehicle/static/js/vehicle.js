@@ -1135,6 +1135,7 @@ async function populateVehicleTable() {
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = ""; // Clear existing rows
+  const isDarkMode = document.body.classList.contains("dark-mode");
 
   showHidecar();
   const listContainer = document.getElementById("vehicle-list");
