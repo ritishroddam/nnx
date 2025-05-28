@@ -1159,6 +1159,57 @@ async function populateVehicleTable() {
     const address = vehicle.address || "Location unknown";
     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
 
+    const now = new Date();
+    const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+    const timeDiff = Math.abs(now - lastUpdated);
+    let statusText = "Moving";
+    if (timeDiff > 24 * 60 * 60 * 1000) {
+      statusText = "Offline";
+    }
+
+    const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+    const sosIcon =
+      device.sos === "1"
+        ? `<span class="material-symbols-outlined" style="${
+            iconStyle + iconRed
+          }">sos</span>`
+        : "";
+    const gpsIcon =
+      statusText === "Offline" ? "location_disabled" : "my_location";
+    
+    let ignitionIcon, ignitionColor;
+    if (vehicle.ignition === "0") {
+      ignitionIcon = "key_off";
+      ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
+    } else {
+      ignitionIcon = "key";
+      ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+    }
+
+    const ASUgsmValue = parseInt(vehicle.gsm);
+
+    let gsmIcon, gsmColor;
+
+    if (ASUgsmValue == 0) {
+      gsmIcon = "signal_cellular_null";
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red in dark mode
+    } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+      gsmIcon = "signal_cellular_1_bar";
+      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; // Brighter orange in dark mode
+    } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+      gsmIcon = "signal_cellular_2_bar";
+      gsmColor = isDarkMode ? "#ffe082" : "#ffc107"; // Brighter yellow in dark mode
+    } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+      gsmIcon = "signal_cellular_3_bar";
+      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; // Brighter light green in dark mode
+    } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+      gsmIcon = "signal_cellular_4_bar";
+      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; // Brighter green in dark mode
+    } else {
+      gsmIcon = "signal_cellular_off";
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red for unknown state
+    }    
+
     console.log(vehicle.imei);
 
     const row = tableBody.insertRow();
@@ -1185,11 +1236,16 @@ async function populateVehicleTable() {
       ? parseFloat(vehicle.distance).toFixed(2)
       : "N/A";
     row.insertCell(8).innerText = vehicle.odometer; // Assuming odometer reading
-    row.insertCell(9).innerText = vehicle.ignition;
-    row.insertCell(10).innerText = vehicle.gsm;
-    row.insertCell(11).innerText = vehicle.sos;
+
+    const icons = `
+      ${sosIcon}
+      <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle}">${ignitionIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+    `;
+    row.insertCell(9).innerText = icons;
     row.insertCell(
-      12
+      10
     ).innerHTML = `<a href="${url}" target="_blank">View Data</a>`;
   });
   showHidecar();
