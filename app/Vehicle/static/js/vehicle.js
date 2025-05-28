@@ -1245,7 +1245,7 @@ async function populateVehicleTable() {
       <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
       <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
     `;
-    row.insertCell(9).innerText = icons;
+    row.insertCell(9).innerHTML = icons;
     row.insertCell(
       10
     ).innerHTML = `<a href="${url}" target="_blank">View Data</a>`;
