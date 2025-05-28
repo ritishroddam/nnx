@@ -335,3 +335,37 @@ tr:hover {
 .dark-mode .close-btn:hover {
   color: #fff;
 }
+
+/* Scrollable tbody with fixed header */
+.device-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.device-table thead,
+.device-table tbody {
+    display: block;
+    width: 100%;
+}
+
+.device-table tbody {
+    max-height: 400px;   /* Set your preferred height */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.device-table th,
+.device-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    box-sizing: border-box;
+    word-break: break-word;
+}
+
+/* Set explicit widths for each column (adjust as needed for your columns) */
+.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 140px; }
+.device-table th:nth-child(2), .device-table td:nth-child(2) { width: 120px; }
+.device-table th:nth-child(3), .device-table td:nth-child(3) { width: 200px; }
+/* ...repeat for all columns... */
