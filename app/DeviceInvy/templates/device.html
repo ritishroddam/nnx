@@ -41,6 +41,7 @@ Device Inventory
             <th>Tenure</th>
             <th>Status</th>
             <th>Actions</th>
+            <th style="width:16px; padding:0; border:none; background:transparent"></th> <!-- Fake scrollbar column -->
           </tr>
         </thead>
         <tbody id="deviceTable">
@@ -74,6 +75,7 @@ Device Inventory
               <button class="icon-btn edit-icon" onclick="editDevice('{{ device._id }}')">✏️</button>
               <button class="icon-btn delete-icon" onclick="deleteDevice('{{ device._id }}')">🗑️</button>
             </td>
+            <td></td>
           </tr>
           {% endfor %}
         </tbody>
