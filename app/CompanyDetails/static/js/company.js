@@ -5,11 +5,9 @@ document.getElementById("uploadBtn").addEventListener("click", function () {
 document.getElementById("manualEntryBtn").addEventListener("click", function () {
   document.getElementById("manualEntryForm").classList.remove("hidden");
 });
-
 document.getElementById("cancelBtn").addEventListener("click", function () {
   document.getElementById("manualEntryForm").classList.add("hidden");
 });
-
 document.getElementById("closeCompanyModal").addEventListener("click", function () {
   document.getElementById("manualEntryForm").classList.add("hidden");
 });
