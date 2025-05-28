@@ -268,9 +268,9 @@ body {
 .icon-legend-container {
   position: absolute;
   top: 18px;
-  right: 24px;      /* Move to right */
-  left: auto;       /* Remove left positioning */
-  z-index: 100;
+  right: 24px;
+  left: auto;
+  z-index: 1;
 }
 
 .info-icon1 {
