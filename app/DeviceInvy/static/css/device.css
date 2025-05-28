@@ -343,6 +343,12 @@ tr:hover {
     table-layout: fixed;
 }
 
+.device-table thead,
+.device-table tbody {
+    display: block;
+    width: 100%;
+}
+
 .device-table tbody {
     max-height: 500px;   /* Set your preferred height */
     overflow-y: auto;
