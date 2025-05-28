@@ -6,15 +6,8 @@ window.onload = async () => {
 const dataElement = document.getElementById("vehicle-data");
 const vehicleData = JSON.parse(dataElement.textContent);
 
-const socket = io(CONFIG.SOCKET_SERVER_URL, {
-  transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
-});
 
-socket.on("connect", () => {
+document.addEventListener("DOMContentLoaded", async function () {
   console.log("Connected to the socket server");
   const licensePlateNumber = vehicleData["License Plate Number"] || null;
   console.log(vehicleData);

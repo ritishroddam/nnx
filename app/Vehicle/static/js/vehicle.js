@@ -25,9 +25,7 @@ var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 
-socket.on("connect", () => {
-  console.log("Connected to socket server");
-
+document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
 
   if (companyName != "None") {
