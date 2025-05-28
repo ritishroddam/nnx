@@ -2,15 +2,31 @@ document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadFormContainer").classList.toggle("hidden");
 });
 
-document.getElementById("cancelBtn").addEventListener("click", function () {
-  document.getElementById("manualEntryForm").classList.add("hidden");
+// Show modal
+document.getElementById("manualEntryBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").classList.remove("hidden");
 });
 
-document
-  .getElementById("manualEntryBtn")
-  .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.toggle("hidden");
-  });
+// Close modal with X button
+document.getElementById("closeCompanyModal").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").classList.add("hidden");
+  document.getElementById("manualForm").reset();
+});
+
+// Close modal with Cancel button
+document.getElementById("cancelBtn").addEventListener("click", function () {
+  document.getElementById("manualEntryModal").classList.add("hidden");
+  document.getElementById("manualForm").reset();
+});
+
+// Close modal when clicking outside the modal content
+window.addEventListener("click", function(event) {
+  const modal = document.getElementById("manualEntryModal");
+  if (event.target === modal) {
+    modal.classList.add("hidden");
+    document.getElementById("manualForm").reset();
+  }
+});
 
 // Add form validation logic if necessary
 

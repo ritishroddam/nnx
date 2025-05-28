@@ -1,15 +1,12 @@
 {% extends "base.html" %}
 
-
 {% block head %}
 <title>Company Details</title>
-
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GPS Company Inventory</title>
 <link rel="stylesheet" href="{{ url_for('CompanyDetails.static', filename='css/company.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-
 <script defer src="{{ url_for('CompanyDetails.static', filename='js/company.js') }}"></script>
 {% endblock %}
 
@@ -22,73 +19,77 @@ Company Details
   Add New Customer
 </button>
 
-<div id="manualEntryForm" class="hidden">
-  <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <div class="mb-4">
-      <label for="CompanyName">Company Name</label>
-      <input type="text" name="CompanyName" id="CompanyName" required />
-      <div id="companyNameError" class="error hidden">
-        Company Name is required.
+<!-- Modal Popup for Manual Entry -->
+<div class="company-modal hidden" id="manualEntryModal">
+  <div class="company-modal-content">
+    <span class="company-close-btn" id="closeCompanyModal">&times;</span>
+    <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="mb-4">
+        <label for="CompanyName">Company Name</label>
+        <input type="text" name="CompanyName" id="CompanyName" required />
+        <div id="companyNameError" class="error hidden">
+          Company Name is required.
+        </div>
       </div>
-    </div>
-    <div class="mb-4">
-      <label for="ContactPerson">Contact Person</label>
-      <input type="text" name="ContactPerson" id="ContactPerson" required />
-      <div id="contactPersonError" class="error hidden">
-        Contact Person is required.
+      <div class="mb-4">
+        <label for="ContactPerson">Contact Person</label>
+        <input type="text" name="ContactPerson" id="ContactPerson" required />
+        <div id="contactPersonError" class="error hidden">
+          Contact Person is required.
+        </div>
       </div>
-    </div>
-    <div class="mb-4">
-      <label for="EmailAddress">Email Address</label>
-      <input type="email" name="EmailAddress" id="EmailAddress" required />
-      <div id="emailAddressError" class="error hidden">
-        Email Address is required.
+      <div class="mb-4">
+        <label for="EmailAddress">Email Address</label>
+        <input type="email" name="EmailAddress" id="EmailAddress" required />
+        <div id="emailAddressError" class="error hidden">
+          Email Address is required.
+        </div>
       </div>
-    </div>
-    <div class="mb-4">
-      <label for="PhoneNumber">Phone Number</label>
-      <input type="text" name="PhoneNumber" id="PhoneNumber" required />
-      <div id="phoneNumberError" class="error hidden">
-        Phone Number is required.
+      <div class="mb-4">
+        <label for="PhoneNumber">Phone Number</label>
+        <input type="text" name="PhoneNumber" id="PhoneNumber" required />
+        <div id="phoneNumberError" class="error hidden">
+          Phone Number is required.
+        </div>
       </div>
-    </div>
-    <div class="mb-4">
-      <label for="CompanyAddress">Company Address</label>
-      <input type="text" name="CompanyAddress" id="CompanyAddress" required />
-      <div id="companyAddressError" class="error hidden">
-        Company Address is required.
+      <div class="mb-4">
+        <label for="CompanyAddress">Company Address</label>
+        <input type="text" name="CompanyAddress" id="CompanyAddress" required />
+        <div id="companyAddressError" class="error hidden">
+          Company Address is required.
+        </div>
       </div>
-    </div>
-    <div class="mb-4">
-      <label for="NumberOfGPSDevices">Number of GPS Devices</label>
-      <input type="number" name="NumberOfGPSDevices" id="NumberOfGPSDevices" />
-    </div>
-    <div class="mb-4">
-      <label for="NumberOfVehicles">Number of Vehicles</label>
-      <input type="number" name="NumberOfVehicles" id="NumberOfVehicles" />
-    </div>
-    <div class="mb-4">
-      <label for="NumberOfDrivers">Number of Drivers</label>
-      <input type="number" name="NumberOfDrivers" id="NumberOfDrivers" />
-    </div>
-    <div class="mb-4">
-      <label for="PaymentStatus">Payment Status</label>
-      <input type="text" name="PaymentStatus" id="PaymentStatus" />
-    </div>
-    <div class="mb-4">
-      <label for="SupportContact">Support Contact</label>
-      <input type="text" name="SupportContact" id="SupportContact" />
-    </div>
-    <div class="mb-4">
-      <label for="Remarks">Remarks</label>
-      <input type="text" name="Remarks" id="Remarks" />
-    </div>
-    <button type="submit" class="btn success">Submit</button>
-    <button type="button" id="cancelBtn" class="btn danger">
-      Cancel
-    </button>
-  </form>
+      <div class="mb-4">
+        <label for="NumberOfGPSDevices">Number of GPS Devices</label>
+        <input type="number" name="NumberOfGPSDevices" id="NumberOfGPSDevices" />
+      </div>
+      <div class="mb-4">
+        <label for="NumberOfVehicles">Number of Vehicles</label>
+        <input type="number" name="NumberOfVehicles" id="NumberOfVehicles" />
+      </div>
+      <div class="mb-4">
+        <label for="NumberOfDrivers">Number of Drivers</label>
+        <input type="number" name="NumberOfDrivers" id="NumberOfDrivers" />
+      </div>
+      <div class="mb-4">
+        <label for="PaymentStatus">Payment Status</label>
+        <input type="text" name="PaymentStatus" id="PaymentStatus" />
+      </div>
+      <div class="mb-4">
+        <label for="SupportContact">Support Contact</label>
+        <input type="text" name="SupportContact" id="SupportContact" />
+      </div>
+      <div class="mb-4">
+        <label for="Remarks">Remarks</label>
+        <input type="text" name="Remarks" id="Remarks" />
+      </div>
+      <div class="button-container">
+        <button type="submit" class="btn success">Submit</button>
+        <button type="button" id="cancelBtn" class="btn danger">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Upload Button -->
