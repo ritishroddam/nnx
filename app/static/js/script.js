@@ -16,6 +16,63 @@ const userID = document
   .getElementById("userID-data")
   .getAttribute("data-userID");
 
+const socket = io(CONFIG.SOCKET_SERVER_URL, {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+});
+
+socket.on("connect", () => {
+  console.log("Connected to socket server");
+
+  let companyNames = null;
+
+  if (companyName != "None") {
+    companyNames = companyName;
+  }
+
+  socket.emit("authenticate", {
+    user_id: userID,
+    company: companyNames,
+  });
+});
+
+socket.on("authentication_success", (data) => {
+  console.log("Authentication successful");
+  socket.emit("get_rooms");
+});
+
+socket.on("authentication_error", (data) => {
+  console.error("Authentication failed:", data.message);
+});
+
+socket.on("connect_error", (error) => {
+  console.error("WebSocket connection error:", error);
+});
+
+socket.on("disconnect", () => {
+  console.warn("WebSocket disconnected");
+});
+
+socket.on("authentication_success", (data) => {
+  console.log("Authentication successful");
+  socket.emit("get_rooms");
+});
+
+socket.on("vehicle_update", async function (data) {
+  try {
+    if(data.sos === "1") {
+      triggerSOS(data.imei, markers[data.imei]);
+      displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
+      data = null;
+    }
+  } catch (error) {
+    console.error("Error in vehicle_update handler:", error);
+  }
+});
+
 async function refreshToken() {
   try {
     const response = await fetch("/refresh", {

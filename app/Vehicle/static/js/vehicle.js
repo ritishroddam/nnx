@@ -70,10 +70,6 @@ socket.on("authentication_success", (data) => {
   socket.emit("get_rooms");
 });
 
-socket.on("vehicle_live_update", (data) => {
-  console.log("Live update received for vehicle KA73BB6459:", data);
-});
-
 socket.on("vehicle_update", async function (data) {
   try {
     // Wait for fetchdistance to resolve and return the updated data
