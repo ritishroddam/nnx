@@ -81,6 +81,9 @@ socket.on("vehicle_update", async function (data) {
 
     updateVehicleData(updatedData);
     updateVehicleCard(updatedData);
+    if(data.sos === "1") {
+      triggerSOS(data.imei, markers[data.imei]);
+    }
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
   }
