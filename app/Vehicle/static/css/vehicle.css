@@ -494,45 +494,38 @@ input:checked + .slider:before {
 .vehicle-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 18px;
-  text-align: left;
+  background-color: white;
+  color: #333;
 }
 
-.vehicle-table th,
-.vehicle-table td {
+.dark-mode .vehicle-table {
+  background-color: #000;
+  color: #ccc;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
+.vehicle-table th, .vehicle-table td {
   padding: 12px 15px;
-  border: 1px solid #ddd;
+  text-align: left;
+  border-bottom: 1px solid #eee;
 }
 
 .vehicle-table th {
-  background-color: #f2f2f2;
-  color: #333;
+  background-color: #f5f5f5;
+  font-weight: 500;
+}
+
+.vehicle-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.dark-mode .vehicle-table tr:hover {
+  background-color: #444;
 }
 
 .dark-mode .vehicle-table th {
   background-color: #333;
   color: #ccc;
-}
-
-.vehicle-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.vehicle-table tr:nth-child(odd) {
-  background-color: #fff;
-}
-
-.dark-mode .vehicle-table tr:nth-child(even) {
-  background-color: #444;
-}
-
-.vehicle-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-.dark-mode .vehicle-table tr:nth-child(odd) {
-  background-color: #555;
 }
 
 .vehicle-table-container {
