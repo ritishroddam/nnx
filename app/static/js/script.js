@@ -58,8 +58,7 @@ socket.on("disconnect", () => {
 
 socket.on("vehicle_update", async function (data) {
   try {
-    console.log("Vehicle update received:", data);
-    if(data.sos === "1") {
+    if(data.sos === "0") {
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
       data = null;
     }
