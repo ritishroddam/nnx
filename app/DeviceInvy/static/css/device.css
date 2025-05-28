@@ -349,6 +349,16 @@ tr:hover {
     width: 100%;
 }
 
+.device-table th:last-child,
+.device-table td:last-child {
+    width: 16px;
+    min-width: 16px;
+    max-width: 16px;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
 .device-table tbody {
     max-height: 500px;   /* Set your preferred height */
     overflow-y: auto;
