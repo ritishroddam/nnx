@@ -1,4 +1,3 @@
-
 document.getElementById("DateIn").addEventListener("change", function () {
   var dateIn = new Date(this.value);
   var warrantyDate = new Date(dateIn);
@@ -19,8 +18,9 @@ document.querySelector(".close-btn").addEventListener("click", function() {
 });
 
 // Close modal with Cancel button
-document.getElementById("cancelBtn").addEventListener("click", function() {
+document.getElementById("cancelBtn").addEventListener("click", function () {
   document.getElementById("manualEntryModal").classList.add("hidden");
+  document.getElementById("manualForm").reset();
 });
 
 // Close modal when clicking outside
