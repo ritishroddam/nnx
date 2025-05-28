@@ -669,7 +669,7 @@ input:checked + .slider:before {
 #vehicle-table-container .search-container button {
   padding: 8px 12px;
   background-color: var(--primary-color);
-  color: white;
+  color: #ccc;
   border: none;
   border-radius: 0 4px 4px 0;
   cursor: pointer;
