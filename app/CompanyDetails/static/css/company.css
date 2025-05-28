@@ -155,6 +155,10 @@ tr:hover {
     table-layout: fixed;
 }
 
+.company-table thead{
+  padding-right: 10px;
+}
+
 .company-table thead,
 .company-table tbody {
     display: block;
