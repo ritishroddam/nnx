@@ -138,9 +138,9 @@ tr:hover {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 20px;
-    margin-bottom: 20px;
-    max-height: 500px;      /* Set your preferred height */
+    margin-top: 10px;
+    margin-bottom: 10px;
+    max-height: 580px;      /* Set your preferred height */
     position: relative;
     overflow-y: auto;       /* Enable vertical scroll */
     overflow-x: auto;       /* Optional: enable horizontal scroll if needed */
