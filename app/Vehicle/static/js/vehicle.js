@@ -1168,6 +1168,7 @@ async function populateVehicleTable() {
     }
 
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+    const iconRed = "color:#d32f2f;";
     const sosIcon =
       device.sos === "1"
         ? `<span class="material-symbols-outlined" style="${
