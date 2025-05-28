@@ -65,11 +65,6 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
-socket.on("authentication_success", (data) => {
-  console.log("Authentication successful");
-  socket.emit("get_rooms");
-});
-
 socket.on("vehicle_update", async function (data) {
   try {
     // Wait for fetchdistance to resolve and return the updated data
@@ -88,7 +83,7 @@ socket.on("vehicle_update", async function (data) {
 
 socket.on("sos_alert", function (data) {
   console.log("SOS alert received:", data);
-  imei = data.imei;
+  const imei = data.imei;
   if (markers[imei]) {
     triggerSOS(imei, markers[imei]);
   }

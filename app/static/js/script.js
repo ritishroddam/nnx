@@ -56,13 +56,9 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
-socket.on("authentication_success", (data) => {
-  console.log("Authentication successful");
-  socket.emit("get_rooms");
-});
-
 socket.on("vehicle_update", async function (data) {
   try {
+    console.log("Vehicle update received:", data);
     if(data.sos === "1") {
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
       data = null;
