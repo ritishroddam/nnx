@@ -273,6 +273,19 @@ body {
   z-index: 1;
 }
 
+.table-container{
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.dark-mode .table-container {
+    background-color: #000;
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .info-icon1 {
   position: relative;
   cursor: pointer;
