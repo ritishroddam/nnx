@@ -282,30 +282,61 @@ tr:hover {
 }
 
 .modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 800px;
+  background-color: #fff;
+  color: #222;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.18), 0 1.5px 6px rgba(44, 62, 80, 0.08);
+  padding: 32px 28px 24px 28px;
+  width: 90%;
+  max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
-  
-  /* Center the modal content */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
+  transition: box-shadow 0.2s;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 18px 6px 16px 6px;
+    max-width: 98vw;
+  }
+}
+
+.dark-mode .modal-content {
+  background-color: #23272b;
+  color: #eee;
+  box-shadow: 0 4px 24px rgba(200, 200, 200, 0.10), 0 1.5px 6px rgba(200, 200, 200, 0.05);
+}
+
+.modal-content .form-group label {
+  color: #34495e;
+}
+
+.dark-mode .modal-content .form-group label {
+  color: #bfc9d1;
+}
+
+.modal-content .button-container {
+  margin-top: 24px;
 }
 
 .close-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.5rem;
+  top: 14px;
+  right: 18px;
+  font-size: 1.7rem;
   cursor: pointer;
   color: #aaa;
+  transition: color 0.2s;
+  z-index: 2;
 }
 
 .close-btn:hover {
-  color: #000;
+  color: #222;
+}
+
+.dark-mode .close-btn:hover {
+  color: #fff;
 }
