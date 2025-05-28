@@ -2,15 +2,17 @@ document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadFormContainer").classList.toggle("hidden");
 });
 
+document.getElementById("manualEntryBtn").addEventListener("click", function () {
+  document.getElementById("manualEntryForm").classList.remove("hidden");
+});
+
 document.getElementById("cancelBtn").addEventListener("click", function () {
   document.getElementById("manualEntryForm").classList.add("hidden");
 });
 
-document
-  .getElementById("manualEntryBtn")
-  .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.toggle("hidden");
-  });
+document.getElementById("closeCompanyModal").addEventListener("click", function () {
+  document.getElementById("manualEntryForm").classList.add("hidden");
+});
 
 // Add form validation logic if necessary
 
