@@ -31,10 +31,6 @@ th {
   color: #333;
 }
 
-tr:nth-child(even) {
-  background-color: #f4f4f4;
-}
-
 tr:hover {
   background-color: #e2e8f0;
 }
