@@ -25,14 +25,6 @@ var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 
-const socket = io(CONFIG.SOCKET_SERVER_URL, {
-  transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
-});
-
 socket.on("connect", () => {
   console.log("Connected to socket server");
 
