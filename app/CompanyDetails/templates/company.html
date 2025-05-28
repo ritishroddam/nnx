@@ -1,15 +1,12 @@
 {% extends "base.html" %}
 
-
 {% block head %}
 <title>Company Details</title>
-
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GPS Company Inventory</title>
 <link rel="stylesheet" href="{{ url_for('CompanyDetails.static', filename='css/company.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-
 <script defer src="{{ url_for('CompanyDetails.static', filename='js/company.js') }}"></script>
 {% endblock %}
 
@@ -22,130 +19,8 @@ Company Details
   Add New Customer
 </button>
 
-<div id="manualEntryForm" class="hidden">
-  <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <div class="mb-4">
-      <label for="CompanyName">Company Name</label>
-      <input type="text" name="CompanyName" id="CompanyName" required />
-      <div id="companyNameError" class="error hidden">
-        Company Name is required.
-      </div>
-    </div>
-    <div class="mb-4">
-      <label for="ContactPerson">Contact Person</label>
-      <input type="text" name="ContactPerson" id="ContactPerson" required />
-      <div id="contactPersonError" class="error hidden">
-        Contact Person is required.
-      </div>
-    </div>
-    <div class="mb-4">
-      <label for="EmailAddress">Email Address</label>
-      <input type="email" name="EmailAddress" id="EmailAddress" required />
-      <div id="emailAddressError" class="error hidden">
-        Email Address is required.
-      </div>
-    </div>
-    <div class="mb-4">
-      <label for="PhoneNumber">Phone Number</label>
-      <input type="text" name="PhoneNumber" id="PhoneNumber" required />
-      <div id="phoneNumberError" class="error hidden">
-        Phone Number is required.
-      </div>
-    </div>
-    <div class="mb-4">
-      <label for="CompanyAddress">Company Address</label>
-      <input type="text" name="CompanyAddress" id="CompanyAddress" required />
-      <div id="companyAddressError" class="error hidden">
-        Company Address is required.
-      </div>
-    </div>
-    <div class="mb-4">
-      <label for="NumberOfGPSDevices">Number of GPS Devices</label>
-      <input type="number" name="NumberOfGPSDevices" id="NumberOfGPSDevices" />
-    </div>
-    <div class="mb-4">
-      <label for="NumberOfVehicles">Number of Vehicles</label>
-      <input type="number" name="NumberOfVehicles" id="NumberOfVehicles" />
-    </div>
-    <div class="mb-4">
-      <label for="NumberOfDrivers">Number of Drivers</label>
-      <input type="number" name="NumberOfDrivers" id="NumberOfDrivers" />
-    </div>
-    <div class="mb-4">
-      <label for="PaymentStatus">Payment Status</label>
-      <input type="text" name="PaymentStatus" id="PaymentStatus" />
-    </div>
-    <div class="mb-4">
-      <label for="SupportContact">Support Contact</label>
-      <input type="text" name="SupportContact" id="SupportContact" />
-    </div>
-    <div class="mb-4">
-      <label for="Remarks">Remarks</label>
-      <input type="text" name="Remarks" id="Remarks" />
-    </div>
-    <button type="submit" class="btn success">Submit</button>
-    <button type="button" id="cancelBtn" class="btn danger">
-      Cancel
-    </button>
-  </form>
-</div>
-
-<!-- Upload Button -->
-<button id="uploadBtn" class="btn mb-4">Upload</button>
-
-<!-- Hidden Upload Form Container -->
-<div id="uploadFormContainer" class="hidden">
-  <form id="uploadForm" action="{{ url_for('CompanyDetails.upload_customers') }}" method="post"
-    enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <input type="file" name="file" accept=".xls,.xlsx" required />
-    <button type="submit" class="btn">Upload Excel</button>
-    <a href="{{ url_for('CompanyDetails.download_template') }}" class="btn">Download Template</a>
-  </form>
-</div>
-
-<table>
-  <thead>
-    <tr>
-      <th>Company Name</th>
-      <th>Contact Person</th>
-      <th>Email Address</th>
-      <th>Phone Number</th>
-      <th>Company Address</th>
-      <th>Number of GPS Devices</th>
-      <th>Number of Vehicles</th>
-      <th>Number of Drivers</th>
-      <th>Payment Status</th>
-      <th>Support Contact</th>
-      <th>Remarks</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody id="customerTable">
-    {% for customer in customers %}
-    <tr data-id="{{ customer._id }}">
-      <td>{{ customer['Company Name'] }}</td>
-      <td>{{ customer['Contact Person'] }}</td>
-      <td>{{ customer['Email Address'] }}</td>
-      <td>{{ customer['Phone Number'] }}</td>
-      <td>{{ customer['Company Address'] }}</td>
-      <td>{{ customer['Number of GPS Devices'] }}</td>
-      <td>{{ customer['Number of Vehicles'] }}</td>
-      <td>{{ customer['Number of Drivers'] }}</td>
-      <td>{{ customer['Payment Status'] }}</td>
-      <td>{{ customer['Support Contact'] }}</td>
-      <td>{{ customer['Remarks'] }}</td>
-      <td>
-        <button class="icon-btn edit-icon" onclick="editCustomer('{{ customer._id }}')">✏️</button>
-        <button class="icon-btn delete-icon" onclick="deleteCustomer('{{ customer._id }}')">🗑️</button>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<div class="company-modal hidden" id="manualEntryForm">
+<!-- Modal Popup for Manual Entry -->
+<div class="company-modal hidden" id="manualEntryModal">
   <div class="company-modal-content">
     <span class="company-close-btn" id="closeCompanyModal">&times;</span>
     <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post">
@@ -216,4 +91,58 @@ Company Details
     </form>
   </div>
 </div>
+
+<!-- Upload Button -->
+<button id="uploadBtn" class="btn mb-4">Upload</button>
+
+<!-- Hidden Upload Form Container -->
+<div id="uploadFormContainer" class="hidden">
+  <form id="uploadForm" action="{{ url_for('CompanyDetails.upload_customers') }}" method="post"
+    enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="file" name="file" accept=".xls,.xlsx" required />
+    <button type="submit" class="btn">Upload Excel</button>
+    <a href="{{ url_for('CompanyDetails.download_template') }}" class="btn">Download Template</a>
+  </form>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Company Name</th>
+      <th>Contact Person</th>
+      <th>Email Address</th>
+      <th>Phone Number</th>
+      <th>Company Address</th>
+      <th>Number of GPS Devices</th>
+      <th>Number of Vehicles</th>
+      <th>Number of Drivers</th>
+      <th>Payment Status</th>
+      <th>Support Contact</th>
+      <th>Remarks</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="customerTable">
+    {% for customer in customers %}
+    <tr data-id="{{ customer._id }}">
+      <td>{{ customer['Company Name'] }}</td>
+      <td>{{ customer['Contact Person'] }}</td>
+      <td>{{ customer['Email Address'] }}</td>
+      <td>{{ customer['Phone Number'] }}</td>
+      <td>{{ customer['Company Address'] }}</td>
+      <td>{{ customer['Number of GPS Devices'] }}</td>
+      <td>{{ customer['Number of Vehicles'] }}</td>
+      <td>{{ customer['Number of Drivers'] }}</td>
+      <td>{{ customer['Payment Status'] }}</td>
+      <td>{{ customer['Support Contact'] }}</td>
+      <td>{{ customer['Remarks'] }}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editCustomer('{{ customer._id }}')">✏️</button>
+        <button class="icon-btn delete-icon" onclick="deleteCustomer('{{ customer._id }}')">🗑️</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
