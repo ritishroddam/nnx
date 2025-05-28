@@ -27,39 +27,51 @@ input[type="text"] {
 }
 
 table {
-  width: 100%;
-  border-collapse: separate;
-  margin-top: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 2px solid #000;
-  display: table !important; 
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    max-height: calc(100vh - 250px);
+    position: relative;
+    width: 100%;
+    border-collapse: collapse;
+    color: #333;
+}
+
+.dark-mode .table {
+    background-color: #000;
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 td,
 th {
-  padding: 12px;
-  color: #000;
-  border: none;
-  text-align: left;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
 }
 tr {
   border-bottom: 2px solid #000;
 }
-tr:last-child {
-  border-bottom: none;
-}
+
 th {
-  background-color: #e2e8f0;
-  color: #333;
-  border-bottom: 2px solid #000;
+    background-color: #f5f5f5;
+    font-weight: 500;
 }
-tr:nth-child(even) {
-  background-color: #f4f4f4;
+
+.dark-mode th {
+    background-color: #333;
+    color: #ccc;
 }
+
 tr:hover {
-  background-color: #e2e8f0;
+  background-color: #f9f9f9;
+}
+
+.dark-mode tr:hover {
+    background-color: #444;
 }
 
 .btn {
