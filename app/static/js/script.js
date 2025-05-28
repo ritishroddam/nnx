@@ -64,7 +64,6 @@ socket.on("authentication_success", (data) => {
 socket.on("vehicle_update", async function (data) {
   try {
     if(data.sos === "1") {
-      triggerSOS(data.imei, markers[data.imei]);
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
       data = null;
     }
