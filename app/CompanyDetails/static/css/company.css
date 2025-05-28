@@ -234,3 +234,23 @@ tr:hover {
 .company-close-btn:hover {
   color: #222;
 }
+
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  width: 48%; /* Two columns on desktop */
+  min-width: 200px;
+}
+
+@media (max-width: 700px) {
+  .form-group {
+    width: 100%; /* Stack on mobile */
+  }
+}
