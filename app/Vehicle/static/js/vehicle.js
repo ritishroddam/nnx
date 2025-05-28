@@ -88,7 +88,7 @@ socket.on("vehicle_update", async function (data) {
 
 socket.on("sos_alert", function (data) {
   console.log("SOS alert received:", data);
-  imei = data.imei;
+  const imei = data.imei;
   if (markers[imei]) {
     triggerSOS(imei, markers[imei]);
   }
