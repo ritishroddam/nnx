@@ -99,43 +99,45 @@ Company Details
   </form>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Company Name</th>
-      <th>Contact Person</th>
-      <th>Email Address</th>
-      <th>Phone Number</th>
-      <th>Company Address</th>
-      <th>Number of GPS Devices</th>
-      <th>Number of Vehicles</th>
-      <th>Number of Drivers</th>
-      <th>Payment Status</th>
-      <th>Support Contact</th>
-      <th>Remarks</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody id="customerTable">
-    {% for customer in customers %}
-    <tr data-id="{{ customer._id }}">
-      <td>{{ customer['Company Name'] }}</td>
-      <td>{{ customer['Contact Person'] }}</td>
-      <td>{{ customer['Email Address'] }}</td>
-      <td>{{ customer['Phone Number'] }}</td>
-      <td>{{ customer['Company Address'] }}</td>
-      <td>{{ customer['Number of GPS Devices'] }}</td>
-      <td>{{ customer['Number of Vehicles'] }}</td>
-      <td>{{ customer['Number of Drivers'] }}</td>
-      <td>{{ customer['Payment Status'] }}</td>
-      <td>{{ customer['Support Contact'] }}</td>
-      <td>{{ customer['Remarks'] }}</td>
-      <td>
-        <button class="icon-btn edit-icon" onclick="editCustomer('{{ customer._id }}')">✏️</button>
-        <button class="icon-btn delete-icon" onclick="deleteCustomer('{{ customer._id }}')">🗑️</button>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="company-table-container">
+  <table class="company-table">
+    <thead>
+      <tr>
+        <th>Company Name</th>
+        <th>Contact Person</th>
+        <th>Email Address</th>
+        <th>Phone Number</th>
+        <th>Company Address</th>
+        <th>Number of GPS Devices</th>
+        <th>Number of Vehicles</th>
+        <th>Number of Drivers</th>
+        <th>Payment Status</th>
+        <th>Support Contact</th>
+        <th>Remarks</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="customerTable">
+      {% for customer in customers %}
+      <tr data-id="{{ customer._id }}">
+        <td>{{ customer['Company Name'] }}</td>
+        <td>{{ customer['Contact Person'] }}</td>
+        <td>{{ customer['Email Address'] }}</td>
+        <td>{{ customer['Phone Number'] }}</td>
+        <td>{{ customer['Company Address'] }}</td>
+        <td>{{ customer['Number of GPS Devices'] }}</td>
+        <td>{{ customer['Number of Vehicles'] }}</td>
+        <td>{{ customer['Number of Drivers'] }}</td>
+        <td>{{ customer['Payment Status'] }}</td>
+        <td>{{ customer['Support Contact'] }}</td>
+        <td>{{ customer['Remarks'] }}</td>
+        <td>
+          <button class="icon-btn edit-icon" onclick="editCustomer('{{ customer._id }}')">✏️</button>
+          <button class="icon-btn delete-icon" onclick="deleteCustomer('{{ customer._id }}')">🗑️</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

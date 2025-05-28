@@ -133,7 +133,7 @@ tr:hover {
   color: #dc3545;
 }
 
-/* --- Modern Table Styling (matches inventory modules) --- */
+/* --- Modern Table Styling (matches DeviceInvy) --- */
 .company-table-container {
     background-color: white;
     border-radius: 8px;
@@ -146,13 +146,21 @@ tr:hover {
 }
 
 .company-table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    max-height: calc(100vh - 250px);
+    position: relative;
     width: 100%;
     border-collapse: collapse;
-    background-color: white;
     color: #333;
 }
 
-.company-table th, .company-table td {
+.company-table th,
+.company-table td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
@@ -165,6 +173,22 @@ tr:hover {
 
 .company-table tr:hover {
     background-color: #f9f9f9;
+}
+
+/* Optional: dark mode support if you want to match DeviceInvy dark mode */
+.dark-mode .company-table {
+    background-color: #000;
+    color: #ccc;
+    box-shadow: 0px 0px 10px #cccccc90;
+}
+
+.dark-mode .company-table th {
+    background-color: #333;
+    color: #ccc;
+}
+
+.dark-mode .company-table tr:hover {
+    background-color: #444;
 }
 
 /* --- Modal/Popup Styling (match DeviceInvy) --- */
