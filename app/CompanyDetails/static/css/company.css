@@ -162,12 +162,8 @@ tr:hover {
     width: 100%;
 }
 
-.company-table thead {
-    /* Keeps header always visible */
-}
-
 .company-table tbody {
-    max-height: 400px; /* Set your preferred scrollable height */
+    max-height: 480px; 
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -177,7 +173,7 @@ tr:hover {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
-    width: 180px; /* Adjust as needed for your columns */
+    width: 180px; 
     box-sizing: border-box;
     word-break: break-word;
 }
