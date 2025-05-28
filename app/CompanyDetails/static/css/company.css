@@ -138,26 +138,38 @@ tr:hover {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 10px;
-    margin-bottom: 10px;
-    max-height: 580px;      /* Set your preferred height */
+    margin-top: 20px;
+    margin-bottom: 20px;
     position: relative;
-    overflow-y: auto;       /* Enable vertical scroll */
-    overflow-x: auto;       /* Optional: enable horizontal scroll if needed */
+    overflow-x: auto;
 }
 
 .company-table {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
     margin-top: 20px;
     margin-bottom: 20px;
-    max-height: calc(100vh - 250px);
-    position: relative;
     width: 100%;
     border-collapse: collapse;
     color: #333;
+    table-layout: fixed;
+}
+
+.company-table thead,
+.company-table tbody {
+    display: block;
+    width: 100%;
+}
+
+.company-table thead {
+    /* Keeps header always visible */
+}
+
+.company-table tbody {
+    max-height: 400px; /* Set your preferred scrollable height */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .company-table th,
@@ -165,11 +177,17 @@ tr:hover {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
+    width: 180px; /* Adjust as needed for your columns */
+    box-sizing: border-box;
+    word-break: break-word;
 }
 
 .company-table th {
     background-color: #f5f5f5;
     font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .company-table tr:hover {
