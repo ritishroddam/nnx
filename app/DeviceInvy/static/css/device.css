@@ -350,7 +350,7 @@ tr:hover {
 }
 
 .device-table tbody {
-    max-height: 400px;   /* Set your preferred height */
+    max-height: 500px;   /* Set your preferred height */
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -362,6 +362,11 @@ tr:hover {
     border-bottom: 1px solid #eee;
     box-sizing: border-box;
     word-break: break-word;
+}
+
+.device-table tr{
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 /* Set explicit widths for each column (adjust as needed for your columns) */
