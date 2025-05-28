@@ -172,10 +172,23 @@ tr:hover {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
-    width: 180px; 
     box-sizing: border-box;
     word-break: break-word;
 }
+
+/* Set explicit widths for each column */
+.company-table th:nth-child(1), .company-table td:nth-child(1) { width: 140px; }
+.company-table th:nth-child(2), .company-table td:nth-child(2) { width: 120px; }
+.company-table th:nth-child(3), .company-table td:nth-child(3) { width: 200px; }
+.company-table th:nth-child(4), .company-table td:nth-child(4) { width: 130px; }
+.company-table th:nth-child(5), .company-table td:nth-child(5) { width: 180px; }
+.company-table th:nth-child(6), .company-table td:nth-child(6) { width: 100px; }
+.company-table th:nth-child(7), .company-table td:nth-child(7) { width: 120px; }
+.company-table th:nth-child(8), .company-table td:nth-child(8) { width: 120px; }
+.company-table th:nth-child(9), .company-table td:nth-child(9) { width: 120px; }
+.company-table th:nth-child(10), .company-table td:nth-child(10) { width: 140px; }
+.company-table th:nth-child(11), .company-table td:nth-child(11) { width: 120px; }
+.company-table th:nth-child(12), .company-table td:nth-child(12) { width: 100px; }
 
 .company-table th {
     background-color: #f5f5f5;
