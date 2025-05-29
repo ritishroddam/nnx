@@ -12,6 +12,23 @@ from app.utils import roles_required, get_filtered_results # type: ignore
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
+def getImeis():
+    claims = get_jwt()
+    user_roles = claims.get('roles', [])
+    userID = claims.get('user_id')
+    userCompany = claims.get('company')
+    vehicle_inventory = db["vehicle_inventory"]
+
+    if 'admin' in user_roles:
+        return list((vehicle_inventory.find({},{"IMEI": 1, "_id": 0})).distinct("IMEI"))
+    elif 'user' in user_roles:
+        return list((vehicle_inventory.find({
+            'CompanyName': userCompany,
+            'AssignedUsers': {'$in': [userID]}
+        },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
+    else:
+        return list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
+
 def get_alert_type(record):
     if record.get('source') == 'sos_logs':
         return "Panic Alert"
@@ -73,21 +90,9 @@ def alert_card_endpoint(alert_type):
                 if vehicle:
                     imei = vehicle["IMEI"]
             else:
-                claims = get_jwt()
-                user_roles = claims.get('roles', [])
-                userID = claims.get('user_id')
-                userCompany = claims.get('company')
-                vehicle_inventory = db["vehicle_inventory"]
-
-                if 'admin' in user_roles:
-                    imeis = list((vehicle_inventory.find({},{"IMEI": 1, "_id": 0})).distinct("IMEI"))
-                elif 'user' in user_roles:
-                    imeis = list((vehicle_inventory.find({
-                        'CompanyName': userCompany,
-                        'AssignedUsers': {'$in': [userID]}
-                    },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
-                else:
-                    imeis = list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
+                imeis = getImeis()
+                if not imeis:
+                    return jsonify({"success": False, "message": "No vehicles found for the user"}), 404
 
             base_projection = {
                 "date_time": 1,
@@ -302,9 +307,14 @@ def notification_alerts():
     acknowledged_ids = set(
         ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
     )
+    
+    imeis = getImeis()
 
+    if not imeis:
+        return
     # Panic Alerts
     panic_alerts = list(db['sos_logs'].find({
+        "imei": {"$in": imeis},
         "date_time": {"$gte": start_of_day, "$lte": end_of_day},
         "latitude": {"$exists": True, "$ne": None, "$ne": ""},
         "longitude": {"$exists": True, "$ne": None, "$ne": ""}
@@ -312,6 +322,7 @@ def notification_alerts():
 
     # Speeding Alerts
     speeding_alerts = list(db['atlanta'].find({
+        "imei": {"$in": imeis},
         "date_time": {"$gte": start_of_day, "$lte": end_of_day},
         "gps": "A",
         "latitude": {"$exists": True, "$ne": None, "$ne": ""},
@@ -321,6 +332,7 @@ def notification_alerts():
 
     # Main Power Discontinue Alerts
     main_power_alerts = list(db['atlanta'].find({
+        "imei": {"$in": imeis},
         "date_time": {"$gte": start_of_day, "$lte": end_of_day},
         "gps": "A",
         "latitude": {"$exists": True, "$ne": None, "$ne": ""},
@@ -330,13 +342,18 @@ def notification_alerts():
 
     def enrich(alerts, alert_type):
         enriched = []
+        vehicles = db['vehicle_inventory'].find(
+            {"IMEI": {"$in": imeis}},
+            {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
+        )
+        
+        vehicle_map = {vehicle["IMEI"]: vehicle for vehicle in vehicles}
+        
         for alert in alerts:
             if str(alert["_id"]) in acknowledged_ids:
                 continue
-            vehicle = db['vehicle_inventory'].find_one(
-                {"IMEI": alert.get("imei")},
-                {"LicensePlateNumber": 1, "_id": 0}
-            )
+            vehicle = vehicle_map.get(alert["imei"])
+            
             enriched.append({
                 "id": str(alert["_id"]),
                 "type": alert_type,
