@@ -394,18 +394,15 @@ async function initMap() {
 
   const darkMode = document.body.classList.contains("dark-mode");
 
-  // const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
-  const mapId = "f32dd48f00948a56c802fc00"
+  const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
   liveMaps = new Map(document.getElementById("live-map"), {
     zoom: 8,
     center: { lat: 12.9716, lng: 77.5946 },
     mapId: mapId,
-    tilt: 67,
-    heading: 0,
     gestureHandling: "greedy",
     zoomControl: true,
-    mapTypeControl: true, // Disable default map type buttons
+    mapTypeControl: false, // Disable default map type buttons
     clickableIcons: false, // Disable POI icons
     zoomControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
