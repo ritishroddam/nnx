@@ -401,6 +401,8 @@ async function initMap() {
     zoom: 8,
     center: { lat: 12.9716, lng: 77.5946 },
     mapId: mapId,
+    tilt: 67,
+    heading: 0,
     gestureHandling: "greedy",
     zoomControl: true,
     mapTypeControl: false, // Disable default map type buttons
