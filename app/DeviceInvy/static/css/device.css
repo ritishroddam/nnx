@@ -345,7 +345,6 @@ tr:hover {
 
 .device-table thead,
 .device-table tbody {
-    display: block;
     width: 100%;
 }
 
