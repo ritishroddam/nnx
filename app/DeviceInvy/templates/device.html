@@ -163,14 +163,18 @@ Device Inventory
         <span class="close-btn" id="closeUploadBtn">&times;</span>
         <form id="uploadForm" action="{{ url_for('DeviceInvy.upload_file')}}" method="post" enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <input type="file" name="file" accept=".xls,.xlsx" required />
-          <button type="submit" class="btn">Upload Excel</button>
-          <a href="{{ url_for('DeviceInvy.download_template')}}" class="btn">Download Template</a>
+          <div class="upload-form-group">
+            <input type="file" name="file" accept=".xls,.xlsx" required />
+            <button type="submit" class="btn">Upload Excel</button>
+            <a href="{{ url_for('DeviceInvy.download_template')}}" class="btn">Download Template</a>
+          </div>
           <div class="preloader"></div>
         </form>
-        <button type="button" id="cancelUploadBtn" class="btn danger">
-          Cancel
-        </button>
+        <div class="button-container">
+          <button type="button" id="cancelUploadBtn" class="btn danger">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
 

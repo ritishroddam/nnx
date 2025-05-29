@@ -285,7 +285,7 @@ tr:hover {
     transition: box-shadow 0.2s;
     font-family: 'Segoe UI', Arial, sans-serif;
     margin-top: 100px;
-    margin-left: 350px;
+    margin-left: 250px;
 }
 
 @media (max-width: 600px) {
@@ -372,5 +372,54 @@ tr:hover {
     border-bottom: 1px solid #eee;
     box-sizing: border-box;
     word-break: break-word;
+}
+
+.upload-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+  align-items: stretch;
+}
+
+.upload-form-group input[type="file"] {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+.upload-form-group .btn,
+.upload-form-group a.btn {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 500px) {
+  .upload-form-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .upload-form-group .btn,
+  .upload-form-group a.btn {
+    width: auto;
+  }
+}
+
+#uploadBox .modal-content {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 32px 32px 26px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#uploadBox .button-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
 }
 
