@@ -106,8 +106,12 @@ def alert_card_endpoint(alert_type):
                     "latitude": {"$exists": True, "$ne": None, "$ne": ""},
                     "longitude": {"$exists": True, "$ne": None, "$ne": ""}
                 }
-                if imei:
-                    panic_query["imei"] = imei
+                if vehicle_number:
+                    if imei:
+                        query["imei"] = imei
+                else:
+                    if imeis:
+                        query["imei"] = {"$in": imeis}
                 
                 count = db['sos_logs'].count_documents(panic_query)
                 
