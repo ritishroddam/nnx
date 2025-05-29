@@ -319,8 +319,8 @@ tr:hover {
 
 .close-btn {
   position: absolute;
-  top: 14px;
-  right: 18px;
+  top: 5px;
+  right: 10px;
   font-size: 1.7rem;
   cursor: pointer;
   color: #aaa;
@@ -391,6 +391,7 @@ tr:hover {
   border-radius: 5px;
   border: 1px solid #ccc;
   background: #fafafa;
+  margin-top: 22px;
 }
 
 .upload-form-group .btn,
