@@ -394,12 +394,15 @@ async function initMap() {
 
   const darkMode = document.body.classList.contains("dark-mode");
 
-  const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+  // const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+  const mapId = "satellite"
 
   liveMaps = new Map(document.getElementById("live-map"), {
     zoom: 8,
     center: { lat: 12.9716, lng: 77.5946 },
     mapId: mapId,
+    tilt: 67,
+    heading: 0,
     gestureHandling: "greedy",
     zoomControl: true,
     mapTypeControl: false, // Disable default map type buttons
