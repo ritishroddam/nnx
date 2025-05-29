@@ -7,23 +7,23 @@ document.getElementById("DateIn").addEventListener("change", function () {
     .split("T")[0];
 });
 
-// Show modal
+// Show manual entry modal
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").style.display = "block";
+  document.getElementById("manualEntryModal").classList.remove("hidden");
 });
 
-// Close modal - shouldn't affect table visibility
-document.querySelector(".close-btn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").style.display = "none";
+// Close manual modal with X button
+document.querySelector("#manualEntryModal .close-btn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").classList.add("hidden");
 });
 
-// Close modal with Cancel button
+// Close manual modal with Cancel button
 document.getElementById("cancelBtn").addEventListener("click", function () {
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("manualForm").reset();
 });
 
-// Close modal when clicking outside
+// Close manual modal when clicking outside
 window.addEventListener("click", function(event) {
   if (event.target === document.getElementById("manualEntryModal")) {
     document.getElementById("manualEntryModal").classList.add("hidden");
