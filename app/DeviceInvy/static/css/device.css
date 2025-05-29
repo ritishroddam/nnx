@@ -285,7 +285,7 @@ tr:hover {
     transition: box-shadow 0.2s;
     font-family: 'Segoe UI', Arial, sans-serif;
     margin-top: 100px;
-    margin-left: 150px;
+    margin-left: 100px;
 }
 
 @media (max-width: 600px) {
@@ -375,7 +375,8 @@ tr:hover {
 }
 
 #uploadBox{
-  background: transparent;
+  background: blur(5px);
+  position: fixed;
 }
 
 .upload-form-group {
