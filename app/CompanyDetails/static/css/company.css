@@ -223,55 +223,33 @@ tr:hover {
 }
 
 /* --- Modal/Popup Styling (match DeviceInvy) --- */
+/* Modal overlay */
 .company-modal {
   display: flex;
   align-items: center;
   justify-content: center;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(5px);
   z-index: 1000;
 }
-
 .company-modal.hidden {
   display: none;
 }
-
 .company-modal-content {
-  background-color: #fff;
-  color: #222;
+  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.18), 0 1.5px 6px rgba(44, 62, 80, 0.08);
+  box-shadow: 0 4px 24px rgba(44,62,80,0.18), 0 1.5px 6px rgba(44,62,80,0.08);
   padding: 32px 32px 26px 28px;
   width: 100%;
-  max-width: 600px;
-  max-height: 100vh;
-  overflow-y: auto;
+  max-width: 500px;
   position: relative;
-  transition: box-shadow 0.2s;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  margin-top: 100px;
-  margin-left: 0;
-}
-
-@media (max-width: 600px) {
-  .company-modal-content {
-    padding: 18px 6px 16px 6px;
-    max-width: 98vw;
-    max-height: 98vh;
-  }
-}
-
-.company-modal-content .button-container {
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 24px;
+  flex-direction: column;
+  align-items: stretch;
 }
-
 .company-close-btn {
   position: absolute;
   top: 14px;
@@ -282,9 +260,26 @@ tr:hover {
   transition: color 0.2s;
   z-index: 2;
 }
-
 .company-close-btn:hover {
   color: #222;
+}
+.upload-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+  align-items: stretch;
+}
+@media (min-width: 500px) {
+  .upload-form-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .upload-form-group .btn,
+  .upload-form-group a.btn {
+    width: auto;
+  }
 }
 
 .form-container {

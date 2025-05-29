@@ -88,15 +88,22 @@ Company Details
 <!-- Upload Button -->
 <button id="uploadBtn" class="btn mb-4">Upload</button>
 
-<!-- Hidden Upload Form Container -->
-<div id="uploadFormContainer" class="hidden">
-  <form id="uploadForm" action="{{ url_for('CompanyDetails.upload_customers') }}" method="post"
-    enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <input type="file" name="file" accept=".xls,.xlsx" required />
-    <button type="submit" class="btn">Upload Excel</button>
-    <a href="{{ url_for('CompanyDetails.download_template') }}" class="btn">Download Template</a>
-  </form>
+<!-- Upload Modal Popup -->
+<div id="uploadModal" class="company-modal hidden">
+  <div class="company-modal-content">
+    <span class="company-close-btn" id="closeUploadModal">&times;</span>
+    <form id="uploadForm" action="{{ url_for('CompanyDetails.upload_customers') }}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="upload-form-group">
+        <input type="file" name="file" accept=".xls,.xlsx" required />
+        <button type="submit" class="btn">Upload Excel</button>
+        <a href="{{ url_for('CompanyDetails.download_template') }}" class="btn">Download Template</a>
+      </div>
+    </form>
+    <div class="button-container" style="justify-content: flex-end;">
+      <button type="button" id="cancelUploadBtn" class="btn danger">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <div class="company-table-container">

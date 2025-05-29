@@ -129,3 +129,23 @@ function deleteCustomer(customerId) {
 function cancelEdit() {
   location.reload(); // Reload page to reset changes
 }
+
+// Show upload modal
+document.getElementById("uploadBtn").addEventListener("click", function() {
+  document.getElementById("uploadModal").classList.remove("hidden");
+});
+// Close modal with X
+document.getElementById("closeUploadModal").addEventListener("click", function() {
+  document.getElementById("uploadModal").classList.add("hidden");
+});
+// Close modal with Cancel
+document.getElementById("cancelUploadBtn").addEventListener("click", function() {
+  document.getElementById("uploadModal").classList.add("hidden");
+});
+// Close modal when clicking outside the content
+window.addEventListener("click", function(event) {
+  const modal = document.getElementById("uploadModal");
+  if (event.target === modal) {
+    modal.classList.add("hidden");
+  }
+});
