@@ -166,10 +166,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.success) {
         countSpan.textContent = data.count;
         list.innerHTML = "";
-        if (data.alerts.length === 0) {
+        // Only show Panic Alert and Main Power Discontinue Alert
+        const filteredAlerts = data.alerts.filter(
+          (alert) =>
+            alert.type === "Panic Alert" ||
+            alert.type === "Main Power Discontinue Alert"
+        );
+        if (filteredAlerts.length === 0) {
           list.innerHTML = "<li>No new alerts</li>";
         } else {
-          data.alerts.forEach((alert) => {
+          filteredAlerts.forEach((alert) => {
             const li = document.createElement("li");
             li.innerHTML = `<strong>${alert.type}</strong> - ${alert.vehicle} <br><small>${new Date(
               alert.date_time
