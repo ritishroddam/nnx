@@ -14,17 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let allAlerts = [];
   let currentPage = 1;
 
-  const socket = io({
-    transports: ["websocket"],
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-  });
 
-  socket.on("connect", () => {
-    console.log("Connected to WebSocket server");
-    socket.emit("join_alerts");
-  });
+  socket.emit("join_alerts");
 
   socket.on("new_alert", (data) => {
     console.log("New alert received:", data);

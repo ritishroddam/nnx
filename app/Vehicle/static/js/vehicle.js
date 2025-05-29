@@ -25,17 +25,7 @@ var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
 
-const socket = io(CONFIG.SOCKET_SERVER_URL, {
-  transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
-});
-
-socket.on("connect", () => {
-  console.log("Connected to socket server");
-
+document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
 
   if (companyName != "None") {
@@ -74,7 +64,6 @@ socket.on("vehicle_update", async function (data) {
     updateVehicleCard(updatedData);
     if(data.sos === "1") {
       triggerSOS(data.imei, markers[data.imei]);
-      displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
     }
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);

@@ -1,14 +1,6 @@
 window.onload =  initMap;
 
-const socket = io("https://cordonnx.com:5000", {
-  transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
-});
-
-socket.on("connect", () => {
+document.addEventListener("DOMContentLoaded", async function () {
   console.log("Connected to the socket server");
   const licensePlateNumber = window.licensePlateNumber || null;
   console.log(licensePlateNumber);
