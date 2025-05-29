@@ -7,41 +7,51 @@ document.getElementById("DateIn").addEventListener("change", function () {
     .split("T")[0];
 });
 
+function hideAllModals() {
+  document.getElementById("manualEntryModal").classList.add("hidden");
+  document.getElementById("uploadBox").classList.add("hidden");
+}
+
 // Show manual entry modal
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
+  hideAllModals();
   document.getElementById("manualEntryModal").classList.remove("hidden");
 });
 
 // Close manual modal with X button
 document.querySelector("#manualEntryModal .close-btn").addEventListener("click", function() {
-  document.getElementById("manualEntryModal").classList.add("hidden");
+  hideAllModals();
 });
 
 // Close manual modal with Cancel button
 document.getElementById("cancelBtn").addEventListener("click", function () {
-  document.getElementById("manualEntryModal").classList.add("hidden");
+  hideAllModals();
   document.getElementById("manualForm").reset();
 });
 
 // Close manual modal when clicking outside
 window.addEventListener("click", function(event) {
   if (event.target === document.getElementById("manualEntryModal")) {
-    document.getElementById("manualEntryModal").classList.add("hidden");
+    hideAllModals();
+  }
+  if (event.target === document.getElementById("uploadBox")) {
+    hideAllModals();
   }
 });
 
 document.getElementById("uploadBtn").addEventListener("click", function () {
+  hideAllModals();
   document.getElementById("uploadBox").classList.remove("hidden");
 });
 
 // Close modal with X button
 document.getElementById("closeUploadBtn").addEventListener("click", function () {
-  document.getElementById("uploadBox").classList.add("hidden");
+  hideAllModals();
 });
 
 // Close modal with Cancel button
 document.getElementById("cancelUploadBtn").addEventListener("click", function () {
-  document.getElementById("uploadBox").classList.add("hidden");
+  hideAllModals();
 });
 
 // Close modal when clicking outside the modal content

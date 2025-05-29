@@ -154,7 +154,11 @@ Device Inventory
       </form>
     </div>
 
-    <div id="uploadBox" class="modal hidden">
+    <div id="errorBox" class="error-box hidden"></div>
+   
+  </div>
+
+   <div id="uploadBox" class="modal hidden">
       <div class="modal-content">
         <span class="close-btn" id="closeUploadBtn">&times;</span>
         <form id="uploadForm" action="{{ url_for('DeviceInvy.upload_file')}}" method="post" enctype="multipart/form-data">
@@ -169,10 +173,6 @@ Device Inventory
         </button>
       </div>
     </div>
-
-    <div id="errorBox" class="error-box hidden"></div>
-   
-  </div>
 
 </section>
 {% endblock %}
