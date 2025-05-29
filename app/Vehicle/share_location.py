@@ -54,7 +54,7 @@ def api_share_location():
     link = url_for('ShareLocation.view_share_location', licensePlateNumber = licensePlateNumber, token=token, _external=True)
     return jsonify({"link": link})
 
-@share_location_bp.route('/share-location/<licensePlateNumber>/<token>')
+@share_location_bp.route('/<licensePlateNumber>/<token>')
 def view_share_location(licensePlateNumber, token):
     info = links_collection.find_one({"token": token})
     now = datetime.now(timezone.utc)  # Make now timezone-aware (UTC)
