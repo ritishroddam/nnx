@@ -285,7 +285,7 @@ tr:hover {
     transition: box-shadow 0.2s;
     font-family: 'Segoe UI', Arial, sans-serif;
     margin-top: 100px;
-    margin-left: 450px;
+    margin-left: 350px;
 }
 
 @media (max-width: 600px) {
