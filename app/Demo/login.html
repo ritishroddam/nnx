@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page with Globe</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        background-color: #000; /* Change this to transparent if you want */
+      }
+
+      #background-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("static/uploads/black.pn") no-repeat center center;
+        background-size: cover;
+        z-index: 0;
+      }
+
+      #globe-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 150px;
+        height: 150px;
+        transform-origin: center;
+        z-index: 1;
+        opacity: 0;
+        transition: all 6s ease-out;
+        border-radius: 50%; /* Perfect circle */
+        background-color: #000000; /* Set the background color to black */
+      }
+
+      .preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgb(255, 255, 255);
+        border-radius: 50%;
+        border-top: 5px solid #075aeb;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .login-container {
+        display: none;
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transition: opacity 2s ease-in; /* Adjust timing as needed */
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 50px;
+        border-radius: 10px;
+        display: flex;
+        z-index: 10;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: white;
+      }
+      .login-container.show {
+        display: flex;
+        opacity: 1;
+      }
+
+      .logo-container {
+        margin-right: 20px;
+      }
+
+      .company-logo {
+        width: 150px;
+        height: auto;
+      }
+
+      .login-form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      input {
+        margin: 10px 0;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #fullscreen-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        z-index: 1000;
+        font-size: 20px;
+      }
+
+      #fullscreen-button i {
+        color: #fff;
+        font-size: 24px;
+      }
+      #fullscreen-button:hover {
+        background-color: #0056b3;
+      }
+      /* Adjust the keyframes for bottom-left to center movement */
+      @keyframes globeMove {
+        from {
+          bottom: 0;
+          left: 0;
+          width: 150px;
+          height: 150px;
+          opacity: 0;
+        }
+        to {
+          bottom: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 500px;
+          height: 500px;
+          opacity: 1;
+        }
+      }
+      #map-container {
+        display: none; /* Initially hidden */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10;
+      }
+      .hidden {
+        display: none;
+      }
+
+      /* Welcome box styling */
+      #welcome-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -130%); /* Center the box */
+        background-color: white;
+        padding: 15px;
+        width: 500px; /* Fix the width of the box */
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        z-index: 999; /* Ensure it stays on top */
+        display: none; /* Hidden initially */
+        box-sizing: border-box; /* Include padding in the width */
+      }
+
+      /* Styling for the company name */
+      #company-name {
+        color: blue;
+        font-size: 18px;
+        margin-bottom: 8px; /* Space between company name and address */
+        word-wrap: break-word; /* Ensure long text wraps inside the box */
+      }
+
+      /* Styling for the company address */
+      #company-address {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 8px; /* Space between address and image */
+        word-wrap: break-word; /* Ensure long text wraps inside the box */
+      }
+
+      /* Styling for the company image */
+      #company-image {
+        max-width: 50%; /* Set image width to 100% of the container */
+        max-height: 50%; /* Maintain aspect ratio */
+        border-radius: 8px;
+        margin: 0 auto; /* Center the image */
+        display: block; /* Image takes up full line and stays centered */
+        margin-top: 5px; /* Space between image and address */
+        margin-bottom: 5px;
+      }
+      /* Styling for the Get Started Button */
+      #get-started-btn {
+        background-color: #4caf50; /* Green background */
+        color: white; /* White text */
+        border: none; /* Remove borders */
+        border-radius: 5px; /* Rounded corners */
+        padding: 10px 15px; /* Padding inside the button */
+        font-size: 14px; /* Font size */
+        cursor: pointer; /* Pointer cursor on hover */
+        margin-top: 10px; /* Space between image and button */
+        display: inline-block;
+      }
+
+      #get-started-btn:hover {
+        background-color: #45a049; /* Darker green on hover */
+      }
+      .password-container {
+        position: relative;
+        width: 100%;
+        color: #333;
+      }
+
+      .password-container i {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #333;
+        cursor: pointer; /* Add this to make the cursor a pointing hand */
+      }
+    </style>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPEMAElTxMzur0DK-Mh3fPUVmdQVBJu8A"
+    ></script>
+  </head>
+  <body>
+    <div class="preloader">
+      <div class="spinner"></div>
+    </div>
+    <!-- Fixed night sky background -->
+    <div id="globe-container"></div>
+    <!-- Animated globe -->
+    <button id="fullscreen-button"><i class="fas fa-expand"></i></button>
+    <div class="login-container">
+      <div class="logo-container">
+        <!-- Space for your company logo -->
+        <img
+          src="../static/uploads/new.png"
+          alt="Company Logo"
+          class="company-logo"
+        />
+      </div>
+      <div class="login-form">
+        <h2>Sign In</h2>
+        <form id="loginForm" action="/login" method="POST">
+          <input type="text" name="username" placeholder="Username" required />
+
+          <div class="password-container">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+            <i class="fa-solid fa-eye" id="togglePassword"></i>
+          </div>
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </div>
+    <div id="map-container"></div>
+    <div id="welcome-box" class="hidden">
+      <h2 id="company-name"></h2>
+      <p id="company-address"></p>
+      <img
+        id="company-image"
+        src="default_image.png"
+        alt="Company Image"
+        style="max-width: 200px; height: auto"
+      />
+      <button id="get-started-btn">Let's Get Started</button>
+    </div>
+    <script src="https://unpkg.com/globe.gl"></script>
+    <script>
+      window.addEventListener("load", () => {
+        const preloader = document.querySelector(".preloader");
+        const globeContainer = document.getElementById("globe-container");
+        const loginContainer = document.querySelector(".login-container");
+
+        const globe = Globe()(globeContainer)
+          .globeImageUrl(
+            "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+          )
+          .backgroundImageUrl("static/uploads/black.png")
+          .bumpImageUrl(
+            "//unpkg.com/three-globe/example/img/earth-topology.png"
+          )
+          .pointOfView({
+            lat: 12.96012189242263,
+            lng: 77.57498142420876,
+            altitude: 1.5,
+          })
+          .showAtmosphere(true)
+          .atmosphereAltitude(0.075)
+          .width(1200)
+          .height(1200);
+
+        globe.controls().autoRotate = true;
+        globe.controls().autoRotateSpeed = 0.5;
+
+        // Hide preloader and start animations after load
+        setTimeout(() => {
+          preloader.style.display = "none";
+          globeContainer.style.left = "50%";
+          globeContainer.style.bottom = "25%";
+          globeContainer.style.transform = "translate(-50%, -50%)";
+          globeContainer.style.width = "500px";
+          globeContainer.style.height = "500px";
+          globeContainer.style.opacity = "1";
+        }, 3000);
+
+        setTimeout(() => {
+          loginContainer.classList.add("show");
+        }, 6000);
+
+        // Get the "Let's Get Started" button and the login form
+        const getStartedButton = document.getElementById("get-started-btn");
+        const loginForm = document.getElementById("loginForm");
+
+        // Add an event listener to the button to trigger form submission
+        getStartedButton.addEventListener("click", function () {
+          loginForm.submit();
+        });
+
+        // Fullscreen API logic
+        const fullscreenButton = document.getElementById("fullscreen-button");
+
+        fullscreenButton.addEventListener("click", () => {
+          const elem = document.documentElement;
+          if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch((err) => {
+              alert(
+                `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+              );
+            });
+          } else {
+            document.exitFullscreen();
+          }
+        });
+        // Login form event
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const response = await fetch("/login", {
+              method: "POST",
+              body: formData,
+              headers: {
+                "X-Requested-With": "XMLHttpRequest", // AJAX request
+              },
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const {
+                latitude,
+                longitude,
+                company_name,
+                address,
+                company_image,
+              } = data; // Fetch all required data from the response
+
+              // Save data to sessionStorage
+              sessionStorage.setItem("company_name", company_name || "Company");
+              sessionStorage.setItem(
+                "address",
+                address || "No address provided"
+              );
+              sessionStorage.setItem(
+                "company_image",
+                company_image || "static/uploads/default_image.png"
+              );
+
+              // Zoom the globe in (continue your code here...)
+              const zoomLevel = 0.05;
+              const zoomDuration = 2000;
+
+              globe.controls().autoRotate = false; // Stop auto-rotation during zoom
+
+              globe.pointOfView(
+                {
+                  lat: parseFloat(latitude),
+                  lng: parseFloat(longitude),
+                  altitude: zoomLevel,
+                },
+                zoomDuration
+              );
+
+              const globeContainer = document.getElementById("globe-container");
+              globeContainer.style.transition = "all 2s ease";
+              globeContainer.style.width = "100vw";
+              globeContainer.style.height = "100vh";
+              globeContainer.style.left = "80%";
+              globeContainer.style.transform = "translate(-50%, -50%) scale(2)";
+
+              // Display Google Maps after the zoom animation
+              setTimeout(() => {
+                globeContainer.style.display = "none";
+
+                const mapContainer = document.getElementById("map-container");
+                mapContainer.style.display = "block"; // Show the map container
+
+                // Determine time of day and set map style
+                const currentHour = new Date().getHours();
+                const isNight = currentHour >= 18 || currentHour < 6;
+                const mapStyles = isNight ? darkMapStyle : lightMapStyle;
+
+                // Initialize Google Maps with dynamic style
+                const mapOptions = {
+                  center: {
+                    lat: parseFloat(latitude),
+                    lng: parseFloat(longitude),
+                  },
+                  zoom: 15,
+                  styles: mapStyles,
+                  mapTypeId: google.maps.MapTypeId.ROADMAP, // Start with road map
+                };
+                const map = new google.maps.Map(mapContainer, mapOptions);
+
+                // Add a bouncing marker to the specific location
+                const marker = new google.maps.Marker({
+                  position: {
+                    lat: parseFloat(latitude),
+                    lng: parseFloat(longitude),
+                  },
+                  map: map,
+                  animation: google.maps.Animation.BOUNCE, // Bouncing animation
+                  title: "Your Location",
+                });
+
+                // After 3 seconds, transition to satellite view and zoom in more
+                setTimeout(() => {
+                  map.setMapTypeId(google.maps.MapTypeId.SATELLITE); // Switch to satellite view
+                  map.setZoom(18); // Zoom in closer
+                }, 3000); // Wait 3 seconds before changing view and zooming in
+
+                // Second zoom in after 6 seconds (3 seconds after the first zoom)
+                setTimeout(() => {
+                  map.setZoom(20); // Second zoom in, closer
+                }, 6000); // Adjust timing as necessary
+
+                setTimeout(() => {
+                  const welcomeBox = document.getElementById("welcome-box");
+                  const companyNameElement =
+                    document.getElementById("company-name");
+                  const companyAddressElement =
+                    document.getElementById("company-address");
+                  const companyImageElement =
+                    document.getElementById("company-image");
+
+                  // Fetch the necessary data from sessionStorage after login
+                  const company_name =
+                    sessionStorage.getItem("company_name") || "Company";
+                  const address =
+                    sessionStorage.getItem("address") || "No address provided";
+                  const company_image_url =
+                    sessionStorage.getItem("company_image");
+
+                  // Construct a valid image URL or use a default image if not available
+                  const validImageUrl =
+                    company_image_url && company_image_url !== "null"
+                      ? company_image_url
+                      : "static/uploads/default_image.png"; // Default image if not available
+
+                  // Debugging: log values to ensure they're correct
+                  // console.log("Company Name:", company_name);
+                  // console.log("Address:", address);
+                  // console.log("Image URL:", validImageUrl);
+
+                  // Construct the welcome message
+                  companyNameElement.innerHTML = `<span style="color: blue;">Welcome,</br>${company_name}!</span>`;
+
+                  // Set company address and image
+                  companyAddressElement.innerText = address; // Display the company address
+                  companyImageElement.src = validImageUrl; // Set company image
+
+                  // Adjust box position to move above the marker
+                  welcomeBox.style.bottom = "150px"; // Move the welcome box above the marker
+                  welcomeBox.classList.remove("hidden");
+                  welcomeBox.style.display = "block";
+                }, 3500); // Show the box 3.5 seconds after the marker is visible
+              }, zoomDuration + 500);
+            } else {
+              alert("Login failed");
+            }
+          });
+      });
+
+      // Define dark and light styles for the map
+      const darkMapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#212121" }] },
+        { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+        {
+          featureType: "administrative",
+          elementType: "geometry",
+          stylers: [{ color: "#757575" }],
+        },
+        {
+          featureType: "administrative.country",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9e9e9e" }],
+        },
+        {
+          featureType: "administrative.land_parcel",
+          stylers: [{ visibility: "off" }],
+        },
+        {
+          featureType: "administrative.locality",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#bdbdbd" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#757575" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "geometry",
+          stylers: [{ color: "#181818" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#616161" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.stroke",
+          stylers: [{ color: "#1b1b1b" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry.fill",
+          stylers: [{ color: "#2c2c2c" }],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#8a8a8a" }],
+        },
+        {
+          featureType: "road.arterial",
+          elementType: "geometry",
+          stylers: [{ color: "#373737" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [{ color: "#3c3c3c" }],
+        },
+        {
+          featureType: "road.highway.controlled_access",
+          elementType: "geometry",
+          stylers: [{ color: "#4e4e4e" }],
+        },
+        {
+          featureType: "road.local",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#616161" }],
+        },
+        {
+          featureType: "transit",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#757575" }],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry",
+          stylers: [{ color: "#000000" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#3d3d3d" }],
+        },
+      ];
+
+      const lightMapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+        { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#f5f5f5" }] },
+        {
+          featureType: "administrative.land_parcel",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#bdbdbd" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "geometry",
+          stylers: [{ color: "#eeeeee" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#757575" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "geometry",
+          stylers: [{ color: "#e5e5e5" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9e9e9e" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry",
+          stylers: [{ color: "#ffffff" }],
+        },
+        {
+          featureType: "road.arterial",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#757575" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [{ color: "#dadada" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#616161" }],
+        },
+        {
+          featureType: "transit",
+          elementType: "geometry",
+          stylers: [{ color: "#f2f2f2" }],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry",
+          stylers: [{ color: "#c9c9c9" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9e9e9e" }],
+        },
+      ];
+    </script>
+    <script>
+      const togglePassword = document.querySelector("#togglePassword");
+      const password = document.querySelector("#password");
+
+      togglePassword.addEventListener("click", function () {
+        // Toggle the type attribute
+        const type =
+          password.getAttribute("type") === "password" ? "text" : "password";
+        password.setAttribute("type", type);
+
+        // Toggle the eye slash icon
+        this.classList.toggle("fa-eye-slash");
+      });
+    </script>
+  </body>
+</html>

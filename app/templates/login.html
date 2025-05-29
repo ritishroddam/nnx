@@ -15,4 +15,75 @@
         <button type="submit" class="btn">Login</button>
     </form>
 </div>
+<div id="globe-container" style="width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:0;"></div>
+<div id="login-box" style="position:relative;z-index:2;">
+    <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
+        <input type="text" name="username" placeholder="Username" required /><br>
+        <input type="password" name="password" placeholder="Password" required /><br>
+        <button type="submit">Login</button>
+        <div id="login-error" style="color:red;margin-top:10px;"></div>
+    </form>
+</div>
+<div id="company-info" style="display:none;position:absolute;top:10%;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:20px;border-radius:10px;z-index:3;text-align:center;">
+    <h2 id="company-name"></h2>
+    <p id="company-address"></p>
+    <div id="map" style="width:400px;height:300px;margin:0 auto;"></div>
+</div>
+<script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+<script src="https://unpkg.com/globe.gl"></script>
+<script>
+let globe = Globe()
+    (document.getElementById('globe-container'))
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+    .showAtmosphere(true)
+    .atmosphereColor('#3a228a')
+    .atmosphereAltitude(0.25)
+    .width(window.innerWidth)
+    .height(window.innerHeight);
+
+globe.controls().autoRotate = true;
+globe.controls().autoRotateSpeed = 0.5;
+
+window.addEventListener('resize', () => {
+    globe.width(window.innerWidth);
+    globe.height(window.innerHeight);
+});
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const response = await fetch("{{ url_for('auth.login') }}", {
+        method: "POST",
+        body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+    const data = await response.json();
+    if (data.status === "success") {
+        // Animate globe to location
+        globe.pointOfView({ lat: data.latitude, lng: data.longitude, altitude: 1.2 }, 2000);
+        // Show company info
+        document.getElementById('company-name').innerText = data.company_name;
+        document.getElementById('company-address').innerText = data.company_address;
+        document.getElementById('company-info').style.display = 'block';
+        // Show Google Map
+        setTimeout(() => {
+            let map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: data.latitude, lng: data.longitude },
+                zoom: 15
+            });
+            new google.maps.Marker({
+                position: { lat: data.latitude, lng: data.longitude },
+                map: map,
+                title: data.company_name
+            });
+        }, 2000);
+        // Redirect after a short delay
+        setTimeout(() => {
+            window.location.href = data.dashboard_url;
+        }, 5000);
+    } else {
+        document.getElementById('login-error').innerText = data.message || "Login failed";
+    }
+});
+</script>
 {% endblock %}
