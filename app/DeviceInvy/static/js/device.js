@@ -31,18 +31,26 @@ window.addEventListener("click", function(event) {
 });
 
 document.getElementById("uploadBtn").addEventListener("click", function () {
-  document.getElementById("uploadBox").classList.toggle("hidden");
+  document.getElementById("uploadBox").classList.remove("hidden");
 });
 
-document.getElementById("cancelBtn").addEventListener("click", function () {
-  document.getElementById("manualEntryForm").classList.add("hidden");
+// Close modal with X button
+document.getElementById("closeUploadBtn").addEventListener("click", function () {
+  document.getElementById("uploadBox").classList.add("hidden");
 });
 
-document
-  .getElementById("cancelUploadBtn")
-  .addEventListener("click", function () {
-    document.getElementById("uploadBox").classList.add("hidden");
-  });
+// Close modal with Cancel button
+document.getElementById("cancelUploadBtn").addEventListener("click", function () {
+  document.getElementById("uploadBox").classList.add("hidden");
+});
+
+// Close modal when clicking outside the modal content
+window.addEventListener("click", function(event) {
+  const uploadBox = document.getElementById("uploadBox");
+  if (event.target === uploadBox) {
+    uploadBox.classList.add("hidden");
+  }
+});
 
 document.getElementById("uploadForm").addEventListener("submit", function () {
   document.querySelector(".preloader").style.display = "block";
