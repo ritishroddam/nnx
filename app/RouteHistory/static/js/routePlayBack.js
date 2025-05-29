@@ -405,7 +405,7 @@ async function initMap() {
     heading: 0,
     gestureHandling: "greedy",
     zoomControl: true,
-    mapTypeControl: false, // Disable default map type buttons
+    mapTypeControl: true, // Disable default map type buttons
     clickableIcons: false, // Disable POI icons
     zoomControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
