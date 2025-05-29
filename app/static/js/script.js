@@ -163,14 +163,14 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await res.json();
       if (data.success) {
-        countSpan.textContent = data.count;
-        list.innerHTML = "";
         // Only show Panic Alert and Main Power Discontinue Alert
         const filteredAlerts = data.alerts.filter(
           (alert) =>
             alert.type === "Panic Alert" ||
             alert.type === "Main Power Discontinue Alert"
         );
+        countSpan.textContent = filteredAlerts.length; // <-- Fix here
+        list.innerHTML = "";
         if (filteredAlerts.length === 0) {
           list.innerHTML = "<li>No new alerts</li>";
         } else {
