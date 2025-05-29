@@ -375,8 +375,8 @@ tr:hover {
 }
 
 #uploadBox{
-  background-color: transparent;
-  filter: blur(5px);
+  backdrop-filter: blur(5px);
+  position: fixed;
 }
 
 .upload-form-group {
