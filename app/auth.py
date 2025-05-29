@@ -10,29 +10,33 @@ from .utils import roles_required
 from app import db
 from datetime import datetime, timezone, timedelta
 import requests
-from config import config
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # Check if already logged in (optional - remove if you want to force new login)
     try:
         verify_jwt_in_request(optional=True)
         current_user = get_jwt_identity()
         if current_user:
             return redirect(url_for('Vehicle.map'))
     except NoAuthorizationError:
+        # Handle expired or invalid tokens gracefully
         response = redirect(url_for('auth.login'))
         unset_jwt_cookies(response)
         unset_refresh_cookies(response)
         flash('Your session has expired. Please log in again.', 'warning')
         return response
     except JWTDecodeError:
+        # Handle invalid token format
         response = redirect(url_for('auth.login'))
         unset_jwt_cookies(response)
         unset_refresh_cookies(response)
         flash('Invalid session. Please log in again.', 'danger')
         return response
+    except NoAuthorizationError:
+        pass
 
     if request.method == 'GET':
         return render_template('login.html')
@@ -41,50 +45,29 @@ def login():
         password = request.form.get('password')
 
         if not username or not password:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'status': 'error', 'message': 'Username and password are required'}), 400
             flash('Username and password are required', 'danger')
             return redirect(url_for('auth.login'))
 
         user = User.find_by_username(username)
         if not user or not User.verify_password(user, password):
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
             flash('Invalid username or password', 'danger')
             return redirect(url_for('auth.login'))
-
-        company_name = ""
-        company_address = ""
-        lat, lng = None, None
-
-        if user.get('company') and user['company'] != 'none':
+        
+        if user['company'] != 'none':
             company = User.get_company_by_company_id(user['company'])
-            if company:
-                company_name = company.get("Company Name", "")
-                company_address = company.get("Company Address", "")
-                lat, lng = geocode_address(company_address)
-        if not lat or not lng:
-            lat, lng = 13.0207, 77.6478
+            print(f"Company: {company}")
+        else:
+            company = None
 
-        # AJAX: Return only company name and address
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({
-                'status': 'success',
-                'latitude': lat,
-                'longitude': lng,
-                'company_name': company_name,
-                'company_address': company_address,
-                'dashboard_url': url_for('Vehicle.map')  # or the correct dashboard for the user
-            })
-
-        # Normal login: set tokens/cookies and redirect as before
+        # Create both access and refresh tokens
         additional_claims = {
             'username': username,
             'user_id': str(user['_id']),
             'roles': str([user['role']]),
             'company_id': str(user['company']),
-            'company': str({'Company Name': company_name, 'Company Address': company_address}),
+            'company': str(company),
         }
+        
         access_token = create_access_token(
             identity=username,
             additional_claims=additional_claims
@@ -93,14 +76,18 @@ def login():
             identity=username,
             additional_claims=additional_claims
         )
+
         decoded_access_token = decode_token(access_token)
         decoded_refresh_token = decode_token(refresh_token)
+
         access_token_exp = decoded_access_token['exp']
         refresh_token_exp = decoded_refresh_token['exp']
         current_time = datetime.now(timezone.utc).timestamp()
+
         access_token_max_age = int(access_token_exp - current_time)
         refresh_token_max_age = int(refresh_token_exp - current_time)
 
+        # Wrap the rendered template in a Response object
         if user['role'] == 'sim':
             response = redirect(url_for('SimInvy.page'))
         elif user['role'] == 'device':
@@ -112,6 +99,7 @@ def login():
 
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
+
         return response
 
 @auth_bp.route('/api/login', methods=['POST'])
@@ -360,14 +348,3 @@ def logout():
 def unauthorized():
     flash('To access this page please login or login with an account that has access to the page', 'danger')
     return render_template('login.html'), 403
-
-def geocode_address(address):
-    api_key = config['development']().GMAPS_API_KEY  # Replace with your actual key
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
-    resp = requests.get(url)
-    if resp.status_code == 200:
-        data = resp.json()
-        if data['results']:
-            location = data['results'][0]['geometry']['location']
-            return location['lat'], location['lng']
-    return None, None
