@@ -49,11 +49,16 @@ def editDarkMode():
         "darkMode": darkMode,
     }
 
-    userConfiCollection.update_one(
+    result = userConfiCollection.update_one(
         {"userID": ObjectId(userID)},
         {"$set": userConfig},
         upsert=True
     )
+
+    if result.modified_count > 0 or result.upserted_id:
+        return jsonify({"message": "User configuration updated successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to update user configuration"}), 500
 
 @userConfigBlueprint.route('/editConfig', methods=['POST'])
 @jwt_required()
