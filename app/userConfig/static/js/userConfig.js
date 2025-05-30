@@ -1,21 +1,17 @@
 document.addEventListener("DOMContentLoaded", function() {
   // Selectize for alerts
 
-    $("alerts").selectize({
-        plugins: ['remove_button'],
-        create: false,
-        sortField: 'text',
-        placeholder: 'Select alert types...'
-    });
-
-  // Selectize for darkMode
-  var darkModeSelect = document.getElementById('darkMode');
-  if (darkModeSelect) {
-    Selectize(darkModeSelect, {
+  $("alerts").selectize({
+      plugins: ['remove_button'],
       create: false,
-      sortField: 'text'
-    });
-  }
+      sortField: 'text',
+      placeholder: 'Select alert types...'
+  });
+
+  $("alerts").selectize({
+    create: false,
+    sortField: 'text'
+  });
 
   var form = document.getElementById('userConfigForm');
   var saveBtn = document.getElementById('saveConfigBtn');
