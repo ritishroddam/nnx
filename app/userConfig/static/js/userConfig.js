@@ -1,14 +1,13 @@
 document.addEventListener("DOMContentLoaded", function() {
   // Selectize for alerts
-  var alertsSelect = document.getElementById('alerts');
-  if (alertsSelect) {
-    Selectize(alertsSelect, {
-      plugins: ['remove_button'],
-      create: false,
-      sortField: 'text',
-      placeholder: 'Select alert types...'
+
+    $("alerts").selectize({
+        plugins: ['remove_button'],
+        create: false,
+        sortField: 'text',
+        placeholder: 'Select alert types...'
     });
-  }
+
   // Selectize for darkMode
   var darkModeSelect = document.getElementById('darkMode');
   if (darkModeSelect) {
