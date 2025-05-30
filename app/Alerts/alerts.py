@@ -466,9 +466,12 @@ def notification_alerts():
     if not alert_types:
         return jsonify({"success": False, "message": "No alert types configured for the user"}), 404 
     
+    panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alerts")
+    main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
+    
     notifications = (
-        enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alert"), "Panic Alert") +
-        enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts"), "Main Power Discontinue Alert") 
+        enrich(panic_alerts, "Panic Alert") +
+        enrich(main_power_off_alerts, "Main Power Discontinue Alert") 
     )
     
     for alert_type in alert_types:
