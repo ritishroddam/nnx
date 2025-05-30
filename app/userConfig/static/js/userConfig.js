@@ -37,14 +37,14 @@ document.addEventListener("DOMContentLoaded", function() {
     .then(({status, body}) => {
       saveBtn.disabled = false;
       if (status === 200) {
-        displayFlashMessage("success", "Configuration updated successfully!");
+        displayFlashMessage("Configuration updated successfully!", "success");
       } else {
-        displayFlashMessage("error", "Failed to update configuration");
+        displayFlashMessage("Failed to update configuration", "danger");
       }
     })
     .catch(() => {
       saveBtn.disabled = false;
-      displayFlashMessage("error", "Failed to update configuration");
+      displayFlashMessage("Failed to update configuration", "danger");
     });
   });
 });
