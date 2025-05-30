@@ -11,6 +11,7 @@
 Sim Inventory
 {% endblock %}
 
+{% block block_container %}
 <div class="filter-container mb-4">
   <label for="statusFilter">Filter by Status:</label>
   <select id="statusFilter" onchange="filterSimsByStatus()">
@@ -22,70 +23,71 @@ Sim Inventory
   </select>
 </div>
 
-{% block block_container %}
-
-<button id="manualEntryBtn" class="btn success mb-4">
-  Add New SIM
-</button>
-
-<div id="manualEntryModal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close-modal">&times;</span>
-      <div id="manualEntryForm" class="hidden">
-        <form id="manualForm" action="{{ url_for('SimInvy.manual_entry') }}" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <div class="mb-4">
-            <label for="MobileNumber">Mobile Number</label>
-            <input type="text" name="MobileNumber" id="MobileNumber" required />
-            <div id="mobileError" class="error hidden">
-              Mobile Number must be 10 digits long.
-            </div>
-          </div>
-          <div class="mb-4">
-            <label for="SimNumber">SIM Number</label>
-            <input type="text" name="SimNumber" id="SimNumber" required />
-            <div id="simError" class="error hidden">
-              SIM Number must be 20 digits long.
-            </div>
-          </div>
-          <div class="mb-4">
-            <label for="DateIn">Date In</label>
-            <input type="date" name="DateIn" id="DateIn" required max="" />
-          </div>
-          <div class="mb-4">
-            <label for="DateOut">Date Out</label>
-            <input type="date" name="DateOut" id="DateOut" max="" />
-          </div>
-          <div class="mb-4">
-            <label for="Vendor">Vendor</label>
-            <input type="text" name="Vendor" id="Vendor" required />
-          </div>
-          <button type="submit" class="btn success">Submit</button>
-          <button type="button" id="cancelBtn" class="btn danger">
-            Cancel
-          </button>
-        </form>
-      </div>
-  </div>
-</div>  
-
-<button id="uploadBtn" class="btn mb-4">Upload</button>
-<button id="downloadExcelBtn" class="btn">Download Excel</button>
-
-<div id="uploadModal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close-modal">&times;</span>
-      <div id="uploadFormContainer" class="hidden">
-        <form id="uploadForm" action="{{ url_for('SimInvy.upload_file') }}" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <input type="file" name="file" accept=".xls,.xlsx" required />
-          <button type="submit" class="btn">Upload Excel</button>
-          <a href="{{ url_for('SimInvy.download_template') }}" class="btn">Download Template</a>
-          <div class="preloader"></div>
-        </form>
-      </div>
-  </div>  
+<!-- Action Buttons -->
+<div class="action-buttons">
+  <button id="manualEntryBtn" class="btn success mb-4">Add New SIM</button>
+  <button id="uploadBtn" class="btn mb-4">Upload</button>
+  <button id="downloadExcelBtn" class="btn">Download Excel</button>
 </div>
+
+<!-- Manual Entry Modal -->
+<div id="manualEntryModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h2>Add New SIM</h2>
+    <form id="manualForm" action="{{ url_for('SimInvy.manual_entry') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label for="MobileNumber">Mobile Number</label>
+        <input type="text" name="MobileNumber" id="MobileNumber" required />
+        <div id="mobileError" class="error hidden">Mobile Number must be 10 digits long.</div>
+      </div>
+      <div class="form-group">
+        <label for="SimNumber">SIM Number</label>
+        <input type="text" name="SimNumber" id="SimNumber" required />
+        <div id="simError" class="error hidden">SIM Number must be 20 digits long.</div>
+      </div>
+      <div class="form-group">
+        <label for="DateIn">Date In</label>
+        <input type="date" name="DateIn" id="DateIn" required max="" />
+      </div>
+      <div class="form-group">
+        <label for="DateOut">Date Out</label>
+        <input type="date" name="DateOut" id="DateOut" max="" />
+      </div>
+      <div class="form-group">
+        <label for="Vendor">Vendor</label>
+        <input type="text" name="Vendor" id="Vendor" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn success">Submit</button>
+        <button type="button" id="cancelBtn" class="btn danger">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h2>Upload SIM Data</h2>
+    <form id="uploadForm" action="{{ url_for('SimInvy.upload_file') }}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label for="file">Select Excel File:</label>
+        <input type="file" name="file" id="file" accept=".xls,.xlsx" required />
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn">Upload Excel</button>
+        <a href="{{ url_for('SimInvy.download_template') }}" class="btn">Download Template</a>
+      </div>
+      <div class="preloader"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Rest of your existing content (error box, flash messages, table) -->
 <div id="errorBox" class="error-box hidden"></div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}

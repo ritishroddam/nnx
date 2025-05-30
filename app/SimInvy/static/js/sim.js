@@ -33,12 +33,49 @@ document
     window.location.href = "/simInvy/download_excel";
   });
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const formattedToday = today.toISOString().split("T")[0];
   const dateInInput = document.getElementById("DateIn");
   const dateOutInput = document.getElementById("DateOut");
+
+  const manualEntryBtn = document.getElementById("manualEntryBtn");
+  const manualEntryModal = document.getElementById("manualEntryModal");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const uploadModal = document.getElementById("uploadModal");
+  const closeModalButtons = document.querySelectorAll(".close-modal");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  // Open Manual Entry Modal
+  manualEntryBtn.addEventListener("click", function() {
+    manualEntryModal.style.display = "block";
+    document.getElementById("MobileNumber").focus();
+  });
+
+  // Open Upload Modal
+  uploadBtn.addEventListener("click", function() {
+    uploadModal.style.display = "block";
+  });
+
+  // Close modals when clicking X
+  closeModalButtons.forEach(button => {
+    button.addEventListener("click", function() {
+      this.closest(".modal").style.display = "none";
+    });
+  });
+
+  // Close modals when clicking outside
+  window.addEventListener("click", function(event) {
+    if (event.target.classList.contains("modal")) {
+      event.target.style.display = "none";
+    }
+  });
+
+  // Close Manual Entry Modal with Cancel button
+  cancelBtn.addEventListener("click", function() {
+    manualEntryModal.style.display = "none";
+  });
 
   dateInInput.setAttribute("max", formattedToday);
   dateOutInput.setAttribute("max", formattedToday);

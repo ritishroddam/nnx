@@ -214,7 +214,7 @@ input#editStatusDate, input#editReactivationDate {
   display: block;
 }
 
-/* Modal styles */
+/* Modal Styles */
 .modal {
   display: none;
   position: fixed;
@@ -226,18 +226,14 @@ input#editStatusDate, input#editReactivationDate {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal.hidden {
-  display: none;
-}
-
 .modal-content {
   background-color: #fefefe;
   margin: 5% auto;
   padding: 20px;
   border: 1px solid #888;
   border-radius: 8px;
-  width: 80%;
-  max-width: 600px;
+  width: 90%;
+  max-width: 500px;
   position: relative;
 }
 
@@ -248,12 +244,35 @@ input#editStatusDate, input#editReactivationDate {
   font-weight: bold;
   cursor: pointer;
   position: absolute;
-  right: 20px;
-  top: 10px;
+  right: 15px;
+  top: 5px;
 }
 
 .close-modal:hover,
 .close-modal:focus {
   color: black;
   text-decoration: none;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
