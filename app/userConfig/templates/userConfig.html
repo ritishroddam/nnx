@@ -2,11 +2,11 @@
 
 {% block head %}
 <title>User Configuration</title>
-<link rel="stylesheet" href="{{ url_for('userConfig.static', filename='css/userConfig.css') }}">
-<script defer src="{{ url_for('userConfig.static', filename='js/userConfig.js') }}"></script>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
+
+<link rel="stylesheet" href="{{ url_for('userConfig.static', filename='css/userConfig.css') }}">
+<script defer src="{{ url_for('userConfig.static', filename='js/userConfig.js') }}"></script>
 {% endblock %}
 
 {% block h1 %}
