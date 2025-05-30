@@ -357,7 +357,7 @@ input[type="date"] {
 }
 
 /* Set explicit widths for each column */
-.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 140px; }
+.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 120px; }
 .sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 120px; }
 .sim-table th:nth-child(3), .sim-table td:nth-child(3) { width: 200px; }
 .sim-table th:nth-child(4), .sim-table td:nth-child(4) { width: 130px; }
