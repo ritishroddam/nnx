@@ -1,20 +1,30 @@
-document
-  .getElementById("manualEntryBtn")
-  .addEventListener("click", function () {
-    document.getElementById("manualEntryForm").classList.toggle("hidden");
-    document.getElementById("MobileNumber").focus();
-  });
-
-document.getElementById("cancelBtn").addEventListener("click", function () {
-  document.getElementById("manualEntryForm").classList.add("hidden");
+document.getElementById("manualEntryBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").classList.remove("hidden");
+  document.getElementById("MobileNumber").focus();
 });
 
-document.getElementById("uploadBtn").addEventListener("click", function () {
-  document.getElementById("uploadFormContainer").classList.toggle("hidden");
+document.getElementById("cancelBtn").addEventListener("click", function() {
+  document.getElementById("manualEntryModal").classList.add("hidden");
+});
+
+document.getElementById("uploadBtn").addEventListener("click", function() {
+  document.getElementById("uploadModal").classList.remove("hidden");
 });
 
 document.getElementById("uploadForm").addEventListener("submit", function () {
   document.querySelector(".preloader").style.display = "block";
+});
+
+document.querySelectorAll(".close-modal").forEach(closeBtn => {
+  closeBtn.addEventListener("click", function() {
+    this.closest(".modal").classList.add("hidden");
+  });
+});
+
+window.addEventListener("click", function(event) {
+  if (event.target.classList.contains("modal")) {
+    event.target.classList.add("hidden");
+  }
 });
 
 document
@@ -23,12 +33,49 @@ document
     window.location.href = "/simInvy/download_excel";
   });
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const formattedToday = today.toISOString().split("T")[0];
   const dateInInput = document.getElementById("DateIn");
   const dateOutInput = document.getElementById("DateOut");
+
+  const manualEntryBtn = document.getElementById("manualEntryBtn");
+  const manualEntryModal = document.getElementById("manualEntryModal");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const uploadModal = document.getElementById("uploadModal");
+  const closeModalButtons = document.querySelectorAll(".close-modal");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  // Open Manual Entry Modal
+  manualEntryBtn.addEventListener("click", function() {
+    manualEntryModal.style.display = "block";
+    document.getElementById("MobileNumber").focus();
+  });
+
+  // Open Upload Modal
+  uploadBtn.addEventListener("click", function() {
+    uploadModal.style.display = "block";
+  });
+
+  // Close modals when clicking X
+  closeModalButtons.forEach(button => {
+    button.addEventListener("click", function() {
+      this.closest(".modal").style.display = "none";
+    });
+  });
+
+  // Close modals when clicking outside
+  window.addEventListener("click", function(event) {
+    if (event.target.classList.contains("modal")) {
+      event.target.style.display = "none";
+    }
+  });
+
+  // Close Manual Entry Modal with Cancel button
+  cancelBtn.addEventListener("click", function() {
+    manualEntryModal.style.display = "none";
+  });
 
   dateInInput.setAttribute("max", formattedToday);
   dateOutInput.setAttribute("max", formattedToday);
@@ -276,35 +323,6 @@ function updateStatusFieldsVisibility(status, statusDateInput, reactivationDateI
     reactivationDateInput.style.display = 'none';
   }
 }
-
-// Helper function for date formatting
-// function formatDateForInput(dateStr) {
-//   if (!dateStr) return '';
-//   const parts = dateStr.split('-');
-//   if (parts.length === 3) {
-//     return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-//   }
-//   return dateStr;
-// }
-
-// function updateStatusFieldsVisibility(status, statusDateInput, reactivationDateInput) {
-//   if (status === 'SafeCustody' || status === 'Suspended') {
-//     statusDateInput.style.display = 'block';
-//     if (status === 'SafeCustody') {
-//       reactivationDateInput.style.display = 'block';
-//       // Calculate 90 days from now for reactivation date
-//       const today = new Date();
-//       const reactivationDate = new Date();
-//       reactivationDate.setDate(today.getDate() + 90);
-//       reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
-//     } else {
-//       reactivationDateInput.style.display = 'none';
-//     }
-//   } else {
-//     statusDateInput.style.display = 'none';
-//     reactivationDateInput.style.display = 'none';
-//   }
-// }
 
 function cancelEdit(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
