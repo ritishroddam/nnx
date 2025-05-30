@@ -1,14 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
   // Selectize for alerts
 
-  $("alerts").selectize({
+  $("#alerts").selectize({
       plugins: ['remove_button'],
       create: false,
       sortField: 'text',
       placeholder: 'Select alert types...'
   });
 
-  $("alerts").selectize({
+  $("#darkMode").selectize({
     create: false,
     sortField: 'text'
   });
