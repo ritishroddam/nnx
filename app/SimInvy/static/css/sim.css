@@ -345,6 +345,7 @@ input[type="date"] {
     max-height: 480px; 
     overflow-y: auto;
     overflow-x: hidden;
+    background: #f6f6f6;
 }
 
 .sim-table th,
