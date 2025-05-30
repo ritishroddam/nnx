@@ -96,4 +96,4 @@ def getCompanyLogo():
         io.BytesIO(companyLogo.read()),
         mimetype = companyLogo.content_type or 'image/png',
         download_name=companyLogo.filename or 'company_logo.png'
-    )      
+    )
