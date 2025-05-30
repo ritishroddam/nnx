@@ -235,6 +235,13 @@ function formatDateForInput(dateStr) {
 }
 
 function editSim(simId) {
+
+  const currentlyEditing = document.querySelector('tr.editing');
+  if (currentlyEditing) {
+    const editingId = currentlyEditing.getAttribute('data-id');
+    cancelEdit(editingId);
+  }
+
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
   // Store original values (columns 0-10)
@@ -296,7 +303,7 @@ function editSim(simId) {
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
   `;
 
-  row.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+  row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   // Add event listener for status change to handle SafeCustody/Suspended fields
   const statusSelect = row.cells[3].querySelector('#editStatus');
@@ -333,7 +340,8 @@ function updateStatusFieldsVisibility(status, statusDateInput, reactivationDateI
 function cancelEdit(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
-  row.classList.remove('editing');
+  if (row) {
+    row.classList.remove('editing');
 
   // Restore original values from stored attributes
   row.cells[0].innerText = row.getAttribute("data-original-mobile");
@@ -351,12 +359,14 @@ function cancelEdit(simId) {
   row.cells[11].innerHTML = `
     <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
   `;
+  }
 }
 
 function saveSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
-  row.classList.remove('editing');
+  if (row) {
+    row.classList.remove('editing');
 
   // Get updated data from input fields
   const updatedData = {
@@ -441,4 +451,4 @@ function saveSim(simId) {
       alert(error.message || "An error occurred. Please try again.");
     });
 }
-
+}
