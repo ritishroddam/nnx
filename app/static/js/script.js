@@ -184,34 +184,29 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       });
       const data = await res.json();
-      if (data.success) {
-        // Only show Panic Alert and Main Power Discontinue Alert
-        const filteredAlerts = data.alerts.filter(
-          (alert) =>
-            alert.type === "Panic Alert" ||
-            alert.type === "Main Power Discontinue Alert"
-        );
-        countSpan.textContent = filteredAlerts.length; // <-- Fix here
-        list.innerHTML = "";
-        if (filteredAlerts.length === 0) {
-          list.innerHTML = "<li>No new alerts</li>";
-        } else {
-          filteredAlerts.forEach((alert) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<strong>${alert.type}</strong> - ${alert.vehicle} <br><small>${new Date(
-              alert.date_time
-            ).toLocaleString()}</small>`;
-            li.dataset.alertId = alert.id;
-            li.dataset.alertType = alert.type;
-            li.addEventListener("click", function () {
-              window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
-                alert.type
-              )}`;
-            });
-            list.appendChild(li);
+    if (data.success) {
+      // Show all alerts, no filter
+      countSpan.textContent = data.alerts.length;
+      list.innerHTML = "";
+      if (data.alerts.length === 0) {
+        list.innerHTML = "<li>No new alerts</li>";
+      } else {
+        data.alerts.forEach((alert) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${alert.type}</strong> - ${alert.vehicle} <br><small>${new Date(
+            alert.date_time
+          ).toLocaleString()}</small>`;
+          li.dataset.alertId = alert.id;
+          li.dataset.alertType = alert.type;
+          li.addEventListener("click", function () {
+            window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
+              alert.type
+            )}`;
           });
-        }
+          list.appendChild(li);
+        });
       }
+    }
     } catch (e) {
       countSpan.textContent = "!";
       list.innerHTML = "<li>Error loading alerts</li>";

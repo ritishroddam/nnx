@@ -427,22 +427,27 @@ def notification_alerts():
             {"IMEI": {"$in": imeis}},
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
         )
-        
         vehicle_map = {vehicle["IMEI"]: vehicle for vehicle in vehicles}
-        
+        ist = pytz.timezone("Asia/Kolkata")
         for alert in alerts:
             if str(alert["_id"]) in acknowledged_ids:
                 continue
             vehicle = vehicle_map.get(alert["imei"])
-            
+            # Convert UTC to IST
+            dt_utc = alert.get("date_time")
+            if dt_utc:
+                dt_ist = dt_utc.astimezone(ist)
+                date_time_str = dt_ist.isoformat()
+            else:
+                date_time_str = ""
             enriched.append({
                 "id": str(alert["_id"]),
                 "type": alert_type,
-                "alert_type": alert_type,  # <-- Add this line
+                "alert_type": alert_type,
                 "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
-                "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",  # for frontend
-                "date_time": alert["date_time"].isoformat() if alert.get("date_time") else "",
-                "acknowledged": False  # or set based on your logic
+                "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                "date_time": date_time_str,
+                "acknowledged": False
             })
         return enriched
 
