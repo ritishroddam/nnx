@@ -317,7 +317,7 @@ input[type="date"] {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-top: 10px;
     position: relative;
-    overflow-x: auto;
+  overflow: hidden;
 }
 
 .sim-table {
@@ -343,7 +343,6 @@ input[type="date"] {
 .sim-table thead,
 .sim-table tbody {
     display: block;
-    width: 100%;
     overflow-y: auto;
 }
 
@@ -358,9 +357,8 @@ input[type="date"] {
 }
 
 .sim-table tbody {
-    max-height: 480px; 
-    overflow-y: auto;
-    overflow-x: hidden;
+  display: block;
+  overflow-y: auto;
 }
 
 .sim-table th,
@@ -425,6 +423,13 @@ input[type="date"] {
   border: 2px solid #007bff;
   width: auto;
   min-width: 100%;
+}
+
+.sim-table thead tr,
+.sim-table tbody tr:not(.editing) {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .sim-table tbody tr.editing td {
