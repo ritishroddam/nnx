@@ -428,7 +428,7 @@ tr:hover {
   justify-content: flex-end;
 }
 
-.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 140px; }
+.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 150px; }
 .device-table th:nth-child(2), .device-table td:nth-child(2) { width: 140px; }
 .device-table th:nth-child(3), .device-table td:nth-child(3) { width: 120px; }
 .device-table th:nth-child(4), .device-table td:nth-child(4) { width: 80px; }
@@ -438,5 +438,5 @@ tr:hover {
 .device-table th:nth-child(8), .device-table td:nth-child(8) { width: 120px; }
 .device-table th:nth-child(9), .device-table td:nth-child(9) { width: 80px; }
 .device-table th:nth-child(10), .device-table td:nth-child(10) { width: 120px; }
-.device-table th:nth-child(11), .device-table td:nth-child(11) { width: 120px; }
+.device-table th:nth-child(11), .device-table td:nth-child(11) { width: 80px; }
 .device-table th:nth-child(12), .device-table td:nth-child(12) { width: 80px; }
