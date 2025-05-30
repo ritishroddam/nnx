@@ -150,18 +150,17 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify({ darkMode: isDarkMode ? "true" : "false"}),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          displayFlashMessage("Theme updated successfully!", "success");
-        } else {
-          displayFlashMessage("Failed to update theme", "danger");
-        }
-      })
-      .catch(() => {
+    .then((response) => {
+      if (response.status === 200) {
+        displayFlashMessage("Theme updated successfully!", "success");
+      } else {
         displayFlashMessage("Failed to update theme", "danger");
-      });
-
+      }
+      return response.json(); // If you still want to use the response data elsewhere
+    })
+    .catch(() => {
+      displayFlashMessage("Failed to update theme", "danger");
+    });
   });
 
   const profile = document.getElementById("profile");
