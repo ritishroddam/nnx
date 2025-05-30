@@ -276,3 +276,16 @@ input#editStatusDate, input#editReactivationDate {
   gap: 10px;
   flex-wrap: wrap;
 }
+
+.form-group input[type="date"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+input[type="date"] {
+  display: block !important;
+}
