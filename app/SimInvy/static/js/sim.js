@@ -304,21 +304,13 @@ function editSim(simId) {
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
   `;
 
-  const syncScroll = (e) => {
-    tableHeader.scrollLeft = e.target.scrollLeft;
-  };
-
-  row.addEventListener('scroll', syncScroll);
-  row.setAttribute('data-scroll-listener', 'true');
-
-  // Scroll to show the edited row
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   // Add event listener for status change to handle SafeCustody/Suspended fields
   const statusSelect = row.cells[3].querySelector('#editStatus');
   const statusDateInput = row.cells[5].querySelector('#editStatusDate');
   const reactivationDateInput = row.cells[6].querySelector('#editReactivationDate');
-
+  
   // Set initial visibility
   updateStatusFieldsVisibility(statusSelect.value, statusDateInput, reactivationDateInput);
   
@@ -350,9 +342,6 @@ function cancelEdit(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
   if (row) {
-    if (row.getAttribute('data-scroll-listener') === 'true') {
-      row.removeEventListener('scroll', syncScroll);
-    }
     row.classList.remove('editing');
 
   // Restore original values from stored attributes

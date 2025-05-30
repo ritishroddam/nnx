@@ -464,11 +464,6 @@ input[type="date"] {
   box-sizing: border-box;
 }
 
-.sync-scroll {
-  overflow-x: auto;
-  width: 100%;
-}
-
 @media (max-width: 768px) {
   .table-container {
     border: 1px solid #ddd;
