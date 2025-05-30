@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
       themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
 
-    fetch("/userConfig/editConfig", {
+    fetch("/userConfig/editDarkMode", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
