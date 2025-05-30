@@ -243,11 +243,6 @@ function editSim(simId) {
   }
 
   const row = document.querySelector(`tr[data-id='${simId}']`);
-  const tableHeader = document.querySelector('.sim-table thead');
-
-  row.classList.add('editing');
-  row.setAttribute("data-original-mobile", row.cells[0].innerText);
-
 
   // Store original values (columns 0-10)
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
@@ -261,6 +256,10 @@ function editSim(simId) {
   row.setAttribute("data-original-date-out", row.cells[8].innerText);
   row.setAttribute("data-original-vendor", row.cells[9].innerText);
   row.setAttribute("data-original-editor", row.cells[10].innerText);
+
+  row.classList.add('editing');
+
+  row.setAttribute("data-original-mobile", row.cells[0].innerText);
 
   // Status dropdown options
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
