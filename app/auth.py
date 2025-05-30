@@ -10,6 +10,7 @@ from .utils import roles_required
 from app import db
 from datetime import datetime, timezone, timedelta
 import requests
+from app.userConfig.userConfig import userConfiCollection
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -52,6 +53,11 @@ def login():
         if not user or not User.verify_password(user, password):
             flash('Invalid username or password', 'danger')
             return redirect(url_for('auth.login'))
+        
+        user_config = userConfiCollection.find_one({"userID": user['_id']})
+        dark_mode_value = "false"
+        if user_config and user_config.get("darkMode") == "true":
+            dark_mode_value = "true"
         
         if user['company'] != 'none':
             company = User.get_company_by_company_id(user['company'])
@@ -99,7 +105,9 @@ def login():
 
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
-
+        
+        expires = datetime.now() + timedelta(days=3650)
+        response.set_cookie("darkMode", dark_mode_value, expires=expires, path="/")
         return response
 
 @auth_bp.route('/api/login', methods=['POST'])

@@ -34,6 +34,27 @@ def page():
         userConfigs['_id'] = str(userConfigs['_id'])
     return render_template('userConfig.html', userConfigs=userConfigs)
 
+@userConfigBlueprint.route('/editDarkMode', methods=['POST'])
+@jwt_required()
+def editDarkMode():
+    darkMode = request.json.get('darkMode')
+
+    if darkMode not in ["true", "false"]:
+        return jsonify({"error": "Invalid input"}), 400
+
+    claims = get_jwt()
+    userID = claims.get('user_id')
+
+    userConfig = {
+        "darkMode": darkMode,
+    }
+
+    userConfiCollection.update_one(
+        {"userID": ObjectId(userID)},
+        {"$set": userConfig},
+        upsert=True
+    )
+
 @userConfigBlueprint.route('/editConfig', methods=['POST'])
 @jwt_required()
 def editConfig():

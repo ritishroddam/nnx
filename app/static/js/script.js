@@ -141,6 +141,15 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
+
+    fetch("/userConfig/editConfig", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify({ darkMode: isDarkMode ? "true" : "false"}),
+    })
   });
 
   const profile = document.getElementById("profile");
