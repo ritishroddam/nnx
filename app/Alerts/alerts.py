@@ -462,10 +462,6 @@ def notification_alerts():
     if not alertConfig or not alertConfig.get("alerts"):
         return jsonify({"success": False, "message": "No alert configuration found for the user"}), 404
     
-    alert_types = alertConfig["alerts"]
-    if not alert_types:
-        return jsonify({"success": False, "message": "No alert types configured for the user"}), 404 
-    
     panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alerts")
     main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
     
@@ -473,6 +469,16 @@ def notification_alerts():
         enrich(panic_alerts, "Panic Alert") +
         enrich(main_power_off_alerts, "Main Power Discontinue Alert") 
     )
+    
+    alert_types = alertConfig["alerts"]
+    if not alert_types:
+        notifications.sort(key=lambda x: x["date_time"], reverse=True)
+
+        return jsonify({
+            "success": True,
+            "count": len(notifications),
+            "alerts": notifications
+        })
     
     for alert_type in alert_types:
         if alert_type not in ["panic_alert", "main_power_alerts", "speeding_alerts", "harsh_break_alerts",
