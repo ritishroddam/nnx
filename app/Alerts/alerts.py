@@ -291,6 +291,115 @@ def alert_card_endpoint(alert_type):
         return wrapper
     return decorator
 
+def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
+    if alert_type == "panic_alerts":
+        return list(db['sos_logs'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""}
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "main_power_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "main_power": "0"
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "speeding_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "$expr": {"$gte": [{"$toDouble": {"$ifNull": ["$speed", 0]}}, 60]}
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+    
+    elif alert_type == "harsh_break_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "harsh_break": "1"
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+    
+    elif alert_type == "harsh_acceleration_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "harsh_speed": "1"
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "gsm_low_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "$or": [
+                {"gsm_sig": "0"},
+                {"$expr": {"$lt": [{"$toInt": {"$ifNull": [{"$toInt": "$gsm_sig"}, 99]}}, 7]}}
+            ]
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "internal_battery_low_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "$or": [
+                {"internal_bat": "0.0"},
+                {"internal_bat": {"$lt": "3.7"}}
+            ]
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "idle_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "speed": "0.0",
+            "ignition": "1"
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "ignition_off_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "ignition": "0"
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    elif alert_type == "ignition_on_alerts":
+        return list(db['atlanta'].find({
+            "imei": {"$in": imeis},
+            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+            "gps": "A",
+            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+            "ignition": "1",
+            "speed": {"$ne": "0.0"}
+        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+        
+    
+
 @alerts_bp.route('/notification_alerts', methods=['GET'])
 @jwt_required()
 def notification_alerts():
@@ -311,33 +420,6 @@ def notification_alerts():
 
     if not imeis:
         return
-    # Panic Alerts
-    panic_alerts = list(db['sos_logs'].find({
-        "imei": {"$in": imeis},
-        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
-        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
-        "longitude": {"$exists": True, "$ne": None, "$ne": ""}
-    }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
-
-    # Speeding Alerts
-    speeding_alerts = list(db['atlanta'].find({
-        "imei": {"$in": imeis},
-        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
-        "gps": "A",
-        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
-        "longitude": {"$exists": True, "$ne": None, "$ne": ""},
-        "$expr": {"$gte": [{"$toDouble": {"$ifNull": ["$speed", 0]}}, 60]}
-    }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
-
-    # Main Power Discontinue Alerts
-    main_power_alerts = list(db['atlanta'].find({
-        "imei": {"$in": imeis},
-        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
-        "gps": "A",
-        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
-        "longitude": {"$exists": True, "$ne": None, "$ne": ""},
-        "main_power": "0"
-    }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
 
     def enrich(alerts, alert_type):
         enriched = []
@@ -364,11 +446,32 @@ def notification_alerts():
             })
         return enriched
 
+    claims = get_jwt()
+    userId = claims.get('user_id')
+    
+    if not userId:
+        return jsonify({"success": False, "message": "User ID not found in JWT claims"}), 400
+    
+    alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
+    
+    if not alertConfig or not alertConfig.get("alerts"):
+        return jsonify({"success": False, "message": "No alert configuration found for the user"}), 404
+    
+    alert_types = alertConfig["alerts"]
+    if not alert_types:
+        return jsonify({"success": False, "message": "No alert types configured for the user"}), 404 
+    
     notifications = (
-        enrich(panic_alerts, "Panic Alert") +
-        enrich(speeding_alerts, "Speeding Alert") +
-        enrich(main_power_alerts, "Main Power Discontinue Alert")
+        enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alert"), "Panic Alert") +
+        enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts"), "Main Power Discontinue Alert") 
     )
+    
+    for alert_type in alert_types:
+        if alert_type not in ["panic_alert", "main_power_alerts", "speeding_alerts", "harsh_break_alerts",
+                              "harsh_acceleration_alerts", "gsm_low_alerts", "internal_battery_low_alerts",
+                              "main_power_off_alerts", "idle_alerts", "ignition_off_alerts", "ignition_on_alerts"]:
+            return jsonify({"success": False, "message": f"Unsupported alert type: {alert_type}"}), 400
+        notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())    
 
     notifications.sort(key=lambda x: x["date_time"], reverse=True)
 

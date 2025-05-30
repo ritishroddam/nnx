@@ -25,8 +25,8 @@ User Configuration
       <label for="alerts">Alerts</label>
       <select id="alerts" name="alerts" multiple>
         {% set all_alert_types = [
-          'panic', 'speeding', 'harsh_break', 'harsh_acceleration', 'gsm_low',
-          'internal_battery_low', 'main_power_off', 'idle', 'ignition_off', 'ignition_on'
+          'speeding_alerts', 'harsh_break_alerts', 'harsh_acceleration_alerts', 'gsm_low_alerts',
+          'internal_battery_low_alerts', 'idle_alerts', 'ignition_off_alerts', 'ignition_on_alerts'
         ] %}
         {% for alert in all_alert_types %}
         <option value="{{ alert }}" {% if alert in userConfigs.alerts %}selected{% endif %}>
