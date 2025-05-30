@@ -139,6 +139,7 @@ tr:hover {
   border: none;
   cursor: pointer;
   font-size: 16px;
+  margin: 0 5px;
 }
 .edit-icon {
   color: #007bff;
@@ -326,9 +327,13 @@ input[type="date"] {
     margin-top: 20px;
     margin-bottom: 20px;
     width: 100%;
+    min-width: 1200px; 
     border-collapse: collapse;
     color: #333;
     table-layout: fixed;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: block;
 }
 
 .sim-table thead{
@@ -339,6 +344,17 @@ input[type="date"] {
 .sim-table tbody {
     display: block;
     width: 100%;
+    overflow-y: auto;
+}
+
+.sim-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.sim-table tbody tr:not(.editing) {
+  display: table-row;
 }
 
 .sim-table tbody {
@@ -354,6 +370,9 @@ input[type="date"] {
     border-bottom: 1px solid #eee;
     box-sizing: border-box;
     word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Set explicit widths for each column */
@@ -396,4 +415,48 @@ input[type="date"] {
 
 .dark-mode .sim-table tr:hover {
     background-color: #444;
+}
+
+/* Add these styles to your existing CSS */
+.sim-table tbody tr.editing {
+  display: flex;
+  overflow-x: auto;
+  background-color: #f8f9fa;
+  border: 2px solid #007bff;
+  width: auto;
+  min-width: 100%;
+}
+
+.sim-table tbody tr.editing td {
+  flex: 0 0 auto;
+  min-width: 120px; /* Match your column widths */
+  white-space: nowrap;
+}
+
+/* Keep the header row fixed */
+.sim-table thead tr {
+  position: sticky;
+  top: 0;
+  background-color: #f5f5f5;
+  z-index: 10;
+}
+
+.sim-table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Make sure edit inputs are visible and properly sized */
+.sim-table tbody tr.editing td input,
+.sim-table tbody tr.editing td select {
+  min-width: 100px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    border: 1px solid #ddd;
+  }
 }
