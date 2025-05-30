@@ -44,17 +44,14 @@ document.addEventListener("DOMContentLoaded", function() {
     .then(({status, body}) => {
       saveBtn.disabled = false;
       if (status === 200) {
-        successMsg.textContent = body.message || "Configuration updated!";
-        successMsg.style.display = "block";
+        displayFlashMessage("success", "Configuration updated successfully!");
       } else {
-        errorMsg.textContent = body.error || "Failed to update configuration";
-        errorMsg.style.display = "block";
+        displayFlashMessage("error", "Failed to update configuration");
       }
     })
     .catch(() => {
       saveBtn.disabled = false;
-      errorMsg.textContent = "Failed to update configuration";
-      errorMsg.style.display = "block";
+      displayFlashMessage("error", "Failed to update configuration");
     });
   });
 });
