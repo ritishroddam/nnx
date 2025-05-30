@@ -166,7 +166,7 @@ tr:hover {
 
 /* Status-based row coloring */
 tr.available {
-  background-color: #e6f7e6; /* Light green for available */
+  background-color: #fff; /* Light green for available */
 }
 
 tr.allocated {
@@ -345,7 +345,6 @@ input[type="date"] {
     max-height: 480px; 
     overflow-y: auto;
     overflow-x: hidden;
-    background: #f6f6f6;
 }
 
 .sim-table th,
@@ -356,20 +355,6 @@ input[type="date"] {
     box-sizing: border-box;
     word-break: break-word;
 }
-
-/* Set explicit widths for each column */
-.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 140px; }
-.sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 120px; }
-.sim-table th:nth-child(3), .sim-table td:nth-child(3) { width: 200px; }
-.sim-table th:nth-child(4), .sim-table td:nth-child(4) { width: 130px; }
-.sim-table th:nth-child(5), .sim-table td:nth-child(5) { width: 180px; }
-.sim-table th:nth-child(6), .sim-table td:nth-child(6) { width: 100px; }
-.sim-table th:nth-child(7), .sim-table td:nth-child(7) { width: 120px; }
-.sim-table th:nth-child(8), .sim-table td:nth-child(8) { width: 120px; }
-.sim-table th:nth-child(9), .sim-table td:nth-child(9) { width: 120px; }
-.sim-table th:nth-child(10), .sim-table td:nth-child(10) { width: 140px; }
-.sim-table th:nth-child(11), .sim-table td:nth-child(11) { width: 120px; }
-.sim-table th:nth-child(12), .sim-table td:nth-child(12) { width: 100px; }
 
 .sim-table th {
     background-color: #f5f5f5;
