@@ -15,13 +15,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var form = document.getElementById('userConfigForm');
   var saveBtn = document.getElementById('saveConfigBtn');
-  var successMsg = document.getElementById('successMsg');
-  var errorMsg = document.getElementById('errorMsg');
-
   form.addEventListener('submit', function(e) {
     e.preventDefault();
-    successMsg.style.display = "none";
-    errorMsg.style.display = "none";
     saveBtn.disabled = true;
 
     var darkMode = darkModeSelect.value;
