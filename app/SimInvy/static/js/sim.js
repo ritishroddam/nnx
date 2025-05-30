@@ -243,6 +243,11 @@ function editSim(simId) {
   }
 
   const row = document.querySelector(`tr[data-id='${simId}']`);
+  const tableHeader = document.querySelector('.sim-table thead');
+
+  row.classList.add('editing');
+  row.setAttribute("data-original-mobile", row.cells[0].innerText);
+
 
   // Store original values (columns 0-10)
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
@@ -256,10 +261,6 @@ function editSim(simId) {
   row.setAttribute("data-original-date-out", row.cells[8].innerText);
   row.setAttribute("data-original-vendor", row.cells[9].innerText);
   row.setAttribute("data-original-editor", row.cells[10].innerText);
-
-  row.classList.add('editing');
-
-  row.setAttribute("data-original-mobile", row.cells[0].innerText);
 
   // Status dropdown options
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
@@ -303,13 +304,21 @@ function editSim(simId) {
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
   `;
 
+  const syncScroll = (e) => {
+    tableHeader.scrollLeft = e.target.scrollLeft;
+  };
+
+  row.addEventListener('scroll', syncScroll);
+  row.setAttribute('data-scroll-listener', 'true');
+
+  // Scroll to show the edited row
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   // Add event listener for status change to handle SafeCustody/Suspended fields
   const statusSelect = row.cells[3].querySelector('#editStatus');
   const statusDateInput = row.cells[5].querySelector('#editStatusDate');
   const reactivationDateInput = row.cells[6].querySelector('#editReactivationDate');
-  
+
   // Set initial visibility
   updateStatusFieldsVisibility(statusSelect.value, statusDateInput, reactivationDateInput);
   
@@ -341,6 +350,9 @@ function cancelEdit(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
   if (row) {
+    if (row.getAttribute('data-scroll-listener') === 'true') {
+      row.removeEventListener('scroll', syncScroll);
+    }
     row.classList.remove('editing');
 
   // Restore original values from stored attributes

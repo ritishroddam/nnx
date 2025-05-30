@@ -317,7 +317,7 @@ input[type="date"] {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-top: 10px;
     position: relative;
-    overflow-x: auto;
+  overflow: hidden;
 }
 
 .sim-table {
@@ -343,7 +343,6 @@ input[type="date"] {
 .sim-table thead,
 .sim-table tbody {
     display: block;
-    width: 100%;
     overflow-y: auto;
 }
 
@@ -427,10 +426,18 @@ input[type="date"] {
   min-width: 100%;
 }
 
+.sim-table thead tr,
+.sim-table tbody tr:not(.editing) {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
 .sim-table tbody tr.editing td {
   flex: 0 0 auto;
   min-width: 120px; /* Match your column widths */
   white-space: nowrap;
+  position: relative;
 }
 
 /* Keep the header row fixed */
@@ -442,9 +449,11 @@ input[type="date"] {
 }
 
 .sim-table thead {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f5f5f5;
 }
 
 /* Make sure edit inputs are visible and properly sized */
@@ -453,6 +462,11 @@ input[type="date"] {
   min-width: 100px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.sync-scroll {
+  overflow-x: auto;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
