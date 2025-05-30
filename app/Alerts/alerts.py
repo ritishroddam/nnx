@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, jsonify, url_for # type: ignore
-from pymongo import MongoClient # type: ignore
 from datetime import datetime, timedelta
 from pytz import timezone # type: ignore
 import pytz # type: ignore
