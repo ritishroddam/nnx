@@ -224,6 +224,26 @@ input#editStatusDate, input#editReactivationDate {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+  .modal {
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+}
+
+body.modal-open {
+  overflow: hidden; /* Prevent scrolling when modal is open */
+}
+
+.main-content {
+  transition: filter 0.3s ease;
+}
+
+.main-content.blurred {
+  filter: blur(5px);
 }
 
 .modal-content {
