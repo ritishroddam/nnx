@@ -459,9 +459,6 @@ def notification_alerts():
     
     alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
     
-    if not alertConfig or not alertConfig.get("alerts"):
-        return jsonify({"success": False, "message": "No alert configuration found for the user"}), 404
-    
     panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alerts")
     main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
     
@@ -469,6 +466,16 @@ def notification_alerts():
         enrich(panic_alerts, "Panic Alert") +
         enrich(main_power_off_alerts, "Main Power Discontinue Alert") 
     )
+    
+    if not alertConfig or not alertConfig.get("alerts"):
+        notifications.sort(key=lambda x: x["date_time"], reverse=True)
+
+        return jsonify({
+            "success": True,
+            "count": len(notifications),
+            "alerts": notifications
+        })
+    
     
     alert_types = alertConfig["alerts"]
     if not alert_types:
