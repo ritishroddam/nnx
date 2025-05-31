@@ -244,10 +244,10 @@ function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
-    marker.div.appendChild(sosDiv);
+    marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
 
-    marker.div.classList.add("vehicle-blink");
+    marker.content.classList.add("vehicle-blink");
 
     setTimeout(() => {
       removeSOS(imei);
