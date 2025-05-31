@@ -60,8 +60,12 @@ socket.on("vehicle_update", async function (data) {
   try {
     if(data.sos === "1") {
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
-      const audio = new Audio("/static/sounds/notification.mp3");
-      // audio.play().catch((e) => console.warn("Audio play failed:", e));
+      const audio = new Audio("/static/sounds/sosNotification.wav");
+      audio.play().catch((e) => console.warn("Audio play failed:", e));
+      setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }, 5000);
       data = null;
     }
   } catch (error) {
