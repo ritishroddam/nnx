@@ -73,6 +73,7 @@ def get_sims_by_status(status):
     # Get SIMs and add IMEI info
     sims = list(collection.find(query))
     for sim in sims:
+        sim["_id"] = str(sim["_id"])
         if sim['SimNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['SimNumber']]
             sim['status'] = 'Allocated'
