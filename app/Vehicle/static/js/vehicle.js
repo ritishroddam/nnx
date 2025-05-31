@@ -355,6 +355,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       gsmIcon,
       gsmColor;
     const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
+    const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+    const iconRed = "color:#d32f2f;";
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "Offline";
@@ -424,8 +426,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red for unknown state
     }
 
-    const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
-    const iconRed = "color:#d32f2f;";
     const iconRow = `
       <span
       class="material-symbols-outlined"
