@@ -27,6 +27,23 @@ def getImeis():
         },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
     else:
         return list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
+    
+def getImeisWithSpeed():
+    claims = get_jwt()
+    user_roles = claims.get('roles', [])
+    userID = claims.get('user_id')
+    userCompany = claims.get('company')
+    vehicle_inventory = db["vehicle_inventory"]
+
+    if 'admin' in user_roles:
+        return vehicle_inventory.find({}, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
+    elif 'user' in user_roles:
+        return vehicle_inventory.find({
+            'CompanyName': userCompany,
+            'AssignedUsers': {'$in': [userID]}
+        }, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
+    else:
+        return vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
 
 def get_alert_type(record):
     if record.get('source') == 'sos_logs':
@@ -309,16 +326,6 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
             "longitude": {"$exists": True, "$ne": None, "$ne": ""},
             "main_power": "0"
         }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
-        
-    elif alert_type == "speeding_alerts":
-        return list(db['atlanta'].find({
-            "imei": {"$in": imeis},
-            "date_time": {"$gte": start_of_day, "$lte": end_of_day},
-            "gps": "A",
-            "latitude": {"$exists": True, "$ne": None, "$ne": ""},
-            "longitude": {"$exists": True, "$ne": None, "$ne": ""},
-            "$expr": {"$gte": [{"$toDouble": {"$ifNull": ["$speed", 0]}}, 60]}
-        }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
     
     elif alert_type == "harsh_break_alerts":
         return list(db['atlanta'].find({
@@ -398,7 +405,32 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
             "speed": {"$ne": "0.0"}
         }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
         
-    
+def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
+    # Build a list of per-IMEI speed conditions
+    or_conditions = []
+    for record in imeisWithSpeed:
+        imei = record.get("IMEI")
+        normal_speed = float(record.get("normalSpeed", 60))
+        or_conditions.append({
+            "$and": [
+                {"imei": imei},
+                {"$expr": {"$gte": [{"$toDouble": {"$ifNull": ["$speed", 0]}}, normal_speed]}}
+            ]
+        })
+
+    query = {
+        "imei": {"$in": imeis},
+        "date_time": {"$gte": start_of_day, "$lte": end_of_day},
+        "gps": "A",
+        "latitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "longitude": {"$exists": True, "$ne": None, "$ne": ""},
+        "$or": or_conditions
+    }
+
+    return list(db['atlanta'].find(
+        query,
+        {"_id": 1, "date_time": 1, "imei": 1}
+    ).sort("date_time", -1))
 
 @alerts_bp.route('/notification_alerts', methods=['GET'])
 @jwt_required()
@@ -416,8 +448,17 @@ def notification_alerts():
         ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
     )
     
-    imeis = getImeis()
-
+    alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
+    
+    if alertConfig.get("alerts"):
+        if alertConfig.get("alerts") is "speeding_alerts":
+            imeisWithSpeed = getImeisWithSpeed()
+            imeis = imeisWithSpeed.distinct("IMEI")
+        else:
+            imeis = getImeis()
+    else:
+        imeis = getImeis()
+            
     if not imeis:
         return
 
@@ -457,8 +498,6 @@ def notification_alerts():
     if not userId:
         return jsonify({"success": False, "message": "User ID not found in JWT claims"}), 400
     
-    alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
-    
     panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alerts")
     main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
     
@@ -475,8 +514,7 @@ def notification_alerts():
             "count": len(notifications),
             "alerts": notifications
         })
-    
-    
+        
     alert_types = alertConfig["alerts"]
     if not alert_types:
         notifications.sort(key=lambda x: x["date_time"], reverse=True)
@@ -487,12 +525,16 @@ def notification_alerts():
             "alerts": notifications
         })
     
+    if "speeding_alerts" in alertConfig.get("alerts", []):
+        notifications += enrich(getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day), "Speeding Alert")
+
     for alert_type in alert_types:
         if alert_type not in ["panic_alert", "main_power_alerts", "speeding_alerts", "harsh_break_alerts",
                               "harsh_acceleration_alerts", "gsm_low_alerts", "internal_battery_low_alerts",
                               "main_power_off_alerts", "idle_alerts", "ignition_off_alerts", "ignition_on_alerts"]:
             return jsonify({"success": False, "message": f"Unsupported alert type: {alert_type}"}), 400
-        notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())    
+        if alert_type != "speeding_alerts":
+            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())    
 
     notifications.sort(key=lambda x: x["date_time"], reverse=True)
 
