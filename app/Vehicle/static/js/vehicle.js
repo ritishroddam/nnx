@@ -126,6 +126,9 @@ async function fetchVehicleData() {
         stoppage_time_delta: vehicle.stoppage_time_delta,
         status_time_delta: vehicle.status_time_delta,
         status_time_str: vehicle.status_time_str,
+        normalSpeed: vehicle.normalSpeed,
+        overSpeed: vehicle.overSpeed,
+        slowSpeed: vehicle.slowSpeed,
       });
     });
   } catch (error) {
