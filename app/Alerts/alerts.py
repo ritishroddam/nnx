@@ -448,6 +448,12 @@ def notification_alerts():
         ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
     )
     
+    claims = get_jwt()
+    userId = claims.get('user_id')
+    
+    if not userId:
+        return jsonify({"success": False, "message": "User ID not found in JWT claims"}), 400
+    
     alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
     
     if alertConfig.get("alerts"):
@@ -491,12 +497,6 @@ def notification_alerts():
                 "acknowledged": False
             })
         return enriched
-
-    claims = get_jwt()
-    userId = claims.get('user_id')
-    
-    if not userId:
-        return jsonify({"success": False, "message": "User ID not found in JWT claims"}), 400
     
     panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alerts")
     main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
