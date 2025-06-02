@@ -167,28 +167,43 @@ def alert_card_endpoint(alert_type):
                         query["imei"] = {"$in": imeis}
 
                 if alert_type == "speeding":
-                    query["$expr"] = {
-                        "$gte": [
-                            {"$toDouble": {"$ifNull": ["$speed", 0]}},
-                            60
-                        ]
-                    }
+    # Get IMEIs and their normalSpeed
+                    if vehicle_number and imei:
+                        imeis_with_speed = db['vehicle_inventory'].find({"IMEI": imei}, {"IMEI": 1, "normalSpeed": 1, "_id": 0})
+                    else:
+                        imeis_with_speed = db['vehicle_inventory'].find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "normalSpeed": 1, "_id": 0})
+
+                    or_conditions = []
+                    for record in imeis_with_speed:
+                        this_imei = record.get("IMEI")
+                        normal_speed = float(record.get("normalSpeed", 60))
+                        or_conditions.append({
+                            "$and": [
+                                {"imei": this_imei},
+                                {"$expr": {"$gte": [{"$toDouble": {"$ifNull": ["$speed", 0]}}, normal_speed]}}
+                            ]
+                        })
+
+                    query["$or"] = or_conditions
                     projection = {
                         **base_projection,
                         "speed": 1
                     }
+                    
                 elif alert_type == "harsh_break":
                     query["harsh_break"] = "1"
                     projection = {
                         **base_projection,
                         "harsh_break": 1
                     }
+                    
                 elif alert_type == "harsh_acceleration":
                     query["harsh_speed"] = "1"
                     projection = {
                         **base_projection,
                         "harsh_speed": 1
                     }
+                    
                 elif alert_type == "gsm_low":
                     query["$or"] = [
                         {"gsm_sig": "0"},
@@ -203,6 +218,7 @@ def alert_card_endpoint(alert_type):
                         **base_projection,
                         "gsm_sig": 1
                     }
+                    
                 elif alert_type == "internal_battery_low":
                     query["$or"] = [
                         {"internal_bat": "0.0"},
@@ -212,12 +228,14 @@ def alert_card_endpoint(alert_type):
                         **base_projection,
                         "internal_bat": 1
                     }
+                    
                 elif alert_type == "main_power_off":
                     query["main_power"] = "0"
                     projection = {
                         **base_projection,
                         "main_power": 1
                     }
+                    
                 elif alert_type == "idle":
                     query["$and"] = [
                         {"speed": "0.0"},
@@ -228,12 +246,14 @@ def alert_card_endpoint(alert_type):
                         "speed": 1,
                         "ignition": 1
                     }
+                    
                 elif alert_type == "ignition_off":
                     query["ignition"] = "0"
                     projection = {
                         **base_projection,
                         "ignition": 1
                     }
+                    
                 elif alert_type == "ignition_on":
                     query["$and"] = [
                         {"ignition": "1"},
@@ -244,6 +264,7 @@ def alert_card_endpoint(alert_type):
                         "ignition": 1,
                         "speed": 1
                     }
+                        
                 else:
                     projection = base_projection
                 
