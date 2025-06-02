@@ -278,9 +278,7 @@ def get_vehicles():
         distances = getVehicleDistances(imei_list)
         stoppage_times = getStopTimeToday(imei_list)
         print("Getting Vehicle statuses")
-        from app.Vehicle.tasks import get_vehicle_status_task
-        task = get_vehicle_status_task.delay(imei_list)
-        statuses = task.get(timeout=10) 
+        statuses = getVehicleStatus(imei_list)
 
         print("Building vehicle data")
         vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list)
