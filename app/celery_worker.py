@@ -1,6 +1,8 @@
 from celery import Celery
+from flask import Flask
+from config import config
 
-def make_celery(app):
+def make_celery(app: Flask):
     celery = Celery(
         app.import_name,
         backend=app.config['CELERY_RESULT_BACKEND'],

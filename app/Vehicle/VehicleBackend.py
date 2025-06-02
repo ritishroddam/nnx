@@ -6,8 +6,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
-from app.Vehicle.tasks import get_vehicle_status_task
-
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
@@ -280,6 +278,7 @@ def get_vehicles():
         distances = getVehicleDistances(imei_list)
         stoppage_times = getStopTimeToday(imei_list)
         print("Getting Vehicle statuses")
+        from app.Vehicle.tasks import get_vehicle_status_task
         task = get_vehicle_status_task.delay(imei_list)
         statuses = task.get(timeout=10) 
 
