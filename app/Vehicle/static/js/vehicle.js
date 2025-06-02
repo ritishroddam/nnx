@@ -127,7 +127,6 @@ async function fetchVehicleData() {
         status_time_delta: vehicle.status_time_delta,
         status_time_str: vehicle.status_time_str,
         normalSpeed: vehicle.normalSpeed,
-        overSpeed: vehicle.overSpeed,
         slowSpeed: vehicle.slowSpeed,
       });
     });
@@ -265,6 +264,25 @@ function vehicleInfoPage(licensePlateNumber) {
 
 window.vehicleInfoPage = vehicleInfoPage;
 
+function getHeadingText(filterValue) {
+  switch (filterValue) {
+    case "0":
+      return "Stationary Vehicles";
+    case "0-40":
+      return "Slow Speed Vehicles";
+    case "40-60":
+      return "Moderate Speed Vehicles";
+    case "60+":
+      return "High Speed Vehicles";
+    case "sos":
+      return "SOS Alert Vehicles";
+    case "offline":
+      return "Offline Vehicles";
+    default:
+      return "Total Vehicles";
+  }
+}
+
 function renderVehicleCards(vehicles, filterValue = "all") {
   // If toggle-card-switch is off, hide cards and update counter
   if (document.getElementById("toggle-card-switch").checked === false) {
@@ -275,29 +293,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     vehicleCount.innerText = vehicles.length;
 
     let headingText = "TOTAL VEHICLE'S";
-    switch (filterValue) {
-      case "0":
-        headingText = "Stationary Vehicles";
-        break;
-      case "0-40":
-        headingText = "Slow Speed Vehicles";
-        break;
-      case "40-60":
-        headingText = "Moderate Speed Vehicles";
-        break;
-      case "60+":
-        headingText = "High Speed Vehicles";
-        break;
-      case "sos":
-        headingText = "SOS Alert Vehicles";
-        break;
-      case "offline":
-        headingText = "Offline Vehicles";
-        break;
-      default:
-        headingText = "TOTAL VEHICLE'S";
-        break;
-    }
+    headingText = getHeadingText(filterValue);
+
     vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
     return;
   }
@@ -311,29 +308,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   vehicleCount.innerText = vehicles.length;
 
   let headingText = "TOTAL VEHICLE'S";
-  switch (filterValue) {
-    case "0":
-      headingText = "Stationary Vehicles";
-      break;
-    case "0-40":
-      headingText = "Slow Speed Vehicles";
-      break;
-    case "40-60":
-      headingText = "Moderate Speed Vehicles";
-      break;
-    case "60+":
-      headingText = "High Speed Vehicles";
-      break;
-    case "sos":
-      headingText = "SOS Alert Vehicles";
-      break;
-    case "offline":
-      headingText = "Offline Vehicles";
-      break;
-    default:
-      headingText = "TOTAL VEHICLE'S";
-      break;
-  }
+  headingText = getHeadingText(filterValue);
+
   vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
 
   vehicles.forEach((vehicle) => {
@@ -859,6 +835,8 @@ function filterVehicles() {
     const hasSOS = marker.device.sos === "1"; // Check if SOS is active
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
+    const slowSpeedThreshold = marker.device.slowSpeed;
+    const normalSpeedThreshold = marker.device.normalSpeed;
 
     let isVisible = false;
 
@@ -867,14 +845,14 @@ function filterVehicles() {
         isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
         break;
       case "0-40":
-        isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
+        isVisible = speedKmh > 0 && speedKmh <= slowSpeedThreshold && hoursSinceLastUpdate < 24;
         break;
       case "40-60":
         isVisible =
-          speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
+          speedKmh > slowSpeedThreshold && speedKmh <= normalSpeedThreshold && hoursSinceLastUpdate < 24;
         break;
       case "60+":
-        isVisible = speedKmh > 60 && hoursSinceLastUpdate < 24;
+        isVisible = speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
         break;
       case "sos":
         isVisible = hasSOS && hoursSinceLastUpdate < 24;
