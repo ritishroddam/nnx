@@ -230,6 +230,10 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         inventory = inventory_lookup.get(imei, {})
         vehicle["LicensePlateNumber"] = inventory.get('LicensePlateNumber', 'Unknown')
         vehicle["VehicleType"] = inventory.get('VehicleType', 'Unknown')
+        vehicle["normalSpeed"] = float(inventory.get('normalSpeed', "0") or 0)
+        vehicle["overSpeed"] = float(inventory.get('overSpeed', "0") or 0)
+        vehicle["slowSpeed"] =  float(inventory.get('slowSpeed', "0") or 0)
+        
         vehicle["distance"] = round(distances.get(imei, 0), 2)
 
         stoppage_time_item = stoppage_lookup.get(imei, {})
