@@ -14,6 +14,10 @@ from app.userConfig.userConfig import userConfiCollection
 
 auth_bp = Blueprint('auth', __name__)
 
+@auth_bp.route("/serverType")
+def index():
+    return f"Server: {request.environ.get('SERVER_SOFTWARE', 'Unknown')}"
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     # Check if already logged in (optional - remove if you want to force new login)
