@@ -20,6 +20,9 @@ class Config:
     GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY') or 'AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84'
     MONGO_URI = "mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin"
     
+    CELERY_BROKER_URL = 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+    
     @staticmethod
     def init_app(app):
         pass
