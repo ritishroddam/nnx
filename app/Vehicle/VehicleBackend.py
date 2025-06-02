@@ -257,6 +257,7 @@ def get_vehicles():
         vehicles = []
 
         # Determine inventory_data and imei_list based on role
+        print("Fetching vehicle inventory data")
         if 'admin' in user_roles:
             inventory_data = list(vehicle_inventory_collection.find())
         elif 'user' in user_roles:
@@ -270,15 +271,20 @@ def get_vehicles():
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
 
+        print("Creating IMEI list from inventory data")
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         if not imei_list:
             return jsonify([]), 200
 
         # Fetch all required data in batch
+        print("Getting Vehicle distances")
         distances = getVehicleDistances(imei_list)
+        print("Getting Vehicle stoppage times")
         stoppage_times = getStopTimeToday(imei_list)
+        print("Getting Vehicle statuses")
         statuses = getVehicleStatus(imei_list)
 
+        print("Building vehicle data")
         vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list)
 
         for vehicle in vehicles:
