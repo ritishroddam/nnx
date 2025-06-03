@@ -193,21 +193,21 @@ function filterSimsByStatus() {
       data.forEach(sim => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', sim._id);
-        row.className = sim.status.toLowerCase();
+        row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
         
         row.innerHTML = `
-          <td>${sim.MobileNumber}</td>          <!-- Column 0 -->
-          <td>${sim.SimNumber}</td>            <!-- Column 1 -->
-          <td>${sim.IMEI || 'N/A'}</td>        <!-- Column 2 -->
-          <td>${sim.status}</td>               <!-- Column 3 -->
-          <td>${sim.isActive ? 'Active' : 'Inactive'}</td> <!-- Column 4 -->
-          <td>${sim.statusDate || ''}</td>     <!-- Column 5 -->
-          <td>${sim.reactivationDate || ''}</td> <!-- Column 6 -->
-          <td>${sim.DateIn || ''}</td>         <!-- Column 7 -->
-          <td>${sim.DateOut || ''}</td>        <!-- Column 8 -->
-          <td>${sim.Vendor || ''}</td>         <!-- Column 9 -->
-          <td>${sim.lastEditedBy || 'N/A'}</td> <!-- Column 10 -->
-          <td>                                  <!-- Column 11 (Actions) -->
+          <td>${sim.MobileNumber}</td>
+          <td>${sim.SimNumber}</td>
+          <td>${sim.IMEI || 'N/A'}</td>
+          <td>${sim.status}</td>
+          <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
+          <td>${sim.statusDate || ''}</td>
+          <td>${sim.reactivationDate || ''}</td>
+          <td>${sim.DateIn || ''}</td>
+          <td>${sim.DateOut || ''}</td>
+          <td>${sim.Vendor || ''}</td>
+          <td>${sim.lastEditedBy || 'N/A'}</td>
+          <td>
             <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
           </td>
         `;

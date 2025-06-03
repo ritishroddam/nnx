@@ -326,7 +326,6 @@ input[type="date"] {
   min-width: 1200px; /* Ensure this is wide enough for all columns */
   border-collapse: collapse;
   color: #333;
-  table-layout: fixed;
 }
 
 /* Fixed header implementation */
