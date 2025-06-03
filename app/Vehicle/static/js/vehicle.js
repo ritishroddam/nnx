@@ -80,6 +80,25 @@ socket.on("sos_alert", function (data) {
   }
 });
 
+function formatTimeDelta(timeDelta){
+  const seconds = int(timeDelta / 1000);
+
+  if(seconds >= 86400){
+    days = Math.floor(seconds / 86400);
+    hours = Math.floor((seconds % 86400) / 3600);
+    return `${days} days ${hours} hours`;
+  } else if(seconds >= 3600){
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours} hours ${minutes} minutes`;
+  } else if(seconds >= 60){
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes} minutes ${remainingSeconds} seconds`;
+  }
+  return `${seconds} seconds`;
+}
+
 async function updateData(data) {
   const oldData = vehicleData.get(data.imei);
 
@@ -89,10 +108,39 @@ async function updateData(data) {
 
     data["distance"] = String(distance);
     data["gsm"] = String(data.gsm_sig);
+
+    const lastUpdated = convertToDate(data.date, data.time);
+    const now = new Date();
+    const timeDiff = Math.abs(now - lastUpdated);
+
+    if (timeDiff > 24 * 60 * 60 * 1000) {
+      statusText = "Offline";
+      statusClass = "vehicle-status-offline";
+    } else if (data.ignition === "0" && speed === 0) {
+      statusText = "Stopped";
+      statusClass = "vehicle-status-stopped";
+    } else if (data.ignition === "1" && speed === 0) {
+      statusText = "Idle";
+      statusClass = "vehicle-status-idle";
+    }
+    else{
+      statusText = "Moving";
+      statusClass = "vehicle-status-moving";
+    }
+
+    if (statusText === oldData.status){
+      const newTime = convertToDate(data.date, data.time) - convertToDate(oldData.date, oldData.time);
+      data["status_time_delta"] = oldData.status_time_delta + newTime;
+      data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
+    }
+
     vehicleData.set(data.imei, data);
   } else {
     data["distance"] = "0.00";
     data["gsm"] = String(data.gsm_sig);
+    data["status_time_delta"] = 0;
+    data["status_time_str"] = "0 seconds";
+
     vehicleData.set(data.imei, data);
   }
 
