@@ -312,91 +312,72 @@ input[type="date"] {
 }
 
 .sim-table-container {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 10px;
-    position: relative;
-  overflow: hidden;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 10px;
+  overflow-x: auto;
+  position: relative;
 }
 
 .sim-table {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 100%;
-    min-width: 1200px; 
-    border-collapse: collapse;
-    color: #333;
-    table-layout: fixed;
-    overflow-x: auto;
-    white-space: nowrap;
-    display: block;
-}
-
-.sim-table thead{
-  padding-right: 15px;
-}
-
-.sim-table thead,
-.sim-table tbody {
-    display: block;
-    overflow-y: auto;
-}
-
-.sim-table tbody tr {
-  display: table;
   width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  color: #333;
   table-layout: fixed;
-}
-
-.sim-table tbody tr:not(.editing) {
-  display: table-row;
-}
-
-.sim-table tbody {
-  display: block;
-  overflow-y: auto;
 }
 
 .sim-table th,
 .sim-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    box-sizing: border-box;
-    word-break: break-word;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Set explicit widths for each column */
-.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 190px; }
-.sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 190px; }
+.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 120px; }
+.sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 150px; }
 .sim-table th:nth-child(3), .sim-table td:nth-child(3) { width: 120px; }
 .sim-table th:nth-child(4), .sim-table td:nth-child(4) { width: 100px; }
-.sim-table th:nth-child(5), .sim-table td:nth-child(5) { width: 180px; }
+.sim-table th:nth-child(5), .sim-table td:nth-child(5) { width: 80px; }
 .sim-table th:nth-child(6), .sim-table td:nth-child(6) { width: 100px; }
 .sim-table th:nth-child(7), .sim-table td:nth-child(7) { width: 120px; }
-.sim-table th:nth-child(8), .sim-table td:nth-child(8) { width: 120px; }
-.sim-table th:nth-child(9), .sim-table td:nth-child(9) { width: 120px; }
-.sim-table th:nth-child(10), .sim-table td:nth-child(10) { width: 140px; }
+.sim-table th:nth-child(8), .sim-table td:nth-child(8) { width: 100px; }
+.sim-table th:nth-child(9), .sim-table td:nth-child(9) { width: 100px; }
+.sim-table th:nth-child(10), .sim-table td:nth-child(10) { width: 120px; }
 .sim-table th:nth-child(11), .sim-table td:nth-child(11) { width: 120px; }
-.sim-table th:nth-child(12), .sim-table td:nth-child(12) { width: 100px; }
+.sim-table th:nth-child(12), .sim-table td:nth-child(12) { width: 80px; }
 
 .sim-table th {
-    background-color: #f5f5f5;
-    font-weight: 500;
-    position: sticky;
-    top: 0;
-    z-index: 2;
+  background-color: #f5f5f5;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
 }
 
 .sim-table tr:hover {
     background-color: #f9f9f9;
+}
+
+.sim-table tr.editing {
+  background-color: #f8f9fa;
+  border: 2px solid #007bff;
+}
+
+.sim-table tr.editing td {
+  padding: 8px 15px;
+}
+
+.sim-table tr.editing input,
+.sim-table tr.editing select {
+  width: 100%;
+  min-width: 80px;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
 /* Optional: dark mode support if you want to match DeviceInvy dark mode */
@@ -415,50 +396,6 @@ input[type="date"] {
     background-color: #444;
 }
 
-/* Add these styles to your existing CSS */
-.sim-table tbody tr.editing {
-  display: flex;
-  overflow-x: auto;
-  background-color: #f8f9fa;
-  border: 2px solid #007bff;
-  width: auto;
-  min-width: 100%;
-}
-
-.sim-table thead tr,
-.sim-table tbody tr:not(.editing) {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.sim-table tbody tr.editing td {
-  flex: 0 0 auto;
-  min-width: 120px; /* Match your column widths */
-  white-space: nowrap;
-}
-
-/* Keep the header row fixed */
-.sim-table thead tr {
-  position: sticky;
-  top: 0;
-  background-color: #f5f5f5;
-  z-index: 10;
-}
-
-.sim-table thead {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-/* Make sure edit inputs are visible and properly sized */
-.sim-table tbody tr.editing td input,
-.sim-table tbody tr.editing td select {
-  min-width: 100px;
-  width: 100%;
-  box-sizing: border-box;
-}
 
 @media (max-width: 768px) {
   .table-container {

@@ -244,6 +244,10 @@ function editSim(simId) {
 
   const row = document.querySelector(`tr[data-id='${simId}']`);
 
+  for (let i = 0; i < 11; i++) {
+    row.setAttribute(`data-original-col-${i}`, row.cells[i].innerText);
+  }
+
   // Store original values (columns 0-10)
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
   row.setAttribute("data-original-sim", row.cells[1].innerText);
