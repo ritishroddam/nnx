@@ -181,16 +181,13 @@ function filterSimsByStatus() {
       data.forEach(sim => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', sim._id);
-        
-        // Handle status safely with a default value
-        const simStatus = sim.status || 'Available';
-        row.className = simStatus === 'Allocated' ? 'allocated' : simStatus.toLowerCase();
+        row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
         
         row.innerHTML = `
           <td>${sim.MobileNumber}</td>
           <td>${sim.SimNumber}</td>
           <td>${sim.IMEI || 'N/A'}</td>
-          <td>${simStatus}</td>
+          <td>${sim.status}</td>
           <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
           <td>${sim.statusDate || ''}</td>
           <td>${sim.reactivationDate || ''}</td>
@@ -213,33 +210,6 @@ function filterSimsByStatus() {
       errorBox.classList.remove('hidden');
       setTimeout(() => errorBox.classList.add('hidden'), 5000);
     });
-}
-
-function renderSimTable(sims) {
-  const tableBody = document.getElementById('simTable');
-  tableBody.innerHTML = '';
-  
-  if (sims.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="12">No SIMs found</td></tr>';
-    return;
-  }
-
-  sims.forEach(sim => {
-    const row = document.createElement('tr');
-    row.className = sim.status.toLowerCase();
-    row.innerHTML = `
-      <td>${sim.MobileNumber}</td>
-      <td>${sim.SimNumber}</td>
-      <td>${sim.IMEI || 'N/A'}</td>
-      <td>${sim.status}</td>
-      <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
-      <!-- other columns -->
-      <td>
-        <button class="edit-btn" onclick="editSim('${sim._id}')">Edit</button>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  });
 }
 
 function formatDateForInput(dateStr) {

@@ -26,6 +26,7 @@ def format_date(date_str):
 @sim_bp.route('/page')
 @jwt_required()
 def page():
+    # Get all vehicles with SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
     vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
@@ -48,47 +49,58 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    # Get all vehicle SIM numbers
-    vehicle_sims = list(db['vehicle_inventory'].distinct('sim_number'))
-    
-    # Base query
+    vehicle_collection = db['vehicle_inventory']
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+
+    allocated_sims = {v['sim_number']: v.get('imei', 'N/A') 
+                     for v in vehicles if 'sim_number' in v}
+
     query = {}
-    
+
     if status == 'Available':
-        # SIMs not in any vehicle AND marked as Available
         query = {
-            'SimNumber': {'$nin': vehicle_sims},
+            'SimNumber': {'$nin': list(allocated_sims.keys())},
             'status': 'Available'
         }
     elif status == 'Allocated':
-        # SIMs that are in vehicles
-        query = {'SimNumber': {'$in': vehicle_sims}}
-    elif status in ['SafeCustody', 'Suspended']:
-        query = {'status': status}
+        query = {
+            'SimNumber': {'$in': list(allocated_sims.keys())}
+        }
+    elif status == 'SafeCustody':
+        query = {'status': 'SafeCustody'}
+    elif status == 'Suspended':
+        query = {'status': 'Suspended'}
     elif status == 'All':
-        query = {}
-    
-    # Get SIMs and process them
+        query = {} 
+
     sims = list(collection.find(query))
+
     results = []
-    
     for sim in sims:
         sim_data = {
             '_id': str(sim['_id']),
             'MobileNumber': sim['MobileNumber'],
             'SimNumber': sim['SimNumber'],
-            'status': 'Allocated' if sim['SimNumber'] in vehicle_sims else sim.get('status', 'Available'),
+            'DateIn': sim.get('DateIn', ''),
+            'DateOut': sim.get('DateOut', ''),
+            'Vendor': sim.get('Vendor', ''),
+            'status': sim.get('status', 'Available'),
             'isActive': sim.get('isActive', True),
-            'IMEI': get_imei_for_sim(sim['SimNumber']),  # Implement this helper function
-            # Include all other fields...
+            'lastEditedBy': sim.get('lastEditedBy', 'N/A')
         }
+
+        if sim['SimNumber'] in allocated_sims:
+            sim_data['IMEI'] = allocated_sims[sim['SimNumber']]
+            sim_data['status'] = 'Allocated'
+
+        if sim_data['status'] in ['SafeCustody', 'Suspended']:
+            sim_data['statusDate'] = sim.get('statusDate', '')
+            if sim_data['status'] == 'SafeCustody':
+                sim_data['reactivationDate'] = sim.get('reactivationDate', '')
+        
         results.append(sim_data)
     
     return jsonify(results)
-
-def get_imei_for_sim(sim_number):
-    vehicle = db['vehicle_inventory'].find_one({'sim_number': sim_number})
-    return vehicle.get('imei', 'N/A') if vehicle else 'N/A'
 
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
