@@ -1,7 +1,8 @@
-from app.database import db
-from functools import wraps
 from flask import jsonify, redirect, url_for, request, flash
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity, get_jwt
+from functools import wraps
+from bson import ObjectId
+from app.database import db
 
 def roles_required(*required_roles):
     def wrapper(fn):
@@ -49,7 +50,7 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
         # Users can only access data for vehicles assigned to them
         inventory_data = list(vehicle_inventory.find({
             'CompanyName': userCompany,
-            'AssignedUsers': {'$in': [userID]}
+            'AssignedUsers': ObjectId(userID)
         }))
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         results = collection.find({"imei": {"$in": imei_list}, **collection_query})
@@ -82,7 +83,7 @@ def get_vehicle_data():
         # Users can only access data for vehicles assigned to them
         results = vehicle_inventory.find({
             'CompanyName': userCompany,
-            'AssignedUsers': {'$in': [userID]}
+            'AssignedUsers': ObjectId(userID)
         })
     else:
         # Client admins can access data for all vehicles in their company

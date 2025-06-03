@@ -125,6 +125,7 @@ def create_app(config_name='default'):
                         'userName': userName,
                         'assignedVehicles': assignedVehiclesList,
                     }
+                    socketio.emit('authentication_success', {'status': 'success'}, room=sid)
                 else:
                     flash("No vehicles assigned to this user", "warning")
                     socketio.emit('authentication_error', {'status': 'error', 'message': 'No vehicles assigned to this user'}, room=sid)

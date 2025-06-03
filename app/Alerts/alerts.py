@@ -23,7 +23,7 @@ def getImeis():
     elif 'user' in user_roles:
         return list((vehicle_inventory.find({
             'CompanyName': userCompany,
-            'AssignedUsers': {'$in': [userID]}
+            'AssignedUsers': ObjectId(userID)
         },{"IMEI": 1, "_id": 0})).distinct("IMEI"))
     else:
         return list((vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "_id": 0})).distinct("IMEI"))
@@ -40,7 +40,7 @@ def getImeisWithSpeed():
     elif 'user' in user_roles:
         return vehicle_inventory.find({
             'CompanyName': userCompany,
-            'AssignedUsers': {'$in': [userID]}
+            'AssignedUsers': ObjectId(userID)
         }, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
     else:
         return vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
@@ -477,12 +477,9 @@ def notification_alerts():
     
     alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
     
-    if alertConfig.get("alerts"):
-        if "speeding_alerts" in alertConfig.get("alerts", []):
-            imeisWithSpeed = getImeisWithSpeed()
-            imeis = imeisWithSpeed.distinct("IMEI")
-        else:
-            imeis = getImeis()
+    if alertConfig and alertConfig.get("alerts") and "speeding_alerts" in alertConfig["alerts"]:
+        imeisWithSpeed = getImeisWithSpeed()
+        imeis = imeisWithSpeed.distinct("IMEI")
     else:
         imeis = getImeis()
             
