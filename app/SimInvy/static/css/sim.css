@@ -321,7 +321,7 @@ input[type="date"] {
   max-height: 70vh; /* Adjust based on your needs */
 }
 
-..sim-table {
+.sim-table {
   width: 100%;
   min-width: 1200px; /* Ensure this is wide enough for all columns */
   border-collapse: collapse;
