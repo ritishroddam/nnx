@@ -316,19 +316,28 @@ input[type="date"] {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-top: 10px;
-  overflow-x: auto;
+  overflow: auto;
   position: relative;
+  max-height: 70vh; /* Adjust based on your needs */
 }
 
-.sim-table {
+..sim-table {
   width: 100%;
-  min-width: 1200px;
+  min-width: 1200px; /* Ensure this is wide enough for all columns */
   border-collapse: collapse;
   color: #333;
   table-layout: fixed;
 }
 
-.sim-table th,
+/* Fixed header implementation */
+.sim-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f5f5f5;
+}
+
+.sim-table th, 
 .sim-table td {
   padding: 12px 15px;
   text-align: left;
@@ -339,18 +348,26 @@ input[type="date"] {
   text-overflow: ellipsis;
 }
 
-.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 120px; }
-.sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 150px; }
-.sim-table th:nth-child(3), .sim-table td:nth-child(3) { width: 120px; }
-.sim-table th:nth-child(4), .sim-table td:nth-child(4) { width: 100px; }
-.sim-table th:nth-child(5), .sim-table td:nth-child(5) { width: 80px; }
-.sim-table th:nth-child(6), .sim-table td:nth-child(6) { width: 100px; }
-.sim-table th:nth-child(7), .sim-table td:nth-child(7) { width: 120px; }
-.sim-table th:nth-child(8), .sim-table td:nth-child(8) { width: 100px; }
-.sim-table th:nth-child(9), .sim-table td:nth-child(9) { width: 100px; }
-.sim-table th:nth-child(10), .sim-table td:nth-child(10) { width: 120px; }
-.sim-table th:nth-child(11), .sim-table td:nth-child(11) { width: 120px; }
-.sim-table th:nth-child(12), .sim-table td:nth-child(12) { width: 80px; }
+/* Column widths - adjust as needed */
+.sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 120px; min-width: 120px; }
+.sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 150px; min-width: 150px; }
+.sim-table th:nth-child(3), .sim-table td:nth-child(3) { width: 120px; min-width: 120px; }
+.sim-table th:nth-child(4), .sim-table td:nth-child(4) { width: 100px; min-width: 100px; }
+.sim-table th:nth-child(5), .sim-table td:nth-child(5) { width: 80px; min-width: 80px; }
+.sim-table th:nth-child(6), .sim-table td:nth-child(6) { width: 100px; min-width: 100px; }
+.sim-table th:nth-child(7), .sim-table td:nth-child(7) { width: 120px; min-width: 120px; }
+.sim-table th:nth-child(8), .sim-table td:nth-child(8) { width: 100px; min-width: 100px; }
+.sim-table th:nth-child(9), .sim-table td:nth-child(9) { width: 100px; min-width: 100px; }
+.sim-table th:nth-child(10), .sim-table td:nth-child(10) { width: 120px; min-width: 120px; }
+.sim-table th:nth-child(11), .sim-table td:nth-child(11) { width: 120px; min-width: 120px; }
+.sim-table th:nth-child(12), .sim-table td:nth-child(12) { width: 80px; min-width: 80px; }
+
+.sim-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f5f5f5;
+  z-index: 11; /* Higher than the body cells */
+}
 
 .sim-table th {
   background-color: #f5f5f5;
@@ -378,6 +395,20 @@ input[type="date"] {
   min-width: 80px;
   padding: 5px;
   box-sizing: border-box;
+}
+
+.sim-table-container::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.sim-table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.sim-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 /* Optional: dark mode support if you want to match DeviceInvy dark mode */
