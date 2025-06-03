@@ -1,6 +1,7 @@
 from flask import Flask, Blueprint, render_template, request, jsonify, flash
 from datetime import datetime, timedelta
 from pytz import timezone
+from bson import ObjectId
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
@@ -265,7 +266,7 @@ def get_vehicles():
             userCompany = claims.get('company')
             inventory_data = list(vehicle_inventory_collection.find({
                 'CompanyName': userCompany,
-                'AssignedUsers': {'$in': [userID]}
+                'AssignedUsers': ObjectId(userID),
             }))
         else:
             userCompany = claims.get('company')
