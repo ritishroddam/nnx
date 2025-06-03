@@ -78,20 +78,26 @@ def create_app(config_name='default'):
         try:
             sid = request.sid
             user_id = data.get('user_id')
-            company = data.get('company')  # Can be None
-            
+            company = data.get('company')
+            userRole = data.get('userRole')
+            userName = data.get('userName')            
             # Store user session info
-            user_sessions[sid] = {
-                'user_id': user_id,
-                'company': company
-            }
             
-
             user = db['users'].find_one({"_id": ObjectId(user_id)})
 
             if not user:
                 flash("Invalid user", "danger")
                 socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid user {user_id}'}, room=sid)
+                return
+            
+            if user['username'] != userName:
+                flash("Invalid username", "danger")
+                socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid username {userName}'}, room=sid)
+                return
+            
+            if user['role'] != userRole:
+                flash("Invalid user role", "danger")
+                socketio.emit('authentication_error', {'status': 'error', 'message': f'Invalid user role {userRole}'}, room=sid)
                 return
             
             if user['company'] != 'none':
@@ -107,22 +113,47 @@ def create_app(config_name='default'):
                     return
 
             # Add user to company room if they have one
-            if company not in (None, '', 'none'):
-                company = company.strip().lower()
-                if company not in company_rooms:
-                    company_rooms[company] = []
-                company_rooms[company].append(sid)
-                # socketio.enter_room(sid, f"company_{company}")
-                join_room(f"company_{company}")
-            else:
-                # Users without company see all data
-                # socketio.enter_room(sid, "all_data")
-                join_room("all_data")
-                
-            print(f"User {user_id} authenticated with company {company}")
-            print(company_rooms)
-            print("SID: ",sid)
-            socketio.emit('authentication_success', {'status': 'success'}, room=sid)
+            if userRole in ['user']:
+                assignedVehicles = list(db['vehicle_inventory'].find({"AssignedUsers": ObjectId(user_id)}, {"LicensePlateNumber": 1, "_id": 0}))
+                if assignedVehicles:
+                    assignedVehiclesList = [vehicle['LicensePlateNumber'] for vehicle in assignedVehicles]
+                    join_room(f"user_{user_id}")
+                    user_sessions[sid] = {
+                        'user_id': user_id,
+                        'company': company,
+                        'userRole': userRole,
+                        'userName': userName,
+                        'assignedVehicles': assignedVehiclesList,
+                    }
+                else:
+                    flash("No vehicles assigned to this user", "warning")
+                    socketio.emit('authentication_error', {'status': 'error', 'message': 'No vehicles assigned to this user'}, room=sid)
+                    return
+            else:     
+                if company not in (None, '', 'none'):
+                    company = company.strip().lower()
+                    if company not in company_rooms:
+                        company_rooms[company] = []
+                    company_rooms[company].append(sid)
+                    # socketio.enter_room(sid, f"company_{company}")
+                    join_room(f"company_{company}")
+                else:
+                    # Users without company see all data
+                    # socketio.enter_room(sid, "all_data")
+                    join_room("all_data")
+
+                print(f"User {user_id} authenticated with company {company}")
+                print(company_rooms)
+                print("SID: ",sid)
+                socketio.emit('authentication_success', {'status': 'success'}, room=sid)
+
+                user_sessions[sid] = {
+                    'user_id': user_id,
+                    'company': company,
+                    'userRole': userRole,
+                    'userName': userName,
+                }
+            
         except Exception as e:
             print(f"Authentication error: {e}")
             socketio.emit('authentication_error', {'status': 'error', 'message': str(e)}, room=sid)
@@ -162,8 +193,15 @@ def create_app(config_name='default'):
                 # Get the vehicle's company from inventory
                 imei = vehicle_data.get('imei')
                 vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
-
+                
+                assignedUsers = vehicle_info.get('AssignedUsers', []) if vehicle_info else []
                 company = vehicle_info.get('CompanyName') if vehicle_info else None
+                
+                if assignedUsers:
+                    for user_session in user_sessions.values():
+                        if user_session['userRole'] == 'user' and user_session['user_id'] in assignedUsers:
+                            socketio.emit('vehicle_update', vehicle_data, room=f"user_{user_session['user_id']}")
+                            print(f"Emitted {user_session['user_id']} data for IMEI {vehicle_data['imei']}")
 
                 if company:
                     company = company.strip().lower()

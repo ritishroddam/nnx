@@ -12,6 +12,8 @@ const userName = document
   .getElementById("username-data")
   .getAttribute("data-username");
 
+console.log("User Name:", userName);
+
 const userID = document
   .getElementById("userID-data")
   .getAttribute("data-userID");
@@ -36,6 +38,8 @@ socket.on("connect", () => {
   socket.emit("authenticate", {
     user_id: userID,
     company: companyNames,
+    userRole: userRole,
+    userName: userName,
   });
 });
 
