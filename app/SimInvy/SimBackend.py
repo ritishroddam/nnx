@@ -26,7 +26,6 @@ def format_date(date_str):
 @sim_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all vehicles with SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
     vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
