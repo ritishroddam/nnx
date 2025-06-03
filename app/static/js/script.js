@@ -36,6 +36,8 @@ socket.on("connect", () => {
   socket.emit("authenticate", {
     user_id: userID,
     company: companyNames,
+    userRole: userRole,
+    userName: userName,
   });
 });
 
