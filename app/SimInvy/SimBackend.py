@@ -76,6 +76,8 @@ def get_sims_by_status(status):
     sims = list(collection.find(query))
     for sim in sims:
         sim["_id"] = str(sim["_id"])
+        
+        sim.setdefault('status', 'Available')
         # Add IMEI if SIM is allocated to a vehicle
         if sim['SimNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['SimNumber']]

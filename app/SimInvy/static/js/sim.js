@@ -181,13 +181,16 @@ function filterSimsByStatus() {
       data.forEach(sim => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', sim._id);
-        row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
+        
+        // Handle status safely with a default value
+        const simStatus = sim.status || 'Available';
+        row.className = simStatus === 'Allocated' ? 'allocated' : simStatus.toLowerCase();
         
         row.innerHTML = `
           <td>${sim.MobileNumber}</td>
           <td>${sim.SimNumber}</td>
           <td>${sim.IMEI || 'N/A'}</td>
-          <td>${sim.status}</td>
+          <td>${simStatus}</td>
           <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
           <td>${sim.statusDate || ''}</td>
           <td>${sim.reactivationDate || ''}</td>
