@@ -181,7 +181,7 @@ function filterSimsByStatus() {
       data.forEach(sim => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', sim._id);
-        // row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
+        row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
         
         row.innerHTML = `
           <td>${sim.MobileNumber}</td>
