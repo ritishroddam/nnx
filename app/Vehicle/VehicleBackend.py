@@ -103,7 +103,7 @@ def getVehicleStatus(imei_list):
                     last_change_time = h["date_time"]
 
                 status = current_status
-                status_time_delta = (latest["date_time"] - last_change_time).total_seconds() * 1000
+                status_time_delta = (now - last_change_time).total_seconds() * 1000
                 status_time_str = format_seconds(status_time_delta)
 
             statuses.append({
