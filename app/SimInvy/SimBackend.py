@@ -62,26 +62,23 @@ def get_sims_by_status(status):
     # Build query based on status
     query = {}
     if status == 'Available':
-        query = {'SimNumber': {'$nin': list(sim_to_imei.keys())}}
+        query = {'status': 'Available'}
     elif status == 'Allocated':
-        query = {'SimNumber': {'$in': list(sim_to_imei.keys())}}
+        query = {'status': 'Allocated'}  # Changed to filter by status directly
     elif status == 'SafeCustody':
         query = {'status': 'SafeCustody'}
     elif status == 'Suspended':
         query = {'status': 'Suspended'}
+    elif status == 'All':
+        query = {}  # Return all SIMs
     
     # Get SIMs and add IMEI info
     sims = list(collection.find(query))
     for sim in sims:
         sim["_id"] = str(sim["_id"])
+        # Add IMEI if SIM is allocated to a vehicle
         if sim['SimNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['SimNumber']]
-            # Explicitly set status to Allocated for allocated SIMs
-            sim['status'] = 'Allocated'
-            sim['isActive'] = True
-        else:
-            sim.setdefault('status', 'Available')
-            sim.setdefault('isActive', True)
     
     return jsonify(sims)
 
