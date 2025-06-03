@@ -48,43 +48,48 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    # Get all vehicle SIM numbers
-    vehicle_sims = list(db['vehicle_inventory'].distinct('sim_number'))
+    try:
+        # Get all vehicles and their SIM numbers
+        vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
+        sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
+        allocated_sim_numbers = set(sim_to_imei.keys())
+
+        # Get all SIMs from inventory
+        all_sims = list(collection.find({}))
+        
+        results = []
+        for sim in all_sims:
+            sim_number = sim['SimNumber']
+            
+            # Determine actual status (Allocated takes priority)
+            actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+            
+            # Skip if not matching the requested status
+            if status != 'All' and actual_status != status:
+                continue
+                
+            # Prepare SIM data
+            sim_data = {
+                '_id': str(sim['_id']),
+                'MobileNumber': sim['MobileNumber'],
+                'SimNumber': sim_number,
+                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+                'status': actual_status,
+                'isActive': sim.get('isActive', True),
+                'statusDate': sim.get('statusDate', ''),
+                'reactivationDate': sim.get('reactivationDate', ''),
+                'DateIn': sim.get('DateIn', ''),
+                'DateOut': sim.get('DateOut', ''),
+                'Vendor': sim.get('Vendor', ''),
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+            }
+            results.append(sim_data)
+        
+        return jsonify(results)
     
-    # Base query
-    query = {}
-    
-    if status == 'Available':
-        # SIMs not in any vehicle AND marked as Available
-        query = {
-            'SimNumber': {'$nin': vehicle_sims},
-            'status': 'Available'
-        }
-    elif status == 'Allocated':
-        # SIMs that are in vehicles
-        query = {'SimNumber': {'$in': vehicle_sims}}
-    elif status in ['SafeCustody', 'Suspended']:
-        query = {'status': status}
-    elif status == 'All':
-        query = {}
-    
-    # Get SIMs and process them
-    sims = list(collection.find(query))
-    results = []
-    
-    for sim in sims:
-        sim_data = {
-            '_id': str(sim['_id']),
-            'MobileNumber': sim['MobileNumber'],
-            'SimNumber': sim['SimNumber'],
-            'status': 'Allocated' if sim['SimNumber'] in vehicle_sims else sim.get('status', 'Available'),
-            'isActive': sim.get('isActive', True),
-            'IMEI': get_imei_for_sim(sim['SimNumber']),  # Implement this helper function
-            # Include all other fields...
-        }
-        results.append(sim_data)
-    
-    return jsonify(results)
+    except Exception as e:
+        print(f"Error in get_sims_by_status: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 def get_imei_for_sim(sim_number):
     vehicle = db['vehicle_inventory'].find_one({'sim_number': sim_number})

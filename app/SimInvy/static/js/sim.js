@@ -171,7 +171,7 @@ function filterSimsByStatus() {
     .then(response => response.json())
     .then(data => {
       const tableBody = document.getElementById('simTable');
-      tableBody.innerHTML = '';
+      tableBody.innerHTML = '<tr><td colspan="12">Loading SIM data...</td></tr>';
       
       if (data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="12" class="no-results">No SIMs found with this status</td></tr>';
@@ -215,29 +215,37 @@ function filterSimsByStatus() {
     });
 }
 
-function renderSimTable(sims) {
+ffunction renderSimTable(sims) {
   const tableBody = document.getElementById('simTable');
   tableBody.innerHTML = '';
   
-  if (sims.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="12">No SIMs found</td></tr>';
+  if (!sims || sims.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="12">No SIMs found with this status</td></tr>';
     return;
   }
 
   sims.forEach(sim => {
     const row = document.createElement('tr');
+    row.setAttribute('data-id', sim._id);
     row.className = sim.status.toLowerCase();
+    
     row.innerHTML = `
       <td>${sim.MobileNumber}</td>
       <td>${sim.SimNumber}</td>
-      <td>${sim.IMEI || 'N/A'}</td>
+      <td>${sim.IMEI}</td>
       <td>${sim.status}</td>
       <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
-      <!-- other columns -->
+      <td>${sim.statusDate || ''}</td>
+      <td>${sim.reactivationDate || ''}</td>
+      <td>${sim.DateIn || ''}</td>
+      <td>${sim.DateOut || ''}</td>
+      <td>${sim.Vendor || ''}</td>
+      <td>${sim.lastEditedBy || 'N/A'}</td>
       <td>
-        <button class="edit-btn" onclick="editSim('${sim._id}')">Edit</button>
+        <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
       </td>
     `;
+    
     tableBody.appendChild(row);
   });
 }
