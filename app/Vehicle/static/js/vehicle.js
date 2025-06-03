@@ -116,10 +116,10 @@ async function updateData(data) {
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "Offline";
       statusClass = "vehicle-status-offline";
-    } else if (data.ignition === "0" && speed === 0) {
+    } else if (data.ignition === "0" && data.speed === 0) {
       statusText = "Stopped";
       statusClass = "vehicle-status-stopped";
-    } else if (data.ignition === "1" && speed === 0) {
+    } else if (data.ignition === "1" && data.speed === 0) {
       statusText = "Idle";
       statusClass = "vehicle-status-idle";
     }
