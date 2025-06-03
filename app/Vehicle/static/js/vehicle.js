@@ -112,20 +112,17 @@ async function updateData(data) {
     const lastUpdated = convertToDate(data.date, data.time);
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
+    let statusText;
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "Offline";
-      statusClass = "vehicle-status-offline";
     } else if (data.ignition === "0" && data.speed === 0) {
       statusText = "Stopped";
-      statusClass = "vehicle-status-stopped";
     } else if (data.ignition === "1" && data.speed === 0) {
       statusText = "Idle";
-      statusClass = "vehicle-status-idle";
     }
     else{
       statusText = "Moving";
-      statusClass = "vehicle-status-moving";
     }
 
     if (statusText === oldData.status){
