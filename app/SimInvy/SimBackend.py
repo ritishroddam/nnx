@@ -48,58 +48,57 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+    try:
+        # Get all vehicles and their SIM numbers
+        vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
+        allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+        sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
 
-    allocated_sims = {v['sim_number']: v.get('imei', 'N/A') 
-                     for v in vehicles if 'sim_number' in v}
-
-    query = {}
-
-    if status == 'Available':
-        query = {
-            'SimNumber': {'$nin': list(allocated_sims.keys())},
-            'status': 'Available'
-        }
-    elif status == 'Allocated':
-        query = {
-            'SimNumber': {'$in': list(allocated_sims.keys())}
-        }
-    elif status == 'SafeCustody':
-        query = {'status': 'SafeCustody'}
-    elif status == 'Suspended':
-        query = {'status': 'Suspended'}
-    elif status == 'All':
-        query = {} 
-
-    sims = list(collection.find(query))
-
-    results = []
-    for sim in sims:
-        sim_data = {
-            '_id': str(sim['_id']),
-            'MobileNumber': sim['MobileNumber'],
-            'SimNumber': sim['SimNumber'],
-            'DateIn': sim.get('DateIn', ''),
-            'DateOut': sim.get('DateOut', ''),
-            'Vendor': sim.get('Vendor', ''),
-            'status': sim.get('status', 'Available'),
-            'isActive': sim.get('isActive', True),
-            'lastEditedBy': sim.get('lastEditedBy', 'N/A')
-        }
-
-        if sim['SimNumber'] in allocated_sims:
-            sim_data['IMEI'] = allocated_sims[sim['SimNumber']]
-            sim_data['status'] = 'Allocated'
-
-        if sim_data['status'] in ['SafeCustody', 'Suspended']:
-            sim_data['statusDate'] = sim.get('statusDate', '')
-            if sim_data['status'] == 'SafeCustody':
-                sim_data['reactivationDate'] = sim.get('reactivationDate', '')
+        # Get all SIMs from inventory
+        all_sims = list(collection.find({}))
         
-        results.append(sim_data)
-    
-    return jsonify(results)
+        results = []
+        for sim in all_sims:
+            sim_number = sim.get('SimNumber', '')
+            
+            # Determine actual status (Allocated takes priority over stored status)
+            actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+            
+            # Skip if not matching the requested status (unless 'All')
+            if status != 'All' and actual_status != status:
+                continue
+                
+            # Prepare SIM data
+            sim_data = {
+                '_id': str(sim.get('_id', '')),
+                'MobileNumber': sim.get('MobileNumber', ''),
+                'SimNumber': sim_number,
+                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+                'status': actual_status,
+                'isActive': sim.get('isActive', True),
+                'statusDate': sim.get('statusDate', ''),
+                'reactivationDate': sim.get('reactivationDate', ''),
+                'DateIn': sim.get('DateIn', ''),
+                'DateOut': sim.get('DateOut', ''),
+                'Vendor': sim.get('Vendor', ''),
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+            }
+            
+            # Add status-specific dates if needed
+            if actual_status in ['SafeCustody', 'Suspended']:
+                if 'statusDate' not in sim_data or not sim_data['statusDate']:
+                    sim_data['statusDate'] = datetime.utcnow().strftime('%Y-%m-%d')
+                if actual_status == 'SafeCustody' and ('reactivationDate' not in sim_data or not sim_data['reactivationDate']):
+                    reactivation_date = datetime.utcnow() + timedelta(days=90)
+                    sim_data['reactivationDate'] = reactivation_date.strftime('%Y-%m-%d')
+            
+            results.append(sim_data)
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        print(f"Error in get_sims_by_status: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
