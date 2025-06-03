@@ -477,12 +477,9 @@ def notification_alerts():
     
     alertConfig = db['userConfig'].find_one({"userID": ObjectId(userId)}, {"_id": 0, "alerts": 1})
     
-    if alertConfig.get("alerts"):
-        if "speeding_alerts" in alertConfig.get("alerts", []):
-            imeisWithSpeed = getImeisWithSpeed()
-            imeis = imeisWithSpeed.distinct("IMEI")
-        else:
-            imeis = getImeis()
+    if alertConfig and alertConfig.get("alerts") and "speeding_alerts" in alertConfig["alerts"]:
+        imeisWithSpeed = getImeisWithSpeed()
+        imeis = imeisWithSpeed.distinct("IMEI")
     else:
         imeis = getImeis()
             
