@@ -76,7 +76,9 @@ def get_sims_by_status(status):
         sim["_id"] = str(sim["_id"])
         if sim['SimNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['SimNumber']]
+            # Explicitly set status to Allocated for allocated SIMs
             sim['status'] = 'Allocated'
+            sim['isActive'] = True
         else:
             sim.setdefault('status', 'Available')
             sim.setdefault('isActive', True)

@@ -47,32 +47,27 @@ document.addEventListener("DOMContentLoaded", function() {
   const closeModalButtons = document.querySelectorAll(".close-modal");
   const cancelBtn = document.getElementById("cancelBtn");
 
-  // Open Manual Entry Modal
   manualEntryBtn.addEventListener("click", function() {
     manualEntryModal.style.display = "block";
     document.getElementById("MobileNumber").focus();
   });
 
-  // Open Upload Modal
   uploadBtn.addEventListener("click", function() {
     uploadModal.style.display = "block";
   });
 
-  // Close modals when clicking X
   closeModalButtons.forEach(button => {
     button.addEventListener("click", function() {
       this.closest(".modal").style.display = "none";
     });
   });
 
-  // Close modals when clicking outside
   window.addEventListener("click", function(event) {
     if (event.target.classList.contains("modal")) {
       event.target.style.display = "none";
     }
   });
 
-  // Close Manual Entry Modal with Cancel button
   cancelBtn.addEventListener("click", function() {
     manualEntryModal.style.display = "none";
   });
@@ -117,25 +112,21 @@ document.addEventListener("DOMContentLoaded", function() {
         ? new Date(dateOutValue)
         : null;
 
-      // Validate DateIn (should not be in the future)
       if (dateInObj && dateInObj > today) {
         alert("Future dates are not allowed for 'Date In'.");
         isValid = false;
       }
 
-      // Validate DateOut (should not be in the future)
       if (dateOutObj && dateOutObj > today) {
         alert("Future dates are not allowed for 'Date Out'.");
         isValid = false;
       }
 
-      // Ensure DateIn is earlier than DateOut
       if (dateInObj && dateOutObj && dateInObj >= dateOutObj) {
         alert("'Date In' must be earlier than 'Date Out'.");
         isValid = false;
       }
 
-      // Validate Mobile Number
       if (!indianMobileRegex.test(mobileNumber)) {
         mobileError.textContent =
           "Please enter a valid 10-digit Indian mobile number.";
@@ -145,7 +136,6 @@ document.addEventListener("DOMContentLoaded", function() {
         mobileError.classList.add("hidden");
       }
 
-      // Validate SIM Number (must be 20 digits)
       if (simNumber.length !== 20 || isNaN(simNumber)) {
         simError.textContent = "SIM Number must be exactly 20 digits.";
         simError.classList.remove("hidden");
@@ -154,20 +144,18 @@ document.addEventListener("DOMContentLoaded", function() {
         simError.classList.add("hidden");
       }
 
-      // Prevent form submission if any validation fails
       if (!isValid) {
         event.preventDefault();
       }
     });
 
-  // Prevent manual future date entry
   function preventManualFutureDates(event) {
     const input = event.target;
     if (input.value) {
       const enteredDate = new Date(input.value);
       if (enteredDate > today) {
         alert("Future dates are not allowed.");
-        input.value = formattedToday; // Reset to today
+        input.value = formattedToday; 
       }
     }
   }
@@ -193,7 +181,8 @@ function filterSimsByStatus() {
       data.forEach(sim => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', sim._id);
-        row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
+        row.className = sim.status.toLowerCase();
+        // row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
         
         row.innerHTML = `
           <td>${sim.MobileNumber}</td>
@@ -224,7 +213,6 @@ function filterSimsByStatus() {
     });
 }
 
-// Add this helper function
 function formatDateForInput(dateStr) {
   if (!dateStr) return '';
   const parts = dateStr.split('-');
@@ -248,7 +236,6 @@ function editSim(simId) {
     row.setAttribute(`data-original-col-${i}`, row.cells[i].innerText);
   }
 
-  // Store original values (columns 0-10)
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
   row.setAttribute("data-original-sim", row.cells[1].innerText);
   row.setAttribute("data-original-imei", row.cells[2].innerText);
@@ -265,12 +252,10 @@ function editSim(simId) {
 
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
 
-  // Status dropdown options
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
     .map(opt => `<option value="${opt}" ${row.cells[3].innerText === opt ? 'selected' : ''}>${opt}</option>`)
     .join('');
 
-  // Replace row data with input fields (columns 0-9)
   row.cells[0].innerHTML = `<input type="text" value="${row.getAttribute("data-original-mobile")}" style="min-width: 120px"/>`;
   row.cells[1].innerHTML = `<input type="text" value="${row.getAttribute("data-original-sim")}" style="min-width: 120px"/>`;
   row.cells[2].innerHTML = `<span>${row.getAttribute("data-original-imei") || 'N/A'}</span>`;
@@ -291,7 +276,6 @@ function editSim(simId) {
   row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
   row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
 
-  // Last Edited By column (column 10)
   row.cells[10].innerHTML = `
     <input type="text" 
            value="${row.getAttribute("data-original-editor") || ''}" 
@@ -301,7 +285,6 @@ function editSim(simId) {
     />
 `;
 
-  // Actions column (column 11) - ONLY place buttons here
   row.cells[11].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
@@ -309,12 +292,10 @@ function editSim(simId) {
 
   row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  // Add event listener for status change to handle SafeCustody/Suspended fields
   const statusSelect = row.cells[3].querySelector('#editStatus');
   const statusDateInput = row.cells[5].querySelector('#editStatusDate');
   const reactivationDateInput = row.cells[6].querySelector('#editReactivationDate');
-  
-  // Set initial visibility
+
   updateStatusFieldsVisibility(statusSelect.value, statusDateInput, reactivationDateInput);
   
   statusSelect.addEventListener('change', function() {
@@ -327,7 +308,6 @@ function updateStatusFieldsVisibility(status, statusDateInput, reactivationDateI
     statusDateInput.style.display = 'block';
     if (status === 'SafeCustody') {
       reactivationDateInput.style.display = 'block';
-      // Calculate 90 days from now for reactivation date
       const today = new Date();
       const reactivationDate = new Date();
       reactivationDate.setDate(today.getDate() + 90);
@@ -347,7 +327,6 @@ function cancelEdit(simId) {
   if (row) {
     row.classList.remove('editing');
 
-  // Restore original values from stored attributes
   row.cells[0].innerText = row.getAttribute("data-original-mobile");
   row.cells[1].innerText = row.getAttribute("data-original-sim");
   row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
@@ -372,7 +351,6 @@ function saveSim(simId) {
   if (row) {
     row.classList.remove('editing');
 
-  // Get updated data from input fields
   const updatedData = {
     MobileNumber: row.cells[0].querySelector("input").value.trim(),
     SimNumber: row.cells[1].querySelector("input").value.trim(),
@@ -386,7 +364,6 @@ function saveSim(simId) {
     lastEditedBy: row.cells[10].querySelector("input").value.trim()
   };
 
-  // Validation logic
   const errors = [];
   const indianMobileRegex = /^[6-9]\d{9}$/;
 
@@ -411,7 +388,6 @@ function saveSim(simId) {
     return;
   }
 
-  // Send the updated data to the server
   fetch(`/simInvy/edit_sim/${simId}`, {
     method: "POST",
     headers: {
@@ -428,7 +404,6 @@ function saveSim(simId) {
     })
     .then((data) => {
       if (data.success) {
-        // Update the table row with the new values
         row.cells[0].innerText = updatedData.MobileNumber;
         row.cells[1].innerText = updatedData.SimNumber;
         row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
