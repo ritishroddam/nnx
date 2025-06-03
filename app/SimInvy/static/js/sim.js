@@ -171,7 +171,7 @@ function filterSimsByStatus() {
     .then(response => response.json())
     .then(data => {
       const tableBody = document.getElementById('simTable');
-      tableBody.innerHTML = '<tr><td colspan="12">Loading SIM data...</td></tr>';
+      tableBody.innerHTML = '';
       
       if (data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="12" class="no-results">No SIMs found with this status</td></tr>';
@@ -181,16 +181,13 @@ function filterSimsByStatus() {
       data.forEach(sim => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', sim._id);
-        
-        // Handle status safely with a default value
-        const simStatus = sim.status || 'Available';
-        row.className = simStatus === 'Allocated' ? 'allocated' : simStatus.toLowerCase();
+        row.className = sim.status === 'Allocated' ? 'allocated' : sim.status.toLowerCase();
         
         row.innerHTML = `
           <td>${sim.MobileNumber}</td>
           <td>${sim.SimNumber}</td>
           <td>${sim.IMEI || 'N/A'}</td>
-          <td>${simStatus}</td>
+          <td>${sim.status}</td>
           <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
           <td>${sim.statusDate || ''}</td>
           <td>${sim.reactivationDate || ''}</td>
@@ -213,41 +210,6 @@ function filterSimsByStatus() {
       errorBox.classList.remove('hidden');
       setTimeout(() => errorBox.classList.add('hidden'), 5000);
     });
-}
-
-ffunction renderSimTable(sims) {
-  const tableBody = document.getElementById('simTable');
-  tableBody.innerHTML = '';
-  
-  if (!sims || sims.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="12">No SIMs found with this status</td></tr>';
-    return;
-  }
-
-  sims.forEach(sim => {
-    const row = document.createElement('tr');
-    row.setAttribute('data-id', sim._id);
-    row.className = sim.status.toLowerCase();
-    
-    row.innerHTML = `
-      <td>${sim.MobileNumber}</td>
-      <td>${sim.SimNumber}</td>
-      <td>${sim.IMEI}</td>
-      <td>${sim.status}</td>
-      <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
-      <td>${sim.statusDate || ''}</td>
-      <td>${sim.reactivationDate || ''}</td>
-      <td>${sim.DateIn || ''}</td>
-      <td>${sim.DateOut || ''}</td>
-      <td>${sim.Vendor || ''}</td>
-      <td>${sim.lastEditedBy || 'N/A'}</td>
-      <td>
-        <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
-      </td>
-    `;
-    
-    tableBody.appendChild(row);
-  });
 }
 
 function formatDateForInput(dateStr) {

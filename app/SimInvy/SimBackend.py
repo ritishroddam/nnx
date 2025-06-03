@@ -26,6 +26,7 @@ def format_date(date_str):
 @sim_bp.route('/page')
 @jwt_required()
 def page():
+    # Get all vehicles with SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
     vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
@@ -48,52 +49,58 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    try:
-        # Get all vehicles and their SIM numbers
-        vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
-        sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
-        allocated_sim_numbers = set(sim_to_imei.keys())
+    vehicle_collection = db['vehicle_inventory']
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
 
-        # Get all SIMs from inventory
-        all_sims = list(collection.find({}))
+    allocated_sims = {v['sim_number']: v.get('imei', 'N/A') 
+                     for v in vehicles if 'sim_number' in v}
+
+    query = {}
+
+    if status == 'Available':
+        query = {
+            'SimNumber': {'$nin': list(allocated_sims.keys())},
+            'status': 'Available'
+        }
+    elif status == 'Allocated':
+        query = {
+            'SimNumber': {'$in': list(allocated_sims.keys())}
+        }
+    elif status == 'SafeCustody':
+        query = {'status': 'SafeCustody'}
+    elif status == 'Suspended':
+        query = {'status': 'Suspended'}
+    elif status == 'All':
+        query = {} 
+
+    sims = list(collection.find(query))
+
+    results = []
+    for sim in sims:
+        sim_data = {
+            '_id': str(sim['_id']),
+            'MobileNumber': sim['MobileNumber'],
+            'SimNumber': sim['SimNumber'],
+            'DateIn': sim.get('DateIn', ''),
+            'DateOut': sim.get('DateOut', ''),
+            'Vendor': sim.get('Vendor', ''),
+            'status': sim.get('status', 'Available'),
+            'isActive': sim.get('isActive', True),
+            'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+        }
+
+        if sim['SimNumber'] in allocated_sims:
+            sim_data['IMEI'] = allocated_sims[sim['SimNumber']]
+            sim_data['status'] = 'Allocated'
+
+        if sim_data['status'] in ['SafeCustody', 'Suspended']:
+            sim_data['statusDate'] = sim.get('statusDate', '')
+            if sim_data['status'] == 'SafeCustody':
+                sim_data['reactivationDate'] = sim.get('reactivationDate', '')
         
-        results = []
-        for sim in all_sims:
-            sim_number = sim['SimNumber']
-            
-            # Determine actual status (Allocated takes priority)
-            actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
-            
-            # Skip if not matching the requested status
-            if status != 'All' and actual_status != status:
-                continue
-                
-            # Prepare SIM data
-            sim_data = {
-                '_id': str(sim['_id']),
-                'MobileNumber': sim['MobileNumber'],
-                'SimNumber': sim_number,
-                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
-                'status': actual_status,
-                'isActive': sim.get('isActive', True),
-                'statusDate': sim.get('statusDate', ''),
-                'reactivationDate': sim.get('reactivationDate', ''),
-                'DateIn': sim.get('DateIn', ''),
-                'DateOut': sim.get('DateOut', ''),
-                'Vendor': sim.get('Vendor', ''),
-                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
-            }
-            results.append(sim_data)
-        
-        return jsonify(results)
+        results.append(sim_data)
     
-    except Exception as e:
-        print(f"Error in get_sims_by_status: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-def get_imei_for_sim(sim_number):
-    vehicle = db['vehicle_inventory'].find_one({'sim_number': sim_number})
-    return vehicle.get('imei', 'N/A') if vehicle else 'N/A'
+    return jsonify(results)
 
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
