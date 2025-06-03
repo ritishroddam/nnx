@@ -8,7 +8,7 @@ from app.database import db # type: ignore
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
 from app.models import User # type: ignore
 from app.utils import roles_required # type: ignore
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
@@ -26,7 +26,6 @@ def format_date(date_str):
 @sim_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all vehicles with SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
     vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
@@ -49,58 +48,57 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+    try:
+        # Get all vehicles and their SIM numbers
+        vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
+        allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+        sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
 
-    allocated_sims = {v['sim_number']: v.get('imei', 'N/A') 
-                     for v in vehicles if 'sim_number' in v}
-
-    query = {}
-
-    if status == 'Available':
-        query = {
-            'SimNumber': {'$nin': list(allocated_sims.keys())},
-            'status': 'Available'
-        }
-    elif status == 'Allocated':
-        query = {
-            'SimNumber': {'$in': list(allocated_sims.keys())}
-        }
-    elif status == 'SafeCustody':
-        query = {'status': 'SafeCustody'}
-    elif status == 'Suspended':
-        query = {'status': 'Suspended'}
-    elif status == 'All':
-        query = {} 
-
-    sims = list(collection.find(query))
-
-    results = []
-    for sim in sims:
-        sim_data = {
-            '_id': str(sim['_id']),
-            'MobileNumber': sim['MobileNumber'],
-            'SimNumber': sim['SimNumber'],
-            'DateIn': sim.get('DateIn', ''),
-            'DateOut': sim.get('DateOut', ''),
-            'Vendor': sim.get('Vendor', ''),
-            'status': sim.get('status', 'Available'),
-            'isActive': sim.get('isActive', True),
-            'lastEditedBy': sim.get('lastEditedBy', 'N/A')
-        }
-
-        if sim['SimNumber'] in allocated_sims:
-            sim_data['IMEI'] = allocated_sims[sim['SimNumber']]
-            sim_data['status'] = 'Allocated'
-
-        if sim_data['status'] in ['SafeCustody', 'Suspended']:
-            sim_data['statusDate'] = sim.get('statusDate', '')
-            if sim_data['status'] == 'SafeCustody':
-                sim_data['reactivationDate'] = sim.get('reactivationDate', '')
+        # Get all SIMs from inventory
+        all_sims = list(collection.find({}))
         
-        results.append(sim_data)
-    
-    return jsonify(results)
+        results = []
+        for sim in all_sims:
+            sim_number = sim.get('SimNumber', '')
+            
+            # Determine actual status (Allocated takes priority over stored status)
+            actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+            
+            # Skip if not matching the requested status (unless 'All')
+            if status != 'All' and actual_status != status:
+                continue
+                
+            # Prepare SIM data
+            sim_data = {
+                '_id': str(sim.get('_id', '')),
+                'MobileNumber': sim.get('MobileNumber', ''),
+                'SimNumber': sim_number,
+                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+                'status': actual_status,
+                'isActive': sim.get('isActive', True),
+                'statusDate': sim.get('statusDate', ''),
+                'reactivationDate': sim.get('reactivationDate', ''),
+                'DateIn': sim.get('DateIn', ''),
+                'DateOut': sim.get('DateOut', ''),
+                'Vendor': sim.get('Vendor', ''),
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+            }
+            
+            # Add status-specific dates if needed
+            if actual_status in ['SafeCustody', 'Suspended']:
+                if 'statusDate' not in sim_data or not sim_data['statusDate']:
+                    sim_data['statusDate'] = datetime.utcnow().strftime('%Y-%m-%d')
+                if actual_status == 'SafeCustody' and ('reactivationDate' not in sim_data or not sim_data['reactivationDate']):
+                    reactivation_date = datetime.utcnow() + timedelta(days=90)
+                    sim_data['reactivationDate'] = reactivation_date.strftime('%Y-%m-%d')
+            
+            results.append(sim_data)
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        print(f"Error in get_sims_by_status: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
@@ -286,21 +284,54 @@ def download_template():
 @sim_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    sims = list(collection.find({}, {"_id": 0})) 
-    
-    if not sims:
-        return "No data available", 404
+    try:
+        # Get all SIMs and convert to list of dicts
+        sims = list(collection.find({}, {"_id": 0}))
+        
+        if not sims:
+            return "No data available", 404
 
-    df = pd.DataFrame(sims) 
-    
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+        # Process each SIM to remove timezone info from datetime fields
+        processed_sims = []
+        datetime_fields = ['lastEditedAt', 'statusDate', 'reactivationDate', 'DateIn', 'DateOut']
+        
+        for sim in sims:
+            processed_sim = {}
+            for key, value in sim.items():
+                if key in datetime_fields and value is not None:
+                    if isinstance(value, datetime):
+                        # Convert to naive datetime (without timezone)
+                        processed_sim[key] = value.replace(tzinfo=None)
+                    elif isinstance(value, str):
+                        try:
+                            # Parse string and convert to naive datetime
+                            dt = datetime.strptime(value, '%Y-%m-%d')
+                            processed_sim[key] = dt
+                        except ValueError:
+                            # If parsing fails, keep original string value
+                            processed_sim[key] = value
+                    else:
+                        processed_sim[key] = value
+                else:
+                    processed_sim[key] = value
+            processed_sims.append(processed_sim)
 
-    output.seek(0)
+        # Create DataFrame from processed data
+        df = pd.DataFrame(processed_sims)
+        
+        # Create Excel file in memory
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl", datetime_format='YYYY-MM-DD') as writer:
+            df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+        
+        output.seek(0)
 
-    return Response(
-        output,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
-    )
+        return Response(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
+        )
+        
+    except Exception as e:
+        print(f"Error generating Excel file: {str(e)}")
+        return jsonify({'error': str(e)}), 500
