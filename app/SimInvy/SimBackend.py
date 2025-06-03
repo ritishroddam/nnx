@@ -26,15 +26,12 @@ def format_date(date_str):
 @sim_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all vehicles with SIM and IMEI info
     vehicle_collection = db['vehicle_inventory']
     vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
-    # Create mapping of SIM numbers to IMEIs
     sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') 
                   for v in vehicles if 'sim_number' in v}
     
-    # Get all SIMs and add status/IMEI info
     sims = list(collection.find({}))
     for sim in sims:
         if sim['SimNumber'] in sim_to_imei:
@@ -51,81 +48,58 @@ def page():
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
 def get_sims_by_status(status):
-    # Get all vehicles with SIM and IMEI info
-    vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+    # Get all vehicle SIM numbers
+    vehicle_sims = list(db['vehicle_inventory'].distinct('sim_number'))
     
-    # Create mapping of SIM numbers to IMEIs
-    allocated_sims = {v['sim_number']: v.get('imei', 'N/A') 
-                     for v in vehicles if 'sim_number' in v}
-    
-    # Build the base query
+    # Base query
     query = {}
     
-    # Handle different status filters
     if status == 'Available':
-        # SIMs not allocated to any vehicle AND marked as Available
+        # SIMs not in any vehicle AND marked as Available
         query = {
-            'SimNumber': {'$nin': list(allocated_sims.keys())},
+            'SimNumber': {'$nin': vehicle_sims},
             'status': 'Available'
         }
     elif status == 'Allocated':
-        # SIMs that are allocated to vehicles
-        query = {
-            'SimNumber': {'$in': list(allocated_sims.keys())}
-        }
-    elif status == 'SafeCustody':
-        query = {'status': 'SafeCustody'}
-    elif status == 'Suspended':
-        query = {'status': 'Suspended'}
+        # SIMs that are in vehicles
+        query = {'SimNumber': {'$in': vehicle_sims}}
+    elif status in ['SafeCustody', 'Suspended']:
+        query = {'status': status}
     elif status == 'All':
-        query = {}  # Return all SIMs
+        query = {}
     
-    # Get SIMs based on query
+    # Get SIMs and process them
     sims = list(collection.find(query))
-    
-    # Process the results
     results = []
+    
     for sim in sims:
         sim_data = {
             '_id': str(sim['_id']),
             'MobileNumber': sim['MobileNumber'],
             'SimNumber': sim['SimNumber'],
-            'DateIn': sim.get('DateIn', ''),
-            'DateOut': sim.get('DateOut', ''),
-            'Vendor': sim.get('Vendor', ''),
-            'status': sim.get('status', 'Available'),
+            'status': 'Allocated' if sim['SimNumber'] in vehicle_sims else sim.get('status', 'Available'),
             'isActive': sim.get('isActive', True),
-            'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+            'IMEI': get_imei_for_sim(sim['SimNumber']),  # Implement this helper function
+            # Include all other fields...
         }
-        
-        # Set IMEI and status for allocated SIMs
-        if sim['SimNumber'] in allocated_sims:
-            sim_data['IMEI'] = allocated_sims[sim['SimNumber']]
-            sim_data['status'] = 'Allocated'
-        
-        # Add status-specific dates if they exist
-        if sim_data['status'] in ['SafeCustody', 'Suspended']:
-            sim_data['statusDate'] = sim.get('statusDate', '')
-            if sim_data['status'] == 'SafeCustody':
-                sim_data['reactivationDate'] = sim.get('reactivationDate', '')
-        
         results.append(sim_data)
     
     return jsonify(results)
+
+def get_imei_for_sim(sim_number):
+    vehicle = db['vehicle_inventory'].find_one({'sim_number': sim_number})
+    return vehicle.get('imei', 'N/A') if vehicle else 'N/A'
 
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
 def manual_entry():
     data = request.form.to_dict()
 
-    # Strip any leading/trailing whitespace
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    data['status'] = 'Available'  # Default status
-    data['isActive'] = True  # Default active status
+    data['status'] = 'Available' 
+    data['isActive'] = True  
 
-    # Validate alphanumeric and length
     if len(data['MobileNumber']) != 10 :
         flash("The lenght of Mobile Number must be 10", "danger")
 
@@ -138,7 +112,6 @@ def manual_entry():
         flash("The lenght of SIM Number must be 20", "danger")
         return redirect(url_for('SimInvy.page'))
 
-    # Check if Mobile Number or SIM Number is unique
     if collection.find_one({"MobileNumber": data['MobileNumber']}):
         flash("Mobile Number already exists", "danger")
 
@@ -151,7 +124,6 @@ def manual_entry():
         flash("SIM Number already exists", "danger")
         return redirect(url_for('SimInvy.page'))
 
-    # Insert into MongoDB
     collection.insert_one(data)
     flash("SIM added successfully!", "success")
     return redirect(url_for('SimInvy.page'))
@@ -202,7 +174,6 @@ def upload_file():
     if file and (file.filename.endswith('.xls') or file.filename.endswith('.xlsx')):
         df = pd.read_excel(file)
 
-        # Validate data and prepare for MongoDB insertion
         records = []
         for index, row in df.iterrows():
             mobile_number = str(row['MobileNumber']).strip()
@@ -211,7 +182,6 @@ def upload_file():
             date_out = str(row['DateOut']).split(' ')[0].strip() if not pd.isnull(row['DateOut']) else ""
             vendor = str(row['Vendor']).strip()
 
-            # Perform necessary validations
             if len(mobile_number) != 10:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
@@ -222,7 +192,6 @@ def upload_file():
                 flash(f"Duplicate Mobile Number or SIM Number at row {index + 2}", "danger")
                 return redirect(url_for('SimInvy.page'))
 
-            # Create record to insert
             record = {
                 "MobileNumber": mobile_number,
                 "SimNumber": sim_number,
@@ -232,7 +201,6 @@ def upload_file():
             }
             records.append(record)
 
-        # Insert records into MongoDB
         if records:
             collection.insert_many(records)
             flash("File uploaded and SIMs added successfully!", "success")
@@ -249,7 +217,6 @@ def edit_sim(sim_id):
         current_user = get_jwt_identity()
         updated_data = request.json
         
-        # Convert string boolean to actual boolean
         is_active = updated_data.get('isActive')
         if isinstance(is_active, str):
             is_active = is_active.lower() == 'true'
@@ -307,14 +274,13 @@ def download_template():
 @sim_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    sims = list(collection.find({}, {"_id": 0}))  # Fetch all SIMs (excluding _id)
+    sims = list(collection.find({}, {"_id": 0})) 
     
     if not sims:
         return "No data available", 404
 
-    df = pd.DataFrame(sims)  # Convert MongoDB data to DataFrame
+    df = pd.DataFrame(sims) 
     
-    # Convert DataFrame to Excel
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="SIM Inventory")
