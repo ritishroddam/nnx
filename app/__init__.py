@@ -193,7 +193,8 @@ def create_app(config_name='default'):
                 # Get the vehicle's company from inventory
                 imei = vehicle_data.get('imei')
                 vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
-                assignedUsers = vehicle_info.get('AssignedUsers', [])
+                
+                assignedUsers = vehicle_info.get('AssignedUsers', []) if vehicle_info else []
                 company = vehicle_info.get('CompanyName') if vehicle_info else None
                 
                 if assignedUsers:
