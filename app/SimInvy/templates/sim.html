@@ -33,6 +33,7 @@ Sim Inventory
   <div class="modal-content">
     <span class="close-modal">&times;</span>
     <h2>Add New SIM</h2>
+    <br>
     <form id="manualForm" action="{{ url_for('SimInvy.manual_entry') }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-group">
