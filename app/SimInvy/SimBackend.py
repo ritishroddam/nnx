@@ -8,7 +8,7 @@ from app.database import db # type: ignore
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
 from app.models import User # type: ignore
 from app.utils import roles_required # type: ignore
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
@@ -308,6 +308,7 @@ def download_excel():
                             dt = datetime.strptime(value, '%Y-%m-%d')
                             processed_sim[key] = dt
                         except ValueError:
+                            # If parsing fails, keep original string value
                             processed_sim[key] = value
                     else:
                         processed_sim[key] = value
@@ -320,7 +321,7 @@ def download_excel():
         
         # Create Excel file in memory
         output = BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        with pd.ExcelWriter(output, engine="openpyxl", datetime_format='YYYY-MM-DD') as writer:
             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
         
         output.seek(0)
