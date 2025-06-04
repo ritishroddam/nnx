@@ -427,26 +427,29 @@ document.addEventListener("DOMContentLoaded", function() {
 
   
   // Modal event listeners
-  document.getElementById("manualEntryBtn").addEventListener("click", function() {
-    document.getElementById("manualEntryModal").classList.remove("hidden");
-    document.getElementById("LicensePlateNumber").focus();
-  });
+document.getElementById("manualEntryBtn").addEventListener("click", function() {
+  document.body.classList.add("modal-open");
+  document.getElementById("manualEntryModal").classList.remove("hidden");
+});
 
-  document.getElementById("uploadBtn").addEventListener("click", function() {
-    document.getElementById("uploadModal").classList.remove("hidden");
-  });
+document.getElementById("uploadBtn").addEventListener("click", function() {
+  document.body.classList.add("modal-open");
+  document.getElementById("uploadModal").classList.remove("hidden");
+});
 
-  document.querySelectorAll(".close-modal").forEach(closeBtn => {
-    closeBtn.addEventListener("click", function() {
-      this.closest(".modal").classList.add("hidden");
-    });
+document.querySelectorAll(".close-modal").forEach(closeBtn => {
+  closeBtn.addEventListener("click", function() {
+    document.body.classList.remove("modal-open");
+    this.closest(".modal").classList.add("hidden");
   });
+});
 
-  window.addEventListener("click", function(event) {
-    if (event.target.classList.contains("modal")) {
-      event.target.classList.add("hidden");
-    }
-  });
+window.addEventListener("click", function(event) {
+  if (event.target.classList.contains("modal")) {
+    document.body.classList.remove("modal-open");
+    event.target.classList.add("hidden");
+  }
+});
 
   const cancelBtn = document.getElementById("cancelBtn");
   if (cancelBtn) {

@@ -139,11 +139,19 @@ body.modal-open {
 
 .modal-content {
   background-color: #fefefe;
-  margin: 10% auto;
+  margin: 5% auto; /* Reduced from 10% to give more space */
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
   max-width: 600px;
+  max-height: 80vh; /* Limit height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  position: relative;
+  padding-bottom: 40px; /* Space for close button */
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 .close-modal {
@@ -155,6 +163,7 @@ body.modal-open {
   position: absolute;
   right: 15px;
   top: 5px;
+  z-index: 1;
 }
 
 .close-modal:hover,
