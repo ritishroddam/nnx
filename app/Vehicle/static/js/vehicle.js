@@ -113,15 +113,16 @@ async function updateData(data) {
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
     let statusText;
+    speed = parseFloat(data.speed) || 0;
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "offline";
     } else if (data.ignition === "0") {
       statusText = "stopped";
-    } else if (data.ignition === "1" && data.speed === 0) {
+    } else if (data.ignition === "1" && speed === 0) {
       statusText = "idle";
     }
-    else if(data.ignition === "1" && data.speed > 0){
+    else if(data.ignition === "1" && speed > 0){
       statusText = "moving";
     }else{
       statusText = "unknown";
