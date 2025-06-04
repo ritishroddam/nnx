@@ -90,6 +90,7 @@ def getVehicleStatus(imei_list):
                     current_status = "idle"
                 else:
                     current_status = "unknown"
+                    print(imei)
 
                 print(current_status)
                 last_change_time = latest["date_time"]
