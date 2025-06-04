@@ -115,26 +115,48 @@ async function updateData(data) {
     let statusText;
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
-      statusText = "Offline";
-    } else if (data.ignition === "0" && data.speed === 0) {
-      statusText = "Stopped";
+      statusText = "offline";
+    } else if (data.ignition === "0") {
+      statusText = "stopped";
     } else if (data.ignition === "1" && data.speed === 0) {
-      statusText = "Idle";
+      statusText = "idle";
     }
-    else{
-      statusText = "Moving";
+    else if(data.ignition === "1" && data.speed > 0){
+      statusText = "moving";
+    }else{
+      statusText = "unknown";
     }
 
     if (statusText === oldData.status){
       const newTime = convertToDate(data.date, data.time) - convertToDate(oldData.date, oldData.time);
       data["status_time_delta"] = oldData.status_time_delta + newTime;
       data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
+      data["status"] = statusText;
     }
 
     vehicleData.set(data.imei, data);
   } else {
+    const lastUpdated = convertToDate(data.date, data.time);
+    const now = new Date();
+    const timeDiff = Math.abs(now - lastUpdated);
+    let statusText = data.status;
+
+    if (timeDiff > 24 * 60 * 60 * 1000) {
+      statusText = "offline";
+    } else if (data.ignition === "0") {
+      statusText = "stopped";
+    } else if (data.ignition === "1" && data.speed === 0) {
+      statusText = "idle";
+    }
+    else if(data.ignition === "1" && data.speed > 0){
+      statusText = "moving";
+    }else{
+      statusText = "unknown";
+    }
+
     data["distance"] = "0.00";
     data["gsm"] = String(data.gsm_sig);
+    data["status"] = statusText;
     data["status_time_delta"] = 0;
     data["status_time_str"] = "0 seconds";
 
@@ -204,20 +226,25 @@ function updateVehicleCard(data) {
   // Determine status and class
   let statusText, statusClass;
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
+  statusText = data.status;
 
-  if (timeDiff > 24 * 60 * 60 * 1000) {
+  if (statusText === "offline") {
     statusText = "Offline";
     statusClass = "vehicle-status-offline";
-  } else if (data.ignition === "0" && speed === 0) {
+  } else if (statusText === "stopped") {
     statusText = "Stopped";
     statusClass = "vehicle-status-stopped";
-  } else if (data.ignition === "1" && speed === 0) {
+  } else if (statusText === "idle") {
     statusText = "Idle";
     statusClass = "vehicle-status-idle";
   }
-  else{
+  else if (statusText === "moving") {
     statusText = "Moving";
     statusClass = "vehicle-status-moving";
+  }
+  else {
+    statusText = "Unknown";
+    statusClass = "vehicle-status-unknown";
   }
 
   let timeText;
@@ -384,18 +411,23 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
 
-    if (timeDiff > 24 * 60 * 60 * 1000) {
+    statusText = vehicle.status;
+
+    if (statusText === "offline") {
       statusText = "Offline";
       statusColor = isDarkMode ? "#616161" : "#9e9e9e"; // Grey for offline in dark mode
-    } else if (speed === 0 && vehicle.ignition === "0") {
+    } else if (statusText === "stopped") {
       statusText = "Stopped";
       statusColor = isDarkMode ? "#d32f2f" : "#f44336"; // Red for stopped in dark mode
-    } else if (speed === 0 && vehicle.ignition === "1") {
+    } else if (statusText === "idle") {
       statusText = "Idle";
       statusColor = isDarkMode ? "#ff9800" : "#f57c00"; // Orange for idle in dark mode
-    }else{
+    }else if (statusText === "moving") {
       statusText = "Moving";
       statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; // Green for moving in dark mode
+    }else {
+      statusText = "Unknown";
+      statusColor = isDarkMode ? "#9e9e9e" : "#616161"; // Grey for unknown in dark mode
     }
 
     // Time since status
@@ -554,17 +586,23 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     sinceText = `since ${secondsAgo} sec`;
   }
 
-  let statusText = "Moving";
-  let statusColor = "#4caf50"; // Default green for moving
-  if (timeDiff > 24 * 60 * 60 * 1000) {
+  let statusText = device.status;
+  let statusColor;
+  if (statusText === "offline") {
     statusText = "Offline";
     statusColor = "#616161";
-  } else if (parseFloat(device.speed) === 0 && device.ignition === "0") {
+  } else if (statusText === "stopped") {
     statusText = "Stopped";
     statusColor = "#d32f2f";
-  } else if (parseFloat(device.speed) === 0 && device.ignition === "1") {
+  } else if (statusText === "idle") {
     statusText = "Idle";
     statusColor = "#ff9800";
+  } else if (statusText === "moving") {
+    statusText = "Moving";
+    statusColor = "#4caf50";
+  } else {
+    statusText = "Unknown";
+    statusColor = "#9e9e9e";
   }
 
   // Icons
@@ -1175,10 +1213,7 @@ async function populateVehicleTable() {
     const now = new Date();
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const timeDiff = Math.abs(now - lastUpdated);
-    let statusText = "Moving";
-    if (timeDiff > 24 * 60 * 60 * 1000) {
-      statusText = "Offline";
-    }
+    let statusText =  vehicle.status;
 
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
