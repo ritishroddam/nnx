@@ -404,6 +404,23 @@ function populateDropdown() {
   $("#imeiDropdown").selectize();
 }
 
+function filterTableByCompany(selectedCompany) {
+    const table = document.querySelector('.vehicle-table');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const companyCell = row.querySelector('td:nth-child(2)'); // 2nd column
+        if (!companyCell) return;
+        
+        const companyName = companyCell.textContent.trim();
+        row.style.display = (!selectedCompany || companyName === selectedCompany) 
+            ? '' 
+            : 'none';
+    });
+}
+
+
 // Initialize IMEI fetching
 document.addEventListener("DOMContentLoaded", function() {
   fetchIMEIData();
@@ -424,34 +441,34 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("uploadModal").classList.remove("hidden");
     });
   }
-
-const companyFilter = document.getElementById('companyFilter');
-  if (companyFilter) {
-    companyFilter.addEventListener('change', function() {
-      const selectedCompany = this.value;
-      const rows = document.querySelectorAll('.vehicle-table tbody tr');
-      
-      rows.forEach(row => {
-        const companyCell = row.querySelector('td:nth-child(2)'); // 2nd column is Company Name
-        const companyName = companyCell.textContent.trim();
-        
-        if (!selectedCompany || companyName === selectedCompany) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    });
-  }
   
-  // Initialize Selectize on the dropdown (if using)
-  if ($('#companyFilter').length) {
-    $('#companyFilter').selectize({
-      create: false,
-      sortField: 'text',
-      placeholder: 'Select Company'
-    });
-  }
+const companyFilter = document.getElementById('companyFilter');
+    
+    if (companyFilter) {
+        companyFilter.addEventListener('change', function() {
+            const selectedCompany = this.value.toLowerCase();
+            console.log("Filtering by company:", selectedCompany || "All Companies");
+            
+            const tableRows = document.querySelectorAll('.vehicle-table tbody tr');
+            tableRows.forEach(row => {
+                const companyNameCell = row.cells[1];
+                const rowCompanyName = companyNameCell.textContent.trim().toLowerCase();
+                
+                console.log("Checking row with company:", rowCompanyName);
+                
+                if (!selectedCompany || rowCompanyName === selectedCompany) {
+                    row.style.display = '';
+                    console.log("Showing row");
+                } else {
+                    row.style.display = 'none';
+                    console.log("Hiding row");
+                }
+            });
+        });
+        
+        // Trigger initial filter
+        companyFilter.dispatchEvent(new Event('change'));
+    }
 
   // Modal event listeners
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
