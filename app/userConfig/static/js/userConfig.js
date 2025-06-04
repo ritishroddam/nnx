@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", function() {
       plugins: ['remove_button'],
       create: false,
       sortField: 'text',
-      placeholder: 'Select alert types...'
+      placeholder: 'Select alert types...',
+      allowEmptyOption: true
   });
 
   $("#darkMode").selectize({
