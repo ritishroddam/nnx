@@ -18,6 +18,20 @@ Vehicle Details
 {% endblock %}
 
 {% block block_container %}
+
+<!-- Company Filter Dropdown -->
+<div class="filter-container">
+  <div class="form-group">
+    <label for="companyFilter">Filter by Company:</label>
+    <select id="companyFilter" class="filter-select">
+      <option value="">All Companies</option>
+      {% for company in companies %}
+      <option value="{{ company.id }}">{{ company.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
 <!-- Action Buttons -->
 <div class="action-buttons">
   <button id="manualEntryBtn" class="btn success mb-4">Add New Vehicle</button>
@@ -173,7 +187,7 @@ Vehicle Details
 <div class="vehicle-table-container">
   <table class="vehicle-table">
     <thead>
-      <tr>
+      <tr data-id="{{ vehicle['_id'] }}" data-company-id="{{ vehicle['CompanyID'] }}">
         <th>License Plate Number</th>
         <th>Company Name</th>
         <th>IMEI Number</th>

@@ -425,7 +425,25 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  
+const companyFilter = document.getElementById('companyFilter');
+  if (companyFilter) {
+    companyFilter.addEventListener('change', function() {
+      const selectedCompany = this.value.toLowerCase();
+      const rows = document.querySelectorAll('.vehicle-table tbody tr');
+      
+      rows.forEach(row => {
+        const companyCell = row.querySelector('td:nth-child(2)'); // Company name cell
+        const companyName = companyCell.textContent.trim().toLowerCase();
+        
+        if (!selectedCompany || companyName.includes(selectedCompany)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  }
+
   // Modal event listeners
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.body.classList.add("modal-open");

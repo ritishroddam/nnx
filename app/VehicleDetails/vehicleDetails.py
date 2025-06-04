@@ -20,18 +20,36 @@ companies_collection = db['customers_list']
 cities_collection = db['cities']
 
 # Home route
+# @vehicleDetails_bp.route('/page')
+# @jwt_required()
+# def page():
+#     vehicles = list(vehicle_collection.find({}))
+#     for vehicle in vehicles:
+#         if vehicle.get('CompanyID'):
+#             tempCompanyDict = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
+#             if tempCompanyDict:
+#                 vehicle['CompanyID'] = str(tempCompanyDict['Company Name'])
+#             else:
+#                 vehicle['CompanyID'] = ""
+#     return render_template('vehicleDetails.html', vehicles=vehicles)
+
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
     vehicles = list(vehicle_collection.find({}))
+    companies = list(companies_collection.find({}, {"Company Name": 1}))  # Get all companies
+    
     for vehicle in vehicles:
         if vehicle.get('CompanyID'):
             tempCompanyDict = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
             if tempCompanyDict:
-                vehicle['CompanyID'] = str(tempCompanyDict['Company Name'])
+                vehicle['CompanyName'] = tempCompanyDict['Company Name']
             else:
-                vehicle['CompanyID'] = ""
-    return render_template('vehicleDetails.html', vehicles=vehicles)
+                vehicle['CompanyName'] = ""
+    
+    return render_template('vehicleDetails.html', 
+                         vehicles=vehicles,
+                         companies=[{"id": str(c["_id"]), "name": c["Company Name"]} for c in companies])
 
 # API to fetch IMEI Numbers
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
