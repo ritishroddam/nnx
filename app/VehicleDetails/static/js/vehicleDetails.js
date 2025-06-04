@@ -425,17 +425,17 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-const companyFilter = document.getElementById('companyFilter');
+  const companyFilter = document.getElementById('companyFilter');
   if (companyFilter) {
     companyFilter.addEventListener('change', function() {
-      const selectedCompany = this.value.toLowerCase();
+      const selectedCompanyId = this.value;
       const rows = document.querySelectorAll('.vehicle-table tbody tr');
       
       rows.forEach(row => {
-        const companyCell = row.querySelector('td:nth-child(2)'); // Company name cell
-        const companyName = companyCell.textContent.trim().toLowerCase();
+        const companyCell = row.querySelector('td:nth-child(2)'); // Assuming company name is in 2nd column
+        const companyId = row.getAttribute('data-company-id') || '';
         
-        if (!selectedCompany || companyName.includes(selectedCompany)) {
+        if (!selectedCompanyId || companyId === selectedCompanyId) {
           row.style.display = '';
         } else {
           row.style.display = 'none';
