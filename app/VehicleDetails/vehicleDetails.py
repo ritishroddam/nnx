@@ -36,38 +36,40 @@ cities_collection = db['cities']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all vehicles
-    vehicles = list(vehicle_collection.find({}))
+    # Get all vehicles and convert to dict
+    vehicles = [dict(v) for v in vehicle_collection.find({})]
     
-    # Get all companies for the filter dropdown
+    # Get all companies
     companies = list(companies_collection.find({}, {"Company Name": 1, "_id": 1}))
     
-    # Prepare vehicle data with proper company names
+    # Create a mapping of CompanyID to Company Name for quick lookup
+    company_map = {str(c["_id"]): c.get("Company Name", "Unknown") for c in companies}
+    
+    # Prepare vehicle data
     vehicle_data = []
     for vehicle in vehicles:
-        vehicle_dict = dict(vehicle)
+        if 'CompanyID' not in vehicle:
+            print(f"Vehicle {vehicle['LicensePlateNumber']} has no CompanyID")
+            vehicle['CompanyID'] = "" 
         
-        # Convert ObjectId to string for template
-        vehicle_dict['_id'] = str(vehicle['_id'])
-        
-        # Handle CompanyID and CompanyName
-        if 'CompanyID' in vehicle and vehicle['CompanyID']:
-            company = companies_collection.find_one(
-                {"_id": ObjectId(vehicle['CompanyID'])},
-                {"Company Name": 1}
-            )
-            vehicle_dict['CompanyName'] = company['Company Name'] if company else "N/A"
-            vehicle_dict['CompanyID'] = str(vehicle['CompanyID'])  # Ensure string format
+        # Handle Company Name
+        company_id = vehicle.get('CompanyID', '')
+        if company_id:
+            # Convert to string if it's ObjectId
+            if isinstance(company_id, ObjectId):
+                company_id = str(company_id)
+                vehicle['CompanyID'] = company_id
+            
+            vehicle['CompanyName'] = company_map.get(company_id, "Unknown Company")
         else:
-            vehicle_dict['CompanyName'] = "N/A"
-            vehicle_dict['CompanyID'] = ""
+            vehicle['CompanyName'] = "No Company Assigned"
         
-        vehicle_data.append(vehicle_dict)
+        vehicle_data.append(vehicle)
     
-    # Prepare companies data for filter dropdown
+    # Prepare companies for filter dropdown
     companies_data = [{
         "id": str(c["_id"]), 
-        "name": c["Company Name"]
+        "name": c.get("Company Name", "Unknown")
     } for c in companies]
     
     return render_template(
