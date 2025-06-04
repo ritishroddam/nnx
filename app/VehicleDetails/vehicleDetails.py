@@ -36,41 +36,30 @@ cities_collection = db['cities']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all vehicles and convert to dict
-    vehicles = [dict(v) for v in vehicle_collection.find({})]
+    # Get all vehicles
+    vehicles = list(vehicle_collection.find({}, {'CompanyName': 1, 'LicensePlateNumber': 1, 'IMEI': 1, 'SIM': 1, 'VehicleType': 1, 'VehicleModel': 1, 'VehicleMake': 1, 'YearOfManufacture': 1}))
     
-    # Get all companies
-    companies = list(companies_collection.find({}, {"Company Name": 1, "_id": 1}))
+    # Get unique company names from vehicles
+    company_names = set()
+    for vehicle in vehicle_collection.find({'CompanyName': {'$exists': False}}):
+        vehicle_collection.update_one(
+            {'_id': vehicle['_id']},
+            {'$set': {'CompanyName': 'Default Company'}}
+        )
     
-    # Create a mapping of CompanyID to Company Name for quick lookup
-    company_map = {str(c["_id"]): c.get("Company Name", "Unknown") for c in companies}
-    
-    # Prepare vehicle data
+    # Prepare the data
     vehicle_data = []
     for vehicle in vehicles:
-        if 'CompanyID' not in vehicle:
-            print(f"Vehicle {vehicle['LicensePlateNumber']} has no CompanyID")
-            vehicle['CompanyID'] = "" 
+        vehicle_dict = dict(vehicle)
+        vehicle_dict['_id'] = str(vehicle['_id'])
         
-        # Handle Company Name
-        company_id = vehicle.get('CompanyID', '')
-        if company_id:
-            # Convert to string if it's ObjectId
-            if isinstance(company_id, ObjectId):
-                company_id = str(company_id)
-                vehicle['CompanyID'] = company_id
-            
-            vehicle['CompanyName'] = company_map.get(company_id, "Unknown Company")
-        else:
-            vehicle['CompanyName'] = "No Company Assigned"
+        # Ensure CompanyName exists
+        vehicle_dict['CompanyName'] = vehicle.get('CompanyName', 'No Company Assigned')
         
-        vehicle_data.append(vehicle)
+        vehicle_data.append(vehicle_dict)
     
-    # Prepare companies for filter dropdown
-    companies_data = [{
-        "id": str(c["_id"]), 
-        "name": c.get("Company Name", "Unknown")
-    } for c in companies]
+    # Prepare companies for filter dropdown (using names directly)
+    companies_data = [{"id": name, "name": name} for name in sorted(company_names)]
     
     return render_template(
         'vehicleDetails.html',
@@ -142,6 +131,15 @@ def get_sim_inventory():
 def manual_entry():
     data = request.form.to_dict()
     data = {key.strip(): value.strip() for key, value in data.items()}  # Clean input
+    
+    # Get unique company names from existing vehicles
+    company_names = vehicle_collection.distinct('CompanyName')
+    data['CompanyName'] = data.get('CompanyName', '')
+    
+    # Validate company name exists
+    if data['CompanyName'] and data['CompanyName'] not in company_names:
+        flash("Invalid company name", "danger")
+        return redirect(url_for('VehicleDetails.page'))
 
     # Validate required fields
     required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyID', 'VehicleType']

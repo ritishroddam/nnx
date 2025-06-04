@@ -428,14 +428,13 @@ document.addEventListener("DOMContentLoaded", function() {
   const companyFilter = document.getElementById('companyFilter');
   if (companyFilter) {
     companyFilter.addEventListener('change', function() {
-      const selectedCompanyId = this.value;
+      const selectedCompany = this.value;
       const rows = document.querySelectorAll('.vehicle-table tbody tr');
       
       rows.forEach(row => {
-        const companyCell = row.querySelector('td:nth-child(2)'); // Assuming company name is in 2nd column
-        const companyId = row.getAttribute('data-company-id') || '';
+        const companyName = row.getAttribute('data-company-name');
         
-        if (!selectedCompanyId || companyId === selectedCompanyId) {
+        if (!selectedCompany || companyName === selectedCompany) {
           row.style.display = '';
         } else {
           row.style.display = 'none';
