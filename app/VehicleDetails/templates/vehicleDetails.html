@@ -187,7 +187,7 @@ Vehicle Details
 <div class="vehicle-table-container">
   <table class="vehicle-table">
     <thead>
-      <tr data-id="{{ vehicle['_id'] }}" data-company-id="{{ vehicle['CompanyID'] }}">
+      <tr>
         <th>License Plate Number</th>
         <th>Company Name</th>
         <th>IMEI Number</th>
@@ -209,7 +209,7 @@ Vehicle Details
     </thead>
     <tbody>
       {% for vehicle in vehicles %}
-      <tr data-id="{{ vehicle['_id'] }}">
+      <tr data-id="{{ vehicle['_id'] }}" data-company-id="{{ vehicle['CompanyID'] }}">
         <td>{{ vehicle['LicensePlateNumber'] }}</td>
         <td>{{ vehicle['CompanyName'] }}</td>
         <td>{{ vehicle['IMEI'] }}</td>
