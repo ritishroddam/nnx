@@ -148,7 +148,7 @@ body.modal-open {
   overflow-y: auto; /* Enable vertical scrolling */
   position: relative;
   padding-bottom: 40px; /* Space for close button */
-  margin-top: 50px;
+  margin-top: 100px;
 }
 
 body.modal-open {
@@ -299,6 +299,33 @@ body.modal-open {
 
 .dark-mode .vehicle-table tr:hover {
   background-color: #444;
+}
+
+/* Filter Container Styles */
+.filter-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.filter-container .form-group {
+  margin-bottom: 0;
+}
+
+.filter-select {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.filter-container label {
+  margin-right: 10px;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {

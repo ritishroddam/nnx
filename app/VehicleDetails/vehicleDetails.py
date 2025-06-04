@@ -20,18 +20,63 @@ companies_collection = db['customers_list']
 cities_collection = db['cities']
 
 # Home route
+# @vehicleDetails_bp.route('/page')
+# @jwt_required()
+# def page():
+#     vehicles = list(vehicle_collection.find({}))
+#     for vehicle in vehicles:
+#         if vehicle.get('CompanyID'):
+#             tempCompanyDict = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
+#             if tempCompanyDict:
+#                 vehicle['CompanyID'] = str(tempCompanyDict['Company Name'])
+#             else:
+#                 vehicle['CompanyID'] = ""
+#     return render_template('vehicleDetails.html', vehicles=vehicles)
+
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    vehicles = list(vehicle_collection.find({}))
+    # Get all vehicles and convert to dict
+    vehicles = [dict(v) for v in vehicle_collection.find({})]
+    
+    # Get all companies
+    companies = list(companies_collection.find({}, {"Company Name": 1, "_id": 1}))
+    
+    # Create a mapping of CompanyID to Company Name for quick lookup
+    company_map = {str(c["_id"]): c.get("Company Name", "Unknown") for c in companies}
+    
+    # Prepare vehicle data
+    vehicle_data = []
     for vehicle in vehicles:
-        if vehicle.get('CompanyID'):
-            tempCompanyDict = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
-            if tempCompanyDict:
-                vehicle['CompanyID'] = str(tempCompanyDict['Company Name'])
-            else:
-                vehicle['CompanyID'] = ""
-    return render_template('vehicleDetails.html', vehicles=vehicles)
+        if 'CompanyID' not in vehicle:
+            print(f"Vehicle {vehicle['LicensePlateNumber']} has no CompanyID")
+            vehicle['CompanyID'] = "" 
+        
+        # Handle Company Name
+        company_id = vehicle.get('CompanyID', '')
+        if company_id:
+            # Convert to string if it's ObjectId
+            if isinstance(company_id, ObjectId):
+                company_id = str(company_id)
+                vehicle['CompanyID'] = company_id
+            
+            vehicle['CompanyName'] = company_map.get(company_id, "Unknown Company")
+        else:
+            vehicle['CompanyName'] = "No Company Assigned"
+        
+        vehicle_data.append(vehicle)
+    
+    # Prepare companies for filter dropdown
+    companies_data = [{
+        "id": str(c["_id"]), 
+        "name": c.get("Company Name", "Unknown")
+    } for c in companies]
+    
+    return render_template(
+        'vehicleDetails.html',
+        vehicles=vehicle_data,
+        companies=companies_data
+    )
 
 # API to fetch IMEI Numbers
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
