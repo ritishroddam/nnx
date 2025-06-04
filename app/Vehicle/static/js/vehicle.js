@@ -84,8 +84,8 @@ function formatTimeDelta(timeDelta){
   const seconds = parseInt(timeDelta / 1000);
 
   if(seconds >= 86400){
-    days = Math.floor(seconds / 86400);
-    hours = Math.floor((seconds % 86400) / 3600);
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
     return `${days} days ${hours} hours`;
   } else if(seconds >= 3600){
     const hours = Math.floor(seconds / 3600);
