@@ -412,26 +412,16 @@ document.addEventListener("DOMContentLoaded", function() {
   if (manualEntryBtn) {
     manualEntryBtn.addEventListener("click", function(e) {
       e.preventDefault();
-      const modal = document.getElementById("manualEntryModal");
-      if (modal) {
-        modal.classList.remove("hidden");
-        document.getElementById("LicensePlateNumber")?.focus();
-      } else {
-        console.error("Manual entry modal not found");
-      }
+      document.getElementById("manualEntryModal").classList.remove("hidden");
+      document.getElementById("LicensePlateNumber")?.focus();
     });
   }
 
-    const uploadBtn = document.getElementById("uploadBtn");
+  const uploadBtn = document.getElementById("uploadBtn");
   if (uploadBtn) {
     uploadBtn.addEventListener("click", function(e) {
       e.preventDefault();
-      const modal = document.getElementById("uploadModal");
-      if (modal) {
-        modal.classList.remove("hidden");
-      } else {
-        console.error("Upload modal not found");
-      }
+      document.getElementById("uploadModal").classList.remove("hidden");
     });
   }
 
@@ -448,7 +438,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.querySelectorAll(".close-modal").forEach(closeBtn => {
     closeBtn.addEventListener("click", function() {
-      this.closest(".modal")?.classList.add("hidden");
+      this.closest(".modal").classList.add("hidden");
     });
   });
 
@@ -457,6 +447,13 @@ document.addEventListener("DOMContentLoaded", function() {
       event.target.classList.add("hidden");
     }
   });
+
+  const cancelBtn = document.getElementById("cancelBtn");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", function() {
+      document.getElementById("manualEntryModal").classList.add("hidden");
+    });
+  }
 
   // Fix for Excel download filename
   document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
