@@ -22,8 +22,16 @@ User Configuration
       </select>
     </div>
     <div class="form-group">
+      <label for="alertsSound">Alerts Sound</label>
+      <select id="alertsSound" name="alertsSound">
+        <option value="true" {{ 'selected' if userConfigs.alertsSound == 'true' }}>True</option>
+        <option value="false" {{ 'selected' if userConfigs.alertsSound == 'false' }}>False</option>
+      </select>
+    </div>
+    <div class="form-group">
       <label for="alerts">Alerts</label>
       <select id="alerts" name="alerts" multiple>
+        <option value = "" {% if not userConfigs.alerts %}selected{% endif %}>None</option>
         {% set all_alert_types = [
           'speeding_alerts', 'harsh_break_alerts', 'harsh_acceleration_alerts', 'gsm_low_alerts',
           'internal_battery_low_alerts', 'idle_alerts', 'ignition_off_alerts', 'ignition_on_alerts'
