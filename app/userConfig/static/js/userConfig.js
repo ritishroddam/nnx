@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function() {
   $("#alerts").selectize({
       plugins: ['remove_button'],
       create: false,
-      sortField: 'text',
       placeholder: 'Select alert types...',
       allowEmptyOption: true
   });
