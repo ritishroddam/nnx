@@ -37,29 +37,23 @@ cities_collection = db['cities']
 @jwt_required()
 def page():
     # Get all vehicles
-    vehicles = list(vehicle_collection.find({}, {'CompanyName': 1, 'LicensePlateNumber': 1, 'IMEI': 1, 'SIM': 1, 'VehicleType': 1, 'VehicleModel': 1, 'VehicleMake': 1, 'YearOfManufacture': 1}))
+    vehicles = list(vehicle_collection.find({}))
     
-    # Get unique company names from vehicles
+    # Extract unique company names from vehicles
     company_names = set()
-    for vehicle in vehicle_collection.find({'CompanyName': {'$exists': False}}):
-        vehicle_collection.update_one(
-            {'_id': vehicle['_id']},
-            {'$set': {'CompanyName': 'Default Company'}}
-        )
+    for vehicle in vehicles:
+        if 'CompanyName' in vehicle and vehicle['CompanyName']:
+            company_names.add(vehicle['CompanyName'])
     
-    # Prepare the data
+    # Prepare vehicles data with string _id
     vehicle_data = []
     for vehicle in vehicles:
         vehicle_dict = dict(vehicle)
         vehicle_dict['_id'] = str(vehicle['_id'])
-        
-        # Ensure CompanyName exists
-        vehicle_dict['CompanyName'] = vehicle.get('CompanyName', 'No Company Assigned')
-        
         vehicle_data.append(vehicle_dict)
     
-    # Prepare companies for filter dropdown (using names directly)
-    companies_data = [{"id": name, "name": name} for name in sorted(company_names)]
+    # Prepare companies data for dropdown
+    companies_data = [{"name": name} for name in sorted(company_names)]
     
     return render_template(
         'vehicleDetails.html',

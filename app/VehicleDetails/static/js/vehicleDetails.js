@@ -425,14 +425,15 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  const companyFilter = document.getElementById('companyFilter');
+const companyFilter = document.getElementById('companyFilter');
   if (companyFilter) {
     companyFilter.addEventListener('change', function() {
       const selectedCompany = this.value;
       const rows = document.querySelectorAll('.vehicle-table tbody tr');
       
       rows.forEach(row => {
-        const companyName = row.getAttribute('data-company-name');
+        const companyCell = row.querySelector('td:nth-child(2)'); // 2nd column is Company Name
+        const companyName = companyCell.textContent.trim();
         
         if (!selectedCompany || companyName === selectedCompany) {
           row.style.display = '';
@@ -440,6 +441,15 @@ document.addEventListener("DOMContentLoaded", function() {
           row.style.display = 'none';
         }
       });
+    });
+  }
+  
+  // Initialize Selectize on the dropdown (if using)
+  if ($('#companyFilter').length) {
+    $('#companyFilter').selectize({
+      create: false,
+      sortField: 'text',
+      placeholder: 'Select Company'
     });
   }
 
