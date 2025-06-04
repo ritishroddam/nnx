@@ -71,10 +71,12 @@ def getVehicleStatus(imei_list):
             now = utc_now
 
             # Check offline
+            print(latest["date_time"]< twenty_four_hours_ago)
             if latest["date_time"] < twenty_four_hours_ago:
                 status = "offline"
                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
                 status_time_str = format_seconds(status_time_delta)
+                print(status)
             else:
                 ignition = latest.get("ignition")
                 speed = float(latest.get("speed", 0))
@@ -84,12 +86,12 @@ def getVehicleStatus(imei_list):
                     current_status = "stopped"
                 elif ignition == "1" and speed > 0:
                     current_status = "moving"
-                elif ignition == "1" and speed == 0:
+                elif ignition == "1" and speed == 0.0:
                     current_status = "idle"
                 else:
                     current_status = "unknown"
 
-                # Find last status change in history
+                print(current_status)
                 last_change_time = latest["date_time"]
                 for h in history[1:]:
                     h_ignition = h.get("ignition")
