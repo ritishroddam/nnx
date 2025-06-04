@@ -80,12 +80,12 @@ def getVehicleStatus(imei_list):
                 speed = float(latest.get("speed", 0))
                 # Find when the status last changed
                 current_status = None
-                if ignition == "1" and speed > 0:
+                if ignition == "0":
+                    current_status = "stopped"
+                elif ignition == "1" and speed > 0:
                     current_status = "moving"
                 elif ignition == "1" and speed == 0:
                     current_status = "idle"
-                elif ignition == "0":
-                    current_status = "stopped"
                 else:
                     current_status = "unknown"
 
