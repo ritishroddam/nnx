@@ -81,7 +81,7 @@ socket.on("sos_alert", function (data) {
 });
 
 function formatTimeDelta(timeDelta){
-  const seconds = int(timeDelta / 1000);
+  const seconds = parseInt(timeDelta / 1000);
 
   if(seconds >= 86400){
     days = Math.floor(seconds / 86400);
