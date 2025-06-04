@@ -249,7 +249,9 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         vehicle['status'] = status_item.get('status', 'unknown')
         vehicle['status_time_str'] = status_item.get('status_time_str', '0 seconds')
         vehicle['status_time_delta'] = status_item.get('status_time_delta', 0)
-
+        
+        print(vehicle['status'], vehicle['imei'])
+        
         vehicles.append(vehicle)
     return vehicles
 
