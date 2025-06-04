@@ -84,7 +84,7 @@ def getVehicleStatus(imei_list):
                     current_status = "moving"
                 elif ignition == "1" and speed == 0:
                     current_status = "idle"
-                elif ignition == "0" and speed == 0:
+                elif ignition == "0":
                     current_status = "stopped"
                 else:
                     current_status = "unknown"
