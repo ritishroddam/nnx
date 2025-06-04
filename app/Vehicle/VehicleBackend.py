@@ -41,7 +41,7 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         seven_days_ago = utc_now - timedelta(days=7)
-
+        print(imei_list)
         pipeline = [
             {"$match": {"imei": {"$in": imei_list},                
                         "date_time": {
