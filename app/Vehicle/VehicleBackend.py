@@ -253,7 +253,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         else:
             vehicle['status'] = 'offline'
             now = now = datetime.now(timezone('UTC')).timestamp() * 1000
-            date_timeMs = vehicle.get('date_time') * 1000
+            date_timeMs = vehicle.get('date_time').timestamp() * 1000
             status_time_delta = (now - date_timeMs)
             status_time_str = format_seconds(status_time_delta)
             vehicle['status_time_str'] = status_time_str
