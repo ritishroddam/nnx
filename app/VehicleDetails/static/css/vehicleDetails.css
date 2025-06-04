@@ -301,15 +301,6 @@ body.modal-open {
   background-color: #444;
 }
 
-/* Filter Container Styles */
-.filter-container {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
 .filter-container .form-group {
   margin-bottom: 0;
 }

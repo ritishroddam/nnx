@@ -26,7 +26,7 @@ Vehicle Details
     <select id="companyFilter" class="filter-select">
       <option value="">All Companies</option>
       {% for company in companies %}
-      <option value="{{ company.id }}">{{ company.name }}</option>
+      <option value="{{ company.name }}">{{ company.name }}</option>
       {% endfor %}
     </select>
   </div>
@@ -209,7 +209,7 @@ Vehicle Details
     </thead>
     <tbody>
       {% for vehicle in vehicles %}
-      <tr data-id="{{ vehicle['_id'] }}" data-company-id="{{ vehicle['CompanyID'] }}">
+      <tr data-id="{{ vehicle['_id'] }}" data-company-name="{{ vehicle['CompanyName'] }}">
         <td>{{ vehicle['LicensePlateNumber'] }}</td>
         <td>{{ vehicle['CompanyName'] }}</td>
         <td>{{ vehicle['IMEI'] }}</td>
