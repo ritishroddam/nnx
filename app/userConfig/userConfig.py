@@ -65,6 +65,7 @@ def editDarkMode():
 def editConfig():
     darkMode = request.json.get('darkMode')
     alerts = request.json.get('alerts')
+    alertsSound = request.json.get('alertsSound')
     
     if not darkMode or not alerts:
         return jsonify({"error": "Invalid input"}), 400
@@ -77,6 +78,7 @@ def editConfig():
     userConfig = {
         "darkMode": "true" if darkMode == "true" else "false",
         "alerts": listOfAlerts,
+        "alertsSound": "true" if alertsSound == "true" else "false"
     }
     
     result = userConfiCollection.update_one(
