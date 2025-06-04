@@ -36,28 +36,45 @@ cities_collection = db['cities']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
+    # Get all vehicles
     vehicles = list(vehicle_collection.find({}))
+    
+    # Get all companies for the filter dropdown
     companies = list(companies_collection.find({}, {"Company Name": 1, "_id": 1}))
     
-    # Prepare vehicle data with company names
+    # Prepare vehicle data with proper company names
     vehicle_data = []
     for vehicle in vehicles:
         vehicle_dict = dict(vehicle)
-        if vehicle.get('CompanyID'):
-            company = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
-            vehicle_dict['CompanyName'] = company['Company Name'] if company else ""
-            vehicle_dict['CompanyID'] = str(vehicle['CompanyID'])  # Ensure it's string
+        
+        # Convert ObjectId to string for template
+        vehicle_dict['_id'] = str(vehicle['_id'])
+        
+        # Handle CompanyID and CompanyName
+        if 'CompanyID' in vehicle and vehicle['CompanyID']:
+            company = companies_collection.find_one(
+                {"_id": ObjectId(vehicle['CompanyID'])},
+                {"Company Name": 1}
+            )
+            vehicle_dict['CompanyName'] = company['Company Name'] if company else "N/A"
+            vehicle_dict['CompanyID'] = str(vehicle['CompanyID'])  # Ensure string format
         else:
-            vehicle_dict['CompanyName'] = ""
+            vehicle_dict['CompanyName'] = "N/A"
             vehicle_dict['CompanyID'] = ""
+        
         vehicle_data.append(vehicle_dict)
     
-    # Prepare companies data for filter
-    companies_data = [{"id": str(c["_id"]), "name": c["Company Name"]} for c in companies]
+    # Prepare companies data for filter dropdown
+    companies_data = [{
+        "id": str(c["_id"]), 
+        "name": c["Company Name"]
+    } for c in companies]
     
-    return render_template('vehicleDetails.html',
-                         vehicles=vehicle_data,
-                         companies=companies_data)
+    return render_template(
+        'vehicleDetails.html',
+        vehicles=vehicle_data,
+        companies=companies_data
+    )
 
 # API to fetch IMEI Numbers
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
