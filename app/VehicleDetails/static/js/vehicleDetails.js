@@ -407,6 +407,34 @@ function populateDropdown() {
 // Initialize IMEI fetching
 document.addEventListener("DOMContentLoaded", function() {
   fetchIMEIData();
+
+  const manualEntryBtn = document.getElementById("manualEntryBtn");
+  if (manualEntryBtn) {
+    manualEntryBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      const modal = document.getElementById("manualEntryModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        document.getElementById("LicensePlateNumber")?.focus();
+      } else {
+        console.error("Manual entry modal not found");
+      }
+    });
+  }
+
+    const uploadBtn = document.getElementById("uploadBtn");
+  if (uploadBtn) {
+    uploadBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      const modal = document.getElementById("uploadModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+      } else {
+        console.error("Upload modal not found");
+      }
+    });
+  }
+
   
   // Modal event listeners
   document.getElementById("manualEntryBtn").addEventListener("click", function() {
@@ -420,7 +448,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.querySelectorAll(".close-modal").forEach(closeBtn => {
     closeBtn.addEventListener("click", function() {
-      this.closest(".modal").classList.add("hidden");
+      this.closest(".modal")?.classList.add("hidden");
     });
   });
 
