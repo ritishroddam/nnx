@@ -109,6 +109,7 @@ def getVehicleStatus(imei_list):
                 status_time_delta = (now - last_change_time).total_seconds() * 1000
                 status_time_str = format_seconds(status_time_delta)
 
+            print(status, imei)
             statuses.append({
                 "imei": imei,
                 "status": status,
