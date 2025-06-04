@@ -116,8 +116,8 @@ def getVehicleStatus(imei_list):
                 "status_time_delta": status_time_delta,
                 "status_time_str": status_time_str,
             })
-
-        return statuses
+        missingImeis = set(imei_list) - {item['imei'] for item in statuses}
+        return (statuses, missingImeis)
 
     except Exception as e:
         print(f"Error in getVehicleStatus: {e}")
@@ -220,7 +220,7 @@ def getVehicleDistances(imei):
         flash("Error fetching distances", "danger")
         return jsonify({"error": str(e)}), 500
 
-def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list):
+def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list, missingImeis):
     vehicles = []
 
     inventory_lookup = {v.get('IMEI'): v for v in inventory_data}
@@ -245,10 +245,18 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         vehicle['stoppage_time'] = stoppage_time_item.get('stoppage_time_str', '0 seconds')
         vehicle['stoppage_time_delta'] = stoppage_time_item.get('total_stoppage_seconds', 0)
 
-        status_item = status_lookup.get(imei, {})
-        vehicle['status'] = status_item.get('status', 'unknown')
-        vehicle['status_time_str'] = status_item.get('status_time_str', '0 seconds')
-        vehicle['status_time_delta'] = status_item.get('status_time_delta', 0)
+        if imei not in missingImeis:
+            status_item = status_lookup.get(imei, {})
+            vehicle['status'] = status_item.get('status', 'unknown')
+            vehicle['status_time_str'] = status_item.get('status_time_str', '0 seconds')
+            vehicle['status_time_delta'] = status_item.get('status_time_delta', 0)
+        else:
+            vehicle['status'] = 'offline'
+            now = datetime.now(timezone('UTC'))
+            status_time_delta = (now - vehicle.get('date_time'))
+            status_time_str = format_seconds(status_time_delta.total_seconds() * 1000)
+            vehicle['status_time_str'] = status_time_str
+            vehicle['status_time_delta'] = status_time_delta.total_seconds() * 1000
         
         print(vehicle['status'], vehicle['imei'])
         
@@ -285,10 +293,10 @@ def get_vehicles():
         distances = getVehicleDistances(imei_list)
         stoppage_times = getStopTimeToday(imei_list)
         print("Getting Vehicle statuses")
-        statuses = getVehicleStatus(imei_list)
+        statuses, missingImeis = getVehicleStatus(imei_list)
 
         print("Building vehicle data")
-        vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list)
+        vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list, missingImeis)
 
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])
