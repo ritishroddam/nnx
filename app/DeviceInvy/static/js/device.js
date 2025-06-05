@@ -109,6 +109,75 @@ document.getElementById("Package").addEventListener("change", function () {
   }
 });
 
+document.getElementById("searchBtn").addEventListener("click", searchDevices);
+document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
+document.getElementById("imeiSearch").addEventListener("keyup", function(event) {
+  if (event.key === "Enter") {
+    searchDevices();
+  }
+});
+
+function searchDevices() {
+  const searchValue = document.getElementById("imeiSearch").value.trim();
+  if (!searchValue) {
+    clearSearch();
+    return;
+  }
+
+  fetch(`/deviceInvy/search_devices?imei=${searchValue}`)
+    .then(response => response.json())
+    .then(data => {
+      const tableBody = document.getElementById("deviceTable");
+      tableBody.innerHTML = ''; // Clear current table
+
+      if (data.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="13" class="no-results">No devices found</td>`;
+        tableBody.appendChild(row);
+        return;
+      }
+
+      data.forEach(device => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', device._id);
+        row.innerHTML = `
+          <td>${device.IMEI}</td>
+          <td>${device.GLNumber || ''}</td>
+          <td>${device.DeviceModel}</td>
+          <td>${device.DeviceMake}</td>
+          <td>${device.DateIn}</td>
+          <td>${device.Warranty}</td>
+          <td>${device.SentBy}</td>
+          <td>${device.OutwardTo}</td>
+          <td>${device.Package}</td>
+          <td>${device.Package === 'Package' ? device.Tenure || '' : ''}</td>
+          <td>
+            ${device.Status === 'Active' ? 
+              '<button class="status-btn status-active" disabled>Active</button>' : 
+              device.Status === 'Inactive' ? 
+              '<button class="status-btn status-inactive" disabled>Inactive</button>' : 
+              ''}
+          </td>
+          <td>
+            <button class="icon-btn edit-icon" onclick="editDevice('${device._id}')">✏️</button>
+            <button class="icon-btn delete-icon" onclick="deleteDevice('${device._id}')">🗑️</button>
+          </td>
+          <td></td>
+        `;
+        tableBody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Error searching devices:', error);
+      alert('Error searching devices. Please try again.');
+    });
+}
+
+function clearSearch() {
+  document.getElementById("imeiSearch").value = '';
+  location.reload(); 
+}
+
 ////////////////// Download ////////////////////////
 document.getElementById("downloadExcel").addEventListener("click", function () {
   window.location.href = "/deviceInvy/download_excel";
