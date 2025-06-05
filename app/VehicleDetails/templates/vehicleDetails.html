@@ -216,6 +216,8 @@ Vehicle Details
         <th>Location</th>
         <th>Odometer Reading</th>
         <th>Service Due Date</th>
+        <th>Slow Speed Limit</th>
+        <th>Normal Speed Limit</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -238,6 +240,8 @@ Vehicle Details
         <td>{{ vehicle['Location'] }}</td>
         <td>{{ vehicle['OdometerReading'] }}</td>
         <td>{{ vehicle['ServiceDueDate'] }}</td>
+        <td>{{ vehicle['slowSpeed'] }}</td>
+        <td>{{ vehicle['normalSpeed'] }}</td>
         <td>
           <button class="icon-btn edit-icon" onclick="editVehicle('{{ vehicle._id }}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteVehicle('{{ vehicle._id }}')">🗑️</button>

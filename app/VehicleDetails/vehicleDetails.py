@@ -254,6 +254,8 @@ def upload_vehicle_file():
             location = str(row['Location']).strip()
             odometer_reading = str(row['OdometerReading']).strip()
             service_due_date = str(row['ServiceDueDate']).strip()
+            slowSpeed = str(row['SlowSpeed']).strip()
+            normalSpeed = str(row['normalSpeed']).strip()
 
             number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
             vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
@@ -265,6 +267,8 @@ def upload_vehicle_file():
             current_status = current_status if current_status != 'nan' else ""
             odometer_reading = odometer_reading if odometer_reading != 'nan' else ""
             service_due_date = service_due_date if service_due_date != 'nan' else ""
+            slowSpeed = slowSpeed if slowSpeed != 'nan' else "20"
+            normalSpeed = normalSpeed if normalSpeed != 'nan' else "60"
 
             if not license_plate_number or not imei or not sim or not location:
                 flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
@@ -337,6 +341,8 @@ def upload_vehicle_file():
                 "Location": location,
                 "OdometerReading": odometer_reading,
                 "ServiceDueDate": service_due_date,
+                "normalSpeed": normalSpeed,
+                "slowSpeed": slowSpeed
             }
 
             records.append(record)
