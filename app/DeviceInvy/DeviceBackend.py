@@ -29,25 +29,30 @@ def page():
     devices = list(collection.find({}))
     return render_template('device.html', devices=devices)
 
-@device_bp.route('/search_suggestions')
+@device_bp.route('/search_devices')
 @jwt_required()
-def search_suggestions():
+def search_devices():
     imei_query = request.args.get('imei', '').strip()
     
-    if not imei_query or len(imei_query) < 2:
+    if not imei_query:
         return jsonify([])
     
-    # Search for IMEIs that start with or contain the query
+    # Search for full IMEI match or last 5 digits match
     query = {
-        "IMEI": {"$regex": f"^{imei_query}"}  # Starts with the search term
+        "$or": [
+            {"IMEI": imei_query},
+            {"IMEI": {"$regex": f"{imei_query}$"}}  # Ends with the search term
+        ]
     }
     
-    devices = list(collection.find(query, {
-        "_id": 0,
-        "IMEI": 1,
-        "DeviceModel": 1,
-        "DeviceMake": 1
-    }).limit(5))  # Limit to 5 suggestions
+    devices = list(collection.find(query, {"_id": 1, "IMEI": 1, "GLNumber": 1, "DeviceModel": 1, 
+                                         "DeviceMake": 1, "DateIn": 1, "Warranty": 1, 
+                                         "SentBy": 1, "OutwardTo": 1, "Package": 1, 
+                                         "Tenure": 1, "Status": 1}))
+    
+    # Convert ObjectId to string for JSON serialization
+    for device in devices:
+        device['_id'] = str(device['_id'])
     
     return jsonify(devices)
 
