@@ -144,7 +144,19 @@ Vehicle Details
         <label for="ServiceDueDate">Service Due Date</label>
         <input type="date" name="ServiceDueDate" id="ServiceDueDate" />
       </div>
+
+      <div class="form-group">
+        <label for="slowSpeed">Slow Speed Limit</label>
+        <input type="text" name="slowSpeed" id="slowSpeed" pattern="^\d+$"/>
+      </div>
+
+      <div class="form-group">
+        <label for="normalSpeed">Normal Speed Limit</label>
+        <input type="text" name="normalSpeed" id="normalSpeed" pattern="^\d+$"/>
+      </div>
       
+
+
       <div class="form-actions">
         <button type="submit" class="btn success">Submit</button>
         <button type="button" id="cancelBtn" class="btn danger">Cancel</button>
@@ -204,6 +216,8 @@ Vehicle Details
         <th>Location</th>
         <th>Odometer Reading</th>
         <th>Service Due Date</th>
+        <th>Slow Speed Limit</th>
+        <th>Normal Speed Limit</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -226,6 +240,8 @@ Vehicle Details
         <td>{{ vehicle['Location'] }}</td>
         <td>{{ vehicle['OdometerReading'] }}</td>
         <td>{{ vehicle['ServiceDueDate'] }}</td>
+        <td>{{ vehicle['slowSpeed'] }}</td>
+        <td>{{ vehicle['normalSpeed'] }}</td>
         <td>
           <button class="icon-btn edit-icon" onclick="editVehicle('{{ vehicle._id }}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteVehicle('{{ vehicle._id }}')">🗑️</button>
