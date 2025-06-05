@@ -79,6 +79,7 @@ tr:hover {
   border-radius: 5px;
   cursor: pointer;
   text-decoration: none;
+  height: 35px;
 }
 
 .btn:hover {
