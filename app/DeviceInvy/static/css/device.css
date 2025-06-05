@@ -79,7 +79,6 @@ tr:hover {
   border-radius: 5px;
   cursor: pointer;
   text-decoration: none;
-  height: 35px;
 }
 
 .btn:hover {
@@ -459,4 +458,8 @@ tr:hover {
     text-align: center;
     padding: 20px;
     color: #666;
+}
+
+.searchBtn{
+  height: 35px;
 }
