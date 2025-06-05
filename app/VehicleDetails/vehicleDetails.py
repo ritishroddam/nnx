@@ -19,20 +19,6 @@ device_collection = db['device_inventory']
 companies_collection = db['customers_list']
 cities_collection = db['cities']
 
-# Home route
-# @vehicleDetails_bp.route('/page')
-# @jwt_required()
-# def page():
-#     vehicles = list(vehicle_collection.find({}))
-#     for vehicle in vehicles:
-#         if vehicle.get('CompanyID'):
-#             tempCompanyDict = companies_collection.find_one({"_id": ObjectId(vehicle['CompanyID'])}, {"Company Name": 1})
-#             if tempCompanyDict:
-#                 vehicle['CompanyID'] = str(tempCompanyDict['Company Name'])
-#             else:
-#                 vehicle['CompanyID'] = ""
-#     return render_template('vehicleDetails.html', vehicles=vehicles)
-
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
@@ -149,6 +135,12 @@ def manual_entry():
 
     # ...existing validation code...
 
+    if data['normalSpeed'] == "":
+        data['normalSpeed'] = "60"
+    
+    if data['slowSpeed'] == "":
+        data['slowSpeed'] = "20"
+    
     # Save city and state in the same column
     location = data['Location'].split(',')
     data['Location'] = f"{location[0].strip()}, {location[1].strip()}"

@@ -144,7 +144,19 @@ Vehicle Details
         <label for="ServiceDueDate">Service Due Date</label>
         <input type="date" name="ServiceDueDate" id="ServiceDueDate" />
       </div>
+
+      <div class="form-group">
+        <label for="slowSpeed">Slow Speed Limit</label>
+        <input type="text" name="slowSpeed" id="slowSpeed" pattern="^\d+$"/>
+      </div>
+
+      <div class="form-group">
+        <label for="normalSpeed">Normal Speed Limit</label>
+        <input type="text" name="normalSpeed" id="normalSpeed" pattern="^\d+$"/>
+      </div>
       
+
+
       <div class="form-actions">
         <button type="submit" class="btn success">Submit</button>
         <button type="button" id="cancelBtn" class="btn danger">Cancel</button>
