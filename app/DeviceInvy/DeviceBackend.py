@@ -29,6 +29,33 @@ def page():
     devices = list(collection.find({}))
     return render_template('device.html', devices=devices)
 
+@device_bp.route('/search_devices')
+@jwt_required()
+def search_devices():
+    imei_query = request.args.get('imei', '').strip()
+    
+    if not imei_query:
+        return jsonify([])
+    
+    # Search for full IMEI match or last 5 digits match
+    query = {
+        "$or": [
+            {"IMEI": imei_query},
+            {"IMEI": {"$regex": f"{imei_query}$"}}  # Ends with the search term
+        ]
+    }
+    
+    devices = list(collection.find(query, {"_id": 1, "IMEI": 1, "GLNumber": 1, "DeviceModel": 1, 
+                                         "DeviceMake": 1, "DateIn": 1, "Warranty": 1, 
+                                         "SentBy": 1, "OutwardTo": 1, "Package": 1, 
+                                         "Tenure": 1, "Status": 1}))
+    
+    # Convert ObjectId to string for JSON serialization
+    for device in devices:
+        device['_id'] = str(device['_id'])
+    
+    return jsonify(devices)
+
 @device_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
 def manual_entry():
