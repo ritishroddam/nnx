@@ -44,9 +44,7 @@
   transform: translateY(-5px);
   background-color: #3a3d47;
 }
-.card-content {
-  margin-bottom: 20px;
-}
+
 .card h3 {
   margin: 0;
   color: #fff;
