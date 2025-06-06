@@ -1,3 +1,17 @@
+document.getElementById('companyFilter').addEventListener('change', function() {
+  const filterValue = this.value.toLowerCase();
+  const rows = document.querySelectorAll('#customerTable tr');
+  
+  rows.forEach(row => {
+    const companyName = row.cells[0].textContent.toLowerCase();
+    if (filterValue === '' || companyName.includes(filterValue)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+});
+
 document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadFormContainer").classList.toggle("hidden");
 });

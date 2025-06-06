@@ -15,6 +15,14 @@ Company Details
 {% endblock %}
 
 {% block block_container %}
+
+<select id="companyFilter" class="filter-dropdown">
+  <option value="">All Companies</option>
+  {% for company in unique_companies %}
+  <option value="{{ company }}">{{ company }}</option>
+  {% endfor %}
+</select>
+
 <button id="manualEntryBtn" class="btn success mb-4">
   Add New Customer
 </button>

@@ -19,7 +19,9 @@ customers_collection = db['customers_list']
 @jwt_required()
 def page():
     customers = list(customers_collection.find())
-    return render_template('company.html', customers=customers)
+    unique_companies = customers_collection.distinct('Company Name')
+    return render_template('company.html', customers=customers, unique_companies=unique_companies)
+    # return render_template('company.html', customers=customers)
 
 # Route to add a new customer manually
 @company_bp.route('/manual_entry', methods=['POST'])
