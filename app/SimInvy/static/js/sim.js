@@ -47,6 +47,10 @@ document.addEventListener("DOMContentLoaded", function() {
   const closeModalButtons = document.querySelectorAll(".close-modal");
   const cancelBtn = document.getElementById("cancelBtn");
 
+  document.getElementById("manualEntryModal").classList.add("hidden");
+  document.getElementById("uploadModal").classList.add("hidden");
+
+
   document.getElementById("searchBtn").addEventListener("click", searchSims);
   document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
   document.getElementById("simSearch").addEventListener("keyup", function(event) {
@@ -55,27 +59,32 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  manualEntryBtn.addEventListener("click", function() {
-    manualEntryModal.classList.remove("hidden");
+  // Manual Entry Button
+  document.getElementById("manualEntryBtn").addEventListener("click", function() {
+    document.getElementById("manualEntryModal").classList.remove("hidden");
     document.getElementById("MobileNumber").focus();
   });
 
-  uploadBtn.addEventListener("click", function() {
-    uploadModal.classList.remove("hidden");
+  // Upload Button
+  document.getElementById("uploadBtn").addEventListener("click", function() {
+    document.getElementById("uploadModal").classList.remove("hidden");
   });
 
-  downloadExcelBtn.addEventListener("click", function() {
+  // Download Excel Button
+  document.getElementById("downloadExcelBtn").addEventListener("click", function() {
     window.location.href = "/simInvy/download_excel";
   });
 
-  closeModalButtons.forEach(button => {
-    button.addEventListener("click", function() {
+  // Close buttons
+  document.querySelectorAll(".close-modal").forEach(btn => {
+    btn.addEventListener("click", function() {
       this.closest(".modal").classList.add("hidden");
     });
   });
 
-  cancelBtn.addEventListener("click", function() {
-    manualEntryModal.classList.add("hidden");
+  // Cancel button
+  document.getElementById("cancelBtn").addEventListener("click", function() {
+    document.getElementById("manualEntryModal").classList.add("hidden");
   });
 
   window.addEventListener("click", function(event) {
