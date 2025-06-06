@@ -112,6 +112,13 @@ def manual_entry():
     data = request.form.to_dict()
     data = {key.strip(): value.strip() for key, value in data.items()}  # Clean input
     
+    vehicleNumbersDict = vehicle_collection.find({}, {"LicensePlateNumber": 1})
+    vehicleNumbersList = [vehicle['LicensePlateNumber'] for vehicle in vehicleNumbersDict]
+    
+    if data['LicensePlateNumber'] in vehicleNumbersList:
+        flash(f"License Plate Number {data['LicensePlateNumber']} already exists", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
     # Get unique company names from existing vehicles
     company_names = vehicle_collection.distinct('CompanyName')
     data['CompanyName'] = data.get('CompanyName', '')
