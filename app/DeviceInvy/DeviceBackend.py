@@ -38,7 +38,7 @@ def page():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
-        vehicle = vehiclesData[device['IMEI'] if device['IMEI'] in VehicleData else None]
+        vehicle = VehicleData[device['IMEI']]
         device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
         device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
     
@@ -75,7 +75,7 @@ def search_devices():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
-        vehicle = vehiclesData[device['IMEI'] if device['IMEI'] in VehicleData else None]
+        vehicle = VehicleData[device['IMEI']]
         device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
         device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
         device['_id'] = str(device['_id'])
@@ -210,7 +210,7 @@ def download_excel():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
-        vehicle = vehiclesData[device['IMEI'] if device['IMEI'] in VehicleData else None]
+        vehicle = VehicleData[device['IMEI']]
         device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
         device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
 
