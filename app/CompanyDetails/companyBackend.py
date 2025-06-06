@@ -21,6 +21,30 @@ def page():
     customers = list(customers_collection.find())
     return render_template('company.html', customers=customers)
 
+@company_bp.route('/search_companies')
+@jwt_required()
+def search_companies():
+    search_query = request.args.get('query', '').strip()
+    
+    if not search_query:
+        return jsonify([])
+    
+    # Search for companies where the name contains the search query (case insensitive)
+    query = {
+        "$or": [
+            {"Company Name": {"$regex": f".*{search_query}.*", "$options": "i"}},  # Contains search term
+            {"Company Name": {"$regex": f"^{search_query}$", "$options": "i"}}      # Exact match
+        ]
+    }
+    
+    companies = list(customers_collection.find(query))
+    
+    # Convert ObjectId to string for JSON serialization
+    for company in companies:
+        company['_id'] = str(company['_id'])
+    
+    return jsonify(companies)
+
 # Route to add a new customer manually
 @company_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
