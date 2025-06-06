@@ -1,14 +1,3 @@
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById("searchBtn").addEventListener("click", searchCompanies);
-  document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
-  document.getElementById("companySearch").addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-      searchCompanies();
-    }
-  });
-
-});
-
 document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadFormContainer").classList.toggle("hidden");
 });
@@ -38,61 +27,6 @@ window.addEventListener("click", function(event) {
     document.getElementById("manualForm").reset();
   }
 });
-
-function searchCompanies() {
-  const searchValue = document.getElementById("companySearch").value.trim();
-  if (!searchValue) {
-    clearSearch();
-    return;
-  }
-
-  fetch(`/companyDetails/search_companies?query=${searchValue}`)
-    .then(response => response.json())
-    .then(data => {
-      const tableBody = document.getElementById("customerTable");
-      tableBody.innerHTML = ''; // Clear current table
-
-      if (data.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="12" class="no-results">No companies found</td>`;
-        tableBody.appendChild(row);
-        return;
-      }
-
-      // Render the search results
-      data.forEach(customer => {
-        const row = document.createElement('tr');
-        row.setAttribute('data-id', customer._id);
-        row.innerHTML = `
-          <td>${customer['Company Name']}</td>
-          <td>${customer['Contact Person']}</td>
-          <td>${customer['Email Address']}</td>
-          <td>${customer['Phone Number']}</td>
-          <td>${customer['Company Address']}</td>
-          <td>${customer['Number of GPS Devices']}</td>
-          <td>${customer['Number of Vehicles']}</td>
-          <td>${customer['Number of Drivers']}</td>
-          <td>${customer['Payment Status']}</td>
-          <td>${customer['Support Contact']}</td>
-          <td>${customer['Remarks']}</td>
-          <td>
-            <button class="icon-btn edit-icon" onclick="editCustomer('${customer._id}')">✏️</button>
-            <button class="icon-btn delete-icon" onclick="deleteCustomer('${customer._id}')">🗑️</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-    })
-    .catch(error => {
-      console.error('Error searching companies:', error);
-      alert('Error searching companies. Please try again.');
-    });
-}
-
-function clearSearch() {
-  document.getElementById("companySearch").value = '';
-  location.reload(); // Reload the page to show all companies
-}
 
 // Add form validation logic if necessary
 
