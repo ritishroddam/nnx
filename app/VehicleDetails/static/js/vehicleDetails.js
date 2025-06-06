@@ -186,8 +186,8 @@ function editVehicle(vehicleId) {
     <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
     <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
   </select>`;
-  const vehicleType = row.cells[14].querySelector("#VehicleType");
-  $(vehicleType).selectize({
+  const vehicleTypeSelectize = row.cells[14].querySelector("#VehicleType");
+  $(vehicleTypeSelectize).selectize({
     create: false,
     sortField: "text",
     searchField: ["text"],
@@ -207,8 +207,8 @@ function editVehicle(vehicleId) {
     <option value="active" ${currentStatus === "active" ? "selected" : ""}>Active</option>
     <option value="inactive" ${currentStatus === "inactive" ? "selected" : ""}>Inactive</option>
   </select>`;
-  const currentStatus = row.cells[13].querySelector("#VehicleType");
-  $(currentStatus).selectize({
+  const currentStatusSelectize = row.cells[13].querySelector("#VehicleType");
+  $(currentStatusSelectize).selectize({
     create: false,
     sortField: "text",
     searchField: ["text"],
