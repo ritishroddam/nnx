@@ -429,7 +429,6 @@ input[type="date"] {
 .search-container {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .search-container input {
