@@ -177,8 +177,8 @@ function editVehicle(vehicleId) {
 
   row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
   row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
-  row.cells[2].innerHTML = `<input type="text" value="${imei} data-editable></select>`;
-  row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="sim_number" data-editable></select>`;
+  row.cells[2].innerHTML = `<input type="text" value="${imei} data-key="imei" data-editable />`;
+  row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="sim_number" data-editable />`;
 
   row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
     <option value="car" ${vehicleType === "car" ? "selected" : ""}>Car</option>
@@ -222,8 +222,8 @@ function saveVehicle(vehicleID) {
 
   const licensePlateNumber = row.cells[0].querySelector("input").value.trim();
   const companyName = row.cells[1].querySelector("input").value.trim();
-  const imei = row.cells[2].querySelector("select").value.trim();
-  const sim = row.cells[3].querySelector("select").value.trim();
+  const imei = row.cells[2].querySelector("input").value.trim();
+  const sim = row.cells[3].querySelector("input").value.trim();
   const vehicleType = row.cells[4].querySelector("select").value.trim();
   const numberOfSeats = row.cells[5].querySelector("input").value.trim();
   const vehicleModel = row.cells[6].querySelector("input").value.trim();
@@ -265,7 +265,10 @@ function saveVehicle(vehicleID) {
   // Send updated data to backend
   fetch(`/vehicleDetails/edit_vehicle/${vehicleID}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+     },
     body: JSON.stringify(updatedData),
   })
     .then((response) => response.json())
