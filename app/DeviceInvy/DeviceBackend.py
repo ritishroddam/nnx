@@ -153,23 +153,77 @@ def upload_file():
         flash("Unsupported file format", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
+# @device_bp.route('/download_excel')
+# @jwt_required()
+# def download_excel():
+#     devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
+    
+#     if not devices:
+#         return "No data available", 404
+
+#     df = pd.DataFrame(devices)
+    
+#     # Convert DataFrame to Excel
+#     output = BytesIO()
+#     with pd.ExcelWriter(output, engine="openpyxl") as writer:
+#         df.to_excel(writer, index=False, sheet_name="Devices")
+
+#     output.seek(0)
+
+#     return Response(
+#         output,
+#         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#         headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
+#     )
+
 @device_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
+    # Specify exactly which fields you want to include
+    projection = {
+        "_id": 0,  # Exclude _id
+        "IMEI": 1,
+        "GLNumber": 1,
+        "DeviceModel": 1,
+        "DeviceMake": 1,
+        "DateIn": 1,
+        "Warranty": 1,
+        "SentBy": 1,
+        "OutwardTo": 1,
+        "Package": 1,
+        "Tenure": 1,
+        "Status": 1
+    }
+    
+    devices = list(collection.find({}, projection))
     
     if not devices:
-        return "No data available", 404
+        return jsonify({"error": "No data available"}), 404
 
     df = pd.DataFrame(devices)
     
-    # Convert DataFrame to Excel
+    # Reorder columns if needed
+    column_order = [
+        'IMEI',
+        'GLNumber',
+        'DeviceModel',
+        'DeviceMake',
+        'DateIn',
+        'Warranty',
+        'SentBy',
+        'OutwardTo',
+        'Package',
+        'Tenure',
+        'Status'
+    ]
+    df = df[column_order]
+    
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Devices")
-
+    
     output.seek(0)
-
+    
     return Response(
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

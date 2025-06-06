@@ -179,8 +179,26 @@ function clearSearch() {
 }
 
 ////////////////// Download ////////////////////////
-document.getElementById("downloadExcel").addEventListener("click", function () {
-  window.location.href = "/deviceInvy/download_excel";
+
+// document.getElementById("downloadExcel").addEventListener("click", function () {
+//   window.location.href = "/deviceInvy/download_excel";
+// });
+
+document.getElementById("downloadExcel").addEventListener("click", function() {
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = '/deviceInvy/download_excel';
+    
+    // Add hidden input for JWT token if needed
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'access_token';
+    tokenInput.value = localStorage.getItem('access_token') || getCookie('access_token');
+    form.appendChild(tokenInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 });
 
 function editDevice(deviceId) {

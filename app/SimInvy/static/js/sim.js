@@ -47,6 +47,14 @@ document.addEventListener("DOMContentLoaded", function() {
   const closeModalButtons = document.querySelectorAll(".close-modal");
   const cancelBtn = document.getElementById("cancelBtn");
 
+  document.getElementById("searchBtn").addEventListener("click", searchSims);
+  document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
+  document.getElementById("simSearch").addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+      searchSims();
+    }
+  });
+
   manualEntryBtn.addEventListener("click", function() {
     manualEntryModal.style.display = "block";
     document.getElementById("MobileNumber").focus();
@@ -163,6 +171,39 @@ document.addEventListener("DOMContentLoaded", function() {
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
 });
+
+function searchSims() {
+  const searchValue = document.getElementById("simSearch").value.trim();
+  if (!searchValue) {
+    clearSearch();
+    return;
+  }
+
+  fetch(`/simInvy/search_sims?query=${searchValue}`)
+    .then(response => response.json())
+    .then(data => {
+      const tableBody = document.getElementById("simTable");
+      tableBody.innerHTML = ''; // Clear current table
+
+      if (data.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="12" class="no-results">No SIMs found</td>`;
+        tableBody.appendChild(row);
+        return;
+      }
+
+      renderSimTable(data);
+    })
+    .catch(error => {
+      console.error('Error searching SIMs:', error);
+      alert('Error searching SIMs. Please try again.');
+    });
+}
+
+function clearSearch() {
+  document.getElementById("simSearch").value = '';
+  filterSimsByStatus(); // Reset to show all SIMs
+}
 
 function filterSimsByStatus() {
   const status = document.getElementById('statusFilter').value;
