@@ -32,14 +32,14 @@ def page():
     
     vehiclesData = vehicle_collection.find(
         {"IMEI": {"$in": imeiList}}, 
-        {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
+        {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
     )
     
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
         vehicle = VehicleData[device['IMEI']]
-        device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
+        device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
         device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
     
     return render_template('device.html', devices=devices)
@@ -69,14 +69,14 @@ def search_devices():
     
     vehiclesData = vehicle_collection.find(
         {"IMEI": {"$in": imeiList}}, 
-        {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
+        {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
     )
     
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
         vehicle = VehicleData[device['IMEI']]
-        device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
+        device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
         device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
         device['_id'] = str(device['_id'])
     
@@ -204,14 +204,14 @@ def download_excel():
     
     vehiclesData = vehicle_collection.find(
         {"IMEI": {"$in": imeiList}}, 
-        {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
+        {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
     )
     
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
         vehicle = VehicleData[device['IMEI']]
-        device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
+        device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
         device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
 
     if not devices:
