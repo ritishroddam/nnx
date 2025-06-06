@@ -184,49 +184,21 @@ function clearSearch() {
 //   window.location.href = "/deviceInvy/download_excel";
 // });
 
-document.getElementById("downloadExcel").addEventListener("click", async function() {
-    try {
-        // Show loading state
-        this.disabled = true;
-        const originalText = this.textContent;
-        this.textContent = "Preparing download...";
-        
-        // Get JWT token from where you store it (localStorage/cookies)
-        const token = localStorage.getItem('access_token') || getCookie('access_token');
-        
-        const response = await fetch('/deviceInvy/download_excel', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                // Include CSRF token if needed
-                'X-CSRF-TOKEN': getCookie('csrf_access_token') 
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Download failed: ${response.statusText}`);
-        }
-        
-        // Get the blob and create download link
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Device_Inventory.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-    } catch (error) {
-        console.error('Download error:', error);
-        alert(`Download failed: ${error.message}`);
-    } finally {
-        // Reset button state
-        this.disabled = false;
-        this.textContent = originalText;
-    }
+document.getElementById("downloadExcel").addEventListener("click", function() {
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = '/deviceInvy/download_excel';
+    
+    // Add hidden input for JWT token if needed
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'access_token';
+    tokenInput.value = localStorage.getItem('access_token') || getCookie('access_token');
+    form.appendChild(tokenInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 });
 
 function editDevice(deviceId) {
