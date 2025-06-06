@@ -222,8 +222,8 @@ function saveVehicle(vehicleID) {
 
   const licensePlateNumber = row.cells[0].querySelector("input").value.trim();
   const companyName = row.cells[1].querySelector("input").value.trim();
-  const imei = row.cells[2].querySelector("select").value.trim();
-  const sim = row.cells[3].querySelector("select").value.trim();
+  const imei = row.cells[2].querySelector("input").value.trim();
+  const sim = row.cells[3].querySelector("input").value.trim();
   const vehicleType = row.cells[4].querySelector("select").value.trim();
   const numberOfSeats = row.cells[5].querySelector("input").value.trim();
   const vehicleModel = row.cells[6].querySelector("input").value.trim();
