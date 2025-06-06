@@ -25,7 +25,6 @@ select {
   width: 100%;
   max-width: 300px;
   padding: 10px;
-  margin-bottom: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
@@ -71,6 +70,10 @@ select {
   height: 30px;
   animation: spin 2s linear infinite;
   margin: 10px auto;
+}
+
+#manualEntryBtn{
+  background-color: #28a745;
 }
 
 @keyframes spin {
