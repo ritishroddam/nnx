@@ -217,7 +217,9 @@ input#editStatusDate, input#editReactivationDate {
 
 /* Modal Styles */
 .modal {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: fixed;
   z-index: 1000;
   left: 0;
@@ -226,6 +228,10 @@ input#editStatusDate, input#editReactivationDate {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
+}
+
+.modal.hidden {
+  display: none;
 }
 
 @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
@@ -249,7 +255,7 @@ body.modal-open {
 
 .modal-content {
   background-color: #fefefe;
-  margin: 8% auto;
+  margin: auto;
   padding: 20px;
   border: 1px solid #888;
   border-radius: 8px;
