@@ -294,21 +294,7 @@ function saveVehicle(vehicleID) {
 }
 
 function cancelEdit(vehicleID) {
-  const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
-  const cells = row.querySelectorAll("td[data-editable]");
-
-  // Revert to original values
-  cells.forEach((cell) => {
-    const originalValue = cell.getAttribute("data-original-value");
-    cell.textContent = originalValue;
-  });
-
-  // Restore action buttons
-  const actionCell = row.querySelector("td[data-actions]");
-  actionCell.innerHTML = `
-        <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
-        <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
-    `;
+  location.reload();
 }
 
 function deleteVehicle(vehicleID) {
