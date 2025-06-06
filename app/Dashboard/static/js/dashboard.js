@@ -463,18 +463,18 @@ async function initMap() {
         trafficLayer = new TrafficLayer();
         trafficLayer.setMap(map);
 
-        const homeContent = document.createElement("img");
-        homeContent.src = "/static/images/HomeIcon.png";
-        homeContent.style.width = "40px";
-        homeContent.style.height = "40px";
-        homeContent.style.position = "absolute";
-        homeContent.alt = "Home Icon";
+        // const homeContent = document.createElement("img");
+        // homeContent.src = "/static/images/HomeIcon.png";
+        // homeContent.style.width = "40px";
+        // homeContent.style.height = "40px";
+        // homeContent.style.position = "absolute";
+        // homeContent.alt = "Home Icon";
 
         marker = new AdvancedMarkerElement({
           position: userLocation,
           map: map,
           title: "Your Location",
-          content: homeContent,
+          // content: homeContent,
         });
 
       },
@@ -505,18 +505,17 @@ async function fallbackToDefaultLocation() {
     trafficLayer = new TrafficLayer();
     trafficLayer.setMap(map);
 
-    const homeContent = document.createElement("img");
-    homeContent.src = "/static/images/HomeIcon.png";
-    homeContent.style.width = "40px";
-    homeContent.style.height = "40px";
-    homeContent.style.position = "absolute";
-    homeContent.alt = "Home Icon";
+    // const homeContent = document.createElement("img");
+    // homeContent.src = "/static/images/HomeIcon.png";
+    // homeContent.style.width = "40px";
+    // homeContent.style.height = "40px";
+    // homeContent.style.position = "absolute";
+    // homeContent.alt = "Home Icon";
 
     marker = new AdvancedMarkerElement({
       position: defaultLocation,
       map: map,
       title: "Your Location",
-      content: homeContent,
     });
 
 
