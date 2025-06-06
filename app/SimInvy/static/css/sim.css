@@ -443,6 +443,10 @@ input[type="date"] {
     padding: 8px 16px;
 }
 
+#searchBtn{
+  height: 35px;
+}
+
 .no-results {
     text-align: center;
     padding: 20px;
