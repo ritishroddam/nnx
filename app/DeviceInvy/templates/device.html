@@ -27,12 +27,6 @@ Device Inventory
 
     <!-- <button id="downloadExcel" class="btn">Download Table</button> -->
      <a href="/deviceInvy/download_excel" class="btn" id="downloadExcel">Download Table</a>
-
-    {% with messages = get_flashed_messages(with_categories=true) %} {%
-      if messages %} {% for category, message in messages %}
-      <div class="flash-box flash-{{ category }}">{{ message }}</div>
-      {% endfor %} {% endif %} {% endwith %}
-  
       <table class="device-table">
         <thead>
           <tr>
