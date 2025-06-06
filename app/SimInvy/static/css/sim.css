@@ -217,9 +217,7 @@ input#editStatusDate, input#editReactivationDate {
 
 /* Modal Styles */
 .modal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none; /* Start hidden */
   position: fixed;
   z-index: 1000;
   left: 0;
@@ -232,6 +230,21 @@ input#editStatusDate, input#editReactivationDate {
 
 .modal.hidden {
   display: none;
+}
+
+.modal:not(.hidden) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure buttons remain visible */
+#manualEntryBtn, 
+#uploadBtn, 
+#downloadExcelBtn {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
