@@ -143,6 +143,8 @@ function searchDevices() {
         row.innerHTML = `
           <td>${device.IMEI}</td>
           <td>${device.GLNumber || ''}</td>
+          <td>${device.LicensePlateNumber || ''}</td>
+          <td>${device.CompanyName || ''}</td>
           <td>${device.DeviceModel}</td>
           <td>${device.DeviceMake}</td>
           <td>${device.DateIn}</td>
@@ -213,28 +215,28 @@ function editDevice(deviceId) {
     row.cells[1].innerText.trim() === "None"
       ? ""
       : row.cells[1].innerText.trim();
-  const deviceModel = row.cells[2].innerText;
-  const deviceMake = row.cells[3].innerText;
-  const dateIn = row.cells[4].innerText;
-  const warranty = row.cells[5].innerText;
-  const sentBy = row.cells[6].innerText;
-  const outwardTo = row.cells[7].innerText;
-  const packageValue = row.cells[8].innerText;
-  const tenureValue = row.cells[9].innerText;
-  const status = row.cells[10].innerText.trim();
+  const deviceModel = row.cells[4].innerText;
+  const deviceMake = row.cells[5].innerText;
+  const dateIn = row.cells[6].innerText;
+  const warranty = row.cells[7].innerText;
+  const sentBy = row.cells[8].innerText;
+  const outwardTo = row.cells[9].innerText;
+  const packageValue = row.cells[10].innerText;
+  const tenureValue = row.cells[11].innerText;
+  const status = row.cells[12].innerText.trim();
   
 
   // Replace row cells with editable inputs
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
-  row.cells[2].innerHTML = `<input type="text" value="${deviceModel}" />`;
-  row.cells[3].innerHTML = `<input type="text" value="${deviceMake}" />`;
+  row.cells[4].innerHTML = `<input type="text" value="${deviceModel}" />`;
+  row.cells[5].innerHTML = `<input type="text" value="${deviceMake}" />`;
 
-  row.cells[4].innerHTML = `<input type="date" value="${dateIn}" />`;
-  row.cells[5].innerHTML = `<input type="date" value="${warranty}" />`;
-  row.cells[6].innerHTML = `<input type="text" value="${sentBy}" />`;
-  row.cells[7].innerHTML = `<input type="text" value="${outwardTo}" />`;
-  row.cells[8].innerHTML = `
+  row.cells[6].innerHTML = `<input type="date" value="${dateIn}" />`;
+  row.cells[7].innerHTML = `<input type="date" value="${warranty}" />`;
+  row.cells[8].innerHTML = `<input type="text" value="${sentBy}" />`;
+  row.cells[9].innerHTML = `<input type="date" value="${outwardTo}" />`;
+  row.cells[10].innerHTML = `
     <select id="editPackage">
       <option value="Rental" ${
         packageValue === "Rental" ? "selected" : ""
@@ -248,11 +250,11 @@ function editDevice(deviceId) {
     </select>
   `;
 
-  row.cells[9].innerHTML = `<input type="text" id="editTenure" value="${tenureValue}" ${
+  row.cells[11].innerHTML = `<input type="text" id="editTenure" value="${tenureValue}" ${
     packageValue === "Package" ? "" : "disabled"
   } />`;
 
-  row.cells[10].innerHTML = `
+  row.cells[12].innerHTML = `
     <input type="radio" name="status-${deviceId}" value="Active" ${
     status === "Active" ? "checked" : ""
   } /> Active
@@ -261,7 +263,7 @@ function editDevice(deviceId) {
   } /> Inactive
   `;
 
-  row.cells[11].innerHTML = `
+  row.cells[13].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveDevice('${deviceId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${deviceId}')">❌</button>
   `;
@@ -293,16 +295,16 @@ function saveDevice(deviceId) {
 
   const imeiValue = row.cells[0].querySelector("input").value.trim();
   const glNumberValue = row.cells[1].querySelector("input").value.trim();
-  const deviceModel = row.cells[2].querySelector("input").value.trim();
-  const deviceMake = row.cells[3].querySelector("input").value.trim();
-  const dateIn = row.cells[4].querySelector("input").value.trim();
+  const deviceModel = row.cells[4].querySelector("input").value.trim();
+  const deviceMake = row.cells[5].querySelector("input").value.trim();
+  const dateIn = row.cells[6].querySelector("input").value.trim();
   const today = new Date().toISOString().split("T")[0];
-  const warranty = row.cells[5].querySelector("input").value.trim();
-  const sentBy = row.cells[6].querySelector("input").value.trim();
-  const outwardTo = row.cells[7].querySelector("input").value.trim();
-  const packageValue = row.cells[8].querySelector("select").value;
-  const tenureValue = row.cells[9].querySelector("input").value.trim();
-  const status = row.cells[10]
+  const warranty = row.cells[7].querySelector("input").value.trim();
+  const sentBy = row.cells[8].querySelector("input").value.trim();
+  const outwardTo = row.cells[9].querySelector("input").value.trim();
+  const packageValue = row.cells[10].querySelector("select").value;
+  const tenureValue = row.cells[11].querySelector("input").value.trim();
+  const status = row.cells[12]
     .querySelector(`input[name="status-${deviceId}"]:checked`)
     .value.trim();
 
@@ -373,18 +375,18 @@ function saveDevice(deviceId) {
       if (data.success) {
         row.cells[0].innerText = updatedData.IMEI;
         row.cells[1].innerText = updatedData.GLNumber || "";
-        row.cells[2].innerText = updatedData.DeviceModel;
-        row.cells[3].innerText = updatedData.DeviceMake;
-        row.cells[4].innerText = updatedData.DateIn;
-        row.cells[5].innerText = updatedData.Warranty;
-        row.cells[6].innerText = updatedData.SentBy;
-        row.cells[7].innerText = updatedData.OutwardTo;
-        row.cells[8].innerText = updatedData.Package;
-        row.cells[9].innerText = updatedData.Tenure || "";
-        row.cells[10].innerHTML = `<button class="status-btn ${
+        row.cells[4].innerText = updatedData.DeviceModel;
+        row.cells[5].innerText = updatedData.DeviceMake;
+        row.cells[6].innerText = updatedData.DateIn;
+        row.cells[7].innerText = updatedData.Warranty;
+        row.cells[8].innerText = updatedData.SentBy;
+        row.cells[9].innerText = updatedData.OutwardTo;
+        row.cells[10].innerText = updatedData.Package;
+        row.cells[11].innerText = updatedData.Tenure || "";
+        row.cells[12].innerHTML = `<button class="status-btn ${
           updatedData.Status === "Active" ? "status-active" : "status-inactive"
         }" disabled>${updatedData.Status}</button>`;
-        row.cells[11].innerHTML = `
+        row.cells[13].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
         `;

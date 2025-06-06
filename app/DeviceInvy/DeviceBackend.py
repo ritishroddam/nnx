@@ -21,12 +21,27 @@ config['default'].init_app(app)
 app.secret_key = app.config['SECRET_KEY']
 
 collection = db['device_inventory']
+vehicle_collection = db['vehicle_inventory']
 
 
 @device_bp.route('/page')
 @jwt_required()
 def page():
     devices = list(collection.find({}))
+    imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
+    
+    vehiclesData = vehicle_collection.find(
+        {"IMEI": {"$in": imeiList}}, 
+        {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
+    )
+    
+    VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
+    
+    for device in devices:
+        vehicle = vehiclesData[device['IMEI'] if device['IMEI'] in VehicleData else None]
+        device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
+        device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+    
     return render_template('device.html', devices=devices)
 
 @device_bp.route('/search_devices')
@@ -50,8 +65,19 @@ def search_devices():
                                          "SentBy": 1, "OutwardTo": 1, "Package": 1, 
                                          "Tenure": 1, "Status": 1}))
     
-    # Convert ObjectId to string for JSON serialization
+    imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
+    
+    vehiclesData = vehicle_collection.find(
+        {"IMEI": {"$in": imeiList}}, 
+        {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
+    )
+    
+    VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
+    
     for device in devices:
+        vehicle = vehiclesData[device['IMEI'] if device['IMEI'] in VehicleData else None]
+        device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
+        device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
         device['_id'] = str(device['_id'])
     
     return jsonify(devices)
@@ -153,29 +179,6 @@ def upload_file():
         flash("Unsupported file format", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
-# @device_bp.route('/download_excel')
-# @jwt_required()
-# def download_excel():
-#     devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
-    
-#     if not devices:
-#         return "No data available", 404
-
-#     df = pd.DataFrame(devices)
-    
-#     # Convert DataFrame to Excel
-#     output = BytesIO()
-#     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-#         df.to_excel(writer, index=False, sheet_name="Devices")
-
-#     output.seek(0)
-
-#     return Response(
-#         output,
-#         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-#         headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
-#     )
-
 @device_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
@@ -197,6 +200,20 @@ def download_excel():
     
     devices = list(collection.find({}, projection))
     
+    imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
+    
+    vehiclesData = vehicle_collection.find(
+        {"IMEI": {"$in": imeiList}}, 
+        {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
+    )
+    
+    VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
+    
+    for device in devices:
+        vehicle = vehiclesData[device['IMEI'] if device['IMEI'] in VehicleData else None]
+        device['LicensePlateNumber'] = vehicle['LicensePlateNumberr'] if vehicle else None
+        device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+
     if not devices:
         return jsonify({"error": "No data available"}), 404
 
@@ -206,6 +223,8 @@ def download_excel():
     column_order = [
         'IMEI',
         'GLNumber',
+        'LicensePlateNumber',
+        'CompanyName',
         'DeviceModel',
         'DeviceMake',
         'DateIn',
