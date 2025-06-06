@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Prevent selecting future dates
   dateInInput.addEventListener("input", function () {
     if (this.value > today) {
-      alert("Future dates are not allowed.");
+      displayFlashMessage("Future dates are not allowed.", "warning");
       this.value = today; // Reset to today's date
     }
   });
@@ -171,7 +171,7 @@ function searchDevices() {
     })
     .catch(error => {
       console.error('Error searching devices:', error);
-      alert('Error searching devices. Please try again.');
+      displayFlashMessage("Error searching devices. Please try again.");
     });
 }
 
@@ -324,22 +324,22 @@ function saveDevice(deviceId) {
 
   // Validate inputs
   if (imeiValue.length !== 15 || isNaN(imeiValue)) {
-    alert("IMEI must be exactly 15 digits and numeric.");
+    displayFlashMessage("IMEI must be exactly 15 digits and numeric.", "warning");
     return;
   }
 
   if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {
-    alert("GL Number must be exactly 13 digits if entered.");
+    displayFlashMessage("GL Number must be exactly 13 digits if entered.", "warning");
     return;
   }
 
   if (dateIn > today) {
-    alert("Future dates are not allowed.");
+    displayFlashMessage("Future dates are not allowed for Date In.", "warning");
     return;
   }
 
   if (packageValue === "Package" && tenureValue.trim() === "") {
-    alert("Tenure is required when Package is selected.");
+    displayFlashMessage("Tenure is required when Package is selected.", "warning");
     return;
   }
 
@@ -390,13 +390,14 @@ function saveDevice(deviceId) {
           <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
         `;
+        displayFlashMessage("Changes saved successfully!", "success");
       } else {
-        alert("Failed to save changes. Please try again.");
+        displayFlashMessage("Failed to save changes. Please try again.");
       }
     })
     .catch((error) => {
       console.error("Error updating device:", error);
-      alert("An error occurred. Please try again.");
+      displayFlashMessage("An error occurred. Please try again.");
     });
 }
 
@@ -418,14 +419,15 @@ function deleteDevice(deviceId) {
         if (data.success) {
           // Remove the row from the table
           document.querySelector(`tr[data-id='${deviceId}']`).remove();
-          alert("Device deleted successfully!");
+          displayFlashMessage("Device deleted successfully!", "success");
         } else {
-          alert("Error: " + data.message);
+          displayFlashMessage("Failed to delete device. Please try again.");
+          console.error("Error deleting device:", data.message);
         }
       })
       .catch((error) => {
+        displayFlashMessage("An error occurred while deleting the device.");
         console.error("Error deleting device:", error);
-        alert("An error occurred. Please try again.");
       });
   }
 }
