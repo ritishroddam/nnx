@@ -153,27 +153,55 @@ def upload_file():
         flash("Unsupported file format", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
+# @device_bp.route('/download_excel')
+# @jwt_required()
+# def download_excel():
+#     devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
+    
+#     if not devices:
+#         return "No data available", 404
+
+#     df = pd.DataFrame(devices)
+    
+#     # Convert DataFrame to Excel
+#     output = BytesIO()
+#     with pd.ExcelWriter(output, engine="openpyxl") as writer:
+#         df.to_excel(writer, index=False, sheet_name="Devices")
+
+#     output.seek(0)
+
+#     return Response(
+#         output,
+#         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#         headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
+#     )
+
 @device_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    devices = list(collection.find({}, {"_id": 0}))  # Fetch all devices (excluding _id)
+    devices = list(collection.find({}, {"_id": 0}))
     
     if not devices:
-        return "No data available", 404
+        return jsonify({"error": "No data available"}), 404
 
     df = pd.DataFrame(devices)
     
-    # Convert DataFrame to Excel
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Devices")
 
     output.seek(0)
-
+    
+    # Add more headers for better caching control
     return Response(
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
+        headers={
+            "Content-Disposition": "attachment;filename=Device_Inventory.xlsx",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
     )
 
 @device_bp.route('/edit_device/<device_id>', methods=['POST'])
