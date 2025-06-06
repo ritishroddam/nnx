@@ -184,9 +184,13 @@ function clearSearch() {
 //   window.location.href = "/deviceInvy/download_excel";
 // });
 
-// Even simpler than form approach, works like your current version
 document.getElementById("downloadExcel").addEventListener("click", function() {
-    window.open('/deviceInvy/download_excel', '_blank');
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = '/deviceInvy/download_excel';
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 });
 
 function editDevice(deviceId) {
