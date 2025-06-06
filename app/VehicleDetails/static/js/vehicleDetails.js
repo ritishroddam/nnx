@@ -186,6 +186,13 @@ function editVehicle(vehicleId) {
     <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
     <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
   </select>`;
+  const vehicleType = row.cells[14].querySelector("#VehicleType");
+  $(vehicleType).selectize({
+    create: false,
+    sortField: "text",
+    searchField: ["text"],
+    dropdownParent: "body"
+  });
 
   row.cells[5].innerHTML = `<input type="number" value="${numberOfSeats}" data-key="number_of_seats" data-editable />`;
   row.cells[6].innerHTML = `<input type="text" value="${vehicleModel}" data-key="vehicle_model" data-editable />`;
@@ -196,10 +203,17 @@ function editVehicle(vehicleId) {
   row.cells[11].innerHTML = `<input type="date" value="${insuranceExpiryDate}" data-key="insurance_expiry_date" data-editable />`;
   row.cells[12].innerHTML = `<input type="text" value="${driverName}" data-key="driver_name" data-editable />`;
 
-  row.cells[13].innerHTML = `<select data-key="current_status" data-editable>
+  row.cells[13].innerHTML = `<select id = "currentStatus" data-key="current_status" data-editable>
     <option value="active" ${currentStatus === "active" ? "selected" : ""}>Active</option>
     <option value="inactive" ${currentStatus === "inactive" ? "selected" : ""}>Inactive</option>
   </select>`;
+  const currentStatus = row.cells[13].querySelector("#VehicleType");
+  $(currentStatus).selectize({
+    create: false,
+    sortField: "text",
+    searchField: ["text"],
+    dropdownParent: "body"
+  });
 
   row.cells[14].innerHTML = `        <select id="Location" name="Location" data-editable data-key="location">
           <option value="">Select Location</option>
