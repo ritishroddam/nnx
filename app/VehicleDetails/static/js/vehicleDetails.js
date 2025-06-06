@@ -177,7 +177,7 @@ function editVehicle(vehicleId) {
 
   row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
   row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
-  row.cells[2].innerHTML = `<input type="text" value="${imei} data-key="imei" data-editable />`;
+  row.cells[2].innerHTML = `<input type="text" value="${imei}" data-key="imei" data-editable />`;
   row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="sim_number" data-editable />`;
 
   row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
