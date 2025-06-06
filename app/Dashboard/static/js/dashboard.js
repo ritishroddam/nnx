@@ -61,15 +61,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   function getWeather(lat, lon) {
-    // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
     let url;
-    // if (!lat || !lon) {
-    //   url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
-    // } else {
-    //   url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-    // }
-    console.log("Fetching weather data for coordinates:", lat, lon);
-    url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    if (!lat || !lon) {
+      url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
+    } else {
+      url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    }
 
     fetch(url)
       .then((response) => response.json())
@@ -108,8 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           getWeather(lat, lon);
         },
         () => {
-          document.getElementById("weather").innerHTML =
-            "<p>Unable to retrieve your location.</p>";
+          getWeather(null, null);
         }
       );
     } else {
