@@ -154,18 +154,62 @@ window.addEventListener("click", function(event) {
 
 function editVehicle(vehicleId) {
   const row = document.querySelector(`tr[data-id="${vehicleId}"]`);
-  const cells = row.querySelectorAll("td[data-editable]");
 
-  // Make fields editable
-  cells.forEach((cell) => {
-    const currentValue = cell.textContent.trim();
-    cell.setAttribute("data-original-value", currentValue); // Save the original value
-    cell.innerHTML = `<input type="text" value="${currentValue}" class="table-input" />`;
-  });
+  const licensePlateNumber = row.cells[0].innerText;
+  const companyName = row.cells[1].innerText;
+  const imei = row.cells[2].innerText;
+  const sim = row.cells[3].innerText;
+  const vehicleType = row.cells[4].innerText;
+  const numberOfSeats = row.cells[5].innerText;
+  const vehicleModel = row.cells[6].innerText;
+  const vehicleMake = row.cells[7].innerText;
+  const yearOfManufacture = row.cells[8].innerText;
+  const dateOfPurchase = row.cells[9].innerText;
+  const insuranceNumber = row.cells[10].innerText;
+  const insuranceExpiryDate = row.cells[11].innerText;
+  const driverName = row.cells[12].innerText;
+  const currentStatus = row.cells[13].innerText;
+  const location = row.cells[14].innerText;
+  const odometerReading = row.cells[15].innerText;
+  const serviceDueDate = row.cells[16].innerText;
+  const slowSpeed = row.cells[17].innerText;
+  const normalSpeed = row.cells[18].innerText;
 
-  // Replace Edit/Delete buttons with Save/Cancel
-  const actionCell = row.querySelector("td[data-actions]");
-  actionCell.innerHTML = `
+  row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
+  row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
+  row.cells[2].innerHTML = `<select id="imeiDropdown" data-key="imei" data-editable></select>`;
+  row.cells[3].innerHTML = `<select id="sim-Dropdown" data-key="sim_number" data-editable></select>`;
+
+  row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
+    <option value="car" ${vehicleType === "car" ? "selected" : ""}>Car</option>
+    <option value="bus" ${vehicleType === "bus" ? "selected" : ""}>Bus</option>
+    <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
+    <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
+  </select>`;
+
+  row.cells[5].innerHTML = `<input type="number" value="${numberOfSeats}" data-key="number_of_seats" data-editable />`;
+  row.cells[6].innerHTML = `<input type="text" value="${vehicleModel}" data-key="vehicle_model" data-editable />`;
+  row.cells[7].innerHTML = `<input type="text" value="${vehicleMake}" data-key="vehicle_make" data-editable />`;
+  row.cells[8].innerHTML = `<input type="number" value="${yearOfManufacture}" data-key="year_of_manufacture" data-editable />`;
+  row.cells[9].innerHTML = `<input type="date" value="${dateOfPurchase}" data-key="date_of_purchase" data-editable />`;
+  row.cells[10].innerHTML = `<input type="text" value="${insuranceNumber}" data-key="insurance_name" data-editable />`;
+  row.cells[11].innerHTML = `<input type="date" value="${insuranceExpiryDate}" data-key="insurance_expiry_date" data-editable />`;
+  row.cells[12].innerHTML = `<input type="text" value="${driverName}" data-key="driver_name" data-editable />`;
+
+  row.cells[13].innerHTML = `<select data-key="current_status" data-editable>
+    <option value="active" ${currentStatus === "active" ? "selected" : ""}>Active</option>
+    <option value="inactive" ${currentStatus === "inactive" ? "selected" : ""}>Inactive</option>
+  </select>`;
+
+  row.cells[14].innerHTML = `        <select id="Location" name="Location" data-editable data-key="location">
+          <option value="">Select Location</option>
+        </select>`;
+  row.cells[15].innerHTML = `<input type="number" value="${odometerReading}" data-key="odometer_reading" data-editable />`;
+  row.cells[16].innerHTML = `<input type="date" value="${serviceDueDate}" data-key="service_due_date" data-editable />`;
+  row.cells[17].innerHTML = `<input type="number" value="${slowSpeed}" data-key="slow_speed" data-editable />`;
+  row.cells[18].innerHTML = `<input type="number" value="${normalSpeed}" data-key="normal_speed" data-editable />`;
+
+  row.cells[19].innerHTML = `
     <button class="icon-btn edit-icon" onclick="saveVehicle('${vehicleId}')">💾</button>
     <button class="icon-btn delete-icon" onclick="cancelEdit('${vehicleId}')">❌</button>
   `;
@@ -173,15 +217,48 @@ function editVehicle(vehicleId) {
 
 function saveVehicle(vehicleID) {
   const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
-  const cells = row.querySelectorAll("td[data-editable]");
 
-  // Collect updated data
-  const updatedData = {};
-  cells.forEach((cell) => {
-    const key = cell.getAttribute("data-key");
-    const input = cell.querySelector("input");
-    updatedData[key] = input ? input.value.trim() : "";
-  });
+  const licensePlateNumber = row.cells[0].querySelector("input").value.trim();
+  const companyName = row.cells[1].querySelector("input").value.trim();
+  const imei = row.cells[2].querySelector("select").value.trim();
+  const sim = row.cells[3].querySelector("select").value.trim();
+  const vehicleType = row.cells[4].querySelector("select").value.trim();
+  const numberOfSeats = row.cells[5].querySelector("input").value.trim();
+  const vehicleModel = row.cells[6].querySelector("input").value.trim();
+  const vehicleMake = row.cells[7].querySelector("input").value.trim();
+  const yearOfManufacture = row.cells[8].querySelector("input").value.trim();
+  const dateOfPurchase = row.cells[9].querySelector("input").value.trim();
+  const insuranceNumber = row.cells[10].querySelector("input").value.trim();
+  const insuranceExpiryDate = row.cells[11].querySelector("input").value.trim();
+  const driverName = row.cells[12].querySelector("input").value.trim();
+  const currentStatus = row.cells[13].querySelector("select").value.trim();
+  const location = row.cells[14].querySelector("select").value.trim();
+  const odometerReading = row.cells[15].querySelector("input").value.trim();
+  const serviceDueDate = row.cells[16].querySelector("input").value.trim();
+  const slowSpeed = row.cells[17].querySelector("input").value.trim();
+  const normalSpeed = row.cells[18].querySelector("input").value.trim();
+
+  const updatedData = {
+    LicensePlateNumber: String(licensePlateNumber),
+    CompanyName: String(companyName),
+    IMEI: String(imei),
+    SIM: String(sim),
+    VehicleType: String(vehicleType),
+    NumberOfSeatsContainer: String(numberOfSeats),
+    VehicleModel: String(vehicleModel),
+    VehicleMake: String(vehicleMake),
+    YearOfManufacture: String(yearOfManufacture),
+    DateOfPurchase: String(dateOfPurchase),
+    InsuranceNumber: String(insuranceNumber),
+    InsuranceExpiry: String(insuranceExpiryDate),
+    DriverName: String(driverName),
+    CurrentStatus: String(currentStatus),
+    Location: String(location),
+    OdometerReading: String(odometerReading),
+    ServiceDueDate: String(serviceDueDate),
+    SlowSpeed: String(slowSpeed),
+    NormalSpeed: String(normalSpeed),
+  };
 
   // Send updated data to backend
   fetch(`/vehicleDetails/edit_vehicle/${vehicleID}`, {

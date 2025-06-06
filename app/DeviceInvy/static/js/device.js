@@ -204,6 +204,7 @@ function editDevice(deviceId) {
   const packageValue = row.cells[8].innerText;
   const tenureValue = row.cells[9].innerText;
   const status = row.cells[10].innerText.trim();
+  
 
   // Replace row cells with editable inputs
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;

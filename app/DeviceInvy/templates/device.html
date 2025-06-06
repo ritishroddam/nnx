@@ -54,24 +54,23 @@ Device Inventory
           {% for device in devices %}
           <tr data-id="{{ device._id }}">
             <td>{{ device.IMEI }}</td>
-            <!--                   <td>{{ device.GLNumber }}</td> -->
             <td>{{ device.GLNumber if device.GLNumber else '' }}</td>
-            <td>{{ device['DeviceModel'] }}</td>
-            <td>{{ device['DeviceMake'] }}</td>
-            <td>{{ device['DateIn'] }}</td>
-            <td>{{ device.Warranty }}</td>
-            <td>{{ device['SentBy'] }}</td>
-            <td>{{ device['OutwardTo'] }}</td>
-            <td>{{ device.Package }}</td>
-            <td>{{ device.Tenure if device.Package == 'Package' else '' }}</td>
+            <td>{{ device['DeviceModel'] if device['DeviceModel'] else '' }}</td>
+            <td>{{ device['DeviceMake'] if device['DeviceMake'] else '' }}</td>
+            <td>{{ device['DateIn'] if device['DateIn'] else '' }}</td>
+            <td>{{ device['Warranty'] if device['Warranty'] else '' }}</td>
+            <td>{{ device['SentBy'] if device['SentBy'] else '' }}</td>
+            <td>{{ device['OutwardTo'] if device['OutwardTo'] else '' }}</td>
+            <td>{{ device['Package'] if device['Package'] else '' }}</td>
+            <td>{{ device['Tenure'] if device[Package] == 'Package' else '' }}</td>
             <td>
-              {% if device.Status == 'Active' %}
+              {% if device['Status'] == 'Active' %}
               <button class="status-btn status-active" disabled>
-                {{ device.Status }}
+                {{ device['Status'] }}
               </button>
-              {% elif device.Status == 'Inactive' %}
+              {% elif device['Status'] == 'Inactive' %}
               <button class="status-btn status-inactive" disabled>
-                {{ device.Status }}
+                {{ device.['Status'] }}
               </button>
               {% else %}
   
