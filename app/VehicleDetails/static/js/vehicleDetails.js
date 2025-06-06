@@ -160,7 +160,7 @@ function editVehicle(vehicleId) {
   const imei = row.cells[2].innerText;
   const sim = row.cells[3].innerText;
   const vehicleType = row.cells[4].innerText;
-  const numberOfSeats = row.cells[5].innerText;
+  const numberOfSeatsContainer = row.cells[5].innerText;
   const vehicleModel = row.cells[6].innerText;
   const vehicleMake = row.cells[7].innerText;
   const yearOfManufacture = row.cells[8].innerText;
@@ -186,8 +186,15 @@ function editVehicle(vehicleId) {
     <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
     <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
   </select>`;
+  const vehicleTypeSelectize = row.cells[4].querySelector("#VehicleType");
+  $(vehicleTypeSelectize).selectize({
+    create: false,
+    sortField: "text",
+    searchField: ["text"],
+    dropdownParent: "body"
+  });
 
-  row.cells[5].innerHTML = `<input type="number" value="${numberOfSeats}" data-key="number_of_seats" data-editable />`;
+  row.cells[5].innerHTML = `<input type="number" value="${numberOfSeatsContainer}" data-key="number_of_seats" data-editable />`;
   row.cells[6].innerHTML = `<input type="text" value="${vehicleModel}" data-key="vehicle_model" data-editable />`;
   row.cells[7].innerHTML = `<input type="text" value="${vehicleMake}" data-key="vehicle_make" data-editable />`;
   row.cells[8].innerHTML = `<input type="number" value="${yearOfManufacture}" data-key="year_of_manufacture" data-editable />`;
@@ -196,10 +203,17 @@ function editVehicle(vehicleId) {
   row.cells[11].innerHTML = `<input type="date" value="${insuranceExpiryDate}" data-key="insurance_expiry_date" data-editable />`;
   row.cells[12].innerHTML = `<input type="text" value="${driverName}" data-key="driver_name" data-editable />`;
 
-  row.cells[13].innerHTML = `<select data-key="current_status" data-editable>
+  row.cells[13].innerHTML = `<select id = "currentStatus" data-key="current_status" data-editable>
     <option value="active" ${currentStatus === "active" ? "selected" : ""}>Active</option>
     <option value="inactive" ${currentStatus === "inactive" ? "selected" : ""}>Inactive</option>
   </select>`;
+  const currentStatusSelectize = row.cells[13].querySelector("#currentStatus");
+  $(currentStatusSelectize).selectize({
+    create: false,
+    sortField: "text",
+    searchField: ["text"],
+    dropdownParent: "body"
+  });
 
   row.cells[14].innerHTML = `        <select id="Location" name="Location" data-editable data-key="location">
           <option value="">Select Location</option>
@@ -225,7 +239,7 @@ function saveVehicle(vehicleID) {
   const imei = row.cells[2].querySelector("input").value.trim();
   const sim = row.cells[3].querySelector("input").value.trim();
   const vehicleType = row.cells[4].querySelector("select").value.trim();
-  const numberOfSeats = row.cells[5].querySelector("input").value.trim();
+  const numberOfSeatsContainer = row.cells[5].querySelector("input").value.trim();
   const vehicleModel = row.cells[6].querySelector("input").value.trim();
   const vehicleMake = row.cells[7].querySelector("input").value.trim();
   const yearOfManufacture = row.cells[8].querySelector("input").value.trim();
@@ -246,7 +260,7 @@ function saveVehicle(vehicleID) {
     IMEI: String(imei),
     SIM: String(sim),
     VehicleType: String(vehicleType),
-    NumberOfSeatsContainer: String(numberOfSeats),
+    NumberOfSeatsContainer: String(numberOfSeatsContainer),
     VehicleModel: String(vehicleModel),
     VehicleMake: String(vehicleMake),
     YearOfManufacture: String(yearOfManufacture),
@@ -258,8 +272,8 @@ function saveVehicle(vehicleID) {
     Location: String(location),
     OdometerReading: String(odometerReading),
     ServiceDueDate: String(serviceDueDate),
-    SlowSpeed: String(slowSpeed),
-    NormalSpeed: String(normalSpeed),
+    slowSpeed: String(slowSpeed),
+    normalSpeed: String(normalSpeed),
   };
 
   // Send updated data to backend
@@ -280,7 +294,7 @@ function saveVehicle(vehicleID) {
         row.cells[2].innerHTML = imei;
         row.cells[3].innerHTML = sim;
         row.cells[4].innerHTML = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1);
-        row.cells[5].innerHTML = numberOfSeats;
+        row.cells[5].innerHTML = numberOfSeatsContainer;
         row.cells[6].innerHTML = vehicleModel;
         row.cells[7].innerHTML = vehicleMake;
         row.cells[8].innerHTML = yearOfManufacture;
@@ -383,15 +397,15 @@ async function fetchCompanies() {
     if (!response.ok) throw new Error("Failed to fetch companies");
 
     const companies = await response.json();
-    const companySelect = document.getElementById("CompanyID");
+    const companySelect = document.getElementById("CompanyName");
     companies.forEach(company => {
       const option = document.createElement("option");
-      option.value = company.id;
+      option.value = company.name;
       option.textContent = company.name;
       companySelect.appendChild(option);
     });
 
-    $("#CompanyID").selectize({
+    $("#CompanyName").selectize({
       create: false,
       sortField: "text",
       searchField: ["text"]

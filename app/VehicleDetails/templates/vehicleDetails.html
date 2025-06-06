@@ -55,8 +55,8 @@ Vehicle Details
       </div>
 
       <div class="form-group">
-        <label for="CompanyID">Company</label>
-        <select id="CompanyID" name="CompanyID" required>
+        <label for="CompanyName">Company</label>
+        <select id="CompanyName" name="CompanyName" required>
           <option value="">Select Company</option>
         </select>
       </div>
@@ -87,8 +87,8 @@ Vehicle Details
       </div>
 
       <div class="form-group hidden" id="NumberOfSeatsContainer">
-        <label for="NumberOfSeats">Number of Seats (excluding driver)</label>
-        <input type="number" name="NumberOfSeats" id="NumberOfSeats" />
+        <label for="NumberOfSeatsContainer">Number of Seats (excluding driver)</label>
+        <input type="number" name="NumberOfSeatsContainer" id="NumberOfSeatsContainer" />
       </div>
 
       <div class="form-group">
@@ -191,14 +191,6 @@ Vehicle Details
 
 <div id="errorBox" class="error-box hidden"></div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="flash-box flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
 <div class="vehicle-table-container">
   <table class="vehicle-table">
     <thead>
@@ -233,7 +225,7 @@ Vehicle Details
         <td>{{ vehicle['IMEI'] if vehicle['IMEI'] else "" }}</td>
         <td>{{ vehicle['SIM'] if vehicle['SIM'] else "" }}</td>
         <td>{{ vehicle['VehicleType'] if vehicle['VehicleType'] else "" }}</td>
-        <td>{{ vehicle['NumberOfSeats'] if vehicle['NumberOfSeats'] else "" }}</td>
+        <td>{{ vehicle['NumberOfSeatsContainer'] if vehicle['NumberOfSeatsContainer'] else "" }}</td>
         <td>{{ vehicle['VehicleModel'] if vehicle['VehicleModel'] else "" }}</td>
         <td>{{ vehicle['VehicleMake'] if vehicle['VehicleMake'] else "" }}</td>
         <td>{{ vehicle['YearOfManufacture'] if vehicle['YearOfManufacture'] else "" }}</td>
