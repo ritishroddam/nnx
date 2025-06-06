@@ -129,7 +129,7 @@ def manual_entry():
             return redirect(url_for('VehicleDetails.page'))
 
     # Additional validation for number of seats
-    if data['VehicleType'] in ['bus', 'car'] and not data.get('NumberOfSeats'):
+    if data['VehicleType'] in ['bus', 'car'] and not data.get('NumberOfSeatsContainer'):
         flash("Number of seats is required for bus and car.", "danger")
         return redirect(url_for('VehicleDetails.page'))
 
@@ -224,7 +224,7 @@ def upload_vehicle_file():
         df = pd.read_excel(file)
 
         required_columns = [
-            'LicensePlateNumber', 'ComapnyName', 'IMEI', 'SIM', 'VehicleType', 'NumberOfSeatsContainer', 'VehicleModel', 'VehicleMake',
+            'LicensePlateNumber', 'ComapnyName', 'IMEI', 'SIM', 'VehicleType', 'NumberOfSeatsContainerContainer', 'VehicleModel', 'VehicleMake',
             'YearOfManufacture', 'DateOfPurchase', 'InsuranceNumber', 'DriverName',
             'CurrentStatus', 'Location', 'OdometerReading', 'ServiceDueDate'
         ]
@@ -243,7 +243,7 @@ def upload_vehicle_file():
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
             vehicle_type = str(row['VehicleType']).strip()
-            number_of_seats = str(row['NumberOfSeatsContainer']).strip()
+            number_of_seats = str(row['NumberOfSeatsContainerContainer']).strip()
             vehicle_model = str(row['VehicleModel']).strip()
             vehicle_make = str(row['VehicleMake']).strip()
             year_of_manufacture = str(row['YearOfManufacture']).strip()
@@ -332,7 +332,7 @@ def upload_vehicle_file():
                 "IMEI": imei,
                 "SIM": sim,
                 "VehicleType": vehicle_type,
-                "NumberOfSeats": number_of_seats,
+                "NumberOfSeatsContainer": number_of_seats,
                 "VehicleModel": vehicle_model,
                 "VehicleMake": vehicle_make,
                 "YearOfManufacture": year_of_manufacture,
@@ -374,7 +374,7 @@ def download_vehicle_template():
 @vehicleDetails_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    sims = list(vehicle_collection.find({}, {"_id": 0}))  # Fetch all SIMs (excluding _id)
+    sims = list(vehicle_collection.find({}, {"_id": 0, "AssignedUsers": 0}))  # Fetch all SIMs (excluding _id)
     
     if not sims:
         return "No data available", 404

@@ -87,8 +87,8 @@ Vehicle Details
       </div>
 
       <div class="form-group hidden" id="NumberOfSeatsContainer">
-        <label for="NumberOfSeats">Number of Seats (excluding driver)</label>
-        <input type="number" name="NumberOfSeats" id="NumberOfSeats" />
+        <label for="numberOfSeatsContainer">Number of Seats (excluding driver)</label>
+        <input type="number" name="numberOfSeatsContainer" id="numberOfSeatsContainer" />
       </div>
 
       <div class="form-group">
@@ -225,7 +225,7 @@ Vehicle Details
         <td>{{ vehicle['IMEI'] if vehicle['IMEI'] else "" }}</td>
         <td>{{ vehicle['SIM'] if vehicle['SIM'] else "" }}</td>
         <td>{{ vehicle['VehicleType'] if vehicle['VehicleType'] else "" }}</td>
-        <td>{{ vehicle['NumberOfSeats'] if vehicle['NumberOfSeats'] else "" }}</td>
+        <td>{{ vehicle['numberOfSeatsContainer'] if vehicle['numberOfSeatsContainer'] else "" }}</td>
         <td>{{ vehicle['VehicleModel'] if vehicle['VehicleModel'] else "" }}</td>
         <td>{{ vehicle['VehicleMake'] if vehicle['VehicleMake'] else "" }}</td>
         <td>{{ vehicle['YearOfManufacture'] if vehicle['YearOfManufacture'] else "" }}</td>

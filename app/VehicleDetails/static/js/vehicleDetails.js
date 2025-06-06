@@ -160,7 +160,7 @@ function editVehicle(vehicleId) {
   const imei = row.cells[2].innerText;
   const sim = row.cells[3].innerText;
   const vehicleType = row.cells[4].innerText;
-  const numberOfSeats = row.cells[5].innerText;
+  const numberOfSeatsContainer = row.cells[5].innerText;
   const vehicleModel = row.cells[6].innerText;
   const vehicleMake = row.cells[7].innerText;
   const yearOfManufacture = row.cells[8].innerText;
@@ -194,7 +194,7 @@ function editVehicle(vehicleId) {
     dropdownParent: "body"
   });
 
-  row.cells[5].innerHTML = `<input type="number" value="${numberOfSeats}" data-key="number_of_seats" data-editable />`;
+  row.cells[5].innerHTML = `<input type="number" value="${numberOfSeatsContainer}" data-key="number_of_seats" data-editable />`;
   row.cells[6].innerHTML = `<input type="text" value="${vehicleModel}" data-key="vehicle_model" data-editable />`;
   row.cells[7].innerHTML = `<input type="text" value="${vehicleMake}" data-key="vehicle_make" data-editable />`;
   row.cells[8].innerHTML = `<input type="number" value="${yearOfManufacture}" data-key="year_of_manufacture" data-editable />`;
@@ -239,7 +239,7 @@ function saveVehicle(vehicleID) {
   const imei = row.cells[2].querySelector("input").value.trim();
   const sim = row.cells[3].querySelector("input").value.trim();
   const vehicleType = row.cells[4].querySelector("select").value.trim();
-  const numberOfSeats = row.cells[5].querySelector("input").value.trim();
+  const numberOfSeatsContainer = row.cells[5].querySelector("input").value.trim();
   const vehicleModel = row.cells[6].querySelector("input").value.trim();
   const vehicleMake = row.cells[7].querySelector("input").value.trim();
   const yearOfManufacture = row.cells[8].querySelector("input").value.trim();
@@ -260,7 +260,7 @@ function saveVehicle(vehicleID) {
     IMEI: String(imei),
     SIM: String(sim),
     VehicleType: String(vehicleType),
-    NumberOfSeatsContainer: String(numberOfSeats),
+    NumberOfSeatsContainer: String(numberOfSeatsContainer),
     VehicleModel: String(vehicleModel),
     VehicleMake: String(vehicleMake),
     YearOfManufacture: String(yearOfManufacture),
@@ -294,7 +294,7 @@ function saveVehicle(vehicleID) {
         row.cells[2].innerHTML = imei;
         row.cells[3].innerHTML = sim;
         row.cells[4].innerHTML = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1);
-        row.cells[5].innerHTML = numberOfSeats;
+        row.cells[5].innerHTML = numberOfSeatsContainer;
         row.cells[6].innerHTML = vehicleModel;
         row.cells[7].innerHTML = vehicleMake;
         row.cells[8].innerHTML = yearOfManufacture;
