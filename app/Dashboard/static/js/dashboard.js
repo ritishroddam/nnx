@@ -62,7 +62,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function getWeather(lat, lon) {
     // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
+    let url;
+    // if (!lat || !lon) {
+    //   url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
+    // } else {
+    //   url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    // }
+
+    url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
 
     fetch(url)
       .then((response) => response.json())
@@ -490,14 +497,14 @@ async function fallbackToDefaultLocation() {
     const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
     map = new Map(document.getElementById("map"), {
       center: defaultLocation,
-      zoom: 12,
+      zoom: 15,
       disableDefaultUI: true,
       mapId: mapId,
     });
 
     trafficLayer = new TrafficLayer();
     trafficLayer.setMap(map);
-    
+
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
     marker = new AdvancedMarkerElement({
       position: defaultLocation,
