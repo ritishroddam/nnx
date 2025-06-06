@@ -418,7 +418,8 @@ function fetchCitiesEdit(row, location){
     $(citySelect).selectize({
       create: false,
       sortField: "text",
-      searchField: ["text"]
+      searchField: ["text"],
+      dropdownParent: "body"
     });
     // Set the previous value as selected
     const selectizeInstance = $(citySelect)[0].selectize;
