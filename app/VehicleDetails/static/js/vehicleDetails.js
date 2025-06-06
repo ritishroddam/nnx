@@ -397,12 +397,15 @@ function fetchCitiesEdit(row, location){
       option.textContent = cityValue;
       citySelect.appendChild(option);
     });
+    // Initialize selectize after options are added
+    $(citySelect).selectize({
+      create: false,
+      sortField: "text",
+      searchField: ["text"]
+    });
     // Set the previous value as selected
-    citySelect.value = location;
-    // If using selectize, update it as well
-    if ($(citySelect).data('selectize')) {
-      $(citySelect)[0].selectize.setValue(location);
-    }
+    const selectizeInstance = $(citySelect)[0].selectize;
+    selectizeInstance.setValue(location);
   });
 }
 
