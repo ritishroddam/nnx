@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // } else {
     //   url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
     // }
-
+    console.log("Fetching weather data for coordinates:", lat, lon);
     url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
 
     fetch(url)
