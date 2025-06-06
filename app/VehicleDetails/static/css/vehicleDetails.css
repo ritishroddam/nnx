@@ -301,6 +301,16 @@ body.modal-open {
   background-color: #444;
 }
 
+.filter-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .filter-container .form-group {
   margin-bottom: 0;
 }
