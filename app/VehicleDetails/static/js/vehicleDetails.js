@@ -177,8 +177,8 @@ function editVehicle(vehicleId) {
 
   row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
   row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
-  row.cells[2].innerHTML = `<input type="text" data-editable></select>`;
-  row.cells[3].innerHTML = `<select id="text" data-key="sim_number" data-editable></select>`;
+  row.cells[2].innerHTML = `<input type="text" value="${imei} data-editable></select>`;
+  row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="sim_number" data-editable></select>`;
 
   row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
     <option value="car" ${vehicleType === "car" ? "selected" : ""}>Car</option>
@@ -204,6 +204,8 @@ function editVehicle(vehicleId) {
   row.cells[14].innerHTML = `        <select id="Location" name="Location" data-editable data-key="location">
           <option value="">Select Location</option>
         </select>`;
+  fetchCitiesEdit(location);
+
   row.cells[15].innerHTML = `<input type="number" value="${odometerReading}" data-key="odometer_reading" data-editable />`;
   row.cells[16].innerHTML = `<input type="date" value="${serviceDueDate}" data-key="service_due_date" data-editable />`;
   row.cells[17].innerHTML = `<input type="number" value="${slowSpeed}" data-key="slow_speed" data-editable />`;
@@ -381,6 +383,27 @@ async function fetchCompanies() {
     console.error("Error fetching companies:", error);
     alert("Unable to load companies. Please try again later.");
   }
+}
+
+function fetchCitiesEdit(location){
+  fetch("/vehicleDetails/get_cities")
+  .then(response => response.json())
+  .then(cities => {
+    const citySelect = row.cells[14].querySelector("#Location");
+    cities.forEach(city => {
+      const cityValue = `${city.city}, ${city.state}`;
+      const option = document.createElement("option");
+      option.value = cityValue;
+      option.textContent = cityValue;
+      citySelect.appendChild(option);
+    });
+    // Set the previous value as selected
+    citySelect.value = location;
+    // If using selectize, update it as well
+    if ($(citySelect).data('selectize')) {
+      $(citySelect)[0].selectize.setValue(location);
+    }
+  });
 }
 
 async function fetchCities() {
