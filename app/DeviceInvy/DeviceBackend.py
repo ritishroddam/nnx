@@ -30,10 +30,10 @@ def page():
     devices = list(collection.find({}))
     imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
     
-    vehiclesData = list(vehicle_collection.find(
+    vehiclesData = vehicle_collection.find(
         {"IMEI": {"$in": imeiList}}, 
         {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
-    ))
+    )
     
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
@@ -67,10 +67,10 @@ def search_devices():
     
     imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
     
-    vehiclesData = list(vehicle_collection.find(
+    vehiclesData = vehicle_collection.find(
         {"IMEI": {"$in": imeiList}}, 
         {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
-    ))
+    )
     
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
@@ -202,10 +202,10 @@ def download_excel():
     
     imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
     
-    vehiclesData = list(vehicle_collection.find(
+    vehiclesData = vehicle_collection.find(
         {"IMEI": {"$in": imeiList}}, 
         {"_id": 0, "LicensePlateNumberr": 1, "CompanyName": 1, "IMEI":1}
-    ))
+    )
     
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
