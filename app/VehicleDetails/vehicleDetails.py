@@ -144,6 +144,9 @@ def manual_entry():
     location = data['Location'].split(',')
     data['Location'] = f"{location[0].strip()}, {location[1].strip()}"
     
+    data.pop('csrf_token', None)
+    data.pop('CompanyId', None)
+    
     try:
         vehicle_collection.insert_one(data)
         flash("Vehicle added successfully!", "success")
@@ -322,7 +325,6 @@ def upload_vehicle_file():
             if vehicle_collection.find_one({"SIM": sim}):
                 flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                 return redirect(url_for('VehicleDetails.page'))
-        
 
             record = {
                 "LicensePlateNumber": license_plate_number,
