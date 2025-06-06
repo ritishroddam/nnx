@@ -122,7 +122,7 @@ def manual_entry():
         return redirect(url_for('VehicleDetails.page'))
 
     # Validate required fields
-    required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyID', 'VehicleType']
+    required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyName', 'VehicleType']
     for field in required_fields:
         if not data.get(field):
             flash(f"{field} is required.", "danger")
