@@ -274,27 +274,41 @@ function saveVehicle(vehicleID) {
     .then((response) => response.json())
     .then((result) => {
       if (result.success) {
-        // Update table with new values
-        cells.forEach((cell) => {
-          const input = cell.querySelector("input");
-          cell.textContent = input ? input.value.trim() : "";
-        });
+        // Update the row with new values
+        row.cells[0].innerHTML = licensePlateNumber;
+        row.cells[1].innerHTML = companyName;
+        row.cells[2].innerHTML = imei;
+        row.cells[3].innerHTML = sim;
+        row.cells[4].innerHTML = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1);
+        row.cells[5].innerHTML = numberOfSeats;
+        row.cells[6].innerHTML = vehicleModel;
+        row.cells[7].innerHTML = vehicleMake;
+        row.cells[8].innerHTML = yearOfManufacture;
+        row.cells[9].innerHTML = dateOfPurchase;
+        row.cells[10].innerHTML = insuranceNumber;
+        row.cells[11].innerHTML = insuranceExpiryDate;
+        row.cells[12].innerHTML = driverName;
+        row.cells[13].innerHTML = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
+        row.cells[14].innerHTML = location;
+        row.cells[15].innerHTML = odometerReading;
+        row.cells[16].innerHTML = serviceDueDate;
+        row.cells[17].innerHTML = slowSpeed;
+        row.cells[18].innerHTML = normalSpeed;
 
-        // Restore original action buttons
-        const actionCell = row.querySelector("td[data-actions]");
-        actionCell.innerHTML = `
-                <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
-                <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
-            `;
+        // Reset action buttons
+        row.cells[19].innerHTML = `
+          <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
+          <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
+        `;
 
-        alert("Vehicle updated successfully!");
+        displayFlashMessage("Vehicle details updated successfully.", "success");
       } else {
-        alert(`Error: ${result.message}`);
+        displayFlashMessage(`Error: ${result.message}`);
       }
     })
     .catch((error) => {
       console.error("Error saving vehicle:", error);
-      alert("An error occurred while saving. Please try again.");
+      displayFlashMessage("An error occurred while saving. Please try again.");
     });
 }
 
