@@ -265,7 +265,10 @@ function saveVehicle(vehicleID) {
   // Send updated data to backend
   fetch(`/vehicleDetails/edit_vehicle/${vehicleID}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+     },
     body: JSON.stringify(updatedData),
   })
     .then((response) => response.json())
