@@ -56,28 +56,32 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   manualEntryBtn.addEventListener("click", function() {
-    manualEntryModal.style.display = "block";
+    manualEntryModal.classList.remove("hidden");
     document.getElementById("MobileNumber").focus();
   });
 
   uploadBtn.addEventListener("click", function() {
-    uploadModal.style.display = "block";
+    uploadModal.classList.remove("hidden");
+  });
+
+  downloadExcelBtn.addEventListener("click", function() {
+    window.location.href = "/simInvy/download_excel";
   });
 
   closeModalButtons.forEach(button => {
     button.addEventListener("click", function() {
-      this.closest(".modal").style.display = "none";
+      this.closest(".modal").classList.add("hidden");
     });
+  });
+
+  cancelBtn.addEventListener("click", function() {
+    manualEntryModal.classList.add("hidden");
   });
 
   window.addEventListener("click", function(event) {
     if (event.target.classList.contains("modal")) {
-      event.target.style.display = "none";
+      event.target.classList.add("hidden");
     }
-  });
-
-  cancelBtn.addEventListener("click", function() {
-    manualEntryModal.style.display = "none";
   });
 
   dateInInput.setAttribute("max", formattedToday);
@@ -198,11 +202,6 @@ function searchSims() {
       console.error('Error searching SIMs:', error);
       alert('Error searching SIMs. Please try again.');
     });
-}
-
-function clearSearch() {
-  document.getElementById("simSearch").value = '';
-  filterSimsByStatus(); // Reset to show all SIMs
 }
 
 function filterSimsByStatus() {
