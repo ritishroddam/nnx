@@ -119,6 +119,11 @@ Vehicle Details
       </div>
       
       <div class="form-group">
+        <label for="InsuranceExpiry">Insurance Expiry</label>
+        <input type="date" name="InsuranceExpiry" id="InsuranceExpiry" />
+      </div>
+      
+      <div class="form-group">
         <label for="DriverName">Driver Name</label>
         <input type="text" name="DriverName" id="DriverName" />
       </div>
@@ -211,6 +216,7 @@ Vehicle Details
         <th>Year of Manufacture</th>
         <th>Date of Purchase</th>
         <th>Insurance Number</th>
+        <th>Insurance Expiry</th>
         <th>Driver Name</th>
         <th>Current Status</th>
         <th>Location</th>
@@ -224,24 +230,25 @@ Vehicle Details
     <tbody>
       {% for vehicle in vehicles %}
       <tr data-id="{{ vehicle['_id'] }}" data-company-name="{{ vehicle['CompanyName'] }}">
-        <td>{{ vehicle['LicensePlateNumber'] }}</td>
-        <td>{{ vehicle['CompanyName'] }}</td>
-        <td>{{ vehicle['IMEI'] }}</td>
-        <td>{{ vehicle['SIM'] }}</td>
-        <td>{{ vehicle['VehicleType'] }}</td>
-        <td>{{ vehicle['NumberOfSeats'] }}</td>
-        <td>{{ vehicle['VehicleModel'] }}</td>
-        <td>{{ vehicle['VehicleMake'] }}</td>
-        <td>{{ vehicle['YearOfManufacture'] }}</td>
-        <td>{{ vehicle['DateOfPurchase'] }}</td>
-        <td>{{ vehicle['InsuranceNumber'] }}</td>
-        <td>{{ vehicle['DriverName'] }}</td>
-        <td>{{ vehicle['CurrentStatus'] }}</td>
-        <td>{{ vehicle['Location'] }}</td>
-        <td>{{ vehicle['OdometerReading'] }}</td>
-        <td>{{ vehicle['ServiceDueDate'] }}</td>
-        <td>{{ vehicle['slowSpeed'] }}</td>
-        <td>{{ vehicle['normalSpeed'] }}</td>
+        <td>{{ vehicle['LicensePlateNumber'] if vehicle['LicensePlateNumber'] else "" }}</td>
+        <td>{{ vehicle['CompanyName'] if vehicle['CompanyName'] else "" }}</td>
+        <td>{{ vehicle['IMEI'] if vehicle['IMEI'] else "" }}</td>
+        <td>{{ vehicle['SIM'] if vehicle['SIM'] else "" }}</td>
+        <td>{{ vehicle['VehicleType'] if vehicle['VehicleType'] else "" }}</td>
+        <td>{{ vehicle['NumberOfSeats'] if vehicle['NumberOfSeats'] else "" }}</td>
+        <td>{{ vehicle['VehicleModel'] if vehicle['VehicleModel'] else "" }}</td>
+        <td>{{ vehicle['VehicleMake'] if vehicle['VehicleMake'] else "" }}</td>
+        <td>{{ vehicle['YearOfManufacture'] if vehicle['YearOfManufacture'] else "" }}</td>
+        <td>{{ vehicle['DateOfPurchase'] if vehicle['DateOfPurchase'] else "" }}</td>
+        <td>{{ vehicle['InsuranceNumber'] if vehicle['InsuranceNumber'] else "" }}</td>
+        <td>{{ vehicle['InsuranceExpiry'] if vehicle['InsuranceExpiry'] else "" }}</td>
+        <td>{{ vehicle['DriverName'] if vehicle['DriverName'] else "" }}</td>
+        <td>{{ vehicle['CurrentStatus'] if vehicle['CurrentStatus'] else "" }}</td>
+        <td>{{ vehicle['Location'] if vehicle['Location'] else "" }}</td>
+        <td>{{ vehicle['OdometerReading'] if vehicle['OdometerReading'] else "" }}</td>
+        <td>{{ vehicle['ServiceDueDate'] if vehicle['ServiceDueDate'] else "" }}</td>
+        <td>{{ vehicle['slowSpeed'] if vehicle['slowSpeed'] else "" }}</td>
+        <td>{{ vehicle['normalSpeed'] if vehicle['normalSpeed'] else "" }}</td>
         <td data-actions>
           <button class="icon-btn edit-icon" onclick="editVehicle('{{ vehicle._id }}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteVehicle('{{ vehicle._id }}')">🗑️</button>

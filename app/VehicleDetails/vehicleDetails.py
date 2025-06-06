@@ -249,6 +249,7 @@ def upload_vehicle_file():
             year_of_manufacture = str(row['YearOfManufacture']).strip()
             date_of_purchase = str(row['DateOfPurchase']).strip()
             insurance_number = str(row['InsuranceNumber']).strip()
+            insurance_expiry_date = str(row['InsuranceExpiry']).strip() if 'InsuranceExpiry' in df.columns else ""
             driver_name = str(row['DriverName']).strip()
             current_status = str(row['CurrentStatus']).strip()
             location = str(row['Location']).strip()
@@ -263,6 +264,7 @@ def upload_vehicle_file():
             year_of_manufacture = year_of_manufacture if year_of_manufacture != 'nan' else ""
             date_of_purchase = date_of_purchase if date_of_purchase != 'nan' else ""
             insurance_number = insurance_number if insurance_number != 'nan' else ""
+            insurance_expiry_date = insurance_expiry_date if insurance_expiry_date != 'nan' else ""
             driver_name = driver_name if driver_name != 'nan' else ""
             current_status = current_status if current_status != 'nan' else ""
             odometer_reading = odometer_reading if odometer_reading != 'nan' else ""
@@ -336,6 +338,7 @@ def upload_vehicle_file():
                 "YearOfManufacture": year_of_manufacture,
                 "DateOfPurchase": date_of_purchase,
                 "InsuranceNumber": insurance_number,
+                "InsuranceExpiry": insurance_expiry_date,
                 "DriverName": driver_name,
                 "CurrentStatus": current_status,
                 "Location": location,
