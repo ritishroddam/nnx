@@ -29,8 +29,8 @@ Sim Inventory
 
 <!-- Action Buttons -->
 <div class="action-buttons">
-  <button id="manualEntryBtn" class="modal hidden">Add New SIM</button>
-  <button id="uploadModal" class="modal hidden">Upload</button>
+  <button id="manualEntryBtn" class="btn success mb-4">Add New SIM</button>
+  <button id="uploadBtn" class="btn mb-4">Upload</button>
   <button id="downloadExcelBtn" class="btn">Download Excel</button>
 </div>
 
@@ -95,6 +95,14 @@ Sim Inventory
 
 <!-- Rest of your existing content (error box, flash messages, table) -->
 <div id="errorBox" class="error-box hidden"></div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-box flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 <div class="sim-table-container">
 <table class="sim-table">
