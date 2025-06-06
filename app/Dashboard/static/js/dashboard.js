@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await renderPieChart();
 });
 
-let map, trafficLayer;
+let map, trafficLayer, marker;
 
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", async function () {
@@ -434,9 +434,10 @@ themeToggle.addEventListener("click", async function () {
 
 async function initMap() {
   const { Map, TrafficLayer } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
   const mapOptions = {
-    zoom: 12,
+    zoom: 15,
     disableDefaultUI: true,
   };
 
@@ -461,6 +462,21 @@ async function initMap() {
 
         trafficLayer = new TrafficLayer();
         trafficLayer.setMap(map);
+
+        const homeContent = document.createElement("img");
+        homeContent.src = "/static/images/HomeIcon.png";
+        homeContent.style.width = "40px";
+        homeContent.style.height = "40px";
+        homeContent.style.position = "absolute";
+        homeContent.alt = "Home Icon";
+
+        marker = new AdvancedMarkerElement({
+          position: userLocation,
+          map: map,
+          title: "Your Location",
+          content: homeContent,
+        });
+
       },
       () => {
         fallbackToDefaultLocation();
@@ -488,6 +504,22 @@ async function fallbackToDefaultLocation() {
 
     trafficLayer = new TrafficLayer();
     trafficLayer.setMap(map);
+
+    const homeContent = document.createElement("img");
+    homeContent.src = "/static/images/HomeIcon.png";
+    homeContent.style.width = "40px";
+    homeContent.style.height = "40px";
+    homeContent.style.position = "absolute";
+    homeContent.alt = "Home Icon";
+
+    marker = new AdvancedMarkerElement({
+      position: defaultLocation,
+      map: map,
+      title: "Your Location",
+      content: homeContent,
+    });
+
+
   } catch (error) {
     console.error("Error initializing fallback location:", error);
   }
