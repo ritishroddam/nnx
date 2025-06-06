@@ -238,7 +238,7 @@ def upload_vehicle_file():
         records = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip()
-            dictCompanyID = companies_collection.find_one({"Company Name": str(row['ComapanyName']).strip()},{"_id": 1})
+            companyName = str(row['ComapanyName']).strip()
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
             vehicle_type = str(row['VehicleType']).strip()
@@ -282,9 +282,8 @@ def upload_vehicle_file():
                 flash(f"License Plate Number {license_plate_number} is invalid.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
-            if dictCompanyID:
-                companyID = str(dictCompanyID['_id'])
-            else:
+            company = db['customers_list'].find_one({"Company Name": companyName})
+            if not company:
                 flash(f"For row {row} Company Name invalid", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
@@ -327,7 +326,7 @@ def upload_vehicle_file():
 
             record = {
                 "LicensePlateNumber": license_plate_number,
-                "CompanyID": companyID,
+                "CompanyName": companyName,
                 "IMEI": imei,
                 "SIM": sim,
                 "VehicleType": vehicle_type,
