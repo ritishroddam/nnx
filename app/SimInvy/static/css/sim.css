@@ -230,9 +230,9 @@ input#editStatusDate, input#editReactivationDate {
   backdrop-filter: blur(5px);
 }
 
-/* .modal.hidden {
+.modal.hidden {
   display: none;
-} */
+}
 
 @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
   .modal {
