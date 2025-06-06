@@ -397,15 +397,15 @@ async function fetchCompanies() {
     if (!response.ok) throw new Error("Failed to fetch companies");
 
     const companies = await response.json();
-    const companySelect = document.getElementById("CompanyID");
+    const companySelect = document.getElementById("CompanyName");
     companies.forEach(company => {
       const option = document.createElement("option");
-      option.value = company.id;
+      option.value = company.name;
       option.textContent = company.name;
       companySelect.appendChild(option);
     });
 
-    $("#CompanyID").selectize({
+    $("#CompanyName").selectize({
       create: false,
       sortField: "text",
       searchField: ["text"]

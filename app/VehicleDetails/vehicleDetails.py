@@ -132,7 +132,6 @@ def manual_entry():
     if data['VehicleType'] in ['bus', 'car'] and not data.get('NumberOfSeatsContainer'):
         flash("Number of seats is required for bus and car.", "danger")
         return redirect(url_for('VehicleDetails.page'))
-
     # ...existing validation code...
 
     if data['normalSpeed'] == "":
