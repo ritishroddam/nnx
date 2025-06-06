@@ -242,7 +242,7 @@ Vehicle Details
         <td>{{ vehicle['ServiceDueDate'] }}</td>
         <td>{{ vehicle['slowSpeed'] }}</td>
         <td>{{ vehicle['normalSpeed'] }}</td>
-        <td>
+        <td data-actions>
           <button class="icon-btn edit-icon" onclick="editVehicle('{{ vehicle._id }}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteVehicle('{{ vehicle._id }}')">🗑️</button>
         </td>
