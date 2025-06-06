@@ -204,7 +204,7 @@ function editVehicle(vehicleId) {
   row.cells[14].innerHTML = `        <select id="Location" name="Location" data-editable data-key="location">
           <option value="">Select Location</option>
         </select>`;
-  fetchCitiesEdit(location);
+  fetchCitiesEdit(row, location);
 
   row.cells[15].innerHTML = `<input type="number" value="${odometerReading}" data-key="odometer_reading" data-editable />`;
   row.cells[16].innerHTML = `<input type="date" value="${serviceDueDate}" data-key="service_due_date" data-editable />`;
@@ -385,7 +385,7 @@ async function fetchCompanies() {
   }
 }
 
-function fetchCitiesEdit(location){
+function fetchCitiesEdit(row, location){
   fetch("/vehicleDetails/get_cities")
   .then(response => response.json())
   .then(cities => {
