@@ -272,8 +272,8 @@ function saveVehicle(vehicleID) {
     Location: String(location),
     OdometerReading: String(odometerReading),
     ServiceDueDate: String(serviceDueDate),
-    SlowSpeed: String(slowSpeed),
-    NormalSpeed: String(normalSpeed),
+    slowSpeed: String(slowSpeed),
+    normalSpeed: String(normalSpeed),
   };
 
   // Send updated data to backend
