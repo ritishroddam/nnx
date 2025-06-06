@@ -326,12 +326,25 @@ def create_app(config_name='default'):
                 pass
 
     @app.after_request
-    def set_refreshed_token(response):
+    def afterRequest(response):
         try:
             if hasattr(g, 'new_access_token'):
                 set_access_cookies(response, g.new_access_token)
         except Exception as e:
             print(f"Error setting refreshed token: {e}")
+        
+        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None]:
+            try:
+                claims = get_jwt()
+                user_id = claims.get('user_id')
+                user_config = db['userConfig'].find_one({"userID": ObjectId(user_id)})
+                dark_mode_value = "true" if user_config and user_config.get("darkMode") == "true" else "false"
+                expires = datetime.now() + timedelta(days=3650)
+                response.set_cookie("darkMode", dark_mode_value, expires=expires, path="/")
+                
+            except Exception as e:
+                print(f"Error retrieving user config: {e}")    
+        
         return response
         
     
