@@ -426,6 +426,28 @@ input[type="date"] {
     background-color: #444;
 }
 
+.search-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.search-container button {
+    padding: 8px 16px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
 
 @media (max-width: 768px) {
   .table-container {

@@ -227,12 +227,7 @@ def download_excel():
     return Response(
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": "attachment;filename=Device_Inventory.xlsx",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0"
-        }
+        headers={"Content-Disposition": "attachment;filename=Device_Inventory.xlsx"}
     )
 
 @device_bp.route('/edit_device/<device_id>', methods=['POST'])

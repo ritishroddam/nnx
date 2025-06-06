@@ -100,6 +100,58 @@ def get_sims_by_status(status):
         print(f"Error in get_sims_by_status: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@sim_bp.route('/search_sims')
+@jwt_required()
+def search_sims():
+    search_query = request.args.get('query', '').strip()
+    
+    if not search_query:
+        return jsonify([])
+    
+    # Get all vehicles and their SIM numbers
+    vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
+    allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+    sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
+
+    # Build the search query
+    query = {
+        "$or": [
+            {"MobileNumber": {"$regex": f"{search_query}$"}},  # Ends with search term
+            {"SimNumber": {"$regex": f"{search_query}$"}},     # Ends with search term
+            {"MobileNumber": search_query},                    # Exact match
+            {"SimNumber": search_query}                        # Exact match
+        ]
+    }
+    
+    # Get matching SIMs from inventory
+    matching_sims = list(collection.find(query))
+    
+    results = []
+    for sim in matching_sims:
+        sim_number = sim.get('SimNumber', '')
+        
+        # Determine actual status (Allocated takes priority over stored status)
+        actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+        
+        # Prepare SIM data
+        sim_data = {
+            '_id': str(sim.get('_id', '')),
+            'MobileNumber': sim.get('MobileNumber', ''),
+            'SimNumber': sim_number,
+            'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+            'status': actual_status,
+            'isActive': sim.get('isActive', True),
+            'statusDate': sim.get('statusDate', ''),
+            'reactivationDate': sim.get('reactivationDate', ''),
+            'DateIn': sim.get('DateIn', ''),
+            'DateOut': sim.get('DateOut', ''),
+            'Vendor': sim.get('Vendor', ''),
+            'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+        }
+        results.append(sim_data)
+    
+    return jsonify(results)
+
 @sim_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
 def manual_entry():
