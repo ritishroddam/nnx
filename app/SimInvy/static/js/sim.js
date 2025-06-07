@@ -59,13 +59,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const searchTerm = this.value.trim().toLowerCase();
         filterTable(searchTerm);
     });
-     
 
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
 
-
-  document.getElementById("searchBtn").addEventListener("click", searchSims);
   document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
   document.getElementById("simSearch").addEventListener("keyup", function(event) {
     if (event.key === "Enter") {
