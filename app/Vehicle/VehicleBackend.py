@@ -21,7 +21,11 @@ company_collection = db['customers_list']
 def map():
     claims = get_jwt()
     company = claims.get('company_id')
-    companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
+    if company == 'none':
+        companyLatLng = {'lat': "33.7490", 'lng': "-84.3880"}
+    else:
+        companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
+        
     return render_template('vehicleMap.html', companyLatLng=companyLatLng)
 
 def format_seconds(seconds):
