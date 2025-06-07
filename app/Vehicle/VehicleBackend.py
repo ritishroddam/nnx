@@ -41,7 +41,6 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         seven_days_ago = utc_now - timedelta(days=7)
-        print(imei_list)
         pipeline = [
             {"$match": {"imei": {"$in": imei_list},                
                         "date_time": {
@@ -70,13 +69,10 @@ def getVehicleStatus(imei_list):
             history = item["history"]
             now = utc_now
 
-            # Check offline
-            print(latest["date_time"]< twenty_four_hours_ago, imei)
             if latest["date_time"] < twenty_four_hours_ago:
                 status = "offline"
                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
                 status_time_str = format_seconds(status_time_delta)
-                print(status)
             else:
                 ignition = latest.get("ignition")
                 speed = float(latest.get("speed", 0))
@@ -90,9 +86,7 @@ def getVehicleStatus(imei_list):
                     current_status = "idle"
                 else:
                     current_status = "unknown"
-                    print(imei)
 
-                print(current_status)
                 last_change_time = latest["date_time"]
                 for h in history[1:]:
                     h_ignition = h.get("ignition")
@@ -109,7 +103,6 @@ def getVehicleStatus(imei_list):
                 status_time_delta = (now - last_change_time).total_seconds() * 1000
                 status_time_str = format_seconds(status_time_delta)
 
-            print(status, imei)
             statuses.append({
                 "imei": imei,
                 "status": status,
@@ -258,8 +251,6 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
             status_time_str = format_seconds(status_time_delta)
             vehicle['status_time_str'] = status_time_str
             vehicle['status_time_delta'] = status_time_delta
-        
-        print(vehicle['status'], vehicle['imei'])
         
         vehicles.append(vehicle)
     return vehicles

@@ -32,12 +32,14 @@ Device Inventory
           <tr>
             <th>IMEI</th>
             <th>GL Number</th>
+            <th>Assigned Vehicle</th>
+            <th>Assigned Company</th>
             <th>Device Model</th>
             <th>Device Make</th>
             <th>Date In</th>
             <th>Warranty</th>
             <th>Sent By</th>
-            <th>Outward To</th>
+            <th>Outward Date</th>
             <th>Package</th>
             <th>Tenure</th>
             <th>Status</th>
@@ -48,8 +50,10 @@ Device Inventory
         <tbody id="deviceTable">
           {% for device in devices %}
           <tr data-id="{{ device._id }}">
-            <td>{{ device.IMEI }}</td>
-            <td>{{ device.GLNumber if device.GLNumber else '' }}</td>
+            <td>{{ device["IMEI"] }}</td>
+            <td>{{ device['GLNumber'] if device['GLNumber'] else '' }}</td>
+            <td>{{ device['LicensePlateNumber'] if device['LicensePlateNumber'] else '' }}</td>
+            <td>{{ device['CompanyName'] if device['CompanyName'] else '' }}</td>
             <td>{{ device['DeviceModel'] if device['DeviceModel'] else '' }}</td>
             <td>{{ device['DeviceMake'] if device['DeviceMake'] else '' }}</td>
             <td>{{ device['DateIn'] if device['DateIn'] else '' }}</td>
@@ -121,7 +125,7 @@ Device Inventory
           </div>
           <div class="form-group">
             <label for="OutwardTo">Outward To</label>
-            <input type="text" name="OutwardTo" id="OutwardTo" />
+            <input type="date" name="OutwardTo" id="OutwardTo" />
           </div>
           <div class="form-group">
             <label for="Package">Package</label>
