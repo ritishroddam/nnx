@@ -59,11 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const searchTerm = this.value.trim().toLowerCase();
         filterTable(searchTerm);
     });
-    
-    clearBtn.addEventListener('click', function() {
-        searchInput.value = '';
-        filterTable('');
-    });  
+     
 
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
