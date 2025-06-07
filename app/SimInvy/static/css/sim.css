@@ -41,7 +41,7 @@ th, td {
 
 /* Ensure dropdowns are fully visible */
 select {
-  width: 100%;
+  width: 20%;
   min-width: 80px; /* Adjust as needed */
 }
 
