@@ -13,10 +13,10 @@ Sim Inventory
 {% block block_container %}
 
 <div class="search-container mb-4">
+  <label>Search:</label>
   <input type="text" id="simSearch" placeholder="Search by Mobile, SIM or IMEI..." />
-</div>
 
-<div class="filter-container mb-4">
+  <div class="filter-container mb-4">
   <select id="statusFilter" onchange="filterSimsByStatus()">
     <option value="All">All SIMs</option>
     <option value="Available">Available</option>
@@ -24,6 +24,7 @@ Sim Inventory
     <option value="SafeCustody">Safe Custody</option>
     <option value="Suspended">Suspended</option>
   </select>
+</div>
 </div>
 
 <!-- Action Buttons -->
