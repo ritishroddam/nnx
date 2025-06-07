@@ -10,9 +10,7 @@ body {
   position: fixed;
   top: 4vh;
   right: 2vw;
-  width: 36vw;
-  max-width: 36vw;
-  min-width: 22vw;
+  width: 22vw;
   padding: 2vw 2vw 2vw 2vw;
   box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
   background: #fff;
