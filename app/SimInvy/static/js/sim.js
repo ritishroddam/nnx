@@ -30,26 +30,6 @@ window.addEventListener("click", function(event) {
   }
 });
 
-document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
-    e.preventDefault();
-    fetch("/simInvy/download_excel")
-        .then(response => response.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'SIM_Inventory.xlsx';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch(error => {
-            console.error('Error downloading Excel:', error);
-            alert('Error downloading Excel file. Please try again.');
-        });
-});
-
 document.addEventListener("DOMContentLoaded", function() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -121,9 +101,25 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
   // Download Excel Button
-  document.getElementById("downloadExcelBtn").addEventListener("click", function() {
-    window.location.href = "/simInvy/download_excel";
-  });
+    document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
+        e.preventDefault();
+        fetch("/simInvy/download_excel")
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'SIM_Inventory.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error downloading Excel:', error);
+                alert('Error downloading Excel file. Please try again.');
+            });
+    });
 
   // Close buttons
   document.querySelectorAll(".close-modal").forEach(btn => {
