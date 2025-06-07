@@ -1,3 +1,6 @@
+let allSimsData = [];
+let originalTableRows = [];
+
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.remove("hidden");
   document.getElementById("MobileNumber").focus();
@@ -27,12 +30,6 @@ window.addEventListener("click", function(event) {
   }
 });
 
-document
-  .getElementById("downloadExcelBtn")
-  .addEventListener("click", function () {
-    window.location.href = "/simInvy/download_excel";
-  });
-
 document.addEventListener("DOMContentLoaded", function() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -40,24 +37,31 @@ document.addEventListener("DOMContentLoaded", function() {
   const dateInInput = document.getElementById("DateIn");
   const dateOutInput = document.getElementById("DateOut");
 
-  const manualEntryBtn = document.getElementById("manualEntryBtn");
-  const manualEntryModal = document.getElementById("manualEntryModal");
-  const uploadBtn = document.getElementById("uploadBtn");
-  const uploadModal = document.getElementById("uploadModal");
-  const closeModalButtons = document.querySelectorAll(".close-modal");
-  const cancelBtn = document.getElementById("cancelBtn");
+  const tableRows = document.querySelectorAll('#simTable tr');
+    originalTableData = Array.from(tableRows).map(row => {
+        return {
+            element: row,
+            mobile: row.cells[0].textContent.trim(),
+            sim: row.cells[1].textContent.trim(),
+            imei: row.cells[2].textContent.trim(),
+            status: row.cells[3].textContent.trim()
+        };
+    });
+
+  const tableBody = document.getElementById('simTable');
+    originalTableRows = Array.from(tableBody.querySelectorAll('tr'));
+    
+    // Set up search functionality
+    const searchInput = document.getElementById('simSearch');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        filterTable(searchTerm);
+    });
 
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
-
-
-  document.getElementById("searchBtn").addEventListener("click", searchSims);
-  document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
-  document.getElementById("simSearch").addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-      searchSims();
-    }
-  });
 
   // Manual Entry Button
   document.getElementById("manualEntryBtn").addEventListener("click", function() {
@@ -70,10 +74,13 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("uploadModal").classList.remove("hidden");
   });
 
-  // Download Excel Button
-  document.getElementById("downloadExcelBtn").addEventListener("click", function() {
-    window.location.href = "/simInvy/download_excel";
-  });
+  setupDownloadButton();
+
+     // Set up search input event listener
+    document.getElementById('simSearch').addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        filterTable(searchTerm);
+    });
 
   // Close buttons
   document.querySelectorAll(".close-modal").forEach(btn => {
@@ -186,30 +193,105 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function searchSims() {
-  const searchValue = document.getElementById("simSearch").value.trim();
-  if (!searchValue) {
-    clearSearch();
-    return;
-  }
-
-  fetch(`/simInvy/search_sims?query=${searchValue}`)
-    .then(response => response.json())
-    .then(data => {
-      const tableBody = document.getElementById("simTable");
-      tableBody.innerHTML = ''; // Clear current table
-
-      if (data.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="12" class="no-results">No SIMs found</td>`;
-        tableBody.appendChild(row);
+    const searchValue = document.getElementById("simSearch").value.trim().toLowerCase();
+    if (!searchValue) {
+        clearSearch();
         return;
-      }
+    }
 
-      renderSimTable(data);
-    })
-    .catch(error => {
-      console.error('Error searching SIMs:', error);
-      alert('Error searching SIMs. Please try again.');
+    const filteredSims = allSimsData.filter(sim => {
+        return (
+            sim.MobileNumber.toLowerCase().includes(searchValue) ||
+            sim.SimNumber.toLowerCase().includes(searchValue) ||
+            sim.IMEI.toLowerCase().includes(searchValue)
+        );
+    });
+
+    renderSimTable(filteredSims);
+}
+
+function clearSearch() {
+    document.getElementById("simSearch").value = "";
+    renderSimTable(allSimsData);
+}
+
+function setupDownloadButton() {
+    const downloadBtn = document.getElementById("downloadExcelBtn");
+    if (!downloadBtn) {
+        console.error("Download Excel button not found!");
+        return;
+    }
+
+    downloadBtn.addEventListener("click", async function(e) {
+        e.preventDefault();
+        
+        const originalText = downloadBtn.textContent;
+        downloadBtn.textContent = "Downloading...";
+        downloadBtn.disabled = true;
+
+        try {
+            const response = await fetch("/simInvy/download_excel", {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                }
+            });
+          
+            if (!response.ok) {
+                // Try to get more detailed error message from response
+                const errorData = await response.json().catch(() => ({}));
+                const errorMsg = errorData.message || `Server error: ${response.status}`;
+                throw new Error(errorMsg);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SIM_Inventory.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert(`Download failed: ${error.message}`);
+        } finally {
+            downloadBtn.textContent = originalText;
+            downloadBtn.disabled = false;
+        }
+    });
+}
+
+function filterTable(searchTerm) {
+    const tableBody = document.getElementById('simTable');
+    
+    if (!searchTerm) {
+        // Show all rows if search is empty
+        originalTableRows.forEach(row => {
+            row.style.display = '';
+        });
+        return;
+    }
+
+    originalTableRows.forEach(row => {
+        // Skip if row doesn't have cells (header row, etc.)
+        if (row.cells.length < 3) {
+            return;
+        }
+        
+        const mobile = row.cells[0].textContent.trim().toLowerCase();
+        const sim = row.cells[1].textContent.trim().toLowerCase();
+        const imei = row.cells[2].textContent.trim().toLowerCase();
+        
+        const matches = (
+            mobile.includes(searchTerm) ||
+            sim.includes(searchTerm) ||
+            imei.includes(searchTerm)
+        );
+        
+        row.style.display = matches ? '' : 'none';
     });
 }
 

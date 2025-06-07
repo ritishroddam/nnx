@@ -447,7 +447,12 @@ input[type="date"] {
 
 .search-container {
     display: flex;
+    align-items: center;
     gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
 }
 
 .search-container input {
@@ -455,6 +460,17 @@ input[type="date"] {
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    min-width: 200px;
+}
+
+.search-container button {
+    padding: 8px 16px;
+    white-space: nowrap;
+}
+
+.search-container label {
+    margin-right: 10px;
+    font-weight: 500;
 }
 
 .search-container button {

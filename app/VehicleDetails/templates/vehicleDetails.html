@@ -28,6 +28,11 @@ Vehicle Details
       <option value="{{ company.name }}">{{ company.name }}</option>
       {% endfor %}
     </select>
+
+    <div class="search-container">
+    <label for="searchInput">Search:</label>
+    <input type="text" id="searchInput" placeholder="Search by License Plate, IMEI, or SIM..." class="search-input">
+    </div>
 </div>
 
 <!-- Action Buttons -->

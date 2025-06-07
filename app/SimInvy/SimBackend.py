@@ -337,53 +337,34 @@ def download_template():
 @jwt_required()
 def download_excel():
     try:
-        # Get all SIMs and convert to list of dicts
+        # Get all SIMs and convert to DataFrame
         sims = list(collection.find({}, {"_id": 0}))
         
         if not sims:
-            return "No data available", 404
+            return jsonify({"error": "No data available"}), 404
 
-        # Process each SIM to remove timezone info from datetime fields
-        processed_sims = []
-        datetime_fields = ['lastEditedAt', 'statusDate', 'reactivationDate', 'DateIn', 'DateOut']
-        
-        for sim in sims:
-            processed_sim = {}
-            for key, value in sim.items():
-                if key in datetime_fields and value is not None:
-                    if isinstance(value, datetime):
-                        # Convert to naive datetime (without timezone)
-                        processed_sim[key] = value.replace(tzinfo=None)
-                    elif isinstance(value, str):
-                        try:
-                            # Parse string and convert to naive datetime
-                            dt = datetime.strptime(value, '%Y-%m-%d')
-                            processed_sim[key] = dt
-                        except ValueError:
-                            # If parsing fails, keep original string value
-                            processed_sim[key] = value
-                    else:
-                        processed_sim[key] = value
-                else:
-                    processed_sim[key] = value
-            processed_sims.append(processed_sim)
-
-        # Create DataFrame from processed data
-        df = pd.DataFrame(processed_sims)
+        # Create DataFrame
+        df = pd.DataFrame(sims)
         
         # Create Excel file in memory
         output = BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl", datetime_format='YYYY-MM-DD') as writer:
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
         
         output.seek(0)
-
-        return Response(
-            output,
+        
+        # Create response with correct headers
+        response = Response(
+            output.getvalue(),
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
+            headers={
+                "Content-Disposition": "attachment; filename=SIM_Inventory.xlsx",
+                "Cache-Control": "no-cache"
+            }
         )
         
+        return response
+        
     except Exception as e:
-        print(f"Error generating Excel file: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        print(f"Error generating Excel: {str(e)}")
+        return jsonify({"error": str(e)}), 500
