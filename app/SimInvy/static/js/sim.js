@@ -63,13 +63,6 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
 
-  document.getElementById("clearSearchBtn").addEventListener("click", clearSearch);
-  document.getElementById("simSearch").addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-      searchSims();
-    }
-  });
-
   // Manual Entry Button
   document.getElementById("manualEntryBtn").addEventListener("click", function() {
     document.getElementById("manualEntryModal").classList.remove("hidden");
