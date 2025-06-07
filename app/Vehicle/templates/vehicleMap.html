@@ -121,6 +121,6 @@ Vehicle Map
 <script>
   window.lat = "{{ companyLatLng.lat|tojson }}";
   window.lng = "{{ companyLatLng.lng|tojson }}";
-  console.log("lat: {{ window.lat }}, lng: {{ window.lng }}");
+  console.log("lat and lng:", window.lat, window.lng);
 </script>
 {% endblock %}
