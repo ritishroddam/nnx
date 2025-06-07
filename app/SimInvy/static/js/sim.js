@@ -1,5 +1,5 @@
 let allSimsData = [];
-let originalTableData = [];
+let originalTableRows = [];
 
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.remove("hidden");
@@ -67,6 +67,23 @@ document.addEventListener("DOMContentLoaded", function() {
             status: row.cells[3].textContent.trim()
         };
     });
+
+  const tableBody = document.getElementById('simTable');
+    originalTableRows = Array.from(tableBody.querySelectorAll('tr'));
+    
+    // Set up search functionality
+    const searchInput = document.getElementById('simSearch');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        filterTable(searchTerm);
+    });
+    
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        filterTable('');
+    });  
 
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
@@ -242,21 +259,33 @@ function clearSearch() {
 }
 
 function filterTable(searchTerm) {
+    const tableBody = document.getElementById('simTable');
+    
     if (!searchTerm) {
         // Show all rows if search is empty
-        originalTableData.forEach(item => {
-            item.element.style.display = '';
+        originalTableRows.forEach(row => {
+            row.style.display = '';
         });
         return;
     }
 
-    originalTableData.forEach(item => {
+    originalTableRows.forEach(row => {
+        // Skip if row doesn't have cells (header row, etc.)
+        if (row.cells.length < 3) {
+            return;
+        }
+        
+        const mobile = row.cells[0].textContent.trim().toLowerCase();
+        const sim = row.cells[1].textContent.trim().toLowerCase();
+        const imei = row.cells[2].textContent.trim().toLowerCase();
+        
         const matches = (
-            item.mobile.toLowerCase().includes(searchTerm) ||
-            item.sim.toLowerCase().includes(searchTerm) ||
-            item.imei.toLowerCase().includes(searchTerm)
+            mobile.includes(searchTerm) ||
+            sim.includes(searchTerm) ||
+            imei.includes(searchTerm)
         );
-        item.element.style.display = matches ? '' : 'none';
+        
+        row.style.display = matches ? '' : 'none';
     });
 }
 
