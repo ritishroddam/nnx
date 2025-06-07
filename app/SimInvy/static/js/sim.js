@@ -80,12 +80,6 @@ document.addEventListener("DOMContentLoaded", function() {
         filterTable(searchTerm);
     });
 
-    // Clear search button
-    document.getElementById('clearSearchBtn').addEventListener('click', function() {
-        document.getElementById('simSearch').value = '';
-        filterTable('');
-    });
-
   // Close buttons
   document.querySelectorAll(".close-modal").forEach(btn => {
     btn.addEventListener("click", function() {
