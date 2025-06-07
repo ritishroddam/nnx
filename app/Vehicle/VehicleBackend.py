@@ -22,7 +22,7 @@ def map():
     claims = get_jwt()
     company = claims.get('company_id')
     if company == 'none':
-        companyLatLng = {'lat': "33.7490", 'lng': "-84.3880"}
+        companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
     else:
         companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
         
