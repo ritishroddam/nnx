@@ -119,8 +119,9 @@ Vehicle Map
   </div>
 </div>
 <script>
-  window.latLng = "{{ companyLatLng|tojson }}";
+  window.lat = "{{ companyLatLng.lat|tojson }}";
+  window.lng = "{{ companyLatLng.lng|tojson }}";
   console.log("LatLng from template:", window.latLng);
-  console.log("lat: {{ companyLatLng.lat }}, lng: {{ companyLatLng.lng }}");
+  console.log("lat: {{ window.lat }}, lng: {{ window.lng }}");
 </script>
 {% endblock %}

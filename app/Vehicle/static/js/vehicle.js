@@ -52,8 +52,8 @@ function stopRotation() {
 function startZoomAnimation() {
   stopRotation();
   // Reset camera options for repeatable animation
-  const lat = parseFloat(window.latLng.lat);
-  const lng = parseFloat(window.latLng.lng);
+  const lat = parseFloat(window.lat);
+  const lng = parseFloat(window.lng);
 
   cameraOptions.tilt = 0;
   cameraOptions.heading = 0;
