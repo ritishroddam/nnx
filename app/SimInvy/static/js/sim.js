@@ -1,4 +1,5 @@
 let allSimsData = [];
+let originalTableData = [];
 
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.remove("hidden");
@@ -29,6 +30,26 @@ window.addEventListener("click", function(event) {
   }
 });
 
+document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
+    e.preventDefault();
+    fetch("/simInvy/download_excel")
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SIM_Inventory.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            console.error('Error downloading Excel:', error);
+            alert('Error downloading Excel file. Please try again.');
+        });
+});
+
 document.addEventListener("DOMContentLoaded", function() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -37,20 +58,13 @@ document.addEventListener("DOMContentLoaded", function() {
   const dateOutInput = document.getElementById("DateOut");
 
   const tableRows = document.querySelectorAll('#simTable tr');
-    allSimsData = Array.from(tableRows).map(row => {
+    originalTableData = Array.from(tableRows).map(row => {
         return {
-            _id: row.getAttribute('data-id'),
-            MobileNumber: row.cells[0].textContent,
-            SimNumber: row.cells[1].textContent,
-            IMEI: row.cells[2].textContent,
-            status: row.cells[3].textContent,
-            isActive: row.cells[4].textContent === 'Active',
-            statusDate: row.cells[5].textContent,
-            reactivationDate: row.cells[6].textContent,
-            DateIn: row.cells[7].textContent,
-            DateOut: row.cells[8].textContent,
-            Vendor: row.cells[9].textContent,
-            lastEditedBy: row.cells[10].textContent
+            element: row,
+            mobile: row.cells[0].textContent.trim(),
+            sim: row.cells[1].textContent.trim(),
+            imei: row.cells[2].textContent.trim(),
+            status: row.cells[3].textContent.trim()
         };
     });
 
@@ -77,26 +91,22 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("uploadModal").classList.remove("hidden");
   });
 
+     // Set up search input event listener
+    document.getElementById('simSearch').addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        filterTable(searchTerm);
+    });
+
+    // Clear search button
+    document.getElementById('clearSearchBtn').addEventListener('click', function() {
+        document.getElementById('simSearch').value = '';
+        filterTable('');
+    });
+
   // Download Excel Button
-  document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
-    e.preventDefault();
-    fetch("/simInvy/download_excel")
-        .then(response => response.blob())
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'SIM_Inventory.xlsx';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch(error => {
-            console.error('Error downloading Excel:', error);
-            alert('Error downloading Excel file. Please try again.');
-        });
-});
+  document.getElementById("downloadExcelBtn").addEventListener("click", function() {
+    window.location.href = "/simInvy/download_excel";
+  });
 
   // Close buttons
   document.querySelectorAll(".close-modal").forEach(btn => {
@@ -229,6 +239,25 @@ function searchSims() {
 function clearSearch() {
     document.getElementById("simSearch").value = "";
     renderSimTable(allSimsData);
+}
+
+function filterTable(searchTerm) {
+    if (!searchTerm) {
+        // Show all rows if search is empty
+        originalTableData.forEach(item => {
+            item.element.style.display = '';
+        });
+        return;
+    }
+
+    originalTableData.forEach(item => {
+        const matches = (
+            item.mobile.toLowerCase().includes(searchTerm) ||
+            item.sim.toLowerCase().includes(searchTerm) ||
+            item.imei.toLowerCase().includes(searchTerm)
+        );
+        item.element.style.display = matches ? '' : 'none';
+    });
 }
 
 function filterSimsByStatus() {
