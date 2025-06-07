@@ -71,7 +71,7 @@ function startZoomAnimation() {
 
   fullMap = null;
 
-  document.getElementById("fullMap").style.display = "none";
+  // document.getElementById("fullMap").style.display = "none";
 };
 
 function animate(time) {
