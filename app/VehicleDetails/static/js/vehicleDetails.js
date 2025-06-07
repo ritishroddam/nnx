@@ -52,6 +52,26 @@ function filterTableByCompany(selectedCompany) {
     });
 }
 
+function handleSearch() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.querySelector('.vehicle-table');
+    
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const licensePlate = row.cells[0].textContent.toLowerCase();
+        const imei = row.cells[2].textContent.toLowerCase();
+        const sim = row.cells[3].textContent.toLowerCase();
+        
+        const matchesSearch = 
+            licensePlate.includes(searchTerm) || 
+            imei.includes(searchTerm) || 
+            sim.includes(searchTerm);
+            
+        row.style.display = matchesSearch ? '' : 'none';
+    });
+}
 
 // Initialize IMEI fetching
 document.addEventListener("DOMContentLoaded", function() {
@@ -100,6 +120,11 @@ const companyFilter = document.getElementById('companyFilter');
         
         // Trigger initial filter
         companyFilter.dispatchEvent(new Event('change'));
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
     }
 
   // Modal event listeners
