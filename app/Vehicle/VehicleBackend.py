@@ -10,14 +10,19 @@ from app.geocoding import geocodeInternal
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
-@vehicle_bp.route('/map')
-@jwt_required()
-def map():
-    return render_template('vehicleMap.html')
 
 collection = db['distinctAtlanta']
 atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
+company_collection = db['customers_list']
+
+@vehicle_bp.route('/map')
+@jwt_required()
+def map():
+    claims = get_jwt()
+    company = claims.get('company_id')
+    companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
+    return render_template('vehicleMap.html', companyLatLng=companyLatLng)
 
 def format_seconds(seconds):
     seconds = int(seconds/1000)

@@ -15,9 +15,21 @@ const cameraOptions = {
   zoom: 3,
   center: { lat: 12.9716, lng: 77.5946 },
 };
+
 const mapOptions = {
   ...cameraOptions,
   mapId: "f32dd48f00948a56c802fc00",
+  disableDefaultUI: true,      // disables ALL controls
+  zoomControl: false,
+  mapTypeControl: false,
+  streetViewControl: false,
+  fullscreenControl: false,
+  clickableIcons: false,
+  gestureHandling: "none",     // disables user interaction
+  draggable: false,
+  keyboardShortcuts: false,
+  scrollwheel: false,
+  disableDoubleClickZoom: true,
 };
 
 let rotationTween = null;

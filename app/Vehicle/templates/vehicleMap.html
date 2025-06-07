@@ -16,6 +16,7 @@ Vehicle Map
 {% endblock %}
 
 {% block topbar_icons %}
+<div id="fullMap"></div>
 <div class="filter-container">
   <label for="speed-filter">Filter by Speed:</label>
   <select id="speed-filter" class="speed-filter" onchange="filterVehicles()">
@@ -118,4 +119,8 @@ Vehicle Map
     </table>
   </div>
 </div>
+<script>
+
+  window.latLng = "{{ companyLatLng }}";
+</script>
 {% endblock %}
