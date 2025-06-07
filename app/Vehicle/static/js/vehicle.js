@@ -68,8 +68,6 @@ function startZoomAnimation() {
       fullMap.moveCamera(cameraOptions);
     })
     .start();
-
-  fullMap = null;
 };
 
 function animate(time) {
