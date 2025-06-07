@@ -379,10 +379,15 @@ def download_excel():
         output.seek(0)
 
         return Response(
-            output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
-        )
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": "attachment;filename=SIM_Inventory.xlsx",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
         
     except Exception as e:
         print(f"Error generating Excel file: {str(e)}")

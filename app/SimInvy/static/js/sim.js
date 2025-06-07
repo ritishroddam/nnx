@@ -101,25 +101,51 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
   // Download Excel Button
-    document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
-        e.preventDefault();
-        fetch("/simInvy/download_excel")
-            .then(response => response.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'SIM_Inventory.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                console.error('Error downloading Excel:', error);
-                alert('Error downloading Excel file. Please try again.');
-            });
+  document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
+    e.preventDefault();
+    
+    // Show loading indicator
+    const originalText = this.textContent;
+    this.textContent = "Downloading...";
+    this.disabled = true;
+    
+    fetch("/simInvy/download_excel", {
+        headers: {
+            'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'SIM_Inventory.xlsx';
+        
+        // Add to DOM and trigger click
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        console.error('Download error:', error);
+        alert('Failed to download Excel file. Please try again.');
+    })
+    .finally(() => {
+        // Restore button state
+        this.textContent = originalText;
+        this.disabled = false;
     });
+});
 
   // Close buttons
   document.querySelectorAll(".close-modal").forEach(btn => {
