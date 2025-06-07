@@ -70,8 +70,6 @@ function startZoomAnimation() {
     .start();
 
   fullMap = null;
-
-  document.getElementById("fullMap").style.display = "none";
 };
 
 function animate(time) {
