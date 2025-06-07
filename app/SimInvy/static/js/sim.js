@@ -74,6 +74,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("uploadModal").classList.remove("hidden");
   });
 
+  setupDownloadButton();
+
      // Set up search input event listener
     document.getElementById('simSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim().toLowerCase();
@@ -186,8 +188,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  setupDownloadButton();
-
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
 });
@@ -222,40 +222,42 @@ function setupDownloadButton() {
         return;
     }
 
-    downloadBtn.addEventListener("click", function(e) {
+    downloadBtn.addEventListener("click", async function(e) {
         e.preventDefault();
         
-        // Show loading state
         const originalText = downloadBtn.textContent;
         downloadBtn.textContent = "Downloading...";
         downloadBtn.disabled = true;
 
-        fetch("/simInvy/download_excel")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch("/simInvy/download_excel", {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 }
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'SIM_Inventory.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                console.error('Download error:', error);
-                alert('Error downloading Excel file. Please try again.');
-            })
-            .finally(() => {
-                // Restore button state
-                downloadBtn.textContent = originalText;
-                downloadBtn.disabled = false;
             });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SIM_Inventory.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert(`Download failed: ${error.message}`);
+        } finally {
+            downloadBtn.textContent = originalText;
+            downloadBtn.disabled = false;
+        }
     });
 }
 
