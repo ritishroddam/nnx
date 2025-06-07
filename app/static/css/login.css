@@ -8,20 +8,27 @@ body {
 
 .container {
   position: fixed;
-  width: 40vw;
-  max-width: 30vw;
-  padding: 2vw;
-  left: 2vw;
   top: 4vh;
+  right: 2vw;
+  width: 36vw;
+  max-width: 36vw;
+  min-width: 22vw;
+  padding: 2vw 2vw 2vw 2vw;
   box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 1.5vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  z-index: 10;
 }
 
 .alert {
   padding: 2vh 2vw;
   border-radius: 1vh;
   width: 100%;
-  max-width: 30vw;
-  margin: 2vh 0;
+  margin-bottom: 2vh;
+  box-sizing: border-box;
 }
 
 .alert-success {
@@ -44,16 +51,12 @@ body {
   color: #0c5460;
 }
 
-.login-container,
-.register-container,
-.dashboard-container,
-.unauthorized-container {
-  background: white;
-  padding: 2vw;
-  border-radius: 1vh;
-  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
+.login-container {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
   width: 100%;
-  max-width: 30vw;
   margin: 0;
 }
 
@@ -77,7 +80,7 @@ input {
   width: 100%;
   padding: 1.5vh 1vw;
   border: 0.2vh solid #ddd;
-  border-radius: 4px;
+  border-radius: 1vh;
   box-sizing: border-box;
   font-size: 1.8vh;
 }
