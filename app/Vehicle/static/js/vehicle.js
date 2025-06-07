@@ -81,6 +81,7 @@ function animate(time) {
 
 (async () => {
   // Wait for the Maps library to be loaded
+  document.getElementById("fullMap").style.display = "block";
   const [{ Map }] = await Promise.all([
     google.maps.importLibrary("maps"),
     google.maps.importLibrary("core"),

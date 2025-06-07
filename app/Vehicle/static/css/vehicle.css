@@ -9,12 +9,6 @@ body {
   overflow: hidden !important;
 }
 
-#fullMap {
-  height: 100%;
-  width: 100%;
-  z-index: 100;
-}
-
 .floating-card {
   position: absolute;
   top: 11vh;
