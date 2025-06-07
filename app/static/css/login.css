@@ -3,28 +3,25 @@ body {
   background-color: #f4f4f9;
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
 }
 
 .container {
-    position: fixed;
-    width: 40vw;
-    max-width: 17vw;
-    padding: 2vw;
-    left: 72vw;
-    top: 11vh;
-    box-shadow: 0 0 1vw rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 40vw;
+  max-width: 30vw;
+  padding: 2vw;
+  left: 2vw;
+  top: 4vh;
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
 }
 
 .alert {
   padding: 2vh 2vw;
   border-radius: 1vh;
   width: 100%;
-  max-width: 26vw;
-  margin: 2vh auto;
+  max-width: 30vw;
+  margin: 2vh 0;
 }
 
 .alert-success {
@@ -51,13 +48,13 @@ body {
 .register-container,
 .dashboard-container,
 .unauthorized-container {
-    background: white;
-    padding: 2vw;
-    border-radius: 1vh;
-    box-shadow: 0 0 1vw rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 26vw;
-    margin: 0 auto;
+  background: white;
+  padding: 2vw;
+  border-radius: 1vh;
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 30vw;
+  margin: 0;
 }
 
 h2 {
@@ -67,32 +64,33 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 2vh;
 }
 
 label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 1vh;
   font-weight: bold;
 }
 
 input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 1.5vh 1vw;
+  border: 0.2vh solid #ddd;
   border-radius: 4px;
   box-sizing: border-box;
+  font-size: 1.8vh;
 }
 
 .btn {
   width: 100%;
-  padding: 10px;
+  padding: 1.5vh 0;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 1vh;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 2vh;
 }
 
 .btn:hover {
@@ -101,7 +99,7 @@ input {
 
 .btn-logout {
   background-color: #dc3545;
-  margin-top: 20px;
+  margin-top: 2vh;
 }
 
 .btn-logout:hover {
@@ -109,14 +107,14 @@ input {
 }
 
 .user-info {
-  margin: 20px 0;
-  padding: 15px;
+  margin: 3vh 0;
+  padding: 2vh 1vw;
   background-color: #f8f9fa;
-  border-radius: 4px;
+  border-radius: 1vh;
 }
 
 .admin-links {
-  margin: 20px 0;
+  margin: 3vh 0;
 }
 
 a {
