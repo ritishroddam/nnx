@@ -236,9 +236,12 @@ function setupDownloadButton() {
                     'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 }
             });
-
+          
             if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
+                // Try to get more detailed error message from response
+                const errorData = await response.json().catch(() => ({}));
+                const errorMsg = errorData.message || `Server error: ${response.status}`;
+                throw new Error(errorMsg);
             }
 
             const blob = await response.blob();
