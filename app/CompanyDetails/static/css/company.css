@@ -249,6 +249,7 @@ tr:hover {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  margin-top: 40px;
 }
 
 .company-close-btn {
