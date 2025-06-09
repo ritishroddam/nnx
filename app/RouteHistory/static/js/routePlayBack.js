@@ -595,13 +595,13 @@ async function plotPathOnMap(pathCoordinates) {
         position: coords[0],
         size: 32,
         icon: "car",
-        angle: pathCoordinates[0].course,
+        angle: (pathCoordinates[0].course - 90),
       },
     ],
     getIcon: (d) => "car",
     getPosition: (d) => d.position,
     getSize: (d) => d.size,
-    getAngle: - 90, //(d) => d.angle,
+    getAngle: (d) => d.angle,
     iconAtlas: carIconUrl,
     iconMapping: {
       car: { x: 0, y: 0, width: 87, height: 155, anchorY: 155, mask: false },
@@ -776,7 +776,7 @@ function updateCarPosition(index) {
     getIcon: (d) => "car",
     getPosition: (d) => d.position,
     getSize: (d) => d.size,
-    getAngle: - 90, //(d) => d.angle,
+    getAngle: (d) => d.angle,
     iconAtlas: "/static/images/car_green.png",
     iconMapping: {
       car: { x: 0, y: 0, width: 48, height: 48, mask: false },
@@ -843,7 +843,7 @@ function moveCar() {
           getIcon: (d) => "car",
           getPosition: (d) => d.position,
           getSize: (d) => d.size,
-          getAngle: - 90, //(d) => d.angle,
+          getAngle: (d) => d.angle,
           iconAtlas: "/static/images/car_green.png",
           iconMapping: {
             car: {
@@ -965,7 +965,11 @@ function calculateBearing(start, end) {
   const startLatLng = new google.maps.LatLng(start.lat, start.lng);
   const endLatLng = new google.maps.LatLng(end.lat, end.lng);
 
-  return google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
+  let bearing = google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
+  if (bearing < 0) {
+    bearing += 360;
+  }
+  return (bearing - 90); //adjusting to match the icon's orientation
 }
 
 function startCarAnimation() {
