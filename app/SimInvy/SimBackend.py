@@ -338,55 +338,47 @@ def download_template():
 def download_excel():
     try:
         sims = list(collection.find({}))
-        
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
-        date_fields = ['DateIn', 'DateOut', 'statusDate', 'reactivationDate', 'lastEditedAt', 'createdAt', 'updatedAt']
+        # Map sim_number to IMEI from vehicle_inventory
+        vehicle_collection = db['vehicle_inventory']
+        vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+        sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
+
+        # Define the exact columns to export (in order)
+        export_columns = [
+            'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
+            'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
+            'Vendor', 'lastEditedBy'
+        ]
 
         processed_data = []
         for sim in sims:
-            clean_sim = {}
-            for key, value in sim.items():
-                if key == '_id':
-                    clean_sim[key] = str(value)
-                elif key in date_fields:
-                    if value is None:
-                        clean_sim[key] = ''
-                    elif isinstance(value, datetime):
-                        # Convert to timezone-naive datetime
-                        if value.tzinfo is not None:
-                            value = value.astimezone(tz=None).replace(tzinfo=None)
-                        clean_sim[key] = value.strftime('%Y-%m-%d')
-                    elif isinstance(value, str):
-                        try:
-                            # Try parsing ISO format with timezone and stripping it
-                            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-                            clean_sim[key] = parsed.astimezone(tz=None).replace(tzinfo=None).strftime('%Y-%m-%d')
-                        except:
-                            clean_sim[key] = value.split("T")[0]  # fallback
-                    else:
-                        clean_sim[key] = str(value)
-                else:
-                    clean_sim[key] = value
-            processed_data.append(clean_sim)
+            sim_number = sim.get('SimNumber', '')
+            row = {
+                'MobileNumber': sim.get('MobileNumber', ''),
+                'SimNumber': sim_number,
+                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+                'status': sim.get('status', 'Available'),
+                'isActive': 'Active' if sim.get('isActive', True) else 'Inactive',
+                'statusDate': str(sim.get('statusDate', '')).split('T')[0] if sim.get('statusDate') else '',
+                'reactivationDate': str(sim.get('reactivationDate', '')).split('T')[0] if sim.get('reactivationDate') else '',
+                'DateIn': str(sim.get('DateIn', '')).split('T')[0] if sim.get('DateIn') else '',
+                'DateOut': str(sim.get('DateOut', '')).split('T')[0] if sim.get('DateOut') else '',
+                'Vendor': sim.get('Vendor', ''),
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+            }
+            processed_data.append(row)
 
-
-        # Force all values to strings to avoid Excel datetime/tz issues
-        stringified_data = []
-        for row in processed_data:
-            stringified_data.append({k: str(v) if v is not None else '' for k, v in row.items()})
-        
-        df = pd.DataFrame(stringified_data)
-
-        df = df.drop('_id', axis=1, errors='ignore')
+        # Create DataFrame with only export columns
+        df = pd.DataFrame(processed_data, columns=export_columns)
 
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
-        
-        output.seek(0)
 
+        output.seek(0)
         return send_file(
             output,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
