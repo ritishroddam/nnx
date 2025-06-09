@@ -756,11 +756,12 @@ function updateCarPosition(index) {
   if (!deckInitialized || !coords.length) return;
   const point = coords[index];
 
-  const bearing =
-    calculateBearing(
-      coords[Math.max(0, index - 1)], point
-    );
-
+  const prev = coords[Math.max(0, index - 1)];
+  const bearing = calculateBearing(
+    { lat: prev[1], lng: prev[0] },
+    { lat: point[1], lng: point[0] }
+  );
+  
   // Update IconLayer data for the car
   const iconLayer = new deck.IconLayer({
     id: "car-icon",
@@ -824,8 +825,8 @@ function moveCar() {
 
         const isLastStep = stepIndex >= steps - 1;
         const stepBearing = isLastStep
-      ? calculateBearing({ lat, lng }, { lat: end[1], lng: end[0] })
-      : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
+          ? calculateBearing({ lat, lng }, { lat: end[1], lng: end[0] })
+          : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
 
 
         // Update IconLayer for the car
