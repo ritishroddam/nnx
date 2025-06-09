@@ -343,31 +343,44 @@ def download_excel():
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
-        # Convert ObjectId and handle datetime fields
+        # Define date fields that need processing
+        date_fields = ['DateIn', 'DateOut', 'statusDate', 'reactivationDate', 'lastEditedAt']
+        
+        # Process each document
+        processed_sims = []
         for sim in sims:
-            sim['_id'] = str(sim['_id'])
-            # Convert datetime fields to naive datetimes (without timezone)
-            for field in ['DateIn', 'DateOut', 'statusDate', 'reactivationDate', 'lastEditedAt']:
-                if field in sim and sim[field]:
-                    if isinstance(sim[field], datetime):
-                        sim[field] = sim[field].replace(tzinfo=None)
-                    elif isinstance(sim[field], str):
-                        try:
-                            dt = datetime.strptime(sim[field], '%Y-%m-%d')
-                            sim[field] = dt.strftime('%Y-%m-%d')  # Format as string without time
-                        except ValueError:
-                            pass
+            processed_sim = {}
+            for key, value in sim.items():
+                # Handle ObjectId
+                if key == '_id':
+                    processed_sim[key] = str(value)
+                # Handle datetime fields
+                elif key in date_fields:
+                    if value is None:
+                        processed_sim[key] = ''
+                    elif isinstance(value, datetime):
+                        # Convert to naive datetime and format as string
+                        processed_sim[key] = value.replace(tzinfo=None).strftime('%Y-%m-%d')
+                    elif isinstance(value, str):
+                        # Extract just the date part if it's in ISO format
+                        processed_sim[key] = value.split('T')[0]
+                    else:
+                        processed_sim[key] = str(value)
+                else:
+                    processed_sim[key] = value
+            processed_sims.append(processed_sim)
 
         # Create DataFrame
-        df = pd.DataFrame(sims)
+        df = pd.DataFrame(processed_sims)
         
-        # Remove MongoDB-specific fields
-        df = df.drop('_id', axis=1, errors='ignore')
-        
-        # Create Excel file
+        # Remove _id field
+        if '_id' in df.columns:
+            df = df.drop('_id', axis=1)
+
+        # Create Excel file in memory
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False)
+        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+            df.to_excel(writer, index=False, sheet_name="SIM Inventory")
         
         output.seek(0)
         

@@ -223,10 +223,23 @@ function setupDownloadButton() {
         e.preventDefault();
         
         const originalText = downloadBtn.textContent;
-        downloadBtn.textContent = "Downloading...";
+        downloadBtn.textContent = "Preparing...";
         downloadBtn.disabled = true;
 
         try {
+            // Show loading state
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.textContent = "Generating Excel file...";
+            loadingIndicator.style.position = 'fixed';
+            loadingIndicator.style.top = '20px';
+            loadingIndicator.style.right = '20px';
+            loadingIndicator.style.padding = '10px';
+            loadingIndicator.style.background = '#333';
+            loadingIndicator.style.color = 'white';
+            loadingIndicator.style.borderRadius = '5px';
+            loadingIndicator.style.zIndex = '1000';
+            document.body.appendChild(loadingIndicator);
+
             const response = await fetch("/simInvy/download_excel", {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -234,9 +247,13 @@ function setupDownloadButton() {
                 }
             });
           
+            // Remove loading indicator
+            document.body.removeChild(loadingIndicator);
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMsg = errorData.error || errorData.message || `Server error: ${response.status}`;
+                const errorData = await response.json().catch(() => null);
+                const errorMsg = errorData?.error || errorData?.message || 
+                               `Server error (${response.status})`;
                 throw new Error(errorMsg);
             }
 
@@ -249,12 +266,29 @@ function setupDownloadButton() {
             a.click();
             
             // Cleanup
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
         } catch (error) {
             console.error('Download failed:', error);
-            // Replace showErrorToast with a simple alert or implement a toast function
-            alert(`Download failed: ${error.message}`);
+            // Create error display
+            const errorDisplay = document.createElement('div');
+            errorDisplay.textContent = `Error: ${error.message}`;
+            errorDisplay.style.position = 'fixed';
+            errorDisplay.style.top = '20px';
+            errorDisplay.style.right = '20px';
+            errorDisplay.style.padding = '10px';
+            errorDisplay.style.background = '#d32f2f';
+            errorDisplay.style.color = 'white';
+            errorDisplay.style.borderRadius = '5px';
+            errorDisplay.style.zIndex = '1000';
+            document.body.appendChild(errorDisplay);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                document.body.removeChild(errorDisplay);
+            }, 5000);
         } finally {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;
