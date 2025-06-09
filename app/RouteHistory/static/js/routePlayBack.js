@@ -819,6 +819,14 @@ function moveCar() {
       if (stepIndex < steps) {
         const lat = start[1] + latDiff * stepIndex;
         const lng = start[0] + lngDiff * stepIndex;
+        const nextLat = start[1] + latDiff * (stepIndex + 1);
+        const nextLng = start[0] + lngDiff * (stepIndex + 1);
+
+        const stepBearing = calculateBearing(
+          { lat: lat, lng: lng },
+          { lat: nextLat, lng: nextLng }
+        );
+
 
         // Update IconLayer for the car
         const iconLayer = new deck.IconLayer({
@@ -828,7 +836,7 @@ function moveCar() {
               position: [lng, lat],
               icon: "car",
               size: 32,
-              angle: bearing,
+              angle: stepBearing,
             },
           ],
           getIcon: (d) => "car",
