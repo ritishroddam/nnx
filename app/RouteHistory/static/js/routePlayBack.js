@@ -721,8 +721,7 @@ async function plotPathOnMap(pathCoordinates) {
     arrowContent.style.borderRight = "5px solid transparent";
     arrowContent.style.position = "absolute";
     arrowContent.style.transform = `rotate(${calculateBearing(
-      { lat: nextCoord[1], lng: nextCoord[0] },
-      { lat: coord[1], lng: coord[0] }
+      nextCoord,coord
     )}deg)`;
 
     const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -756,13 +755,11 @@ async function plotPathOnMap(pathCoordinates) {
 function updateCarPosition(index) {
   if (!deckInitialized || !coords.length) return;
   const point = coords[index];
+
   const bearing =
-    index > 0
-      ? calculateBearing(
-          { lat: coords[index - 1][1], lng: coords[index - 1][0] },
-          { lat: point[1], lng: point[0] }
-        )
-      : 0;
+    calculateBearing(
+      coords[Math.max(0, index - 1)], point
+    );
 
   // Update IconLayer data for the car
   const iconLayer = new deck.IconLayer({
@@ -791,7 +788,11 @@ function updateCarPosition(index) {
     layers: [deckLayers[0], iconLayer],
   });
 
-  map.panTo({ lat: point[1], lng: point[0] });
+  const carLatLng = new google.maps.LatLng(point[1], point[0]);
+  const bounds = map.getBounds();
+  if (bounds && !bounds.contains(carLatLng)) {
+    map.panTo(carLatLng);
+  }
   sliderTimeDisplay.textContent = pathCoordinates[index].time;
 }
 
@@ -812,15 +813,20 @@ function moveCar() {
     let stepIndex = 0;
     const latDiff = (end[1] - start[1]) / steps;
     const lngDiff = (end[0] - start[0]) / steps;
-    const bearing = calculateBearing(
-      { lat: start[1], lng: start[0] },
-      { lat: end[1], lng: end[0] }
-    );
+    const bearing = calculateBearing(start, end);
 
     function animateStep() {
       if (stepIndex < steps) {
         const lat = start[1] + latDiff * stepIndex;
         const lng = start[0] + lngDiff * stepIndex;
+        const nextLat = start[1] + latDiff * (stepIndex + 1);
+        const nextLng = start[0] + lngDiff * (stepIndex + 1);
+
+        const isLastStep = stepIndex >= steps - 1;
+        const stepBearing = isLastStep
+      ? calculateBearing({ lat, lng }, { lat: end[1], lng: end[0] })
+      : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
+
 
         // Update IconLayer for the car
         const iconLayer = new deck.IconLayer({
@@ -830,7 +836,7 @@ function moveCar() {
               position: [lng, lat],
               icon: "car",
               size: 32,
-              angle: bearing,
+              angle: stepBearing,
             },
           ],
           getIcon: (d) => "car",
@@ -856,7 +862,10 @@ function moveCar() {
           layers: [deckLayers[0], iconLayer],
         });
 
-        map.panTo({ lat, lng });
+        const bounds = map.getBounds();
+        if (bounds && !bounds.contains({ lat, lng })) {
+          map.panTo({ lat, lng });
+        }
         stepIndex++;
         animationInterval = setTimeout(animateStep, stepDuration);
       } else {
