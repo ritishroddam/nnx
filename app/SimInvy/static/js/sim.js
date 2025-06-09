@@ -223,22 +223,30 @@ function setupDownloadButton() {
         e.preventDefault();
         
         const originalText = downloadBtn.textContent;
-        downloadBtn.textContent = "Preparing...";
+        downloadBtn.textContent = "Generating...";
         downloadBtn.disabled = true;
 
         try {
-            // Show loading state
-            const loadingIndicator = document.createElement('div');
-            loadingIndicator.textContent = "Generating Excel file...";
-            loadingIndicator.style.position = 'fixed';
-            loadingIndicator.style.top = '20px';
-            loadingIndicator.style.right = '20px';
-            loadingIndicator.style.padding = '10px';
-            loadingIndicator.style.background = '#333';
-            loadingIndicator.style.color = 'white';
-            loadingIndicator.style.borderRadius = '5px';
-            loadingIndicator.style.zIndex = '1000';
-            document.body.appendChild(loadingIndicator);
+            // Add visual loading indicator
+            const spinner = document.createElement('div');
+            spinner.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px;
+                    background: #333;
+                    color: white;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                ">
+                    <span style="margin-right: 10px;">Generating Excel file...</span>
+                    <div class="spinner"></div>
+                </div>
+            `;
+            document.body.appendChild(spinner);
 
             const response = await fetch("/simInvy/download_excel", {
                 headers: {
@@ -246,14 +254,19 @@ function setupDownloadButton() {
                     'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 }
             });
-          
-            // Remove loading indicator
-            document.body.removeChild(loadingIndicator);
+
+            // Remove spinner
+            document.body.removeChild(spinner);
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                const errorMsg = errorData?.error || errorData?.message || 
-                               `Server error (${response.status})`;
+                let errorMsg = `Server error (${response.status})`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.details || errorData.error || errorMsg;
+                } catch {
+                    const text = await response.text();
+                    if (text) errorMsg = text;
+                }
                 throw new Error(errorMsg);
             }
 
@@ -261,7 +274,7 @@ function setupDownloadButton() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'SIM_Inventory.xlsx';
+            a.download = 'SIM_Inventory_' + new Date().toISOString().split('T')[0] + '.xlsx';
             document.body.appendChild(a);
             a.click();
             
@@ -270,25 +283,35 @@ function setupDownloadButton() {
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             }, 100);
+
         } catch (error) {
             console.error('Download failed:', error);
-            // Create error display
-            const errorDisplay = document.createElement('div');
-            errorDisplay.textContent = `Error: ${error.message}`;
-            errorDisplay.style.position = 'fixed';
-            errorDisplay.style.top = '20px';
-            errorDisplay.style.right = '20px';
-            errorDisplay.style.padding = '10px';
-            errorDisplay.style.background = '#d32f2f';
-            errorDisplay.style.color = 'white';
-            errorDisplay.style.borderRadius = '5px';
-            errorDisplay.style.zIndex = '1000';
-            document.body.appendChild(errorDisplay);
+            
+            // Show error message
+            const errorDiv = document.createElement('div');
+            errorDiv.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px;
+                    background: #d32f2f;
+                    color: white;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    max-width: 400px;
+                ">
+                    <strong>Download Failed</strong>
+                    <div style="margin-top: 5px;">${error.message}</div>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
             
             // Auto-remove after 5 seconds
             setTimeout(() => {
-                document.body.removeChild(errorDisplay);
+                document.body.removeChild(errorDiv);
             }, 5000);
+            
         } finally {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;
