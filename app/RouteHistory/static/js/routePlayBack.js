@@ -604,7 +604,7 @@ async function plotPathOnMap(pathCoordinates) {
   carContent.style.transform = `rotate(${pathCoordinates[0].course || 0}deg)`;
 
   carMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: { lat: coords[0][1], lng: coords[0][0] },
+    position: coords[0], // Use the object directly
     map: map,
     title: "Vehicle",
     content: carContent,
@@ -628,7 +628,7 @@ async function plotPathOnMap(pathCoordinates) {
 
   // Markers for start and end points using AdvancedMarkerElement
   startMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: { lat: coords[0][1], lng: coords[0][0] },
+    position: coords[0], // Use the object directly
     map: map,
     title: "Start",
     content: startContent,
@@ -659,10 +659,7 @@ async function plotPathOnMap(pathCoordinates) {
   });
 
   endMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: {
-      lat: coords[coords.length - 1][1],
-      lng: coords[coords.length - 1][0],
-    },
+    position: coords[coords.length - 1], // Use the object directly
     map: map,
     title: "End",
     content: endContent,
@@ -718,7 +715,7 @@ async function plotPathOnMap(pathCoordinates) {
     )}deg)`;
 
     const marker = new google.maps.marker.AdvancedMarkerElement({
-      position: { lat: coord[1], lng: coord[0] },
+      position: coord, // Use the object directly
       map: map,
       title: "Arrow",
       content: arrowContent,
