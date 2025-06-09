@@ -601,7 +601,7 @@ async function plotPathOnMap(pathCoordinates) {
     getIcon: (d) => "car",
     getPosition: (d) => d.position,
     getSize: (d) => d.size,
-    getAngle: (d) => d.angle,
+    getAngle: (d) => 0, //d.angle,
     iconAtlas: carIconUrl,
     iconMapping: {
       car: { x: 0, y: 0, width: 87, height: 155, anchorY: 155, mask: false },
@@ -776,7 +776,7 @@ function updateCarPosition(index) {
     getIcon: (d) => "car",
     getPosition: (d) => d.position,
     getSize: (d) => d.size,
-    getAngle: (d) => d.angle,
+    getAngle: (d) => 0, //d.angle,
     iconAtlas: "/static/images/car_green.png",
     iconMapping: {
       car: { x: 0, y: 0, width: 48, height: 48, mask: false },
@@ -843,7 +843,7 @@ function moveCar() {
           getIcon: (d) => "car",
           getPosition: (d) => d.position,
           getSize: (d) => d.size,
-          getAngle: (d) => d.angle,
+          getAngle: (d) => 0, //d.angle,
           iconAtlas: "/static/images/car_green.png",
           iconMapping: {
             car: {
