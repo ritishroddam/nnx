@@ -969,7 +969,7 @@ function calculateBearing(start, end) {
   if (bearing < 0) {
     bearing += 360;
   }
-  return (bearing - 90); //adjusting to match the icon's orientation
+  return (bearing); //adjusting to match the icon's orientation
 }
 
 function startCarAnimation() {
