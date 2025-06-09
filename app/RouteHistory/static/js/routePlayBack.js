@@ -769,7 +769,7 @@ function updateCarPosition(index) {
       {
         position: point,
         icon: "car",
-        size: 48,
+        size: 32,
         angle: bearing,
       },
     ],
@@ -779,7 +779,7 @@ function updateCarPosition(index) {
     getAngle: (d) => d.angle,
     iconAtlas: "/static/images/car_green.png",
     iconMapping: {
-      car: { x: 0, y: 0, width: 48, height: 48, mask: false },
+      car: { x: 0, y: 0, width: 87, height: 155, anchorY: 155, mask: false },
     },
     sizeScale: 1,
     pickable: false,
