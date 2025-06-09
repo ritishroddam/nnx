@@ -822,10 +822,10 @@ function moveCar() {
         const nextLat = start[1] + latDiff * (stepIndex + 1);
         const nextLng = start[0] + lngDiff * (stepIndex + 1);
 
-        const stepBearing = calculateBearing(
-          { lat: lat, lng: lng },
-          { lat: nextLat, lng: nextLng }
-        );
+        const isLastStep = stepIndex >= steps - 1;
+        const stepBearing = isLastStep
+      ? calculateBearing({ lat, lng }, { lat: end[1], lng: end[0] })
+      : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
 
 
         // Update IconLayer for the car
