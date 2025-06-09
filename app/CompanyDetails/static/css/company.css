@@ -133,7 +133,6 @@ tr:hover {
   color: #dc3545;
 }
 
-/* --- Modern Table Styling (matches DeviceInvy) --- */
 .company-table-container {
     background-color: white;
     border-radius: 8px;
@@ -180,7 +179,6 @@ tr:hover {
     word-break: break-word;
 }
 
-/* Set explicit widths for each column */
 .company-table th:nth-child(1), .company-table td:nth-child(1) { width: 140px; }
 .company-table th:nth-child(2), .company-table td:nth-child(2) { width: 120px; }
 .company-table th:nth-child(3), .company-table td:nth-child(3) { width: 200px; }
@@ -206,7 +204,6 @@ tr:hover {
     background-color: #f9f9f9;
 }
 
-/* Optional: dark mode support if you want to match DeviceInvy dark mode */
 .dark-mode .company-table {
     background-color: #000;
     color: #ccc;
@@ -222,8 +219,6 @@ tr:hover {
     background-color: #444;
 }
 
-/* --- Modal/Popup Styling (match DeviceInvy) --- */
-/* Modal overlay */
 .company-modal {
   display: flex;
   align-items: center;
@@ -235,9 +230,11 @@ tr:hover {
   backdrop-filter: blur(5px);
   z-index: 1000;
 }
+
 .company-modal.hidden {
   display: none;
 }
+
 .company-modal-content {
   background: #fff;
   border-radius: 12px;
@@ -259,9 +256,11 @@ tr:hover {
   margin-left: 455px;
   transition: color 0.2s;
 }
+
 .company-close-btn:hover {
   color: #222;
 }
+
 .upload-form-group {
   display: flex;
   flex-direction: column;
@@ -270,7 +269,6 @@ tr:hover {
   align-items: stretch;
 }
 
-/* --- Filter Dropdown Styling --- */
 .filter-container {
   display: flex;
   align-items: center;
@@ -315,7 +313,6 @@ tr:hover {
   border-color: #999;
 }
 
-/* Dark mode support */
 .dark-mode .filter-container {
   background-color: #333;
 }
@@ -356,12 +353,12 @@ tr:hover {
 .form-group {
   display: flex;
   flex-direction: column;
-  width: 48%; /* Two columns on desktop */
+  width: 48%; 
   min-width: 200px;
 }
 
 @media (max-width: 700px) {
   .form-group {
-    width: 100%; /* Stack on mobile */
+    width: 100%; 
   }
 }
