@@ -337,37 +337,25 @@ def download_template():
 @jwt_required()
 def download_excel():
     try:
-        # Get all SIMs
         sims = list(collection.find({}))
         
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
-        # Define all possible date fields
-        date_fields = [
-            'DateIn', 'DateOut', 'statusDate', 
-            'reactivationDate', 'lastEditedAt',
-            'createdAt', 'updatedAt'  # Add any other potential date fields
-        ]
+        date_fields = ['DateIn', 'DateOut', 'statusDate', 'reactivationDate', 'lastEditedAt', 'createdAt', 'updatedAt']
 
-        # Process each document to clean date fields
         processed_data = []
         for sim in sims:
             clean_sim = {}
             for key, value in sim.items():
-                # Convert ObjectId to string
                 if key == '_id':
                     clean_sim[key] = str(value)
-                # Handle date fields
                 elif key in date_fields:
                     if value is None:
                         clean_sim[key] = ''
                     elif isinstance(value, datetime):
-                        # Force naive datetime (no timezone)
-                        naive_date = value.replace(tzinfo=None)
-                        clean_sim[key] = naive_date.strftime('%Y-%m-%d')
+                        clean_sim[key] = value.replace(tzinfo=None).strftime('%Y-%m-%d')
                     elif isinstance(value, str):
-                        # Extract just the date part if ISO format
                         clean_sim[key] = value.split('T')[0]
                     else:
                         clean_sim[key] = str(value)
@@ -375,24 +363,15 @@ def download_excel():
                     clean_sim[key] = value
             processed_data.append(clean_sim)
 
-        # Create DataFrame
         df = pd.DataFrame(processed_data)
-        
-        # Remove MongoDB-specific fields
         df = df.drop('_id', axis=1, errors='ignore')
 
-        # Create Excel file in memory
         output = BytesIO()
-        with pd.ExcelWriter(
-            output, 
-            engine='openpyxl',
-            datetime_format='YYYY-MM-DD',  # Explicit date format
-            options={'remove_timezone': True}  # Additional safety
-        ) as writer:
+        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
         
         output.seek(0)
-        
+
         return send_file(
             output,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -401,8 +380,6 @@ def download_excel():
         )
         
     except Exception as e:
-        print(f"Error generating Excel: {str(e)}")
-        # Add detailed error logging
         import traceback
         traceback.print_exc()
         return jsonify({
