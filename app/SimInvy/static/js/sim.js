@@ -217,10 +217,7 @@ function clearSearch() {
 
 function setupDownloadButton() {
     const downloadBtn = document.getElementById("downloadExcelBtn");
-    if (!downloadBtn) {
-        console.error("Download Excel button not found!");
-        return;
-    }
+    if (!downloadBtn) return;
 
     downloadBtn.addEventListener("click", async function(e) {
         e.preventDefault();
@@ -256,7 +253,8 @@ function setupDownloadButton() {
             document.body.removeChild(a);
         } catch (error) {
             console.error('Download failed:', error);
-            showErrorToast(`Download failed: ${error.message}`);
+            // Replace showErrorToast with a simple alert or implement a toast function
+            alert(`Download failed: ${error.message}`);
         } finally {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;

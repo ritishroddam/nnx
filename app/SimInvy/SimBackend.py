@@ -337,41 +337,46 @@ def download_template():
 @jwt_required()
 def download_excel():
     try:
-        # Get all SIMs and convert to DataFrame
+        # Get all SIMs
         sims = list(collection.find({}))
         
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
-        # Convert ObjectId to string for serialization
+        # Convert ObjectId and handle datetime fields
         for sim in sims:
             sim['_id'] = str(sim['_id'])
+            # Convert datetime fields to naive datetimes (without timezone)
+            for field in ['DateIn', 'DateOut', 'statusDate', 'reactivationDate', 'lastEditedAt']:
+                if field in sim and sim[field]:
+                    if isinstance(sim[field], datetime):
+                        sim[field] = sim[field].replace(tzinfo=None)
+                    elif isinstance(sim[field], str):
+                        try:
+                            dt = datetime.strptime(sim[field], '%Y-%m-%d')
+                            sim[field] = dt.strftime('%Y-%m-%d')  # Format as string without time
+                        except ValueError:
+                            pass
 
         # Create DataFrame
         df = pd.DataFrame(sims)
         
-        # Remove _id field if not needed
-        if '_id' in df.columns:
-            df = df.drop('_id', axis=1)
-
-        # Create Excel file in memory
+        # Remove MongoDB-specific fields
+        df = df.drop('_id', axis=1, errors='ignore')
+        
+        # Create Excel file
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+            df.to_excel(writer, index=False)
         
         output.seek(0)
         
-        # Create response with correct headers
-        response = Response(
-            output.getvalue(),
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={
-                "Content-Disposition": "attachment; filename=SIM_Inventory.xlsx",
-                "Cache-Control": "no-cache"
-            }
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='SIM_Inventory.xlsx'
         )
-        
-        return response
         
     except Exception as e:
         print(f"Error generating Excel: {str(e)}")
