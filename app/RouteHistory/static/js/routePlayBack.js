@@ -575,7 +575,7 @@ async function plotPathOnMap(pathCoordinates) {
   sliderTimeDisplay.textContent = pathCoordinates[0].time;
 
   const deckCoords = coords.map(({ lat, lng }) => [lng, lat]);
-  
+
   const pathLayer = new deck.PathLayer({
     id: "route-path",
     data: [{ path: deckCoords }],
@@ -588,7 +588,7 @@ async function plotPathOnMap(pathCoordinates) {
     capRounded: true,
     pickable: false,
   });
-  
+
   deckOverlay = new deck.GoogleMapsOverlay({
     layers: [pathLayer],
   });
@@ -751,16 +751,16 @@ function updateCarPosition(index) {
   // Calculate bearing for rotation
   const prev = coords[Math.max(0, index - 1)];
   const bearing = calculateBearing(
-    { lat: prev[1], lng: prev[0] },
-    { lat: point[1], lng: point[0] }
+    prev,
+    point
   );
 
-  carMarker.position = { lat: point[1], lng: point[0] };
+  carMarker.position = point;
   if (carMarker.content) {
     carMarker.content.style.transform = `rotate(${bearing}deg)`;
   }
 
-  const carLatLng = new google.maps.LatLng(point[1], point[0]);
+  const carLatLng = new google.maps.LatLng(point.lat, point.lng);
   const bounds = map.getBounds();
   if (bounds && !bounds.contains(carLatLng)) {
     map.panTo(carLatLng);
@@ -778,39 +778,36 @@ function moveCar() {
     const stepDuration = 20 / speedMultiplier;
     const steps = Math.floor(
       google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(start[1], start[0]),
-        new google.maps.LatLng(end[1], end[0])
+        new google.maps.LatLng(start.lat, start.lng),
+        new google.maps.LatLng(end.lat, end.lng)
       ) / 10
     );
     let stepIndex = 0;
-    const latDiff = (end[1] - start[1]) / steps;
-    const lngDiff = (end[0] - start[0]) / steps;
+    const latDiff = (end.lat - start.lat) / steps;
+    const lngDiff = (end.lng - start.lng) / steps;
 
     function animateStep() {
       if (stepIndex < steps) {
-        const lat = start[1] + latDiff * stepIndex;
-        const lng = start[0] + lngDiff * stepIndex;
-        const nextLat = start[1] + latDiff * (stepIndex + 1);
-        const nextLng = start[0] + lngDiff * (stepIndex + 1);
+        const lat = start.lat + latDiff * stepIndex;
+        const lng = start.lng + lngDiff * stepIndex;
+        const nextLat = start.lat + latDiff * (stepIndex + 1);
+        const nextLng = start.lng + lngDiff * (stepIndex + 1);
 
         const isLastStep = stepIndex >= steps - 1;
         const stepBearing = isLastStep
-          ? calculateBearing({ lat, lng }, { lat: end[1], lng: end[0] })
+          ? calculateBearing({ lat, lng }, { lat: end.lat, lng: end.lng })
           : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
 
         // Move and rotate the car marker
         if (carMarker) {
-          const latitude = start.lat + (end.lat - start.lat) * (stepIndex / steps);
-          const longitude = start.lng + (end.lng - start.lng) * (stepIndex / steps);
-
-          carMarker.position = { latitude, longitude };
+          carMarker.position = { lat, lng };
           if (carMarker.content) {
             carMarker.content.style.transform = `rotate(${stepBearing}deg)`;
           }
         }
 
         const bounds = map.getBounds();
-        if (bounds && !bounds.contains({ lat, lng })) {
+        if (bounds && !bounds.contains(new google.maps.LatLng(lat, lng))) {
           map.panTo({ lat, lng });
         }
         stepIndex++;
