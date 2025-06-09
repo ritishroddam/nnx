@@ -720,7 +720,7 @@ async function plotPathOnMap(pathCoordinates) {
     arrowContent.style.borderLeft = "5px solid transparent";
     arrowContent.style.borderRight = "5px solid transparent";
     arrowContent.style.position = "absolute";
-    arrowContent.style.transform = `rotate(${calculateBearing(
+    arrowContent.style.transform = `rotate(${calculateBearingGoogle(
       nextCoord,coord
     )}deg)`;
 
@@ -961,6 +961,13 @@ function fetchAndDisplayAlerts(imei) {
     });
 }
 
+function calculateBearingGoogle(start, end) {
+  const startLatLng = new google.maps.LatLng(start.lat, start.lng);
+  const endLatLng = new google.maps.LatLng(end.lat, end.lng);
+
+  return google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
+}
+
 function calculateBearing(start, end) {
   const startLatLng = new google.maps.LatLng(start.lat, start.lng);
   const endLatLng = new google.maps.LatLng(end.lat, end.lng);
@@ -969,7 +976,7 @@ function calculateBearing(start, end) {
   if (bearing < 0) {
     bearing += 360;
   }
-  return (bearing); //adjusting to match the icon's orientation
+  return (bearing);
 }
 
 function startCarAnimation() {
