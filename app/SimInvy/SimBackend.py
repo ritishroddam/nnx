@@ -338,14 +338,22 @@ def download_template():
 def download_excel():
     try:
         # Get all SIMs and convert to DataFrame
-        sims = list(collection.find({}, {"_id": 0}))
+        sims = list(collection.find({}))
         
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
+        # Convert ObjectId to string for serialization
+        for sim in sims:
+            sim['_id'] = str(sim['_id'])
+
         # Create DataFrame
         df = pd.DataFrame(sims)
         
+        # Remove _id field if not needed
+        if '_id' in df.columns:
+            df = df.drop('_id', axis=1)
+
         # Create Excel file in memory
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:

@@ -238,9 +238,8 @@ function setupDownloadButton() {
             });
           
             if (!response.ok) {
-                // Try to get more detailed error message from response
                 const errorData = await response.json().catch(() => ({}));
-                const errorMsg = errorData.message || `Server error: ${response.status}`;
+                const errorMsg = errorData.error || errorData.message || `Server error: ${response.status}`;
                 throw new Error(errorMsg);
             }
 
@@ -252,11 +251,12 @@ function setupDownloadButton() {
             document.body.appendChild(a);
             a.click();
             
+            // Cleanup
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
         } catch (error) {
             console.error('Download failed:', error);
-            alert(`Download failed: ${error.message}`);
+            showErrorToast(`Download failed: ${error.message}`);
         } finally {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;
