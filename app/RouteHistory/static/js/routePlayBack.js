@@ -574,19 +574,21 @@ async function plotPathOnMap(pathCoordinates) {
   timelineSlider.value = 0;
   sliderTimeDisplay.textContent = pathCoordinates[0].time;
 
-  // --- deck.gl PathLayer and IconLayer ---
+  const deckCoords = coords.map(({ lat, lng }) => [lng, lat]);
+  
   const pathLayer = new deck.PathLayer({
     id: "route-path",
-    data: [{ path: coords }],
+    data: [{ path: deckCoords }],
     getPath: (d) => d.path,
     getWidth: 6,
     getColor: [80, 80, 80, 230],
     widthMinPixels: 3,
     widthMaxPixels: 8,
-    rounded: true,
+    jointRounded: true,
+    capRounded: true,
     pickable: false,
   });
-
+  
   deckOverlay = new deck.GoogleMapsOverlay({
     layers: [pathLayer],
   });
