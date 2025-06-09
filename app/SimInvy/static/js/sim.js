@@ -219,42 +219,109 @@ function setupDownloadButton() {
     const downloadBtn = document.getElementById("downloadExcelBtn");
     if (!downloadBtn) return;
 
-    downloadBtn.addEventListener("click", async function(e) {
+    downloadBtn.addEventListener("click", async function (e) {
         e.preventDefault();
-        
+
         const originalText = downloadBtn.textContent;
-        downloadBtn.textContent = "Downloading...";
+        downloadBtn.textContent = "Generating...";
         downloadBtn.disabled = true;
 
         try {
-            const response = await fetch("/simInvy/download_excel", {
+            // Spinner
+            const spinner = document.createElement('div');
+            spinner.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px;
+                    background: #333;
+                    color: white;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                ">
+                    <span style="margin-right: 10px;">Generating Excel file...</span>
+                    <div class="spinner"></div>
+                </div>
+            `;
+            document.body.appendChild(spinner);
+
+            // Collect visible table rows
+            const visibleRows = Array.from(document.querySelectorAll("#simTable tr"))
+                .filter(row => row.cells.length > 1 && row.style.display !== 'none');
+
+            const simsToExport = visibleRows.map(row => ({
+                MobileNumber: row.cells[0].textContent.trim(),
+                SimNumber: row.cells[1].textContent.trim(),
+                IMEI: row.cells[2].textContent.trim(),
+                status: row.cells[3].textContent.trim(),
+                isActive: row.cells[4].textContent.trim(),
+                statusDate: row.cells[5].textContent.trim(),
+                reactivationDate: row.cells[6].textContent.trim(),
+                DateIn: row.cells[7].textContent.trim(),
+                DateOut: row.cells[8].textContent.trim(),
+                Vendor: row.cells[9].textContent.trim(),
+                lastEditedBy: row.cells[10].textContent.trim()
+            }));
+
+            const response = await fetch("/simInvy/download_excel_filtered", {
+                method: "POST",
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                }
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('access_token')}`
+                },
+                body: JSON.stringify({ sims: simsToExport })
             });
-          
+
+            // Remove spinner
+            document.body.removeChild(spinner);
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMsg = errorData.error || errorData.message || `Server error: ${response.status}`;
-                throw new Error(errorMsg);
+                const errText = await response.text();
+                throw new Error(errText || `Server error (${response.status})`);
             }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'SIM_Inventory.xlsx';
+            a.download = 'Filtered_SIM_Inventory_' + new Date().toISOString().split('T')[0] + '.xlsx';
             document.body.appendChild(a);
             a.click();
-            
-            // Cleanup
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+
         } catch (error) {
             console.error('Download failed:', error);
-            // Replace showErrorToast with a simple alert or implement a toast function
-            alert(`Download failed: ${error.message}`);
+
+            const errorDiv = document.createElement('div');
+            errorDiv.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px;
+                    background: #d32f2f;
+                    color: white;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    max-width: 400px;
+                ">
+                    <strong>Download Failed</strong>
+                    <div style="margin-top: 5px;">${error.message}</div>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+
         } finally {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;

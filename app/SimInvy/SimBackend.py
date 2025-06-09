@@ -337,40 +337,48 @@ def download_template():
 @jwt_required()
 def download_excel():
     try:
-        # Get all SIMs
         sims = list(collection.find({}))
-        
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
-        # Convert ObjectId and handle datetime fields
-        for sim in sims:
-            sim['_id'] = str(sim['_id'])
-            # Convert datetime fields to naive datetimes (without timezone)
-            for field in ['DateIn', 'DateOut', 'statusDate', 'reactivationDate', 'lastEditedAt']:
-                if field in sim and sim[field]:
-                    if isinstance(sim[field], datetime):
-                        sim[field] = sim[field].replace(tzinfo=None)
-                    elif isinstance(sim[field], str):
-                        try:
-                            dt = datetime.strptime(sim[field], '%Y-%m-%d')
-                            sim[field] = dt.strftime('%Y-%m-%d')  # Format as string without time
-                        except ValueError:
-                            pass
+        # Map sim_number to IMEI from vehicle_inventory
+        vehicle_collection = db['vehicle_inventory']
+        vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+        sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
 
-        # Create DataFrame
-        df = pd.DataFrame(sims)
-        
-        # Remove MongoDB-specific fields
-        df = df.drop('_id', axis=1, errors='ignore')
-        
-        # Create Excel file
+        # Define the exact columns to export (in order)
+        export_columns = [
+            'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
+            'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
+            'Vendor', 'lastEditedBy'
+        ]
+
+        processed_data = []
+        for sim in sims:
+            sim_number = sim.get('SimNumber', '')
+            row = {
+                'MobileNumber': sim.get('MobileNumber', ''),
+                'SimNumber': sim_number,
+                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+                'status': sim.get('status', 'Available'),
+                'isActive': 'Active' if sim.get('isActive', True) else 'Inactive',
+                'statusDate': str(sim.get('statusDate', '')).split('T')[0] if sim.get('statusDate') else '',
+                'reactivationDate': str(sim.get('reactivationDate', '')).split('T')[0] if sim.get('reactivationDate') else '',
+                'DateIn': str(sim.get('DateIn', '')).split('T')[0] if sim.get('DateIn') else '',
+                'DateOut': str(sim.get('DateOut', '')).split('T')[0] if sim.get('DateOut') else '',
+                'Vendor': sim.get('Vendor', ''),
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+            }
+            processed_data.append(row)
+
+        # Create DataFrame with only export columns
+        df = pd.DataFrame(processed_data, columns=export_columns)
+
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False)
-        
+        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+            df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+
         output.seek(0)
-        
         return send_file(
             output,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -379,5 +387,50 @@ def download_excel():
         )
         
     except Exception as e:
-        print(f"Error generating Excel: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "error": "Failed to generate Excel file",
+            "details": str(e)
+        }), 500
+
+@sim_bp.route('/download_excel_filtered', methods=['POST'])
+@jwt_required()
+def download_excel_filtered():
+    try:
+        data = request.get_json()
+        sims = data.get("sims", [])
+
+        if not sims:
+            return jsonify({"error": "No SIM data received"}), 400
+
+        # Ensure correct order and column names
+        columns = [
+            'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
+            'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
+            'Vendor', 'lastEditedBy'
+        ]
+
+        # Normalize and clean values
+        cleaned = []
+        for sim in sims:
+            cleaned.append({col: str(sim.get(col, '')).strip() for col in columns})
+
+        df = pd.DataFrame(cleaned, columns=columns)
+
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+            df.to_excel(writer, index=False, sheet_name="Filtered SIMs")
+
+        output.seek(0)
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='Filtered_SIMs.xlsx'
+        )
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Export failed", "details": str(e)}), 500
