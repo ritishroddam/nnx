@@ -372,7 +372,13 @@ def download_excel():
             processed_data.append(clean_sim)
 
 
-        df = pd.DataFrame(processed_data)
+        # Force all values to strings to avoid Excel datetime/tz issues
+        stringified_data = []
+        for row in processed_data:
+            stringified_data.append({k: str(v) if v is not None else '' for k, v in row.items()})
+        
+        df = pd.DataFrame(stringified_data)
+
         df = df.drop('_id', axis=1, errors='ignore')
 
         output = BytesIO()
