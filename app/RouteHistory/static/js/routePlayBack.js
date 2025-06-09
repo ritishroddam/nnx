@@ -788,7 +788,11 @@ function updateCarPosition(index) {
     layers: [deckLayers[0], iconLayer],
   });
 
-  map.panTo({ lat: point[1], lng: point[0] });
+  const carLatLng = new google.maps.LatLng(point[1], point[0]);
+  const bounds = map.getBounds();
+  if (bounds && !bounds.contains(carLatLng)) {
+    map.panTo(carLatLng);
+  }
   sliderTimeDisplay.textContent = pathCoordinates[index].time;
 }
 
@@ -850,7 +854,10 @@ function moveCar() {
           layers: [deckLayers[0], iconLayer],
         });
 
-        map.panTo({ lat, lng });
+        const bounds = map.getBounds();
+        if (bounds && !bounds.contains({ lat, lng })) {
+          map.panTo({ lat, lng });
+        }
         stepIndex++;
         animationInterval = setTimeout(animateStep, stepDuration);
       } else {
