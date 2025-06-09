@@ -329,7 +329,6 @@ function setupDownloadButton() {
     });
 }
 
-
 function filterTable(searchTerm) {
     const tableBody = document.getElementById('simTable');
     
