@@ -354,14 +354,23 @@ def download_excel():
                     if value is None:
                         clean_sim[key] = ''
                     elif isinstance(value, datetime):
-                        clean_sim[key] = value.replace(tzinfo=None).strftime('%Y-%m-%d')
+                        # Convert to timezone-naive datetime
+                        if value.tzinfo is not None:
+                            value = value.astimezone(tz=None).replace(tzinfo=None)
+                        clean_sim[key] = value.strftime('%Y-%m-%d')
                     elif isinstance(value, str):
-                        clean_sim[key] = value.split('T')[0]
+                        try:
+                            # Try parsing ISO format with timezone and stripping it
+                            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                            clean_sim[key] = parsed.astimezone(tz=None).replace(tzinfo=None).strftime('%Y-%m-%d')
+                        except:
+                            clean_sim[key] = value.split("T")[0]  # fallback
                     else:
                         clean_sim[key] = str(value)
                 else:
                     clean_sim[key] = value
             processed_data.append(clean_sim)
+
 
         df = pd.DataFrame(processed_data)
         df = df.drop('_id', axis=1, errors='ignore')
