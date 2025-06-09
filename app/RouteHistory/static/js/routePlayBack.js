@@ -973,10 +973,8 @@ function calculateBearing(start, end) {
   const endLatLng = new google.maps.LatLng(end.lat, end.lng);
 
   let bearing = google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
-  if (bearing < 0) {
-    bearing += 360;
-  }
-  return (bearing);
+
+  return (bearing + 360) % 360;
 }
 
 function startCarAnimation() {
