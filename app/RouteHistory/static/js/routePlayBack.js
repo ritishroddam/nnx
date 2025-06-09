@@ -563,7 +563,7 @@ async function plotPathOnMap(pathCoordinates) {
 
   // Fit map to bounds
   const bounds = new google.maps.LatLngBounds();
-  coords.forEach(([lng, lat]) =>
+  coords.forEach(({ lat, lng }) =>
     bounds.extend(new google.maps.LatLng(lat, lng))
   );
   map.fitBounds(bounds);
