@@ -393,3 +393,44 @@ def download_excel():
             "error": "Failed to generate Excel file",
             "details": str(e)
         }), 500
+
+@sim_bp.route('/download_excel_filtered', methods=['POST'])
+@jwt_required()
+def download_excel_filtered():
+    try:
+        data = request.get_json()
+        sims = data.get("sims", [])
+
+        if not sims:
+            return jsonify({"error": "No SIM data received"}), 400
+
+        # Ensure correct order and column names
+        columns = [
+            'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
+            'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
+            'Vendor', 'lastEditedBy'
+        ]
+
+        # Normalize and clean values
+        cleaned = []
+        for sim in sims:
+            cleaned.append({col: str(sim.get(col, '')).strip() for col in columns})
+
+        df = pd.DataFrame(cleaned, columns=columns)
+
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+            df.to_excel(writer, index=False, sheet_name="Filtered SIMs")
+
+        output.seek(0)
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='Filtered_SIMs.xlsx'
+        )
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Export failed", "details": str(e)}), 500
