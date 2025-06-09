@@ -558,7 +558,7 @@ async function plotPathOnMap(pathCoordinates) {
   if (endMarker) endMarker.map = null;
   if (carMarker) carMarker.map = null; // Clear the previous car marker
 
-  coords = pathCoordinates.map((item) => [item.lng, item.lat]);
+  coords = pathCoordinates.map((item) => ({ lat: item.lat, lng: item.lng }));
   if (coords.length === 0) return;
 
   // Fit map to bounds
@@ -602,7 +602,7 @@ async function plotPathOnMap(pathCoordinates) {
   carContent.style.position = "absolute";
   carContent.alt = "Car";
   carContent.style.transform = `rotate(${pathCoordinates[0].course || 0}deg)`;
-  
+
   carMarker = new google.maps.marker.AdvancedMarkerElement({
     position: { lat: coords[0][1], lng: coords[0][0] },
     map: map,
@@ -801,7 +801,10 @@ function moveCar() {
 
         // Move and rotate the car marker
         if (carMarker) {
-          carMarker.position = { lat, lng };
+          const latitude = start.lat + (end.lat - start.lat) * (stepIndex / steps);
+          const longitude = start.lng + (end.lng - start.lng) * (stepIndex / steps);
+
+          carMarker.position = { latitude, longitude };
           if (carMarker.content) {
             carMarker.content.style.transform = `rotate(${stepBearing}deg)`;
           }
