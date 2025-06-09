@@ -721,8 +721,7 @@ async function plotPathOnMap(pathCoordinates) {
     arrowContent.style.borderRight = "5px solid transparent";
     arrowContent.style.position = "absolute";
     arrowContent.style.transform = `rotate(${calculateBearing(
-      { lat: nextCoord[1], lng: nextCoord[0] },
-      { lat: coord[1], lng: coord[0] }
+      nextCoord,coord
     )}deg)`;
 
     const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -756,13 +755,11 @@ async function plotPathOnMap(pathCoordinates) {
 function updateCarPosition(index) {
   if (!deckInitialized || !coords.length) return;
   const point = coords[index];
+
   const bearing =
-    index > 0
-      ? calculateBearing(
-          { lat: coords[index - 1][1], lng: coords[index - 1][0] },
-          { lat: point[1], lng: point[0] }
-        )
-      : 0;
+    calculateBearing(
+      coords[Math.max(0, index - 1)], point
+    );
 
   // Update IconLayer data for the car
   const iconLayer = new deck.IconLayer({
@@ -812,10 +809,7 @@ function moveCar() {
     let stepIndex = 0;
     const latDiff = (end[1] - start[1]) / steps;
     const lngDiff = (end[0] - start[0]) / steps;
-    const bearing = calculateBearing(
-      { lat: start[1], lng: start[0] },
-      { lat: end[1], lng: end[0] }
-    );
+    const bearing = calculateBearing(start, end);
 
     function animateStep() {
       if (stepIndex < steps) {
