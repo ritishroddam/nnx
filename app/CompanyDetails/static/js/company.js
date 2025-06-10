@@ -115,8 +115,7 @@ function saveCustomer(customerId) {
     .then((data) => {
       if (data.success) {
         displayFlashMessage(data.message || "Customer details updated successfully.","success");
-        setTimeout(() => {}, 5000);
-        location.reload();
+        setTimeout(() => {location.reload();}, 5000);
       } else {
         displayFlashMessage(data.message || "Failed to save changes.");
       }
