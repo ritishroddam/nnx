@@ -67,8 +67,16 @@ tr:hover {
   background-color: #0056b3;
 }
 
+#manualEntryBtn:hover{
+  background-color: #2f7a00;
+}
+
 .upload{
   background-color: #38b000;
+}
+
+.btn.upload:hover {
+  background-color: #2f7a00;
 }
 
 .hidden {
