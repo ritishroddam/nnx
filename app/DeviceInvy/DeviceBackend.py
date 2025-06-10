@@ -119,12 +119,46 @@ def manual_entry():
     flash("Device added successfully!", "success")
     return redirect(url_for('DeviceInvy.page'))
 
+# @device_bp.route('/download_template')
+# @jwt_required()
+# def download_template():
+#     base_dir = os.path.dirname(os.path.abspath(__file__))
+#     path = os.path.join(base_dir, 'templates', 'device_inventory_template.xlsx')
+#     return send_file(path, as_attachment=True)
+
 @device_bp.route('/download_template')
 @jwt_required()
 def download_template():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(base_dir, 'templates', 'device_inventory_template.xlsx')
-    return send_file(path, as_attachment=True)
+    column_headers = [
+        'IMEI',
+        'GL Number',
+        'Assigned Vehicle',
+        'Assigned Company',
+        'Device Model',
+        'Device Make',
+        'Date In',
+        'Warranty',
+        'Sent By',
+        'Outward Date',
+        'Package',
+        'Tenure',
+        'Status',
+        'Actions'
+    ]
+
+    # Create an empty DataFrame with just headers
+    df = pd.DataFrame(columns=column_headers)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Template")
+
+    output.seek(0)
+
+    return Response(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment;filename=Device_Inventory_Template.xlsx"}
+    )
 
 @device_bp.route('/upload_file', methods=['POST'])
 @jwt_required()
