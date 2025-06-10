@@ -269,8 +269,8 @@ function setupDownloadButton() {
             const response = await fetch("/simInvy/download_excel_filtered", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('access_token')}`
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
                 },
                 body: JSON.stringify({ sims: simsToExport })
             });
