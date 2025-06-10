@@ -558,12 +558,12 @@ async function plotPathOnMap(pathCoordinates) {
   if (endMarker) endMarker.map = null;
   if (carMarker) carMarker.map = null; // Clear the previous car marker
 
-  coords = pathCoordinates.map((item) => [item.lng, item.lat]);
+  coords = pathCoordinates.map((item) => ({ lat: item.lat, lng: item.lng }));
   if (coords.length === 0) return;
 
   // Fit map to bounds
   const bounds = new google.maps.LatLngBounds();
-  coords.forEach(([lng, lat]) =>
+  coords.forEach(({ lat, lng }) =>
     bounds.extend(new google.maps.LatLng(lat, lng))
   );
   map.fitBounds(bounds);
@@ -574,49 +574,44 @@ async function plotPathOnMap(pathCoordinates) {
   timelineSlider.value = 0;
   sliderTimeDisplay.textContent = pathCoordinates[0].time;
 
-  // --- deck.gl PathLayer and IconLayer ---
+  const deckCoords = coords.map(({ lat, lng }) => [lng, lat]);
+
   const pathLayer = new deck.PathLayer({
     id: "route-path",
-    data: [{ path: coords }],
+    data: [{ path: deckCoords }],
     getPath: (d) => d.path,
     getWidth: 6,
     getColor: [80, 80, 80, 230],
     widthMinPixels: 3,
     widthMaxPixels: 8,
-    rounded: true,
-    pickable: false,
-  });
-
-  // Car icon at the first point
-  const iconLayer = new deck.IconLayer({
-    id: "car-icon",
-    data: [
-      {
-        position: coords[0],
-        size: 32,
-        icon: "car",
-        angle: pathCoordinates[0].course,
-      },
-    ],
-    getIcon: (d) => "car",
-    getPosition: (d) => d.position,
-    getSize: (d) => d.size,
-    getAngle: (d) => d.angle,
-    iconAtlas: carIconUrl,
-    iconMapping: {
-      car: { x: 0, y: 0, width: 87, height: 155, anchorY: 155, mask: false },
-    },
-    sizeScale: 1,
+    jointRounded: true,
+    capRounded: true,
     pickable: false,
   });
 
   deckOverlay = new deck.GoogleMapsOverlay({
-    layers: [pathLayer, iconLayer],
+    layers: [pathLayer],
   });
   deckOverlay.setMap(map);
 
-  deckLayers = [pathLayer, iconLayer];
+  deckLayers = [pathLayer];
   deckInitialized = true;
+
+  const carContent = document.createElement("img");
+  carContent.src = "/static/images/car_green.png";
+  carContent.style.width = "18px";
+  carContent.style.height = "32px";
+  carContent.style.position = "absolute";
+  carContent.alt = "Car";
+  carContent.style.transform = `rotate(${pathCoordinates[0].course || 0}deg)`;
+
+  carMarker = new google.maps.marker.AdvancedMarkerElement({
+    position: coords[0], // Use the object directly
+    map: map,
+    title: "Vehicle",
+    content: carContent,
+  });
+  window.__allMapMarkers.push(carMarker);
 
   // --- InfoWindows and Markers for Start/End/Intermediate Points ---
   const startContent = document.createElement("div");
@@ -635,7 +630,7 @@ async function plotPathOnMap(pathCoordinates) {
 
   // Markers for start and end points using AdvancedMarkerElement
   startMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: { lat: coords[0][1], lng: coords[0][0] },
+    position: coords[0], // Use the object directly
     map: map,
     title: "Start",
     content: startContent,
@@ -666,10 +661,7 @@ async function plotPathOnMap(pathCoordinates) {
   });
 
   endMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: {
-      lat: coords[coords.length - 1][1],
-      lng: coords[coords.length - 1][0],
-    },
+    position: coords[coords.length - 1], // Use the object directly
     map: map,
     title: "End",
     content: endContent,
@@ -720,12 +712,12 @@ async function plotPathOnMap(pathCoordinates) {
     arrowContent.style.borderLeft = "5px solid transparent";
     arrowContent.style.borderRight = "5px solid transparent";
     arrowContent.style.position = "absolute";
-    arrowContent.style.transform = `rotate(${calculateBearing(
+    arrowContent.style.transform = `rotate(${calculateBearingGoogle(
       nextCoord,coord
     )}deg)`;
 
     const marker = new google.maps.marker.AdvancedMarkerElement({
-      position: { lat: coord[1], lng: coord[0] },
+      position: coord, // Use the object directly
       map: map,
       title: "Arrow",
       content: arrowContent,
@@ -753,43 +745,22 @@ async function plotPathOnMap(pathCoordinates) {
 }
 
 function updateCarPosition(index) {
-  if (!deckInitialized || !coords.length) return;
+  if (!coords.length || !carMarker) return;
   const point = coords[index];
 
+  // Calculate bearing for rotation
   const prev = coords[Math.max(0, index - 1)];
-  const bearing = (calculateBearing(
-    { lat: prev[1], lng: prev[0] },
-    { lat: point[1], lng: point[0] }
-  )) ;
+  const bearing = calculateBearing(
+    prev,
+    point
+  );
 
-  // Update IconLayer data for the car
-  const iconLayer = new deck.IconLayer({
-    id: "car-icon",
-    data: [
-      {
-        position: point,
-        icon: "car",
-        size: 48,
-        angle: bearing,
-      },
-    ],
-    getIcon: (d) => "car",
-    getPosition: (d) => d.position,
-    getSize: (d) => d.size,
-    getAngle: (d) => d.angle,
-    iconAtlas: "/static/images/car_green.png",
-    iconMapping: {
-      car: { x: 0, y: 0, width: 48, height: 48, mask: false },
-    },
-    sizeScale: 1,
-    pickable: false,
-  });
+  carMarker.position = point;
+  if (carMarker.content) {
+    carMarker.content.style.transform = `rotate(${bearing}deg)`;
+  }
 
-  deckOverlay.setProps({
-    layers: [deckLayers[0], iconLayer],
-  });
-
-  const carLatLng = new google.maps.LatLng(point[1], point[0]);
+  const carLatLng = new google.maps.LatLng(point.lat, point.lng);
   const bounds = map.getBounds();
   if (bounds && !bounds.contains(carLatLng)) {
     map.panTo(carLatLng);
@@ -807,64 +778,36 @@ function moveCar() {
     const stepDuration = 20 / speedMultiplier;
     const steps = Math.floor(
       google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(start[1], start[0]),
-        new google.maps.LatLng(end[1], end[0])
+        new google.maps.LatLng(start.lat, start.lng),
+        new google.maps.LatLng(end.lat, end.lng)
       ) / 10
     );
     let stepIndex = 0;
-    const latDiff = (end[1] - start[1]) / steps;
-    const lngDiff = (end[0] - start[0]) / steps;
-    const bearing = (calculateBearing(start, end)) ;
+    const latDiff = (end.lat - start.lat) / steps;
+    const lngDiff = (end.lng - start.lng) / steps;
 
     function animateStep() {
       if (stepIndex < steps) {
-        const lat = start[1] + latDiff * stepIndex;
-        const lng = start[0] + lngDiff * stepIndex;
-        const nextLat = start[1] + latDiff * (stepIndex + 1);
-        const nextLng = start[0] + lngDiff * (stepIndex + 1);
+        const lat = start.lat + latDiff * stepIndex;
+        const lng = start.lng + lngDiff * stepIndex;
+        const nextLat = start.lat + latDiff * (stepIndex + 1);
+        const nextLng = start.lng + lngDiff * (stepIndex + 1);
 
         const isLastStep = stepIndex >= steps - 1;
         const stepBearing = isLastStep
-          ? calculateBearing({ lat, lng }, { lat: end[1], lng: end[0] })
+          ? calculateBearing({ lat, lng }, { lat: end.lat, lng: end.lng })
           : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
 
-
-        // Update IconLayer for the car
-        const iconLayer = new deck.IconLayer({
-          id: "car-icon",
-          data: [
-            {
-              position: [lng, lat],
-              icon: "car",
-              size: 32,
-              angle: stepBearing ,
-            },
-          ],
-          getIcon: (d) => "car",
-          getPosition: (d) => d.position,
-          getSize: (d) => d.size,
-          getAngle: (d) => d.angle,
-          iconAtlas: "/static/images/car_green.png",
-          iconMapping: {
-            car: {
-              x: 0,
-              y: 0,
-              width: 87,
-              height: 155,
-              anchorY: 155,
-              mask: false,
-            },
-          },
-          sizeScale: 1,
-          pickable: false,
-        });
-
-        deckOverlay.setProps({
-          layers: [deckLayers[0], iconLayer],
-        });
+        // Move and rotate the car marker
+        if (carMarker) {
+          carMarker.position = { lat, lng };
+          if (carMarker.content) {
+            carMarker.content.style.transform = `rotate(${stepBearing}deg)`;
+          }
+        }
 
         const bounds = map.getBounds();
-        if (bounds && !bounds.contains({ lat, lng })) {
+        if (bounds && !bounds.contains(new google.maps.LatLng(lat, lng))) {
           map.panTo({ lat, lng });
         }
         stepIndex++;
@@ -961,11 +904,20 @@ function fetchAndDisplayAlerts(imei) {
     });
 }
 
-function calculateBearing(start, end) {
+function calculateBearingGoogle(start, end) {
   const startLatLng = new google.maps.LatLng(start.lat, start.lng);
   const endLatLng = new google.maps.LatLng(end.lat, end.lng);
 
   return google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
+}
+
+function calculateBearing(start, end) {
+  const startLatLng = new google.maps.LatLng(start.lat, start.lng);
+  const endLatLng = new google.maps.LatLng(end.lat, end.lng);
+
+  let bearing = google.maps.geometry.spherical.computeHeading(startLatLng, endLatLng);
+
+  return (bearing + 360) % 360;
 }
 
 function startCarAnimation() {
