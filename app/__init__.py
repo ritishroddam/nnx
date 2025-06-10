@@ -335,6 +335,7 @@ def create_app(config_name='default'):
         
         if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None]:
             try:
+                verify_jwt_in_request(optional=True)
                 claims = get_jwt()
                 user_id = claims.get('user_id')
                 user_config = db['userConfig'].find_one({"userID": ObjectId(user_id)})
