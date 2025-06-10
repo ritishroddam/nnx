@@ -62,9 +62,15 @@ tr:hover {
   cursor: pointer;
   text-decoration: none;
 }
+
 .btn:hover {
   background-color: #0056b3;
 }
+
+.upload{
+  background-color: #38b000;
+}
+
 .hidden {
   display: none;
 }
