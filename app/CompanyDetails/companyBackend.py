@@ -152,9 +152,11 @@ def edit_customer(customer_id):
             {'$set': updated_data}
         )
         if result.modified_count > 0:
-            return jsonify({'success': True, 'message': 'Customer updated successfully!'})
+            flash('Customer details updated successfully!', 'success')
+            return redirect(url_for('CompanyDetails.page'))
         else:
-            return jsonify({'success': False, 'message': 'No changes made.'})
+            flash('No changes made or customer not found.', 'warning')
+            return redirect(url_for('CompanyDetails.page'))
     except Exception as e:
         flash("Error editing customer", 'danger')
         print(f"Error editing customer: {e}")
