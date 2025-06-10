@@ -164,7 +164,7 @@ Company Details
         <td>{{ customer['Number of Drivers'] }}</td>
         <td>{{ customer['Payment Status'] }}</td>
         <td>{{ customer['Support Contact'] }}</td>
-        <td>{{ customer['Remarks'] }}</td>
+        <td>{{ customer['Remarks'] || ""}}</td>
         <td>
           <button class="icon-btn edit-icon" onclick="editCustomer('{{ customer._id }}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteCustomer('{{ customer._id }}')">🗑️</button>
