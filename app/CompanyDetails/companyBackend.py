@@ -1,25 +1,27 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, Blueprint
-from pymongo import MongoClient
 from bson.objectid import ObjectId
 import pandas as pd
 import os
-import sys
+import gridfs
 import re
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 
-
 company_bp = Blueprint('CompanyDetails', __name__, static_folder='static', template_folder='templates')
 
 customers_collection = db['customers_list']
+
+fs = gridfs.GridFS(db)
 
 @company_bp.route('/page')
 @jwt_required()
 def page():
     customers = list(customers_collection.find())
     unique_companies = customers_collection.distinct('Company Name')
+    for company in customers:
+        company.pop('companyLogo', None)
     return render_template('company.html', customers=customers, unique_companies=unique_companies)
     # return render_template('company.html', customers=customers)
 
@@ -27,6 +29,19 @@ def page():
 @company_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
 def manual_entry():
+
+    companyLogo = request.files.get('CompanyLogo')
+    companyName = request.form.get('CompanyName')
+    
+    if companyLogo:
+        logo_id = fs.put(
+            companyLogo.stream,
+            filename=f"{companyName}Logo",
+            content_type=companyLogo.content_type
+        )
+    else:
+        logo_id = ObjectId("683970cc1ae3f41668357362")
+
     customer = {
         'Company Name': request.form.get('CompanyName'),
         'Contact Person': request.form.get('ContactPerson'),
@@ -39,6 +54,9 @@ def manual_entry():
         'Payment Status': request.form.get('PaymentStatus'),
         'Support Contact': request.form.get('SupportContact'),
         'Remarks': request.form.get('Remarks'),
+        'lat': request.form.get('lat'),
+        'lng': request.form.get('lng'),
+        "companyLogo": logo_id,
     }
 
     customers_collection.insert_one(customer)
@@ -60,10 +78,19 @@ def upload_customers():
 
     try:
         df = pd.read_excel(file)
+        
+        logo_id = ObjectId("683970cc1ae3f41668357362")
 
-        # Assign unique Company IDs for each record
+        if 'lat' in df.columns:
+            df['lat'] = df['lat'].astype(str)
+        if 'lng' in df.columns:
+            df['lng'] = df['lng'].astype(str)
+        
         records = df.to_dict(orient="records")
 
+        for record in records:
+            record['companyLogo'] = logo_id
+        
         customers_collection.insert_many(records)
         flash('Customers uploaded successfully!', 'success')
     except Exception as e:
@@ -88,8 +115,8 @@ def edit_customer(customer_id):
         try:
             object_id = ObjectId(customer_id)
         except Exception:
-            print("ERROR: Invalid device ID")
-            return jsonify({'success': False, 'message': 'Invalid device ID'}), 400
+            flash('Invalid customer ID', 'danger')
+            return redirect(url_for('CompanyDetails.page'))
 
         updated_data = request.json
 
@@ -98,19 +125,26 @@ def edit_customer(customer_id):
             'Company Name', 'Contact Person', 'Email Address', 
             'Phone Number', 'Company Address'
         ]
+        index = 0
         for field in required_fields:
             if not updated_data.get(field):
-                return jsonify({'success': False, 'message': f'{field} is required.'}), 400
-
+                index += 1
+                flash(f'{field} is required.', 'danger')
+        
+        if index > 0:    
+            return redirect(url_for('CompanyDetails.page'))
+            
         # Validation: Email format
         email = updated_data.get('Email Address')
         if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-            return jsonify({'success': False, 'message': 'Invalid Email Address format.'}), 400
+            flash('Invalid Email Address format.', 'danger')
+            return redirect(url_for('CompanyDetails.page'))
 
         # Validation: Phone number length and numeric
         phone = updated_data.get('Phone Number')
         if not phone.isdigit() or len(phone) != 10:
-            return jsonify({'success': False, 'message': 'Phone Number must be 10 digits.'}), 400
+            flash('Phone Number must be 10 digits.', 'danger')
+            return redirect(url_for('CompanyDetails.page'))
 
         # Update the customer in the database
         result = customers_collection.update_one(
@@ -122,8 +156,9 @@ def edit_customer(customer_id):
         else:
             return jsonify({'success': False, 'message': 'No changes made.'})
     except Exception as e:
+        flash("Error editing customer", 'danger')
         print(f"Error editing customer: {e}")
-        return jsonify({'success': False, 'message': 'Error editing customer.'}), 500
+        return redirect(url_for('CompanyDetails.page'))
 
 # Route to delete a customer
 @company_bp.route('/delete_customer/<customer_id>', methods=['DELETE'])

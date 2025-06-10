@@ -35,7 +35,7 @@ Company Details
   <div class="company-modal-content">
     <span class="company-close-btn" id="closeCompanyModal">&times;</span>
     <!-- Only the form part inside your modal -->
-    <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post">
+    <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-container">
         <div class="form-group">
@@ -62,6 +62,18 @@ Company Details
           <label for="CompanyAddress">Company Address</label>
           <input type="text" name="CompanyAddress" id="CompanyAddress" required />
           <div id="companyAddressError" class="error hidden">Company Address is required.</div>
+        </div>
+        <div class="form-group">
+          <label for="lat">Latitude Of Company</label>
+          <input type="text" name="lat" id="lat"/>
+        </div>
+        <div class="form-group">
+          <label for="lng">Longitude Of Company</label>
+          <input type="text" name="lng" id="lng"/>
+        </div>
+        <div class="form-group">
+          <label for="CompanyLogo">Company Logo (JPG/PNG only)</label>
+          <input type="file" name="CompanyLogo" id="CompanyLogo" accept=".jpg,.jpeg,.png,image/jpeg,image/png" />
         </div>
         <div class="form-group">
           <label for="NumberOfGPSDevices">Number of GPS Devices</label>
@@ -126,6 +138,8 @@ Company Details
         <th>Email Address</th>
         <th>Phone Number</th>
         <th>Company Address</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
         <th>Number of GPS Devices</th>
         <th>Number of Vehicles</th>
         <th>Number of Drivers</th>
@@ -143,6 +157,8 @@ Company Details
         <td>{{ customer['Email Address'] }}</td>
         <td>{{ customer['Phone Number'] }}</td>
         <td>{{ customer['Company Address'] }}</td>
+        <td>{{ customer['lat'] }}</td>
+        <td>{{ customer['lng'] }}</td>
         <td>{{ customer['Number of GPS Devices'] }}</td>
         <td>{{ customer['Number of Vehicles'] }}</td>
         <td>{{ customer['Number of Drivers'] }}</td>

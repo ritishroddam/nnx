@@ -52,12 +52,14 @@ function editCustomer(customerId) {
   const emailAddress = row.cells[2].innerText;
   const phoneNumber = row.cells[3].innerText;
   const companyAddress = row.cells[4].innerText;
-  const gpsDevices = row.cells[5].innerText;
-  const vehicles = row.cells[6].innerText;
-  const drivers = row.cells[7].innerText;
-  const paymentStatus = row.cells[8].innerText;
-  const supportContact = row.cells[9].innerText;
-  const remarks = row.cells[10].innerText;
+  const lat = row.cells[5].innerText;
+  const lng = row.cells[6].innerText;
+  const gpsDevices = row.cells[7].innerText;
+  const vehicles = row.cells[8].innerText;
+  const drivers = row.cells[9].innerText;
+  const paymentStatus = row.cells[10].innerText;
+  const supportContact = row.cells[11].innerText;
+  const remarks = row.cells[12].innerText;
 
   // row.cells[0].innerHTML = `<input type="text" value="${companyID}" />`;
   row.cells[0].innerHTML = `<input type="text" value="${companyName}" />`;
@@ -65,16 +67,18 @@ function editCustomer(customerId) {
   row.cells[2].innerHTML = `<input type="email" value="${emailAddress}" />`;
   row.cells[3].innerHTML = `<input type="text" value="${phoneNumber}" />`;
   row.cells[4].innerHTML = `<input type="text" value="${companyAddress}" />`;
-  row.cells[5].innerHTML = `<input type="number" value="${gpsDevices}" />`;
-  row.cells[6].innerHTML = `<input type="number" value="${vehicles}" />`;
-  row.cells[7].innerHTML = `<input type="number" value="${drivers}" />`;
-  row.cells[8].innerHTML = `<input type="text" value="${paymentStatus}" />`;
-  row.cells[9].innerHTML = `<input type="text" value="${supportContact}" />`;
-  row.cells[10].innerHTML = `<input type="text" value="${remarks}" />`;
+  row.cells[5].innerHTML = `<input type="number" step="any" value="${lat}" placeholder="Latitude" />`;
+  row.cells[6].innerHTML = `<input type="number" step="any" value="${lng}" placeholder="Longitude" />`;
+  row.cells[7].innerHTML = `<input type="number" value="${gpsDevices}" />`;
+  row.cells[8].innerHTML = `<input type="number" value="${vehicles}" />`;
+  row.cells[9].innerHTML = `<input type="number" value="${drivers}" />`;
+  row.cells[10].innerHTML = `<input type="text" value="${paymentStatus}" />`;
+  row.cells[11].innerHTML = `<input type="text" value="${supportContact}" />`;
+  row.cells[12].innerHTML = `<input type="text" value="${remarks}" />`;
 
   // Keep Company ID as non-editable text
 
-  row.cells[11].innerHTML = `
+  row.cells[13].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveCustomer('${customerId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit()">❌</button>
   `;
@@ -84,12 +88,13 @@ function saveCustomer(customerId) {
   const row = document.querySelector(`tr[data-id='${customerId}']`);
 
   const updatedData = {
-    // CompanyID: row.cells[0].querySelector("input").value.trim(),
     CompanyName: row.cells[0].querySelector("input").value.trim(),
     ContactPerson: row.cells[1].querySelector("input").value.trim(),
     EmailAddress: row.cells[2].querySelector("input").value.trim(),
     PhoneNumber: row.cells[3].querySelector("input").value.trim(),
     CompanyAddress: row.cells[4].querySelector("input").value.trim(),
+    lat: String(row.cells[5].querySelector("input").value.trim()),
+    lng: String(row.cells[6].querySelector("input").value.trim()),
     NumberOfGPSDevices: row.cells[5].querySelector("input").value.trim(),
     NumberOfVehicles: row.cells[6].querySelector("input").value.trim(),
     NumberOfDrivers: row.cells[7].querySelector("input").value.trim(),
@@ -111,12 +116,12 @@ function saveCustomer(customerId) {
       if (data.success) {
         location.reload();
       } else {
-        alert("Failed to save the changes.");
+        displayFlashMessage("Future dates are not allowed.");
       }
     })
     .catch((error) => {
       console.error("Error updating customer:", error);
-      alert("An error occurred. Please try again.");
+      displayFlashMessage("An error occurred while updating the customer.");
     });
 }
 
