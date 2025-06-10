@@ -114,7 +114,8 @@ function saveCustomer(customerId) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        displayFlashMessage(data.message || "Customer details updated successfully.");
+        displayFlashMessage(data.message || "Customer details updated successfully.","success");
+        setTimeout(() => {}, 5000);
         location.reload();
           
       } else {
