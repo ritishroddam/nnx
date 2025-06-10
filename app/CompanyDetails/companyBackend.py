@@ -115,8 +115,8 @@ def edit_customer(customer_id):
         try:
             object_id = ObjectId(customer_id)
         except Exception:
-            flash('Invalid customer ID', 'danger')
-            return redirect(url_for('CompanyDetails.page'))
+            print("ERROR: Invalid device ID")
+            return jsonify({'success': False, 'message': 'Invalid device ID'}), 400
 
         updated_data = request.json
 
@@ -125,26 +125,19 @@ def edit_customer(customer_id):
             'Company Name', 'Contact Person', 'Email Address', 
             'Phone Number', 'Company Address'
         ]
-        index = 0
         for field in required_fields:
             if not updated_data.get(field):
-                index += 1
-                flash(f'{field} is required.', 'danger')
-        
-        if index > 0:    
-            return redirect(url_for('CompanyDetails.page'))
-            
+                return jsonify({'success': False, 'message': f'{field} is required.'}), 400
+
         # Validation: Email format
         email = updated_data.get('Email Address')
         if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-            flash('Invalid Email Address format.', 'danger')
-            return redirect(url_for('CompanyDetails.page'))
+            return jsonify({'success': False, 'message': 'Invalid Email Address format.'}), 400
 
         # Validation: Phone number length and numeric
         phone = updated_data.get('Phone Number')
         if not phone.isdigit() or len(phone) != 10:
-            flash('Phone Number must be 10 digits.', 'danger')
-            return redirect(url_for('CompanyDetails.page'))
+            return jsonify({'success': False, 'message': 'Phone Number must be 10 digits.'}), 400
 
         # Update the customer in the database
         result = customers_collection.update_one(
@@ -152,15 +145,12 @@ def edit_customer(customer_id):
             {'$set': updated_data}
         )
         if result.modified_count > 0:
-            flash('Customer details updated successfully!', 'success')
-            return redirect(url_for('CompanyDetails.page'))
+            return jsonify({'success': True, 'message': 'Customer updated successfully!'})
         else:
-            flash('No changes made or customer not found.', 'warning')
-            return redirect(url_for('CompanyDetails.page'))
+            return jsonify({'success': False, 'message': 'No changes made.'})
     except Exception as e:
-        flash("Error editing customer", 'danger')
         print(f"Error editing customer: {e}")
-        return redirect(url_for('CompanyDetails.page'))
+        return jsonify({'success': False, 'message': 'Error editing customer.'}), 500
 
 # Route to delete a customer
 @company_bp.route('/delete_customer/<customer_id>', methods=['DELETE'])

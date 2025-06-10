@@ -110,23 +110,13 @@ function saveCustomer(customerId) {
       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
     },
     body: JSON.stringify(updatedData),
-    redirect: "follow"
   })
-    .then((response) => {
-      // If redirected, just reload the page
-      if (response.redirected) {
-        window.location.href = response.url;
-        return;
-      }
-      // If not redirected, try to parse JSON (for API error responses)
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
-      // Only handle JSON if not redirected
-      if (data && data.success) {
+      if (data.success) {
         location.reload();
-      } else if (data && data.message) {
-        displayFlashMessage(data.message);
+      } else {
+        displayFlashMessage("Future dates are not allowed.");
       }
     })
     .catch((error) => {
