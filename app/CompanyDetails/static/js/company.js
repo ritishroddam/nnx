@@ -95,12 +95,12 @@ function saveCustomer(customerId) {
     "Company Address": row.cells[4].querySelector("input").value.trim(),
     "lat": String(row.cells[5].querySelector("input").value.trim()),
     "lng": String(row.cells[6].querySelector("input").value.trim()),
-    "Number of GPS Devices": row.cells[5].querySelector("input").value.trim(),
-    "Number of Vehicles": row.cells[6].querySelector("input").value.trim(),
-    "Number of Drivers": row.cells[7].querySelector("input").value.trim(),
-    "Payment Status": row.cells[8].querySelector("input").value.trim(),
-    "Support Contact": row.cells[9].querySelector("input").value.trim(),
-    "Remarks": row.cells[10].querySelector("input").value.trim(),
+    "Number of GPS Devices": row.cells[7].querySelector("input").value.trim(),
+    "Number of Vehicles": row.cells[8].querySelector("input").value.trim(),
+    "Number of Drivers": row.cells[9].querySelector("input").value.trim(),
+    "Payment Status": row.cells[10].querySelector("input").value.trim(),
+    "Support Contact": row.cells[11].querySelector("input").value.trim(),
+    "Remarks": row.cells[12].querySelector("input").value.trim(),
   };
 
   fetch(`/companyDetails/edit_customer/${customerId}`, {
