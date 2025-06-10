@@ -114,14 +114,16 @@ function saveCustomer(customerId) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
+        displayFlashMessage(data.message || "Customer details updated successfully.");
         location.reload();
+          
       } else {
-        displayFlashMessage("Future dates are not allowed.");
+        displayFlashMessage(data.message || "Failed to save changes.");
       }
     })
     .catch((error) => {
+      displayFlashMessage("An error occurred while saving the changes.");
       console.error("Error updating customer:", error);
-      displayFlashMessage("An error occurred while updating the customer.");
     });
 }
 
