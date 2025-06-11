@@ -940,8 +940,17 @@ input:checked + .slider:before {
   color: #fff;
   cursor: pointer;
 }
+
+.share-popup-content button:hover {
+  background: #1b5e20;
+}
+
 .share-popup-content button#close-share-popup {
   background: #888;
+}
+
+.share-popup-content button#close-share-popup:hover {
+  background: #555;
 }
 
 #share-link-input {
