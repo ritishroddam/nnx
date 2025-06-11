@@ -463,7 +463,6 @@ input[type="date"] {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 15px;
     padding: 10px;
     background-color: #f5f5f5;
     border-radius: 5px;
