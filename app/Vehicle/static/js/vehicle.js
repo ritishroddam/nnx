@@ -864,7 +864,7 @@ function showShareLocationPopup(plate) {
   const toDate = new Date(now.getTime() + 15 * 60000);
   document.getElementById("to-datetime").value = toISOStringLocal(toDate);
 
-  document.getElementById("close-share-popup").onclick = () => popup.remove();
+  document.getElementById('closeBtn').onclick = closePopup;
 
   document.getElementById("generate-share-link").onclick = async function () {
     const from_datetime = document.getElementById("from-datetime").value;
@@ -904,6 +904,13 @@ function showShareLocationPopup(plate) {
 function closePopup() {
   document.getElementById('popup').style.display = 'none';
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const closeBtn = document.getElementById('closeBtn');
+  if (closeBtn) {
+    closeBtn.onclick = closePopup;
+  }
+});
 
 function addMarkerClickListener(marker, latLng, device, coords) {
   if (!(latLng instanceof google.maps.LatLng)) {
