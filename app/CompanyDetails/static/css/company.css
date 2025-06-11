@@ -170,14 +170,15 @@ tr:hover {
 
 .company-table thead,
 .company-table tbody {
-    display: block;
-    width: 100%;
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .company-table tbody {
-    max-height: 480px; 
-    overflow-y: auto;
-    overflow-x: hidden;
+  display: block;
+  max-height: 480px;
+  overflow-y: auto;
 }
 
 .company-table th,
