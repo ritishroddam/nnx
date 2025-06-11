@@ -260,6 +260,11 @@ def create_app(config_name='default'):
             claims = get_jwt()
             user_id = claims['user_id']
             user = User.get_user_by_id(user_id)
+            
+            user_config = db['userConfig'].find_one({"userID": ObjectId(user_id)})
+            dark_mode_value = user_config.get("darkMode") if user_config and user_config.get("darkMode") else "false"
+            alert_Sound = user_config.get("alertSound") if user_config and user_config.get("alertSound") else "true"
+            
             print(f"User ID: {user['company']}")
             if user['company'] != 'none':
                 company = User.get_company_by_company_id(user['company'])
@@ -271,7 +276,9 @@ def create_app(config_name='default'):
                 'username': str(current_user),
                 'role': str(user['role']),
                 'company_id': str(user['company']),
-                'company': str(company)
+                'company': str(company),
+                'dark_mode': dark_mode_value,
+                'alert_sound': alert_Sound,
             }
         except Exception:
             return {
@@ -279,6 +286,8 @@ def create_app(config_name='default'):
                 'role': 'N/A',
                 'company_id': 'N/A',
                 'company': 'N/A',
+                'dark_mode': 'false',
+                'alert_sound': 'true',
             }
     
     @jwt.expired_token_loader

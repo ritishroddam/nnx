@@ -18,6 +18,14 @@ const userID = document
   .getElementById("userID-data")
   .getAttribute("data-userID");
 
+const darkModeData = document
+  .getElementById("dark-mode-data")
+  .getAttribute("data-dark-mode");
+
+const alertSound = document
+  .getElementById("alert-sound-data")
+  .getAttribute("data-alert-sound");
+
 const socket = io(CONFIG.SOCKET_SERVER_URL, {
   transports: ["websocket"],
   reconnection: true,
@@ -63,13 +71,7 @@ socket.on("disconnect", () => {
 socket.on("vehicle_update", async function (data) {
   try {
     if(data.sos === "1") {
-      displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`);
-      const audio = new Audio("/static/sounds/sosNotification.wav");
-      audio.play().catch((e) => console.warn("Audio play failed:", e));
-      setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-      }, 5000);
+      displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`, "danger", "sos");
       data = null;
     }
   } catch (error) {
@@ -238,21 +240,43 @@ document.addEventListener("DOMContentLoaded", function () {
   loadNotifications();
 });
 
-function displayFlashMessage(message, category = "danger") {
-  const flashMessagesContainer = document.getElementById(
-    "flash-messages-container"
-  );
-  if (flashMessagesContainer) {
-    const flashMessage = document.createElement("div");
-    flashMessage.className = `flash-message flash-${category}`;
-    flashMessage.innerHTML = `
-      <span>${message}</span>
-      <button class="close-btn" onclick="this.parentElement.remove()">×</button>
-    `;
-    flashMessagesContainer.appendChild(flashMessage);
-
-    setTimeout(() => flashMessage.remove(), 5000);
-  } else {
+function displayFlashMessage(message, category = "danger", dismissAfter = 5000) {
+  const flashMessagesContainer = document.getElementById("flash-messages-container");
+  if (!flashMessagesContainer) {
     console.error("Flash messages container not found");
+    return;
+  }
+
+  flashMessagesContainer.setAttribute("aria-live", "polite");
+
+  const flashMessage = document.createElement("div");
+  flashMessage.className = `flash-message flash-${category}`;
+  flashMessage.innerHTML = `
+    <span>${message}</span>
+    <button class="close-btn" type="button">×</button>
+  `;
+  flashMessagesContainer.appendChild(flashMessage);
+
+  let audio;
+  let stopAudio = () => {};
+  if (dismissAfter === "sos") {
+    audio = new Audio("/static/sounds/sosNotification.wav");
+    audio.loop = true;
+    audio.play().catch((e) => console.warn("Audio play failed:", e));
+    stopAudio = () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }
+
+  const removeFlash = () => {
+    flashMessage.remove();
+    stopAudio();
+  };
+
+  flashMessage.querySelector(".close-btn").onclick = removeFlash;
+
+  if (dismissAfter !== "sos") {
+    setTimeout(removeFlash, dismissAfter);
   }
 }
