@@ -905,13 +905,6 @@ function closePopup() {
   document.getElementById('popup').style.display = 'none';
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const closeBtn = document.getElementById('closeBtn');
-  if (closeBtn) {
-    closeBtn.onclick = closePopup;
-  }
-});
-
 function addMarkerClickListener(marker, latLng, device, coords) {
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(coords.lat, coords.lon);
@@ -1841,4 +1834,9 @@ window.onload = async function () {
         searchTable();
       }
     });
+};
+
+window.closePopup = function () {
+  const popup = document.getElementById('popup');
+  if (popup) popup.style.display = 'none';
 };

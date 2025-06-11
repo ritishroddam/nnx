@@ -13,6 +13,13 @@
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="{{ url_for('Vehicle.static', filename='js/share_location.js') }}"></script>
+
+<script>
+  function closePopup() {
+    const popup = document.getElementById('popup');
+    if (popup) popup.style.display = 'none';
+  }
+</script>
 </head>
 
 <body>
