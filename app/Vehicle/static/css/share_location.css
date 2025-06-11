@@ -66,6 +66,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
+  margin-left: 240px;
 }
 
 .share-location-popup .close-btn:hover {

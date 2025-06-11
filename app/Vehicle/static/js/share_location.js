@@ -102,3 +102,8 @@ function openMap() {
     window.open(url, "_blank");
   }
 }
+
+function closePopup() {
+  const popup = document.getElementById('popup');
+  if (popup) popup.style.display = 'none';
+}

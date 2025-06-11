@@ -1812,10 +1812,6 @@ function addHoverListenersToCardsAndMarkers() {
   });
 }
 
-function closePopup() {
-  document.getElementById('popup').style.display = 'none';
-}
-
 window.filterVehicles = filterVehicles;
 
 window.onload = async function () {
