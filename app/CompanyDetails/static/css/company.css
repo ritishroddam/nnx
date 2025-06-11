@@ -134,24 +134,34 @@ tr:hover {
 }
 
 .company-table-container {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 10px;
-    position: relative;
-    overflow-x: auto;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 10px;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
 }
 
 .company-table {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 100%;
-    border-collapse: collapse;
-    color: #333;
-    table-layout: fixed;
+  min-width: 1600px;
+  width: max-content;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: #333;
+  table-layout: auto;
+}
+
+.company-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+.company-table-container::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
 }
 
 .company-table thead{
