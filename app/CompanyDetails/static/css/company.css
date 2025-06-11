@@ -252,6 +252,8 @@ tr:hover {
   padding: 10px 15px 20px 20px;
   width: 100%;
   max-width: 500px;
+  max-height: 90vh; /* Limit modal height */
+  overflow-y: auto;  /* Enable vertical scroll */
   position: relative;
   display: flex;
   flex-direction: column;
