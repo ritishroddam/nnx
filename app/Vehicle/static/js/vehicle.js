@@ -901,6 +901,10 @@ function showShareLocationPopup(plate) {
   };
 }
 
+function closePopup() {
+  document.getElementById('popup').style.display = 'none';
+}
+
 function addMarkerClickListener(marker, latLng, device, coords) {
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(coords.lat, coords.lon);

@@ -931,14 +931,17 @@ input:checked + .slider:before {
   margin-top: 6px;
 }
 .share-popup-content button {
-  margin-top: 12px;
-  padding: 6px 18px;
-  font-size: 15px;
-  border-radius: 4px;
+  background-color: crimson;
+  position: absolute;
+  top: 1vh;
+  right: 1vw;
+  font-size: 2.5vh;
+  font-weight: bold;
+  color: #888;
+  background: none;
   border: none;
-  background: #2e7d32;
-  color: #fff;
   cursor: pointer;
+  margin-left: 240px;
 }
 .share-popup-content button#close-share-popup {
   background: #888;
