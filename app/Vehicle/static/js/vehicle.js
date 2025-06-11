@@ -829,7 +829,6 @@ function showShareLocationPopup(plate) {
   popup.id = "share-location-popup";
   popup.innerHTML = `
     <div class="share-popup-content">
-    <button class="close-btn" onclick="closePopup()">x</button>
       <h3>Share Live Location</h3>
       <div>
         <label for="from-datetime">From:</label>
@@ -843,6 +842,7 @@ function showShareLocationPopup(plate) {
       <div style="margin-top:10px;">
         <input id="share-link-input" type="text" value="" readonly style="width:90%;">
       </div>
+      <button id="close-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
     </div>
   `;
   document.body.appendChild(popup);
@@ -864,7 +864,7 @@ function showShareLocationPopup(plate) {
   const toDate = new Date(now.getTime() + 15 * 60000);
   document.getElementById("to-datetime").value = toISOStringLocal(toDate);
 
-  document.getElementById('closeBtn').onclick = closePopup;
+  document.getElementById("close-share-popup").onclick = () => popup.remove();
 
   document.getElementById("generate-share-link").onclick = async function () {
     const from_datetime = document.getElementById("from-datetime").value;
@@ -899,10 +899,6 @@ function showShareLocationPopup(plate) {
       input.value = "Failed to generate link.";
     }
   };
-}
-
-function closePopup() {
-  document.getElementById('popup').style.display = 'none';
 }
 
 function addMarkerClickListener(marker, latLng, device, coords) {
@@ -1834,9 +1830,4 @@ window.onload = async function () {
         searchTable();
       }
     });
-};
-
-window.closePopup = function () {
-  const popup = document.getElementById('popup');
-  if (popup) popup.style.display = 'none';
 };
