@@ -170,7 +170,7 @@ tr:hover {
 
 .company-table thead,
 .company-table tbody {
-    display: block;
+    display: contents;
     width: 100%;
 }
 
