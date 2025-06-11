@@ -829,7 +829,7 @@ function showShareLocationPopup(plate) {
   popup.id = "share-location-popup";
   popup.innerHTML = `
     <div class="share-popup-content">
-    <button class="close-btn" onclick="closePopup()">×</button>
+    <button class="close-btn" onclick="closePopup()">x</button>
       <h3>Share Live Location</h3>
       <div>
         <label for="from-datetime">From:</label>
