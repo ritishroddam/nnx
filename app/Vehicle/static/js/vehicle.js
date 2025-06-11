@@ -829,6 +829,7 @@ function showShareLocationPopup(plate) {
   popup.id = "share-location-popup";
   popup.innerHTML = `
     <div class="share-popup-content">
+    <button class="close-btn" onclick="closePopup()">×</button>
       <h3>Share Live Location</h3>
       <div>
         <label for="from-datetime">From:</label>
@@ -842,7 +843,6 @@ function showShareLocationPopup(plate) {
       <div style="margin-top:10px;">
         <input id="share-link-input" type="text" value="" readonly style="width:90%;">
       </div>
-      <button id="close-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
     </div>
   `;
   document.body.appendChild(popup);
@@ -1810,6 +1810,10 @@ function addHoverListenersToCardsAndMarkers() {
       });
     }
   });
+}
+
+function closePopup() {
+  document.getElementById('popup').style.display = 'none';
 }
 
 window.filterVehicles = filterVehicles;
