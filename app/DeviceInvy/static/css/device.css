@@ -337,10 +337,25 @@ tr:hover {
 }
 
 /* Scrollable tbody with fixed header */
+
+.table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
 .device-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
+  min-width: 1300px;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .device-table thead,
