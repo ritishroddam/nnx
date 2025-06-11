@@ -35,7 +35,8 @@ table {
     margin-bottom: 20px;
     max-height: calc(100vh - 250px);
     position: relative;
-    width: 100%;
+    width:auto !important;
+    max-width: auto !important;
     border-collapse: collapse;
     color: #333;
 }
@@ -284,8 +285,6 @@ tr:hover {
     position: relative;
     transition: box-shadow 0.2s;
     font-family: 'Segoe UI', Arial, sans-serif;
-    margin-top: 100px;
-    margin-left: 100px;
 }
 
 @media (max-width: 600px) {
@@ -337,10 +336,26 @@ tr:hover {
 }
 
 /* Scrollable tbody with fixed header */
+
+.table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: block;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
 .device-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
+  min-width: 1600px; /* increase if needed */
+  width: max-content;
+  table-layout: auto;
 }
 
 .device-table thead,
@@ -371,6 +386,7 @@ tr:hover {
     border-bottom: 1px solid #eee;
     box-sizing: border-box;
     word-break: break-word;
+    min-width: 200px; /* Minimum width for each cell */
 }
 
 #uploadBox{

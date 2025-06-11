@@ -134,24 +134,34 @@ tr:hover {
 }
 
 .company-table-container {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 10px;
-    position: relative;
-    overflow-x: auto;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 10px;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
 }
 
 .company-table {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 100%;
-    border-collapse: collapse;
-    color: #333;
-    table-layout: fixed;
+  min-width: 1600px;
+  width: max-content;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: #333;
+  table-layout: auto;
+}
+
+.company-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+.company-table-container::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
 }
 
 .company-table thead{
@@ -160,7 +170,7 @@ tr:hover {
 
 .company-table thead,
 .company-table tbody {
-    display: block;
+    display: contents;
     width: 100%;
 }
 
@@ -241,7 +251,9 @@ tr:hover {
   box-shadow: 0 4px 24px rgba(44,62,80,0.18), 0 1.5px 6px rgba(44,62,80,0.08);
   padding: 10px 15px 20px 20px;
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
+  max-height: 80vh; /* Limit modal height */
+  overflow-y: auto;  /* Enable vertical scroll */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -253,7 +265,7 @@ tr:hover {
   font-size: 1.7rem;
   cursor: pointer;
   color: #aaa;
-  margin-left: 455px;
+  margin-left: 480px;
   transition: color 0.2s;
 }
 
