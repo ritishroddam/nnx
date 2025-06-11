@@ -35,7 +35,8 @@ table {
     margin-bottom: 20px;
     max-height: calc(100vh - 250px);
     position: relative;
-    width: 100%;
+    width:auto !important;
+    max-width: auto !important;
     border-collapse: collapse;
     color: #333;
 }
@@ -341,6 +342,8 @@ tr:hover {
 .table-scroll-container {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  display: block;
 }
 
 .table-scroll-container::-webkit-scrollbar {
@@ -352,7 +355,9 @@ tr:hover {
 }
 
 .device-table {
-  min-width: 1300px;
+  min-width: 1600px; /* increase if needed */
+  width: max-content;
+  table-layout: auto;
 }
 
 .device-table thead,
@@ -383,6 +388,7 @@ tr:hover {
     border-bottom: 1px solid #eee;
     box-sizing: border-box;
     word-break: break-word;
+    min-width: 200px; /* Minimum width for each cell */
 }
 
 #uploadBox{
