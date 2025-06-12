@@ -1,3 +1,75 @@
+let currentSort = { column: "distance", direction: "desc" };
+
+function applySortIcons(column, direction) {
+  document.querySelectorAll(".vehicleLiveTable th").forEach((th) => {
+    const icon = th.querySelector(".sort-icon");
+    if (!icon) return;
+    if (th.dataset.column === column) {
+      icon.textContent = direction === "asc" ? "↑" : "↓";
+      th.classList.add("sorted");
+    } else {
+      icon.textContent = "";
+      th.classList.remove("sorted");
+    }
+  });
+}
+
+function sortTable(column, direction) {
+  const table = document.querySelector(".vehicleLiveTable table");
+  const tbody = table.querySelector("tbody");
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const columnIndex = Array.from(table.querySelectorAll("th")).findIndex(
+    (th) => th.dataset.column === column
+  );
+
+  rows.sort((a, b) => {
+    let cellA = a.children[columnIndex].innerText.trim();
+    let cellB = b.children[columnIndex].innerText.trim();
+
+    // Special handling for Max/Avg Speed column
+    if (column === "max_avg_speed") {
+      cellA = parseFloat(cellA.split("/")[0]) || 0;
+      cellB = parseFloat(cellB.split("/")[0]) || 0;
+    } else if (!isNaN(cellA) && !isNaN(cellB)) {
+      cellA = parseFloat(cellA);
+      cellB = parseFloat(cellB);
+    } else {
+      cellA = cellA.toLowerCase();
+      cellB = cellB.toLowerCase();
+    }
+
+    if (cellA < cellB) return direction === "asc" ? -1 : 1;
+    if (cellA > cellB) return direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  tbody.innerHTML = "";
+  rows.forEach((row) => tbody.appendChild(row));
+  applySortIcons(column, direction);
+}
+
+function setupTableSorting() {
+  const table = document.querySelector(".vehicleLiveTable table");
+  table.querySelectorAll("th").forEach((header) => {
+    header.addEventListener("click", () => {
+      const column = header.dataset.column;
+      if (!column) return;
+      const direction =
+        currentSort.column === column && currentSort.direction === "asc"
+          ? "desc"
+          : "asc";
+      sortTable(column, direction);
+      currentSort = { column, direction };
+    });
+  });
+}
+
+function afterTableRender() {
+  setupTableSorting();
+  sortTable("distance", "desc");
+  currentSort = { column: "distance", direction: "desc" };
+}
+
 let currentRange = "1day"; // Default
 
 async function fetchVehicleDistances(range = "1day") {
@@ -19,6 +91,8 @@ async function fetchVehicleDistances(range = "1day") {
               </tr>`;
       tableBody.innerHTML += row;
     });
+
+    afterTableRender();
   } catch (error) {
     console.error("Error fetching vehicle distances:", error);
   }
@@ -411,24 +485,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       await fetchVehicleDistances(currentRange);
     });
   });  
-
-  document.getElementById("sortBtn").addEventListener("click", function () {
-    const table = document.querySelector("#vehicleTable");
-    const rows = Array.from(table.rows);
-
-    const dataRows = rows.slice();
-
-    // Sort data rows by distance (descending)
-    dataRows.sort((a, b) => {
-      const x = parseFloat(a.cells[1].innerText);
-      const y = parseFloat(b.cells[1].innerText);
-      return y - x;
-    });
-
-    // Rebuild table with header first, then sorted data
-    table.innerHTML = "";
-    dataRows.forEach((row) => table.appendChild(row));
-  });
 
   await fetchVehicleDistances();
 

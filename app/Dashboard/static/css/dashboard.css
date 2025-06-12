@@ -343,6 +343,21 @@ p {
   padding: 20px;
 }
 
+.vehicleLiveTable th.sorted {
+  background: #ccc !important;
+  color: #2f2f2f !important;
+}
+
+.dark-mode .vehicleLiveTable th.sorted {
+  background: #444 !important;
+  color: #fff !important;
+}
+
+.vehicleLiveTable .sort-icon {
+  margin-left: 4px;
+  font-size: 14px;
+}
+
 .card-chart {
   border-radius: 10px;
   overflow: hidden;

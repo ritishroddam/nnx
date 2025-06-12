@@ -135,12 +135,12 @@ Dashboard
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>Vehicle</th>
-              <th>Distance Travelled (km) <button id="sortBtn">↓</button></th>
-              <th>Driving Time</th>
-              <th>Idle Time</th>
-              <th>Number Of Stops</th>
-              <th>Max/Avg Speed</th>
+              <th data-column="registration">Vehicle</th>
+              <th data-column="distance">Distance Travelled (km) <span class="sort-icon"></span></th>
+              <th data-column="driving_time">Driving Time <span class="sort-icon"></span></th>
+              <th data-column="idle_time">Idle Time <span class="sort-icon"></span></th>
+              <th data-column="number_of_stops">Number Of Stops <span class="sort-icon"></span></th>
+              <th data-column="max_avg_speed">Max/Avg Speed <span class="sort-icon"></span></th>
             </tr>
           </thead>
           <tbody id="vehicleTable">
