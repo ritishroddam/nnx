@@ -43,7 +43,6 @@ def getVehicleStatus(imei_list):
         seven_days_ago = utc_now - timedelta(days=7)
         pipeline = [
             {"$match": {"imei": {"$in": imei_list},
-                        "gps": "A",
                         "date_time": {
                         "$gte": seven_days_ago,
                     }}},
