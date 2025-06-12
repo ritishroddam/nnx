@@ -64,7 +64,6 @@ function startZoomAnimation() {
       fullMap.moveCamera(cameraOptions);
     })
     .onComplete(() => {
-      document.getElementById("fullMap").style.display = "none";
       setTimeout(() => {
         window.location.href = "/vehicle/map";
       }, 3000); // Wait 3 seconds before redirect
@@ -78,7 +77,6 @@ function animate(time) {
 }
 
 (async () => {
-  document.getElementById("fullMap").style.display = "block";
   const [{ Map }] = await Promise.all([
     google.maps.importLibrary("maps"),
     google.maps.importLibrary("core"),
