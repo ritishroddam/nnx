@@ -54,9 +54,32 @@ function hideSkeletonLoader() {
   if (loader) loader.style.display = "none";
 }
 
+// function showSkeletonLoader() {
+//   const loader = document.getElementById("skeleton-loader");
+//   if (loader) loader.style.display = "block";
+// }
+
 function showSkeletonLoader() {
-  const loader = document.getElementById("skeleton-loader");
-  if (loader) loader.style.display = "block";
+  document.getElementById("vehicle-list").innerHTML = `
+    <div id="skeleton-loader">
+      ${[...Array(4)].map(() => `
+        <div class="vehicle-skeleton-card">
+          <div class="vehicle-skeleton-header">
+            <div class="skeleton skeleton-icon"></div>
+            <div class="skeleton skeleton-text short"></div>
+            <div class="skeleton skeleton-icon"></div>
+          </div>
+          <div class="skeleton skeleton-line medium"></div>
+          <div class="skeleton skeleton-line short"></div>
+          <div class="skeleton skeleton-line long"></div>
+          <div class="vehicle-skeleton-footer">
+            <div class="skeleton skeleton-box small"></div>
+            <div class="skeleton skeleton-box small"></div>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function startZoomAnimation() {
