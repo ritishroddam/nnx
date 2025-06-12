@@ -104,26 +104,32 @@ function hideSkeletonLoader() {
 // }
 
 function showSkeletonLoader() {
-  document.getElementById("vehicle-list").innerHTML = `
-    <div id="skeleton-loader">
-      ${[...Array(4)].map(() => `
-        <div class="vehicle-skeleton-card">
-          <div class="vehicle-skeleton-header">
-            <div class="skeleton skeleton-icon"></div>
-            <div class="skeleton skeleton-text short"></div>
-            <div class="skeleton skeleton-icon"></div>
-          </div>
-          <div class="skeleton skeleton-line medium"></div>
-          <div class="skeleton skeleton-line short"></div>
-          <div class="skeleton skeleton-line long"></div>
-          <div class="vehicle-skeleton-footer">
-            <div class="skeleton skeleton-box small"></div>
-            <div class="skeleton skeleton-box small"></div>
-          </div>
+  const vehicleList = document.getElementById("vehicle-list");
+
+  if (!vehicleList) return;
+
+  // Create 5 skeleton cards
+  let skeletonHTML = "";
+  for (let i = 0; i < 5; i++) {
+    skeletonHTML += `
+      <div class="vehicle-skeleton-card">
+        <div class="vehicle-skeleton-header">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-text short"></div>
+          <div class="skeleton skeleton-icon"></div>
         </div>
-      `).join("")}
-    </div>
-  `;
+        <div class="skeleton skeleton-line medium"></div>
+        <div class="skeleton skeleton-line short"></div>
+        <div class="skeleton skeleton-line long"></div>
+        <div class="vehicle-skeleton-footer">
+          <div class="skeleton skeleton-box small"></div>
+          <div class="skeleton skeleton-box small"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  vehicleList.innerHTML = `<div id="skeleton-loader">${skeletonHTML}</div>`;
 }
 
 /////////////////////////////////////////////////////
