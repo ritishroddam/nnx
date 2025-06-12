@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Loading...</title>
+
+<link rel="stylesheet" href="{{ url_for('MapZoomIn.static', filename='css/mapZoomIn.css') }}">
+<script defer type="module" src="{{ url_for('MapZoomIn.static', filename='js/mapZoomIn.js') }}"></script>
+
+{% endblock %}
+
+{% block block_container %}
+<div id="fullMap"></div>
+
+<script>
+  window.lat = "{{ companyLatLng.lat }}";
+  window.lng = "{{ companyLatLng.lng }}";
+  console.log("lat and lng:", window.lat, window.lng);
+</script>
+{% endblock %}
