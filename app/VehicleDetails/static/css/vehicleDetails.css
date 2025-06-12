@@ -145,16 +145,16 @@ body.modal-open {
   margin: 5% auto;
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
-  max-width: 900px;
-  /* Remove max-height and overflow-y to prevent vertical scroll */
+  width: 100%;
+  max-width: 1000px;
   max-height: none;
   overflow-y: visible;
   position: relative;
-  padding-bottom: 40px;
-  margin-top: 100px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  margin-top: 50px;
 }
 
 .modal-form-grid {
