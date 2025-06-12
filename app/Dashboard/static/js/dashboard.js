@@ -416,9 +416,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const table = document.querySelector("#vehicleTable");
     const rows = Array.from(table.rows);
 
-    // Separate header row from data rows
-    const headerRow = rows[0];
-    const dataRows = rows.slice(1);
+    const dataRows = rows.slice();
 
     // Sort data rows by distance (descending)
     dataRows.sort((a, b) => {
@@ -429,7 +427,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Rebuild table with header first, then sorted data
     table.innerHTML = "";
-    table.appendChild(headerRow);
     dataRows.forEach((row) => table.appendChild(row));
   });
 
