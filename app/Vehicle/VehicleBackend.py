@@ -111,6 +111,8 @@ def getVehicleStatus(imei_list):
                 "status": status,
                 "status_time_delta": status_time_delta,
                 "status_time_str": status_time_str,
+                "date": latest["date"],
+                "time": latest["time"],
             })
         missingImeis = set(imei_list) - {item['imei'] for item in statuses}
         return (statuses, missingImeis)
@@ -264,6 +266,10 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
             vehicle['status'] = status_item.get('status', 'unknown')
             vehicle['status_time_str'] = status_item.get('status_time_str', '0 seconds')
             vehicle['status_time_delta'] = status_item.get('status_time_delta', 0)
+            date = vehicle.get('date')
+            time = vehicle.get('time')
+            vehicle['date'] = status_item.get('date', date)
+            vehicle['time'] = status_item.get('time', time)
         else:
             vehicle['status'] = 'offline'
             now = now = datetime.now(timezone('UTC')).timestamp() * 1000
