@@ -498,6 +498,7 @@ p {
   gap: 8px;
   margin-bottom: 10px;
   flex-wrap: wrap;
+  padding: 8px;
 }
 
 .range-btn {
