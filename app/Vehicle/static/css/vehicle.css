@@ -1068,10 +1068,10 @@ input:checked + .slider:before {
 
 .skeleton-vertical-divider {
   width: 1px;
-  height: 100px;
+  height: 300px;
   background: #e0e0e0;
   margin-left: 5px;
-  margin-right: 15px;
+  margin-right: 25px;
   display: inline-block;
 }
 
