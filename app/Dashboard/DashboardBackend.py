@@ -166,10 +166,10 @@ def atlanta_distance_data():
         print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
 
-@dashboard_bp.route('/get_vehicle_data', methods=['GET'])
+@dashboard_bp.route('/get_vehicle_range_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
-def get_vehicle_data():
+def get_vehicle_range_data():
     try:
         utc_now = datetime.now(timezone('UTC'))
 

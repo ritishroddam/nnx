@@ -2,7 +2,7 @@ let currentRange = "1day"; // Default
 
 async function fetchVehicleDistances(range = "1day") {
   try {
-    const response = await fetch(`/dashboard/get_vehicle_data?range=${range}`);
+    const response = await fetch(`/dashboard/get_vehicle_range_data?range=${range}`);
     const data = await response.json();
 
     let tableBody = document.getElementById("vehicleTable");
