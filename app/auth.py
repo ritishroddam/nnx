@@ -105,7 +105,7 @@ def login():
         elif user['role'] == 'vehicle':
             response = redirect(url_for('VehicleInvy.page'))
         else:
-            response = redirect(url_for('Vehicle.map'))
+            response = redirect(url_for('MapZoomIn.home'))
 
         set_access_cookies(response, access_token, max_age=access_token_max_age)
         set_refresh_cookies(response, refresh_token, max_age=refresh_token_max_age)
