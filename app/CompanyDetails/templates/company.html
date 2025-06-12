@@ -118,10 +118,13 @@ Company Details
     <form id="uploadForm" action="{{ url_for('CompanyDetails.upload_customers') }}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="upload-form-group">
-        <input type="file" name="file" accept=".xls,.xlsx" required />
-        <br>
-        <button type="submit" class="btn">Upload Excel</button>
-        <a href="{{ url_for('CompanyDetails.download_template') }}" class="btn">Download Template</a>
+        <div class="upload-file-row">
+          <input type="file" name="file" accept=".xls,.xlsx" required />
+        </div>
+        <div class="upload-btn-row">
+          <button type="submit" class="btn">Upload Excel</button>
+          <a href="{{ url_for('CompanyDetails.download_template') }}" class="btn">Download Template</a>
+        </div>
       </div>
     </form>
     <div class="button-container" style="justify-content: flex-end;">
