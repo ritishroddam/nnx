@@ -25,6 +25,22 @@ collection = db['distinctAtlanta']
 distance_travelled_collection = db['distanceTravelled']
 vehicle_inventory = db["vehicle_inventory"]
 
+def format_seconds(seconds):
+    if seconds >= 86400:
+        days = seconds // 86400
+        hours = (seconds % 86400) // 3600
+        return f"{days} days"
+    elif seconds >= 3600:
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return f"{hours} hours"
+    elif seconds >= 60:
+        minutes = seconds // 60
+        sec = seconds % 60
+        return f"{minutes} minutes"
+    else:
+        return f"{seconds} seconds"
+
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin')  # Restrict access to admin and client admins
@@ -172,32 +188,107 @@ def get_vehicle_distances():
                 },
                 "imei": {"$in": imeis}
             }},
-            {"$project": {  
-                "imei": 1,
-                "odometer": {"$toDouble": "$odometer"} 
-            }},
+            {"$sort": {"imei": 1, "date_time": 1}},
             {"$group": {
                 "_id": "$imei",
-                "start_odometer": {"$min": "$odometer"},
-                "end_odometer": {"$max": "$odometer"}
+                "records": {"$push": {
+                    "date_time": "$date_time",
+                    "ignition": "$ignition",
+                    "speed": "$speed",
+                    "odometer": "$odometer"
+                }},
+                "start_odometer": {"$first": {"$toDouble": "$odometer"}},
+                "end_odometer": {"$last": {"$toDouble": "$odometer"}},
+                "max_speed": {
+                    "$max": {
+                        "$cond": [
+                            {"$eq": ["$ignition", "1"]},
+                            {"$toDouble": "$speed"},
+                            None
+                        ]
+                    }
+                },
+                "sum_speed": {
+                    "$sum": {
+                        "$cond": [
+                            {"$eq": ["$ignition", "1"]},
+                            {"$toDouble": "$speed"},
+                            0
+                        ]
+                    }
+                },
+                "count_speed": {
+                    "$sum": {
+                        "$cond": [
+                            {"$eq": ["$ignition", "1"]},
+                            1,
+                            0
+                        ]
+                    }
+                }
             }},
             {"$project": {
                 "imei": "$_id",
-                "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
-            }},
-            {"$sort": {"distance_traveled": -1}}  # Sort by distance_traveled in descending order
+                "distance": {"$subtract": ["$end_odometer", "$start_odometer"]},
+                "max_speed": 1,
+                "avg_speed": {
+                    "$cond": [
+                        {"$eq": ["$count_speed", 0]},
+                        0,
+                        {"$divide": ["$sum_speed", "$count_speed"]}
+                    ]
+                },
+                "records": 1
+            }}
         ]
 
         results = list(atlanta_collection.aggregate(pipeline))
 
         # Convert IMEI to Vehicle Registration
-        vehicle_data = [
-            {
+        vehicle_data = []
+        for record in results:
+            recs = record["records"]
+            driving_time = timedelta()
+            idle_time = timedelta()
+            number_of_stops = 0
+
+            prev_ignition = None
+            prev_time = None
+
+            for i, r in enumerate(recs):
+                curr_time = r["date_time"]
+                ignition = r["ignition"]
+                speed = float(r["speed"]) if r["speed"] is not None else 0.0
+
+                if prev_time is not None:
+                    delta = curr_time - prev_time
+                    if prev_ignition == "1" and speed > 0:
+                        driving_time += delta
+                    if prev_ignition == "0" and speed == 0:
+                        idle_time += delta
+
+                if prev_ignition == "0" and ignition == "1":
+                    number_of_stops += 1
+
+                prev_ignition = ignition
+                prev_time = curr_time
+
+            driving_timed_delta = driving_time.total_seconds()
+            idle_timed_delta = idle_time.total_seconds()
+            
+            human_readable_driving_time = format_seconds(driving_timed_delta)
+            human_readable_idle_time = format_seconds(idle_timed_delta)
+            
+            
+            vehicle_data.append({
                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
-                "distance": round(record.get("distance_traveled", 0), 2)
-            }
-            for record in results
-        ]
+                "distance": round(record.get("distance", 0), 2),
+                "max_speed": record.get("max_speed", 0),
+                "avg_speed": round(record.get("avg_speed", 0), 2),
+                "driving_time": human_readable_driving_time,
+                "idle_time": human_readable_idle_time,
+                "number_of_stops": number_of_stops
+            })
 
         return jsonify(vehicle_data), 200
 
