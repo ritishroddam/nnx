@@ -95,7 +95,7 @@ def getVehicleStatus(imei_list):
                         break
                     if current_status == "idle" and not (h_ignition == "1" and h_speed == 0):
                         break
-                    if current_status == "stopped" and not (h_ignition == "0" and h_speed == 0):
+                    if current_status == "stopped" and not (h_ignition == "0"):
                         break
                     last_change_time = h["date_time"]
 
