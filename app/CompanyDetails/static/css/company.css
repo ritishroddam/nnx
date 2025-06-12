@@ -276,9 +276,25 @@ tr:hover {
 .upload-form-group {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
   margin-bottom: 15px;
   align-items: stretch;
+}
+
+.upload-file-row {
+  width: 100%;
+}
+
+.upload-btn-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.upload-btn-row .btn,
+.upload-btn-row a.btn {
+  min-width: 150px;
+  text-align: center;
 }
 
 .filter-container {
