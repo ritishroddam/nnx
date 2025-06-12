@@ -972,6 +972,7 @@ input:checked + .slider:before {
   margin-bottom: 12px;
 }
 
+/* Skeleton Loader for Vehicle Card Layout */
 .skeleton-card {
   background: #f3f3f3;
   border-radius: 12px;
@@ -985,6 +986,12 @@ input:checked + .slider:before {
   background: #e0e0e0;
   border-radius: 6px;
   animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
 .skeleton-circle {
@@ -1008,23 +1015,44 @@ input:checked + .slider:before {
   display: inline-block;
 }
 
+.skeleton-bold {
+  width: 70px;
+  height: 14px;
+  border-radius: 4px;
+  background: #d0d0d0;
+  display: inline-block;
+}
+
 .skeleton-line {
-  display: block;
+  display: inline-block;
   border-radius: 6px;
+  margin-bottom: 4px;
+  height: 14px;
+  background: #e0e0e0;
+}
+
+.skeleton-status {
+  width: 220px;
+  height: 18px;
+  border-radius: 6px;
+  background: #e0e0e0;
+  display: block;
   margin-bottom: 4px;
 }
 
-.skeleton-line:nth-child(1) { width: 80px; height: 14px; }
-.skeleton-line:nth-child(2) { width: 160px; height: 16px; }
-.skeleton-line:nth-child(3) { width: 90%; height: 12px; }
+.skeleton-location {
+  width: 90%;
+  height: 12px;
+  border-radius: 6px;
+  background: #e0e0e0;
+  display: block;
+  margin-bottom: 8px;
+}
 
 .skeleton-box {
   border-radius: 6px;
   display: block;
   margin-bottom: 4px;
-}
-
-.skeleton-box {
   background: #e0e0e0;
 }
 
@@ -1050,5 +1078,9 @@ input:checked + .slider:before {
   .skeleton-icon, .skeleton-circle {
     width: 18px;
     height: 18px;
+  }
+  .skeleton-status {
+    width: 120px;
+    height: 14px;
   }
 }

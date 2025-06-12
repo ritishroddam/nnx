@@ -110,19 +110,27 @@ function showSkeletonLoader() {
   let skeletonHTML = "";
   for (let i = 0; i < 5; i++) {
     skeletonHTML += `
-      <div class="vehicle-card skeleton-card" style="margin-bottom:16px;padding:16px;border-radius:12px;box-shadow:0 2px 8px #0001;background:#fff;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="skeleton skeleton-circle" style="width:24px;height:24px;"></div>
-          <div class="skeleton skeleton-text" style="width:120px;height:22px;"></div>
+      <div class="vehicle-card skeleton-card">
+        <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
+          <div class="skeleton skeleton-circle"></div>
+          <div class="skeleton skeleton-text" style="width:120px;"></div>
           <div style="flex:1;"></div>
-          <div class="skeleton skeleton-icon" style="width:22px;height:22px;"></div>
-          <div class="skeleton skeleton-icon" style="width:22px;height:22px;"></div>
-          <div class="skeleton skeleton-icon" style="width:22px;height:22px;"></div>
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
         </div>
-        <div class="skeleton skeleton-line" style="width:80px;height:14px;margin:12px 0 4px 0;"></div>
-        <div class="skeleton skeleton-line" style="width:160px;height:16px;margin-bottom:4px;"></div>
-        <div class="skeleton skeleton-line" style="width:90%;height:12px;margin-bottom:8px;"></div>
-        <div style="display:flex;justify-content:space-between;margin-top:10px;">
+        <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
+        <div class="vehicle-card-row" style="display:flex;align-items:center;gap:6px;">
+          <div class="skeleton skeleton-bold" style="width:70px;height:14px;"></div>
+          <div class="skeleton skeleton-line" style="width:80px;height:14px;"></div>
+        </div>
+        <div class="vehicle-card-row">
+          <div class="skeleton skeleton-status" style="width:220px;height:18px;margin-bottom:4px;"></div>
+        </div>
+        <div class="vehicle-card-row">
+          <div class="skeleton skeleton-location" style="width:90%;height:12px;margin-bottom:8px;"></div>
+        </div>
+        <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;">
           <div>
             <div class="skeleton skeleton-box" style="width:60px;height:13px;margin-bottom:4px;"></div>
             <div class="skeleton skeleton-box" style="width:40px;height:18px;"></div>
