@@ -1,19 +1,46 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block head %}
-<title>Loading...</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    
+    <link rel="stylesheet" href="{{ url_for('MapZoomIn.static', filename='css/mapZoomIn.css') }}">
+    <script  src="{{ url_for('MapZoomIn.static', filename='js/mapZoomIn.js') }}"></script>
 
-<link rel="stylesheet" href="{{ url_for('MapZoomIn.static', filename='css/mapZoomIn.css') }}">
-<script type="module" src="{{ url_for('MapZoomIn.static', filename='js/mapZoomIn.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
+        integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
+        integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
 
-{% endblock %}
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
-{% block content %}
-<div id="fullMap"></div>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-<script>
-  window.lat = "{{ companyLatLng.lat }}";
-  window.lng = "{{ companyLatLng.lng }}";
-  console.log("lat and lng:", window.lat, window.lng);
-</script>
-{% endblock %}
+    <script src="https://unpkg.com/deck.gl@8.9.27/dist.min.js"></script>
+    <script src="https://unpkg.com/@deck.gl/google-maps@8.9.27/dist.min.js"></script>
+
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.umd.js"></script>
+    <!-- prettier-ignore -->
+    <script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
+            ({ key: "AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84", v: "weekly" });</script>
+</head>
+
+
+<body>
+    <div id="fullMap"></div>
+
+    <script>
+      window.lat = "{{ companyLatLng.lat }}";
+      window.lng = "{{ companyLatLng.lng }}";
+      console.log("lat and lng:", window.lat, window.lng);
+    </script>
+</body>
