@@ -114,9 +114,44 @@ Dashboard
 
   </div>
 
-
   <div class="title-with-line">
     <span>Vehicle Data</span>
+    <hr>
+  </div>
+  <div id="vehicleLiveData" class="dashboard-row">
+    <div class="vehicleLiveTable">
+      <!-- Add this block above the table -->
+      <div id="range-selector" class="range-selector">
+        <button class="range-btn active" data-range="1hour">1 hour</button>
+        <button class="range-btn" data-range="6hours">6 hours</button>
+        <button class="range-btn" data-range="12hours">12 hours</button>
+        <button class="range-btn" data-range="1day">1 day</button>
+        <button class="range-btn" data-range="2days">2 days</button>
+        <button class="range-btn" data-range="4days">4 days</button>
+        <button class="range-btn" data-range="7days">7 days</button>
+        <button class="range-btn" data-range="14days">14 days</button>
+        <button class="range-btn" data-range="30days">30 days</button>
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Distance Travelled (km) <button id="sortBtn">↓</button></th>
+            <th>Driving Time</th>
+            <th>Idle Time</th>
+            <th>Number Of Stops</th>
+            <th>Max/Avg Speed</th>
+          </tr>
+        </thead>
+        <tbody id="vehicleTable">
+        </tbody>
+      </table>
+    </div>
+  
+  </div>
+
+  <div class="title-with-line">
+    <span>Vehicle Todays's Distance</span>
     <hr>
   </div>
   <div id="vehicleSetion" class="dashboard-row">
@@ -124,18 +159,6 @@ Dashboard
       <canvas id="devicesChart"></canvas>
     </div>
 
-    <div class="vehicleLiveTable">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Vehicle</th>
-            <th>Distance Travelled (km) <button id="sortBtn">↓</button></th>
-          </tr>
-        </thead>
-        <tbody id="vehicleTable">
-        </tbody>
-      </table>
-    </div>
   </div>
 
   </div>

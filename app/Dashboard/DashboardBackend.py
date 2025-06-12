@@ -166,14 +166,28 @@ def atlanta_distance_data():
         print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
 
-@dashboard_bp.route('/get_vehicle_distances', methods=['GET'])
+@dashboard_bp.route('/get_vehicle_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
-def get_vehicle_distances():
+def get_vehicle_data():
     try:
         utc_now = datetime.now(timezone('UTC'))
-        start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+        range_param = request.args.get("range", "1day")
+        range_map = {
+            "1hour": timedelta(hours=1),
+            "6hours": timedelta(hours=6),
+            "12hours": timedelta(hours=12),
+            "1day": timedelta(days=1),
+            "2days": timedelta(days=2),
+            "4days": timedelta(days=4),
+            "7days": timedelta(days=7),
+            "14days": timedelta(days=14),
+            "30days": timedelta(days=30),
+        }
+        delta = range_map.get(range_param, timedelta(days=1))
+        start_of_day = utc_now - delta
+        end_of_day = utc_now
 
         imeis = list(get_vehicle_data().distinct("IMEI"))
 

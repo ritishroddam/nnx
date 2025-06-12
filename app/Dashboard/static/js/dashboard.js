@@ -1,3 +1,29 @@
+let currentRange = "1day"; // Default
+
+async function fetchVehicleDistances(range = "1day") {
+  try {
+    const response = await fetch(`/dashboard/get_vehicle_data?range=${range}`);
+    const data = await response.json();
+
+    let tableBody = document.getElementById("vehicleTable");
+    tableBody.innerHTML = "";
+
+    data.forEach((vehicle) => {
+      let row = `<tr>
+                  <td>${vehicle.registration}</td>
+                  <td>${vehicle.distance.toFixed(2)}</td>
+                  <td>${vehicle.driving_time}</td>
+                  <td>${vehicle.idle_time}</td>
+                  <td>${vehicle.number_of_stops}</td>
+                  <td>${vehicle.max_speed}/${vehicle.avg_speed}</td>
+              </tr>`;
+      tableBody.innerHTML += row;
+    });
+  } catch (error) {
+    console.error("Error fetching vehicle distances:", error);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   await initMap();
 
@@ -375,25 +401,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await fetchDistanceTravelledData();
 
-  async function fetchVehicleDistances() {
-    try {
-      const response = await fetch("/dashboard/get_vehicle_distances");
-      const data = await response.json();
-
-      let tableBody = document.getElementById("vehicleTable");
-      tableBody.innerHTML = "";
-
-      data.forEach((vehicle) => {
-        let row = `<tr>
-                  <td>${vehicle.registration}</td>
-                  <td>${vehicle.distance.toFixed(2)}</td>
-              </tr>`;
-        tableBody.innerHTML += row;
-      });
-    } catch (error) {
-      console.error("Error fetching vehicle distances:", error);
-    }
-  }
+  document.querySelectorAll("#range-selector .range-btn").forEach((btn) => {
+    btn.addEventListener("click", async function () {
+      document
+        .querySelectorAll("#range-selector .range-btn")
+        .forEach((b) => b.classList.remove("active"));
+      this.classList.add("active");
+      currentRange = this.getAttribute("data-range");
+      await fetchVehicleDistances(currentRange);
+    });
+  });  
 
   document.getElementById("sortBtn").addEventListener("click", function () {
     const table = document.querySelector("#vehicleTable");

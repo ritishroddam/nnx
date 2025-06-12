@@ -81,8 +81,7 @@
 }
 .graph-container,
 .traffic-container,
-.weather-section,
-.vehicleSetion {
+.weather-section{
   flex: 1;
   margin: 0 10px;
 }
@@ -336,6 +335,18 @@ p {
   padding: 20px;
 }
 
+#vehicleLiveData{
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
 .card-chart {
   border-radius: 10px;
   overflow: hidden;
@@ -480,4 +491,38 @@ p {
   font-size: 26px;
   font-weight: bold;
   margin-top: 10px;
+}
+
+.range-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.range-btn {
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  font-size: 15px;
+  color: #222;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.range-btn.active,
+.range-btn:focus {
+  background: #f0f0f0;
+  font-weight: bold;
+  outline: none;
+}
+
+.dark-mode .range-btn {
+  color: #ccc;
+  background: #222;
+}
+
+.dark-mode .range-btn.active {
+  background: #444;
 }
