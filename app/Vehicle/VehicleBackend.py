@@ -222,7 +222,25 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     stoppage_lookup = {item['imei']: item for item in stoppage_times}
     status_lookup = {item['imei']: item for item in statuses}
 
-    vehicleData = list(collection.find({"imei": {"$in": imei_list}}, {'timestamp': 0}))
+    vehicleData = list(atlanta_collection.aggregate(
+        [
+            {"$match": {
+                "gps": "A",
+                "imei": {"$in":imei}
+                }
+            },
+            {"$sort": {"date_time": -1}},
+            {
+                "$group": {
+                    "_id": "$imei",
+                    "latest_doc": {"$first": "$$ROOT"}
+                }
+            },
+            {"$replaceRoot": {"newRoot": "$latest_doc"}},
+            {"$project": {"timestamp": 0}}
+        ]
+    ))
+    
     for vehicle in vehicleData:
         imei = vehicle.get('imei')
         if not imei:
