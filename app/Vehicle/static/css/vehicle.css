@@ -1068,7 +1068,7 @@ input:checked + .slider:before {
 
 .skeleton-vertical-divider {
   width: 1px;
-  height: 150px;
+  height: auto;
   background: #e0e0e0;
   margin-left: 5px;
   margin-right: 35px;
