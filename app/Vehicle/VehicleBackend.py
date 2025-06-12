@@ -226,7 +226,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         [
             {"$match": {
                 "gps": "A",
-                "imei": {"$in":imei}
+                "imei": {"$in":imei_list}
                 }
             },
             {"$sort": {"date_time": -1}},
