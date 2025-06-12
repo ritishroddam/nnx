@@ -245,8 +245,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           data.sims || 0;
         document.querySelector(".card:nth-child(3) h3").textContent =
           data.customers || 0;
-        document.querySelector(".card:nth-child(4) h3").textContent =
-          data.employees || 0;
       } else {
         console.error("Error fetching dashboard data:", data.error);
       }
