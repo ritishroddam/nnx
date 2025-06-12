@@ -211,7 +211,12 @@ def get_vehicle_distances():
                 "sum_speed": {
                     "$sum": {
                         "$cond": [
-                            {"$eq": ["$ignition", "1"]},
+                            {
+                                "$and": [
+                                    {"$eq": ["$ignition", "1"]},
+                                    {"$gt": [{"$toDouble": "$speed"}, 0]}
+                                ]
+                            },
                             {"$toDouble": "$speed"},
                             0
                         ]
@@ -220,7 +225,12 @@ def get_vehicle_distances():
                 "count_speed": {
                     "$sum": {
                         "$cond": [
-                            {"$eq": ["$ignition", "1"]},
+                            {
+                                "$and": [
+                                    {"$eq": ["$ignition", "1"]},
+                                    {"$gt": [{"$toDouble": "$speed"}, 0]}
+                                ]
+                            },
                             1,
                             0
                         ]
