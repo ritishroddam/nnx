@@ -51,6 +51,7 @@ Vehicle Details
     <br>
     <form id="manualForm" action="{{ url_for('VehicleDetails.manual_entry') }}" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="modal-form-grid">
       <div class="form-group">
         <label for="LicensePlateNumber">License Plate Number</label>
         <input type="text" name="LicensePlateNumber" id="LicensePlateNumber" required
@@ -170,6 +171,7 @@ Vehicle Details
         <button type="submit" class="btn success">Submit</button>
         <button type="button" id="cancelBtn" class="btn danger">Cancel</button>
       </div>
+    </div>
     </form>
   </div>
 </div>
