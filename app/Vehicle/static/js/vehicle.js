@@ -49,6 +49,16 @@ function stopRotation() {
   }
 }
 
+function hideSkeletonLoader() {
+  const loader = document.getElementById("skeleton-loader");
+  if (loader) loader.style.display = "none";
+}
+
+function showSkeletonLoader() {
+  const loader = document.getElementById("skeleton-loader");
+  if (loader) loader.style.display = "block";
+}
+
 function startZoomAnimation() {
   stopRotation();
   // Reset camera options for repeatable animation
@@ -271,6 +281,8 @@ async function updateData(data) {
 
 async function fetchVehicleData() {
   try {
+    showSkeletonLoader(); 
+
     const response = await fetch("/vehicle/api/vehicles");
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
@@ -977,6 +989,7 @@ function updateMap() {
   }
 
   renderVehicleCards(vehicleData);
+  hideSkeletonLoader();
   filterVehicles();
 }
 
@@ -1819,6 +1832,8 @@ window.onload = async function () {
   await initMap();
   await fetchVehicleData();
   updateMap();
+
+  hideSkeletonLoader();
 
   document
     .getElementById("table-search-button")
