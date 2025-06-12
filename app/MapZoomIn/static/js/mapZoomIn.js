@@ -84,5 +84,5 @@ function animate(time) {
   fullMap = new Map(document.getElementById("fullMap"), mapOptions);
   requestAnimationFrame(animate);
   startInfiniteRotation();
-  setTimeout(startZoomAnimation, 3000); // 3s rotation, then zoom
+  setTimeout(startZoomAnimation, 1000); // 3s rotation, then zoom
 })();
