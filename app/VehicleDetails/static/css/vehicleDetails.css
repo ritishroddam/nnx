@@ -142,16 +142,54 @@ body.modal-open {
 
 .modal-content {
   background-color: #fefefe;
-  margin: 5% auto; /* Reduced from 10% to give more space */
+  margin: 5% auto;
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
-  max-width: 600px;
-  max-height: 80vh; /* Limit height */
-  overflow-y: auto; /* Enable vertical scrolling */
+  max-width: 900px;
+  /* Remove max-height and overflow-y to prevent vertical scroll */
+  max-height: none;
+  overflow-y: visible;
   position: relative;
-  padding-bottom: 40px; /* Space for close button */
+  padding-bottom: 40px;
   margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px 32px;
+}
+
+.modal-form-grid .form-group {
+  margin-bottom: 0;
+}
+
+/* Optional: Make the close button stay in the top right */
+.close-modal {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 5px;
+  z-index: 1;
+}
+
+/* Responsive: Stack columns on small screens */
+@media (max-width: 900px) {
+  .modal-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .modal-form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 body.modal-open {
