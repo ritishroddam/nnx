@@ -374,6 +374,7 @@ def create_app(config_name='default'):
     from app.VehiclesAssign.vehicleAssign import vehicleAssign_bp
     from app.Vehicle.share_location import share_location_bp
     from app.userConfig.userConfig import userConfigBlueprint
+    from app.MapZoomIn.mapZoomIn import mapZoomIn_bp
 
     app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
@@ -387,6 +388,7 @@ def create_app(config_name='default'):
     app.register_blueprint(vehicleAssign_bp, url_prefix='/vehicleAssign')
     app.register_blueprint(share_location_bp, url_prefix='/shareLocation')
     app.register_blueprint(userConfigBlueprint, url_prefix='/userConfig')
+    app.register_blueprint(mapZoomIn_bp, url_prefix='/mapZoomIn')
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
