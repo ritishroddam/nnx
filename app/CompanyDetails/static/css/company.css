@@ -249,11 +249,11 @@ tr:hover {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(44,62,80,0.18), 0 1.5px 6px rgba(44,62,80,0.08);
-  padding: 10px 15px 20px 20px;
+  padding: 20px 30px 30px 30px;
   width: 100%;
-  max-width: 550px;
-  max-height: 80vh; /* Limit modal height */
-  overflow-y: auto;  /* Enable vertical scroll */
+  max-width: 1000px;
+  max-height: none;
+  overflow-y: visible;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -372,5 +372,28 @@ tr:hover {
 @media (max-width: 700px) {
   .form-group {
     width: 100%; 
+  }
+}
+
+.company-modal-content .form-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px 32px;
+  margin-bottom: 24px;
+}
+
+.company-modal-content .form-group {
+  margin-bottom: 0;
+}
+
+/* Responsive: Stack columns on smaller screens */
+@media (max-width: 1000px) {
+  .company-modal-content .form-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .company-modal-content .form-container {
+    grid-template-columns: 1fr;
   }
 }
