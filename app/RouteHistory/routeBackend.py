@@ -14,7 +14,6 @@ from config import config
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
 data_collection = db["vehicle_inventory"]
-distinct_atlanta_collection = db["distinctAtlanta"]
 atlanta_collection = db["atlanta"]
 company_collection = db["customers_list"]
 

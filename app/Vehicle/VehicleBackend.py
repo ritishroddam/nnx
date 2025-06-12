@@ -10,8 +10,6 @@ from app.geocoding import geocodeInternal
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
-
-collection = db['distinctAtlanta']
 atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 company_collection = db['customers_list']
