@@ -1066,6 +1066,15 @@ input:checked + .slider:before {
   height: 18px;
 }
 
+.skeleton-vertical-divider {
+  width: 1px;
+  height: 48px;
+  background: #e0e0e0;
+  margin-left: 12px;
+  margin-right: 0;
+  display: inline-block;
+}
+
 /* Responsive for skeleton loader */
 @media (max-width: 600px) {
   .skeleton-card {

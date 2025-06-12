@@ -118,6 +118,7 @@ function showSkeletonLoader() {
           <div class="skeleton skeleton-icon"></div>
           <div class="skeleton skeleton-icon"></div>
           <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton-vertical-divider"></div> 
         </div>
         <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:6px;">
