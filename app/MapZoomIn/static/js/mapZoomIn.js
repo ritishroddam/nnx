@@ -3,7 +3,7 @@ const cameraOptions = {
   tilt: 0,
   heading: 0,
   zoom: 3,
-  center: { lat: window.lat || 12.9716, lng: window.lng || 77.5946 },
+  center: { lat: 12.9716, lng:  77.5946 },
 };
 
 const mapOptions = {
@@ -54,7 +54,7 @@ function startZoomAnimation() {
   cameraOptions.tilt = 0;
   cameraOptions.heading = 0;
   cameraOptions.zoom = 3;
-  cameraOptions.center = { lat: window.lat || 12.9716, lng: window.lng || 77.5946 };
+  cameraOptions.center = { lat: parseFloat(window.lat) || 12.9716, lng: parseFloat(window.lng) || 77.5946 };
   fullMap.moveCamera(cameraOptions);
 
   zoomTween = new TWEEN.Tween(cameraOptions)
