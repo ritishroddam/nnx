@@ -138,8 +138,8 @@ body {
   background: rgba(255, 255, 255, 0.35);
   color: #222;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  /* backdrop-filter: blur(16px) saturate(180%); */
+  /* -webkit-backdrop-filter: blur(16px) saturate(180%); */
   /* box-shadow: 0 4px 24px rgba(44,62,80,0.08);
   backdrop-filter: blur(10px); */
   padding: 1% 0.5%;
@@ -245,8 +245,12 @@ body {
 
 .submenu a {
   text-decoration: none;
-  color: white;
+  color: #222;
   font-size: 14px;
+}
+
+.dark-mode .submenu a {
+  color: #ccc;
 }
 
 .submenu li:hover {
@@ -288,8 +292,8 @@ body {
   background: rgba(255, 255, 255, 0.35);
   color: #222;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  /* backdrop-filter: blur(16px) saturate(180%); */
+  /* -webkit-backdrop-filter: blur(16px) saturate(180%); */
   display: flex;
   justify-content: space-between;
   align-items: center;
