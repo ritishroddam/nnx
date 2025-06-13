@@ -83,7 +83,6 @@
 .traffic-container,
 .weather-section{
   flex: 1;
-  margin: 0 10px;
 }
 .weather-info, .datetime-container{
   margin: 10px 0 10px 0;
@@ -152,7 +151,6 @@
   margin: 0;
   padding: 10px;
   background-color: white;
-
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   text-align: center;
   font-size: 1.5em;
@@ -165,26 +163,10 @@
   box-shadow: 0px 0px 10px #cccccc90;
 }
 
-#traffic-status {
-  color: #2f2f2f;
-}
-
-.dark-mode #traffic-status {
-  color: #ccc;
-}
-
 #map {
   width: 100%;
   height: 400px;
   transition: filter 0.3s ease-in-out;
-}
-
-#scrolling-text {
-  position: absolute;
-  white-space: nowrap;
-  animation: scroll 10s linear infinite;
-  font-size: 1em;
-  color: #000;
 }
 
 @keyframes scroll {
@@ -558,7 +540,7 @@ p {
 
 /* Fixed right sidebar */
 .dashboard-sidebar {
-  width: 340px;
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
