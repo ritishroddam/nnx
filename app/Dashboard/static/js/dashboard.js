@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           circumference: 180 * (Math.PI / 180),    // Only half circle
           plugins: {
             legend: {
-              position: "top",
+              position: "bottom",
               labels: {
                 font: {
                   size: 14,
