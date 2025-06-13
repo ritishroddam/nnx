@@ -116,8 +116,12 @@
   font-weight: 500;
 }
 
+.datetime-container {
+  height: 90px;
+}
+
 .weather-container{
-  height: 130px;
+  height: 150px;
 }
 
 .weather-container h1{
