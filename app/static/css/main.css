@@ -133,13 +133,27 @@ body {
   top: 11vh;
   height: 88%;
   width: 60px;
-  background: black;
-  color: #ccc;
+  /* background: black;
+  color: #ccc; */
+  background: rgba(255, 255, 255, 0.55);
+  color: #222;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.08);
   backdrop-filter: blur(10px);
   padding: 1% 0.5%;
   border-radius: 15px;
   transition: width 0.3s ease-in-out;
   z-index: 3;
+}
+
+.dark-mode .sidebar {
+  background: rgba(30, 30, 30, 0.55);
+  color: #ccc;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+}
+
+.sidebar, .topbar {
+  /* Ensures text is readable on translucent backgrounds */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
 .sidebar::after {
@@ -266,17 +280,26 @@ body {
   top: 2%;
   left: 1%;
   width: 98%;
-  background: black;
+  /* background: black;
+  color: #ccc; */
+  background: rgba(255, 255, 255, 0.55);
+  color: #222;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.08);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
   border-radius: 15px;
-  color: #ccc;
   margin-bottom: 50px;
   z-index: 3; 
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+.dark-mode .topbar {
+  background: rgba(30, 30, 30, 0.55);
+  color: #ccc;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
 }
 
 .topbar h1 {
