@@ -8,7 +8,7 @@
 .displayMap{
   height: 100%;
   width: 100%;
-  z-index: 0;
+  z-index: 1;
 }
 
 body.dark-mode {
@@ -428,7 +428,7 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   transition: left 0.3s ease-in-out;
-  z-index: 1;
+  z-index: 2;
   border-radius: 20px;
   padding: 1%;
 }
