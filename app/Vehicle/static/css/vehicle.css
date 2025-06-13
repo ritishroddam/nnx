@@ -240,10 +240,10 @@ body {
   display: flex;
   align-items: center;
   position: relative;
-  width: 56px;
-  height: 20px;
+  width: 68px;
+  height: 26px;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   overflow: hidden;
   cursor: pointer;
@@ -254,8 +254,8 @@ body {
 .toggle-option {
   flex: 1;
   text-align: center;
-  font-size: 12px;
-  min-width: 24px;
+  font-size: 15px;
+  min-width: 30px;
   height: 100%;
   font-weight: bold;
   z-index: 2;
@@ -265,21 +265,19 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  border-radius: 18px;
-  padding: 0 2px;
+  border-radius: 10px;
+  padding: 0 4px;
 }
 
 .dark-mode .toggle-option {
   color: #ccc;
 }
 
-.toggle-slider .active,
 .toggle-slider .toggle-option.active {
   background: #222;
   color: #fff;
 }
 
-.dark-mode .toggle-slider .active,
 .dark-mode .toggle-slider .toggle-option.active {
   background: #111;
   color: #fff;
@@ -287,12 +285,12 @@ body {
 
 .slider-button {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 22px;
-  height: 16px;
+  top: 3px;
+  left: 3px;
+  width: 28px;
+  height: 20px;
   background: #222;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: left 0.3s, background 0.3s;
   z-index: 1;
   box-shadow: 0 2px 8px rgba(44,62,80,0.08);
@@ -303,7 +301,7 @@ body {
 }
 
 .toggle-slider.active .slider-button {
-  left: 32px;
+  left: 37px;
 }
 
 .toggle-slider.active .map-option {
