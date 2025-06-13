@@ -240,10 +240,10 @@ body {
   display: flex;
   align-items: center;
   position: relative;
-  width: 80px;
-  height: 28px;
+  width: 56px;
+  height: 20px;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
   overflow: hidden;
   cursor: pointer;
@@ -254,7 +254,9 @@ body {
 .toggle-option {
   flex: 1;
   text-align: center;
-  font-size: 15px;
+  font-size: 12px;
+  min-width: 24px;
+  height: 100%;
   font-weight: bold;
   z-index: 2;
   transition: color 0.3s;
@@ -263,7 +265,8 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 18px;
+  padding: 0 2px;
 }
 
 .dark-mode .toggle-option {
@@ -284,12 +287,12 @@ body {
 
 .slider-button {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 48px;
-  height: 32px;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 16px;
   background: #222;
-  border-radius: 12px;
+  border-radius: 6px;
   transition: left 0.3s, background 0.3s;
   z-index: 1;
   box-shadow: 0 2px 8px rgba(44,62,80,0.08);
@@ -300,7 +303,7 @@ body {
 }
 
 .toggle-slider.active .slider-button {
-  left: 42px;
+  left: 32px;
 }
 
 .toggle-slider.active .map-option {
