@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
 
-    await initMap();
+    await backgroundMap();
 
     fetch("/userConfig/editDarkMode", {
       method: "POST",
@@ -284,7 +284,7 @@ function displayFlashMessage(message, category = "danger", dismissAfter = 5000) 
   }
 }
 
-async function initMap() {
+async function backgroundMap() {
   const [{ Map }] = await Promise.all([
     google.maps.importLibrary("maps"),
     google.maps.importLibrary("core"),
@@ -321,5 +321,5 @@ async function initMap() {
 }
 
 window.onload = async function () {
-  await initMap();
+  await backgroundMap();
 };
