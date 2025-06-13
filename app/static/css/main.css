@@ -5,10 +5,14 @@
   font-family: Arial, sans-serif;
 }
 
-.displayMap{
-  height: 100%;
-  width: 100%;
-  z-index: 1;
+.displayMap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
 }
 
 body.dark-mode {
