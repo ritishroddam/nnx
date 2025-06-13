@@ -537,6 +537,13 @@ p {
   overflow-y: auto;
 }
 
+.dashboard-content {
+  scrollbar-width: none; /* Firefox */
+}
+.dashboard-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 /* Fixed right sidebar */
 .dashboard-sidebar {
   width: 300px;
