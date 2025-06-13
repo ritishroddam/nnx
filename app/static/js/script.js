@@ -297,7 +297,7 @@ async function initMap() {
   const cameraOptions = {
     tilt: 0,
     heading: 0,
-    zoom: 10,
+    zoom: 9,
     center: { lat: 12.9716, lng:  77.5946 },
   };
 
