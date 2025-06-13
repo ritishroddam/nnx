@@ -208,29 +208,6 @@ body {
   color: #ccc;
 }
 
-.toggle-container {
-  display: flex;
-  align-items: center;
-}
-
-.toggle-container {
-  display: flex;
-  align-items: center;
-}
-
-.toggle-slider {
-  display: flex;
-  align-items: center;
-  position: relative;
-  width: 80px;
-  height: 30px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #d1d1d1;
-  overflow: hidden;
-  cursor: pointer;
-}
-
 ::-webkit-scrollbar {
   width: 8px;
 
@@ -241,36 +218,99 @@ body {
   background: #000000d0;
 }
 
+.toggle-container {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.35); /* Match topbar */
+  border: 1.5px solid #bbb;
+  border-radius: 15px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+  padding: 4px 10px;
+  transition: background 0.3s, border 0.3s;
+  margin-left: 12px;
+}
+
+.dark-mode .toggle-container {
+  background: rgba(0, 0, 0, 0.50);
+  border: 1.5px solid #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+.toggle-slider {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 110px;
+  height: 40px;
+  background: transparent;
+  border-radius: 15px;
+  border: none;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.3s, border 0.3s;
+}
+
 .toggle-option {
   flex: 1;
   text-align: center;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: bold;
   z-index: 2;
-  transition: color 0.3s ease;
+  transition: color 0.3s;
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-radius: 15px;
+}
+
+.dark-mode .toggle-option {
+  color: #ccc;
+}
+
+.toggle-slider .active,
+.toggle-slider .toggle-option.active {
+  background: #222;
+  color: #fff;
+}
+
+.dark-mode .toggle-slider .active,
+.dark-mode .toggle-slider .toggle-option.active {
+  background: #111;
+  color: #fff;
 }
 
 .slider-button {
   position: absolute;
-  top: 1%;
-  left: 2px;
-  width: 45px;
-  height: 27px;
-  background: #000000d0;
-  border-radius: 10px;
-  transition: all 0.3s ease;
+  top: 4px;
+  left: 4px;
+  width: 48px;
+  height: 32px;
+  background: #222;
+  border-radius: 12px;
+  transition: left 0.3s, background 0.3s;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
 }
 
-.active .slider-button {
-  left: 33px;
+.dark-mode .slider-button {
+  background: #111;
 }
 
-.active .map-option {
+.toggle-slider.active .slider-button {
+  left: 58px;
+}
+
+.toggle-slider.active .map-option {
   color: #ccc;
+  background: #222;
 }
 
-.active .list-option {
-  color: #ccc;
+.toggle-slider.active .list-option {
+  color: #fff;
+  background: #222;
 }
 
 .icon-legend-container {
