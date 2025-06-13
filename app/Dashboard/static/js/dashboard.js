@@ -87,7 +87,8 @@ async function fetchVehicleDistances(range = "1day") {
                   <td>${vehicle.driving_time}</td>
                   <td>${vehicle.idle_time}</td>
                   <td>${vehicle.number_of_stops}</td>
-                  <td>${vehicle.max_speed}/${vehicle.avg_speed}</td>
+                  <td>${vehicle.max_speed}</td>
+                  <td>${vehicle.avg_speed}</td>
               </tr>`;
       tableBody.innerHTML += row;
     });
