@@ -415,9 +415,8 @@ body {
 .block-container {
   position: fixed;
   top: 11%;
-  left: 5.5%; /* Adjust based on your top bar height */
-  right: 1%; /* Adjust based on your sidebar width */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  left: 5.5%; 
+  right: 1%; 
   overflow-y: auto;
   transition: left 0.3s ease-in-out;
   z-index: 1;
