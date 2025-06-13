@@ -549,6 +549,14 @@ p {
   z-index: 10;
 }
 
+.dashboard-sidebar {
+  scrollbar-width: none; /* Firefox */
+}
+
+.dashboard-sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 .dark-mode .dashboard-sidebar {
   background: #181818;
 }
