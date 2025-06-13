@@ -523,7 +523,8 @@ p {
   flex-direction: row;
   gap: 24px;
   min-height: 100vh;
-  background: #f4f6f8;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Main content area */
@@ -532,6 +533,8 @@ p {
   min-width: 0;
   padding: 20px 0 20px 0;
   margin-right: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 /* Fixed right sidebar */
@@ -543,8 +546,6 @@ p {
   gap: 20px;
   position: sticky;
   top: 0;
-  height: 100vh;
-  background: #f7f9fa;
   z-index: 10;
 }
 
