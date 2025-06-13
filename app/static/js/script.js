@@ -310,5 +310,5 @@ const mapOptions = {
     google.maps.importLibrary("maps"),
     google.maps.importLibrary("core"),
   ]);
-  fullMap = new Map(document.getElementById("fullMap"), mapOptions);
+  fullMap = new Map(document.getElementById("displayMap"), mapOptions);
 })();
