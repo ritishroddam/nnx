@@ -307,6 +307,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
         options: {
           responsive: true,
+          rotation: -90 * (Math.PI / 180),         // Start at top center
+          circumference: 180 * (Math.PI / 180),    // Only half circle
           plugins: {
             legend: {
               position: "top",
@@ -323,7 +325,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   const labels = original.call(this, chart);
                   labels.forEach((label) => {
                     label.text = label.text;
-                    label.className = "chart-label"; // Add the chart-label class
+                    label.className = "chart-label";
                   });
                   return labels;
                 },
