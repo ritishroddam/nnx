@@ -120,7 +120,7 @@ function setCookie(name, value) {
   } else document.cookie = `${name}=${value};path=/`;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const themeToggle = document.getElementById("theme-toggle");
   const body = document.body;
   // Notification Bell Logic
@@ -134,10 +134,14 @@ document.addEventListener("DOMContentLoaded", function () {
     body.classList.add("dark-mode");
     themeToggle.classList.add("dark");
     themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+    isDarkModeMap = true;
+    await initMap();
   } else {
     body.classList.remove("dark-mode");
     themeToggle.classList.remove("dark");
     themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    isDarkModeMap = false;
+    await initMap();
   }
 
   themeToggle.addEventListener("click", function () {
@@ -281,34 +285,42 @@ function displayFlashMessage(message, category = "danger", dismissAfter = 5000) 
   }
 }
 
-const cameraOptions = {
-  tilt: 0,
-  heading: 0,
-  zoom: 10,
-  center: { lat: 12.9716, lng:  77.5946 },
-};
+var isDarkModeMap = document.body.classList.contains("dark-mode");
 
-
-const mapOptions = {
-  ...cameraOptions,
-  mapId: "e426c1ad17485d79",
-  disableDefaultUI: true,
-  zoomControl: false,
-  mapTypeControl: false,
-  streetViewControl: false,
-  fullscreenControl: false,
-  clickableIcons: false,
-  gestureHandling: "none",
-  draggable: false,
-  keyboardShortcuts: false,
-  scrollwheel: false,
-  disableDoubleClickZoom: true,
-};
-
-(async () => {
+async function initMap() {
   const [{ Map }] = await Promise.all([
     google.maps.importLibrary("maps"),
     google.maps.importLibrary("core"),
   ]);
+
+  var mapId = isDarkModeMap ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+
+  const cameraOptions = {
+    tilt: 0,
+    heading: 0,
+    zoom: 10,
+    center: { lat: 12.9716, lng:  77.5946 },
+  };
+
+  const mapOptions = {
+    ...cameraOptions,
+    mapId: mapId,
+    disableDefaultUI: true,
+    zoomControl: false,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    clickableIcons: false,
+    gestureHandling: "none",
+    draggable: false,
+    keyboardShortcuts: false,
+    scrollwheel: false,
+    disableDoubleClickZoom: true,
+  };
+
   fullMap = new Map(document.getElementById("displayMap"), mapOptions);
-})();
+}
+
+window.onload = async function () {
+  await initMap();
+};
