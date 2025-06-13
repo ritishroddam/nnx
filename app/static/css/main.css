@@ -18,7 +18,7 @@ body.dark-mode {
 
 .flash-messages-container {
   position: fixed;
-  top: 10px;
+  top: 11%;
   right: 10px;
   z-index: 1000;
   display: flex;
