@@ -79,11 +79,7 @@
   align-items: flex-start;
   flex-wrap: wrap;
 }
-.graph-container,
-.traffic-container,
-.weather-section{
-  flex: 1;
-}
+
 .weather-info, .datetime-container{
   margin: 10px 0 10px 0;
 }
@@ -560,7 +556,6 @@ p {
 .dashboard-sidebar .weather-section,
 .dashboard-sidebar .traffic-container,
 .dashboard-sidebar .alerts-container {
-  margin-bottom: 20px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
