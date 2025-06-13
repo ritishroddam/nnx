@@ -77,7 +77,21 @@ Dashboard
 
     <div class="dashboard-row">
       <div class="graph-container">
-        <canvas id="vehiclesChart"></canvas>
+        <div class="graph-header">
+          <span class="graph-subtitle">Total employee</span>
+          <button class="graph-arrow"><i class="fa fa-chevron-right"></i></button>
+        </div>
+        <div class="graph-title">Track your team</div>
+        <canvas id="teamChart" width="180" height="90"></canvas>
+        <div class="graph-total">
+          <span class="graph-total-number" id="teamTotal">63</span>
+          <span class="graph-total-label">Total members</span>
+        </div>
+        <div class="graph-legend">
+          <div><span class="legend-dot designer"></span> Designer <b>48 members</b></div>
+          <div><span class="legend-dot developer"></span> Developer <b>27 members</b></div>
+          <div><span class="legend-dot manager"></span> Project manager <b>18 members</b></div>
+        </div>
       </div>
     </div>
 
