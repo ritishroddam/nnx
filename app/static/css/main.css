@@ -441,6 +441,14 @@ body {
   left: 29vh;
 }
 
+.block-container{
+  scrollbar-width: none;
+}
+
+.block-container::-webkit-scrollbar {
+  display: none;
+}
+
 .notification-dropdown {
   position: absolute;
   right: 0;
