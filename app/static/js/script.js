@@ -280,3 +280,38 @@ function displayFlashMessage(message, category = "danger", dismissAfter = 5000) 
     setTimeout(removeFlash, dismissAfter);
   }
 }
+
+const cameraOptions = {
+  tilt: 0,
+  heading: 0,
+  zoom: 10,
+  center: { lat: 12.9716, lng:  77.5946 },
+};
+
+
+const mapOptions = {
+  ...cameraOptions,
+  mapId: "f32dd48f00948a56c802fc00",
+  disableDefaultUI: true,
+  zoomControl: false,
+  mapTypeControl: false,
+  streetViewControl: false,
+  fullscreenControl: false,
+  clickableIcons: false,
+  gestureHandling: "none",
+  draggable: false,
+  keyboardShortcuts: false,
+  scrollwheel: false,
+  disableDoubleClickZoom: true,
+};
+
+(async () => {
+  const [{ Map }] = await Promise.all([
+    google.maps.importLibrary("maps"),
+    google.maps.importLibrary("core"),
+  ]);
+  fullMap = new Map(document.getElementById("fullMap"), mapOptions);
+  requestAnimationFrame(animate);
+  startInfiniteRotation();
+  setTimeout(startZoomAnimation, 1000); // 3s rotation, then zoom
+})();
