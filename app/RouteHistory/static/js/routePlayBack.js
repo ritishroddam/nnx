@@ -1,4 +1,5 @@
 window.onload = async () => {
+  await backgroundMap();
   await initMap();
   await initialLiveMap();
 };
