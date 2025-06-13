@@ -34,8 +34,6 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
   reconnectionDelayMax: 5000,
 });
 
-var isDarkModeMap = document.body.classList.contains("dark-mode");
-
 socket.on("connect", () => {
   console.log("Connected to socket server");
 
@@ -292,7 +290,9 @@ async function initMap() {
     google.maps.importLibrary("core"),
   ]);
 
-  var mapId = isDarkModeMap ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+  const isDarkModeMap = document.body.classList.contains("dark-mode");
+
+  const mapId = isDarkModeMap ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
   const cameraOptions = {
     tilt: 0,
@@ -317,7 +317,7 @@ async function initMap() {
     disableDoubleClickZoom: true,
   };
 
-  fullMap = new Map(document.getElementById("displayMap"), mapOptions);
+  const bgMap = new Map(document.getElementById("displayMap"), mapOptions);
 }
 
 window.onload = async function () {
