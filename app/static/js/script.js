@@ -298,7 +298,7 @@ async function initMap() {
     tilt: 0,
     heading: 0,
     zoom: 9,
-    center: { lat: 12.9716, lng:  77.5946 },
+    center: { lat: 15.3647, lng:  75.1240 },
   };
 
   const mapOptions = {
