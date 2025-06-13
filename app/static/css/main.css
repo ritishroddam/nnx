@@ -138,6 +138,7 @@ body {
   background: rgba(255, 255, 255, 0.35);
   color: #222;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+  border: 1.5px solid #bbb;
   /* backdrop-filter: blur(16px) saturate(180%); */
   /* -webkit-backdrop-filter: blur(16px) saturate(180%); */
   /* box-shadow: 0 4px 24px rgba(44,62,80,0.08);
@@ -151,7 +152,7 @@ body {
 .dark-mode .sidebar {
   background: rgba(20, 20, 20, 0.85);
   color: #eee;
-  box-shadow: 0 0 24px 4px rgba(0, 150, 255, 0.25), 0 2px 8px rgba(0,0,0,0.7);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.7);
   border: 1.5px solid #333;
 }
 
@@ -293,6 +294,7 @@ body {
   background: rgba(255, 255, 255, 0.35);
   color: #222;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+  border: 1.5px solid #bbb;
   /* backdrop-filter: blur(16px) saturate(180%); */
   /* -webkit-backdrop-filter: blur(16px) saturate(180%); */
   display: flex;
@@ -308,7 +310,7 @@ body {
 .dark-mode .topbar {
   background: rgba(20, 20, 20, 0.85);
   color: #eee;
-  box-shadow: 0 0 24px 4px rgba(0, 150, 255, 0.25), 0 2px 8px rgba(0,0,0,0.7);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.7);
   border: 1.5px solid #333;
 }
 
