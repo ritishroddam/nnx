@@ -144,7 +144,7 @@ body {
 }
 
 .dark-mode .sidebar {
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(0, 0, 0, 0.50);
   color: #eee;
   box-shadow: 0 2px 8px rgba(0,0,0,0.7);
   border: 1.5px solid #333;
@@ -297,7 +297,7 @@ body {
 }
 
 .dark-mode .topbar {
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(0, 0, 0, 0.50);
   color: #eee;
   box-shadow: 0 2px 8px rgba(0,0,0,0.7);
   border: 1.5px solid #333;
