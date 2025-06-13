@@ -297,8 +297,8 @@ async function backgroundMap() {
   const cameraOptions = {
     tilt: 0,
     heading: 0,
-    zoom: 9,
-    center: { lat: 15.3647, lng:  75.1240 },
+    zoom: 10,
+    center: { lat: 15.350238, lng:  75.137595 },
   };
 
   const mapOptions = {

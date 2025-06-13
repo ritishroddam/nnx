@@ -133,16 +133,10 @@ body {
   top: 11vh;
   height: 88%;
   width: 60px;
-  /* background: black;
-  color: #ccc; */
   background: rgba(255, 255, 255, 0.35);
   color: #222;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
   border: 1.5px solid #bbb;
-  /* backdrop-filter: blur(16px) saturate(180%); */
-  /* -webkit-backdrop-filter: blur(16px) saturate(180%); */
-  /* box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-  backdrop-filter: blur(10px); */
   padding: 1% 0.5%;
   border-radius: 15px;
   transition: width 0.3s ease-in-out;
@@ -150,7 +144,7 @@ body {
 }
 
 .dark-mode .sidebar {
-  background: rgba(20, 20, 20, 0.85);
+  background: rgba(0, 0, 0, 0.16);
   color: #eee;
   box-shadow: 0 2px 8px rgba(0,0,0,0.7);
   border: 1.5px solid #333;
@@ -288,15 +282,10 @@ body {
   top: 2%;
   left: 1%;
   width: 98%;
-  /* background: black;
-  backdrop-filter: blur(10px);
-  color: #ccc; */
   background: rgba(255, 255, 255, 0.35);
   color: #222;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
   border: 1.5px solid #bbb;
-  /* backdrop-filter: blur(16px) saturate(180%); */
-  /* -webkit-backdrop-filter: blur(16px) saturate(180%); */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -308,7 +297,7 @@ body {
 }
 
 .dark-mode .topbar {
-  background: rgba(20, 20, 20, 0.85);
+  background: rgba(0, 0, 0, 0.16);
   color: #eee;
   box-shadow: 0 2px 8px rgba(0,0,0,0.7);
   border: 1.5px solid #333;
@@ -371,10 +360,10 @@ body {
   position: absolute;
   top: -10px;
   right: -10px;
-  background: #dc3545;       /* Purple */
+  background: #dc3545;
   color: #fff;
-  font-size: 10px;           /* Smaller number */
-  width: 24px;               /* Smaller badge */
+  font-size: 10px;
+  width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
@@ -432,7 +421,7 @@ body {
   margin-top: 70px;
   padding: 20px;
   transition: margin-left 0.3s ease-in-out;
-  z-index: 2; /* Ensure the content is above the map */
+  z-index: 2;
 }
 
 .sidebar:hover ~ .content {
@@ -442,8 +431,8 @@ body {
 .theme-toggle {
   width: 30px;
   height: 30px;
-  background-color: #ffd700; /* Sun color for light mode */
-  border-radius: 10px; /* Squarcle shape */
+  background-color: #ffd700;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,7 +441,7 @@ body {
 }
 
 .theme-toggle.dark {
-  background-color: #ccc; /* Background color for dark mode */
+  background-color: #ccc;
 }
 
 .theme-toggle i {
