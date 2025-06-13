@@ -292,7 +292,7 @@ async function initMap() {
 
   const isDarkModeMap = document.body.classList.contains("dark-mode");
 
-  const mapId = isDarkModeMap ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+  const mapId = isDarkModeMap ? "f32dd48f00948a5685a13355" : "f32dd48f00948a56d8551c2d";
 
   const cameraOptions = {
     tilt: 0,
