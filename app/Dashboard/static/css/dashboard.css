@@ -548,7 +548,6 @@ p {
   position: sticky;
   top: 0;
   height: 100vh;
-  padding: 20px 10px 20px 0;
   background: #f7f9fa;
   z-index: 10;
 }
