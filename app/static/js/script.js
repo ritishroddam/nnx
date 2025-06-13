@@ -311,7 +311,4 @@ const mapOptions = {
     google.maps.importLibrary("core"),
   ]);
   fullMap = new Map(document.getElementById("fullMap"), mapOptions);
-  requestAnimationFrame(animate);
-  startInfiniteRotation();
-  setTimeout(startZoomAnimation, 1000); // 3s rotation, then zoom
 })();
