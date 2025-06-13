@@ -116,6 +116,14 @@
   font-weight: 500;
 }
 
+.datetime-container {
+  height: 90px;
+}
+
+.weather-container{
+  height: 150px;
+}
+
 .weather-container h1{
   font-size: 16px;
   font-weight: 600;
@@ -603,7 +611,7 @@ p {
 
 .dashboard-sidebar #map {
   width: 100%;
-  height: 222px;
+  height: 300px;
   border-radius: 0 0 12px 12px;
 }
 
