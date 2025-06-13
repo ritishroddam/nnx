@@ -308,7 +308,6 @@ body {
 
 .topbar h1 {
   font-size: 20px;
-  color: white;
 }
 
 .topbar-icons {
@@ -348,13 +347,16 @@ body {
 }
 
 .notification i.fa-bell {
-  font-size: 24px;           /* Large bell */
-  color: #fff;            /* Bold black */
+  font-size: 24px;
+  color: #222;
   filter: none;
   font-weight: 900;
   position: relative;
   cursor: pointer;
 }
+
+.dark-mode .notification i.fa-bell {
+  color: #ccc;
 
 .notification .badge {
   position: absolute;
