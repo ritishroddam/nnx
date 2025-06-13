@@ -34,6 +34,8 @@ const socket = io(CONFIG.SOCKET_SERVER_URL, {
   reconnectionDelayMax: 5000,
 });
 
+var isDarkModeMap = document.body.classList.contains("dark-mode");
+
 socket.on("connect", () => {
   console.log("Connected to socket server");
 
@@ -284,8 +286,6 @@ function displayFlashMessage(message, category = "danger", dismissAfter = 5000) 
     setTimeout(removeFlash, dismissAfter);
   }
 }
-
-var isDarkModeMap = document.body.classList.contains("dark-mode");
 
 async function initMap() {
   const [{ Map }] = await Promise.all([
