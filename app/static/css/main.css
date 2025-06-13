@@ -416,7 +416,6 @@ body {
   position: fixed;
   top: 11%;
   left: 5.5%; /* Adjust based on your top bar height */
-  bottom: 1%;
   right: 1%; /* Adjust based on your sidebar width */
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
