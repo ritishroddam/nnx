@@ -77,21 +77,7 @@ Dashboard
 
     <div class="dashboard-row">
       <div class="graph-container">
-        <div class="graph-header">
-          <span class="graph-subtitle">Total employee</span>
-          <button class="graph-arrow"><i class="fa fa-chevron-right"></i></button>
-        </div>
-        <div class="graph-title">Track your team</div>
-        <canvas id="teamChart" width="180" height="90"></canvas>
-        <div class="graph-total">
-          <span class="graph-total-number" id="teamTotal">63</span>
-          <span class="graph-total-label">Total members</span>
-        </div>
-        <div class="graph-legend">
-          <div><span class="legend-dot designer"></span> Designer <b>48 members</b></div>
-          <div><span class="legend-dot developer"></span> Developer <b>27 members</b></div>
-          <div><span class="legend-dot manager"></span> Project manager <b>18 members</b></div>
-        </div>
+        <canvas id="vehiclesChart"></canvas>
       </div>
     </div>
 
@@ -121,8 +107,7 @@ Dashboard
                 <th data-column="driving_time">Driving Time <span class="sort-icon"></span></th>
                 <th data-column="idle_time">Idle Time <span class="sort-icon"></span></th>
                 <th data-column="number_of_stops">Number Of Stops <span class="sort-icon"></span></th>
-                <th data-column="max_speed">Max Speed <span class="sort-icon"></span></th>
-                <th data-column="avg_speed">Avg Speed <span class="sort-icon"></span></th>
+                <th data-column="max_avg_speed">Max/Avg Speed <span class="sort-icon"></span></th>
               </tr>
             </thead>
             <tbody id="vehicleTable">

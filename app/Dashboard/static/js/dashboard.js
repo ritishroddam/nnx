@@ -87,8 +87,7 @@ async function fetchVehicleDistances(range = "1day") {
                   <td>${vehicle.driving_time}</td>
                   <td>${vehicle.idle_time}</td>
                   <td>${vehicle.number_of_stops}</td>
-                  <td>${vehicle.max_speed}</td>
-                  <td>${vehicle.avg_speed}</td>
+                  <td>${vehicle.max_speed}/${vehicle.avg_speed}</td>
               </tr>`;
       tableBody.innerHTML += row;
     });
@@ -612,33 +611,3 @@ function fetchStatusData() {
     })
     .catch((error) => console.error("Error fetching status data:", error));
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-  if (document.getElementById('teamChart')) {
-    const ctx = document.getElementById('teamChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Designer', 'Developer', 'Project manager'],
-        datasets: [{
-          data: [48, 27, 18],
-          backgroundColor: [
-            '#7edfa7', // Designer
-            '#4b6cb7', // Developer
-            '#e0e0e0'  // Project manager
-          ],
-          borderWidth: 0,
-          cutout: '70%',
-        }]
-      },
-      options: {
-        rotation: -90,
-        circumference: 180,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
-        }
-      }
-    });
-  }
-});
