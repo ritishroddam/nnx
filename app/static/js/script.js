@@ -136,17 +136,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     body.classList.add("dark-mode");
     themeToggle.classList.add("dark");
     themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-    isDarkModeMap = true;
-    await initMap();
   } else {
     body.classList.remove("dark-mode");
     themeToggle.classList.remove("dark");
     themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     isDarkModeMap = false;
-    await initMap();
   }
 
-  themeToggle.addEventListener("click", function () {
+  themeToggle.addEventListener("click", async function () {
     const isDarkMode = body.classList.toggle("dark-mode");
     themeToggle.classList.toggle("dark");
 
@@ -157,6 +154,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     } else {
       themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
+
+    await initMap();
 
     fetch("/userConfig/editDarkMode", {
       method: "POST",
