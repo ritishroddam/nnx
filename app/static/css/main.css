@@ -361,6 +361,7 @@ body {
 
 .dark-mode .notification i.fa-bell {
   color: #ccc;
+}
 
 .notification .badge {
   position: absolute;
