@@ -198,10 +198,12 @@ body {
   text-decoration: none;
   font-size: 16px;
   transition: 0.3s;
+  border: 1.5px solid transparent
 }
 
 .dark-mode .menu-item {
   color: #ccc;
+  border: 1.5px solid transparent;
 }
 
 .menu-item i {
@@ -211,8 +213,17 @@ body {
 }
 
 .menu-item:hover {
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.10); /* subtle translucent for light mode */
+  color: #222;
   border-radius: 5px;
+  border: 1.5px solid #bbb;
+}
+
+.dark-mode .menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08); /* subtle translucent for dark mode */
+  color: #fff;
+  border-radius: 5px;
+  border: 1.5px solid transparent;
 }
 
 .sidebar-text {
@@ -237,6 +248,7 @@ body {
 
 .submenu li {
   padding: 8px 0;
+  border: 1.5px solid transparent;
 }
 
 .submenu a {
@@ -250,9 +262,19 @@ body {
 }
 
 .submenu li:hover {
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.10); /* subtle translucent for light mode */
   border-radius: 5px;
   padding-left: 10%;
+  border: 1.5px solid #bbb;
+  color: #222;
+}
+
+.dark-mode li:hover{
+  background-color: rgba(255, 255, 255, 0.08); /* subtle translucent for dark mode */
+  border-radius: 5px;
+  padding-left: 10%;
+  border: 1.5px solid #333;
+  color: #fff;
 }
 
 .arrow {
