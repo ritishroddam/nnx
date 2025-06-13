@@ -619,21 +619,44 @@ p {
   border-radius: 0 0 12px 12px;
 }
 
-@media (max-width: 1100px) {
-  .dashboard-main-layout {
-    flex-direction: column;
-  }
-  .dashboard-sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    gap: 10px;
-    padding: 0;
-  }
-  .dashboard-sidebar > * {
-    flex: 1;
-    margin-bottom: 0;
-    margin-right: 10px;
-  }
+.graph-container {
+  background: #f7f7fa;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 32px 24px 18px 24px;
+  width: 340px;
+  min-width: 260px;
+  max-width: 370px;
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  color: #222;
+  position: relative;
+  margin: 0 auto;
 }
+
+.graph-container .graph-title,
+.graph-container h3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 2px;
+  letter-spacing: 0.02em;
+  text-align: left;
+  width: 100%;
+}
+
+.graph-container canvas {
+  margin: 0 auto;
+  display: block;
+  background: transparent;
+  max-width: 220px !important;
+  max-height: 120px !important;
+  /* Remove border and shadow for a clean look */
+  border: none;
+  box-shadow: none;
+}
+
+/* ...existing code... */
