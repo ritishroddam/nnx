@@ -309,6 +309,7 @@ p {
   flex-direction: row;
   flex-wrap: wrap;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  margin-bottom: 100px;
 }
 
 #vehicleLiveData{
