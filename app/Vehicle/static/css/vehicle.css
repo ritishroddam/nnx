@@ -278,9 +278,21 @@ body {
   color: #fff;
 }
 
+.toggle-slider .toggle-option.active,
+.toggle-slider .toggle-option.active i,
+.toggle-slider .toggle-option.active .fa{
+  color: #fff !important;
+}
+
 .dark-mode .toggle-slider .toggle-option.active {
-  background: #111;
-  color: #fff;
+  background: #fff;
+  color: #222;
+}
+
+.dark-mode .toggle-slider .toggle-option.active,
+.dark-mode .toggle-slider .toggle-option.active i,
+.dark-mode .toggle-slider .toggle-option.active .fa{
+  color: #222 !important;
 }
 
 .slider-button {
