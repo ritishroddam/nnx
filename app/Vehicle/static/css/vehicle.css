@@ -240,10 +240,10 @@ body {
   display: flex;
   align-items: center;
   position: relative;
-  width: 68px;
-  height: 26px;
+  width: 56px;
+  height: 22px;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
   overflow: hidden;
   cursor: pointer;
@@ -254,8 +254,8 @@ body {
 .toggle-option {
   flex: 1;
   text-align: center;
-  font-size: 15px;
-  min-width: 30px;
+  font-size: 13px;
+  min-width: 22px;
   height: 100%;
   font-weight: bold;
   z-index: 2;
@@ -265,8 +265,8 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  border-radius: 10px;
-  padding: 0 4px;
+  border-radius: 8px;
+  padding: 0 2px;
 }
 
 .dark-mode .toggle-option {
@@ -287,10 +287,10 @@ body {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 28px;
-  height: 20px;
+  width: 22px;
+  height: 16px;
   background: #222;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: left 0.3s, background 0.3s;
   z-index: 1;
   box-shadow: 0 2px 8px rgba(44,62,80,0.08);
@@ -301,18 +301,18 @@ body {
 }
 
 .toggle-slider.active .slider-button {
-  left: 37px;
+  left: 31px;
 }
 
-.toggle-slider.active .map-option {
+/* .toggle-slider.active .map-option {
   color: #ccc;
   background: #222;
-}
+} */
 
-.toggle-slider.active .list-option {
+/* .toggle-slider.active .list-option {
   color: #fff;
   background: #222;
-}
+} */
 
 .icon-legend-container {
   position: absolute;
