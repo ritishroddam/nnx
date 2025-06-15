@@ -1290,8 +1290,12 @@ document.querySelector(".toggle-slider").addEventListener("click", function () {
   this.classList.toggle("active");
 
   if (this.classList.contains("active")) {
+    document.querySelector(".toggle-option.map-option").classList.remove("active");
+    document.querySelector(".toggle-option.list-option").classList.add("active");
     showListView();
   } else {
+    document.querySelector(".toggle-option.map-option").classList.add("active");
+    document.querySelector(".toggle-option.list-option").classList.remove("active");
     showMapView();
   }
 });
