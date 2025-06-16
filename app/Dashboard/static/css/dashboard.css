@@ -135,7 +135,7 @@
 }
 
 .dark-mode .weather-container {
-  background: #000 !important;
+  background: #222 !important;
   color: #ccc !important;
   box-shadow: 0px 0px 10px #cccccc90 !important;
 }
