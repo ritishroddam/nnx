@@ -168,9 +168,14 @@ body {
   justify-content: center;
 }
 
-.logo img {
+.logo .sidebarLogo {
   width: 40px;
   height: 40px;
+}
+
+.logo .sidebar-Extended-Logo{
+  width: 170;
+  height: 26; 
 }
 
 .logo h2 {
