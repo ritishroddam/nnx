@@ -539,7 +539,7 @@
 .graph-container canvas {
   width: 100% !important;
   max-width: 400px;          
-  height: 320px !important;  
+  height: 340px !important;  
   max-height: 340px;
   display: block;
   margin: 0 auto;
@@ -548,7 +548,7 @@
 .card-chart canvas {
   width: 100% !important;
   max-width: 600px;
-  height: 260px !important;
+  height: 270px !important;
   max-height: 320px;
   display: block;
   margin: 0 auto;
