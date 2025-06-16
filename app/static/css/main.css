@@ -226,14 +226,26 @@ body {
   border: 1.5px solid transparent;
 }
 
-.sidebar-text {
+.sidebar-Extended-Logo {
   display: none;
   transition: opacity 0.3s ease-in-out;
 }
 
-.sidebar:hover .sidebar-text {
+.sidebar:hover .sidebar-Extended-Logo {
   display: inline;
 }
+
+.sidebarLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar:hover .sidebarLogo{
+  display: none;
+}
+
 
 .dropdown {
   cursor: pointer;
