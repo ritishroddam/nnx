@@ -362,8 +362,7 @@ def get_status_data():
                         {
                             "$match": {
                                 "speed": "0.0",
-                                "ignition": "0",
-                                "date_time": {"$lt": now - timedelta(minutes=5)}
+                                "ignition": "0"
                             }
                         },
                         {"$count": "count"}
