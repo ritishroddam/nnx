@@ -68,24 +68,6 @@ let zoomTween = null;
     }
   }
 
-  // document.getElementById("start-animation").addEventListener("click", () => {
-  //   stopRotation();
-  //   // Reset camera options for repeatable animation
-  //   cameraOptions.tilt = 0;
-  //   cameraOptions.heading = 0;
-  //   cameraOptions.zoom = 3;
-  //   cameraOptions.center = { lat: 12.9716, lng: 77.5946 };
-  //   map.moveCamera(cameraOptions);
-
-  //   zoomTween = new TWEEN.Tween(cameraOptions)
-  //     .to({ tilt: 65, heading: 90, zoom: 18 }, 15000) // Slower: 15 seconds for zoom
-  //     .easing(TWEEN.Easing.Quadratic.Out)
-  //     .onUpdate(() => {
-  //       map.moveCamera(cameraOptions);
-  //     })
-  //     .start();
-  // });
-
   function animate(time) {
     requestAnimationFrame(animate);
     TWEEN.update(time);
