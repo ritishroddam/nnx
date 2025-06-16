@@ -184,16 +184,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const weatherDiv = document.getElementById("weather");
     const iconCode = data.weather[0].icon;
     const weatherHTML = `
-                    <div class="weather-info">
-                        <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon" style="width: 50px; height: 50px;" />
+                        <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon"/>
                         <div class="weather-info">
-                          <p><strong>${data.name}</strong></p>
-                          <p>${data.weather[0].description}</p>
-                          <p>Temperature: ${data.main.temp} °C</p>
-                          <p>Humidity: ${data.main.humidity}%</p>
-                          <p>Wind Speed: ${data.wind.speed} m/s</p>
+                          <div class="city"><strong>${data.name}</strong></div>
+                          <div class="desc">${data.weather[0].description}</div>
+                          <div class="temp">Temperature: ${data.main.temp} °C</div>
+                          <div class="humidity">Humidity: ${data.main.humidity}%</div>
+                          <div class="wind">Wind Speed: ${data.wind.speed} m/s</div>
                         </div>
-                    </div>
                 `;
     weatherDiv.innerHTML = weatherHTML;
   }
