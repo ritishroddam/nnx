@@ -773,6 +773,21 @@
   border-radius: 0 0 12px 12px;
 }
 
+.datetime-container {
+  color: #111 !important;
+  border-radius: 24px !important;
+  padding: 12px 22px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 1.2em;
+  font-weight: 500;
+  width: fit-content;
+  min-width: 180px;
+  border: none !important;
+}
+
 .datetime-row {
   display: flex;
   align-items: center;
