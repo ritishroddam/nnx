@@ -52,6 +52,7 @@ def getVehicleStatus(imei_list):
             history = item["history"]
             now = utc_now
 
+            print(f"Processing IMEI: {imei}, Latest Date: {latest['date_time']}, History Count: {latest["date_time"] < twenty_four_hours_ago}")
             if latest["date_time"] < twenty_four_hours_ago:
                 status = "offline"
                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
