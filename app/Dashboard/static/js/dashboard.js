@@ -343,8 +343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             },
             centerText: {
               display: true,
-              text: data.total_devices || 0,
-              text: "Total Vehicles: "
+              text: "Total Vehicles: " + data.total_devices,
             },
           },
           animation: {
