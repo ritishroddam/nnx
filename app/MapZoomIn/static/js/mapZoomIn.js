@@ -1,3 +1,28 @@
+function setCookie(name, value) {
+  document.cookie = `${name}=${value};path=/`;
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
+let isDarkModeMap = true;
+
+document.addEventListener("DOMContentLoaded", async function () {
+  const darkModePreference = getCookie("darkMode");
+  const body = document.body;
+  if (darkModePreference === "true") {
+    body.classList.add("dark-mode");
+  } else {
+    body.classList.remove("dark-mode");
+    isDarkModeMap = false;
+  }
+});
+
+const mapId = isDarkModeMap ? "f32dd48f00948a566626b232" : "f32dd48f00948a56c802fc00";
+
 let fullMap;
 const cameraOptions = {
   tilt: 0,
@@ -8,7 +33,7 @@ const cameraOptions = {
 
 const mapOptions = {
   ...cameraOptions,
-  mapId: "f32dd48f00948a56c802fc00",
+  mapId: mapId,
   disableDefaultUI: true,
   zoomControl: false,
   mapTypeControl: false,
