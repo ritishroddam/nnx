@@ -33,7 +33,6 @@ const cameraOptions = {
 const mapOptions = {
   ...cameraOptions,
   mapId: mapId,
-  styles: mapStyles,
   disableDefaultUI: true,
   zoomControl: false,
   mapTypeControl: false,
