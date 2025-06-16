@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-const mapId = isDarkModeMap ? "f32dd48f00948a56c802fc00" : "f32dd48f00948a566626b232";
+const mapId = isDarkModeMap ? "f32dd48f00948a566626b232" : "f32dd48f00948a56c802fc00";
 
 let fullMap;
 const cameraOptions = {
