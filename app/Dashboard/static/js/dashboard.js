@@ -445,6 +445,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         },
       },
+      elements: {
+        point: {
+          radius: 0,         // Hide all dots by default
+          hoverRadius: 7     // Show dot on hover
+        }
+      },
     },
   });
 
