@@ -18,7 +18,7 @@ const cameraOptions = {
 
 const mapOptions = {
   ...cameraOptions,
-  mapId: "f32dd48f00948a56c802fc00",
+  mapId: "f32dd48f00948a566626b232",
   disableDefaultUI: true,      // disables ALL controls
   zoomControl: false,
   mapTypeControl: false,
