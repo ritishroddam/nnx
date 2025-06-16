@@ -76,11 +76,27 @@
     margin-bottom: 20px;
   }
 }
+
 .dashboard-row {
   display: flex;
+  flex-direction: row;
+  align-items: center;      /* Vertically center the charts */
   justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  gap: 40px;                /* More space between charts */
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.graph-container,
+#vehicleSetion {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 50%;
+  box-sizing: border-box;
 }
 
 .weather-container #weather p{
@@ -259,20 +275,9 @@
   margin-bottom: 10px;
   position: relative;
 }
+
 .graph-container {
-  border-radius: 24px;
-  padding: 28px 28px 18px 28px;
-  min-width: 320px;
-  min-height: 370px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  font-family: 'Poppins', Arial, sans-serif;
-  margin-bottom: 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  margin-left: 10px;
+  padding: 0 10px 0 0;
 }
 
 .graph-container .graph-title,
@@ -468,13 +473,7 @@
 }
 
 #vehicleSetion {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 0 0 0 10px;
 }
 
 #vehicleLiveData{
@@ -501,13 +500,40 @@
 }
 
 .card-chart {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 50%;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  align-items: center;
+  justify-content: center;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.graph-container canvas,
+.card-chart canvas {
+  width: 100% !important;
+  max-width: 420px;
+  height: 260px !important;
+  max-height: 320px;
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-row {
+    flex-direction: column;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .graph-container,
+  #vehicleSetion {
+    max-width: 100%;
+    padding: 0;
+  }
+  .graph-container canvas,
+  .card-chart canvas {
+    max-width: 100%;
+    height: 220px !important;
+  }
 }
 
 .dark-mode .card-chart {
@@ -713,6 +739,16 @@
 }
 
 @media (max-width: 900px) {
+    .dashboard-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .graph-container,
+  #vehicleSetion,
+  .card-chart {
+    min-width: 0;
+    max-width: 100%;
+  }
   .status-container {
     flex-wrap: wrap;
     justify-content: center;
