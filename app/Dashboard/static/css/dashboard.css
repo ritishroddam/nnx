@@ -80,9 +80,9 @@
 .dashboard-row {
   display: flex;
   flex-direction: row;
-  align-items: center;      /* Vertically center the charts */
-  justify-content: space-between;
-  gap: 40px;                /* More space between charts */
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
   width: 100%;
   margin-bottom: 32px;
 }
@@ -277,7 +277,15 @@
 }
 
 .graph-container {
+  flex: 1 1 0;
+  max-width: 420px;      /* Limit the width of the line chart */
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 0 10px 0 0;
+  box-sizing: border-box;
 }
 
 .graph-container .graph-title,
@@ -473,7 +481,15 @@
 }
 
 #vehicleSetion {
+  flex: 1 1 0;
+  max-width: 420px;      /* Limit the width of the gauge chart */
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 0 0 0 10px;
+  box-sizing: border-box;
 }
 
 #vehicleLiveData{
