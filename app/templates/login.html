@@ -22,6 +22,7 @@
     <div id="map"></div>
     <div class="container">
         <div class="login-container">
+            <img class="logo" src="{{ url_for('static', filename='images/fullNxLogo.png') }}" alt="Logo">
             <h2>Login</h2>
             <form method="POST" action="{{ url_for('auth.login') }}">
                 <div class="form-group">
