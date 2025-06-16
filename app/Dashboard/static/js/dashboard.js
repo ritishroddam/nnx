@@ -184,14 +184,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const weatherDiv = document.getElementById("weather");
     const iconCode = data.weather[0].icon;
     const weatherHTML = `
-                    <div class="weather-info">
-                        <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon" style="width: 50px; height: 50px;" />
-                        <p><strong>${data.name}</strong></p>
-                        <p>${data.weather[0].description}</p>
-                        <p>Temperature: ${data.main.temp} °C</p>
-                        <p>Humidity: ${data.main.humidity}%</p>
-                        <p>Wind Speed: ${data.wind.speed} m/s</p>
-                    </div>
+                        <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon"/>
+                        <div class="weather-info">
+                          <div class="city"><strong>${data.name}</strong></div>
+                          <div class="desc">${data.weather[0].description}</div>
+                          <div class="temp">Temperature: ${data.main.temp} °C</div>
+                          <div class="humidity">Humidity: ${data.main.humidity}%</div>
+                          <div class="wind">Wind Speed: ${data.wind.speed} m/s</div>
+                        </div>
                 `;
     weatherDiv.innerHTML = weatherHTML;
   }
@@ -277,16 +277,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Create gradient colors
       const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient1.addColorStop(0, "#336699");
-      gradient1.addColorStop(1, "#1b3651");
+      gradient1.addColorStop(0, "#7bb83d");
+      gradient1.addColorStop(1, "#a1d072");
 
       const gradient2 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient2.addColorStop(0, "#bfbfbf");
-      gradient2.addColorStop(1, "#f2f2f2");
+      gradient2.addColorStop(0, "#33669a");
+      gradient2.addColorStop(1, "#538cc6");
 
       const gradient3 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient3.addColorStop(0, "#595959");
-      gradient3.addColorStop(1, "#0d0d0d");
+      gradient3.addColorStop(0, "#bfbfbf");
+      gradient3.addColorStop(1, "#f2f2f2");
 
       const chartConfig = {
         type: "doughnut",
@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 data.offline_vehicles,
               ],
               backgroundColor: [gradient1, gradient2, gradient3],
-              hoverBackgroundColor: ["#336699", "#bfbfbf", "#595959"],
+              hoverBackgroundColor: ["#7bb83d", "#33669a", "#bfbfbf"],
               borderWidth: 0,
             },
           ],
@@ -366,6 +366,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             },
           },
+          rotation: -90,         // <-- Add this line (degrees)
+          circumference: 180,    // <-- Add this line (degrees)
         },
         plugins: [
           {
@@ -374,7 +376,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               const { width } = chart;
               const { top, bottom } = chart.chartArea;
               const ctx = chart.ctx;
-              const centerY = (top + bottom) / 2;
+              // For half donut, center text lower
+              const centerY = bottom - (bottom - top) / 3;
               const text = chart.config.options.plugins.centerText.text;
 
               ctx.save();
@@ -410,7 +413,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           borderColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBackgroundColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBorderColor: isDarkMode ? "black" : "#fff",
-          pointRadius: 5,
+          pointRadius: 0,        // Hide all points by default
+          pointHoverRadius: 7,   // Show point on hover
           borderWidth: 2,
           fill: true,
           tension: 0.3,
@@ -430,22 +434,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       scales: {
         x: {
-          ticks: {
-            color: isDarkMode ? "#ccc" : "#2f2f2f",
-          },
           grid: {
-            color: isDarkMode ? "#787878" : "#d8d8d8",
+            display: false,
+            drawBorder: false
           },
         },
         y: {
-          beginAtZero: true,
-          ticks: {
-            color: isDarkMode ? "#ccc" : "#2f2f2f",
-          },
           grid: {
-            color: isDarkMode ? "#787878" : "#d8d8d8",
+            display: false,
+            drawBorder: false
           },
         },
+      },
+      elements: {
+        point: {
+          radius: 0,         // Hide all points by default
+          hoverRadius: 7     // Show point on hover
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        intersect: false
+      },
+      plugins: {
+        tooltip: {
+          enabled: true
+        }
       },
     },
   });

@@ -45,28 +45,46 @@ Dashboard
 
     <div class="status-container">
       <div class="status-card" id="running-vehicles">
-        <span class="status-count" id="running-vehicles-count">0 / 0</span>
-        <i class="fa fa-car"></i><span>Running Vehicles</span>
+        <div class="status-row">
+          <i class="fa fa-car"></i>
+          <div class="status-count" id="running-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Running</div>
       </div>
       <div class="status-card" id="idle-vehicles">
-        <span class="status-count" id="idle-vehicles-count">0 / 0</span>
-        <i class="fa-solid fa-hourglass-half"></i><span>Idle Vehicles</span>
+        <div class="status-row">
+          <i class="fa-solid fa-hourglass-half"></i>
+          <div class="status-count" id="idle-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Idle</div>
       </div>
       <div class="status-card" id="parked-vehicles">
-        <span class="status-count" id="parked-vehicles-count">0 / 0</span>
-        <i class="fa fa-parking"></i><span>Parked Vehicles</span>
+        <div class="status-row">
+          <i class="fa fa-parking"></i>
+          <div class="status-count" id="parked-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Parked</div>
       </div>
       <div class="status-card" id="speed-vehicles">
-        <span class="status-count" id="speed-vehicles-count">0 / 0</span>
-        <i class="fa-solid fa-gauge"></i><span>Speed Vehicles (40+)</span>
+        <div class="status-row">
+          <i class="fa-solid fa-gauge"></i>
+          <div class="status-count" id="speed-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Speed (40+)</div>
       </div>
       <div class="status-card" id="overspeed-vehicles">
-        <span class="status-count" id="overspeed-vehicles-count">0 / 0</span>
-        <i class="fa-solid fa-gauge-high"></i><span>Over Speed Vehicles (60+)</span>
+        <div class="status-row">
+          <i class="fa-solid fa-gauge-high"></i>
+          <div class="status-count" id="overspeed-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Over Speed (60+)</div>
       </div>
       <div class="status-card" id="disconnected-vehicles">
-        <span class="status-count" id="disconnected-vehicles-count">0 / 0</span>
-        <i class="fa-solid fa-plug-circle-xmark"></i><span>Disconnected Vehicles</span>
+        <div class="status-row">
+          <i class="fa-solid fa-plug-circle-xmark"></i>
+          <div class="status-count" id="disconnected-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Disconnected</div>
       </div>
     </div>
 
@@ -131,8 +149,14 @@ Dashboard
   <!-- Fixed Right Sidebar -->
   <aside class="dashboard-sidebar">
     <div class="datetime-container">
+      <div class="datetime-row">
+      <i class="fa fa-clock"></i>
       <div id="clock"></div>
+      </div>
+      <div class="datetime-row">
+      <i class="fa fa-calendar"></i>
       <div id="date"></div>
+      </div>
     </div>
       <div class="weather-container">
         <h1>Weather</h1>
