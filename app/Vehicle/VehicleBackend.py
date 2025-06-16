@@ -42,7 +42,7 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
-        results = list(status_collection.find({"imei": {"$in": imei_list}}))
+        results = list(status_collection.find({"_id": {"$in": imei_list}}))
         statuses = []
 
         print("Processing vehicle status results")
@@ -52,7 +52,7 @@ def getVehicleStatus(imei_list):
             history = item["history"]
             now = utc_now
 
-            print(f"Processing IMEI: {imei}, Latest Date: {latest['date_time']}, History Count: {latest["date_time"] < twenty_four_hours_ago}")
+            # print(f"Processing IMEI: {imei}, Latest Date: {latest['date_time']}, History Count: {latest["date_time"] < twenty_four_hours_ago}")
             if latest["date_time"] < twenty_four_hours_ago:
                 status = "offline"
                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
