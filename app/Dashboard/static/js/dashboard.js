@@ -400,78 +400,58 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   var ctx = document.getElementById("devicesChart").getContext("2d");
   var devicesChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: [],
-    datasets: [
-      {
-        label: "Distance Travelled (km)",
-        data: [],
-        backgroundColor: isDarkMode
-          ? "rgba(204, 204, 204, 0.08)"
-          : "rgba(47, 47, 47, 0.08)",
-        borderColor: "#6b90a6",
-        pointBackgroundColor: "#6b90a6",
-        pointBorderColor: "#fff",
-        pointRadius: 0, // Hide all points
-        pointHoverRadius: 8, // Show big dot on hover
-        borderWidth: 3,
-        fill: false,
-        tension: 0.45, // Smooth curve
-      },
-    ],
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        enabled: true,
-        mode: "index",
-        intersect: false,
-        callbacks: {
-          labelPointStyle: function() {
-            return {
-              pointStyle: 'circle',
-              rotation: 0
-            }
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: { display: false, drawBorder: false },
-        ticks: { color: "#b0b6be", font: { size: 16, weight: "bold" } }
-      },
-      y: {
-        grid: { display: false, drawBorder: false },
-        ticks: {
-          color: "#b0b6be",
-          font: { size: 16, weight: "bold" },
-          callback: v => v + " H"
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Distance Travelled (km)",
+          data: [],
+          backgroundColor: isDarkMode
+            ? "rgba(204, 204, 204, 0.2)"
+            : "rgba(47, 47, 47, 0.2)",
+          borderColor: isDarkMode ? "#ccc" : "#2f2f2f",
+          pointBackgroundColor: isDarkMode ? "#ccc" : "#2f2f2f",
+          pointBorderColor: isDarkMode ? "black" : "#fff",
+          pointRadius: 5,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
         },
-        min: 4,
-        max: 10,
-        stepSize: 2
-      }
+      ],
     },
-    elements: {
-      point: {
-        radius: 0,
-        hoverRadius: 8,
-        backgroundColor: "#fff",
-        borderColor: "#6b90a6",
-        borderWidth: 3
-      }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: "#2f2f2f",
+            pointStyle: "rectRounded",
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: isDarkMode ? "#ccc" : "#2f2f2f",
+          },
+          grid: {
+            color: isDarkMode ? "#787878" : "#d8d8d8",
+          },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: isDarkMode ? "#ccc" : "#2f2f2f",
+          },
+          grid: {
+            color: isDarkMode ? "#787878" : "#d8d8d8",
+          },
+        },
+      },
     },
-    hover: {
-      mode: "nearest",
-      intersect: false
-    }
-  }
-});
+  });
 
   async function fetchDistanceTravelledData() {
     try {
