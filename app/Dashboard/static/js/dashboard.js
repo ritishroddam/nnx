@@ -366,6 +366,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             },
           },
+          rotation: -90,         // <-- Add this line (degrees)
+          circumference: 180,    // <-- Add this line (degrees)
         },
         plugins: [
           {
@@ -374,7 +376,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               const { width } = chart;
               const { top, bottom } = chart.chartArea;
               const ctx = chart.ctx;
-              const centerY = (top + bottom) / 2;
+              // For half donut, center text lower
+              const centerY = bottom - (bottom - top) / 3;
               const text = chart.config.options.plugins.centerText.text;
 
               ctx.save();
