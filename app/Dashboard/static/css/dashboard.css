@@ -76,11 +76,13 @@
     margin-bottom: 20px;
   }
 }
+
 .dashboard-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 24px;
+  width: 100%;
 }
 
 .weather-container #weather p{
@@ -260,19 +262,9 @@
   position: relative;
 }
 .graph-container {
-  border-radius: 24px;
-  padding: 28px 28px 18px 28px;
+  flex: 2 1 0;
   min-width: 320px;
-  min-height: 370px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  font-family: 'Poppins', Arial, sans-serif;
-  margin-bottom: 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  margin-left: 10px;
+  max-width: 100%;
 }
 
 .graph-container .graph-title,
@@ -468,13 +460,12 @@
 }
 
 #vehicleSetion {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 320px;
+  max-width: 100%;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+  justify-content: stretch;
 }
 
 #vehicleLiveData{
@@ -501,13 +492,11 @@
 }
 
 .card-chart {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 50%;
+  flex: 1 1 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  justify-content: stretch;
 }
 
 .dark-mode .card-chart {
@@ -713,6 +702,16 @@
 }
 
 @media (max-width: 900px) {
+    .dashboard-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .graph-container,
+  #vehicleSetion,
+  .card-chart {
+    min-width: 0;
+    max-width: 100%;
+  }
   .status-container {
     flex-wrap: wrap;
     justify-content: center;
