@@ -278,9 +278,9 @@
 }
 
 .graph-container {
-  flex: 0 1 300px;           /* Make vehiclesChart less wide */
-  max-width: 320px;
-  min-width: 220px;
+  flex: 0 1 380px;          
+  max-width: 400px;
+  min-width: 260px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -538,9 +538,9 @@
 
 .graph-container canvas {
   width: 100% !important;
-  max-width: 320px;
-  height: 260px !important;
-  max-height: 320px;
+  max-width: 400px;          
+  height: 320px !important;  
+  max-height: 340px;
   display: block;
   margin: 0 auto;
 }
