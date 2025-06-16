@@ -84,19 +84,19 @@
   flex-wrap: wrap;
 }
 
-.weather-info, .datetime-container{
-  margin: 0 0 10px 0;
-}
 .weather-container #weather p{
   color: black;
   font-weight: 500;
 }
+
 .dark-mode .weather-section #weather{
   color: #ccc;
 }
+
 .traffic {
   width: 90%;
 }
+
 .weather-section {
   width: 130px;
   height: 150px;
