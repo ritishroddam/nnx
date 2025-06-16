@@ -12,6 +12,7 @@ let isDarkModeMap = true;
 
 document.addEventListener("DOMContentLoaded", async function () {
   const darkModePreference = getCookie("darkMode");
+  const body = document.body;
   if (darkModePreference === "true") {
     body.classList.add("dark-mode");
   } else {
