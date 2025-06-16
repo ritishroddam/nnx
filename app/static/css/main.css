@@ -246,6 +246,14 @@ body {
   display: none;
 }
 
+.sidebar-text{
+  display: none;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar:hover .sidebar-text {
+  display: inline;
+}
 
 .dropdown {
   cursor: pointer;
