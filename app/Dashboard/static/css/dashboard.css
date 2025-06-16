@@ -646,7 +646,7 @@
 }
 
 .status-card i {
-  font-size: 1em;
+  font-size: 1.1em;
   color: #111;
   margin: 0;
   display: inline-block;
@@ -654,13 +654,12 @@
 }
 
 .status-label {
-  font-size: 1em;
+  font-size: .9em;
   font-weight: 700;
   color: #111;
   margin-top: 0.3em;
   margin-bottom: 0;
   line-height: 1.1;
-  text-align: center;
   word-break: break-word;
   letter-spacing: 0.01em;
 }
@@ -671,8 +670,8 @@
 }
 
 .status-count {
-  font-size: 1.5em;
-  font-weight: 600;
+  font-size: 2.4em;
+  font-weight: 500;
   color: #111;
   margin: 0;
   display: inline-block;
