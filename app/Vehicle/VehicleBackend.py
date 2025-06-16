@@ -13,6 +13,7 @@ vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_fol
 atlanta_collection = db['atlanta']
 vehicle_inventory_collection = db['vehicle_inventory']
 company_collection = db['customers_list']
+status_collection = db['statusAtlanta']
 
 @vehicle_bp.route('/map')
 @jwt_required()
@@ -40,26 +41,8 @@ def getVehicleStatus(imei_list):
     try:
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
-        seven_days_ago = utc_now - timedelta(days=7)
-        pipeline = [
-            {"$match": {"imei": {"$in": imei_list},
-                        "date_time": {
-                        "$gte": seven_days_ago,
-                    }}},
-            {"$sort": {"date_time": -1}},
-            {"$group": {
-                "_id": "$imei",
-                "latest": {"$first": "$$ROOT"},
-                "history": {"$push": {
-                    "date_time": "$date_time",
-                    "ignition": "$ignition",
-                    "speed": "$speed"
-                }}
-            }},
-        ]
-
-        print("Running aggregation pipeline for vehicle status")
-        results = list(atlanta_collection.aggregate(pipeline))
+        
+        results = list(status_collection.find({"imei": {"$in": imei_list}}))
         statuses = []
 
         print("Processing vehicle status results")
