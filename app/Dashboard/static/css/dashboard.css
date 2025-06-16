@@ -106,8 +106,6 @@
 .weather-container {
   background: #fff !important;
   border-radius: 24px !important;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(10px) !important;
   padding: 18px 24px !important;
   display: flex;
   flex-direction: row;
@@ -729,7 +727,6 @@ p {
   width: 300px;
   background: #fff !important;
   color: #111 !important;
-  backdrop-filter: none !important;
   padding: 12px 22px !important;
   display: flex;
   flex-direction: column;
@@ -737,7 +734,6 @@ p {
   gap: 8px;
   font-size: 1.2em;
   font-weight: 500;
-  border: none !important;
 }
 
 .datetime-row {
