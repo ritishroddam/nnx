@@ -452,6 +452,15 @@ document.addEventListener("DOMContentLoaded", async () => {
           hoverRadius: 7     // Show point on hover
         }
       },
+      interaction: {
+        mode: 'nearest',
+        intersect: false
+      },
+      plugins: {
+        tooltip: {
+          enabled: true
+        }
+      },
     },
   });
 
