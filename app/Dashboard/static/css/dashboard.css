@@ -684,11 +684,10 @@ p {
 .datetime-row svg {
   color: #222 !important;
   font-size: 1.5em;
-  margin-right: 6px;
+  margin-right: 8px;
 }
 
-.datetime-row span,
-.datetime-row p {
+.datetime-row span {
   color: #111 !important;
   font-size: 1.3em;
   font-weight: 600;
