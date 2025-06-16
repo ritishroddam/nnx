@@ -8,6 +8,18 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
 }
 
+let isDarkModeMap = true;
+
+document.addEventListener("DOMContentLoaded", async function () {
+  const darkModePreference = getCookie("darkMode");
+  if (darkModePreference === "true") {
+    body.classList.add("dark-mode");
+  } else {
+    body.classList.remove("dark-mode");
+    isDarkModeMap = false;
+  }
+});
+
 let map;
 const cameraOptions = {
   tilt: 0,
@@ -16,9 +28,11 @@ const cameraOptions = {
   center: { lat: 0, lng: 0 }, // Equator
 };
 
+const mapId = isDarkModeMap ? "f32dd48f00948a56c802fc00" : "f32dd48f00948a566626b232";
+
 const mapOptions = {
   ...cameraOptions,
-  mapId: "f32dd48f00948a566626b232",
+  mapId: mapId,
   disableDefaultUI: true,
   zoomControl: false,
   mapTypeControl: false,

@@ -1,91 +1,26 @@
-const mapStyles = [
-  {
-    "elementType": "geometry",
-    "stylers": [{ "color": "#f5f5f5" }]
-  },
-  {
-    "elementType": "labels.icon",
-    "stylers": [{ "visibility": "off" }]
-  },
-  {
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#616161" }]
-  },
-  {
-    "elementType": "labels.text.stroke",
-    "stylers": [{ "color": "#f5f5f5" }]
-  },
-  {
-    "featureType": "administrative.land_parcel",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#bdbdbd" }]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#eeeeee" }]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#757575" }]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#e5e5e5" }]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#9e9e9e" }]
-  },
-  {
-    "featureType": "road",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#ffffff" }]
-  },
-  {
-    "featureType": "road.arterial",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#757575" }]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#dadada" }]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#616161" }]
-  },
-  {
-    "featureType": "road.local",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#9e9e9e" }]
-  },
-  {
-    "featureType": "transit.line",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#e5e5e5" }]
-  },
-  {
-    "featureType": "transit.station",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#eeeeee" }]
-  },
-  {
-    "featureType": "water",
-    "elementType": "geometry",
-    "stylers": [{ "color": "#def2ff" }]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.fill",
-    "stylers": [{ "color": "#9e9e9e" }]
+function setCookie(name, value) {
+  document.cookie = `${name}=${value};path=/`;
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+}
+
+let isDarkModeMap = true;
+
+document.addEventListener("DOMContentLoaded", async function () {
+  const darkModePreference = getCookie("darkMode");
+  if (darkModePreference === "true") {
+    body.classList.add("dark-mode");
+  } else {
+    body.classList.remove("dark-mode");
+    isDarkModeMap = false;
   }
-];
+});
+
+const mapId = isDarkModeMap ? "f32dd48f00948a56c802fc00" : "f32dd48f00948a566626b232";
 
 let fullMap;
 const cameraOptions = {
@@ -97,7 +32,7 @@ const cameraOptions = {
 
 const mapOptions = {
   ...cameraOptions,
-  mapId: "f32dd48f00948a566626b232",
+  mapId: mapId,
   styles: mapStyles,
   disableDefaultUI: true,
   zoomControl: false,
