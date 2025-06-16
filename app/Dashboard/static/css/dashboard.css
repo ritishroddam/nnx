@@ -633,6 +633,12 @@
   box-sizing: border-box;
 }
 
+.dark-mode .status-container {
+  background: #222;
+  color: #ccc;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .status-row {
   display: flex;
   align-items: center;
@@ -653,6 +659,10 @@
   vertical-align: middle;
 }
 
+.dark-mode .status-card i {
+  color: #ccc;
+}
+
 .status-label {
   font-size: .9em;
   font-weight: 700;
@@ -662,6 +672,10 @@
   line-height: 1.1;
   word-break: break-word;
   letter-spacing: 0.01em;
+}
+
+.dark-mode .status-label {
+  color: #ccc;
 }
 
 .status-card span {
@@ -677,6 +691,10 @@
   display: inline-block;
   vertical-align: middle;
   line-height: 1;
+}
+
+.dark-mode .status-count {
+  color: #ccc;
 }
 
 .status-card span:not(.status-count) {
