@@ -181,13 +181,6 @@
   margin-bottom: 1px;
 }
 
-/* Remove dark mode override for weather-container */
-.dark-mode .weather-container {
-  background: #fff !important;
-  color: #111 !important;
-  box-shadow: none !important;
-}
-
 .datetime-container,
 .weather-container {
   margin-right: 10px;
