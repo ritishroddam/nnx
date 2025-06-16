@@ -277,16 +277,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Create gradient colors
       const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient1.addColorStop(0, "#336699");
-      gradient1.addColorStop(1, "#1b3651");
+      gradient1.addColorStop(0, "#7bb83d");
+      gradient1.addColorStop(1, "#a1d072");
 
       const gradient2 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient2.addColorStop(0, "#bfbfbf");
-      gradient2.addColorStop(1, "#f2f2f2");
+      gradient2.addColorStop(0, "#595959");
+      gradient2.addColorStop(1, "#0d0d0d");
 
       const gradient3 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient3.addColorStop(0, "#595959");
-      gradient3.addColorStop(1, "#0d0d0d");
+      gradient3.addColorStop(0, "#bfbfbf");
+      gradient3.addColorStop(1, "#f2f2f2");
 
       const chartConfig = {
         type: "doughnut",
