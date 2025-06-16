@@ -266,6 +266,7 @@
   margin-bottom: 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
+  margin-left: 10px;
 }
 
 .graph-container .graph-title,
