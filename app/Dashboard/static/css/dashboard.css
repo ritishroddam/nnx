@@ -628,6 +628,8 @@ p {
   position: sticky;
   top: 0;
   z-index: 10;
+  margin-top: 10px;
+  margin-right: 5px;
 }
 
 .dashboard-sidebar {
