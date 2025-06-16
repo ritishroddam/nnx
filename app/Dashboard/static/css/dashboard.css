@@ -116,10 +116,6 @@
   font-weight: 500;
 }
 
-.datetime-container {
-  height: 90px;
-}
-
 .weather-container{
   height: 150px;
 }
@@ -655,10 +651,9 @@ p {
 }
 
 .datetime-container {
+  width: 300px;
   background: #fff !important;
   color: #111 !important;
-  border-radius: 24px !important;
-  box-shadow: none !important;
   backdrop-filter: none !important;
   padding: 12px 22px !important;
   display: flex;
@@ -667,8 +662,6 @@ p {
   gap: 8px;
   font-size: 1.2em;
   font-weight: 500;
-  width: fit-content;
-  min-width: 180px;
   border: none !important;
 }
 
