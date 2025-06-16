@@ -9,9 +9,9 @@ function getCookie(name) {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
+  let isDarkModeMap = true;
   const darkModePreference = getCookie("darkMode");
   const body = document.body;
-  let isDarkModeMap = true;
   if (darkModePreference === "true") {
     body.classList.add("dark-mode");
     isDarkModeMap = true;
@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   const mapId = isDarkModeMap
-    ? "f32dd48f00948a566626b232"
-    : "f32dd48f00948a56c802fc00";
+    ? "f32dd48f00948a56c802fc00"
+    : "f32dd48f00948a566626b232";
 
   const cameraOptions = {
     tilt: 0,
