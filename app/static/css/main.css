@@ -163,14 +163,14 @@ body {
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
   margin-bottom: 20px;
   justify-content: center;
+  padding: 10px;
 }
 
 .logo .sidebarLogo {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 21px;
 }
 
 .logo .sidebar-Extended-Logo{
