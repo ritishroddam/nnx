@@ -134,12 +134,6 @@
   padding: 0;
 }
 
-.dark-mode .weather-container {
-  background: #2a2d37 !important;
-  color: #ccc !important;
-  box-shadow: 0px 0px 10px #cccccc90 !important;
-}
-
 .weather-icon {
   width: 70px;
   height: 70px;
