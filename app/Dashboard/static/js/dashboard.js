@@ -413,7 +413,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           borderColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBackgroundColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBorderColor: isDarkMode ? "black" : "#fff",
-          pointRadius: 5,
+          pointRadius: 0,        // Hide all points by default
+          pointHoverRadius: 7,   // Show point on hover
           borderWidth: 2,
           fill: true,
           tension: 0.3,
@@ -447,8 +448,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       elements: {
         point: {
-          radius: 0,         // Hide all dots by default
-          hoverRadius: 7     // Show dot on hover
+          radius: 0,         // Hide all points by default
+          hoverRadius: 7     // Show point on hover
         }
       },
     },
