@@ -637,9 +637,7 @@
 }
 
 .dark-mode .status-container {
-  background: #222;
   color: #ccc;
-  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .status-row {
