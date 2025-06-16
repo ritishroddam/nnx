@@ -431,6 +431,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         },
       },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+        },
+        y: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+        },
+      },
     },
   });
 
