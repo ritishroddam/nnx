@@ -431,25 +431,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         },
       },
-      scales: {
-        x: {
-          ticks: {
-            color: isDarkMode ? "#ccc" : "#2f2f2f",
-          },
-          grid: {
-            color: isDarkMode ? "#787878" : "#d8d8d8",
-          },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: isDarkMode ? "#ccc" : "#2f2f2f",
-          },
-          grid: {
-            color: isDarkMode ? "#787878" : "#d8d8d8",
-          },
-        },
-      },
     },
   });
 
