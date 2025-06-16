@@ -9,15 +9,19 @@
 }
 .cards #card1 {
   background-color: #283747;
+  color: azure;
 }
 .cards #card2 {
   background-color: #2e4053;
+  color: azure;
 }
 .cards #card3 {
   background-color: #34495e;
+  color: azure;
 }
 .cards #card4 {
   background-color: #5d6d7e;
+  color: azure;
 }
 
 .dark-mode .cards #card1 {
