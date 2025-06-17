@@ -141,6 +141,12 @@
   overflow-y: auto;
 }
 
+.dark-mode .modal-content {
+  background-color: #333;
+  color: #fff;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .close {
   color: #aaa;
   float: right;
