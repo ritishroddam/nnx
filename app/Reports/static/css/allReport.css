@@ -199,6 +199,13 @@
   margin-bottom: 15px;
 }
 
+.dark-mode .modal-content .form-group {
+  background-color: #444;
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .dark-mode .modal-content form {
   background-color: #444;
   color: #fff;
@@ -207,10 +214,6 @@
 .modal-content form .form-group label {
   display: block;
   margin-bottom: 5px;
-}
-
-.dark-mode .modal-content form label {
-  color: #fff;
 }
 
 .modal-content form .form-group select {
