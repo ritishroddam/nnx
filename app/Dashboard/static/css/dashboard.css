@@ -462,7 +462,7 @@
   align-items: center; /* Align text and line in the center */
   gap: 10px; /* Space between text and line */
   padding: 15px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   margin-top: 20px;
 }
 
@@ -538,7 +538,7 @@
 .card-chart canvas { 
   width: 100% !important;
   max-width: 600px;
-  height: 270px !important;
+  height: 300px !important;
   max-height: 320px;
   display: block;
   margin: 0 auto;
