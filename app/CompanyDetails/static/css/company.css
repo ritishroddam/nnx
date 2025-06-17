@@ -144,6 +144,12 @@ tr:hover {
   white-space: nowrap;
 }
 
+.dark-mode .company-table-container {
+  background-color: #000;
+  color: #ccc;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .company-table {
   min-width: 1600px;
   width: max-content;
@@ -223,6 +229,16 @@ tr:hover {
 .dark-mode .company-table th {
     background-color: #333;
     color: #ccc;
+}
+
+.dark-mode .company-table th,
+.dark-mode .company-table td {
+    color: #eee !important;
+}
+
+/* Optional: Make sure background for empty rows is also dark */
+.dark-mode .company-table td {
+    background-color: #000 !important;
 }
 
 .dark-mode .company-table tr:hover {

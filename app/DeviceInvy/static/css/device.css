@@ -379,6 +379,11 @@ tr:hover {
     overflow-x: hidden;
 }
 
+.dark-mode .device-table tbody{
+    background-color: #000;
+    color: #ccc;
+}
+
 .device-table th,
 .device-table td {
     padding: 12px 15px;
