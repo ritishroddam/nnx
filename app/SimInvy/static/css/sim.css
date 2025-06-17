@@ -446,7 +446,6 @@ input[type="date"] {
 /* Optional: dark mode support if you want to match DeviceInvy dark mode */
 .dark-mode .sim-table {
     background-color: #000;
-    color: #ccc;
     box-shadow: 0px 0px 10px #cccccc90;
 }
 
@@ -456,7 +455,7 @@ input[type="date"] {
 }
 
 .dark-mode .sim-table tr:hover {
-    background-color: #444;
+    background-color: #ccc;
 }
 
 .search-container {
@@ -467,6 +466,11 @@ input[type="date"] {
     padding: 10px;
     background-color: #f5f5f5;
     border-radius: 5px;
+}
+
+.dark-mode .search-container {
+    background-color: #333;
+    color: #ccc;
 }
 
 .search-container input {
