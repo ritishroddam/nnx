@@ -384,6 +384,10 @@ tr:hover {
     color: #ccc;
 }
 
+.dark-mode .device-table tbody tr:hover {
+    background-color: #333;
+}
+
 .device-table th,
 .device-table td {
     padding: 12px 15px;
