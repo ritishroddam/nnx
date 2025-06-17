@@ -199,11 +199,9 @@
   margin-bottom: 15px;
 }
 
-.dark-mode .modal-content .form-group {
+.dark-mode .form-group {
   background-color: #444;
   color: #fff;
-  padding: 10px;
-  border-radius: 5px;
 }
 
 .dark-mode .modal-content form {
