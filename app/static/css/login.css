@@ -13,11 +13,13 @@ body {
   z-index: 1;
 }
 
-.logo {
+.logo{
   display: block;
   height: 120px;
-  width: auto;
-  margin-bottom: 2vh;
+  width: 95px;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .container {
@@ -36,27 +38,40 @@ body {
 }
 
 .alert {
-  font-size: 1.6vh;
-  font-weight: 500;
-  border-left: 5px solid;
-  padding: 1.5vh 1vw;
+  padding: 2vh 2vw;
+  border-radius: 1vh;
+  width: 100%;
+  margin-bottom: 2vh;
+  box-sizing: border-box;
 }
 
-.alert-success { border-color: #28a745; }
-.alert-danger { border-color: #dc3545; }
-.alert-warning { border-color: #ffc107; }
-.alert-info { border-color: #17a2b8; }
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
 
 .login-container {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 3vh 2vw;
-  border-radius: 1.5vh;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2vh;
-  align-items: center;
+  margin: 0;
 }
 
 h2 {
@@ -66,44 +81,33 @@ h2 {
 }
 
 .form-group {
-  width: 100%;
+  margin-bottom: 2vh;
 }
 
-.form-group label {
-  font-weight: 600;
-  color: #2b2b2b;
-  font-size: 1.9vh;
+label {
   display: block;
-  margin-bottom: 0.8vh;
+  margin-bottom: 1vh;
+  font-weight: bold;
 }
 
 input {
   width: 100%;
-  padding: 1.2vh 1vw;
-  font-size: 1.8vh;
-  border: 1px solid #ccc;
+  padding: 1.5vh 1vw;
+  border: 0.2vh solid #ddd;
   border-radius: 1vh;
   box-sizing: border-box;
-}
-
-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0.4vh rgba(0, 123, 255, 0.25);
-  outline: none;
+  font-size: 1.8vh;
 }
 
 .btn {
   width: 100%;
   padding: 1.5vh 0;
   background-color: #007bff;
-  color: #fff;
-  font-size: 2vh;
-  font-weight: bold;
+  color: white;
   border: none;
   border-radius: 1vh;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-  margin-top: 1.5vh;
+  font-size: 2vh;
 }
 
 .btn:hover {
