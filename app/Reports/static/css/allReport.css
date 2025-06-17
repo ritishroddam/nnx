@@ -209,10 +209,10 @@
   margin-bottom: 5px;
 }
 
+.dark-mode .modal-content form label,
 .dark-mode .modal-content form input,
-.dark-mode .modal-content form label {
-  color: #fff;
-  background-color: #000;
+.dark-mode .modal-content form select {
+  color: #ccc;
 }
 
 .modal-content form .form-group select {
