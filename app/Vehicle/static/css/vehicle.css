@@ -15,7 +15,6 @@ body {
   left: 11vh;
   width: 420px;
   max-height: 88vh;
-  overflow-y: auto;
   background: white;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
@@ -625,7 +624,7 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   background: transparent;
-  padding: 20px 10px 10px 10px;
+  padding: 5px 10px 10px 10px;
   border-radius: 12px;
   position: relative;
   width: 389px;
@@ -633,6 +632,7 @@ input:checked + .slider:before {
 
 #vehicle-list {
   overflow-y: auto;
+  max-height: 76vh;
   flex: 1;
   padding: 8px;
 }
