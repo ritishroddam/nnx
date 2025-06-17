@@ -957,6 +957,12 @@ input:checked + .slider:before {
   min-width: 320px;
   max-width: 90vw;
 }
+
+.dark-mode #share-location-popup {
+  background: #1e1e1e;
+  color: #ccc;
+}
+
 .share-popup-content h3 {
   margin-top: 0;
   font-size: 20px;
