@@ -34,29 +34,6 @@ FIELD_COLLECTION_MAP = {
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
 
-# def get_date_range_filter(date_range):
-#     """Improved date range filter using datetime objects"""
-#     tz = pytz.timezone('UTC')
-#     now = datetime.now(tz)
-    
-#     if date_range == "last24hours":
-#         return {'date_time': {'$gte': now - timedelta(hours=24)}}
-#     elif date_range == "today":
-#         today_start = datetime(now.year, now.month, now.day, tzinfo=tz)
-#         return {'date_time': {'$gte': today_start}}
-#     elif date_range == "yesterday":
-#         yesterday_start = datetime(now.year, now.month, now.day, tzinfo=tz) - timedelta(days=1)
-#         yesterday_end = datetime(now.year, now.month, now.day, tzinfo=tz)
-#         return {'date_time': {'$gte': yesterday_start, '$lt': yesterday_end}}
-#     elif date_range == "last7days":
-#         return {'date_time': {'$gte': now - timedelta(days=7)}}
-#     elif date_range == "last30days":
-#         return {'date_time': {'$gte': now - timedelta(days=30)}}
-#     elif date_range == "custom":
-#         # You'll need to implement custom date range handling
-#         return {}
-#     return {}
-
 def get_date_range_filter(date_range, from_date=None, to_date=None):
     """Improved date range filter using datetime objects"""
     tz = pytz.timezone('UTC')
