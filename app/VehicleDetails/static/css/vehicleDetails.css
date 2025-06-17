@@ -45,6 +45,14 @@ select {
   margin-bottom: 15px;
 }
 
+#submitBtn{
+  background-color: #38b000;
+}
+
+#submitBtn:hover {
+  background-color: #2a8f00;
+}
+
 .success {
   background-color: #28a745;
 }
