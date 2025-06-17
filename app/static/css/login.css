@@ -21,8 +21,8 @@ body {
 
 .container {
   position: fixed;
-  top: 3.8vh;
-  right: 5vw;
+  top: 20vh;
+  right: 38vw;
   width: 22vw;
   padding: 2vw 2vw 2vw 2vw;
   background: transparent;
