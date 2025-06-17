@@ -141,6 +141,12 @@
   overflow-y: auto;
 }
 
+.dark-mode .modal-content {
+  background-color: #333;
+  color: #fff;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .close {
   color: #aaa;
   float: right;
@@ -191,6 +197,11 @@
 
 .modal-content form .form-group {
   margin-bottom: 15px;
+}
+
+.dark-mode .modal-content form .form-group{
+  background-color: #444;
+  color: #fff;
 }
 
 .modal-content form .form-group label {
@@ -257,4 +268,43 @@ input[type="datetime-local"] {
     -moz-appearance: none;
     appearance: none;
     height: calc(2.25rem + 2px);
+}
+
+.dark-mode .modal-content,
+.dark-mode .modal-content form,
+.dark-mode .modal-content form .form-group {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .selected-fields li {
+  background-color: #222;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.dark-mode .field-selection {
+  background-color: #222;
+  color: #fff;
+}
+
+.dark-mode .field-selection,
+.dark-mode .field-selection * {
+  color: #fff !important;
+}
+
+.dark-mode .field-selection label {
+  color: #fff !important;
+}
+
+/* If your field-selection items have a background, make it darker for contrast */
+.dark-mode .field-selection > div {
+  background: #222 !important;
+  color: #fff !important;
+}
+
+/* Optional: style the Remove button for dark mode */
+.dark-mode .selected-fields li button {
+  background-color: #007bff;
+  color: #fff;
 }
