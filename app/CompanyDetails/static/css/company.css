@@ -225,6 +225,16 @@ tr:hover {
     color: #ccc;
 }
 
+.dark-mode .company-table th,
+.dark-mode .company-table td {
+    color: #eee !important;
+}
+
+/* Optional: Make sure background for empty rows is also dark */
+.dark-mode .company-table td {
+    background-color: #000 !important;
+}
+
 .dark-mode .company-table tr:hover {
     background-color: #444;
 }
