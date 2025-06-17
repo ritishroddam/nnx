@@ -162,3 +162,21 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+.input-icon-group {
+  position: relative;
+}
+
+.input-icon-group input {
+  padding-left: 3.5vh; 
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 1vh;
+  transform: translateY(-50%);
+  font-size: 1.8vh;
+  color: #007bff;
+  pointer-events: none;
+}
