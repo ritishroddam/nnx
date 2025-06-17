@@ -109,7 +109,7 @@ input {
   border-radius: 4px;
 }
 
-.user-info a{
+.user-info p a{
   text-decoration: none;
   color:darkblue
 }
