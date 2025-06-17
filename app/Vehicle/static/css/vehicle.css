@@ -76,7 +76,7 @@ body {
 .vehicle-card {
   background: #fff;
   border-radius: 14px;
-  box-shadow: 0 2px 8px #0001;
+  box-shadow: 0 2px 8px #ccc;
   margin-bottom: 14px;
   padding: 14px 18px 10px 14px;
   display: flex;
