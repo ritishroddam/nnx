@@ -75,7 +75,7 @@ body {
 }
 
 .dark-mode .login-container {
-  background: #343a40;
+  background: #000;
   border: 3px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 0 1vh rgba(255, 255, 255, 0.6), 0 2vh 4vh rgba(0, 0, 0, 0.1);
 }
