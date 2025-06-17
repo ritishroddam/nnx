@@ -89,6 +89,10 @@
     text-transform: uppercase;
 }
 
+.dark-mode .alert-type-header {
+    color: #ccc;
+}
+
 .alerts-filter {
     display: flex;
     gap: 15px;
