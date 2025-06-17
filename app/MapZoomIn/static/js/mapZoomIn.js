@@ -88,8 +88,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     labelDiv.style.top = "-28px";
     labelDiv.style.left = "50%";
     labelDiv.style.transform = "translateX(-50%)";
-    labelDiv.style.background = "rgba(255,255,255,0.8)";
-    labelDiv.style.color = "#fff";
+    labelDiv.style.background = isDarkModeMap ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)";
+    labelDiv.style.color = isDarkModeMap ? "black" : "#fff";
     labelDiv.style.padding = "2px 8px";
     labelDiv.style.borderRadius = "4px";
     labelDiv.style.fontSize = "14px";
