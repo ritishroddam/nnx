@@ -22,11 +22,10 @@ body {
 .container {
   position: fixed;
   top: 3.8vh;
-  right: 2vw;
+  right: 5vw;
   width: 22vw;
   padding: 2vw 2vw 2vw 2vw;
-  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.1);
-  background: #fff;
+  background: transparent;
   border-radius: 1.5vh;
   display: flex;
   flex-direction: column;
