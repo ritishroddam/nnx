@@ -41,7 +41,8 @@
   margin: 0 auto;
 }
 
-.dark-mode .register-container{
+.dark-mode .register-container,
+.dark-mode .register-container h2{
   background-color: #2c2c2c;
   color: #f0f0f0;
 }
