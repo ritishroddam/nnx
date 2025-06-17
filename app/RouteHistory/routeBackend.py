@@ -82,18 +82,19 @@ def show_vehicle_data(LicensePlateNumber):
                     is_active = True
 
                 now = datetime.now()
-                five_minutes_ago = now - timedelta(minutes=5)
+                five_minutes_ago = now - timedelta(hours=1)
 
                 for entry in vehicle_data:
                     if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo=pytz.UTC):
                         if recent_data is None:
                             recent_data = []
-                        recent_data.append(
-                            {
-                                "time": entry["time"],
-                                "speed": entry["speed"]
-                            }
-                        )
+                        if entry.get("speed") is not "0.0":
+                            recent_data.append(
+                                {
+                                    "time": entry["time"],
+                                    "speed": entry["speed"]
+                                }
+                            )
 
         if recent_data and vehicle_data:
             print(f"Recent data for vehicle {LicensePlateNumber}: {recent_data}")
