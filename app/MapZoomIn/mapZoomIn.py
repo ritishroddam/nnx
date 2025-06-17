@@ -19,11 +19,23 @@ def home():
     claims = get_jwt()
     company = claims.get('company_id')
     if company == 'none':
+        print()
+        print()
+        print()
+        print()
+        print()
+        print(company)
+        print()
+        print()
+        print()
+        print()
+        print()
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
+        company = 'Cordon Telematics Pvt Ltd'
     else:
         try:
             companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
         except Exception as e:
             companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
-        
-    return render_template('mapZoomIn.html', companyLatLng=companyLatLng)
+            
+    return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
