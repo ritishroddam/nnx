@@ -104,6 +104,10 @@ label {
   color: #333;
 }
 
+.dark-mode label {
+  color: #f8f9fa;
+}
+
 input {
   width: 100%;
   padding: 1.5vh 1vw;
@@ -112,6 +116,12 @@ input {
   border: 1px solid #ccc;
   transition: border 0.3s ease, box-shadow 0.3s ease;
   box-sizing: border-box;
+}
+
+.dark-mode input {
+  background-color: #495057;
+  color: #f8f9fa;
+  border: 1px solid #6c757d;
 }
 
 input:focus {
