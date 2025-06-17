@@ -74,6 +74,12 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.dark-mode .login-container {
+  background: #343a40;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 1vh rgba(255, 255, 255, 0.6), 0 2vh 4vh rgba(0, 0, 0, 0.1);
+}
+
 .login-container:hover {
   transform: translateY(-5px);
   box-shadow: 0 0 1.2vh rgba(0, 123, 255, 0.8), 0 3vh 5vh rgba(0, 0, 0, 0.15);
