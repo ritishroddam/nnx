@@ -269,3 +269,27 @@ input[type="datetime-local"] {
     appearance: none;
     height: calc(2.25rem + 2px);
 }
+
+.dark-mode .modal-content,
+.dark-mode .modal-content form,
+.dark-mode .modal-content form .form-group {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .selected-fields li {
+  background-color: #222;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.dark-mode .field-selection {
+  background-color: #222;
+  color: #fff;
+}
+
+/* Optional: style the Remove button for dark mode */
+.dark-mode .selected-fields li button {
+  background-color: #007bff;
+  color: #fff;
+}
