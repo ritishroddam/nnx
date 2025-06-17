@@ -212,7 +212,7 @@
 .dark-mode .modal-content form label,
 .dark-mode .modal-content form input,
 .dark-mode .modal-content form select {
-  color: #ccc;
+  color: #000;
 }
 
 .modal-content form .form-group select {
