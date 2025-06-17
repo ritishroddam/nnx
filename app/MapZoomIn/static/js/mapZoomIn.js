@@ -96,6 +96,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     labelDiv.style.whiteSpace = "nowrap";
     labelDiv.style.pointerEvents = "none";
 
+    const pointerDiv = document.createElement("div");
+    pointerDiv.style.position = "absolute";
+    pointerDiv.style.left = "50%";
+    pointerDiv.style.top = "100%";
+    pointerDiv.style.transform = "translateX(-50%)";
+    pointerDiv.style.width = "0";
+    pointerDiv.style.height = "0";
+    pointerDiv.style.borderLeft = "7px solid transparent";
+    pointerDiv.style.borderRight = "7px solid transparent";
+    pointerDiv.style.borderTop = isDarkModeMap
+      ? "7px solid rgba(255,255,255,0.8)"
+      : "7px solid rgba(0,0,0,0.8)";
+    pointerDiv.style.pointerEvents = "none";
+      
+    labelDiv.appendChild(pointerDiv);
+
     marker.content = document.createElement("div");
     marker.content.style.position = "relative";
     marker.content.appendChild(labelDiv);
