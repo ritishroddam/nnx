@@ -522,7 +522,7 @@ async function initMap() {
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
   const mapOptions = {
-    zoom: 10,
+    zoom: 13,
     disableDefaultUI: true,
   };
 
