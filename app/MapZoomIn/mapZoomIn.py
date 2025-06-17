@@ -20,14 +20,11 @@ def home():
     company = claims.get('company_id')
     if company == 'none':
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
-        companyName = 'Cordon Telematics Pvt Ltd'
+        company = 'Cordon Telematics Pvt Ltd'
     else:
         try:
-            companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1, 'Company Name': 1})
+            companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
         except Exception as e:
             companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
-        if companyLatLng:
-            companyName = companyLatLng.get('Company Name', 'Cordon Telematics Pvt Ltd')
-            companyLatLng.pop('Company Name', None)
             
-    return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=companyName)
+    return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
