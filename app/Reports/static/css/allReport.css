@@ -288,6 +288,21 @@ input[type="datetime-local"] {
   color: #fff;
 }
 
+.dark-mode .field-selection,
+.dark-mode .field-selection * {
+  color: #fff !important;
+}
+
+.dark-mode .field-selection label {
+  color: #fff !important;
+}
+
+/* If your field-selection items have a background, make it darker for contrast */
+.dark-mode .field-selection > div {
+  background: #222 !important;
+  color: #fff !important;
+}
+
 /* Optional: style the Remove button for dark mode */
 .dark-mode .selected-fields li button {
   background-color: #007bff;
