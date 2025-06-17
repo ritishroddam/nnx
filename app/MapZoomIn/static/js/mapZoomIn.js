@@ -75,7 +75,31 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 
-  function startZoomAnimation() {
+  async function startZoomAnimation() {
+
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+    const marker = new AdvancedMarkerElement({
+      map: fullMap,
+      position: { lat: parseFloat(window.lat) || 12.9716, lng: parseFloat(window.lng) || 77.5946 },
+    });
+    const labelDiv = document.createElement("div");
+    labelDiv.textContent = window.companyName || "Cordon Telematics Pvt Ltd";
+    labelDiv.style.position = "absolute";
+    labelDiv.style.top = "-28px";
+    labelDiv.style.left = "50%";
+    labelDiv.style.transform = "translateX(-50%)";
+    labelDiv.style.background = "rgba(255,255,255,0.8)";
+    labelDiv.style.color = "#fff";
+    labelDiv.style.padding = "2px 8px";
+    labelDiv.style.borderRadius = "4px";
+    labelDiv.style.fontSize = "14px";
+    labelDiv.style.whiteSpace = "nowrap";
+    labelDiv.style.pointerEvents = "none";
+
+    marker.content = document.createElement("div");
+    marker.content.style.position = "relative";
+    marker.content.appendChild(labelDiv);
+
     stopRotation();
     cameraOptions.tilt = 0;
     cameraOptions.heading = 0;
@@ -109,5 +133,5 @@ document.addEventListener("DOMContentLoaded", async function () {
   fullMap = new Map(document.getElementById("fullMap"), mapOptions);
   requestAnimationFrame(animate);
   startInfiniteRotation();
-  setTimeout(startZoomAnimation, 1000);
+  setTimeout(await startZoomAnimation, 1000);
 });
