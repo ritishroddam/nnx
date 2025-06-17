@@ -367,6 +367,11 @@ body.modal-open {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.dark-mode .filter-container {
+    background-color: #222;
+    color: #ccc;
+}
+
 .filter-container .form-group {
   margin-bottom: 0;
 }
