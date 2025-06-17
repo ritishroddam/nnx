@@ -199,7 +199,7 @@
   margin-bottom: 15px;
 }
 
-.dark-mode .modal-content form {
+.dark-mode .modal-content form .form-group{
   background-color: #444;
   color: #fff;
 }
