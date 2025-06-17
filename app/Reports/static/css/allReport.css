@@ -209,12 +209,6 @@
   margin-bottom: 5px;
 }
 
-.dark-mode .modal-content form label,
-.dark-mode .modal-content form input,
-.dark-mode .modal-content form select {
-  color: #000;
-}
-
 .modal-content form .form-group select {
   width: 100%;
 }
