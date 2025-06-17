@@ -45,19 +45,6 @@ body {
   display: none !important;
 }
 
-.vehicle-card {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.208);
-  margin-bottom: 14px;
-  padding: 14px 18px 10px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
-  max-width: 100%;
-}
-
 .dark-mode .vehicle-header,
 .dark-mode .stat-value {
   color: #eee;
