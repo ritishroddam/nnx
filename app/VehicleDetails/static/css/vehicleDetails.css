@@ -53,6 +53,14 @@ select {
   background-color: #2a8f00;
 }
 
+#uploadExcel{
+  background-color: #38b000;
+}
+
+#uploadExcel:hover {
+  background-color: #2a8f00;
+}
+
 .success {
   background-color: #28a745;
 }
