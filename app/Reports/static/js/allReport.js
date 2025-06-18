@@ -413,6 +413,34 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
       e.target.parentElement.style.display = "block";
     }
   });
+
+  // Hide "All Vehicle" for Travel Path Report
+  document.querySelectorAll(".report-card").forEach((card) => {
+    card.addEventListener("click", function (e) {
+      const reportType = card.dataset.report;
+      const allVehicleOption = document.getElementById("allVehicleOption");
+      // Show by default
+      if (allVehicleOption) allVehicleOption.style.display = "";
+      // Hide for Travel Path Report
+      if (reportType === "daily-distance" && allVehicleOption) {
+        allVehicleOption.style.display = "none";
+        // Optionally, reset selection if "All Vehicle" was selected
+        const vehicleSelect = document.getElementById("vehicleNumber");
+        if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
+        // If using Selectize, update it too:
+        if (vehicleSelect.selectize) {
+          vehicleSelect.selectize.removeOption("all");
+        }
+      } else if (allVehicleOption) {
+        allVehicleOption.style.display = "";
+        // If using Selectize, ensure option is present
+        const vehicleSelect = document.getElementById("vehicleNumber");
+        if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
+          vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
+        }
+      }
+    });
+  });
 });
 
 // Helper functions
