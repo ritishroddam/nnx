@@ -989,3 +989,18 @@
   padding: 0;
   line-height: 1.2;
 }
+
+.excel-btn {
+  margin-left: 1000px;
+  background-color: #21a366 !important;
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.excel-btn i {
+  font-size: 1.6em;
+  color: #fff;
+}
