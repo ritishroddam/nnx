@@ -456,7 +456,7 @@ def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
 
     return list(db['atlanta'].find(
         query,
-        {"_id": 1, "date_time": 1, "imei": 1}
+        {"_id": 1, "date_time": 1, "imei": 1, "speed": 1, "latitude": 1, "longitude": 1}
     ).sort("date_time", -1))
 
 @alerts_bp.route('/notification_alerts', methods=['GET'])
