@@ -162,6 +162,25 @@ All Reports
                     {% endfor %}
                 </select>
             </div>
+
+            <!-- Speed selection dropdown, hidden by default -->
+            <div class="form-group" id="speedSelectGroup" style="display: none;">
+                <label for="speedSelect">Speed (Km/h) <span style="color:red">*</span></label>
+                <select id="speedSelect" name="speedSelect" required>
+                    <option value="">Select Speed</option>
+                    <option value="10">10 Km/h</option>
+                    <option value="20">20 Km/h</option>
+                    <option value="30">30 Km/h</option>
+                    <option value="40">40 Km/h</option>
+                    <option value="50">50 Km/h</option>
+                    <option value="60">60 Km/h</option>
+                    <option value="70">70 Km/h</option>
+                    <option value="80">80 Km/h</option>
+                    <option value="90">90 Km/h</option>
+                    <option value="100">100 Km/h</option>
+                    <option value="above100">Above 100 Km/h</option>
+                </select>
+            </div>
             
             <div class="form-actions">
                 <button type="button" class="cancel-btn">Cancel</button>

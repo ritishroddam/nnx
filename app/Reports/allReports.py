@@ -247,6 +247,7 @@ def download_custom_report():
         date_range = data.get("dateRange", "all")
         from_date = data.get("fromDate")
         to_date = data.get("toDate")
+        speed_value = data.get("speedValue")  # <-- Get speed value from request
 
         # Handle "all" vehicles
         if vehicle_number == "all":
