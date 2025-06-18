@@ -425,6 +425,12 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
             "ignition": "1",
             "speed": {"$ne": "0.0"}
         }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+    
+    elif alert_type == "speeding_alerts":
+        imeisWithSpeed = getImeisWithSpeed()
+        imeis = imeisWithSpeed.distinct("IMEI")
+        return getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day)
+        
         
 def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
     # Build a list of per-IMEI speed conditions
