@@ -331,10 +331,13 @@ def download_custom_report():
                     base_query = config['query']
                     post_process = config.get('post_process')
                     date_filter = get_date_range_filter(date_range, from_date, to_date)
-                    query = {"imei": imei}
-                    if date_filter:
-                        query.update(date_filter)
-                    query.update(base_query)
+                    base_query = config['query']  # or your base query
+                    query = merge_query_with_date(base_query, date_filter)
+                    # date_filter = get_date_range_filter(date_range, from_date, to_date)
+                    # query = {"imei": imei}
+                    # if date_filter:
+                    #     query.update(date_filter)
+                    # query.update(base_query)
                     cursor = db[collection].find(
                         query,
                         {field: 1 for field in fields}
@@ -564,7 +567,7 @@ def download_custom_report():
                 query.update(date_filter)
 
             # Merge with specific query for standard reports
-            query.update(base_query)
+            query = merge_query_with_date(base_query, date_filter)
             print(query)
 
             # Fetch data
@@ -842,3 +845,14 @@ def get_all_vehicles(query=None):
     if query is None:
         query = {}
     return list(db['vehicle_inventory'].find(query, {"LicensePlateNumber": 1, "IMEI": 1, "_id": 0}))
+
+def merge_query_with_date(base_query, date_filter):
+    """Merge base query and date filter into a single MongoDB query using $and if needed."""
+    if not date_filter:
+        return base_query
+    # If both have 'date_time', use $and
+    if 'date_time' in date_filter:
+        return {'$and': [base_query, date_filter]}
+    else:
+        base_query.update(date_filter)
+        return base_query
