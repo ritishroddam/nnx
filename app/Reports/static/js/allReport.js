@@ -29,12 +29,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const customReportForm = document.getElementById("customReportForm");
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
-  // Show speed dropdown only for Speed Report
-  const speedSelectGroup = document.getElementById("speedSelectGroup");
-  const speedSelect = document.getElementById("speedSelect");
-  let currentReportType = null;
 
-  function handleDateRangeChange() {
+   function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
             // Show the custom date range fields
             customDateRange.style.display = "block";
@@ -68,22 +64,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // Initialize Selectize for dropdowns
   $("select").selectize({
     create: false,
-    sortField: [
-      {
-        field: "value",
-        direction: "asc",
-        sorter: function(a, b) {
-          // Handle "above100" as the last option
-          if (a.value === "above100") return 1;
-          if (b.value === "above100") return -1;
-          // Ignore empty/default option
-          if (!a.value) return -1;
-          if (!b.value) return 1;
-          // Numeric sort
-          return parseInt(a.value) - parseInt(b.value);
-        }
-      }
-    ]
+    sortField: "text",
   });
 
   // Get Selectize instance for vehicleNumber
@@ -148,13 +129,6 @@ document.addEventListener("DOMContentLoaded", function() {
       e.preventDefault();
       const reportType = this.dataset.report;
       const reportName = this.querySelector("h3").textContent;
-
-      // Show speed dropdown only for Speed Report
-      if (reportType === "distance-speed-range") {
-        speedSelectGroup.style.display = "block";
-      } else {
-        speedSelectGroup.style.display = "none";
-      }
 
       if (reportName === "Custom Report") {
         document.getElementById("generateReport").dataset.reportType =
@@ -236,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document
     .getElementById("generateReport")
     .addEventListener("click", async function () {
-      const reportType = currentReportType;
+      const reportType = this.dataset.reportType;
       const reportName = this.dataset.reportName;
       const vehicleNumber = document.getElementById("vehicleNumber").value;
       const dateRange = document.getElementById("dateRange").value;
@@ -264,21 +238,10 @@ document.addEventListener("DOMContentLoaded", function() {
             reportName: reportName,
             dateRange: dateRange,
           };
-          let speedValue = null;
-          if (reportType === "distance-speed-range") {
-            speedValue = speedSelect.value;
-            if (!speedValue) {
-              alert("Please select a speed for the Speed Report.");
-              speedSelect.focus();
-              return;
-            }
-          }
+
           if (dateRange === "custom") {
             body.fromDate = document.getElementById("fromDate").value;
             body.toDate = document.getElementById("toDate").value;
-          }
-          if (reportType === "distance-speed-range") {
-            body.speedValue = speedValue;
           }
 
           const response = await fetch(endpoint, {
@@ -296,9 +259,6 @@ document.addEventListener("DOMContentLoaded", function() {
               errorData.message || "Failed to generate report",
               errorData.category || "danger"
             );
-            generateBtn.disabled = false;
-            generateBtn.textContent = originalText;
-            return; // <-- Add this line!
           }
 
           const blob = await response.blob();
@@ -352,6 +312,326 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
         }
     }
 });
+
+  // Custom report form submission
+  customReportForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const reportName = document.getElementById("reportName").value.trim();
+    if (!reportName) {
+      alert("Please provide a report name");
+      return;
+    }
+
+    const fields = Array.from(selectedFields.children).map(
+      (li) => li.dataset.field
+    );
+    if (fields.length === 0) {
+      alert("Please select at least one field");
+      return;
+    }
+
+    const saveBtn = document.getElementById("saveCustomReport");
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+
+    fetch("/reports/save_custom_report", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify({
+        reportName: reportName,
+        fields: fields,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          displayFlashMessage("Network response was not ok", "danger");
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          alert(data.message);
+          createReportCard({ report_name: reportName, fields: fields });
+          customReportModal.style.display = "none";
+          customReportForm.reset();
+          selectedFields.innerHTML = "";
+        } else {
+          throw new Error(data.message || "Failed to save report");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert(error.message);
+      })
+      .finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+      });
+  });
+
+  // Field selection handling
+  fieldSelection.addEventListener("change", function (e) {
+    const field = e.target.value;
+
+    if (e.target.checked) {
+      const existingField = selectedFields.querySelector(
+        `[data-field="${field}"]`
+      );
+      if (existingField) {
+        alert("This field is already selected.");
+        e.target.checked = false;
+        return;
+      }
+
+      const listItem = document.createElement("li");
+      listItem.textContent = field;
+      listItem.dataset.field = field;
+      listItem.draggable = true;
+
+      const removeButton = document.createElement("button");
+      removeButton.textContent = "Remove";
+      removeButton.className = "btn btn-sm btn-danger";
+      removeButton.style.marginLeft = "10px";
+
+      removeButton.addEventListener("click", function () {
+        selectedFields.removeChild(listItem);
+        const checkbox = fieldSelection.querySelector(
+          `input[value="${field}"]`
+        );
+        if (checkbox) {
+          checkbox.checked = false;
+          checkbox.parentElement.style.display = "block";
+        }
+      });
+
+      listItem.appendChild(removeButton);
+
+      // Drag and drop functionality
+      listItem.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", e.target.dataset.field);
+      });
+
+      listItem.addEventListener("dragover", (e) => e.preventDefault());
+      listItem.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const draggedField = e.dataTransfer.getData("text/plain");
+        const draggedItem = selectedFields.querySelector(
+          `[data-field="${draggedField}"]`
+        );
+        if (draggedItem) {
+          selectedFields.insertBefore(draggedItem, e.target);
+        }
+      });
+
+      selectedFields.appendChild(listItem);
+      e.target.parentElement.style.display = "none";
+    } else {
+      const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
+      if (listItem) selectedFields.removeChild(listItem);
+      e.target.parentElement.style.display = "block";
+    }
+  });
+
+  // Hide "All Vehicle" for Travel Path Report
+  document.querySelectorAll(".report-card").forEach((card) => {
+    card.addEventListener("click", function (e) {
+      const reportType = card.dataset.report;
+      const allVehicleOption = document.getElementById("allVehicleOption");
+      // Show by default
+      if (allVehicleOption) allVehicleOption.style.display = "";
+      // Hide for Travel Path Report
+      if (reportType === "daily-distance" && allVehicleOption) {
+        allVehicleOption.style.display = "none";
+        // Optionally, reset selection if "All Vehicle" was selected
+        const vehicleSelect = document.getElementById("vehicleNumber");
+        if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
+        // If using Selectize, update it too:
+        if (vehicleSelect.selectize) {
+          vehicleSelect.selectize.removeOption("all");
+        }
+      } else if (allVehicleOption) {
+        allVehicleOption.style.display = "";
+        // If using Selectize, ensure option is present
+        const vehicleSelect = document.getElementById("vehicleNumber");
+        if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
+          vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
+        }
+      }
+    });
+  });
+
+  // Show speed dropdown only for Speed Report
+  const speedSelectGroup = document.getElementById("speedSelectGroup");
+  const speedSelect = document.getElementById("speedSelect");
+  let currentReportType = null;
+
+  document.querySelectorAll(".report-card").forEach((card) => {
+    card.addEventListener("click", function () {
+      currentReportType = card.dataset.report;
+      if (currentReportType === "distance-speed-range") {
+        speedSelectGroup.style.display = "";
+      } else {
+        speedSelectGroup.style.display = "none";
+        speedSelect.value = "";
+      }
+      // Hide "All Vehicle" for Travel Path Report
+      const reportType = card.dataset.report;
+      const allVehicleOption = document.getElementById("allVehicleOption");
+      // Show by default
+      if (allVehicleOption) allVehicleOption.style.display = "";
+      // Hide for Travel Path Report
+      if (reportType === "daily-distance" && allVehicleOption) {
+        allVehicleOption.style.display = "none";
+        // Optionally, reset selection if "All Vehicle" was selected
+        const vehicleSelect = document.getElementById("vehicleNumber");
+        if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
+        // If using Selectize, update it too:
+        if (vehicleSelect.selectize) {
+          vehicleSelect.selectize.removeOption("all");
+        }
+      } else if (allVehicleOption) {
+        allVehicleOption.style.display = "";
+        // If using Selectize, ensure option is present
+        const vehicleSelect = document.getElementById("vehicleNumber");
+        if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
+          vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
+        }
+      }
+    });
+  });
+
+  // Make speed selection mandatory for Speed Report
+  document.getElementById("reportForm").addEventListener("submit", function(e) {
+    if (currentReportType === "distance-speed-range") {
+      if (!speedSelect.value) {
+        alert("Please select a speed for the Speed Report.");
+        speedSelect.focus();
+        e.preventDefault();
+        return false;
+      }
+    }
+    // Custom date range validation
+    const dateRange = document.getElementById("dateRange").value;
+    if (dateRange === "custom") {
+        const fromDate = new Date(document.getElementById("fromDate").value);
+        const toDate = new Date(document.getElementById("toDate").value);
+        
+        if (!fromDate || !toDate) {
+            e.preventDefault();
+            alert("Please select both from and to dates");
+            return;
+        }
+        
+        if (fromDate > toDate) {
+            e.preventDefault();
+            alert("From date cannot be after To date");
+            return;
+        }
+        
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        
+        if (fromDate < threeMonthsAgo || toDate < threeMonthsAgo) {
+            e.preventDefault();
+            alert("Date range cannot be older than 3 months");
+            return;
+        }
+    }
+  });
+
+  // Generate report button handler
+  document
+    .getElementById("generateReport")
+    .addEventListener("click", async function () {
+      const reportType = currentReportType;
+      const reportName = this.dataset.reportName;
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const dateRange = document.getElementById("dateRange").value;
+      let speedValue = null;
+      if (reportType === "distance-speed-range") {
+        speedValue = speedSelect.value;
+        if (!speedValue) {
+          alert("Please select a speed for the Speed Report.");
+          speedSelect.focus();
+          return;
+        }
+      }
+
+      if (!vehicleNumber) {
+        alert("Please select a vehicle number");
+        return;
+      }
+
+      const generateBtn = this;
+      const originalText = generateBtn.textContent;
+      generateBtn.disabled = true;
+      generateBtn.textContent = "Generating...";
+
+      if (reportType === "panic") {
+        await generatePanicReport();
+        generateBtn.disabled = false; // Re-enable the button after completion
+        generateBtn.textContent = originalText;
+      } else {
+        try {
+          let endpoint = "/reports/download_custom_report";
+          let body = {
+            reportType: reportType,
+            vehicleNumber: vehicleNumber,
+            reportName: reportName,
+            dateRange: dateRange,
+          };
+          if (dateRange === "custom") {
+            body.fromDate = document.getElementById("fromDate").value;
+            body.toDate = document.getElementById("toDate").value;
+          }
+          if (reportType === "distance-speed-range") {
+            body.speedValue = speedValue;
+          }
+
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify(body),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            displayFlashMessage(
+              errorData.message || "Failed to generate report",
+              errorData.category || "danger"
+            );
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          // Use a generic filename if all vehicles
+          a.download = vehicleNumber === "all"
+          ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+          : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Error:", error);
+          alert(error.message || "Failed to generate report");
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.textContent = originalText;
+        }
+      }
+    });
 
   // Custom report form submission
   customReportForm.addEventListener("submit", function (e) {
@@ -614,8 +894,8 @@ function loadFields() {
         `;
         fieldSelection.appendChild(fieldItem);
       });
-
-    })    .catch((error) => {
+    })
+    .catch((error) => {
       console.error("Error loading fields:", error);
       alert("Failed to load available fields. Please try again.");
     });
