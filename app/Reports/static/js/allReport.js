@@ -149,6 +149,13 @@ document.addEventListener("DOMContentLoaded", function() {
       const reportType = this.dataset.report;
       const reportName = this.querySelector("h3").textContent;
 
+      // Show speed dropdown only for Speed Report
+      if (reportType === "distance-speed-range") {
+        speedSelectGroup.style.display = "block";
+      } else {
+        speedSelectGroup.style.display = "none";
+      }
+
       if (reportName === "Custom Report") {
         document.getElementById("generateReport").dataset.reportType =
           reportType;
