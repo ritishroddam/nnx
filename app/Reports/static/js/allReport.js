@@ -1,4 +1,3 @@
-
 const allowedFields = [
   "main_power",
   "ignition",
@@ -233,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function() {
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             displayFlashMessage(
-              errorData.message || "Failed to generate panic report",
+              errorData.message || "Failed to generate report",
               errorData.category || "danger"
             );
           }
@@ -242,9 +241,10 @@ document.addEventListener("DOMContentLoaded", function() {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `${
-            reportType === "custom" ? reportName : reportType
-          }_report_${vehicleNumber}.xlsx`;
+          // Use a generic filename if all vehicles
+          a.download = vehicleNumber === "all"
+          ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+          : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
@@ -478,7 +478,9 @@ async function generatePanicReport() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `panic_report_${vehicleNumber}.xlsx`;
+    a.download = vehicleNumber === "all"
+      ? `panic_report_ALL_VEHICLES.xlsx`
+      : `panic_report_${vehicleNumber}.xlsx`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);

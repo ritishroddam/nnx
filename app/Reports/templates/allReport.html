@@ -156,6 +156,7 @@ All Reports
                 <label for="vehicleNumber">Vehicle Number</label>
                 <select id="vehicleNumber" name="vehicleNumber">
                     <option value="">Select Vehicle Number</option>
+                    <option value="all">All Vehicle</option>
                     {% for vehicle in vehicles %}
                     <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
                     {% endfor %}
