@@ -254,21 +254,23 @@ document.addEventListener("DOMContentLoaded", function() {
           });
 
           if (!response.ok) {
+            // Only read as JSON if not ok
             const errorData = await response.json().catch(() => ({}));
             displayFlashMessage(
               errorData.message || "Failed to generate report",
               errorData.category || "danger"
             );
+            return; // Don't continue to blob
           }
 
+          // Only read as blob if response is ok
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          // Use a generic filename if all vehicles
           a.download = vehicleNumber === "all"
-          ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
-          : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
+            ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+            : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
@@ -443,8 +445,9 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     card.addEventListener("click", function (e) {
       const reportType = card.dataset.report;
       const allVehicleOption = document.getElementById("allVehicleOption");
-      // Show by default
-      if (allVehicleOption) allVehicleOption.style.display = "";
+      if (allVehicleOption) {
+        allVehicleOption.style.display = "none";
+      }
       // Hide for Travel Path Report
       if (reportType === "daily-distance" && allVehicleOption) {
         allVehicleOption.style.display = "none";
@@ -483,8 +486,9 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
       // Hide "All Vehicle" for Travel Path Report
       const reportType = card.dataset.report;
       const allVehicleOption = document.getElementById("allVehicleOption");
-      // Show by default
-      if (allVehicleOption) allVehicleOption.style.display = "";
+      if (allVehicleOption) {
+        allVehicleOption.style.display = "none";
+      }
       // Hide for Travel Path Report
       if (reportType === "daily-distance" && allVehicleOption) {
         allVehicleOption.style.display = "none";
@@ -604,21 +608,23 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
           });
 
           if (!response.ok) {
+            // Only read as JSON if not ok
             const errorData = await response.json().catch(() => ({}));
             displayFlashMessage(
               errorData.message || "Failed to generate report",
               errorData.category || "danger"
             );
+            return; // Don't continue to blob
           }
 
+          // Only read as blob if response is ok
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          // Use a generic filename if all vehicles
           a.download = vehicleNumber === "all"
-          ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
-          : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
+            ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+            : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
@@ -763,8 +769,9 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     card.addEventListener("click", function (e) {
       const reportType = card.dataset.report;
       const allVehicleOption = document.getElementById("allVehicleOption");
-      // Show by default
-      if (allVehicleOption) allVehicleOption.style.display = "";
+      if (allVehicleOption) {
+        allVehicleOption.style.display = "none";
+      }
       // Hide for Travel Path Report
       if (reportType === "daily-distance" && allVehicleOption) {
         allVehicleOption.style.display = "none";
