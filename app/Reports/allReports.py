@@ -265,16 +265,39 @@ def download_custom_report():
                 vehicles = get_all_vehicles({"CompanyName": userCompany})
 
             all_dfs = []
-            for vehicle in vehicles:
-                imei = vehicle.get("IMEI")
-                license_plate = vehicle.get("LicensePlateNumber")
-                if not imei or not license_plate:
-                    continue
+            for vehicle in vehicles:  # <-- This is the loop
+                imei = vehicle['IMEI']
+                license_plate = vehicle['LicensePlateNumber']
 
-                # The rest of the logic is similar to the single vehicle case,
-                # but you loop over all vehicles and append their dataframes to all_dfs.
-                # For brevity, here's a simplified version for standard reports:
-                if report_type != "custom":
+                if report_type == 'odometer-daily-distance':
+                    collection = 'atlanta'
+                    fields = ["date_time", "odometer"]
+                    base_query = {"imei": imei, "gps": "A"}
+                    date_filter = get_date_range_filter(date_range, from_date, to_date)
+                    query = merge_query_with_date(base_query, date_filter)
+                    cursor = db[collection].find(query, {field: 1 for field in fields}).sort("date_time", 1)
+                    df = pd.DataFrame(list(cursor))
+                    if df.empty or 'odometer' not in df.columns:
+                        continue
+                    df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+                    df = df.dropna(subset=['odometer'])
+                    if df.empty:
+                        continue
+                    start_odo = df['odometer'].iloc[0]
+                    end_odo = df['odometer'].iloc[-1]
+                    total_distance = end_odo - start_odo
+                    last_date = df['date_time'].iloc[-1] if 'date_time' in df.columns else None
+                    summary = {
+                        'Vehicle Number': license_plate,
+                        'odometer': end_odo,
+                        'date_time': last_date,
+                        'Distance (km)': total_distance,
+                        'Total Distance (km)': total_distance,
+                        'Start Odometer': start_odo,
+                        'End Odometer': end_odo
+                    }
+                    all_dfs.append(pd.DataFrame([summary]))
+                else:
                     report_configs = {
                         'daily-distance': {
                             'collection': 'atlanta',
@@ -581,7 +604,7 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
             if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+                df['date_time'] = pd.to_datetime(df['date_time'], utc=True).dt.tz_convert(IST).dt.tz_localize(None)
 
             # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
