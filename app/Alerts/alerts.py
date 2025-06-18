@@ -45,30 +45,29 @@ def getImeisWithSpeed():
     else:
         return vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
 
-def get_alert_type(record):
-    if record.get('source') == 'sos_logs':
+def get_alert_type(alert_type):
+    if alert_type == "panic":
         return "Panic Alert"
-    if record.get('sos') in ["1", 1, True] or record.get('status') == "SOS" or record.get('alarm') == "SOS":
-        return "Panic Alert"
-    if float(record.get('speed', 0.0)) >= 60:
-        return f"Speeding Alert ({float(record.get('speed', 0.0))} km/h)"
-    if record.get('harsh_break') == "1":
+    elif alert_type == "speeding":
+        return "Speeding Alert"
+    elif alert_type == "harsh_break":
         return "Harsh Break Alert"
-    if record.get('harsh_speed') == "1":
+    elif alert_type == "harsh_acceleration":
         return "Harsh Acceleration Alert"
-    if record.get('internal_bat') == "0.0" or float(record.get('internal_bat', 3.7)) < 3.7:
-        return "Internal Battery Low Alert"
-    if record.get('main_power') == "0":
-        return "Main Supply Remove Alert"
-    if record.get('speed') == "0.0" and record.get('ignition') == "1":
-        return "Idle Alert"
-    if record.get('ignition') == "1" and record.get('speed') != "0.0":
-        return "Ignition On Alert"
-    if record.get('ignition') == "0":
-        return "Ignition Off Alert"
-    if record.get('gsm_sig') == "0" or (record.get('gsm_sig') and int(float(record.get('gsm_sig'))) < 7):
+    elif alert_type == "gsm_low":
         return "GSM Signal Low Alert"
-    return "Unknown Alert"
+    elif alert_type == "internal_battery_low":
+        return "Internal Battery Low Alert"
+    elif alert_type == "main_power_off":
+        return "Main Power Off Alert"
+    elif alert_type == "idle":
+        return "Idle Alert"
+    elif alert_type == "ignition_off":
+        return "Ignition Off Alert"
+    elif alert_type == "ignition_on":
+        return "Ignition On Alert"
+    else:
+        return "Unknown Alert"
 
 def alert_card_endpoint(alert_type):
     def decorator(f):
@@ -296,7 +295,7 @@ def alert_card_endpoint(alert_type):
                     
                     location = geocodeInternal(latitude, longitude)
                 
-                    alert_type_detected = get_alert_type(record)
+                    alert_type_detected = get_alert_type(alert_type)
                     acknowledged = db['Ack_alerts'].find_one({"alert_id": str(record["_id"])}) is not None
                     
                     processed_records.append({
@@ -425,12 +424,6 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
             "ignition": "1",
             "speed": {"$ne": "0.0"}
         }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
-    
-    elif alert_type == "speeding_alerts":
-        imeisWithSpeed = getImeisWithSpeed()
-        imeis = imeisWithSpeed.distinct("IMEI")
-        return getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day)
-        
         
 def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
     # Build a list of per-IMEI speed conditions
@@ -456,7 +449,7 @@ def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
 
     return list(db['atlanta'].find(
         query,
-        {"_id": 1, "date_time": 1, "imei": 1, "speed": 1, "latitude": 1, "longitude": 1}
+        {"_id": 1, "date_time": 1, "imei": 1}
     ).sort("date_time", -1))
 
 @alerts_bp.route('/notification_alerts', methods=['GET'])
