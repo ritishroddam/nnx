@@ -371,8 +371,10 @@ def download_custom_report():
                     if 'date_time' in df.columns:
                         # Convert string to datetime (assume UTC if that's how it's stored)
                         df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce', utc=True)
-                        # Convert to IST and remove timezone info for Excel export
-                        df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata').dt.tz_localize(None)
+                        # Convert to IST (if you want to show IST in Excel)
+                        df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata')
+                        # Remove timezone info (make it Excel-compatible)
+                        df['date_time'] = df['date_time'].dt.tz_localize(None)
                     if 'latitude' in df.columns and 'longitude' in df.columns:
                         df['Location'] = df.apply(
                             lambda row: geocodeInternal(row['latitude'], row['longitude'])
@@ -485,8 +487,10 @@ def download_custom_report():
             if 'date_time' in df.columns:
                 # Convert string to datetime (assume UTC if that's how it's stored)
                 df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce', utc=True)
-                # Convert to IST and remove timezone info for Excel export
-                df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata').dt.tz_localize(None)
+                # Convert to IST (if you want to show IST in Excel)
+                df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata')
+                # Remove timezone info (make it Excel-compatible)
+                df['date_time'] = df['date_time'].dt.tz_localize(None)
 
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['Location'] = df.apply(
@@ -612,8 +616,10 @@ def download_custom_report():
             if 'date_time' in df.columns:
                 # Convert string to datetime (assume UTC if that's how it's stored)
                 df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce', utc=True)
-                # Convert to IST and remove timezone info for Excel export
-                df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata').dt.tz_localize(None)
+                # Convert to IST (if you want to show IST in Excel)
+                df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata')
+                # Remove timezone info (make it Excel-compatible)
+                df['date_time'] = df['date_time'].dt.tz_localize(None)
 
             # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
