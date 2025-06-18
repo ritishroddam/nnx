@@ -29,8 +29,6 @@ document.addEventListener("DOMContentLoaded", function() {
   const customReportForm = document.getElementById("customReportForm");
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
-  const speedSelectGroup = document.getElementById("speedSelectGroup");
-  const speedSelect = document.getElementById("speedSelect");
 
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
@@ -481,23 +479,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
         }
       }
     });
-  });
-
-  $('#speedSelect').selectize({
-    create: false,
-    sortField: [
-      {
-        field: "value",
-        direction: "asc",
-        sorter: function(a, b) {
-          if (a.value === "above100") return 1;
-          if (b.value === "above100") return -1;
-          if (!a.value) return -1;
-          if (!b.value) return 1;
-          return parseInt(a.value) - parseInt(b.value);
-        }
-      }
-    ]
   });
 });
 
