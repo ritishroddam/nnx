@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const customReportForm = document.getElementById("customReportForm");
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
+  const speedSelectGroup = document.getElementById("speedSelectGroup");
+  const speedSelect = document.getElementById("speedSelect");
 
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
