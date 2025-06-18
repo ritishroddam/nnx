@@ -45,42 +45,40 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function downloadAlertsAsExcel() {
-    const headers = [
-      "Vehicle Number",
-      "Driver",
-      "Alert Type",
-      "Time",
-      "Latitude & Longitude",
-      "Location",
-      "Status",
-    ];
-
-    const wb = XLSX.utils.book_new();
-
+    // Get headers dynamically from the table, excluding "Action"
+    const headerCells = document.querySelectorAll("#alertsTable thead th");
+    const headers = Array.from(headerCells)
+      .map(th => th.textContent.trim())
+      .filter(h => h.toLowerCase() !== "action");
+  
+    // Find the index of the "Time" column to insert latLng after it
+    const timeIdx = headers.findIndex(h => h.toLowerCase() === "time");
+  
     const rows = [];
     document.querySelectorAll("#alertsTable tbody tr").forEach((row) => {
       if (row.classList.contains("loading-row")) return;
-
+    
       const cells = row.querySelectorAll("td");
       const alertId = row.dataset.alertId;
       const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
       const latLng = alertRow ? alertRow.dataset.latlng : "N/A";
-
-      rows.push([
-        cells[0].textContent.trim(),
-        cells[1].textContent.trim(),
-        cells[2].textContent.trim(),
-        cells[3].textContent.trim(),
-        latLng,
-        cells[4].textContent.trim(),
-        cells[5].textContent.trim(),
-      ]);
+    
+      // Exclude "Action" column and extract cell values
+      const cellValues = Array.from(cells)
+        .filter((cell, idx) => headerCells[idx].textContent.trim().toLowerCase() !== "action")
+        .map(cell => cell.textContent.trim());
+    
+      // Insert latLng after "Time" column, or at the end if not found
+      const insertAt = timeIdx >= 0 ? timeIdx + 1 : cellValues.length;
+      cellValues.splice(insertAt, 0, latLng);
+    
+      rows.push(cellValues);
     });
-
+  
+    const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-
     XLSX.utils.book_append_sheet(wb, ws, "Alerts");
-
+  
     const alertType = document
       .querySelector(".alert-card.active h3")
       .textContent.replace(" Alert", "")
@@ -89,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let filename = `Alerts_${alertType}`;
     if (vehicleNumber) filename += `_${vehicleNumber}`;
     filename += `_${new Date().toISOString().slice(0, 10)}.xlsx`;
-
+  
     XLSX.writeFile(wb, filename);
   }
 
@@ -99,37 +97,37 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function downloadAlertsAsPDF() {
-    const { jsPDF } = window.jspdf;
+  const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
+    if (!jsPDF) {
+      displayFlashMessage("PDF export not available.", "danger");
+      return;
+    }
     const doc = new jsPDF();
 
-    const headers = [
-      "Vehicle Number",
-      "Driver",
-      "Alert Type",
-      "Time",
-      "Latitude & Longitude",
-      "Location",
-      "Status",
-    ];
+    const headerCells = document.querySelectorAll("#alertsTable thead th");
+    const headers = Array.from(headerCells)
+      .map(th => th.textContent.trim())
+      .filter(h => h.toLowerCase() !== "action");
+
+    const timeIdx = headers.findIndex(h => h.toLowerCase() === "time");
 
     const rows = [];
     document.querySelectorAll("#alertsTable tbody tr").forEach((row) => {
       if (row.classList.contains("loading-row")) return;
-
+    
       const cells = row.querySelectorAll("td");
       const alertId = row.dataset.alertId;
       const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
       const latLng = alertRow ? alertRow.dataset.latlng : "N/A";
 
-      rows.push([
-        cells[0].textContent.trim(),
-        cells[1].textContent.trim(),
-        cells[2].textContent.trim(),
-        cells[3].textContent.trim(),
-        latLng,
-        cells[4].textContent.trim(),
-        cells[5].textContent.trim(),
-      ]);
+      const cellValues = Array.from(cells)
+        .filter((cell, idx) => headerCells[idx].textContent.trim().toLowerCase() !== "action")
+        .map(cell => cell.textContent.trim());
+
+      const insertAt = timeIdx >= 0 ? timeIdx + 1 : cellValues.length;
+      cellValues.splice(insertAt, 0, latLng);
+    
+      rows.push(cellValues);
     });
 
     const alertType = document.querySelector(
