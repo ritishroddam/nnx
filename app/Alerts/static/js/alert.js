@@ -45,40 +45,37 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function downloadAlertsAsExcel() {
-    // Get headers dynamically from the table, excluding "Action"
     const headerCells = document.querySelectorAll("#alertsTable thead th");
     const headers = Array.from(headerCells)
       .map(th => th.textContent.trim())
       .filter(h => h.toLowerCase() !== "action");
-  
-    // Find the index of the "Time" column to insert latLng after it
+
     const timeIdx = headers.findIndex(h => h.toLowerCase() === "time");
-  
+    headers.splice(insertAt, 0, "Latitude & Longitude");
+
     const rows = [];
     document.querySelectorAll("#alertsTable tbody tr").forEach((row) => {
       if (row.classList.contains("loading-row")) return;
-    
+
       const cells = row.querySelectorAll("td");
       const alertId = row.dataset.alertId;
       const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
       const latLng = alertRow ? alertRow.dataset.latlng : "N/A";
-    
-      // Exclude "Action" column and extract cell values
+
       const cellValues = Array.from(cells)
         .filter((cell, idx) => headerCells[idx].textContent.trim().toLowerCase() !== "action")
         .map(cell => cell.textContent.trim());
-    
-      // Insert latLng after "Time" column, or at the end if not found
+
       const insertAt = timeIdx >= 0 ? timeIdx + 1 : cellValues.length;
       cellValues.splice(insertAt, 0, latLng);
-    
+
       rows.push(cellValues);
     });
-  
+
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     XLSX.utils.book_append_sheet(wb, ws, "Alerts");
-  
+
     const alertType = document
       .querySelector(".alert-card.active h3")
       .textContent.replace(" Alert", "")
@@ -87,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let filename = `Alerts_${alertType}`;
     if (vehicleNumber) filename += `_${vehicleNumber}`;
     filename += `_${new Date().toISOString().slice(0, 10)}.xlsx`;
-  
+
     XLSX.writeFile(wb, filename);
   }
 
@@ -110,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .filter(h => h.toLowerCase() !== "action");
 
     const timeIdx = headers.findIndex(h => h.toLowerCase() === "time");
+    headers.splice(insertAt, 0, "Latitude & Longitude");
 
     const rows = [];
     document.querySelectorAll("#alertsTable tbody tr").forEach((row) => {
