@@ -500,6 +500,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await fetchVehicleDistances();
 
+  // Download Excel button logic
+  document.getElementById("downloadExcelBtn").addEventListener("click", function () {
+    const table = document.querySelector(".vehicleLiveTable table");
+    if (!table) return;
+
+    // Convert table to worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Data");
+
+    // Download
+    XLSX.writeFile(wb, "vehicle_data.xlsx");
+  });
+
   getLocation();
   setInterval(updateClockAndDate, 1000);
   updateClockAndDate();
