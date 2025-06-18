@@ -29,10 +29,12 @@ document.addEventListener("DOMContentLoaded", function() {
   const customReportForm = document.getElementById("customReportForm");
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
+  // Show speed dropdown only for Speed Report
   const speedSelectGroup = document.getElementById("speedSelectGroup");
   const speedSelect = document.getElementById("speedSelect");
+  let currentReportType = null;
 
-   function handleDateRangeChange() {
+  function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
             // Show the custom date range fields
             customDateRange.style.display = "block";
@@ -227,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document
     .getElementById("generateReport")
     .addEventListener("click", async function () {
-      const reportType = this.dataset.reportType;
+      const reportType = currentReportType;
       const reportName = this.dataset.reportName;
       const vehicleNumber = document.getElementById("vehicleNumber").value;
       const dateRange = document.getElementById("dateRange").value;
@@ -255,10 +257,21 @@ document.addEventListener("DOMContentLoaded", function() {
             reportName: reportName,
             dateRange: dateRange,
           };
-
+          let speedValue = null;
+          if (reportType === "distance-speed-range") {
+            speedValue = speedSelect.value;
+            if (!speedValue) {
+              alert("Please select a speed for the Speed Report.");
+              speedSelect.focus();
+              return;
+            }
+          }
           if (dateRange === "custom") {
             body.fromDate = document.getElementById("fromDate").value;
             body.toDate = document.getElementById("toDate").value;
+          }
+          if (reportType === "distance-speed-range") {
+            body.speedValue = speedValue;
           }
 
           const response = await fetch(endpoint, {
@@ -591,8 +604,8 @@ function loadFields() {
         `;
         fieldSelection.appendChild(fieldItem);
       });
-    })
-    .catch((error) => {
+
+    })    .catch((error) => {
       console.error("Error loading fields:", error);
       alert("Failed to load available fields. Please try again.");
     });

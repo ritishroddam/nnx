@@ -31,7 +31,8 @@ FIELD_COLLECTION_MAP = {
                          'VehicleMake', 'YearOfManufacture', 'DateOfPurchase',
                          'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType'
                          'Location', 'OdometerReading', 'ServiceDueDate'],
-    'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
+    'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp'
+                 ]
 }
 
 def get_date_range_filter(date_range, from_date=None, to_date=None):
