@@ -296,6 +296,9 @@ document.addEventListener("DOMContentLoaded", function() {
               errorData.message || "Failed to generate report",
               errorData.category || "danger"
             );
+            generateBtn.disabled = false;
+            generateBtn.textContent = originalText;
+            return; // <-- Add this line!
           }
 
           const blob = await response.blob();
