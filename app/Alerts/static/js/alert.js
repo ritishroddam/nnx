@@ -100,48 +100,48 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     const doc = new jsPDF();
-  
+
     const headerCells = document.querySelectorAll("#alertsTable thead th");
     const headers = Array.from(headerCells)
       .map(th => th.textContent.trim())
       .filter(h => h.toLowerCase() !== "action");
-  
+
     const timeIdx = headers.findIndex(h => h.toLowerCase() === "time");
     const insertAt = timeIdx >= 0 ? timeIdx + 1 : headers.length;
     headers.splice(insertAt, 0, "Latitude & Longitude");
-  
+
     const rows = [];
     document.querySelectorAll("#alertsTable tbody tr").forEach((row) => {
       if (row.classList.contains("loading-row")) return;
-    
+
       const cells = row.querySelectorAll("td");
       const alertId = row.dataset.alertId;
       const alertRow = document.querySelector(`tr[data-alert-id="${alertId}"]`);
       const latLng = alertRow ? alertRow.dataset.latlng : "N/A";
-    
+
       const cellValues = Array.from(cells)
         .filter((cell, idx) => headerCells[idx].textContent.trim().toLowerCase() !== "action")
         .map(cell => cell.textContent.trim());
-    
+
       cellValues.splice(insertAt, 0, latLng);
-    
+
       rows.push(cellValues);
     });
-  
+
     const alertType = document.querySelector(
       ".alert-card.active h3"
     ).textContent;
     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
     let title = `${alertType} Alerts`;
     if (vehicleNumber) title += ` - ${vehicleNumber}`;
-  
+
     doc.setFontSize(16);
     doc.text(title, 14, 15);
-  
+
     const date = new Date().toLocaleString();
     doc.setFontSize(10);
     doc.text(`Generated on: ${date}`, 14, 22);
-  
+
     doc.autoTable({
       head: [headers],
       body: rows,
@@ -160,13 +160,13 @@ document.addEventListener("DOMContentLoaded", function () {
         fillColor: [245, 245, 245],
       },
     });
-  
+
     let filename = `Alerts_${alertType
       .replace(" Alert", "")
       .replace(/\s+/g, "_")}`;
     if (vehicleNumber) filename += `_${vehicleNumber}`;
     filename += `_${new Date().toISOString().slice(0, 10)}.pdf`;
-  
+
     doc.save(filename);
   }
 
@@ -549,7 +549,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Determine if status/action columns should be shown for current alert type
     const showStatusAndAction = (
         currentEndpoint === "panic" ||
-        currentEndpoint === "speeding" ||
         currentEndpoint === "main_power_off"
     );
 
