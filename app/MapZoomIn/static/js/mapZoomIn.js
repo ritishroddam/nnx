@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     fullMap.moveCamera(cameraOptions);
 
     zoomTween = new TWEEN.Tween(cameraOptions)
-      .to({ tilt: 65, heading: 90, zoom: 18 }, 15000)
+      .to({ tilt: 65, heading: 90, zoom: 18 }, 5000)
       .easing(TWEEN.Easing.Quadratic.Out)
       .onUpdate(() => {
         fullMap.moveCamera(cameraOptions);
