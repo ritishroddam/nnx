@@ -907,3 +907,106 @@ function loadFields() {
       alert("Failed to load available fields. Please try again.");
     });
 }
+
+// Show format selection modal instead of downloading directly
+document.getElementById("generateReport").addEventListener("click", function (e) {
+  e.preventDefault();
+  // Validate form as before
+  const vehicleNumber = document.getElementById("vehicleNumber").value;
+  if (!vehicleNumber) {
+    alert("Please select a vehicle number");
+    return;
+  }
+  // Show the format selection modal
+  document.getElementById("formatSelectionModal").style.display = "block";
+});
+
+// Handle Excel and PDF download buttons
+document.getElementById("downloadExcel").addEventListener("click", async function () {
+  await downloadReport("excel");
+  document.getElementById("formatSelectionModal").style.display = "none";
+});
+document.getElementById("downloadPdf").addEventListener("click", async function () {
+  await downloadReport("pdf");
+  document.getElementById("formatSelectionModal").style.display = "none";
+});
+document.getElementById("cancelDownload").addEventListener("click", function () {
+  document.getElementById("formatSelectionModal").style.display = "none";
+});
+
+// Main download function
+async function downloadReport(format) {
+  const reportType = currentReportType;
+  const reportName = document.getElementById("generateReport").dataset.reportName;
+  const vehicleNumber = document.getElementById("vehicleNumber").value;
+  const dateRange = document.getElementById("dateRange").value;
+  let speedValue = null;
+  if (reportType === "distance-speed-range") {
+    speedValue = document.getElementById("speedSelect").value;
+    if (!speedValue) {
+      alert("Please select a speed for the Speed Report.");
+      return;
+    }
+  }
+  if (!vehicleNumber) {
+    alert("Please select a vehicle number");
+    return;
+  }
+
+  let endpoint = "/reports/download_custom_report";
+  let body = {
+    reportType: reportType,
+    vehicleNumber: vehicleNumber,
+    reportName: reportName,
+    dateRange: dateRange,
+    format: format // Pass format to backend
+  };
+  if (dateRange === "custom") {
+    body.fromDate = document.getElementById("fromDate").value;
+    body.toDate = document.getElementById("toDate").value;
+  }
+  if (reportType === "distance-speed-range") {
+    body.speedValue = speedValue;
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      displayFlashMessage(
+        errorData.message || "Failed to generate report",
+        errorData.category || "danger"
+      );
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    if (format === "pdf") {
+      a.download = vehicleNumber === "all"
+        ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.pdf`
+        : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.pdf`;
+    } else {
+      a.download = vehicleNumber === "all"
+        ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+        : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
+    }
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error("Error:", error);
+    alert(error.message || "Failed to generate report");
+  }
+}
