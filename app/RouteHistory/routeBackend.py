@@ -88,7 +88,7 @@ def show_vehicle_data(LicensePlateNumber):
                     if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo=pytz.UTC):
                         if recent_data is None:
                             recent_data = []
-                        if entry.get("speed") is not "0.0":
+                        if entry.get("speed") != "0.0":
                             recent_data.append(
                                 {
                                     "time": entry["time"],
