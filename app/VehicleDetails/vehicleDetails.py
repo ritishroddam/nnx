@@ -136,8 +136,8 @@ def manual_entry():
             return redirect(url_for('VehicleDetails.page'))
 
     # Additional validation for number of seats
-    if data['VehicleType'] in ['bus', 'car'] and not data.get('NumberOfSeatsContainer'):
-        flash("Number of seats is required for bus and car.", "danger")
+    if data['VehicleType'] in ['bus', "sedan", "hatchback", "suv", "van"] and not data.get('NumberOfSeatsContainer'):
+        flash(f"Number of seats is required {data['VehicleType']}.", "danger")
         return redirect(url_for('VehicleDetails.page'))
     # ...existing validation code...
 
@@ -251,7 +251,7 @@ def upload_vehicle_file():
             companyName = str(row['ComapanyName']).strip()
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
-            vehicle_type = str(row['VehicleType']).strip()
+            vehicle_type = (str(row['VehicleType']).strip()).lower()
             number_of_seats = str(row['NumberOfSeatsContainerContainer']).strip()
             vehicle_model = str(row['VehicleModel']).strip()
             vehicle_make = str(row['VehicleMake']).strip()
@@ -302,7 +302,11 @@ def upload_vehicle_file():
                 flash(f"SIM {sim} must be 20 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
-            if vehicle_type in ['bus', 'car', 'truck']:
+            if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
+                flash(f"In {row} Vehicle Type: {vehicle_type} is invalid.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
                 if not number_of_seats:
                     flash(f"In row {row} Number of seats is required for {vehicle_type}.", "danger")
                     return redirect(url_for('VehicleDetails.page'))

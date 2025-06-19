@@ -206,7 +206,10 @@ function editVehicle(vehicleId) {
   row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="sim_number" data-editable />`;
 
   row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
-    <option value="car" ${vehicleType === "car" ? "selected" : ""}>Car</option>
+    <option value="sedan" ${vehicleType === "sedan" ? "selected" : ""}>Sedan</option>
+    <option value="suv" ${vehicleType === "suv" ? "selected" : ""}>SUV</option>
+    <option value="van" ${vehicleType === "van" ? "selected" : ""}>Van</option>
+    <option value="hatchback"" ${vehicleType === "hatchback"" ? "selected" : ""}>Hatchback</option>
     <option value="bus" ${vehicleType === "bus" ? "selected" : ""}>Bus</option>
     <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
     <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
@@ -504,7 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchField: ["text"],
     onChange: function(value) {
       const numberOfSeatsContainer = document.getElementById("NumberOfSeatsContainer");
-      if (value === "bus" || value === "car") {
+      if (value === "bus" || value === "sedan" || value === "hatchback" || value === "suv" || value === "van") {
         numberOfSeatsContainer.classList.remove("hidden");
       } else {
         numberOfSeatsContainer.classList.add("hidden");
@@ -514,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("VehicleType").addEventListener("change", function () {
     const numberOfSeatsContainer = document.getElementById("NumberOfSeatsContainer");
-    if (this.value === "bus" || this.value === "car") {
+    if (this.value === "bus" || this.value === "sedan" || this.value === "hatchback" || this.value === "suv" || this.value === "van") {
       numberOfSeatsContainer.classList.remove("hidden");
     } else {
       numberOfSeatsContainer.classList.add("hidden");
