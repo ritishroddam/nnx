@@ -34,3 +34,9 @@ class User:
     def get_company_by_company_id(company_id):
         user = db.customers_list.find_one({'_id': ObjectId(company_id)})
         return user['Company Name'] if user else None
+    
+    @staticmethod
+    def get_all_by_role(role):
+        """Return all users with the given role."""
+        from app import db  # or your actual db import
+        return list(db.users.find({'role': role}))
