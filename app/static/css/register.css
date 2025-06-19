@@ -48,6 +48,9 @@
   padding: 2rem;
   border-radius: 8px;
   margin-bottom: 2rem;
+  float: none;
+  width: 100%;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
 }
 
 .dark-mode .register-container,
@@ -150,4 +153,10 @@ th, td {
 
 th {
   background: #f1f1f1;
+}
+
+.registered-clients-table {
+  clear: both;
+  width: 100%;
+  margin-top: 2rem;
 }

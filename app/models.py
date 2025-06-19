@@ -1,5 +1,5 @@
 from app import db
-from bson.objectid import ObjectId
+from bson import ObjectId
 import bcrypt
 
 class User:
@@ -28,7 +28,7 @@ class User:
     
     @staticmethod
     def get_user_by_id(user_id):
-        return db.users.find_one({'_id': ObjectId(user_id)})
+        return db.users.find_one({'_id': user_id})
     
     @staticmethod
     def get_company_by_company_id(company_id):
@@ -40,3 +40,11 @@ class User:
         """Return all users with the given role."""
         from app import db  # or your actual db import
         return list(db.users.find({'role': role}))
+    
+    @staticmethod
+    def find_by_id(user_id):
+        from app import db
+        try:
+            return db.users.find_one({'_id': ObjectId(user_id)})
+        except Exception:
+            return None
