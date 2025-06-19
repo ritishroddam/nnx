@@ -32,8 +32,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
-            // Show the custom date range fields
-            customDateRange.style.display = "block";
+            if (customDateRange) {
+              customDateRange.style.display = "block";
+            }
             
             // Set default values (optional)
             const now = new Date();
@@ -212,7 +213,8 @@ document.addEventListener("DOMContentLoaded", function() {
     .addEventListener("click", async function () {
       const reportType = this.dataset.reportType;
       const reportName = this.dataset.reportName;
-      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const vehicleNumberElem = document.getElementById("vehicleNumber");
+const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
       const dateRange = document.getElementById("dateRange").value;
 
       if (!vehicleNumber) {
@@ -555,7 +557,8 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     .addEventListener("click", async function () {
       const reportType = currentReportType;
       const reportName = this.dataset.reportName;
-      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const vehicleNumberElem = document.getElementById("vehicleNumber");
+const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
       const dateRange = document.getElementById("dateRange").value;
       let speedValue = null;
       if (reportType === "distance-speed-range") {
