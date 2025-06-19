@@ -883,6 +883,10 @@ window.addEventListener("click", function (event) {
       }
     });
   });
+
+  if (customReportModal) {
+      customReportModal.style.display = "block";
+  }
 });
 
 // Helper functions
