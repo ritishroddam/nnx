@@ -18,7 +18,7 @@ def home():
     verify_jwt_in_request(optional=True)
     claims = get_jwt()
     company = claims.get('company')
-    if company is None or company.lower == 'none':
+    if company is None or company.lower() == 'none':
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
         company = 'Cordon Telematics Pvt Ltd'
     else:
