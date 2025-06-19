@@ -24,7 +24,7 @@ def home():
     print()
     print()
     print(type(company))
-    if company == 'none' or company is None:
+    if company == 'none' or company is None or company == 'None':
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
         company = 'Cordon Telematics Pvt Ltd'
     else:
