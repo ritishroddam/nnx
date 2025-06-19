@@ -308,3 +308,32 @@ input[type="datetime-local"] {
   background-color: #007bff;
   color: #fff;
 }
+
+ .format-options {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .format-btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    color: white;
+    transition: background 0.3s;
+  }
+
+  #downloadExcel {
+    background-color: #1D6F42;
+  }
+
+  #downloadPDF {
+    background-color: #D72638;
+  }
+
+  .format-btn i {
+    margin-right: 8px;
+  }

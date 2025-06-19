@@ -207,83 +207,165 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
   // Generate report button handler
-  document
-    .getElementById("generateReport")
-    .addEventListener("click", async function () {
-      const reportType = this.dataset.reportType;
-      const reportName = this.dataset.reportName;
-      const vehicleNumber = document.getElementById("vehicleNumber").value;
-      const dateRange = document.getElementById("dateRange").value;
+  // document.getElementById("generateReport").addEventListener("click", async function () {
+  //     const reportType = this.dataset.reportType;
+  //     const reportName = this.dataset.reportName;
+  //     const vehicleNumber = document.getElementById("vehicleNumber").value;
+  //     const dateRange = document.getElementById("dateRange").value;
 
-      if (!vehicleNumber) {
-        alert("Please select a vehicle number");
+  //     if (!vehicleNumber) {
+  //       alert("Please select a vehicle number");
+  //       return;
+  //     }
+
+  //     const generateBtn = this;
+  //     const originalText = generateBtn.textContent;
+  //     generateBtn.disabled = true;
+  //     generateBtn.textContent = "Generating...";
+
+  //     if (reportType === "panic") {
+  //       await generatePanicReport();
+  //       generateBtn.disabled = false; // Re-enable the button after completion
+  //       generateBtn.textContent = originalText;
+  //     } else {
+  //       try {
+  //         let endpoint = "/reports/download_custom_report";
+  //         let body = {
+  //           reportType: reportType,
+  //           vehicleNumber: vehicleNumber,
+  //           reportName: reportName,
+  //           dateRange: dateRange,
+  //         };
+
+  //         if (dateRange === "custom") {
+  //           body.fromDate = document.getElementById("fromDate").value;
+  //           body.toDate = document.getElementById("toDate").value;
+  //         }
+
+  //         const response = await fetch(endpoint, {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+  //           },
+  //           body: JSON.stringify(body),
+  //         });
+
+  //         if (!response.ok) {
+  //           // Only read as JSON if not ok
+  //           const errorData = await response.json().catch(() => ({}));
+  //           displayFlashMessage(
+  //             errorData.message || "Failed to generate report",
+  //             errorData.category || "danger"
+  //           );
+  //           return; // Don't continue to blob
+  //         }
+
+  //         // Only read as blob if response is ok
+  //         const blob = await response.blob();
+  //         const url = window.URL.createObjectURL(blob);
+  //         const a = document.createElement("a");
+  //         a.href = url;
+  //         a.download = vehicleNumber === "all"
+  //           ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+  //           : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
+  //         document.body.appendChild(a);
+  //         a.click();
+  //         window.URL.revokeObjectURL(url);
+  //         document.body.removeChild(a);
+  //       } catch (error) {
+  //         console.error("Error:", error);
+  //         alert(error.message || "Failed to generate report");
+  //       } finally {
+  //         generateBtn.disabled = false;
+  //         generateBtn.textContent = originalText;
+  //       }
+  //     }
+  //   });
+
+  document.getElementById("generateReport").addEventListener("click", function () {
+    const vehicleNumber = document.getElementById("vehicleNumber").value;
+    if (!vehicleNumber) {
+      alert("Please select a vehicle number");
+      return;
+    }
+
+    document.getElementById("downloadExcel").dataset.reportType = this.dataset.reportType;
+    document.getElementById("downloadExcel").dataset.reportName = this.dataset.reportName;
+
+    document.getElementById("downloadPDF").dataset.reportType = this.dataset.reportType;
+    document.getElementById("downloadPDF").dataset.reportName = this.dataset.reportName;
+
+    document.getElementById("formatModal").style.display = "block";
+  });
+
+  function closeFormatModal() {
+    document.getElementById("formatModal").style.display = "none";
+  }
+
+  document.querySelector(".close-format").addEventListener("click", closeFormatModal);
+  window.addEventListener("click", function (event) {
+    if (event.target == document.getElementById("formatModal")) closeFormatModal();
+  });
+
+  async function downloadReport(format) {
+    const reportType = this.dataset.reportType;
+    const reportName = this.dataset.reportName;
+    const vehicleNumber = document.getElementById("vehicleNumber").value;
+    const dateRange = document.getElementById("dateRange").value;
+
+    let body = {
+      reportType,
+      reportName,
+      vehicleNumber,
+      dateRange,
+      format
+    };
+
+    if (dateRange === "custom") {
+      body.fromDate = document.getElementById("fromDate").value;
+      body.toDate = document.getElementById("toDate").value;
+    }
+
+    try {
+      const response = await fetch("/reports/download_custom_report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        displayFlashMessage(errorData.message || "Failed to generate report", "danger");
         return;
       }
 
-      const generateBtn = this;
-      const originalText = generateBtn.textContent;
-      generateBtn.disabled = true;
-      generateBtn.textContent = "Generating...";
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${reportType}_report_${vehicleNumber}.${format === "pdf" ? "pdf" : "xlsx"}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert(error.message || "Failed to download");
+    } finally {
+      closeFormatModal();
+    }
+  }
 
-      if (reportType === "panic") {
-        await generatePanicReport();
-        generateBtn.disabled = false; // Re-enable the button after completion
-        generateBtn.textContent = originalText;
-      } else {
-        try {
-          let endpoint = "/reports/download_custom_report";
-          let body = {
-            reportType: reportType,
-            vehicleNumber: vehicleNumber,
-            reportName: reportName,
-            dateRange: dateRange,
-          };
+  document.getElementById("downloadExcel").addEventListener("click", function () {
+    downloadReport.call(this, "excel");
+  });
 
-          if (dateRange === "custom") {
-            body.fromDate = document.getElementById("fromDate").value;
-            body.toDate = document.getElementById("toDate").value;
-          }
-
-          const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-            },
-            body: JSON.stringify(body),
-          });
-
-          if (!response.ok) {
-            // Only read as JSON if not ok
-            const errorData = await response.json().catch(() => ({}));
-            displayFlashMessage(
-              errorData.message || "Failed to generate report",
-              errorData.category || "danger"
-            );
-            return; // Don't continue to blob
-          }
-
-          // Only read as blob if response is ok
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = vehicleNumber === "all"
-            ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
-            : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } catch (error) {
-          console.error("Error:", error);
-          alert(error.message || "Failed to generate report");
-        } finally {
-          generateBtn.disabled = false;
-          generateBtn.textContent = originalText;
-        }
-      }
-    });
+  document.getElementById("downloadPDF").addEventListener("click", function () {
+    downloadReport.call(this, "pdf");
+  });
 
 // Add validation for custom date range
 document.getElementById("reportForm").addEventListener("submit", function(e) {
