@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Edit Client Admin</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block h1 %}
+Edit Client Admin
+{% endblock %}
+
+{% block block_container %}
+<div class="container">
+    <div class="register-container">
+        <h2>Edit Client Admin</h2>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="company">Company</label>
+                <select id="company" name="company" required>
+                    <option value="" disabled>Select Company</option>
+                    {% for company in companies %}
+                    <option value="{{ company._id }}" {% if user.company == company._id %}selected{% endif %}>{{ company['Company Name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="{{ url_for('auth.register_client_admin') }}" class="btn btn-warning">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
