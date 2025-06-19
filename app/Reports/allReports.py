@@ -369,7 +369,12 @@ def download_custom_report():
                     if df.empty:
                         continue
                     if 'date_time' in df.columns:
-                        df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+                        # Convert string to datetime (assume UTC if that's how it's stored)
+                        df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce', utc=True)
+                        # Convert to IST (if you want to show IST in Excel)
+                        df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata')
+                        # Remove timezone info (make it Excel-compatible)
+                        df['date_time'] = df['date_time'].dt.tz_localize(None)
                     if 'latitude' in df.columns and 'longitude' in df.columns:
                         df['Location'] = df.apply(
                             lambda row: geocodeInternal(row['latitude'], row['longitude'])
@@ -480,7 +485,12 @@ def download_custom_report():
 
             # Process latitude and longitude if present
             if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+                # Convert string to datetime (assume UTC if that's how it's stored)
+                df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce', utc=True)
+                # Convert to IST (if you want to show IST in Excel)
+                df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata')
+                # Remove timezone info (make it Excel-compatible)
+                df['date_time'] = df['date_time'].dt.tz_localize(None)
 
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['Location'] = df.apply(
@@ -604,7 +614,12 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
             if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+                # Convert string to datetime (assume UTC if that's how it's stored)
+                df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce', utc=True)
+                # Convert to IST (if you want to show IST in Excel)
+                df['date_time'] = df['date_time'].dt.tz_convert('Asia/Kolkata')
+                # Remove timezone info (make it Excel-compatible)
+                df['date_time'] = df['date_time'].dt.tz_localize(None)
 
             # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
@@ -879,134 +894,3 @@ def merge_query_with_date(base_query, date_filter):
     else:
         base_query.update(date_filter)
         return base_query
-
-@reports_bp.route('/preview_report', methods=['POST'])
-@jwt_required()
-def preview_report():
-    try:
-        data = request.get_json()
-        report_type = data.get("reportType")
-        vehicle_number = data.get("vehicleNumber")
-        date_range = data.get("dateRange", "all")
-        from_date = data.get("fromDate")
-        to_date = data.get("toDate")
-        speed_value = data.get("speedValue")
-        limit = int(data.get("limit", 20))
-
-        # Get vehicle details
-        if vehicle_number == "all":
-            # For preview, just show first vehicle
-            vehicle = db['vehicle_inventory'].find_one({}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
-        else:
-            vehicle = db['vehicle_inventory'].find_one(
-                {"LicensePlateNumber": vehicle_number},
-                {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
-            )
-        if not vehicle:
-            return jsonify({"success": False, "message": "Vehicle not found"}), 404
-        imei = vehicle["IMEI"]
-
-        # For custom reports, get the fields from the saved report
-        if report_type == "custom":
-            custom_report_name = data.get("reportName")
-            report = db['custom_reports'].find_one(
-                {"report_name": custom_report_name},
-                {"fields": 1, "_id": 0}
-            )
-            if not report:
-                return jsonify({"success": False, "message": "Custom report not found"}), 404
-            fields = report["fields"]
-            atlanta_fields = [f for f in fields if f in FIELD_COLLECTION_MAP['atlanta']]
-            vehicle_inventory_fields = [f for f in fields if f in FIELD_COLLECTION_MAP['vehicle_inventory']]
-            vehicle_inventory_data = None
-            if vehicle_inventory_fields:
-                vehicle_inventory_data = db['vehicle_inventory'].find_one(
-                    {"IMEI": imei},
-                    {field: 1 for field in vehicle_inventory_fields}
-                )
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
-            atlanta_query = {"imei": imei}
-            if date_filter:
-                atlanta_query.update(date_filter)
-            atlanta_data = []
-            if atlanta_fields:
-                atlanta_data = list(db['atlanta'].find(
-                    atlanta_query,
-                    {field: 1 for field in atlanta_fields}
-                ).sort("date_time", 1).limit(limit))
-            if atlanta_data and vehicle_inventory_data:
-                combined_data = []
-                for record in atlanta_data:
-                    combined_record = {**vehicle_inventory_data, **record}
-                    combined_data.append(combined_record)
-            elif atlanta_data and not vehicle_inventory_data:
-                combined_data = atlanta_data
-            elif not atlanta_data and vehicle_inventory_data:
-                combined_data = [vehicle_inventory_data]
-            else:
-                return jsonify({"success": True, "rows": [], "columns": []})
-            df = pd.DataFrame(combined_data)
-        else:
-            # Standard reports
-            report_configs = {
-                'daily-distance': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude", "speed"],
-                    'query': {"imei": imei, "gps": "A"},
-                },
-                'odometer-daily-distance': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "odometer", "latitude", "longitude"],
-                    'query': {"imei": imei, "gps": "A"},
-                },
-                'distance-speed-range': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "speed", "latitude", "longitude"],
-                    'query': {"imei": imei, "gps": "A"},
-                },
-                'stoppage': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude", "ignition"],
-                    'query': {"imei": imei, "ignition": "0", "gps": "A"},
-                },
-                'idle': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude", "ignition", "speed"],
-                    'query': {"imei": imei, "ignition": "1", "speed": "0.0", "gps": "A"},
-                },
-                'ignition': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "latitude", "longitude", "ignition"],
-                    'query': {"imei": imei, "gps": "A"},
-                },
-                'daily': {
-                    'collection': 'atlanta',
-                    'fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
-                    'query': {"imei": imei, "gps": "A"},
-                }
-            }
-            if report_type not in report_configs:
-                return jsonify({"success": False, "message": "Invalid report type"}), 400
-            config = report_configs[report_type]
-            fields = config['fields']
-            collection = config['collection']
-            base_query = config['query']
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
-            query = merge_query_with_date(base_query, date_filter)
-            cursor = db[collection].find(query, {field: 1 for field in fields}).sort("date_time", 1).limit(limit)
-            df = pd.DataFrame(list(cursor))
-        if df.empty:
-            return jsonify({"success": True, "rows": [], "columns": []})
-        # Remove _id if present
-        if '_id' in df.columns:
-            df.drop('_id', axis=1, inplace=True)
-        # Convert datetimes to string for JSON
-        for col in df.columns:
-            if pd.api.types.is_datetime64_any_dtype(df[col]):
-                df[col] = df[col].astype(str)
-        # Limit columns to 10 for preview if too many
-        columns = df.columns.tolist()[:10]
-        rows = df[columns].head(limit).to_dict(orient="records")
-        return jsonify({"success": True, "rows": rows, "columns": columns})
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500

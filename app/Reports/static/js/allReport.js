@@ -212,8 +212,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .addEventListener("click", async function () {
       const reportType = this.dataset.reportType;
       const reportName = this.dataset.reportName;
-      const vehicleNumberElem = document.getElementById("vehicleNumber");
-      const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
       const dateRange = document.getElementById("dateRange").value;
 
       if (!vehicleNumber) {
@@ -556,8 +555,7 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     .addEventListener("click", async function () {
       const reportType = currentReportType;
       const reportName = this.dataset.reportName;
-      const vehicleNumberElem = document.getElementById("vehicleNumber");
-const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
       const dateRange = document.getElementById("dateRange").value;
       let speedValue = null;
       if (reportType === "distance-speed-range") {
@@ -640,95 +638,6 @@ const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
         }
       }
     });
-
-  // Preview Report Button Handler
-  document.getElementById("previewReportBtn").addEventListener("click", async function () {
-    const reportType = typeof currentReportType !== "undefined" && currentReportType
-        ? currentReportType
-        : document.getElementById("generateReport").dataset.reportType;
-    const reportName = document.getElementById("generateReport").dataset.reportName;
-    const vehicleNumber = document.getElementById("vehicleNumber").value;
-    const dateRange = document.getElementById("dateRange").value;
-    let speedValue = null;
-    if (reportType === "distance-speed-range") {
-        speedValue = document.getElementById("speedSelect").value;
-        if (!speedValue) {
-            alert("Please select a speed for the Speed Report.");
-            return;
-        }
-    }
-    if (!vehicleNumber) {
-        alert("Please select a vehicle number");
-        return;
-    }
-
-    // Prepare request body
-    let body = {
-        reportType: reportType,
-        vehicleNumber: vehicleNumber,
-        reportName: reportName,
-        dateRange: dateRange,
-    };
-    if (dateRange === "custom") {
-        body.fromDate = document.getElementById("fromDate").value;
-        body.toDate = document.getElementById("toDate").value;
-    }
-    if (reportType === "distance-speed-range") {
-        body.speedValue = speedValue;
-    }
-
-    // Fetch preview data (limit to 20 rows for preview)
-    try {
-        const response = await fetch("/reports/preview_report", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-            },
-            body: JSON.stringify({ ...body, limit: 20 }),
-        });
-        const data = await response.json();
-        if (!data.success) {
-            alert(data.message || "Failed to fetch preview data");
-            return;
-        }
-        showPreviewModal(data.rows, data.columns);
-    } catch (error) {
-        alert("Failed to fetch preview data");
-    }
-});
-
-// Show preview modal with table
-function showPreviewModal(rows, columns) {
-    const modal = document.getElementById("previewModal");
-    const container = document.getElementById("previewTableContainer");
-    if (!rows || !rows.length) {
-        container.innerHTML = "<p>No data available for preview.</p>";
-    } else {
-        let html = "<table class='table table-bordered' style='width:100%;font-size:13px;'>";
-        html += "<thead><tr>";
-        columns.forEach(col => html += `<th>${col}</th>`);
-        html += "</tr></thead><tbody>";
-        rows.forEach(row => {
-            html += "<tr>";
-            columns.forEach(col => html += `<td>${row[col] !== undefined ? row[col] : ""}</td>`);
-            html += "</tr>";
-        });
-        html += "</tbody></table>";
-        container.innerHTML = html;
-    }
-    modal.style.display = "block";
-}
-
-// Close preview modal
-document.getElementById("closePreviewModal").onclick = function () {
-    document.getElementById("previewModal").style.display = "none";
-};
-window.addEventListener("click", function (event) {
-    if (event.target == document.getElementById("previewModal")) {
-        document.getElementById("previewModal").style.display = "none";
-    }
-});
 
   // Custom report form submission
   customReportForm.addEventListener("submit", function (e) {
@@ -883,10 +792,6 @@ window.addEventListener("click", function (event) {
       }
     });
   });
-
-  if (customReportModal) {
-      customReportModal.style.display = "block";
-  }
 });
 
 // Helper functions
