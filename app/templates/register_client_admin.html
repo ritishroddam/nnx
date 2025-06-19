@@ -2,6 +2,7 @@
 
 {% block head %}
 <title>Register Client Admin</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 {% endblock %}
 
 {% block h1 %}
@@ -9,7 +10,6 @@ Register Client Admin
 {% endblock %}
 
 {% block block_container %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 <div class="container">
     <div class="register-container">
@@ -39,6 +39,40 @@ Register Client Admin
             </div>
             <button type="submit" class="btn">Register</button>
         </form>
+    </div>
+    <!-- Registered Clients Table -->
+    <div class="registered-clients-table" style="margin-top: 2rem;">
+        <h3>Registered Client Admins</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in client_admins %}
+                <tr>
+                    <td>{{ client.username }}</td>
+                    <td>{{ client.email }}</td>
+                    <td>{{ client.company_name or 'N/A' }}</td>
+                    <td>
+                        <a href="{{ url_for('auth.edit_client_admin', client_id=client._id) }}" class="btn btn-sm btn-warning">Edit</a>
+                        <form method="POST" action="{{ url_for('auth.delete_client_admin', client_id=client._id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this client admin?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align:center;">No client admins registered.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
