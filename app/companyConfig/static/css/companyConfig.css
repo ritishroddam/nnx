@@ -1,5 +1,5 @@
-.user-config-form {
-  max-width: 420px;
+.company-config-form {
+  max-width: 840px;
   margin: 32px auto;
   background: #fff;
   border-radius: 12px;
@@ -10,11 +10,6 @@
 .dark-mode .user-config-form {
   background: black;
   box-shadow: 0px 0px 10px #cccccc90;
-}
-
-.user-config-form h2 {
-  margin-bottom: 24px;
-  text-align: center;
 }
 
 .form-group {
