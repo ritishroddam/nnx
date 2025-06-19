@@ -17,19 +17,8 @@ company_collection = db['customers_list']
 def home():
     verify_jwt_in_request(optional=True)
     claims = get_jwt()
-    company = claims.get('company_id')
+    company = claims.get('company')
     if company == 'none':
-        print()
-        print()
-        print()
-        print()
-        print()
-        print(company)
-        print()
-        print()
-        print()
-        print()
-        print()
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
         company = 'Cordon Telematics Pvt Ltd'
     else:
