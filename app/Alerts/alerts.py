@@ -523,7 +523,7 @@ def notification_alerts():
         enrich(main_power_off_alerts, "Main Power Discontinue Alert") 
     )
     
-    if not alertConfig or not alertConfig.get("alerts"):
+    if not alertConfig or not alertConfig.get("alerts") or "" in alertConfig["alerts"]:
         notifications.sort(key=lambda x: x["date_time"], reverse=True)
 
         return jsonify({
