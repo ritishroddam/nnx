@@ -12,6 +12,9 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -659,8 +662,8 @@ def download_custom_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
-
             output.seek(0)
+
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
