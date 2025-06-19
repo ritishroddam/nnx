@@ -382,9 +382,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     const field = e.target.value;
 
     if (e.target.checked) {
-      const existingField = selectedFields.querySelector(
-        `[data-field="${field}"]`
-      );
 
       const listItem = document.createElement("li");
       listItem.textContent = field;
@@ -545,9 +542,7 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   });
 
   // Generate report button handler
-  document
-    .getElementById("generateReport")
-    .addEventListener("click", async function () {
+  document.getElementById("generateReport").addEventListener("click", async function () {
       const reportType = currentReportType;
       const reportName = this.dataset.reportName;
       const vehicleNumber = document.getElementById("vehicleNumber").value;
