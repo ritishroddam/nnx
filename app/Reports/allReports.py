@@ -12,8 +12,6 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
