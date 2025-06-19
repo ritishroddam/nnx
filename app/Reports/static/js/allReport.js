@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", function() {
   const selectedFields = document.getElementById("selectedFields");
   const customReportForm = document.getElementById("customReportForm");
   const dateRangeSelect = document.getElementById("dateRange");
+  const customDateRange = document.getElementById("customDateRange");
 
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
-            if (customDateRange) {
-              customDateRange.style.display = "block";
-            }
+            // Show the custom date range fields
+            customDateRange.style.display = "block";
             
             // Set default values (optional)
             const now = new Date();
@@ -212,8 +212,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .addEventListener("click", async function () {
       const reportType = this.dataset.reportType;
       const reportName = this.dataset.reportName;
-      const vehicleNumberElem = document.getElementById("vehicleNumber");
-const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
       const dateRange = document.getElementById("dateRange").value;
 
       if (!vehicleNumber) {
@@ -550,96 +549,95 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     }
   });
 
-//   // Generate report button handler
-//   document
-//     .getElementById("generateReport")
-//     .addEventListener("click", async function () {
-//       const reportType = currentReportType;
-//       const reportName = this.dataset.reportName;
-//       const vehicleNumberElem = document.getElementById("vehicleNumber");
-// const vehicleNumber = vehicleNumberElem ? vehicleNumberElem.value : "";
-//       const dateRange = document.getElementById("dateRange").value;
-//       let speedValue = null;
-//       if (reportType === "distance-speed-range") {
-//         speedValue = speedSelect.value;
-//         if (!speedValue) {
-//           alert("Please select a speed for the Speed Report.");
-//           speedSelect.focus();
-//           return;
-//         }
-//       }
+  // Generate report button handler
+  document
+    .getElementById("generateReport")
+    .addEventListener("click", async function () {
+      const reportType = currentReportType;
+      const reportName = this.dataset.reportName;
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const dateRange = document.getElementById("dateRange").value;
+      let speedValue = null;
+      if (reportType === "distance-speed-range") {
+        speedValue = speedSelect.value;
+        if (!speedValue) {
+          alert("Please select a speed for the Speed Report.");
+          speedSelect.focus();
+          return;
+        }
+      }
 
-//       if (!vehicleNumber) {
-//         alert("Please select a vehicle number");
-//         return;
-//       }
+      if (!vehicleNumber) {
+        alert("Please select a vehicle number");
+        return;
+      }
 
-//       const generateBtn = this;
-//       const originalText = generateBtn.textContent;
-//       generateBtn.disabled = true;
-//       generateBtn.textContent = "Generating...";
+      const generateBtn = this;
+      const originalText = generateBtn.textContent;
+      generateBtn.disabled = true;
+      generateBtn.textContent = "Generating...";
 
-//       if (reportType === "panic") {
-//         await generatePanicReport();
-//         generateBtn.disabled = false; // Re-enable the button after completion
-//         generateBtn.textContent = originalText;
-//       } else {
-//         try {
-//           let endpoint = "/reports/download_custom_report";
-//           let body = {
-//             reportType: reportType,
-//             vehicleNumber: vehicleNumber,
-//             reportName: reportName,
-//             dateRange: dateRange,
-//           };
-//           if (dateRange === "custom") {
-//             body.fromDate = document.getElementById("fromDate").value;
-//             body.toDate = document.getElementById("toDate").value;
-//           }
-//           if (reportType === "distance-speed-range") {
-//             body.speedValue = speedValue;
-//           }
+      if (reportType === "panic") {
+        await generatePanicReport();
+        generateBtn.disabled = false; // Re-enable the button after completion
+        generateBtn.textContent = originalText;
+      } else {
+        try {
+          let endpoint = "/reports/download_custom_report";
+          let body = {
+            reportType: reportType,
+            vehicleNumber: vehicleNumber,
+            reportName: reportName,
+            dateRange: dateRange,
+          };
+          if (dateRange === "custom") {
+            body.fromDate = document.getElementById("fromDate").value;
+            body.toDate = document.getElementById("toDate").value;
+          }
+          if (reportType === "distance-speed-range") {
+            body.speedValue = speedValue;
+          }
 
-//           const response = await fetch(endpoint, {
-//             method: "POST",
-//             headers: {
-//               "Content-Type": "application/json",
-//               "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//             },
-//             body: JSON.stringify(body),
-//           });
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify(body),
+          });
 
-//           if (!response.ok) {
-//             // Only read as JSON if not ok
-//             const errorData = await response.json().catch(() => ({}));
-//             displayFlashMessage(
-//               errorData.message || "Failed to generate report",
-//               errorData.category || "danger"
-//             );
-//             return; // Don't continue to blob
-//           }
+          if (!response.ok) {
+            // Only read as JSON if not ok
+            const errorData = await response.json().catch(() => ({}));
+            displayFlashMessage(
+              errorData.message || "Failed to generate report",
+              errorData.category || "danger"
+            );
+            return; // Don't continue to blob
+          }
 
-//           // Only read as blob if response is ok
-//           const blob = await response.blob();
-//           const url = window.URL.createObjectURL(blob);
-//           const a = document.createElement("a");
-//           a.href = url;
-//           a.download = vehicleNumber === "all"
-//             ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
-//             : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
-//           document.body.appendChild(a);
-//           a.click();
-//           window.URL.revokeObjectURL(url);
-//           document.body.removeChild(a);
-//         } catch (error) {
-//           console.error("Error:", error);
-//           alert(error.message || "Failed to generate report");
-//         } finally {
-//           generateBtn.disabled = false;
-//           generateBtn.textContent = originalText;
-//         }
-//       }
-//     });
+          // Only read as blob if response is ok
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = vehicleNumber === "all"
+            ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
+            : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Error:", error);
+          alert(error.message || "Failed to generate report");
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.textContent = originalText;
+        }
+      }
+    });
 
   // Custom report form submission
   customReportForm.addEventListener("submit", function (e) {
@@ -908,107 +906,4 @@ function loadFields() {
       console.error("Error loading fields:", error);
       alert("Failed to load available fields. Please try again.");
     });
-}
-
-// Show format selection modal instead of downloading directly
-document.getElementById("generateReport").addEventListener("click", function (e) {
-  e.preventDefault();
-  // Validate form as before
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  if (!vehicleNumber) {
-    alert("Please select a vehicle number");
-    return;
-  }
-  // Show the format selection modal
-  document.getElementById("formatSelectionModal").style.display = "block";
-});
-
-// Handle Excel and PDF download buttons
-document.getElementById("downloadExcel").addEventListener("click", async function () {
-  await downloadReport("excel");
-  document.getElementById("formatSelectionModal").style.display = "none";
-});
-document.getElementById("downloadPdf").addEventListener("click", async function () {
-  await downloadReport("pdf");
-  document.getElementById("formatSelectionModal").style.display = "none";
-});
-document.getElementById("cancelDownload").addEventListener("click", function () {
-  document.getElementById("formatSelectionModal").style.display = "none";
-});
-
-// Main download function
-async function downloadReport(format) {
-  const reportType = currentReportType;
-  const reportName = document.getElementById("generateReport").dataset.reportName;
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  const dateRange = document.getElementById("dateRange").value;
-  let speedValue = null;
-  if (reportType === "distance-speed-range") {
-    speedValue = document.getElementById("speedSelect").value;
-    if (!speedValue) {
-      alert("Please select a speed for the Speed Report.");
-      return;
-    }
-  }
-  if (!vehicleNumber) {
-    alert("Please select a vehicle number");
-    return;
-  }
-
-  let endpoint = "/reports/download_custom_report";
-  let body = {
-    reportType: reportType,
-    vehicleNumber: vehicleNumber,
-    reportName: reportName,
-    dateRange: dateRange,
-    format: format // Pass format to backend
-  };
-  if (dateRange === "custom") {
-    body.fromDate = document.getElementById("fromDate").value;
-    body.toDate = document.getElementById("toDate").value;
-  }
-  if (reportType === "distance-speed-range") {
-    body.speedValue = speedValue;
-  }
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      displayFlashMessage(
-        errorData.message || "Failed to generate report",
-        errorData.category || "danger"
-      );
-      return;
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    if (format === "pdf") {
-      a.download = vehicleNumber === "all"
-        ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.pdf`
-        : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.pdf`;
-    } else {
-      a.download = vehicleNumber === "all"
-        ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
-        : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
-    }
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-  } catch (error) {
-    console.error("Error:", error);
-    alert(error.message || "Failed to generate report");
-  }
 }
