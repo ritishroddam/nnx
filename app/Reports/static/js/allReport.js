@@ -696,14 +696,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     const field = e.target.value;
 
     if (e.target.checked) {
-      const existingField = selectedFields.querySelector(
-        `[data-field="${field}"]`
-      );
-      if (existingField) {
-        alert("This field is already selected.");
-        e.target.checked = false;
-        return;
-      }
 
       const listItem = document.createElement("li");
       listItem.textContent = field;
