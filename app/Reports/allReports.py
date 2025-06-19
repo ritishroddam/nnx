@@ -13,6 +13,7 @@ from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
 
+
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
 IST = timezone('Asia/Kolkata')
@@ -659,8 +660,8 @@ def download_custom_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
-
             output.seek(0)
+
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
