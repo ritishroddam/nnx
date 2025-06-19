@@ -1,5 +1,5 @@
 from app import db
-from bson import ObjectId
+from bson import ObjectId, errors
 import bcrypt
 
 class User:
@@ -53,6 +53,8 @@ class User:
     def delete_user(user_id):
         from app import db
         try:
-            db.users.delete_one({'_id': user_id})
-        except Exception:
-            pass
+            obj_id = ObjectId(user_id)
+        except (errors.InvalidId, TypeError):
+            return False
+        result = db.users.delete_one({'_id': obj_id})
+        return result.deleted_count > 0

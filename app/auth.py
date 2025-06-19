@@ -316,12 +316,11 @@ def edit_client_admin(client_id):
 @jwt_required()
 @roles_required('admin')
 def delete_client_admin(client_id):
-    user = User.find_by_id(client_id)
-    if not user or user['role'] != 'clientAdmin':
-        flash('Client admin not found.', 'danger')
-    else:
-        User.delete_user(client_id)
+    deleted = User.delete_user(client_id)
+    if deleted:
         flash('Client admin deleted.', 'success')
+    else:
+        flash('Delete failed: Invalid user ID.', 'danger')
     return redirect(url_for('auth.register_client_admin'))
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
