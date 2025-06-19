@@ -369,9 +369,7 @@ def download_custom_report():
                     if df.empty:
                         continue
                     if 'date_time' in df.columns:
-                        df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce')  # convert if string
-                        if df['date_time'].dt.tz is not None:
-                            df['date_time'] = df['date_time'].dt.tz_localize(None)  # remove timezone
+                        df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
                     if 'latitude' in df.columns and 'longitude' in df.columns:
                         df['Location'] = df.apply(
                             lambda row: geocodeInternal(row['latitude'], row['longitude'])
@@ -482,9 +480,7 @@ def download_custom_report():
 
             # Process latitude and longitude if present
             if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce')  # convert if string
-                if df['date_time'].dt.tz is not None:
-                    df['date_time'] = df['date_time'].dt.tz_localize(None)  # remove timezone
+                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['Location'] = df.apply(
@@ -608,9 +604,7 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
             if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time'], errors='coerce')  # convert if string
-                if df['date_time'].dt.tz is not None:
-                    df['date_time'] = df['date_time'].dt.tz_localize(None)  # remove timezone
+                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
             # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
