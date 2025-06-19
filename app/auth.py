@@ -11,7 +11,6 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
-from bson import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -258,6 +257,7 @@ def register():
 @jwt_required()
 @roles_required('admin')
 def register_client_admin():
+    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -271,63 +271,18 @@ def register_client_admin():
         if User.find_by_username(username):
             flash('Username already exists', 'danger')
             return redirect(url_for('auth.register_client_admin'))
+            
         if User.find_by_email(email):
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
-
+        
         User.create_user(username, email, password, company, role='clientAdmin')
-        flash('Admin registration successful.', 'success')
-        return redirect(url_for('auth.register_client_admin'))
+        flash('Admin registration successful. Please login.', 'success')
+        return redirect(request.referrer or url_for('auth.login'))
 
     companies = db.customers_list.find()
-    # Fetch all client admins for the table
-    client_admins = []
-    for user in User.get_all_by_role('clientAdmin'):
-        company_name = 'N/A'
-        if user.get('company') and user['company'] != 'none':
-            try:
-                company_id = ObjectId(user['company'])
-                company_doc = db.customers_list.find_one({'_id': company_id})
-                if company_doc:
-                    company_name = company_doc.get('Company Name', 'N/A')
-            except Exception:
-                company_name = 'N/A'
-        client_admins.append({
-            'username': user['username'],
-            'email': user['email'],
-            '_id': user['_id'],
-            'company_name': company_name
-        })
-    return render_template('register_client_admin.html', companies=companies, client_admins=client_admins)
-
-@auth_bp.route('/edit-client-admin/<client_id>', methods=['GET', 'POST'])
-@jwt_required()
-@roles_required('admin')
-def edit_client_admin(client_id):
-    user = User.find_by_id(client_id)
-    if not user or user['role'] != 'clientAdmin':
-        flash('Client admin not found.', 'danger')
-        return redirect(url_for('auth.register_client_admin'))
-    companies = db.customers_list.find()
-    if request.method == 'POST':
-        user['username'] = request.form.get('username')
-        user['email'] = request.form.get('email')
-        user['company'] = request.form.get('company')
-        User.update_user(user)
-        flash('Client admin updated.', 'success')
-        return redirect(url_for('auth.register_client_admin'))
-    return render_template('edit_client_admin.html', user=user, companies=companies)
-
-@auth_bp.route('/delete-client-admin/<client_id>', methods=['POST'])
-@jwt_required()
-@roles_required('admin')
-def delete_client_admin(client_id):
-    deleted = User.delete_user(client_id)
-    if deleted:
-        flash('Client admin deleted.', 'success')
-    else:
-        flash('Delete failed: Invalid user ID.', 'danger')
-    return redirect(url_for('auth.register_client_admin'))
+    
+    return render_template('register_client_admin.html', companies=companies)
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():

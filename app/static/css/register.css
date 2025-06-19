@@ -5,8 +5,6 @@
   min-height: 100%;
   padding: 20px;
   box-sizing: border-box;
-  max-width: 800px;
-  margin: 0 auto;
 }
 
 .alert {
@@ -43,16 +41,6 @@
   margin: 0 auto;
 }
 
-.register-container {
-  background: #f9f9f9;
-  padding: 2rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  float: none;
-  width: 100%;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
-}
-
 .dark-mode .register-container,
 .dark-mode .register-container h2{
   background-color: #2c2c2c;
@@ -66,19 +54,18 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
 }
 
 label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 5px;
   font-weight: bold;
 }
 
-input, select {
+input {
   width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   box-sizing: border-box;
@@ -86,7 +73,7 @@ input, select {
 
 .btn {
   width: 100%;
-  padding: 0.5rem 1rem;
+  padding: 10px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -97,21 +84,6 @@ input, select {
 
 .btn:hover {
   background-color: #0056b3;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.9em;
-}
-
-.btn-warning {
-  background: #ffc107;
-  color: #212529;
-}
-
-.btn-danger {
-  background: #dc3545;
-  color: #fff;
 }
 
 .btn-logout {
@@ -137,26 +109,4 @@ input, select {
 a {
   color: #007bff;
   text-decoration: none;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 0.75rem;
-  text-align: left;
-}
-
-th {
-  background: #f1f1f1;
-}
-
-.registered-clients-table {
-  clear: both;
-  width: 100%;
-  margin-top: 2rem;
 }
