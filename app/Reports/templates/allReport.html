@@ -166,11 +166,23 @@ All Reports
             <div class="form-actions">
                 <button type="button" class="cancel-btn">Cancel</button>
                 <button type="submit" id="generateReport">Generate Report</button>
+                <button type="button" id="previewReportBtn" title="Preview Report" style="margin-left:10px;">
+                    <i class="fa fa-eye"></i>
+                </button>
             </div>
         </form>
     </div>
 </div>
 
+<div id="previewModal" class="modal">
+    <div class="modal-content" style="max-width:90vw;max-height:80vh;overflow:auto;">
+        <span class="close" id="closePreviewModal">&times;</span>
+        <h2>Report Preview</h2>
+        <div id="previewTableContainer">
+            <!-- Table will be injected here -->
+        </div>
+    </div>
+</div>
 
 
 {% endblock %}
