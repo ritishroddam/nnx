@@ -17,9 +17,13 @@
 }
 
 .form-group label {
-  font-weight: 500;
-  margin-bottom: 8px;
-  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+  color: #222;
+}
+
+.dark-mode .form-group label {
+  color: #ccc;
 }
 
 .btn {
@@ -33,7 +37,36 @@
   margin-top: 10px;
 }
 
+.dark-mode .btn {
+  background: #0056b3;
+}
+
 .btn:disabled {
   background: #aaa;
   cursor: not-allowed;
+}
+
+#companyConfigForm input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+  background: #fff;
+  color: #222;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.dark-mode #companyConfigForm input {
+  background: #333;
+  color: #ccc;
+  border-color: #555;
+}
+
+#companyConfigForm input:focus {
+  border-color: #007bff;
+  outline: none;
 }
