@@ -48,3 +48,11 @@ class User:
             return db.users.find_one({'_id': ObjectId(user_id)})
         except Exception:
             return None
+    
+    @staticmethod
+    def delete_user(user_id):
+        from app import db
+        try:
+            db.users.delete_one({'_id': user_id})
+        except Exception:
+            pass
