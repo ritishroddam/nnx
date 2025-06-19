@@ -209,7 +209,7 @@ function editVehicle(vehicleId) {
     <option value="sedan" ${vehicleType === "sedan" ? "selected" : ""}>Sedan</option>
     <option value="suv" ${vehicleType === "suv" ? "selected" : ""}>SUV</option>
     <option value="van" ${vehicleType === "van" ? "selected" : ""}>Van</option>
-    <option value="hatchback"" ${vehicleType === "hatchback"" ? "selected" : ""}>Hatchback</option>
+    <option value="hatchback" ${vehicleType === "hatchback" ? "selected" : ""}>Hatchback</option>
     <option value="bus" ${vehicleType === "bus" ? "selected" : ""}>Bus</option>
     <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
     <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
