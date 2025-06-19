@@ -11,6 +11,7 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
+from bson import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -282,10 +283,15 @@ def register_client_admin():
     # Fetch all client admins for the table
     client_admins = []
     for user in User.get_all_by_role('clientAdmin'):
-        company_name = None
-        if user['company'] and user['company'] != 'none':
-            company_doc = db.customers_list.find_one({'_id': user['company']})
-            company_name = company_doc['Company Name'] if company_doc else 'N/A'
+        company_name = 'N/A'
+        if user.get('company') and user['company'] != 'none':
+            try:
+                company_id = ObjectId(user['company'])
+                company_doc = db.customers_list.find_one({'_id': company_id})
+                if company_doc:
+                    company_name = company_doc.get('Company Name', 'N/A')
+            except Exception:
+                company_name = 'N/A'
         client_admins.append({
             'username': user['username'],
             'email': user['email'],
