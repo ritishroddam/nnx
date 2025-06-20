@@ -37,4 +37,4 @@ class User:
     
     @staticmethod
     def find_by_role(role):
-        return db.user_collection.find({"role": role})
+        return db.users.find({"role": role})
