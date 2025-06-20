@@ -252,7 +252,7 @@ def upload_vehicle_file():
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
             vehicle_type = (str(row['VehicleType']).strip()).lower()
-            number_of_seats = str(row['NumberOfSeatsContainerContainer']).strip()
+            number_of_seats = str(row['NumberOfSeatsContainer']).strip()
             vehicle_model = str(row['VehicleModel']).strip()
             vehicle_make = str(row['VehicleMake']).strip()
             year_of_manufacture = str(row['YearOfManufacture']).strip()
