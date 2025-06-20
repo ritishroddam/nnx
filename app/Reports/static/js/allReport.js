@@ -207,9 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
   // Generate report button handler
-  document
-  .getElementById("generateReport")
-  .addEventListener("click", async function () {
+  document.getElementById("generateReport").addEventListener("click", async function () {
       const reportType = this.dataset.reportType;
       const reportName = this.dataset.reportName;
       const vehicleNumber = document.getElementById("vehicleNumber").value;
@@ -550,9 +548,7 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   });
 
   // Generate report button handler
-  document
-  .getElementById("generateReport")
-  .addEventListener("click", async function () {
+  document.getElementById("generateReport").addEventListener("click", async function () {
       const reportType = currentReportType;
       const reportName = this.dataset.reportName;
       const vehicleNumber = document.getElementById("vehicleNumber").value;
