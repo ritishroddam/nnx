@@ -121,6 +121,7 @@
   max-width: 400px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   position: relative;
+  margin-top: 220px;
 }
 .modal-content .close {
   position: absolute;
