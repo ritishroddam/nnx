@@ -12,10 +12,7 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
-from openpyxl.styles import PatternFill
-from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill
+
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -360,11 +357,6 @@ def download_custom_report():
                         df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
                     if 'speed' in df.columns:
                         df = add_speed_metrics(df)
-                    # Insert separator row before each vehicle's data
-                    separator_row = pd.DataFrame([[license_plate] + [""] * (len(df.columns) - 1)], columns=df.columns)
-                    separator_row.attrs["is_separator"] = True  # Custom attribute to identify later
-
-                    all_dfs.append(separator_row)    
                     all_dfs.append(df)
 
                 else:
@@ -463,59 +455,10 @@ def download_custom_report():
             final_df = pd.concat(all_dfs, ignore_index=True)
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                workbook = writer.book
-                worksheet_name = "All Vehicles Report"
-                worksheet = workbook.create_sheet(title=worksheet_name)
-            
-                yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
-            
-                current_vehicle = None
-                row_idx = 1  # Excel rows are 1-indexed
-            
-                final_rows = []
-                for df in all_dfs:
-                    if df.empty:
-                        continue
-
-                    vehicle_number = df.iloc[0]['Vehicle Number'] if 'Vehicle Number' in df.columns else None
-                    separator_row = pd.DataFrame([[f"--- Data for Vehicle: {vehicle_number} ---"] + [""] * (len(df.columns) - 1)],
-                                 columns=df.columns)
-                    final_rows.append(separator_row)
-                    final_rows.append(df)
-
-                final_df = pd.concat(final_rows, ignore_index=True)
-                
-                output = BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")            
-                    
-                # Remove default empty sheet if still present
-                if "Sheet" in workbook.sheetnames:
-                    del workbook["Sheet"]
-            
-                workbook.save(output)
-            
+                final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
             output.seek(0)
-            
-            workbook = load_workbook(output)
-            worksheet = workbook["All Vehicles Report"]
-
-            yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
-
-            # Apply fill to separator rows
-            for row in worksheet.iter_rows(min_row=2):  # Skip header
-                first_cell_value = str(row[0].value)
-                if first_cell_value.startswith("--- Data for Vehicle:"):
-                    for cell in row:
-                        cell.fill = yellow_fill
-
-            # Step 4: Save the workbook
-            final_output = BytesIO()
-            workbook.save(final_output)
-            final_output.seek(0)            
-            
             return send_file(
-                final_output,
+                output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 as_attachment=True,
                 download_name=f"{report_type}_report_ALL_VEHICLES.xlsx"
