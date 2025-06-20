@@ -368,7 +368,7 @@ def download_custom_report():
                         {"fields": 1, "_id": 0}
                     )
                     if not report:
-                        return jsonify({"success": False, "message": "Custom report not found", "category":"danger"}), 500
+                        return jsonify({"success": False, "message": "Custom report not found", "category":"danger"}), 404
 
                     fields = report["fields"]
 
@@ -407,13 +407,13 @@ def download_custom_report():
                     elif not atlanta_data and vehicle_inventory_data:
                         combined_data = [vehicle_inventory_data]
                     else:
-                        return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
+                        continue
 
                     # Convert to DataFrame
                     df = pd.DataFrame(combined_data)
 
                     if df.empty:
-                        return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
+                        continue
 
                     # Process latitude and longitude if present
                     if 'date_time' in df.columns:
