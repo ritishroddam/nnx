@@ -66,7 +66,7 @@ Register Client Admin
                     <td>
                         <span class="view-mode">
                             {% for company in companies %}
-                                {% if company._id == admin.company %}
+                                {% if company._id|string == admin.company|string %}
                                     {{ company['Company Name'] }}
                                 {% endif %}
                             {% endfor %}
@@ -74,7 +74,7 @@ Register Client Admin
                         <select class="edit-mode form-control" style="display: none;">
                             <option value="" disabled>Select Company</option>
                             {% for company in companies %}
-                            <option value="{{ company._id }}" {% if company._id == admin.company %}selected{% endif %}>
+                            <option value="{{ company._id }}" {% if company._id|string == admin.company|string %}selected{% endif %}>
                                 {{ company['Company Name'] }}
                             </option>
                             {% endfor %}

@@ -11,7 +11,6 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
-from bson.objectid import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -295,7 +294,7 @@ def update_client_admin(user_id):
     
     try:
         db.users.update_one(
-            {'_id': ObjectId(user_id)},
+            {'_id': user_id},
             {'$set': {
                 'username': data['username'],
                 'email': data['email'],
@@ -311,7 +310,7 @@ def update_client_admin(user_id):
 @roles_required('admin')
 def delete_client_admin(user_id):
     try:
-        db.users.delete_one({'_id': ObjectId(user_id)})
+        db.users.delete_one({'_id': user_id})
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
