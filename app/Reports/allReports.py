@@ -931,7 +931,6 @@ def download_panic_report():
         print(f"Error generating panic report: {str(e)}")  # Add this for debugging
         traceback.print_exc()  # Add this to print full traceback
         return jsonify({"success": False, "message": str(e), "category": "danger"}), 500
-        return jsonify({"success": False, "message": str(e), "category": "danger"}), 500
 
 def get_all_vehicles(query=None):
     """Return a list of all vehicles' LicensePlateNumber and IMEI."""
