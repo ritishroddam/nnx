@@ -110,3 +110,20 @@ a {
   color: #007bff;
   text-decoration: none;
 }
+
+.client-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2em;
+}
+.client-admin-table th, .client-admin-table td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+}
+.client-admin-table th {
+    background: #f4f4f4;
+}
+.client-admin-table tr:nth-child(even) {
+    background: #fafafa;
+}

@@ -43,18 +43,32 @@ Register Client Admin
 </div>
 
 {% for client in clients %}
-    <tr data-id="{{ client._id }}">
-        <td class="editable" data-field="username">{{ client.username }}</td>
-        <td class="editable" data-field="email">{{ client.email }}</td>
-        <td class="editable" data-field="company">{{ client.company }}</td>
-        <td>
-            <button class="edit-btn">Edit</button>
-            <button class="save-btn" style="display:none;">Save</button>
-            <button class="delete-btn">Delete</button>
-        </td>
-    </tr>
+    <h2>Registered Client Admins</h2>
+<table class="client-admin-table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for client in clients %}
+        <tr data-id="{{ client._id }}">
+            <td class="editable" data-field="username">{{ client.username }}</td>
+            <td class="editable" data-field="email">{{ client.email }}</td>
+            <td class="editable" data-field="company">{{ client.company }}</td>
+            <td>
+                <button class="edit-btn">Edit</button>
+                <button class="save-btn" style="display:none;">Save</button>
+                <button class="delete-btn">Delete</button>
+            </td>
+        </tr>
     {% else %}
-    <tr><td colspan="4">No client admins registered.</td></tr>
+        <tr><td colspan="4">No client admins registered.</td></tr>
     {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}
