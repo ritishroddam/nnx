@@ -14,63 +14,104 @@ Company Configuration
 <div class="company-config-form">
     <form id="companyConfigForm">
         <div class="form-group">
-            <h3>Speed Configuration for BUS</h3>
-            <label class="busSlowSpeed">Slow Speed for BUS</label>
-            <input type="number" id="busSlowSpeed" name="busSlowSpeed" value="{{ companyConfig.busSlowSpeed }}" />
-            <label id="busNormalSpeed">Normal Speed for BUS</label>
-            <input type="number" id="busNoramlSpeed" name="busNormalSpeed" value="{{ companyConfig.busNormalSpeed }}" />
+          <h3>Speed Configuration for BUS</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="busSlowSpeed">Slow Speed</label>
+              <input type="number" id="busSlowSpeed" name="busSlowSpeed" value="{{ companyConfig.busSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="busNormalSpeed">Normal Speed</label>
+              <input type="number" id="busNormalSpeed" name="busNormalSpeed" value="{{ companyConfig.busNormalSpeed }}" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
-            <h3>Speed Configuration for SEDAN</h3>
-            <label for="sedanSlowSpeed">Slow Speed for SEDAN</label>
-            <input type="number" id="sedanSlowSpeed" name="sedanSlowSpeed" value="{{ companyConfig.sedanSlowSpeed }}" />
-            <label for="sedanNormalSpeed">Normal Speed for SEDAN</label>
-            <input type="number" id="sedanNormalSpeed" name="sedanNormalSpeed" value="{{ companyConfig.sedanNormalSpeed }}" />
+          <h3>Speed Configuration for SEDAN</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="sedanSlowSpeed">Slow Speed</label>
+              <input type="number" id="sedanSlowSpeed" name="sedanSlowSpeed" value="{{ companyConfig.sedanSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="sedanNormalSpeed">Normal Speed</label>
+              <input type="number" id="sedanNormalSpeed" name="sedanNormalSpeed" value="{{ companyConfig.sedanNormalSpeed }}" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
-            <h3>Speed Configuration for HATCHBACK</h3>
-            <label for="hatchbackSlowSpeed">Slow Speed for HATCHBACK</label>
-            <input type="number" id="hatchbackSlowSpeed" name="hatchbackSlowSpeed" value="{{ companyConfig.hatchbackSlowSpeed }}" />
-            <label for="hatchbackNormalSpeed">Normal Speed for HATCHBACK</label>
-            <input type="number" id="hatchbackNormalSpeed" name="hatchbackNormalSpeed" value="{{ companyConfig.hatchbackNormalSpeed }}" />
+          <h3>Speed Configuration for HATCHBACK</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="hatchbackSlowSpeed">Slow Speed</label>
+              <input type="number" id="hatchbackSlowSpeed" name="hatchbackSlowSpeed" value="{{ companyConfig.hatchbackSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="hatchbackNormalSpeed">Normal Speed</label>
+              <input type="number" id="hatchbackNormalSpeed" name="hatchbackNormalSpeed" value="{{ companyConfig.hatchbackNormalSpeed }}" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
-            <h3>Speed Configuration for SUV</h3>
-            <label for="suvSlowSpeed">Slow Speed for SUV</label>
-            <input type="number" id="suvSlowSpeed" name="suvSlowSpeed" value="{{ companyConfig.suvSlowSpeed }}" />
-            <label for="suvNormalSpeed">Normal Speed for SUV</label>
-            <input type="number" id="suvNormalSpeed" name="suvNormalSpeed" value="{{ companyConfig.suvNormalSpeed }}" />
+          <h3>Speed Configuration for SUV</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="suvSlowSpeed">Slow Speed</label>
+              <input type="number" id="suvSlowSpeed" name="suvSlowSpeed" value="{{ companyConfig.suvSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="suvNormalSpeed">Normal Speed</label>
+              <input type="number" id="suvNormalSpeed" name="suvNormalSpeed" value="{{ companyConfig.suvNormalSpeed }}" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
-            <h3>Speed Configuration for VAN</h3>
-            <label for="vanSlowSpeed">Slow Speed for VAN</label>
-            <input type="number" id="vanSlowSpeed" name="vanSlowSpeed" value="{{ companyConfig.vanSlowSpeed }}" />
-            <label for="vanNormalSpeed">Normal Speed for VAN</label>
-            <input type="number" id="vanNormalSpeed" name="vanNormalSpeed" value="{{ companyConfig.vanNormalSpeed }}" />
+          <h3>Speed Configuration for VAN</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="vanSlowSpeed">Slow Speed</label>
+              <input type="number" id="vanSlowSpeed" name="vanSlowSpeed" value="{{ companyConfig.vanSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="vanNormalSpeed">Normal Speed</label>
+              <input type="number" id="vanNormalSpeed" name="vanNormalSpeed" value="{{ companyConfig.vanNormalSpeed }}" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
-            <h3>Speed Configuration for TRUCK</h3>
-            <label for="truckSlowSpeed">Slow Speed for TRUCK</label>
-            <input type="number" id="truckSlowSpeed" name="truckSlowSpeed" value="{{ companyConfig.truckSlowSpeed }}" />
-            <label for="truckNormalSpeed">Normal Speed for TRUCK</label>
-            <input type="number" id="truckNormalSpeed" name="truckNormalSpeed" value="{{ companyConfig.truckNormalSpeed }}" />
+          <h3>Speed Configuration for TRUCK</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="truckSlowSpeed">Slow Speed</label>
+              <input type="number" id="truckSlowSpeed" name="truckSlowSpeed" value="{{ companyConfig.truckSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="truckNormalSpeed">Normal Speed</label>
+              <input type="number" id="truckNormalSpeed" name="truckNormalSpeed" value="{{ companyConfig.truckNormalSpeed }}" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
-            <h3>Speed Configuration for BIKE</h3>
-            <label for="bikeSlowSpeed">Slow Speed for BIKE</label>
-            <input type="number" id="bikeSlowSpeed" name="bikeSlowSpeed" value="{{ companyConfig.bikeSlowSpeed }}" />
-            <label for="bikeNormalSpeed">Normal Speed for BIKE</label>
-            <input type="number" id="bikeNormalSpeed" name="bikeNormalSpeed" value="{{ companyConfig.bikeNormalSpeed }}" />
+          <h3>Speed Configuration for BIKE</h3>
+          <div class="input-row">
+            <div class="input-col">
+              <label for="bikeSlowSpeed">Slow Speed</label>
+              <input type="number" id="bikeSlowSpeed" name="bikeSlowSpeed" value="{{ companyConfig.bikeSlowSpeed }}" />
+            </div>
+            <div class="input-col">
+              <label for="bikeNormalSpeed">Normal Speed</label>
+              <input type="number" id="bikeNormalSpeed" name="bikeNormalSpeed" value="{{ companyConfig.bikeNormalSpeed }}" />
+            </div>
+          </div>
         </div>  
 
         <button type="submit" class="btn" id="saveConfigBtn">Save Configuration</button>
     </form>
-
 </div>
 {% endblock %}
