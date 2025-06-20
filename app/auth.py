@@ -304,8 +304,8 @@ def register_client_admin():
         flash('Admin registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
 
-    clients = list(User.find_by_role('clientAdmin'))
     companies = db.customers_list.find()
+    clients = list(User.find_by_role('clientAdmin'))
     
     return render_template('register_client_admin.html', companies=companies, clients=clients)
 
