@@ -112,7 +112,8 @@
   overflow: auto; 
   background-color: rgba(0,0,0,0.4);
 }
-.modal-content {
+
+.modal-content1 {
   background-color: #fff;
   margin: 10% auto;
   padding: 20px 24px;
@@ -121,8 +122,10 @@
   max-width: 400px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   position: relative;
+  margin-top: 220px;
 }
-.modal-content .close {
+
+.modal-content1 .close {
   position: absolute;
   right: 16px;
   top: 12px;

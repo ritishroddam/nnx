@@ -555,12 +555,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function () {
       currentReportType = card.dataset.report;
-      if (currentReportType === "distance-speed-range") {
-        speedSelectGroup.style.display = "";
-      } else {
-        speedSelectGroup.style.display = "none";
-        speedSelect.value = "";
-      }
       // Hide "All Vehicle" for Travel Path Report
       const reportType = card.dataset.report;
       const allVehicleOption = document.getElementById("allVehicleOption");
@@ -590,14 +584,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
 
   // Make speed selection mandatory for Speed Report
   document.getElementById("reportForm").addEventListener("submit", function(e) {
-    if (currentReportType === "distance-speed-range") {
-      if (!speedSelect.value) {
-        alert("Please select a speed for the Speed Report.");
-        speedSelect.focus();
-        e.preventDefault();
-        return false;
-      }
-    }
     // Custom date range validation
     const dateRange = document.getElementById("dateRange").value;
     if (dateRange === "custom") {
