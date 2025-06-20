@@ -1,5 +1,5 @@
 .company-config-form {
-  max-width: 840px;
+  max-width: 950px;
   margin: 32px auto;
   background: #fff;
   border-radius: 12px;
@@ -17,8 +17,8 @@
     flex-direction: column;
     align-items: stretch;
   }
-  #companyConfigForm label,
-  #companyConfigForm input {
+  .input-row label,
+  .input-row input {
     width: 100%;
     text-align: left;
   }
@@ -32,7 +32,14 @@
   gap: 18px;
 }
 
-.form-group label {
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.input-row label {
   min-width: 180px;
   width: 30%;
   margin-bottom: 0;
@@ -42,7 +49,7 @@
   text-align: right;
 }
 
-.dark-mode .form-group label {
+.dark-mode .input-row label {
   color: #ccc;
 }
 
@@ -66,7 +73,7 @@
   cursor: not-allowed;
 }
 
-#companyConfigForm input {
+.input-row input {
   width: 65%;
   margin-bottom: 0;
   padding: 10px 12px;
@@ -80,13 +87,13 @@
   transition: border-color 0.2s;
 }
 
-.dark-mode #companyConfigForm input {
+.dark-mode .input-row input {
   background: #333;
   color: #ccc;
   border-color: #555;
 }
 
-#companyConfigForm input:focus {
+.input-row input:focus {
   border-color: #007bff;
   outline: none;
 }
