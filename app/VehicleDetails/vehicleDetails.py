@@ -18,6 +18,7 @@ sim_collection = db['sim_inventory']
 device_collection = db['device_inventory']
 companies_collection = db['customers_list']
 cities_collection = db['cities']
+company_config_collection = db['company_config']
 
 @vehicleDetails_bp.route('/page')
 @jwt_required()
@@ -141,11 +142,14 @@ def manual_entry():
         return redirect(url_for('VehicleDetails.page'))
     # ...existing validation code...
 
-    if data['normalSpeed'] == "":
-        data['normalSpeed'] = "60"
-    
-    if data['slowSpeed'] == "":
-        data['slowSpeed'] = "20"
+    speedConfigs = company_config_collection.find_one({"CompanyName": data['CompanyName']},{"_id": 0, f"{data['VehicleType']}slowSpeed": 1, f"{data['VehicleType']}normalSpeed": 1})
+
+    if not speedConfigs:
+        data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else "20"
+        data['normalSpeed'] = data['normalSpeed'] if data['normalSpeed'] != '' else "60"
+    else:
+        data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}slowSpeed", "20")
+        data['normalSpeed'] = data['normalSpeed'] if data['normalSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}normalSpeed", "60")
     
     # Save city and state in the same column
     location = data['Location'].split(',')
@@ -267,6 +271,12 @@ def upload_vehicle_file():
             slowSpeed = str(row['slowSpeed']).strip()
             normalSpeed = str(row['normalSpeed']).strip()
 
+            if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
+                flash(f"In {row} Vehicle Type: {vehicle_type} is invalid.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            speedConfigs = company_config_collection.find_one({"CompanyName": companyName},{"_id": 0, f"{vehicle_type}slowSpeed": 1, f"{vehicle_type}normalSpeed": 1})
+            
             number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
             vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
             vehicle_make = vehicle_make if vehicle_make != 'nan' else ""
@@ -278,8 +288,13 @@ def upload_vehicle_file():
             current_status = current_status if current_status != 'nan' else ""
             odometer_reading = odometer_reading if odometer_reading != 'nan' else ""
             service_due_date = service_due_date if service_due_date != 'nan' else ""
-            slowSpeed = slowSpeed if slowSpeed != 'nan' else "20"
-            normalSpeed = normalSpeed if normalSpeed != 'nan' else "60"
+
+            if not speedConfigs:
+                slowSpeed = slowSpeed if slowSpeed != 'nan' else "20"
+                normalSpeed = normalSpeed if normalSpeed != 'nan' else "60"
+            else:
+                slowSpeed = slowSpeed if slowSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}slowSpeed", "20")
+                normalSpeed = normalSpeed if normalSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}normalSpeed", "60")
 
             if not license_plate_number or not imei or not sim or not location:
                 flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
@@ -300,10 +315,6 @@ def upload_vehicle_file():
             # Validate length of SIM and IMEI
             if len(sim) != 20:
                 flash(f"SIM {sim} must be 20 characters long.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
-            
-            if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
-                flash(f"In {row} Vehicle Type: {vehicle_type} is invalid.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
