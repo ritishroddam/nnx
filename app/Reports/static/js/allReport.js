@@ -886,7 +886,7 @@ function createReportCard(report) {
     e.stopPropagation();
     e.preventDefault();
     const reportName = reportCard.dataset.reportName || reportCard.querySelector('h3').textContent;
-    if (confirm(`Are you sure you want to delete the report "${reportName}"?`)) {
+    showDeleteConfirm(reportName, function() {
       fetch(`/reports/delete_custom_report?name=${encodeURIComponent(reportName)}`, {
         method: "DELETE",
         headers: {
@@ -897,13 +897,13 @@ function createReportCard(report) {
       .then(data => {
         if (data.success) {
           reportCard.remove();
-          alert("Report deleted successfully.");
+          // Optionally show a toast or flash message here
         } else {
           alert(data.message || "Failed to delete report.");
         }
       })
       .catch(() => alert("Failed to delete report."));
-    }
+    });
   });
 
   const container = document.querySelector(".report-cards");
@@ -1011,7 +1011,7 @@ document.querySelectorAll('.report-card[data-report="custom"] .delete-report').f
     e.preventDefault();
     const reportCard = this.closest('.report-card');
     const reportName = reportCard.dataset.reportName || reportCard.querySelector('h3').textContent;
-    if (confirm(`Are you sure you want to delete the report "${reportName}"?`)) {
+    showDeleteConfirm(reportName, function() {
       fetch(`/reports/delete_custom_report?name=${encodeURIComponent(reportName)}`, {
         method: "DELETE",
         headers: {
@@ -1022,12 +1022,41 @@ document.querySelectorAll('.report-card[data-report="custom"] .delete-report').f
       .then(data => {
         if (data.success) {
           reportCard.remove();
-          alert("Report deleted successfully.");
+          // Optionally show a toast or flash message here
         } else {
           alert(data.message || "Failed to delete report.");
         }
       })
       .catch(() => alert("Failed to delete report."));
-    }
+    });
   });
 });
+
+function showDeleteConfirm(reportName, onConfirm) {
+  const modal = document.getElementById("deleteConfirmModal");
+  const text = document.getElementById("deleteConfirmText");
+  const okBtn = document.getElementById("deleteOkBtn");
+  const cancelBtn = document.getElementById("deleteCancelBtn");
+  const closeBtn = document.getElementById("deleteConfirmClose");
+
+  text.textContent = `Are you sure you want to delete the report "${reportName}"?`;
+  modal.style.display = "block";
+
+  function cleanup() {
+    modal.style.display = "none";
+    okBtn.removeEventListener("click", onOk);
+    cancelBtn.removeEventListener("click", onCancel);
+    closeBtn.removeEventListener("click", onCancel);
+  }
+  function onOk() {
+    cleanup();
+    onConfirm();
+  }
+  function onCancel() {
+    cleanup();
+  }
+
+  okBtn.addEventListener("click", onOk);
+  cancelBtn.addEventListener("click", onCancel);
+  closeBtn.addEventListener("click", onCancel);
+}
