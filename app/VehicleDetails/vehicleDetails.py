@@ -142,7 +142,13 @@ def manual_entry():
         return redirect(url_for('VehicleDetails.page'))
     # ...existing validation code...
 
-    speedConfigs = company_config_collection.find_one({"CompanyName": data['CompanyName']},{"_id": 0, f"{data['VehicleType']}slowSpeed": 1, f"{data['VehicleType']}normalSpeed": 1})
+    companyId = companies_collection.find_one({"Company Name": data['CompanyName']}, {"_id": 1})
+    
+    if not companyId:
+        flash(f"Company {data['CompanyName']} does not exist.", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{data['VehicleType']}slowSpeed": 1, f"{data['VehicleType']}normalSpeed": 1})
 
     if not speedConfigs:
         data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else "20"
@@ -275,7 +281,14 @@ def upload_vehicle_file():
                 flash(f"In {row} Vehicle Type: {vehicle_type} is invalid.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
-            speedConfigs = company_config_collection.find_one({"CompanyName": companyName},{"_id": 0, f"{vehicle_type}slowSpeed": 1, f"{vehicle_type}normalSpeed": 1})
+            
+            companyId = companies_collection.find_one({"Company Name": companyName}, {"_id": 1})
+
+            if not companyId:
+                flash(f"Company {companyName} does not exist.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{vehicle_type}slowSpeed": 1, f"{vehicle_type}normalSpeed": 1})
             
             number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
             vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
