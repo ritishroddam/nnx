@@ -13,6 +13,7 @@ from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
 from openpyxl.styles import PatternFill
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -460,18 +461,41 @@ def download_custom_report():
             final_df = pd.concat(all_dfs, ignore_index=True)
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                final_df = pd.concat(all_dfs, ignore_index=True)
-                final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
-
-                # Apply color to separator rows
                 workbook = writer.book
-                worksheet = writer.sheets["All Vehicles Report"]
-                fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")  # Yellow
-
-                for idx, row in final_df.iterrows():
-                    if row.isna().sum() == len(row) - 1 and isinstance(row[0], str) and row[0] in row.to_list():
-                        for col_idx in range(1, len(row) + 1):
-                            worksheet.cell(row=idx + 2, column=col_idx).fill = fill
+                worksheet_name = "All Vehicles Report"
+                worksheet = workbook.create_sheet(title=worksheet_name)
+            
+                yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+            
+                current_vehicle = None
+                row_idx = 1  # Excel rows are 1-indexed
+            
+                for df in all_dfs:
+                    if df.empty:
+                        continue
+                    
+                    # Detect current vehicle number
+                    vehicle_number = df.iloc[0]['Vehicle Number'] if 'Vehicle Number' in df.columns else None
+            
+                    # Add separator row if new vehicle
+                    if current_vehicle != vehicle_number:
+                        if row_idx > 1:
+                            worksheet.append([f"--- Data for Vehicle: {vehicle_number} ---"])
+                            for col in range(1, len(df.columns) + 1):
+                                worksheet.cell(row=row_idx, column=col).fill = yellow_fill
+                            row_idx += 1
+                        current_vehicle = vehicle_number
+            
+                    for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=row_idx == 1), start=row_idx):
+                        worksheet.append(row)
+                        row_idx += 1
+            
+                # Remove default empty sheet if still present
+                if "Sheet" in workbook.sheetnames:
+                    del workbook["Sheet"]
+            
+                workbook.save(output)
+            
             output.seek(0)
             return send_file(
                 output,
