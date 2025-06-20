@@ -386,6 +386,11 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
       const existingField = selectedFields.querySelector(
         `[data-field="${field}"]`
       );
+      if (existingField) {
+        alert("This field is already selected.");
+        e.target.checked = false;
+        return;
+      }
 
       const listItem = document.createElement("li");
       listItem.textContent = field;
@@ -594,62 +599,67 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   });
 
   // Field selection handling
-  fieldSelection.addEventListener("change", function (e) {
-    const field = e.target.value;
+  // fieldSelection.addEventListener("change", function (e) {
+  //   const field = e.target.value;
 
-    if (e.target.checked) {
-      const existingField = selectedFields.querySelector(
-        `[data-field="${field}"]`
-      );
+  //   if (e.target.checked) {
+  //     const existingField = selectedFields.querySelector(
+  //       `[data-field="${field}"]`
+  //     );
+  //     if (existingField) {
+  //       alert("This field is already selected.");
+  //       e.target.checked = false;
+  //       return;
+  //     }
 
-      const listItem = document.createElement("li");
-      listItem.textContent = field;
-      listItem.dataset.field = field;
-      listItem.draggable = true;
+  //     const listItem = document.createElement("li");
+  //     listItem.textContent = field;
+  //     listItem.dataset.field = field;
+  //     listItem.draggable = true;
 
-      const removeButton = document.createElement("button");
-      removeButton.textContent = "Remove";
-      removeButton.className = "btn btn-sm btn-danger";
-      removeButton.style.marginLeft = "10px";
+  //     const removeButton = document.createElement("button");
+  //     removeButton.textContent = "Remove";
+  //     removeButton.className = "btn btn-sm btn-danger";
+  //     removeButton.style.marginLeft = "10px";
 
-      removeButton.addEventListener("click", function () {
-        selectedFields.removeChild(listItem);
-        const checkbox = fieldSelection.querySelector(
-          `input[value="${field}"]`
-        );
-        if (checkbox) {
-          checkbox.checked = false;
-          checkbox.parentElement.style.display = "block";
-        }
-      });
+  //     removeButton.addEventListener("click", function () {
+  //       selectedFields.removeChild(listItem);
+  //       const checkbox = fieldSelection.querySelector(
+  //         `input[value="${field}"]`
+  //       );
+  //       if (checkbox) {
+  //         checkbox.checked = false;
+  //         checkbox.parentElement.style.display = "block";
+  //       }
+  //     });
 
-      listItem.appendChild(removeButton);
+  //     listItem.appendChild(removeButton);
 
-      // Drag and drop functionality
-      listItem.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", e.target.dataset.field);
-      });
+  //     // Drag and drop functionality
+  //     listItem.addEventListener("dragstart", (e) => {
+  //       e.dataTransfer.setData("text/plain", e.target.dataset.field);
+  //     });
 
-      listItem.addEventListener("dragover", (e) => e.preventDefault());
-      listItem.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const draggedField = e.dataTransfer.getData("text/plain");
-        const draggedItem = selectedFields.querySelector(
-          `[data-field="${draggedField}"]`
-        );
-        if (draggedItem) {
-          selectedFields.insertBefore(draggedItem, e.target);
-        }
-      });
+  //     listItem.addEventListener("dragover", (e) => e.preventDefault());
+  //     listItem.addEventListener("drop", (e) => {
+  //       e.preventDefault();
+  //       const draggedField = e.dataTransfer.getData("text/plain");
+  //       const draggedItem = selectedFields.querySelector(
+  //         `[data-field="${draggedField}"]`
+  //       );
+  //       if (draggedItem) {
+  //         selectedFields.insertBefore(draggedItem, e.target);
+  //       }
+  //     });
 
-      selectedFields.appendChild(listItem);
-      e.target.parentElement.style.display = "none";
-    } else {
-      const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-      if (listItem) selectedFields.removeChild(listItem);
-      e.target.parentElement.style.display = "block";
-    }
-  });
+  //     selectedFields.appendChild(listItem);
+  //     e.target.parentElement.style.display = "none";
+  //   } else {
+  //     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
+  //     if (listItem) selectedFields.removeChild(listItem);
+  //     e.target.parentElement.style.display = "block";
+  //   }
+  // });
 
   // Hide "All Vehicle" for Travel Path Report
   document.querySelectorAll(".report-card").forEach((card) => {
