@@ -35,8 +35,7 @@ FIELD_COLLECTION_MAP = {
 }
 
 def get_date_range_filter(date_range, from_date=None, to_date=None):
-    """Improved date range filter using datetime objects"""
-    tz = pytz.timezone('UTC')
+    tz = pytz.UTC
     now = datetime.now(tz)
 
     if date_range == "last24hours":
@@ -45,32 +44,27 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
         today_start = datetime(now.year, now.month, now.day, tzinfo=tz)
         return {'date_time': {'$gte': today_start}}
     elif date_range == "yesterday":
-        yesterday_start = datetime(now.year, now.month, now.day, tzinfo=tz) - timedelta(days=1)
-        yesterday_end = datetime(now.year, now.month, now.day, tzinfo=tz)
-        return {'date_time': {'$gte': yesterday_start, '$lt': yesterday_end}}
+        ist = timezone('Asia/Kolkata')
+        now_ist = datetime.now(ist)
+        today_ist = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday_start_ist = today_ist - timedelta(days=1)
+        yesterday_end_ist = today_ist
+        yesterday_start_utc = yesterday_start_ist.astimezone(pytz.UTC)
+        yesterday_end_utc = yesterday_end_ist.astimezone(pytz.UTC)
+        return {'date_time': {'$gte': yesterday_start_utc, '$lt': yesterday_end_utc}}
     elif date_range == "last7days":
         return {'date_time': {'$gte': now - timedelta(days=7)}}
     elif date_range == "last30days":
         return {'date_time': {'$gte': now - timedelta(days=30)}}
     elif date_range == "custom" and from_date and to_date:
         try:
-            # Parse the datetime strings from the frontend
-            from_datetime = datetime.strptime(from_date, "%Y-%m-%dT%H:%M")
-            to_datetime = datetime.strptime(to_date, "%Y-%m-%dT%H:%M")
-
-            # Localize to IST and convert to UTC
-            ist = timezone('Asia/Kolkata')
-            from_datetime = ist.localize(from_datetime).astimezone(pytz.UTC)
-            to_datetime = ist.localize(to_datetime).astimezone(pytz.UTC)
-
-            # Validate date range is within 3 months
+            from_datetime = datetime.strptime(from_date, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
+            to_datetime = datetime.strptime(to_date, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
             three_months_ago = now - timedelta(days=90)
             if from_datetime < three_months_ago or to_datetime < three_months_ago:
                 raise ValueError("Date range cannot be older than 3 months")
-
             if from_datetime > to_datetime:
                 raise ValueError("From date cannot be after To date")
-
             return {'date_time': {'$gte': from_datetime, '$lte': to_datetime}}
         except ValueError as e:
             raise ValueError(f"Invalid custom date range: {str(e)}")
