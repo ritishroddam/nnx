@@ -432,6 +432,16 @@ def download_custom_report():
                 combined_data = [vehicle_inventory_data]
             else:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
+            
+            print("======= DEBUG CUSTOM REPORT =======")
+            print("Report Name:", custom_report_name)
+            print("IMEI:", imei)
+            print("Date Filter:", date_filter)
+            print("Atlanta Fields:", atlanta_fields)
+            print("Vehicle Inventory Fields:", vehicle_inventory_fields)
+            print("Atlanta Data Found:", len(atlanta_data) if atlanta_fields else "N/A")
+            print("Vehicle Inventory Data Found:", bool(vehicle_inventory_data))
+
 
             # Convert to DataFrame
             df = pd.DataFrame(combined_data)
