@@ -263,9 +263,6 @@ def download_custom_report():
                 if not imei or not license_plate:
                     continue
 
-                # The rest of the logic is similar to the single vehicle case,
-                # but you loop over all vehicles and append their dataframes to all_dfs.
-                # For brevity, here's a simplified version for standard reports:
                 if report_type != "custom":
                     report_configs = {
                         'daily-distance': {
@@ -360,8 +357,7 @@ def download_custom_report():
                     if 'speed' in df.columns:
                         df = add_speed_metrics(df)
                     all_dfs.append(df)
-                # For custom reports, similar logic applies (loop over vehicles, fetch fields, append to all_dfs)
-                # ... (implement as needed)
+
             if not all_dfs:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
             final_df = pd.concat(all_dfs, ignore_index=True)
@@ -375,8 +371,7 @@ def download_custom_report():
                 as_attachment=True,
                 download_name=f"{report_type}_report_ALL_VEHICLES.xlsx"
             )
-        # ...existing single-vehicle logic below...
-        # Get vehicle details including IMEI and LicensePlateNumber
+
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
