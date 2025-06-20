@@ -148,14 +148,14 @@ def manual_entry():
         flash(f"Company {data['CompanyName']} does not exist.", "danger")
         return redirect(url_for('VehicleDetails.page'))
     
-    speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{data['VehicleType']}slowSpeed": 1, f"{data['VehicleType']}normalSpeed": 1})
+    speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{data['VehicleType']}SlowSpeed": 1, f"{data['VehicleType']}NormalSpeed": 1})
 
     if not speedConfigs:
         data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else "20"
         data['normalSpeed'] = data['normalSpeed'] if data['normalSpeed'] != '' else "60"
     else:
-        data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}slowSpeed", "20")
-        data['normalSpeed'] = data['normalSpeed'] if data['normalSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}normalSpeed", "60")
+        data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}SlowSpeed", "20")
+        data['normalSpeed'] = data['normalSpeed'] if data['normalSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}NormalSpeed", "60")
     
     # Save city and state in the same column
     location = data['Location'].split(',')
@@ -288,7 +288,7 @@ def upload_vehicle_file():
                 flash(f"Company {companyName} does not exist.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
-            speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{vehicle_type}slowSpeed": 1, f"{vehicle_type}normalSpeed": 1})
+            speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{vehicle_type}SlowSpeed": 1, f"{vehicle_type}NormalSpeed": 1})
             print("speed Configs are: ",speedConfigs)
             number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
             vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
@@ -306,8 +306,8 @@ def upload_vehicle_file():
                 slowSpeed = slowSpeed if slowSpeed != 'nan' else "20"
                 normalSpeed = normalSpeed if normalSpeed != 'nan' else "60"
             else:
-                slowSpeed = slowSpeed if slowSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}slowSpeed", "20")
-                normalSpeed = normalSpeed if normalSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}normalSpeed", "60")
+                slowSpeed = slowSpeed if slowSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}SlowSpeed", "20")
+                normalSpeed = normalSpeed if normalSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}NormalSpeed", "60")
 
             if not license_plate_number or not imei or not sim or not location:
                 flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
