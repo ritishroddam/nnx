@@ -155,7 +155,6 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   min-height: 400px;
   overflow-y: auto;
-  margin-top: 220px;
 }
 
 .dark-mode .modal-content {
