@@ -267,12 +267,12 @@ def upload_vehicle_file():
             vehicle_make = str(row['VehicleMake']).strip()
             year_of_manufacture = str(row['YearOfManufacture']).strip()
             if isinstance(row['DateOfPurchase'], pd.Timestamp):
-                date_of_purchase = row['DateOfPurchase'].strftime('%d-%m-%Y')
+                date_of_purchase = row['DateOfPurchase'].strftime('%Y-%m-%d')
             else:
                 date_of_purchase = str(row['DateOfPurchase']).strip()
             insurance_number = str(row['InsuranceNumber']).strip()
             if isinstance(row['InsuranceExpiry'], pd.Timestamp):
-                insurance_expiry_date = row['InsuranceExpiry'].strftime('%d-%m-%Y')
+                insurance_expiry_date = row['InsuranceExpiry'].strftime('%Y-%m-%d')
             else:
                 insurance_expiry_date = str(row['InsuranceExpiry']).strip()
             driver_name = str(row['DriverName']).strip()
@@ -280,7 +280,7 @@ def upload_vehicle_file():
             location = str(row['Location']).strip()
             odometer_reading = str(row['OdometerReading']).strip()
             if isinstance(row['ServiceDueDate'], pd.Timestamp):
-                service_due_date = row['ServiceDueDate'].strftime('%d-%m-%Y')
+                service_due_date = row['ServiceDueDate'].strftime('%Y-%m-%d')
             else:
                 service_due_date = str(row['ServiceDueDate']).strip()
             slowSpeed = str(row['slowSpeed']).strip()
