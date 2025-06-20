@@ -622,6 +622,21 @@ def download_custom_report():
     except Exception as e:
         return jsonify({"success": False, "message": str(e), "category": "danger"}), 500 
 
+@reports_bp.route('/delete_custom_report', methods=['DELETE'])
+@jwt_required()
+def delete_custom_report():
+    try:
+        report_name = request.args.get('name')
+        if not report_name:
+            return jsonify({"success": False, "message": "Report name missing"}), 400
+        result = db['custom_reports'].delete_one({"report_name": report_name})
+        if result.deleted_count == 1:
+            return jsonify({"success": True, "message": "Report deleted"})
+        else:
+            return jsonify({"success": False, "message": "Report not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @reports_bp.route('/download_panic_report', methods=['POST'])
 @jwt_required()
 def download_panic_report():

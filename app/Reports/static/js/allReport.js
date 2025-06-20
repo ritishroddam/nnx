@@ -864,7 +864,7 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
 // Helper functions
 function createReportCard(report) {
   const existingCard = document.querySelector(
-    `.report-card[data-report="${report.report_name}"]`
+    `.report-card[data-report-name="${report.report_name}"]`
   );
   if (existingCard) return;
 
@@ -872,10 +872,36 @@ function createReportCard(report) {
   reportCard.href = "#";
   reportCard.className = "report-card";
   reportCard.dataset.report = "custom";
+  reportCard.dataset.reportName = report.report_name;
   reportCard.innerHTML = `
     <h3>${report.report_name}</h3>
     <i class="fa-solid fa-file-alt"></i>
+    <i class="fa fa-trash delete-report" title="Delete Report" style="color: #d9534f; float: right; cursor: pointer; margin-top: 8px;"></i>
   `;
+
+  // Delete icon handler
+  reportCard.querySelector('.delete-report').addEventListener('click', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (confirm(`Are you sure you want to delete the report "${report.report_name}"?`)) {
+      fetch(`/reports/delete_custom_report?name=${encodeURIComponent(report.report_name)}`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          reportCard.remove();
+          alert("Report deleted successfully.");
+        } else {
+          alert(data.message || "Failed to delete report.");
+        }
+      })
+      .catch(() => alert("Failed to delete report."));
+    }
+  });
 
   const container = document.querySelector(".report-cards");
   container.insertBefore(reportCard, container.lastElementChild);
