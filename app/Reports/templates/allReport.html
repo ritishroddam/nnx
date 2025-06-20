@@ -77,11 +77,16 @@ All Reports
 
     {% for report in reports %}
     <a href="#" class="report-card" data-report="custom" data-report-name="{{ report.report_name }}">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <h3>{{ report.report_name }}</h3>
-            <i class="fa-solid fa-trash delete-report" title="Delete Report" style="color: #d9534f; cursor: pointer; font-size: 1.2em; margin-left: 8px;"></i>
+        <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+            <div>
+                <h3>{{ report.report_name }}</h3>
+            </div>
+            <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-top: 20px;">
+                <i class="fa-solid fa-trash delete-report" title="Delete Report"
+                   style="color: #d9534f; cursor: pointer; font-size: 1.4em;"></i>
+                <i class="fa-solid fa-file-alt" style="font-size: 2.5em;"></i>
+            </div>
         </div>
-        <i class="fa-solid fa-file-alt" style="font-size: 2.5em; margin-top: 10px;"></i>
     </a>
     {% endfor %}
 
