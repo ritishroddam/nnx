@@ -16,14 +16,17 @@
   margin-bottom: 24px;
   text-align: center;
 }
+
 .form-group {
   margin-bottom: 22px;
 }
+
 .form-group label {
   font-weight: 500;
   margin-bottom: 8px;
   display: block;
 }
+
 .btn {
   padding: 10px 18px;
   background: #007bff;
@@ -34,14 +37,8 @@
   font-size: 16px;
   margin-top: 10px;
 }
+
 .btn:disabled {
   background: #aaa;
   cursor: not-allowed;
 }
-.success-message, .error-message {
-  margin-top: 12px;
-  text-align: center;
-  font-weight: 500;
-}
-.success-message { color: #28a745; }
-.error-message { color: #dc3545; }
