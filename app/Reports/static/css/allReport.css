@@ -112,6 +112,7 @@
   overflow: auto; 
   background-color: rgba(0,0,0,0.4);
 }
+
 .modal-content {
   background-color: #fff;
   margin: 10% auto;
@@ -123,6 +124,7 @@
   position: relative;
   margin-top: 220px;
 }
+
 .modal-content .close {
   position: absolute;
   right: 16px;
