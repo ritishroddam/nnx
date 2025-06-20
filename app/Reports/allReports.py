@@ -14,6 +14,8 @@ from app.utils import roles_required
 from app.geocoding import geocodeInternal
 from openpyxl.styles import PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -470,26 +472,23 @@ def download_custom_report():
                 current_vehicle = None
                 row_idx = 1  # Excel rows are 1-indexed
             
+                final_rows = []
                 for df in all_dfs:
                     if df.empty:
                         continue
-                    
-                    # Detect current vehicle number
+
                     vehicle_number = df.iloc[0]['Vehicle Number'] if 'Vehicle Number' in df.columns else None
-            
-                    # Add separator row if new vehicle
-                    if current_vehicle != vehicle_number:
-                        if row_idx > 1:
-                            worksheet.append([f"--- Data for Vehicle: {vehicle_number} ---"])
-                            for col in range(1, len(df.columns) + 1):
-                                worksheet.cell(row=row_idx, column=col).fill = yellow_fill
-                            row_idx += 1
-                        current_vehicle = vehicle_number
-            
-                    for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=row_idx == 1), start=row_idx):
-                        worksheet.append(row)
-                        row_idx += 1
-            
+                    separator_row = pd.DataFrame([[f"--- Data for Vehicle: {vehicle_number} ---"] + [""] * (len(df.columns) - 1)],
+                                 columns=df.columns)
+                    final_rows.append(separator_row)
+                    final_rows.append(df)
+
+                final_df = pd.concat(final_rows, ignore_index=True)
+                
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")            
+                    
                 # Remove default empty sheet if still present
                 if "Sheet" in workbook.sheetnames:
                     del workbook["Sheet"]
@@ -497,6 +496,24 @@ def download_custom_report():
                 workbook.save(output)
             
             output.seek(0)
+            
+            workbook = load_workbook(output)
+            worksheet = workbook["All Vehicles Report"]
+
+            yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+
+            # Apply fill to separator rows
+            for row in worksheet.iter_rows(min_row=2):  # Skip header
+                first_cell_value = str(row[0].value)
+                if first_cell_value.startswith("--- Data for Vehicle:"):
+                    for cell in row:
+                        cell.fill = yellow_fill
+
+            # Step 4: Save the workbook
+            final_output = BytesIO()
+            workbook.save(final_output)
+            final_output.seek(0)            
+            
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
