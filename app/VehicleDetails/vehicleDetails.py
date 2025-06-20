@@ -264,7 +264,7 @@ def upload_vehicle_file():
             location = str(row['Location']).strip()
             odometer_reading = str(row['OdometerReading']).strip()
             service_due_date = str(row['ServiceDueDate']).strip()
-            slowSpeed = str(row['SlowSpeed']).strip()
+            slowSpeed = str(row['slowSpeed']).strip()
             normalSpeed = str(row['normalSpeed']).strip()
 
             number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
