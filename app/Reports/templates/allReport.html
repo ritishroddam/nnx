@@ -15,6 +15,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
     integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
     integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
 {% endblock %}
@@ -75,9 +76,12 @@ All Reports
     </a>
 
     {% for report in reports %}
-    <a href="#" class="report-card" data-report="custom">
-        <h3>{{ report.report_name }}</h3>
-        <i class="fa-solid fa-file-alt"></i>
+    <a href="#" class="report-card" data-report="custom" data-report-name="{{ report.report_name }}">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h3>{{ report.report_name }}</h3>
+            <i class="fa-solid fa-trash delete-report" title="Delete Report" style="color: #d9534f; cursor: pointer; font-size: 1.2em; margin-left: 8px;"></i>
+        </div>
+        <i class="fa-solid fa-file-alt" style="font-size: 2.5em; margin-top: 10px;"></i>
     </a>
     {% endfor %}
 
