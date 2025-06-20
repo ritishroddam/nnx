@@ -317,66 +317,124 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
 });
 
   // Custom report form submission
+  // customReportForm.addEventListener("submit", function (e) {
+  //   e.preventDefault();
+
+  //   const reportName = document.getElementById("reportName").value.trim();
+  //   if (!reportName) {
+  //     alert("Please provide a report name");
+  //     return;
+  //   }
+
+  //   const fields = Array.from(selectedFields.children).map(
+  //     (li) => li.dataset.field
+  //   );
+  //   if (fields.length === 0) {
+  //     alert("Please select at least one field");
+  //     return;
+  //   }
+
+  //   const saveBtn = document.getElementById("saveCustomReport");
+  //   const originalText = saveBtn.textContent;
+  //   saveBtn.disabled = true;
+  //   saveBtn.textContent = "Saving...";
+
+  //   fetch("/reports/save_custom_report", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+  //     },
+  //     body: JSON.stringify({
+  //       reportName: reportName,
+  //       fields: fields,
+  //     }),
+  //   })
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         displayFlashMessage("Network response was not ok", "danger");
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       if (data.success) {
+  //         alert(data.message);
+  //         createReportCard({ report_name: reportName, fields: fields });
+  //         customReportModal.style.display = "none";
+  //         customReportForm.reset();
+  //         selectedFields.innerHTML = "";
+  //       } else {
+  //         throw new Error(data.message || "Failed to save report");
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       alert(error.message);
+  //     })
+  //     .finally(() => {
+  //       saveBtn.disabled = false;
+  //       saveBtn.textContent = originalText;
+  //     });
+  // });
+
   customReportForm.addEventListener("submit", function (e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const reportName = document.getElementById("reportName").value.trim();
-    if (!reportName) {
-      alert("Please provide a report name");
-      return;
-    }
+  const reportName = document.getElementById("reportName").value.trim();
+  if (!reportName) {
+    alert("Please provide a report name");
+    return;
+  }
 
-    const fields = Array.from(selectedFields.children).map(
-      (li) => li.dataset.field
-    );
-    if (fields.length === 0) {
-      alert("Please select at least one field");
-      return;
-    }
+  const fields = Array.from(selectedFields.children).map(
+    (li) => li.dataset.field
+  );
+  if (fields.length === 0) {
+    alert("Please select at least one field");
+    return;
+  }
 
-    const saveBtn = document.getElementById("saveCustomReport");
-    const originalText = saveBtn.textContent;
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
+  const saveBtn = document.getElementById("saveCustomReport");
+  const originalText = saveBtn.textContent;
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
 
-    fetch("/reports/save_custom_report", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify({
-        reportName: reportName,
-        fields: fields,
-      }),
+  fetch("/reports/save_custom_report", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+    },
+    body: JSON.stringify({
+      reportName: reportName,
+      fields: fields,
+    }),
+  })
+    .then((response) => response.json().then(data => ({ ok: response.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) {
+        displayFlashMessage(data.message || "Failed to save report", "danger");
+        throw new Error(data.message || "Failed to save report");
+      }
+      // Success
+      alert(data.message || "Report saved successfully!");
+      // Optionally: createReportCard({ report_name: reportName, fields: fields });
+      customReportModal.style.display = "none";
+      customReportForm.reset();
+      selectedFields.innerHTML = "";
+      // Reload the page to show the new report card
+      window.location.reload();
     })
-      .then((response) => {
-        if (!response.ok) {
-          displayFlashMessage("Network response was not ok", "danger");
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          alert(data.message);
-          createReportCard({ report_name: reportName, fields: fields });
-          customReportModal.style.display = "none";
-          customReportForm.reset();
-          selectedFields.innerHTML = "";
-        } else {
-          throw new Error(data.message || "Failed to save report");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert(error.message);
-      })
-      .finally(() => {
-        saveBtn.disabled = false;
-        saveBtn.textContent = originalText;
-      });
-  });
+    .catch((error) => {
+      console.error("Error:", error);
+      alert(error.message);
+    })
+    .finally(() => {
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalText;
+    });
+});
 
   // Field selection handling
   fieldSelection.addEventListener("change", function (e) {
