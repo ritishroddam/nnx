@@ -11,6 +11,7 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
+from bson import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -220,6 +221,29 @@ def refresh():
         flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
         return
 
+@auth_bp.route('/update-client/<string:user_id>', methods=['POST'])
+@jwt_required()
+@roles_required('admin')
+def update_client(user_id):
+    data = request.json
+    result = db.user_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "username": data.get("username"),
+            "email": data.get("email"),
+            "company": data.get("company"),
+        }}
+    )
+    return jsonify({"success": result.modified_count > 0})
+
+
+@auth_bp.route('/delete-client/<string:user_id>', methods=['DELETE'])
+@jwt_required()
+@roles_required('admin')
+def delete_client(user_id):
+    result = db.user_collection.delete_one({"_id": ObjectId(user_id)})
+    return jsonify({"success": result.deleted_count > 0})    
+
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
 def register():
@@ -280,9 +304,10 @@ def register_client_admin():
         flash('Admin registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
 
+    clients = list(User.find_by_role('clientAdmin'))
     companies = db.customers_list.find()
     
-    return render_template('register_client_admin.html', companies=companies)
+    return render_template('register_client_admin.html', companies=companies, clients=clients)
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():
