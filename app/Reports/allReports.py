@@ -368,7 +368,7 @@ def download_custom_report():
                         {"fields": 1, "_id": 0}
                     )
                     if not report:
-                        return jsonify({"success": False, "message": "Custom report not found", "category":"danger"}), 404
+                        return jsonify({"success": False, "message": "Custom report not found", "category":"danger"}), 500
 
                     fields = report["fields"]
 
