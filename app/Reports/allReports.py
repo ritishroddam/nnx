@@ -515,7 +515,7 @@ def download_custom_report():
             final_output.seek(0)            
             
             return send_file(
-                output,
+                final_output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 as_attachment=True,
                 download_name=f"{report_type}_report_ALL_VEHICLES.xlsx"
