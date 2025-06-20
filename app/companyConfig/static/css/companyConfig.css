@@ -28,6 +28,10 @@
   flex: 1;
 }
 
+.dark-mode .form-group h3{
+  color: #fff;
+}
+
 .input-col label {
   margin-bottom: 6px;
   font-size: 15px;
