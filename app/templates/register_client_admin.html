@@ -40,5 +40,56 @@ Register Client Admin
             <button type="submit" class="btn">Register</button>
         </form>
     </div>
+
+    <div class="admin-list-container">
+        <h2>Registered Client Admins</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin in client_admins %}
+                <tr data-user-id="{{ admin._id }}">
+                    <td>
+                        <span class="view-mode">{{ admin.username }}</span>
+                        <input type="text" class="edit-mode form-control" value="{{ admin.username }}" style="display: none;">
+                    </td>
+                    <td>
+                        <span class="view-mode">{{ admin.email }}</span>
+                        <input type="email" class="edit-mode form-control" value="{{ admin.email }}" style="display: none;">
+                    </td>
+                    <td>
+                        <span class="view-mode">
+                            {% for company in companies %}
+                                {% if company._id == admin.company %}
+                                    {{ company['Company Name'] }}
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        <select class="edit-mode form-control" style="display: none;">
+                            <option value="" disabled>Select Company</option>
+                            {% for company in companies %}
+                            <option value="{{ company._id }}" {% if company._id == admin.company %}selected{% endif %}>
+                                {{ company['Company Name'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-edit btn-sm" onclick="toggleEditMode(this)">Edit</button>
+                        <button class="btn-save btn-sm" onclick="saveUser(this)" style="display: none;">Save</button>
+                        <button class="btn-cancel btn-sm" onclick="cancelEdit(this)" style="display: none;">Cancel</button>
+                        <button class="btn-delete btn-sm" onclick="deleteUser('{{ admin._id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

@@ -11,6 +11,7 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
+from bson.objectid import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -281,8 +282,39 @@ def register_client_admin():
         return redirect(request.referrer or url_for('auth.login'))
 
     companies = db.customers_list.find()
+    client_admins = db.users.find({'role': 'clientAdmin'})
+    companies = db.customers_list.find()
     
-    return render_template('register_client_admin.html', companies=companies)
+    return render_template('register_client_admin.html', companies=companies, client_admins=client_admins)
+
+@auth_bp.route('/api/client-admin/<user_id>', methods=['PUT'])
+@jwt_required()
+@roles_required('admin')
+def update_client_admin(user_id):
+    data = request.get_json()
+    
+    try:
+        db.users.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {
+                'username': data['username'],
+                'email': data['email'],
+                'company': data['company']
+            }}
+        )
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@auth_bp.route('/api/client-admin/<user_id>', methods=['DELETE'])
+@jwt_required()
+@roles_required('admin')
+def delete_client_admin(user_id):
+    try:
+        db.users.delete_one({'_id': ObjectId(user_id)})
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():
