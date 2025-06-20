@@ -34,3 +34,7 @@ class User:
     def get_company_by_company_id(company_id):
         user = db.customers_list.find_one({'_id': ObjectId(company_id)})
         return user['Company Name'] if user else None
+    
+    @staticmethod
+    def find_by_role(role):
+        return db.user_collection.find({"role": role})
