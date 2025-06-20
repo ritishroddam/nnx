@@ -382,108 +382,6 @@ def download_custom_report():
         imei = vehicle["IMEI"]
 
         # For custom reports, get the fields from the saved report
-        # if report_type == "custom":
-        #     custom_report_name = data.get("reportName")
-        #     if not custom_report_name:
-        #         return jsonify({"success": False, "message": "Custom report name missing", "category":"danger"}), 400
-
-        #     report = db['custom_reports'].find_one(
-        #         {"report_name": custom_report_name},
-        #         {"fields": 1, "_id": 0}
-        #     )
-        #     if not report:
-        #         return jsonify({"success": False, "message": "Custom report not found", "category":"danger"}), 404
-
-        #     fields = report["fields"]
-
-        #     # Separate fields by collection
-        #     atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
-        #     vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]    
-
-        #     # Fetch data from vehicle_inventory
-        #     vehicle_inventory_data = None
-        #     if vehicle_inventory_fields:
-        #         vehicle_inventory_data = db['vehicle_inventory'].find_one(
-        #             {"IMEI": imei},
-        #             {field: 1 for field in vehicle_inventory_fields}
-        #         )
-
-        #     # Fetch data from atlanta
-        #     date_filter = get_date_range_filter(date_range, from_date, to_date)
-        #     atlanta_query = {"imei": imei}
-        #     if date_filter:
-        #         atlanta_query.update(date_filter)
-
-        #     if atlanta_fields:
-        #         atlanta_data = list(db['atlanta'].find(
-        #             atlanta_query,
-        #             {field: 1 for field in atlanta_fields}
-        #         ).sort("date_time", 1))
-
-        #     # Combine data
-        #     if atlanta_data and vehicle_inventory_data:
-        #         combined_data = []
-        #         for record in atlanta_data:
-        #             combined_record = {**vehicle_inventory_data, **record}
-        #             combined_data.append(combined_record)
-        #     elif atlanta_data and not vehicle_inventory_data:
-        #         combined_data = atlanta_data
-        #     elif not atlanta_data and vehicle_inventory_data:
-        #         combined_data = [vehicle_inventory_data]
-        #     else:
-        #         return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
-
-        #     # Convert to DataFrame
-        #     df = pd.DataFrame(combined_data)
-
-        #     if df.empty:
-        #         return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
-
-        #     # Process latitude and longitude if present
-        #     if 'date_time' in df.columns:
-        #         df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
-
-        #     if 'latitude' in df.columns and 'longitude' in df.columns:
-        #         df['Location'] = df.apply(
-        #             lambda row: geocodeInternal(row['latitude'], row['longitude'])
-        #             if pd.notnull(row['latitude']) and row['latitude'] != "" and
-        #                pd.notnull(row['longitude']) and row['longitude'] != ""
-        #             else 'Missing coordinates',
-        #             axis=1
-        #         )
-
-        #         cols = df.columns.tolist()
-        #         if 'Location' in cols:
-        #             cols.remove('Location')
-        #         lng_idx = cols.index('longitude')
-        #         cols.insert(lng_idx + 1, 'Location')
-        #         df = df[cols]
-
-        #     df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
-
-        #     # Remove MongoDB _id if present
-        #     if '_id' in df.columns:
-        #         df.drop('_id', axis=1, inplace=True)
-
-        #     if "ignition" in fields:
-        #         df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-
-        #     if 'speed' in df.columns:
-        #         df = add_speed_metrics(df)
-
-        #     # Generate Excel
-        #     output = BytesIO()
-        #     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        #         df.to_excel(writer, index=False, sheet_name=custom_report_name)
-
-        #     output.seek(0)
-        #     return send_file(
-        #         output,
-        #         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        #         as_attachment=True,
-        #         download_name=f"{custom_report_name}_{vehicle_number}.xlsx"
-        #     )
-        
         if report_type == "custom":
             custom_report_name = data.get("reportName")
             if not custom_report_name:
@@ -497,93 +395,93 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "Custom report not found", "category":"danger"}), 404
 
             fields = report["fields"]
-            atlanta_fields = [f for f in fields if f in FIELD_COLLECTION_MAP['atlanta']]
-            vehicle_inventory_fields = [f for f in fields if f in FIELD_COLLECTION_MAP['vehicle_inventory']]
 
-            all_dfs = []
-            for vehicle in vehicles:
-                imei = vehicle.get("IMEI")
-                license_plate = vehicle.get("LicensePlateNumber")
-                if not imei or not license_plate:
-                    continue
-                
-                # Fetch from atlanta
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
-                atlanta_query = {"imei": imei}
-                if date_filter:
-                    atlanta_query.update(date_filter)
+            # Separate fields by collection
+            atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
+            vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]    
 
-                atlanta_data = []
-                if atlanta_fields:
-                    atlanta_data = list(db['atlanta'].find(
-                        atlanta_query,
-                        {f: 1 for f in atlanta_fields}
-                    ).sort("date_time", 1))
+            # Fetch data from vehicle_inventory
+            vehicle_inventory_data = None
+            if vehicle_inventory_fields:
+                vehicle_inventory_data = db['vehicle_inventory'].find_one(
+                    {"IMEI": imei},
+                    {field: 1 for field in vehicle_inventory_fields}
+                )
 
-                # Fetch from vehicle_inventory
-                vehicle_inventory_data = None
-                if vehicle_inventory_fields:
-                    vehicle_inventory_data = db['vehicle_inventory'].find_one(
-                        {"IMEI": imei},
-                        {f: 1 for f in vehicle_inventory_fields}
-                    )
+            # Fetch data from atlanta
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
+            atlanta_query = {"imei": imei}
+            if date_filter:
+                atlanta_query.update(date_filter)
 
-                # Combine
-                if atlanta_data and vehicle_inventory_data:
-                    combined_data = [{**vehicle_inventory_data, **rec} for rec in atlanta_data]
-                elif atlanta_data:
-                    combined_data = atlanta_data
-                elif vehicle_inventory_data:
-                    combined_data = [vehicle_inventory_data]
-                else:
-                    continue
-                
-                df = pd.DataFrame(combined_data)
-                if df.empty:
-                    continue
-                
-                if 'date_time' in df.columns:
-                    df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+            if atlanta_fields:
+                atlanta_data = list(db['atlanta'].find(
+                    atlanta_query,
+                    {field: 1 for field in atlanta_fields}
+                ).sort("date_time", 1))
 
-                if 'latitude' in df.columns and 'longitude' in df.columns:
-                    df['Location'] = df.apply(
-                        lambda row: geocodeInternal(row['latitude'], row['longitude'])
-                        if pd.notnull(row['latitude']) and row['latitude'] != "" and
-                           pd.notnull(row['longitude']) and row['longitude'] != ""
-                        else 'Missing coordinates',
-                        axis=1
-                    )
-                    cols = df.columns.tolist()
-                    if 'Location' in cols:
-                        cols.remove('Location')
-                    lng_idx = cols.index('longitude')
-                    cols.insert(lng_idx + 1, 'Location')
-                    df = df[cols]
-
-                df.insert(0, 'Vehicle Number', license_plate)
-
-                if '_id' in df.columns:
-                    df.drop('_id', axis=1, inplace=True)
-                if "ignition" in fields:
-                    df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-                if 'speed' in df.columns:
-                    df = add_speed_metrics(df)
-
-                all_dfs.append(df)
-
-            if not all_dfs:
+            # Combine data
+            if atlanta_data and vehicle_inventory_data:
+                combined_data = []
+                for record in atlanta_data:
+                    combined_record = {**vehicle_inventory_data, **record}
+                    combined_data.append(combined_record)
+            elif atlanta_data and not vehicle_inventory_data:
+                combined_data = atlanta_data
+            elif not atlanta_data and vehicle_inventory_data:
+                combined_data = [vehicle_inventory_data]
+            else:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
-            final_df = pd.concat(all_dfs, ignore_index=True)
+            # Convert to DataFrame
+            df = pd.DataFrame(combined_data)
+
+            if df.empty:
+                return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
+
+            # Process latitude and longitude if present
+            if 'date_time' in df.columns:
+                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+
+            if 'latitude' in df.columns and 'longitude' in df.columns:
+                df['Location'] = df.apply(
+                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
+                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
+                       pd.notnull(row['longitude']) and row['longitude'] != ""
+                    else 'Missing coordinates',
+                    axis=1
+                )
+
+                cols = df.columns.tolist()
+                if 'Location' in cols:
+                    cols.remove('Location')
+                lng_idx = cols.index('longitude')
+                cols.insert(lng_idx + 1, 'Location')
+                df = df[cols]
+
+            df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+
+            # Remove MongoDB _id if present
+            if '_id' in df.columns:
+                df.drop('_id', axis=1, inplace=True)
+
+            if "ignition" in fields:
+                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+
+            if 'speed' in df.columns:
+                df = add_speed_metrics(df)
+
+            # Generate Excel
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                final_df.to_excel(writer, index=False, sheet_name="All Vehicles Custom Report")
+                df.to_excel(writer, index=False, sheet_name=custom_report_name)
+
             output.seek(0)
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 as_attachment=True,
-                download_name=f"{custom_report_name}_ALL_VEHICLES.xlsx"
+                download_name=f"{custom_report_name}_{vehicle_number}.xlsx"
             )
 
         else:
