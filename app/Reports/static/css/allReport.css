@@ -350,3 +350,86 @@ input[type="datetime-local"] {
   .format-btn i {
     margin-right: 8px;
   }
+
+/* Delete Confirmation Modal Styling */
+#deleteConfirmModal .modal-content {
+  max-width: 350px;
+  min-width: 280px;
+  margin: 10% auto;
+  padding: 32px 28px 24px 28px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  position: relative;
+  text-align: left;
+}
+
+#deleteConfirmModal .close {
+  position: absolute;
+  right: 18px;
+  top: 16px;
+  font-size: 1.5em;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+#deleteConfirmModal .close:hover {
+  color: #d9534f;
+}
+
+#deleteConfirmModal h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.25em;
+  font-weight: bold;
+  color: #222;
+}
+
+#deleteConfirmModal p {
+  margin: 0 0 28px 0;
+  color: #444;
+  font-size: 1em;
+}
+
+#deleteConfirmModal .modal-content > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+#deleteCancelBtn,
+#deleteOkBtn {
+  padding: 8px 22px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+#deleteCancelBtn {
+  background: #f0f0f0;
+  color: #333;
+}
+
+#deleteCancelBtn:hover {
+  background: #e0e0e0;
+}
+
+#deleteOkBtn {
+  background: #d9534f;
+  color: #fff;
+}
+
+#deleteOkBtn:hover {
+  background: #b52b27;
+}
+
+/* Responsive for small screens */
+@media (max-width: 500px) {
+  #deleteConfirmModal .modal-content {
+    width: 95%;
+    min-width: unset;
+    padding: 18px 8px 14px 8px;
+  }
+}
