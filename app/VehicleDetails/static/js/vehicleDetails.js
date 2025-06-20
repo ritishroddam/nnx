@@ -361,7 +361,11 @@ function cancelEdit(vehicleID) {
 function deleteVehicle(vehicleID) {
   if (confirm("Are you sure you want to delete this vehicle?")) {
     fetch(`/vehicleDetails/delete_vehicle/${vehicleID}`, {
-      method: "DELETE",
+      method: "DELETE", 
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
     })
       .then((response) => {
         if (response.ok) {

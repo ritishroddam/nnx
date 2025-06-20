@@ -233,7 +233,7 @@ def upload_vehicle_file():
         df = pd.read_excel(file)
 
         required_columns = [
-            'LicensePlateNumber', 'ComapnyName', 'IMEI', 'SIM', 'VehicleType', 'NumberOfSeatsContainerContainer', 'VehicleModel', 'VehicleMake',
+            'LicensePlateNumber', 'CompanyName', 'IMEI', 'SIM', 'VehicleType', 'NumberOfSeatsContainerContainer', 'VehicleModel', 'VehicleMake',
             'YearOfManufacture', 'DateOfPurchase', 'InsuranceNumber', 'DriverName',
             'CurrentStatus', 'Location', 'OdometerReading', 'ServiceDueDate'
         ]
@@ -248,7 +248,7 @@ def upload_vehicle_file():
         records = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip()
-            companyName = str(row['ComapanyName']).strip()
+            companyName = str(row['CompanyName']).strip()
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
             vehicle_type = (str(row['VehicleType']).strip()).lower()
