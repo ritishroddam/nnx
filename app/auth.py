@@ -11,6 +11,7 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
+from bson.objectid import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -281,8 +282,8 @@ def register_client_admin():
         return redirect(request.referrer or url_for('auth.login'))
 
     companies = db.customers_list.find()
-    client_admins = db.users.find({'role': 'clientAdmin'})
-    companies = db.customers_list.find()
+    client_admins = list(db.users.find({'role': 'clientAdmin'}))
+    companies = list(db.customers_list.find())
     
     return render_template('register_client_admin.html', companies=companies, client_admins=client_admins)
 
@@ -290,18 +291,29 @@ def register_client_admin():
 @jwt_required()
 @roles_required('admin')
 def update_client_admin(user_id):
-    data = request.get_json()
-    
     try:
-        db.users.update_one(
-            {'_id': user_id},
-            {'$set': {
-                'username': data['username'],
-                'email': data['email'],
-                'company': data['company']
-            }}
+        data = request.get_json()
+        
+        # Since IDs are stored as strings, no conversion needed
+        update_data = {
+            'username': data['username'],
+            'email': data['email']
+        }
+        
+        # Only update company if it's provided
+        if 'company' in data and data['company']:
+            update_data['company'] = data['company']
+        
+        result = db.users.update_one(
+            {'_id': user_id},  # Directly use the string ID
+            {'$set': update_data}
         )
-        return jsonify({'success': True}), 200
+        
+        if result.modified_count == 1:
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'error': 'No changes made'}), 400
+            
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
@@ -310,8 +322,13 @@ def update_client_admin(user_id):
 @roles_required('admin')
 def delete_client_admin(user_id):
     try:
-        db.users.delete_one({'_id': user_id})
-        return jsonify({'success': True}), 200
+        result = db.users.delete_one({'_id': user_id})  # Directly use the string ID
+        
+        if result.deleted_count == 1:
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
+            
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 

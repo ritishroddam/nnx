@@ -47,6 +47,23 @@ function toggleEditMode(button) {
 
         if (response.ok) {
             location.reload();
+        } else if (response.status === 401) {
+            // Handle token expiration
+            try {
+                const refreshResponse = await fetch('/refresh', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                if (refreshResponse.ok) {
+                    // Retry the original request
+                    return saveUser(button);
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (refreshError) {
+                window.location.href = '/login';
+            }
         } else {
             const error = await response.json();
             alert(`Error: ${error.error || 'Failed to update user'}`);
@@ -70,6 +87,23 @@ async function deleteUser(userId) {
 
             if (response.ok) {
                 location.reload();
+            } else if (response.status === 401) {
+                // Handle token expiration
+                try {
+                    const refreshResponse = await fetch('/refresh', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    
+                    if (refreshResponse.ok) {
+                        // Retry the original request
+                        return deleteUser(userId);
+                    } else {
+                        window.location.href = '/login';
+                    }
+                } catch (refreshError) {
+                    window.location.href = '/login';
+                }
             } else {
                 const error = await response.json();
                 alert(`Error: ${error.error || 'Failed to delete user'}`);
