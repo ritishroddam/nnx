@@ -46,9 +46,9 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
     elif date_range == "yesterday":
         ist = timezone('Asia/Kolkata')
         now_ist = datetime.now(ist)
-        yesterday_start_ist = datetime(now_ist.year, now_ist.month, now_ist.day, tzinfo=ist) - timedelta(days=1)
-        yesterday_end_ist = datetime(now_ist.year, now_ist.month, now_ist.day, tzinfo=ist)
-        # Convert IST boundaries to UTC for querying MongoDB
+        today_ist = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday_start_ist = today_ist - timedelta(days=1)
+        yesterday_end_ist = today_ist
         yesterday_start_utc = yesterday_start_ist.astimezone(pytz.UTC)
         yesterday_end_utc = yesterday_end_ist.astimezone(pytz.UTC)
         return {'date_time': {'$gte': yesterday_start_utc, '$lt': yesterday_end_utc}}
