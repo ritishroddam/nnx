@@ -11,7 +11,6 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
-from bson.objectid import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -258,6 +257,7 @@ def register():
 @jwt_required()
 @roles_required('admin')
 def register_client_admin():
+    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -265,80 +265,24 @@ def register_client_admin():
         company = request.form.get('company')
 
         if not all([username, email, password, company]):
-            if request.accept_mimetypes.accept_json:
-                return jsonify({'error': 'All fields are required'}), 400
             flash('All fields are required', 'danger')
             return redirect(url_for('auth.register_client_admin'))
 
         if User.find_by_username(username):
-            if request.accept_mimetypes.accept_json:
-                return jsonify({'error': 'Username already exists'}), 400
             flash('Username already exists', 'danger')
             return redirect(url_for('auth.register_client_admin'))
             
         if User.find_by_email(email):
-            if request.accept_mimetypes.accept_json:
-                return jsonify({'error': 'Email already registered'}), 400
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
         User.create_user(username, email, password, company, role='clientAdmin')
-        
-        if request.accept_mimetypes.accept_json:
-            return jsonify({'success': True}), 201
-        flash('Admin registration successful', 'success')
-        return redirect(url_for('auth.register_client_admin'))
+        flash('Admin registration successful. Please login.', 'success')
+        return redirect(request.referrer or url_for('auth.login'))
 
-    # GET request
-    if request.accept_mimetypes.accept_json:
-        return jsonify({'error': 'GET not supported for this endpoint'}), 405
-        
-    return render_template('register_client_admin.html')
-
-@auth_bp.route('/api/client-admin/<user_id>', methods=['PUT'])
-@jwt_required()
-@roles_required('admin')
-def update_client_admin(user_id):
-    try:
-        data = request.get_json()
-        
-        # Since IDs are stored as strings, no conversion needed
-        update_data = {
-            'username': data['username'],
-            'email': data['email']
-        }
-        
-        # Only update company if it's provided
-        if 'company' in data and data['company']:
-            update_data['company'] = data['company']
-        
-        result = db.users.update_one(
-            {'_id': user_id},  # Directly use the string ID
-            {'$set': update_data}
-        )
-        
-        if result.modified_count == 1:
-            return jsonify({'success': True}), 200
-        else:
-            return jsonify({'error': 'No changes made'}), 400
-            
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-@auth_bp.route('/api/client-admin/<user_id>', methods=['DELETE'])
-@jwt_required()
-@roles_required('admin')
-def delete_client_admin(user_id):
-    try:
-        result = db.users.delete_one({'_id': user_id})  # Directly use the string ID
-        
-        if result.deleted_count == 1:
-            return jsonify({'success': True}), 200
-        else:
-            return jsonify({'error': 'User not found'}), 404
-            
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+    companies = db.customers_list.find()
+    
+    return render_template('register_client_admin.html', companies=companies)
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():
@@ -397,67 +341,6 @@ def register_inventory():
         return redirect(request.referrer or url_for('auth.login'))
     
     return render_template('register_inventory.html') 
-
-@auth_bp.route('/get-client-admins', methods=['GET'])
-@jwt_required()
-@roles_required('admin')
-def get_client_admins():
-    try:
-        # Get all client admins with company names
-        admins = list(db.users.find({'role': 'clientAdmin'}))
-        companies = list(db.customers_list.find())
-        
-        # Prepare response data
-        admin_data = []
-        for admin in admins:
-            company_name = next(
-                (c['Company Name'] for c in companies if c['_id'] == admin.get('company')),
-                'No Company'
-            )
-            admin_data.append({
-                'id': str(admin['_id']),
-                'username': admin['username'],
-                'email': admin['email'],
-                'company_id': admin.get('company', ''),
-                'company_name': company_name
-            })
-        
-        return jsonify(admins=admin_data, companies=[{
-            'id': str(c['_id']),
-            'name': c['Company Name']
-        } for c in companies]), 200
-        
-    except Exception as e:
-        return jsonify(error=str(e)), 500
-
-@auth_bp.route('/update-client-admin', methods=['POST'])
-@jwt_required()
-@roles_required('admin')
-def update_client_admin():
-    try:
-        data = request.get_json()
-        db.users.update_one(
-            {'_id': data['id']},
-            {'$set': {
-                'username': data['username'],
-                'email': data['email'],
-                'company': data['company_id']
-            }}
-        )
-        return jsonify(success=True), 200
-    except Exception as e:
-        return jsonify(error=str(e)), 400
-
-@auth_bp.route('/delete-client-admin', methods=['POST'])
-@jwt_required()
-@roles_required('admin')
-def delete_client_admin():
-    try:
-        data = request.get_json()
-        db.users.delete_one({'_id': data['id']})
-        return jsonify(success=True), 200
-    except Exception as e:
-        return jsonify(error=str(e)), 400
 
 @auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():
