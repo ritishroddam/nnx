@@ -12,6 +12,7 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
+from openpyxl.styles import PatternFill
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -356,6 +357,11 @@ def download_custom_report():
                         df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
                     if 'speed' in df.columns:
                         df = add_speed_metrics(df)
+                    # Insert separator row before each vehicle's data
+                    separator_row = pd.DataFrame([[license_plate] + [""] * (len(df.columns) - 1)], columns=df.columns)
+                    separator_row.attrs["is_separator"] = True  # Custom attribute to identify later
+
+                    all_dfs.append(separator_row)    
                     all_dfs.append(df)
 
                 else:
@@ -454,7 +460,18 @@ def download_custom_report():
             final_df = pd.concat(all_dfs, ignore_index=True)
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                final_df = pd.concat(all_dfs, ignore_index=True)
                 final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
+
+                # Apply color to separator rows
+                workbook = writer.book
+                worksheet = writer.sheets["All Vehicles Report"]
+                fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")  # Yellow
+
+                for idx, row in final_df.iterrows():
+                    if row.isna().sum() == len(row) - 1 and isinstance(row[0], str) and row[0] in row.to_list():
+                        for col_idx in range(1, len(row) + 1):
+                            worksheet.cell(row=idx + 2, column=col_idx).fill = fill
             output.seek(0)
             return send_file(
                 output,
