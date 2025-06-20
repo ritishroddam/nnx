@@ -874,9 +874,11 @@ function createReportCard(report) {
   reportCard.dataset.report = "custom";
   reportCard.dataset.reportName = report.report_name;
   reportCard.innerHTML = `
-    <h3>${report.report_name}</h3>
-    <i class="fa-solid fa-file-alt"></i>
-    <i class="fa fa-trash delete-report" title="Delete Report" style="color: #d9534f; float: right; cursor: pointer; margin-top: 8px;"></i>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <h3>${report.report_name}</h3>
+      <i class="fa-solid fa-trash delete-report" title="Delete Report" style="color: #d9534f; cursor: pointer; font-size: 1.2em; margin-left: 8px;"></i>
+    </div>
+    <i class="fa-solid fa-file-alt" style="font-size: 2.5em; margin-top: 10px;"></i>
   `;
 
   // Delete icon handler
