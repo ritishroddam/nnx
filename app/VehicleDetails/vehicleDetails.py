@@ -289,7 +289,7 @@ def upload_vehicle_file():
                 return redirect(url_for('VehicleDetails.page'))
             
             speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{vehicle_type}slowSpeed": 1, f"{vehicle_type}normalSpeed": 1})
-            
+            print(speedConfigs)
             number_of_seats = number_of_seats if number_of_seats != 'nan' else ""
             vehicle_model = vehicle_model if vehicle_model != 'nan' else ""
             vehicle_make = vehicle_make if vehicle_make != 'nan' else ""
