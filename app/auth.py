@@ -226,7 +226,7 @@ def refresh():
 @roles_required('admin')
 def update_client(user_id):
     data = request.json
-    result = db.user_collection.update_one(
+    result = db.users.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {
             "username": data.get("username"),
@@ -241,7 +241,7 @@ def update_client(user_id):
 @jwt_required()
 @roles_required('admin')
 def delete_client(user_id):
-    result = db.user_collection.delete_one({"_id": ObjectId(user_id)})
+    result = db.users.delete_one({"_id": ObjectId(user_id)})
     return jsonify({"success": result.deleted_count > 0})    
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
