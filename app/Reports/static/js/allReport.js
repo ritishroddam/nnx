@@ -885,8 +885,9 @@ function createReportCard(report) {
   reportCard.querySelector('.delete-report').addEventListener('click', function(e) {
     e.stopPropagation();
     e.preventDefault();
-    if (confirm(`Are you sure you want to delete the report "${report.report_name}"?`)) {
-      fetch(`/reports/delete_custom_report?name=${encodeURIComponent(report.report_name)}`, {
+    const reportName = reportCard.dataset.reportName || reportCard.querySelector('h3').textContent;
+    if (confirm(`Are you sure you want to delete the report "${reportName}"?`)) {
+      fetch(`/reports/delete_custom_report?name=${encodeURIComponent(reportName)}`, {
         method: "DELETE",
         headers: {
           "X-CSRF-TOKEN": getCookie("csrf_access_token"),
@@ -1002,3 +1003,31 @@ function loadFields() {
       alert("Failed to load available fields. Please try again.");
     });
 }
+
+// Re-apply delete handler for dynamically created report cards
+document.querySelectorAll('.report-card[data-report="custom"] .delete-report').forEach(function(icon) {
+  icon.addEventListener('click', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    const reportCard = this.closest('.report-card');
+    const reportName = reportCard.dataset.reportName || reportCard.querySelector('h3').textContent;
+    if (confirm(`Are you sure you want to delete the report "${reportName}"?`)) {
+      fetch(`/reports/delete_custom_report?name=${encodeURIComponent(reportName)}`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          reportCard.remove();
+          alert("Report deleted successfully.");
+        } else {
+          alert(data.message || "Failed to delete report.");
+        }
+      })
+      .catch(() => alert("Failed to delete report."));
+    }
+  });
+});
