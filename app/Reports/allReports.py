@@ -436,7 +436,8 @@ def download_custom_report():
                         cols.insert(lng_idx + 1, 'Location')
                         df = df[cols]
 
-                    df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
+                    if 'Vehicle Number' not in df.columns:
+                        df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
                     # Remove MongoDB _id if present
                     if '_id' in df.columns:
