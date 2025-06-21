@@ -71,7 +71,7 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
             raise ValueError(f"Invalid custom date range: {str(e)}")
     return {}
 
-def process_distance_report(df, vehicle_number):
+def process_distance_report(df, vehicle_number, from_date, to_date):
     """Calculate total distance traveled"""
     try:
         # Convert odometer to numeric and calculate differences
@@ -82,6 +82,14 @@ def process_distance_report(df, vehicle_number):
         total_distance = df['Distance (km)'].sum()
 
         # Add summary row
+        
+        mainInfo = pd.DataFrame({
+            'Vehicle Number': [f"Distance report for dates: {from_date} to {to_date}"],
+            'Total Distance (km)': [""],
+            'Start Odometer': [""],
+            'End Odometer': [""]
+        })
+        
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
@@ -277,7 +285,7 @@ def download_custom_report():
                             'fields': ["date_time", "odometer", "latitude", "longitude"],
                             'query': {"imei": imei, "gps": "A"},
                             'sheet_name': "Distance Report",
-                            'post_process': lambda df: process_distance_report(df, license_plate)
+                            'post_process': lambda df: process_distance_report(df, license_plate,  from_date, to_date)
                         },
                         'distance-speed-range': {
                             'collection': 'atlanta',
@@ -591,7 +599,7 @@ def download_custom_report():
                     'fields': ["date_time", "odometer", "latitude", "longitude"],
                     'query': {"imei": imei, "gps": "A"},
                     'sheet_name': "Distance Report",
-                    'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"])
+                    'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"],  from_date, to_date)
                 },
                 'distance-speed-range': {
                     'collection': 'atlanta',
@@ -978,7 +986,7 @@ def view_report_preview():
                 'collection': 'atlanta',
                 'base_fields': ["date_time", "odometer", "latitude", "longitude"],
                 'query': {"gps": "A"},
-                'post_process': lambda df: process_distance_report(df, license_plate)
+                'post_process': lambda df: process_distance_report(df, license_plate, from_date, to_date)
             },
             'distance-speed-range': {  # Speed Report
                 'collection': 'atlanta',
@@ -1088,10 +1096,15 @@ def view_report_preview():
             projection["_id"] = 0
             
             cursor = db[config['collection']].find(query, projection).sort("date_time", 1)
-            df = pd.DataFrame(list(cursor))
+            
+            if report_type != "odometer-daily-distance":
+                df = pd.DataFrame(list(cursor))
 
-            if not df.empty and config['post_process']:
-                df = config['post_process'](df)
+            if report_type == "odometer-daily-distance" and config['post_process']:
+                df = config['post_process'](pd.DataFrame(list(cursor)), license_plate, from_date, to_date)
+            else:   
+                if not df.empty and config['post_process']:
+                    df = config['post_process'](df)
 
         if df.empty:
             return jsonify({"success": True, "data": []})
@@ -1128,8 +1141,7 @@ def view_report_preview():
             all_possible_columns = ['Vehicle Number']
             if report_type == 'odometer-daily-distance':  # Distance Report
                 all_possible_columns.extend([
-                    'date_time', 'latitude', 'longitude', 'Location', 'odometer',
-                    'Distance (km)', 'Total Distance (km)', 'Start Odometer', 'End Odometer'
+                    'date_time', 'Total Distance (km)', 'Start Odometer', 'End Odometer'
                 ])
             elif report_type == 'stoppage':  # Stoppage Report
                 all_possible_columns.extend([
