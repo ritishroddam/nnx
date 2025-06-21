@@ -82,14 +82,13 @@ def process_distance_report(df, vehicle_number, from_date, to_date):
         total_distance = df['Distance (km)'].sum()
 
         # Add summary row
-        
         mainInfo = pd.DataFrame({
             'Vehicle Number': [f"Distance report for dates: {from_date} to {to_date}"],
             'Total Distance (km)': [""],
             'Start Odometer': [""],
             'End Odometer': [""]
         })
-        
+
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
@@ -98,7 +97,13 @@ def process_distance_report(df, vehicle_number, from_date, to_date):
         })
 
         # Combine with original data
-        return pd.concat([df, summary_df], ignore_index=True)
+        result_df = pd.concat([df, mainInfo, summary_df], ignore_index=True)
+        result_df.attrs['merge_info'] = {
+            'row': len(df) + 1,  # 0-based index, +1 for mainInfo row
+            'start_col': 0,
+            'end_col': 3  # Merge first 4 columns (A-D)
+        }
+        return result_df
     except Exception:
         return df
 
