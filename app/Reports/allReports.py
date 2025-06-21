@@ -1109,19 +1109,8 @@ def view_report_preview():
             if report_type != "odometer-daily-distance":
                 df = pd.DataFrame(list(cursor))
 
-            if report_type == "odometer-daily-distance" and config['post_process']:
-                if date_range != "custom":
-                    main_info = pd.DataFrame({
-                        'Distance Report': [f"Distance report for {getDateRanges(date_range)}"],
-                    })
-                else:
-                    main_info = pd.DataFrame({
-                        'Distance Report': [f"Distance report for dates: {from_date} to {to_date}"],
-                    })      
-                
-                summary_data = config['post_process'](pd.DataFrame(list(cursor)))
-                
-                df = pd.concat([main_info, summary_data], ignore_index=True)
+            if report_type == "odometer-daily-distance" and config['post_process']:   
+                df = config['post_process'](pd.DataFrame(list(cursor)))
             else:   
                 if not df.empty and config['post_process']:
                     df = config['post_process'](df)
