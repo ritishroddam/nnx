@@ -1119,7 +1119,7 @@ def view_report_preview():
                         'Distance Report': [f"Distance report for dates: {from_date} to {to_date}"],
                     })      
                 
-                summary_data = config['post_process'](pd.DataFrame(list(cursor)), license_plate)
+                summary_data = config['post_process'](pd.DataFrame(list(cursor)))
                 
                 df = pd.concat([main_info, summary_data], ignore_index=True)
             else:   
