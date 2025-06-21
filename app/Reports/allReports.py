@@ -1,4 +1,5 @@
-from flask import render_template, Blueprint, request, jsonify, send_file
+from flask import render_template, Blueprint, request, jsonify, send_file, Response
+import json
 from datetime import datetime, timedelta
 import traceback
 from pymongo import MongoClient
@@ -1183,24 +1184,24 @@ def view_report_preview():
                 if report_type == 'daily':  # Daily Report
                     all_possible_columns.append('odometer')
 
-            # Reorder columns based on the defined order
             existing_columns = [col for col in all_possible_columns if col in df.columns]
             df = df[existing_columns]
 
             data_records = df.fillna("").to_dict(orient="records")
+            # Build OrderedDict for each row in the desired order
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
             print("Final columns:", df.columns.tolist())
             print("existing_columns:", existing_columns)
-            
-            temp = jsonify({
+            print("ordered_data:", ordered_data)
+
+            # Serialize manually to preserve order
+            json_str = json.dumps({
                 "success": True,
                 "data": ordered_data
-            })
-            
-            print(temp.get_json())
-            
-            return temp
+            }, ensure_ascii=False)
+
+            return Response(json_str, mimetype='application/json')
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
