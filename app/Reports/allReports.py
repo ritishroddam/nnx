@@ -1088,7 +1088,17 @@ def view_report_preview():
             projection["_id"] = 0
             
             cursor = db[config['collection']].find(query, projection).sort("date_time", 1)
-            df = pd.DataFrame(list(cursor))
+            records = list(cursor)
+            if not records:
+                return jsonify({"success": True, "data": []})
+            
+            for rec in records:
+                rec.pop('_id', None)
+                
+            for rec in records:
+                rec['Vehicle Number'] = vehicle["LicensePlateNumber"]
+            
+            df = pd.DataFrame(records)
 
             if not df.empty and config['post_process']:
                 df = config['post_process'](df)
