@@ -100,9 +100,13 @@ def process_distance_report(df, vehicle_number):
         total_distance = df['Distance (km)'].sum()
         
         summary_df = pd.DataFrame({
+            'z': 'Distance Report',
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
             'Start Odometer': [df['odometer'].iloc[0]],
+            'a': 'hi',
+            'b': 'hello',
+            'c': 'world',
             'End Odometer': [df['odometer'].iloc[-1]]
         })
 
