@@ -1193,10 +1193,14 @@ def view_report_preview():
             print("Final columns:", df.columns.tolist())
             print("existing_columns:", existing_columns)
             
-            return jsonify({
+            temp = jsonify({
                 "success": True,
                 "data": ordered_data
             })
+            
+            print(temp)
+            
+            return temp
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
