@@ -995,7 +995,7 @@ def view_report_preview():
                 'collection': 'atlanta',
                 'base_fields': ["date_time", "odometer", "latitude", "longitude"],
                 'query': {"gps": "A"},
-                'post_process': lambda df: process_distance_report(df, license_plate)
+                'post_process': lambda df, license_plate: process_distance_report(df, license_plate)
             },
             'distance-speed-range': {  # Speed Report
                 'collection': 'atlanta',
