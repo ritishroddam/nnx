@@ -87,7 +87,7 @@ def getDateRanges(date_range):
         return f"{(now - timedelta(days=7)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}" 
     elif date_range == "last30days":
         return f"{(now - timedelta(days=30)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}"
-    return {}
+    return f"Hi"
 
 def process_distance_report(df, vehicle_number):
     """Calculate total distance traveled"""
