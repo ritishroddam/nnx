@@ -1190,6 +1190,9 @@ def view_report_preview():
             data_records = df.fillna("").to_dict(orient="records")
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
+            print("Final columns:", df.columns.tolist())
+            print("existing_columns:", existing_columns)
+            
             return jsonify({
                 "success": True,
                 "data": ordered_data
