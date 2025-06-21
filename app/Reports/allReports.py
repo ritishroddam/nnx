@@ -1198,7 +1198,7 @@ def view_report_preview():
                 "data": ordered_data
             })
             
-            print(temp)
+            print(temp.get_json())
             
             return temp
 
