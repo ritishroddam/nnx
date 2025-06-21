@@ -1188,7 +1188,7 @@ def view_report_preview():
             df = df[existing_columns]
 
             data_records = df.fillna("").to_dict(orient="records")
-            ordered_data = [OrderedDict((col, row[col]) for col in df.columns) for row in data_records]
+            ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
             return jsonify({
                 "success": True,
