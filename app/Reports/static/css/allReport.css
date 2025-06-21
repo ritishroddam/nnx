@@ -428,6 +428,15 @@ input[type="datetime-local"] {
   background: #b52b27;
 }
 
+#reportPreviewModal .modal-content {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
 /* Responsive for small screens */
 @media (max-width: 500px) {
   #deleteConfirmModal .modal-content {

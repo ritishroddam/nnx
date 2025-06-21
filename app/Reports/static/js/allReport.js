@@ -206,6 +206,82 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+document.getElementById("viewReport").addEventListener("click", async function (e) {
+  e.preventDefault();
+
+  const reportType = document.getElementById("generateReport").dataset.reportType;
+  const reportName = document.getElementById("generateReport").dataset.reportName;
+  const vehicleNumber = document.getElementById("vehicleNumber").value;
+  const dateRange = document.getElementById("dateRange").value;
+
+  if (!vehicleNumber) {
+    alert("Please select a vehicle number");
+    return;
+  }
+
+  const body = {
+    reportType,
+    reportName,
+    vehicleNumber,
+    dateRange,
+  };
+
+  if (dateRange === "custom") {
+    body.fromDate = document.getElementById("fromDate").value;
+    body.toDate = document.getElementById("toDate").value;
+  }
+
+  try {
+    const response = await fetch("/reports/view_report_preview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify(body),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      alert(result.message || "Failed to load preview");
+      return;
+    }
+
+    // Create table
+    const container = document.getElementById("reportPreviewTableContainer");
+    container.innerHTML = "";
+
+    if (result.data.length === 0) {
+      container.innerHTML = "<p>No data found.</p>";
+    } else {
+      const table = document.createElement("table");
+      table.className = "table table-bordered table-striped";
+      const headers = Object.keys(result.data[0]);
+
+      const thead = document.createElement("thead");
+      thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      result.data.forEach(row => {
+        const tr = document.createElement("tr");
+        headers.forEach(h => {
+          tr.innerHTML += `<td>${row[h] ?? ''}</td>`;
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    document.getElementById("reportPreviewModal").style.display = "block";
+
+  } catch (error) {
+    console.error("Error fetching report preview:", error);
+    alert("An error occurred while loading the preview.");
+  }
+});
+
   document.getElementById("generateReport").addEventListener("click", async function (e) {
   e.preventDefault();
 
@@ -948,3 +1024,7 @@ function showDeleteConfirm(reportName, onConfirm) {
   cancelBtn.addEventListener("click", onCancel);
   closeBtn.addEventListener("click", onCancel);
 }
+
+document.getElementById("closePreviewModal").addEventListener("click", function () {
+  document.getElementById("reportPreviewModal").style.display = "none";
+});

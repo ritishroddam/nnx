@@ -175,6 +175,9 @@ All Reports
             <div class="form-actions">
                 <button type="button" class="cancel-btn">Cancel</button>
                 <button type="submit" id="generateReport">Generate Report</button>
+                <button type="button" id="viewReport" title="Preview Report" style="margin-left: 10px;">
+                   <i class="fa-solid fa-eye"></i>
+                </button>
             </div>
         </form>
     </div>
@@ -191,5 +194,16 @@ All Reports
     </div>
   </div>
 </div>
+
+<div id="reportPreviewModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+    <span class="close" id="closePreviewModal">&times;</span>
+    <h2>Report Preview</h2>
+    <div id="reportPreviewTableContainer">
+      <!-- Table gets injected here -->
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}

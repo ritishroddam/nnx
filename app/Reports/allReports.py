@@ -937,3 +937,67 @@ def get_all_vehicles(query=None):
     if query is None:
         query = {}
     return list(db['vehicle_inventory'].find(query, {"LicensePlateNumber": 1, "IMEI": 1, "_id": 0}))
+
+@reports_bp.route('/view_report_preview', methods=['POST'])
+@jwt_required()
+def view_report_preview():
+    try:
+        data = request.get_json()
+        report_type = data.get("reportType")
+        vehicle_number = data.get("vehicleNumber")
+        date_range = data.get("dateRange", "all")
+        from_date = data.get("fromDate")
+        to_date = data.get("toDate")
+        report_name = data.get("reportName")
+
+        vehicle = db['vehicle_inventory'].find_one(
+            {"LicensePlateNumber": vehicle_number},
+            {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
+        )
+        if not vehicle:
+            return jsonify({"success": False, "message": "Vehicle not found"}), 404
+
+        imei = vehicle["IMEI"]
+
+        query = {"imei": imei}
+        if date_range:
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
+            query.update(date_filter)
+
+        if report_type == "distance-speed-range":
+            query.update({"gps": "A"})
+            fields = ["date_time", "speed", "latitude", "longitude"]
+        elif report_type == "odometer-daily-distance":
+            query.update({"gps": "A"})
+            fields = ["date_time", "odometer", "latitude", "longitude"]
+        elif report_type == "stoppage":
+            query.update({"ignition": "0", "gps": "A"})
+            fields = ["date_time", "latitude", "longitude", "ignition"]
+        elif report_type == "idle":
+            query.update({"ignition": "1", "speed": "0.0", "gps": "A"})
+            fields = ["date_time", "latitude", "longitude", "ignition", "speed"]
+        elif report_type == "ignition":
+            query.update({"gps": "A"})
+            fields = ["date_time", "latitude", "longitude", "ignition"]
+        elif report_type == "daily":
+            query.update({"gps": "A"})
+            fields = ["date_time", "odometer", "speed", "latitude", "longitude"]
+        else:  # fallback
+            fields = ["date_time", "latitude", "longitude", "speed"]
+
+        cursor = db['atlanta'].find(query, {field: 1 for field in fields}).sort("date_time", 1)
+        df = pd.DataFrame(list(cursor))
+
+        if df.empty:
+            return jsonify({"success": True, "data": []})
+
+        if 'date_time' in df.columns:
+            df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None).astype(str)
+
+        return jsonify({
+            "success": True,
+            "data": df.fillna("").to_dict(orient="records")
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
