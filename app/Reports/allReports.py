@@ -1153,7 +1153,8 @@ def view_report_preview():
             df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
         # Add Vehicle Number as first column
-        df.insert(0, 'Vehicle Number', license_plate)
+        if 'Vehicle Number' not in df.columns:
+            df.insert(0, 'Vehicle Number', license_plate)
 
         # Ensure consistent column order for each report type
         if report_type in report_configs:
