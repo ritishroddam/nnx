@@ -100,17 +100,14 @@ def process_distance_report(df, vehicle_number):
         total_distance = df['Distance (km)'].sum()
         
         summary_df = pd.DataFrame({
-            'z': 'Distance Report',
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
             'Start Odometer': [df['odometer'].iloc[0]],
-            'a': 'hi',
-            'b': 'hello',
-            'c': 'world',
             'End Odometer': [df['odometer'].iloc[-1]]
         })
 
-        # Combine with original data
+        summary_df = summary_df[['Vehicle Number', 'Total Distance (km)', 'Start Odometer', 'End Odometer']]
+        
         return summary_df
     except Exception:
         return df
@@ -1155,7 +1152,7 @@ def view_report_preview():
             all_possible_columns = ['Vehicle Number']
             if report_type == 'odometer-daily-distance':  # Distance Report
                 all_possible_columns.extend([
-                    'date_time', 'Total Distance (km)', 'Start Odometer', 'End Odometer'
+                    'Total Distance (km)', 'Start Odometer', 'End Odometer'
                 ])
             elif report_type == 'stoppage':  # Stoppage Report
                 all_possible_columns.extend([
