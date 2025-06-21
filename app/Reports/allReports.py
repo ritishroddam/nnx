@@ -71,7 +71,25 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
             raise ValueError(f"Invalid custom date range: {str(e)}")
     return {}
 
-def process_distance_report(df, vehicle_number, from_date, to_date):
+def getDateRanges(date_range):
+    tz = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(tz)
+
+    if date_range == "last24hours":
+        return f"Last 24 hours from {now.strftime('%Y-%m-%d %H:%M:%S')}"
+    elif date_range == "today":
+        today_start = datetime(now.year, now.month, now.day, tzinfo=tz)
+        return f"{today_start.strftime('%Y-%m-%d')}"
+    elif date_range == "yesterday":
+        yesterday_start_ist = now - timedelta(days=1)
+        return f"{yesterday_start_ist.strftime('%Y-%m-%d')}"
+    elif date_range == "last7days":
+        return f"{(now - timedelta(days=7)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}" 
+    elif date_range == "last30days":
+        return f"{(now - timedelta(days=30)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}"
+    return {}
+
+def process_distance_report(df, vehicle_number):
     """Calculate total distance traveled"""
     try:
         # Convert odometer to numeric and calculate differences
@@ -80,15 +98,7 @@ def process_distance_report(df, vehicle_number, from_date, to_date):
 
         # Calculate total distance
         total_distance = df['Distance (km)'].sum()
-
-        # Add summary row
-        mainInfo = pd.DataFrame({
-            'Vehicle Number': [f"Distance report for dates: {from_date} to {to_date}"],
-            'Total Distance (km)': [""],
-            'Start Odometer': [""],
-            'End Odometer': [""]
-        })
-
+        
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
@@ -97,13 +107,7 @@ def process_distance_report(df, vehicle_number, from_date, to_date):
         })
 
         # Combine with original data
-        result_df = pd.concat([df, mainInfo, summary_df], ignore_index=True)
-        result_df.attrs['merge_info'] = {
-            'row': len(df) + 1,  # 0-based index, +1 for mainInfo row
-            'start_col': 0,
-            'end_col': 3  # Merge first 4 columns (A-D)
-        }
-        return result_df
+        return summary_df
     except Exception:
         return df
 
@@ -290,7 +294,7 @@ def download_custom_report():
                             'fields': ["date_time", "odometer", "latitude", "longitude"],
                             'query': {"imei": imei, "gps": "A"},
                             'sheet_name': "Distance Report",
-                            'post_process': lambda df: process_distance_report(df, license_plate,  from_date, to_date)
+                            'post_process': lambda df: process_distance_report(df, license_plate)
                         },
                         'distance-speed-range': {
                             'collection': 'atlanta',
@@ -604,7 +608,7 @@ def download_custom_report():
                     'fields': ["date_time", "odometer", "latitude", "longitude"],
                     'query': {"imei": imei, "gps": "A"},
                     'sheet_name': "Distance Report",
-                    'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"],  from_date, to_date)
+                    'post_process': lambda df: process_distance_report(df, vehicle["LicensePlateNumber"])
                 },
                 'distance-speed-range': {
                     'collection': 'atlanta',
@@ -991,7 +995,7 @@ def view_report_preview():
                 'collection': 'atlanta',
                 'base_fields': ["date_time", "odometer", "latitude", "longitude"],
                 'query': {"gps": "A"},
-                'post_process': lambda df: process_distance_report(df, license_plate, from_date, to_date)
+                'post_process': lambda df: process_distance_report(df, license_plate)
             },
             'distance-speed-range': {  # Speed Report
                 'collection': 'atlanta',
@@ -1106,7 +1110,18 @@ def view_report_preview():
                 df = pd.DataFrame(list(cursor))
 
             if report_type == "odometer-daily-distance" and config['post_process']:
-                df = config['post_process'](pd.DataFrame(list(cursor)), license_plate, from_date, to_date)
+                if date_range != "custom":
+                    main_info = pd.DataFrame({
+                        'Distance Report': [f"Distance report for {getDateRanges(date_range)}"],
+                    })
+                else:
+                    main_info = pd.DataFrame({
+                        'Distance Report': [f"Distance report for dates: {from_date} to {to_date}"],
+                    })      
+                
+                summary_data = config['post_process'](pd.DataFrame(list(cursor)), license_plate)
+                
+                df = pd.concat([main_info, summary_data], ignore_index=True)
             else:   
                 if not df.empty and config['post_process']:
                     df = config['post_process'](df)
