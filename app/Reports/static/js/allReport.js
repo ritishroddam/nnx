@@ -256,22 +256,77 @@ document.getElementById("viewReport").addEventListener("click", async function (
     } else {
       const table = document.createElement("table");
       table.className = "table table-bordered table-striped";
-      const headers = Object.keys(result.data[0]);
-
+      
+      // Create table header
       const thead = document.createElement("thead");
-      thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+      const headerRow = document.createElement("tr");
+      
+      // Get all column headers from the first data item
+      const headers = Object.keys(result.data[0]);
+      
+      // Format headers for better readability
+      const formattedHeaders = headers.map(header => {
+        // Replace underscores with spaces and capitalize each word
+        return header
+          .replace(/_/g, ' ')
+          .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+      });
+      
+      // Add headers to the table
+      formattedHeaders.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
       table.appendChild(thead);
 
+      // Create table body
       const tbody = document.createElement("tbody");
       result.data.forEach(row => {
         const tr = document.createElement("tr");
         headers.forEach(h => {
-          tr.innerHTML += `<td>${row[h] ?? ''}</td>`;
+          const td = document.createElement("td");
+          // Format specific columns if needed
+          if (h === 'date_time') {
+            // Format date for better readability
+            td.textContent = new Date(row[h]).toLocaleString();
+          } else if (h === 'ignition') {
+            // Display ON/OFF clearly
+            td.textContent = row[h] === 'ON' ? 'ON' : 'OFF';
+          } else if (h.endsWith('(km)') || h.endsWith('(min)')) {
+            // Format numeric values with 2 decimal places
+            const numValue = parseFloat(row[h]);
+            td.textContent = !isNaN(numValue) ? numValue.toFixed(2) : row[h] || '';
+          } else {
+            td.textContent = row[h] || '';
+          }
+          tr.appendChild(td);
         });
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
       container.appendChild(table);
+    }
+
+    // Update modal title based on report type
+    const modalTitle = document.getElementById("reportPreviewModalTitle");
+    if (modalTitle) {
+      const reportTitles = {
+        'daily-distance': 'Travel Path Report Preview',
+        'odometer-daily-distance': 'Distance Report Preview',
+        'distance-speed-range': 'Speed Report Preview',
+        'stoppage': 'Stoppage Report Preview',
+        'idle': 'Idle Report Preview',
+        'ignition': 'Ignition Report Preview',
+        'daily': 'Daily Report Preview',
+        'panic': 'Panic Report Preview',
+        'custom': `${reportName} Preview`
+      };
+      modalTitle.textContent = reportTitles[reportType] || 'Report Preview';
     }
 
     document.getElementById("reportPreviewModal").style.display = "block";

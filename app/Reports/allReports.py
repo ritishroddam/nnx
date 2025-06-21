@@ -958,45 +958,209 @@ def view_report_preview():
             return jsonify({"success": False, "message": "Vehicle not found"}), 404
 
         imei = vehicle["IMEI"]
+        license_plate = vehicle["LicensePlateNumber"]
 
         query = {"imei": imei}
         if date_range:
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             query.update(date_filter)
 
-        if report_type == "distance-speed-range":
-            query.update({"gps": "A"})
-            fields = ["date_time", "speed", "latitude", "longitude"]
-        elif report_type == "odometer-daily-distance":
-            query.update({"gps": "A"})
-            fields = ["date_time", "odometer", "latitude", "longitude"]
-        elif report_type == "stoppage":
-            query.update({"ignition": "0", "gps": "A"})
-            fields = ["date_time", "latitude", "longitude", "ignition"]
-        elif report_type == "idle":
-            query.update({"ignition": "1", "speed": "0.0", "gps": "A"})
-            fields = ["date_time", "latitude", "longitude", "ignition", "speed"]
-        elif report_type == "ignition":
-            query.update({"gps": "A"})
-            fields = ["date_time", "latitude", "longitude", "ignition"]
-        elif report_type == "daily":
-            query.update({"gps": "A"})
-            fields = ["date_time", "odometer", "speed", "latitude", "longitude"]
-        else:  # fallback
-            fields = ["date_time", "latitude", "longitude", "speed"]
+        # Define report configurations with exact columns for each report type
+        report_configs = {
+            'daily-distance': {  # Travel Path Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "latitude", "longitude", "speed"],
+                'query': {"gps": "A"},
+                'post_process': lambda df: add_speed_metrics(df)
+            },
+            'odometer-daily-distance': {  # Distance Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "odometer", "latitude", "longitude"],
+                'query': {"gps": "A"},
+                'post_process': lambda df: process_distance_report(df, license_plate)
+            },
+            'distance-speed-range': {  # Speed Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "speed", "latitude", "longitude"],
+                'query': {"gps": "A"},
+                'post_process': lambda df: add_speed_metrics(df)
+            },
+            'stoppage': {  # Stoppage Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "latitude", "longitude", "ignition"],
+                'query': {"ignition": "0", "gps": "A"},
+                'post_process': lambda df: process_duration_report(df, "Stoppage Duration (min)")
+            },
+            'idle': {  # Idle Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "latitude", "longitude", "ignition", "speed"],
+                'query': {"ignition": "1", "speed": "0.0", "gps": "A"},
+                'post_process': lambda df: process_duration_report(df, "Idle Duration (min)")
+            },
+            'ignition': {  # Ignition Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "latitude", "longitude", "ignition"],
+                'query': {"gps": "A"},
+                'post_process': lambda df: process_duration_report(df, "Ignition Duration (min)")
+            },
+            'daily': {  # Daily Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
+                'query': {"gps": "A"},
+                'post_process': lambda df: add_speed_metrics(df)
+            },
+            'panic': {  # Panic Report
+                'collection': 'atlanta',
+                'base_fields': ["date_time", "latitude", "longitude", "speed", "odometer"],
+                'query': {
+                    "$or": [
+                        {"sos": {"$in": ["1", 1, True]}},
+                        {"status": "SOS"},
+                        {"alarm": "SOS"}
+                    ]
+                },
+                'post_process': lambda df: add_speed_metrics(df)
+            },
+            'custom': {
+                'collection': 'atlanta',
+                'base_fields': [],  # Will be populated from custom report config
+                'query': {},
+                'post_process': lambda df: df
+            }
+        }
 
-        projection = {field: 1 for field in fields}
-        projection["_id"] = 0
-        
-        cursor = db['atlanta'].find(query, projection).sort("date_time", 1)
+        if report_type == "custom":
+            # Get fields from custom report configuration
+            if not report_name:
+                return jsonify({"success": False, "message": "Custom report name missing"}), 400
 
-        df = pd.DataFrame(list(cursor)) 
+            report = db['custom_reports'].find_one(
+                {"report_name": report_name},
+                {"fields": 1, "_id": 0}
+            )
+            if not report:
+                return jsonify({"success": False, "message": "Custom report not found"}), 404
+
+            fields = report["fields"]
+            # Separate fields by collection
+            atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
+            vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]
+            
+            # Fetch data from vehicle_inventory
+            vehicle_inventory_data = None
+            if vehicle_inventory_fields:
+                vehicle_inventory_data = db['vehicle_inventory'].find_one(
+                    {"IMEI": imei},
+                    {field: 1 for field in vehicle_inventory_fields}
+                )
+
+            # Fetch data from atlanta
+            if atlanta_fields:
+                atlanta_data = list(db['atlanta'].find(
+                    query,
+                    {field: 1 for field in atlanta_fields}
+                ).sort("date_time", 1))
+
+            # Combine data
+            if atlanta_data and vehicle_inventory_data:
+                combined_data = []
+                for record in atlanta_data:
+                    combined_record = {**vehicle_inventory_data, **record}
+                    combined_data.append(combined_record)
+            elif atlanta_data and not vehicle_inventory_data:
+                combined_data = atlanta_data
+            elif not atlanta_data and vehicle_inventory_data:
+                combined_data = [vehicle_inventory_data]
+            else:
+                return jsonify({"success": True, "data": []})
+
+            df = pd.DataFrame(combined_data)
+        else:
+            if report_type not in report_configs:
+                return jsonify({"success": False, "message": "Invalid report type"}), 400
+
+            config = report_configs[report_type]
+            fields = config['base_fields']
+            query.update(config['query'])
+
+            projection = {field: 1 for field in fields}
+            projection["_id"] = 0
+            
+            cursor = db[config['collection']].find(query, projection).sort("date_time", 1)
+            df = pd.DataFrame(list(cursor))
+
+            if not df.empty and config['post_process']:
+                df = config['post_process'](df)
 
         if df.empty:
             return jsonify({"success": True, "data": []})
 
+        # Common processing for all reports
         if 'date_time' in df.columns:
             df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None).astype(str)
+
+        if 'latitude' in df.columns and 'longitude' in df.columns:
+            df['Location'] = df.apply(
+                lambda row: geocodeInternal(row['latitude'], row['longitude'])
+                if pd.notnull(row['latitude']) and row['latitude'] != "" and
+                   pd.notnull(row['longitude']) and row['longitude'] != ""
+                else 'Missing coordinates',
+                axis=1
+            )
+            # Reorder columns to place Location after longitude
+            cols = df.columns.tolist()
+            if 'Location' in cols:
+                cols.remove('Location')
+            lng_idx = cols.index('longitude') if 'longitude' in cols else len(cols)
+            cols.insert(lng_idx + 1, 'Location')
+            df = df[cols]
+
+        if "ignition" in df.columns:
+            df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+
+        # Add Vehicle Number as first column
+        df.insert(0, 'Vehicle Number', license_plate)
+
+        # Ensure consistent column order for each report type
+        if report_type in report_configs:
+            # Get all possible columns for this report type
+            all_possible_columns = ['Vehicle Number']
+            if report_type == 'odometer-daily-distance':  # Distance Report
+                all_possible_columns.extend([
+                    'date_time', 'latitude', 'longitude', 'Location', 'odometer',
+                    'Distance (km)', 'Total Distance (km)', 'Start Odometer', 'End Odometer'
+                ])
+            elif report_type == 'stoppage':  # Stoppage Report
+                all_possible_columns.extend([
+                    'date_time', 'latitude', 'longitude', 'Location', 'ignition',
+                    'Stoppage Duration (min)'
+                ])
+            elif report_type == 'idle':  # Idle Report
+                all_possible_columns.extend([
+                    'date_time', 'latitude', 'longitude', 'Location', 'speed',
+                    'Average Speed', 'Maximum Speed', 'ignition', 'Idle Duration (min)'
+                ])
+            elif report_type == 'ignition':  # Ignition Report
+                all_possible_columns.extend([
+                    'date_time', 'latitude', 'longitude', 'Location', 'ignition',
+                    'Ignition Duration (min)'
+                ])
+            elif report_type == 'panic':  # Panic Report
+                all_possible_columns.extend([
+                    'date_time', 'latitude', 'longitude', 'Location', 'speed',
+                    'Average Speed', 'Maximum Speed', 'odometer'
+                ])
+            else:  # Other reports (Travel Path, Speed, Daily)
+                all_possible_columns.extend([
+                    'date_time', 'latitude', 'longitude', 'Location', 'speed',
+                    'Average Speed', 'Maximum Speed'
+                ])
+                if report_type == 'daily':  # Daily Report
+                    all_possible_columns.append('odometer')
+
+            # Reorder columns based on the defined order
+            existing_columns = [col for col in all_possible_columns if col in df.columns]
+            df = df[existing_columns]
 
         return jsonify({
             "success": True,

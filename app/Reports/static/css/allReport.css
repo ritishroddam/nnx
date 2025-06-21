@@ -501,6 +501,33 @@ input[type="datetime-local"] {
   position: relative;
 }
 
+#reportPreviewTableContainer {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+#reportPreviewTableContainer table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+#reportPreviewTableContainer th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+#reportPreviewModal .modal-body {
+  padding: 0;
+}
+
+#reportPreviewModal .modal-content {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Responsive for small screens */
 @media (max-width: 500px) {
   #deleteConfirmModal .modal-content {
