@@ -7,6 +7,7 @@ from datetime import datetime
 import pytz
 from pytz import timezone
 from io import BytesIO
+from collections import OrderedDict
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
@@ -1186,10 +1187,13 @@ def view_report_preview():
             existing_columns = [col for col in all_possible_columns if col in df.columns]
             df = df[existing_columns]
 
-        return jsonify({
-            "success": True,
-            "data": df.fillna("").to_dict(orient="records")
-        })
+            data_records = df.fillna("").to_dict(orient="records")
+            ordered_data = [OrderedDict((col, row[col]) for col in df.columns) for row in data_records]
+
+            return jsonify({
+                "success": True,
+                "data": ordered_data
+            })
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
