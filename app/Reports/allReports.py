@@ -985,8 +985,8 @@ def view_report_preview():
         else:  # fallback
             fields = ["date_time", "latitude", "longitude", "speed"]
 
-        cursor = db['atlanta'].find(query, {field: 1 for field in fields}).sort("date_time", 1)
-        df = pd.DataFrame(list(cursor))
+        cursor = db['atlanta'].find(query, {field: 1 for field in fields},"_id": 0).sort("date_time", 1)
+        df = pd.DataFrame(list(cursor)) 
 
         if df.empty:
             return jsonify({"success": True, "data": []})
