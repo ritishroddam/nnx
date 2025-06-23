@@ -85,6 +85,36 @@ report_configs = {
     }
 }
 
+def process_df(df, license_plate, fields, post_process=None):
+            if df.empty:
+                return None
+            if 'date_time' in df.columns:
+                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
+            if 'latitude' in df.columns and 'longitude' in df.columns:
+                df['Location'] = df.apply(
+                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
+                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
+                       pd.notnull(row['longitude']) and row['longitude'] != ""
+                    else 'Missing coordinates',
+                    axis=1
+                )
+                cols = df.columns.tolist()
+                if 'Location' in cols:
+                    cols.remove('Location')
+                lng_idx = cols.index('longitude')
+                cols.insert(lng_idx + 1, 'Location')
+                df = df[cols]
+            if 'Vehicle Number' not in df.columns:
+                df.insert(0, 'Vehicle Number', license_plate)
+            if '_id' in df.columns:
+                df.drop('_id', axis=1, inplace=True)
+            if "ignition" in fields:
+                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+            if 'speed' in df.columns:
+                df = add_speed_metrics(df)
+            if post_process:
+                df = post_process(df)
+            return df
 
 def get_date_range_filter(date_range, from_date=None, to_date=None):
     tz = pytz.UTC
@@ -299,37 +329,6 @@ def download_custom_report():
         date_range = data.get("dateRange", "all")
         from_date = data.get("fromDate")
         to_date = data.get("toDate")
-
-        def process_df(df, license_plate, fields, post_process=None):
-            if df.empty:
-                return None
-            if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
-            if 'latitude' in df.columns and 'longitude' in df.columns:
-                df['Location'] = df.apply(
-                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
-                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
-                       pd.notnull(row['longitude']) and row['longitude'] != ""
-                    else 'Missing coordinates',
-                    axis=1
-                )
-                cols = df.columns.tolist()
-                if 'Location' in cols:
-                    cols.remove('Location')
-                lng_idx = cols.index('longitude')
-                cols.insert(lng_idx + 1, 'Location')
-                df = df[cols]
-            if 'Vehicle Number' not in df.columns:
-                df.insert(0, 'Vehicle Number', license_plate)
-            if '_id' in df.columns:
-                df.drop('_id', axis=1, inplace=True)
-            if "ignition" in fields:
-                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-            if 'speed' in df.columns:
-                df = add_speed_metrics(df)
-            if post_process:
-                df = post_process(df)
-            return df
 
         # Handle "all" vehicles
         if vehicle_number == "all":
@@ -760,38 +759,6 @@ def view_report_preview():
         date_range = data.get("dateRange", "all")
         from_date = data.get("fromDate")
         to_date = data.get("toDate")
-        report_name = data.get("reportName")
-
-        def process_df(df, license_plate, fields, post_process=None):
-            if df.empty:
-                return None
-            if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
-            if 'latitude' in df.columns and 'longitude' in df.columns:
-                df['Location'] = df.apply(
-                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
-                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
-                       pd.notnull(row['longitude']) and row['longitude'] != ""
-                    else 'Missing coordinates',
-                    axis=1
-                )
-                cols = df.columns.tolist()
-                if 'Location' in cols:
-                    cols.remove('Location')
-                lng_idx = cols.index('longitude')
-                cols.insert(lng_idx + 1, 'Location')
-                df = df[cols]
-            if 'Vehicle Number' not in df.columns:
-                df.insert(0, 'Vehicle Number', license_plate)
-            if '_id' in df.columns:
-                df.drop('_id', axis=1, inplace=True)
-            if "ignition" in fields:
-                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-            if 'speed' in df.columns:
-                df = add_speed_metrics(df)
-            if post_process:
-                df = post_process(df)
-            return df
 
         if vehicle_number == "all":
             claims = get_jwt()
