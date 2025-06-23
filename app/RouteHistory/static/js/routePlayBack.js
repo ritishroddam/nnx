@@ -181,7 +181,56 @@ function updateLiveMapPolyline(updatedData) {
   liveMaps.fitBounds(bounds);
   liveMaps.setCenter(updateCoords);
 
+  const darkMode = document.body.classList.contains("dark-mode");
+  const arrowColor = darkMode ? "#fff" : "#2a2a2a";
+
+  for (let i = 0; i < liveCoords.length; i++) {
+    const coord = liveCoords[i];
+    let direction = rotation || 0;
+    if (i < liveCoords.length - 1) {
+      const nextCoord = liveCoords[i + 1];
+      direction = getRotation(coord, nextCoord);
+    }
+    // For the last coord, rotation stays as 0 or you can use previous rotation
+
+    const arrowContent = document.createElement("div");
+    arrowContent.style.width = "10px";
+    arrowContent.style.height = "10px";
+    arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
+    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+    arrowContent.style.borderLeft = "5px solid transparent";
+    arrowContent.style.borderRight = "5px solid transparent";
+    arrowContent.style.position = "absolute";
+    arrowContent.style.transform = `rotate(${direction}deg)`;
+
+    liveMarkers = new google.maps.marker.AdvancedMarkerElement({
+      position: coord,
+      map: liveMaps,
+      title: "Arrow",
+      content: arrowContent,
+    });
+  }
+
   livePathPolyline.setPath(liveCoords);
+}
+
+function getRotation(coord, nextCoord) {
+  // Convert degrees to radians
+  const toRad = deg => deg * Math.PI / 180;
+  const toDeg = rad => rad * 180 / Math.PI;
+
+  const lat1 = toRad(coord.lat);
+  const lon1 = toRad(coord.lng);
+  const lat2 = toRad(nextCoord.lat);
+  const lon2 = toRad(nextCoord.lng);
+
+  const dLon = lon2 - lon1;
+  const y = Math.sin(dLon) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) -
+            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+  let brng = Math.atan2(y, x);
+  brng = toDeg(brng);
+  return (brng + 360) % 360; // Normalize to 0-360
 }
 
 async function plotPolyLineLiveMap(liveData) {
@@ -207,10 +256,15 @@ async function plotPolyLineLiveMap(liveData) {
       speed = `<p><strong>Speed:</strong> ${recentData.speed}</p>`;
     }
 
+    // Detect dark mode
+    const darkMode = document.body.classList.contains("dark-mode");
+    const arrowColor = darkMode ? "#fff" : "#2a2a2a";
+    const polylineColor = darkMode ? "#00bfff" : "#505050";
+
     livePathPolyline = new google.maps.Polyline({
       path: liveCoords,
       geodesic: true,
-      strokeColor: "#505050",
+      strokeColor: polylineColor,
       strokeOpacity: 0.9,
       strokeWeight: 3,
       map: liveMaps,
@@ -222,6 +276,7 @@ async function plotPolyLineLiveMap(liveData) {
     carContent.style.height = "32px";
     carContent.style.position = "absolute";
     carContent.alt = "Car";
+    carContent.style.filter = darkMode ? "brightness(1.5)" : ""; // brighten in dark mode
     carContent.style.transform = `rotate(${rotation}deg)`;
 
     markerLive = new google.maps.marker.AdvancedMarkerElement({
@@ -231,9 +286,36 @@ async function plotPolyLineLiveMap(liveData) {
       content: carContent,
     });
 
+    for (let i = 0; i < liveCoords.length; i++) {
+      const coord = liveCoords[i];
+      let direction = rotation || 0;
+      if (i < liveCoords.length - 1) {
+        const nextCoord = liveCoords[i + 1];
+        direction = getRotation(coord, nextCoord);
+      }
+      // For the last coord, rotation stays as 0 or you can use previous rotation
+
+      const arrowContent = document.createElement("div");
+      arrowContent.style.width = "10px";
+      arrowContent.style.height = "10px";
+      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
+      arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+      arrowContent.style.borderLeft = "5px solid transparent";
+      arrowContent.style.borderRight = "5px solid transparent";
+      arrowContent.style.position = "absolute";
+      arrowContent.style.transform = `rotate(${direction}deg)`;
+
+      liveMarkers = new google.maps.marker.AdvancedMarkerElement({
+        position: coord,
+        map: liveMaps,
+        title: "Arrow",
+        content: arrowContent,
+      });
+    }
+
     startMarkerInfo = new google.maps.InfoWindow({
       content: `<div>
-              <h3>${vehicleData["License Plate Number"] || null}</h3>
+              <h3>${vehicleData["License Plate Number"] || ""}</h3>
               ${speed || ""}
               <p><strong>Location:</strong> ${address}</p>
               <p>${status} since ${statusTime}</p>
