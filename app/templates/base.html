@@ -74,14 +74,14 @@
                             <div class="user-info">
                                 {% if role == 'clientAdmin' %}
                                 <p>
-                                    <a href="{{ url_for('CompanyConfig.home') }}" class="profile-link">
+                                    <a href="{{ url_for('CompanyConfig.home') }}" class="profile-settings-link">
                                         <i class="fa-solid fa-building-columns"></i> Company Settings
                                     </a>
                                 </p>
                                 {% endif %}
 
                                 <p>
-                                    <a href="{{ url_for('userConfig.page') }}" class="profile-link">
+                                    <a href="{{ url_for('userConfig.page') }}" class="profile-settings-link">
                                         <i class="fa-solid fa-user"></i> Profile Settings
                                     </a>
                                 </p>
