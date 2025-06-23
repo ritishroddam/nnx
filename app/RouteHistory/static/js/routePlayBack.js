@@ -168,6 +168,8 @@ function updateLiveMapVehicleData(updatedData) {
   animateMarker(updateCoords);
 }
 
+let liveMarkersArray = [];
+
 function updateLiveMapPolyline(updatedData) {
   const updateCoords = {
     lat: parseFloat(updatedData.latitude),
@@ -183,6 +185,9 @@ function updateLiveMapPolyline(updatedData) {
 
   const darkMode = document.body.classList.contains("dark-mode");
   const arrowColor = darkMode ? "#fff" : "#2a2a2a";
+
+  liveMarkersArray.forEach((marker) => marker.map = null);
+  liveMarkersArray = [];
 
   for (let i = 0; i < liveCoords.length; i++) {
     const coord = liveCoords[i];
@@ -203,12 +208,15 @@ function updateLiveMapPolyline(updatedData) {
     arrowContent.style.position = "absolute";
     arrowContent.style.transform = `rotate(${direction}deg)`;
 
-    liveMarkers = new google.maps.marker.AdvancedMarkerElement({
+    const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
       position: coord,
       map: liveMaps,
       title: "Arrow",
       content: arrowContent,
     });
+
+    liveMarkersArray.push(liveMarkers);
+
   }
 
   livePathPolyline.setPath(liveCoords);
@@ -305,12 +313,14 @@ async function plotPolyLineLiveMap(liveData) {
       arrowContent.style.position = "absolute";
       arrowContent.style.transform = `rotate(${direction}deg)`;
 
-      liveMarkers = new google.maps.marker.AdvancedMarkerElement({
+      const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
         position: coord,
         map: liveMaps,
         title: "Arrow",
         content: arrowContent,
       });
+
+      liveMarkersArray.push(liveMarkers);
     }
 
     startMarkerInfo = new google.maps.InfoWindow({
