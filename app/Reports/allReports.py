@@ -381,7 +381,7 @@ def download_custom_report():
                 for rec in atlanta_data:
                     grouped[rec["imei"]].append(rec)
 
-                for imei in imeis:
+                for idx, imei in enumerate(imeis):
                     license_plate = imei_to_plate[imei]
                     atlanta_records = grouped.get(imei, [])
                     vehicle_inventory_data = vehicle_inventory_data_map.get(imei)
@@ -396,6 +396,10 @@ def download_custom_report():
                     df = pd.DataFrame(combined_data)
                     df = process_df(df, license_plate, fields)
                     if df is not None:
+                        if report_type != "odometer-daily-distance" and idx > 0:
+                            # Insert a separator row
+                            sep_row = pd.DataFrame([{df.columns[0]: f"--- New Vehicle: {license_plate} ---", **{col: "" for col in df.columns[1:]}}])
+                            all_dfs.append(sep_row)
                         all_dfs.append(df)
             else:
                 if report_type not in report_configs:
@@ -810,7 +814,7 @@ def view_report_preview():
                 for rec in atlanta_data:
                     grouped[rec["imei"]].append(rec)
 
-                for imei in imeis:
+                for idx, imei in enumerate(imeis):
                     license_plate = imei_to_plate[imei]
                     atlanta_records = grouped.get(imei, [])
                     vehicle_inventory_data = vehicle_inventory_data_map.get(imei)
@@ -825,6 +829,11 @@ def view_report_preview():
                     df = pd.DataFrame(combined_data)
                     df = process_df(df, license_plate, fields)
                     if df is not None:
+                        if report_type != "odometer-daily-distance" and idx > 0:
+                            # Insert a separator dict
+                            sep_dict = OrderedDict((col, "" for col in df.columns))
+                            sep_dict[df.columns[0]] = f"--- New Vehicle: {license_plate} ---"
+                            all_dfs.append(pd.DataFrame([sep_dict]))
                         all_dfs.append(df)
             else:
                 if report_type not in report_configs:
