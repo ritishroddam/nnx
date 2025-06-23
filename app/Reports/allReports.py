@@ -89,8 +89,7 @@ def process_df(df, license_plate, fields, post_process=None):
             if df.empty:
                 return None
             if 'date_time' in df.columns:
-                df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
-                df['date_time'] = str(df['date_time'].strftime('%d-%b-%Y %I:%M:%S %p'))
+                df['date_time'] = df['date_time'].dt.tz_convert(IST).dt.strftime('%d-%b-%Y %I:%M:%S %p')
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['Location'] = df.apply(
                     lambda row: geocodeInternal(row['latitude'], row['longitude'])
