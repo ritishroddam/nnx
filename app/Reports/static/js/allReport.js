@@ -268,9 +268,9 @@ document.getElementById("viewReport").addEventListener("click", async function (
             td.textContent = row[h] === 'ON' ? 'ON' : 'OFF';
           } else if (h.endsWith('(km)') || h.endsWith('(min)')) {
             const numValue = parseFloat(row[h]);
-            td.textContent = !isNaN(numValue) ? numValue.toFixed(2) : row[h] || '';
+            td.textContent = !isNaN(numValue) ? numValue.toFixed(2) : (row[h] === 0 ? '0.00' : row[h] || '');
           } else {
-            td.textContent = row[h] || '';
+            td.textContent = (row[h] !== undefined && row[h] !== null) ? row[h] : '';
           }
           tr.appendChild(td);
         });
