@@ -49,26 +49,21 @@ def page():
 @jwt_required()
 def get_sims_by_status(status):
     try:
-        # Get all vehicles and their SIM numbers
         vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
         sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
 
-        # Get all SIMs from inventory
         all_sims = list(collection.find({}))
         
         results = []
         for sim in all_sims:
             sim_number = sim.get('SimNumber', '')
             
-            # Determine actual status (Allocated takes priority over stored status)
             actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
             
-            # Skip if not matching the requested status (unless 'All')
             if status != 'All' and actual_status != status:
                 continue
                 
-            # Prepare SIM data
             sim_data = {
                 '_id': str(sim.get('_id', '')),
                 'MobileNumber': sim.get('MobileNumber', ''),
@@ -84,7 +79,6 @@ def get_sims_by_status(status):
                 'lastEditedBy': sim.get('lastEditedBy', 'N/A')
             }
             
-            # Add status-specific dates if needed
             if actual_status in ['SafeCustody', 'Suspended']:
                 if 'statusDate' not in sim_data or not sim_data['statusDate']:
                     sim_data['statusDate'] = datetime.utcnow().strftime('%Y-%m-%d')
@@ -108,32 +102,27 @@ def search_sims():
     if not search_query:
         return jsonify([])
     
-    # Get all vehicles and their SIM numbers
     vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
     allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
     sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
 
-    # Build the search query
     query = {
         "$or": [
-            {"MobileNumber": {"$regex": f"{search_query}$"}},  # Ends with search term
-            {"SimNumber": {"$regex": f"{search_query}$"}},     # Ends with search term
-            {"MobileNumber": search_query},                    # Exact match
-            {"SimNumber": search_query}                        # Exact match
+            {"MobileNumber": {"$regex": f"{search_query}$"}}, 
+            {"SimNumber": {"$regex": f"{search_query}$"}},   
+            {"MobileNumber": search_query},                    
+            {"SimNumber": search_query}                        
         ]
     }
     
-    # Get matching SIMs from inventory
     matching_sims = list(collection.find(query))
     
     results = []
     for sim in matching_sims:
         sim_number = sim.get('SimNumber', '')
         
-        # Determine actual status (Allocated takes priority over stored status)
         actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
         
-        # Prepare SIM data
         sim_data = {
             '_id': str(sim.get('_id', '')),
             'MobileNumber': sim.get('MobileNumber', ''),
@@ -341,12 +330,10 @@ def download_excel():
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
-        # Map sim_number to IMEI from vehicle_inventory
         vehicle_collection = db['vehicle_inventory']
         vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
         sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
 
-        # Define the exact columns to export (in order)
         export_columns = [
             'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
             'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
@@ -371,7 +358,6 @@ def download_excel():
             }
             processed_data.append(row)
 
-        # Create DataFrame with only export columns
         df = pd.DataFrame(processed_data, columns=export_columns)
 
         output = BytesIO()
@@ -404,14 +390,12 @@ def download_excel_filtered():
         if not sims:
             return jsonify({"error": "No SIM data received"}), 400
 
-        # Ensure correct order and column names
         columns = [
             'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
             'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
             'Vendor', 'lastEditedBy'
         ]
 
-        # Normalize and clean values
         cleaned = []
         for sim in sims:
             cleaned.append({col: str(sim.get(col, '')).strip() for col in columns})

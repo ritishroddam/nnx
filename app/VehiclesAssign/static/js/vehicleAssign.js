@@ -11,14 +11,14 @@ document.addEventListener("DOMContentLoaded", function () {
           .then((data) => {
             if (data.vehicles) {
               const vehicleDropdown = vehicleSelect[0].selectize;
-              vehicleDropdown.clearOptions(); // Clear existing options
+              vehicleDropdown.clearOptions();
               data.vehicles.forEach((vehicle) => {
                 vehicleDropdown.addOption({
                   value: vehicle._id,
                   text: vehicle.LicensePlateNumber,
                 });
               });
-              vehicleDropdown.refreshOptions(false); // Refresh the dropdown
+              vehicleDropdown.refreshOptions(false); 
             }
           })
           .catch((error) => {

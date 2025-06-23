@@ -20,7 +20,7 @@ company_collection = db["customers_list"]
 def convertDate(ddmmyy, hhmmss):
     day = int(ddmmyy[0:2])
     month = int(ddmmyy[2:4])
-    year = 2000 + int(ddmmyy[4:6])  # assuming YY is 2000+
+    year = 2000 + int(ddmmyy[4:6])  
     
     hour = int(hhmmss[0:2])
     minute = int(hhmmss[2:4])
@@ -47,7 +47,6 @@ def deltaTimeString(status_time_delta):
 @jwt_required()
 def show_vehicle_data(LicensePlateNumber):
     try:
-        # Fetch vehicle data for the given vehicle number
         print(f"Request received for LicensePlateNumber: {LicensePlateNumber}")
         vehicleData = data_collection.find_one({"LicensePlateNumber": LicensePlateNumber})
         if not vehicleData:
@@ -147,7 +146,6 @@ def show_vehicle_data(LicensePlateNumber):
                 "IMEI": vehicleData.get("IMEI", "Unknown"),
             })
 
-        # Fetch alerts for the vehicle
         alerts = list(db['sos_logs'].find({"imei": vehicleData['IMEI']}))
 
         return render_template('vehicle.html', vehicle_data=processed_data, recent_data=recent_data, alerts=alerts)
@@ -247,16 +245,13 @@ def fetch_live_data(imei):
 @jwt_required()
 def fetch_vehicle_alerts(imei):
     try:
-        # Query the `sos_logs` collection for the specific IMEI
         alerts = list(db["sos_logs"].find({"imei": imei}, {"_id": 0}))
 
-        # If no alerts found, return an empty list
         if not alerts:
             return jsonify([])
 
         ist = pytz.timezone("Asia/Kolkata")
 
-        # Format alerts for frontend
         formatted_alerts = [
             {
                 "timestamp": alert["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p"),
@@ -280,10 +275,8 @@ def get_alerts():
         if not imei:
             return jsonify({"error": "IMEI is required"}), 400
 
-        # Query MongoDB for alerts with the specific IMEI
         alerts = list(db["sos_logs"].find({"imei": imei}, {"_id": 0, "latitude": 1, "longitude": 1, "location": 1, "timestamp": 1}))
 
-        # Format the data for better frontend consumption
         formatted_alerts = [
             {
                 "timestamp": alert["timestamp"],
@@ -312,12 +305,10 @@ def get_vehicle_path():
     iso_end_date = convertDate(end_date, "235959")
 
     try:
-        # Step 1: Verify if the IMEI number exists in the 'data' collection
         data_record = data_collection.find_one({"IMEI": str(imei_numeric)})
         if not data_record:
             return jsonify({"error": f"IMEI number {imei_numeric} not found in data collection"}), 404
 
-        # Step 2: Fetch path data from the 'atlanta' collection for the verified IMEI
         pipeline = [
             {
                 "$match": {
@@ -327,7 +318,7 @@ def get_vehicle_path():
                 }
             },
             {
-                "$sort": {"date_time": 1}  # Sort by date_time in ascending order
+                "$sort": {"date_time": 1}  
             },
             {
                 "$project": {
@@ -346,7 +337,6 @@ def get_vehicle_path():
         if not records_list:
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
 
-        # Step 3: Convert latitude and longitude to decimal format and prepare path data
         ist = pytz.timezone("Asia/Kolkata")
 
         path_data = []

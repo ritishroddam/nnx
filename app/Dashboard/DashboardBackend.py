@@ -43,7 +43,7 @@ def format_seconds(seconds):
 
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
 @jwt_required()
-@roles_required('admin')  # Restrict access to admin and client admins
+@roles_required('admin')  
 def dashboard_data():
     try:
         num_devices = db["device_inventory"].count_documents({})
@@ -68,7 +68,6 @@ def atlanta_pie_data():
     try:
         results = list(get_filtered_results("distinctAtlanta"))
 
-        # If results are empty, return a default response
         if not results:
             return jsonify({
                 "total_devices": 0,
@@ -77,7 +76,6 @@ def atlanta_pie_data():
                 "idle_vehicles": 0
             }), 200
 
-        # Calculate counts
         total_devices = len(results)
         now = datetime.now()
         moving_vehicles = sum(
@@ -146,13 +144,12 @@ def atlanta_distance_data():
                 }
             },
             {
-                "$sort": {"_id": 1}  # Sort by date in ascending order
+                "$sort": {"_id": 1}  
             }
         ]
 
         results = list(atlanta_collection.aggregate(pipeline))
 
-        # Convert results to the required format
         distances = {result["_id"]: result["total_distance"] for result in results}
 
         distancesJson = {
@@ -268,7 +265,6 @@ def get_vehicle_range_data():
 
         results = list(atlanta_collection.aggregate(pipeline))
 
-        # Convert IMEI to Vehicle Registration
         vehicle_data = []
         for record in results:
             recs = record["records"]
@@ -327,9 +323,7 @@ def get_vehicle_range_data():
 def get_status_data():
     try:
         now = datetime.now()
-        imeis = list(get_vehicle_data().distinct("IMEI"))  # Get the list of IMEIs to filter by
-
-        # If no IMEIs are found, return default response
+        imeis = list(get_vehicle_data().distinct("IMEI"))  
         if not imeis:
             return jsonify({
                 'runningVehicles': 0,
@@ -342,9 +336,8 @@ def get_status_data():
                 'totalVehicles': 0
             }), 200
 
-        # Aggregation pipeline
         pipeline = [
-            {"$match": {"imei": {"$in": imeis}}},  # Filter by IMEIs
+            {"$match": {"imei": {"$in": imeis}}},  
             {
                 "$facet": {
                     "totalVehicles": [
@@ -402,10 +395,8 @@ def get_status_data():
             }
         ]
 
-        # Execute the query
         results = list(db["distinctAtlanta"].aggregate(pipeline))
 
-        # If results are empty, return default response
         if not results or not results[0]:
             return jsonify({
                 'runningVehicles': 0,
@@ -418,10 +409,8 @@ def get_status_data():
                 'totalVehicles': 0
             }), 200
 
-        # Extract counts or default to 0 if not present
         results = results[0]
         print(results)
-        # Extract counts or default to 0 if not present or the list is empty
         total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0) if results.get("totalVehicles") else 0
         running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0) if results.get("runningVehicles") else 0
         idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0) if results.get("idleVehicles") else 0
@@ -431,7 +420,6 @@ def get_status_data():
         disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0) if results.get("disconnectedVehicles") else 0
         no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0) if results.get("noGpsVehicles") else 0
 
-        # Return the consolidated response
         return jsonify({
             'runningVehicles': running_vehicles,
             'idleVehicles': idle_vehicles,

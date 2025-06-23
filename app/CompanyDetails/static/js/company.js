@@ -16,24 +16,20 @@ document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadFormContainer").classList.toggle("hidden");
 });
 
-// Show modal
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.remove("hidden");
 });
 
-// Close modal with X button
 document.getElementById("closeCompanyModal").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("manualForm").reset();
 });
 
-// Close modal with Cancel button
 document.getElementById("cancelBtn").addEventListener("click", function () {
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("manualForm").reset();
 });
 
-// Close modal when clicking outside the modal content
 window.addEventListener("click", function(event) {
   const modal = document.getElementById("manualEntryModal");
   if (event.target === modal) {
@@ -41,8 +37,6 @@ window.addEventListener("click", function(event) {
     document.getElementById("manualForm").reset();
   }
 });
-
-// Add form validation logic if necessary
 
 function editCustomer(customerId) {
   const row = document.querySelector(`tr[data-id='${customerId}']`);
@@ -61,7 +55,6 @@ function editCustomer(customerId) {
   const supportContact = row.cells[11].innerText;
   const remarks = row.cells[12].innerText;
 
-  // row.cells[0].innerHTML = `<input type="text" value="${companyID}" />`;
   row.cells[0].innerHTML = `<input type="text" value="${companyName}" />`;
   row.cells[1].innerHTML = `<input type="text" value="${contactPerson}" />`;
   row.cells[2].innerHTML = `<input type="email" value="${emailAddress}" />`;
@@ -75,8 +68,6 @@ function editCustomer(customerId) {
   row.cells[10].innerHTML = `<input type="text" value="${paymentStatus}" />`;
   row.cells[11].innerHTML = `<input type="text" value="${supportContact}" />`;
   row.cells[12].innerHTML = `<input type="text" value="${remarks}" />`;
-
-  // Keep Company ID as non-editable text
 
   row.cells[13].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveCustomer('${customerId}')">💾</button>
@@ -147,22 +138,21 @@ function deleteCustomer(customerId) {
 }
 
 function cancelEdit() {
-  location.reload(); // Reload page to reset changes
+  location.reload(); 
 }
 
-// Show upload modal
 document.getElementById("uploadBtn").addEventListener("click", function() {
   document.getElementById("uploadModal").classList.remove("hidden");
 });
-// Close modal with X
+
 document.getElementById("closeUploadModal").addEventListener("click", function() {
   document.getElementById("uploadModal").classList.add("hidden");
 });
-// Close modal with Cancel
+
 document.getElementById("cancelUploadBtn").addEventListener("click", function() {
   document.getElementById("uploadModal").classList.add("hidden");
 });
-// Close modal when clicking outside the content
+
 window.addEventListener("click", function(event) {
   const modal = document.getElementById("uploadModal");
   if (event.target === modal) {

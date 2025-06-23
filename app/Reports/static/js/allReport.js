@@ -21,7 +21,6 @@ const allowedFields = [
 ];
 
 document.addEventListener("DOMContentLoaded", function() {
-  // Initialize elements
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
   const fieldSelection = document.getElementById("fieldSelection");
@@ -32,58 +31,45 @@ document.addEventListener("DOMContentLoaded", function() {
 
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
-            // Show the custom date range fields
             customDateRange.style.display = "block";
             
-            // Set default values (optional)
             const now = new Date();
             const threeMonthsAgo = new Date();
             threeMonthsAgo.setMonth(now.getMonth() - 3);
             
-            // Format as YYYY-MM-DDTHH:MM for datetime-local inputs
             function formatDate(date) {
                 const pad = num => num.toString().padStart(2, '0');
                 return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
             }
             
-            // Set values
             document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
             document.getElementById("toDate").value = formatDate(now);
         } else {
-            // Hide the custom date range fields
             customDateRange.style.display = "none";
         }
     }
     
-    // Add event listener for changes
     dateRangeSelect.addEventListener("change", handleDateRangeChange);
     
-    // Initialize on page load (in case custom is already selected)
     handleDateRangeChange();
 
-  // Initialize Selectize for dropdowns
   $("select").selectize({
     create: false,
     sortField: "text",
   });
 
-  // Get Selectize instance for vehicleNumber
   const vehicleSelect = document.getElementById("vehicleNumber");
   const vehicleSelectize = vehicleSelect.selectize;
 
-  // Hide "All Vehicle" for Travel Path Report
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function () {
       const reportType = card.dataset.report;
       if (reportType === "daily-distance") {
-        // Remove "All Vehicle" option
         vehicleSelectize.removeOption("all");
-        // If "All Vehicle" was selected, reset to empty
         if (vehicleSelectize.getValue() === "all") {
           vehicleSelectize.clear();
         }
       } else {
-        // Add "All Vehicle" option if not present
         if (!vehicleSelectize.options["all"]) {
           vehicleSelectize.addOption({ value: "all", text: "All Vehicle" });
         }
@@ -91,7 +77,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  // Modal open/close handlers
   document
     .querySelector('[data-report="custom"]')
     .addEventListener("click", function () {
@@ -113,7 +98,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  // Window click handler to close modals
   window.addEventListener("click", function (event) {
     if (event.target == reportModal) {
       reportModal.style.display = "none";
@@ -123,7 +107,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  // Report card click handlers
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function (e) {
       e.preventDefault();
@@ -182,23 +165,19 @@ document.addEventListener("DOMContentLoaded", function() {
     if (this.value === "custom") {
         customDateRange.style.display = "block";
         
-        // Set date limits
         const now = new Date();
         const threeMonthsAgo = new Date();
         threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
         
-        // Format for datetime-local input
         const formatDate = (date) => {
             return date.toISOString().slice(0, 16);
         };
         
-        // Set min/max dates
         document.getElementById("fromDate").max = formatDate(now);
         document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
         document.getElementById("toDate").max = formatDate(now);
         document.getElementById("toDate").min = formatDate(threeMonthsAgo);
         
-        // Set default values
         document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
         document.getElementById("toDate").value = formatDate(now);
     } else {
@@ -247,7 +226,6 @@ document.getElementById("viewReport").addEventListener("click", async function (
       return;
     }
 
-    // Create table
     const container = document.getElementById("reportPreviewTableContainer");
     container.innerHTML = "";
 
@@ -257,25 +235,20 @@ document.getElementById("viewReport").addEventListener("click", async function (
       const table = document.createElement("table");
       table.className = "table table-bordered table-striped";
       
-      // Create table header
       const thead = document.createElement("thead");
       const headerRow = document.createElement("tr");
       
-      // Get all column headers from the first data item
       const headers = Object.keys(result.data[0]);
       
-      // Format headers for better readability
       const formattedHeaders = headers.map(header => {
-        // Replace underscores with spaces and capitalize each word
         return header
           .replace(/_/g, ' ')
-          .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capital letters
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' ');
       });
       
-      // Add headers to the table
       formattedHeaders.forEach(header => {
         const th = document.createElement("th");
         th.textContent = header;
@@ -284,21 +257,16 @@ document.getElementById("viewReport").addEventListener("click", async function (
       thead.appendChild(headerRow);
       table.appendChild(thead);
 
-      // Create table body
       const tbody = document.createElement("tbody");
       result.data.forEach(row => {
         const tr = document.createElement("tr");
         headers.forEach(h => {
           const td = document.createElement("td");
-          // Format specific columns if needed
           if (h === 'date_time') {
-            // Format date for better readability
             td.textContent = new Date(row[h]).toLocaleString();
           } else if (h === 'ignition') {
-            // Display ON/OFF clearly
             td.textContent = row[h] === 'ON' ? 'ON' : 'OFF';
           } else if (h.endsWith('(km)') || h.endsWith('(min)')) {
-            // Format numeric values with 2 decimal places
             const numValue = parseFloat(row[h]);
             td.textContent = !isNaN(numValue) ? numValue.toFixed(2) : row[h] || '';
           } else {
@@ -312,7 +280,6 @@ document.getElementById("viewReport").addEventListener("click", async function (
       container.appendChild(table);
     }
 
-    // Update modal title based on report type
     const modalTitle = document.getElementById("reportPreviewModalTitle");
     if (modalTitle) {
       const reportTitles = {
@@ -340,7 +307,6 @@ document.getElementById("viewReport").addEventListener("click", async function (
   document.getElementById("generateReport").addEventListener("click", async function (e) {
   e.preventDefault();
 
-  // Prefer dataset.reportType if present, else fallback to currentReportType
   const reportType = this.dataset.reportType || (typeof currentReportType !== "undefined" ? currentReportType : null);
   const reportName = this.dataset.reportName;
   const vehicleNumber = document.getElementById("vehicleNumber").value;
@@ -373,7 +339,6 @@ document.getElementById("viewReport").addEventListener("click", async function (
         body.fromDate = document.getElementById("fromDate").value;
         body.toDate = document.getElementById("toDate").value;
       }
-      // If speedValue is defined and reportType is distance-speed-range, add it
       if (reportType === "distance-speed-range" && typeof speedValue !== "undefined") {
         body.speedValue = speedValue;
       }
@@ -417,7 +382,6 @@ document.getElementById("viewReport").addEventListener("click", async function (
   }
 });
 
-// Add validation for custom date range
 document.getElementById("reportForm").addEventListener("submit", function(e) {
     const dateRange = document.getElementById("dateRange").value;
     if (dateRange === "custom") {
@@ -446,68 +410,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
         }
     }
 });
-
-  // Custom report form submission
-  // customReportForm.addEventListener("submit", function (e) {
-  //   e.preventDefault();
-
-  //   const reportName = document.getElementById("reportName").value.trim();
-  //   if (!reportName) {
-  //     alert("Please provide a report name");
-  //     return;
-  //   }
-
-  //   const fields = Array.from(selectedFields.children).map(
-  //     (li) => li.dataset.field
-  //   );
-  //   if (fields.length === 0) {
-  //     alert("Please select at least one field");
-  //     return;
-  //   }
-
-  //   const saveBtn = document.getElementById("saveCustomReport");
-  //   const originalText = saveBtn.textContent;
-  //   saveBtn.disabled = true;
-  //   saveBtn.textContent = "Saving...";
-
-  //   fetch("/reports/save_custom_report", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-  //     },
-  //     body: JSON.stringify({
-  //       reportName: reportName,
-  //       fields: fields,
-  //     }),
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         displayFlashMessage("Network response was not ok", "danger");
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       if (data.success) {
-  //         alert(data.message);
-  //         createReportCard({ report_name: reportName, fields: fields });
-  //         customReportModal.style.display = "none";
-  //         customReportForm.reset();
-  //         selectedFields.innerHTML = "";
-  //       } else {
-  //         throw new Error(data.message || "Failed to save report");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //       alert(error.message);
-  //     })
-  //     .finally(() => {
-  //       saveBtn.disabled = false;
-  //       saveBtn.textContent = originalText;
-  //     });
-  // });
 
   customReportForm.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -548,13 +450,10 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
         displayFlashMessage(data.message || "Failed to save report", "danger");
         throw new Error(data.message || "Failed to save report");
       }
-      // Success
       alert(data.message || "Report saved successfully!");
-      // Optionally: createReportCard({ report_name: reportName, fields: fields });
       customReportModal.style.display = "none";
       customReportForm.reset();
       selectedFields.innerHTML = "";
-      // Reload the page to show the new report card
       window.location.reload();
     })
     .catch((error) => {
@@ -567,7 +466,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     });
 });
 
-  // Field selection handling
   fieldSelection.addEventListener("change", function (e) {
     const field = e.target.value;
 
@@ -604,7 +502,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
 
       listItem.appendChild(removeButton);
 
-      // Drag and drop functionality
       listItem.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", e.target.dataset.field);
       });
@@ -630,7 +527,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     }
   });
 
-  // Hide "All Vehicle" for Travel Path Report
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function (e) {
       const reportType = card.dataset.report;
@@ -638,19 +534,18 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
       if (allVehicleOption) {
         allVehicleOption.style.display = "none";
       }
-      // Hide for Travel Path Report
+
       if (reportType === "daily-distance" && allVehicleOption) {
         allVehicleOption.style.display = "none";
-        // Optionally, reset selection if "All Vehicle" was selected
+
         const vehicleSelect = document.getElementById("vehicleNumber");
         if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
-        // If using Selectize, update it too:
+
         if (vehicleSelect.selectize) {
           vehicleSelect.selectize.removeOption("all");
         }
       } else if (allVehicleOption) {
         allVehicleOption.style.display = "";
-        // If using Selectize, ensure option is present
         const vehicleSelect = document.getElementById("vehicleNumber");
         if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
           vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
@@ -659,7 +554,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     });
   });
 
-  // Show speed dropdown only for Speed Report
   const speedSelectGroup = document.getElementById("speedSelectGroup");
   const speedSelect = document.getElementById("speedSelect");
   let currentReportType = null;
@@ -667,25 +561,22 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function () {
       currentReportType = card.dataset.report;
-      // Hide "All Vehicle" for Travel Path Report
+
       const reportType = card.dataset.report;
       const allVehicleOption = document.getElementById("allVehicleOption");
       if (allVehicleOption) {
         allVehicleOption.style.display = "none";
       }
-      // Hide for Travel Path Report
+
       if (reportType === "daily-distance" && allVehicleOption) {
         allVehicleOption.style.display = "none";
-        // Optionally, reset selection if "All Vehicle" was selected
         const vehicleSelect = document.getElementById("vehicleNumber");
         if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
-        // If using Selectize, update it too:
         if (vehicleSelect.selectize) {
           vehicleSelect.selectize.removeOption("all");
         }
       } else if (allVehicleOption) {
         allVehicleOption.style.display = "";
-        // If using Selectize, ensure option is present
         const vehicleSelect = document.getElementById("vehicleNumber");
         if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
           vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
@@ -694,9 +585,7 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     });
   });
 
-  // Make speed selection mandatory for Speed Report
   document.getElementById("reportForm").addEventListener("submit", function(e) {
-    // Custom date range validation
     const dateRange = document.getElementById("dateRange").value;
     if (dateRange === "custom") {
         const fromDate = new Date(document.getElementById("fromDate").value);
@@ -725,132 +614,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
     }
   });
 
-  // Custom report form submission
-  // customReportForm.addEventListener("submit", function (e) {
-  //   e.preventDefault();
-
-  //   const reportName = document.getElementById("reportName").value.trim();
-  //   if (!reportName) {
-  //     alert("Please provide a report name");
-  //     return;
-  //   }
-
-  //   const fields = Array.from(selectedFields.children).map(
-  //     (li) => li.dataset.field
-  //   );
-  //   if (fields.length === 0) {
-  //     alert("Please select at least one field");
-  //     return;
-  //   }
-
-  //   const saveBtn = document.getElementById("saveCustomReport");
-  //   const originalText = saveBtn.textContent;
-  //   saveBtn.disabled = true;
-  //   saveBtn.textContent = "Saving...";
-
-  //   fetch("/reports/save_custom_report", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-  //     },
-  //     body: JSON.stringify({
-  //       reportName: reportName,
-  //       fields: fields,
-  //     }),
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         displayFlashMessage("Network response was not ok", "danger");
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       if (data.success) {
-  //         alert(data.message);
-  //         createReportCard({ report_name: reportName, fields: fields });
-  //         customReportModal.style.display = "none";
-  //         customReportForm.reset();
-  //         selectedFields.innerHTML = "";
-  //       } else {
-  //         throw new Error(data.message || "Failed to save report");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //       alert(error.message);
-  //     })
-  //     .finally(() => {
-  //       saveBtn.disabled = false;
-  //       saveBtn.textContent = originalText;
-  //     });
-  // });
-
-  // Field selection handling
-  // fieldSelection.addEventListener("change", function (e) {
-  //   const field = e.target.value;
-
-  //   if (e.target.checked) {
-  //     const existingField = selectedFields.querySelector(
-  //       `[data-field="${field}"]`
-  //     );
-  //     if (existingField) {
-  //       alert("This field is already selected.");
-  //       e.target.checked = false;
-  //       return;
-  //     }
-
-  //     const listItem = document.createElement("li");
-  //     listItem.textContent = field;
-  //     listItem.dataset.field = field;
-  //     listItem.draggable = true;
-
-  //     const removeButton = document.createElement("button");
-  //     removeButton.textContent = "Remove";
-  //     removeButton.className = "btn btn-sm btn-danger";
-  //     removeButton.style.marginLeft = "10px";
-
-  //     removeButton.addEventListener("click", function () {
-  //       selectedFields.removeChild(listItem);
-  //       const checkbox = fieldSelection.querySelector(
-  //         `input[value="${field}"]`
-  //       );
-  //       if (checkbox) {
-  //         checkbox.checked = false;
-  //         checkbox.parentElement.style.display = "block";
-  //       }
-  //     });
-
-  //     listItem.appendChild(removeButton);
-
-  //     // Drag and drop functionality
-  //     listItem.addEventListener("dragstart", (e) => {
-  //       e.dataTransfer.setData("text/plain", e.target.dataset.field);
-  //     });
-
-  //     listItem.addEventListener("dragover", (e) => e.preventDefault());
-  //     listItem.addEventListener("drop", (e) => {
-  //       e.preventDefault();
-  //       const draggedField = e.dataTransfer.getData("text/plain");
-  //       const draggedItem = selectedFields.querySelector(
-  //         `[data-field="${draggedField}"]`
-  //       );
-  //       if (draggedItem) {
-  //         selectedFields.insertBefore(draggedItem, e.target);
-  //       }
-  //     });
-
-  //     selectedFields.appendChild(listItem);
-  //     e.target.parentElement.style.display = "none";
-  //   } else {
-  //     const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-  //     if (listItem) selectedFields.removeChild(listItem);
-  //     e.target.parentElement.style.display = "block";
-  //   }
-  // });
-
-  // Hide "All Vehicle" for Travel Path Report
   document.querySelectorAll(".report-card").forEach((card) => {
     card.addEventListener("click", function (e) {
       const reportType = card.dataset.report;
@@ -858,19 +621,15 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
       if (allVehicleOption) {
         allVehicleOption.style.display = "none";
       }
-      // Hide for Travel Path Report
       if (reportType === "daily-distance" && allVehicleOption) {
         allVehicleOption.style.display = "none";
-        // Optionally, reset selection if "All Vehicle" was selected
         const vehicleSelect = document.getElementById("vehicleNumber");
         if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
-        // If using Selectize, update it too:
         if (vehicleSelect.selectize) {
           vehicleSelect.selectize.removeOption("all");
         }
       } else if (allVehicleOption) {
         allVehicleOption.style.display = "";
-        // If using Selectize, ensure option is present
         const vehicleSelect = document.getElementById("vehicleNumber");
         if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
           vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
@@ -880,7 +639,6 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   });
 });
 
-// Helper functions
 function createReportCard(report) {
   const existingCard = document.querySelector(
     `.report-card[data-report-name="${report.report_name}"]`
@@ -900,7 +658,6 @@ function createReportCard(report) {
     <i class="fa-solid fa-file-alt" style="font-size: 2.5em; margin-top: 10px;"></i>
   `;
 
-  // Delete icon handler
   reportCard.querySelector('.delete-report').addEventListener('click', function(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -916,7 +673,6 @@ function createReportCard(report) {
       .then(data => {
         if (data.success) {
           reportCard.remove();
-          // Optionally show a toast or flash message here
         } else {
           alert(data.message || "Failed to delete report.");
         }
@@ -1023,7 +779,6 @@ function loadFields() {
     });
 }
 
-// Re-apply delete handler for dynamically created report cards
 document.querySelectorAll('.report-card[data-report="custom"] .delete-report').forEach(function(icon) {
   icon.addEventListener('click', function(e) {
     e.stopPropagation();
@@ -1041,7 +796,6 @@ document.querySelectorAll('.report-card[data-report="custom"] .delete-report').f
       .then(data => {
         if (data.success) {
           reportCard.remove();
-          // Optionally show a toast or flash message here
         } else {
           alert(data.message || "Failed to delete report.");
         }

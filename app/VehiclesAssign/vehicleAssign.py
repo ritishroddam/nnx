@@ -14,10 +14,9 @@ vehicle_collection = db['vehicle_inventory']
 
 @vehicleAssign_bp.route('/assign_vehicles', methods=['GET', 'POST'])
 @jwt_required()
-@roles_required('clientAdmin')  # Restrict access to client admins
+@roles_required('clientAdmin')  
 def assign_vehicles():
     if request.method == 'GET':
-        # Fetch vehicles and users belonging to the same company
         company_id = get_jwt().get('company_id')
         companyName = get_jwt().get('company')
         vehicles = list(vehicle_collection.find({"CompanyName": companyName}))
@@ -47,18 +46,16 @@ def assign_vehicles():
             return redirect(url_for('VehicleAssign.assign_vehicles'))
 
         except Exception as e:
-            # Log the error for debugging purposes
             print(f"Error during vehicle assignment: {e}")
             flash("An error occurred during the assignment operation.", "danger")
             return redirect(url_for('VehicleAssign.assign_vehicles'))
         
 @vehicleAssign_bp.route('/get_unassigned_vehicles/<user_id>', methods=['GET'])
 @jwt_required()
-@roles_required('clientAdmin')  # Restrict access to client admins
+@roles_required('clientAdmin') 
 def get_unassigned_vehicles(user_id):
     try:
         companyName = get_jwt().get('company')
-        # Fetch vehicles that are either unassigned or not assigned to the selected user
         unassigned_vehicles = list(vehicle_collection.find(
             {
                 "CompanyName": companyName,

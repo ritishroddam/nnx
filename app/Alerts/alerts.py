@@ -166,7 +166,6 @@ def alert_card_endpoint(alert_type):
                         query["imei"] = {"$in": imeis}
 
                 if alert_type == "speeding":
-    # Get IMEIs and their normalSpeed
                     if vehicle_number and imei:
                         imeis_with_speed = db['vehicle_inventory'].find({"IMEI": imei}, {"IMEI": 1, "normalSpeed": 1, "_id": 0})
                     else:
@@ -426,7 +425,6 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
         }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
         
 def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
-    # Build a list of per-IMEI speed conditions
     or_conditions = []
     for record in imeisWithSpeed:
         imei = record.get("IMEI")
@@ -463,7 +461,6 @@ def notification_alerts():
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # Only unacknowledged alerts
     acknowledged_ids = set(
         ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
     )

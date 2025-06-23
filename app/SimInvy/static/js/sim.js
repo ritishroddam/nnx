@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", function() {
   const tableBody = document.getElementById('simTable');
     originalTableRows = Array.from(tableBody.querySelectorAll('tr'));
     
-    // Set up search functionality
     const searchInput = document.getElementById('simSearch');
     const clearBtn = document.getElementById('clearSearchBtn');
     
@@ -63,33 +62,28 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
 
-  // Manual Entry Button
   document.getElementById("manualEntryBtn").addEventListener("click", function() {
     document.getElementById("manualEntryModal").classList.remove("hidden");
     document.getElementById("MobileNumber").focus();
   });
 
-  // Upload Button
   document.getElementById("uploadBtn").addEventListener("click", function() {
     document.getElementById("uploadModal").classList.remove("hidden");
   });
 
   setupDownloadButton();
 
-     // Set up search input event listener
     document.getElementById('simSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim().toLowerCase();
         filterTable(searchTerm);
     });
 
-  // Close buttons
   document.querySelectorAll(".close-modal").forEach(btn => {
     btn.addEventListener("click", function() {
       this.closest(".modal").classList.add("hidden");
     });
   });
 
-  // Cancel button
   document.getElementById("cancelBtn").addEventListener("click", function() {
     document.getElementById("manualEntryModal").classList.add("hidden");
   });
@@ -227,7 +221,6 @@ function setupDownloadButton() {
         downloadBtn.disabled = true;
 
         try {
-            // Spinner
             const spinner = document.createElement('div');
             spinner.innerHTML = `
                 <div style="
@@ -248,7 +241,6 @@ function setupDownloadButton() {
             `;
             document.body.appendChild(spinner);
 
-            // Collect visible table rows
             const visibleRows = Array.from(document.querySelectorAll("#simTable tr"))
                 .filter(row => row.cells.length > 1 && row.style.display !== 'none');
 
@@ -275,7 +267,6 @@ function setupDownloadButton() {
                 body: JSON.stringify({ sims: simsToExport })
             });
 
-            // Remove spinner
             document.body.removeChild(spinner);
 
             if (!response.ok) {
@@ -333,7 +324,6 @@ function filterTable(searchTerm) {
     const tableBody = document.getElementById('simTable');
     
     if (!searchTerm) {
-        // Show all rows if search is empty
         originalTableRows.forEach(row => {
             row.style.display = '';
         });
@@ -341,7 +331,6 @@ function filterTable(searchTerm) {
     }
 
     originalTableRows.forEach(row => {
-        // Skip if row doesn't have cells (header row, etc.)
         if (row.cells.length < 3) {
             return;
         }
@@ -364,7 +353,6 @@ function filterSimsByStatus() {
   const status = document.getElementById('statusFilter').value;
   console.log(`Fetching SIMs with status: ${status}`);
   
-  // Show loading indicator
   const tableBody = document.getElementById('simTable');
   tableBody.innerHTML = '<tr><td colspan="12">Loading SIM data...</td></tr>';
   
@@ -408,7 +396,6 @@ function renderSimTable(sims) {
     const row = document.createElement('tr');
     row.setAttribute('data-id', sim._id);
     
-    // Use consistent status values
     const status = sim.status || 'Available';
     row.className = status.toLowerCase();
     

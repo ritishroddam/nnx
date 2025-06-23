@@ -9,10 +9,8 @@ from pymongo import ASCENDING
 
 gecoding_bp = Blueprint('geocode', __name__)
 
-# Initialize Google Maps API client
 gmaps = googlemaps.Client(key=config['development']().GMAPS_API_KEY)
 
-# Create compound index for fast queries
 collection = db['geocoded_address']
 collection.create_index([("lat", ASCENDING), ("lng", ASCENDING)])
 
@@ -33,20 +31,17 @@ def validate_coordinates(lat, lng):
         raise ValueError(f"Invalid coordinates {lat} and {lng}")
     
 def nmea_to_decimal(nmea_value):
-    # Check if the string has a leading zero that should be removed
     nmea_value = str(nmea_value)
     print (nmea_value)
-    # Extract degrees and minutes
     if '.' in nmea_value:
         dot_index = nmea_value.index('.')
         degrees = float(nmea_value[:dot_index - 2])
         print("2")
-        minutes = float(nmea_value[dot_index - 2:])  # Last two digits before the dot and everything after
+        minutes = float(nmea_value[dot_index - 2:])  
         print("3")
     else:
         raise ValueError("Invalid NMEA format")
     
-    # Convert to decimal degrees
     decimal_degrees = degrees + (minutes / 60.0)
     print("4")
     return decimal_degrees
@@ -61,15 +56,13 @@ def geocodeInternal(lat,lng):
         return "Invalid coordinates"
 
     try:
-        # Step 1: Fast bounding box filter (0.5km range)
         nearby_entries = collection.find({
             "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},
             "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045}
         })
-
-        # Step 2: Precise distance calculation
+        
         nearest_entry = None
-        min_distance = 0.5  # Max search radius in km
+        min_distance = 0.5 
         
         for entry in nearby_entries:
             saved_coord = (entry['lat'], entry['lng'])
@@ -88,7 +81,6 @@ def geocodeInternal(lat,lng):
             return (f"{min_distance:.2f} km {bearing} from {nearest_entry['address']}"
                       if min_distance > 0 else nearest_entry['address'])
 
-        # Step 3: Geocode new coordinates
         reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
         if not reverse_geocode_result:
             print("Geocoding API failed")
@@ -96,7 +88,6 @@ def geocodeInternal(lat,lng):
 
         address = reverse_geocode_result[0]['formatted_address']
         
-        # Step 4: Insert new entry
         collection.insert_one({
             'lat': lat,
             'lng': lng,
@@ -122,15 +113,13 @@ def geocode():
         return jsonify({'error': 'Invalid coordinates'}), 400
 
     try:
-        # Step 1: Fast bounding box filter (0.5km range)
         nearby_entries = collection.find({
             "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},
             "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045}
         })
 
-        # Step 2: Precise distance calculation
         nearest_entry = None
-        min_distance = 0.5  # Max search radius in km
+        min_distance = 0.5 
         
         for entry in nearby_entries:
             saved_coord = (entry['lat'], entry['lng'])
@@ -151,7 +140,6 @@ def geocode():
             
             return jsonify({'address': address})
 
-        # Step 3: Geocode new coordinates
         reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
         if not reverse_geocode_result:
             print("Geocoding API failed")
@@ -159,7 +147,6 @@ def geocode():
 
         address = reverse_geocode_result[0]['formatted_address']
         
-        # Step 4: Insert new entry
         collection.insert_one({
             'lat': lat,
             'lng': lng,

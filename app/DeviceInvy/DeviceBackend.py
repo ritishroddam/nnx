@@ -52,11 +52,10 @@ def search_devices():
     if not imei_query:
         return jsonify([])
     
-    # Search for full IMEI match or last 5 digits match
     query = {
         "$or": [
             {"IMEI": imei_query},
-            {"IMEI": {"$regex": f"{imei_query}$"}}  # Ends with the search term
+            {"IMEI": {"$regex": f"{imei_query}$"}}  
         ]
     }
     
@@ -87,16 +86,12 @@ def search_devices():
 def manual_entry():
     data = request.form.to_dict()
     data['IMEI'] = data['IMEI'].strip()
-    # data['GLNumber'] = data['GLNumber'].strip()
-    data['GLNumber'] = data.get('GLNumber', '').strip()  # Set empty string if missing
+    data['GLNumber'] = data.get('GLNumber', '').strip() 
 
-
-    # Validate IMEI length
     if len(data['IMEI']) != 15:
         flash("Invalid IMEI length", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
-    # Check for duplicate IMEI or GLNumber
     print (data['GLNumber'])
 
     if(data['GLNumber'] != ""):
@@ -104,11 +99,9 @@ def manual_entry():
             flash("IMEI or GL Number already exists", "danger")
             return redirect(url_for('DeviceInvy.page'))
 
-    # If OutwardTo is filled, set Status to Active
     if data.get('OutwardTo'):
         data['Status'] = 'Active'
 
-    # Handle "Package" and "Tenure"
     package_type = data.get("Package", "")
     tenure = data.get("Tenure", "").strip() if package_type == "Package" else None
 
@@ -139,16 +132,12 @@ def upload_file():
         records = []
         for index, row in df.iterrows():
             imei = str(row['IMEI']).strip()
-            # gl_number = str(row['GLNumber']).strip()
-            gl_number = str(row.get('GLNumber', '')).strip()  # Set empty string if missing
+            gl_number = str(row.get('GLNumber', '')).strip() 
 
-
-            # Validate IMEI length
             if len(imei) != 15:
                 flash(f"Invalid data at row {index + 2}", "danger")
                 return redirect(url_for('DeviceInvy.page'))
 
-            # Check for duplicate IMEI or GLNumber
             if collection.find_one({"IMEI": imei}) or collection.find_one({"GLNumber": gl_number}):
                 flash(f"Duplicate data at row {index + 2}", "danger")
                 return redirect(url_for('DeviceInvy.page'))
@@ -182,9 +171,8 @@ def upload_file():
 @device_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    # Specify exactly which fields you want to include
     projection = {
-        "_id": 0,  # Exclude _id
+        "_id": 0, 
         "IMEI": 1,
         "GLNumber": 1,
         "DeviceModel": 1,
@@ -219,7 +207,6 @@ def download_excel():
 
     df = pd.DataFrame(devices)
     
-    # Reorder columns if needed
     column_order = [
         'IMEI',
         'GLNumber',
@@ -253,9 +240,8 @@ def download_excel():
 @jwt_required()
 def edit_device(device_id):
     try:
-        print(f"\n=== DEBUG: Updating device with ID: {device_id} ===")  # Debug log
+        print(f"\n=== DEBUG: Updating device with ID: {device_id} ===") 
 
-        # Convert device_id to ObjectId
         try:
             object_id = ObjectId(device_id)
         except Exception:
@@ -263,9 +249,8 @@ def edit_device(device_id):
             return jsonify({'success': False, 'message': 'Invalid device ID'}), 400
 
         updated_data = request.json
-        print("Received Data:", updated_data)  # Debug log
-
-        # Ensure "Tenure" is stored only if "Package" is "Package"
+        print("Received Data:", updated_data) 
+        
         package_type = updated_data.get("Package", "")
         tenure = updated_data.get("Tenure", "").strip() if package_type == "Package" else None
 
