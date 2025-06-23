@@ -194,7 +194,7 @@ function updateLiveMapPolyline(updatedData) {
     let direction = rotation || 0;
     if (i < liveCoords.length - 1) {
       const nextCoord = liveCoords[i + 1];
-      direction = getRotation(coord, nextCoord);
+      direction = getRotation(nextCoord, coord);
     }
     // For the last coord, rotation stays as 0 or you can use previous rotation
 
@@ -299,7 +299,7 @@ async function plotPolyLineLiveMap(liveData) {
       let direction = rotation || 0;
       if (i < liveCoords.length - 1) {
         const nextCoord = liveCoords[i + 1];
-        direction = getRotation(coord, nextCoord);
+        direction = getRotation(nextCoord, coord);
       }
       // For the last coord, rotation stays as 0 or you can use previous rotation
 
