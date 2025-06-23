@@ -21,8 +21,25 @@ def assign_vehicles():
         companyName = get_jwt().get('company')
         vehicles = list(vehicle_collection.find({"CompanyName": companyName}))
         users = list(db['users'].find({"company": company_id, "role": "user"}, {"_id": 1, "username": 1}))
+        
+        assignedData = {}
+        
+        for user in users:
+            assigned_vehicles = list(vehicle_collection.find(
+                {
+                    "CompanyName": companyName,
+                    "AssignedUsers": user["_id"],
+                },
+                {"_id": 1, "LicensePlateNumber": 1}
+            ))
+            
+            if not assigned_vehicles:
+                continue
+            for vehicle in assigned_vehicles:
+                vehicle["_id"] = str(vehicle["_id"])
+            assignedData[str(user["_id"])] = assigned_vehicles
 
-        return render_template('vehicleAssign.html', vehicles=vehicles, users=users)
+        return render_template('vehicleAssign.html', vehicles=vehicles, users=users, assignedData=assignedData)
 
     elif request.method == 'POST':
         vehicle_ids = request.form.getlist('vehicle_ids')
