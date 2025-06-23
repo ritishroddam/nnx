@@ -261,7 +261,6 @@ def get_fields():
     for collection, fields in FIELD_COLLECTION_MAP.items():
         all_fields.update(fields)
 
-    print(all_fields)  
     return jsonify(sorted(list(all_fields)))
 
 @reports_bp.route('/save_custom_report', methods=['POST'])
@@ -881,10 +880,6 @@ def view_report_preview():
             from collections import OrderedDict
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
-            print("Final columns:", final_df.columns.tolist())
-            print("existing_columns:", existing_columns)
-            print("ordered_data:", ordered_data)
-
             json_str = json.dumps({
                 "success": True,
                 "data": ordered_data
@@ -982,10 +977,6 @@ def view_report_preview():
         data_records = df.fillna("").to_dict(orient="records")
         from collections import OrderedDict
         ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
-
-        print("Final columns:", df.columns.tolist())
-        print("existing_columns:", existing_columns)
-        print("ordered_data:", ordered_data)
 
         json_str = json.dumps({
             "success": True,
