@@ -123,7 +123,6 @@ function setCookie(name, value) {
 document.addEventListener("DOMContentLoaded", async function () {
   const themeToggle = document.getElementById("theme-toggle");
   const body = document.body;
-  // Notification Bell Logic
   const bell = document.getElementById("notification-bell");
   const dropdown = document.getElementById("notification-dropdown");
   const countSpan = document.getElementById("notification-count");
@@ -169,7 +168,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       } else {
         displayFlashMessage("Failed to update theme", "danger");
       }
-      return response.json(); // If you still want to use the response data elsewhere
+      return response.json(); 
     })
     .catch(() => {
       displayFlashMessage("Failed to update theme", "danger");
@@ -198,7 +197,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       });
       const data = await res.json();
     if (data.success) {
-      // Show all alerts, no filter
       countSpan.textContent = data.alerts.length;
       list.innerHTML = "";
       if (data.alerts.length === 0) {

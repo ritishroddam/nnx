@@ -20,7 +20,6 @@ reports_bp = Blueprint('Reports', __name__, static_folder='static', template_fol
 
 IST = timezone('Asia/Kolkata')
 
-# Define field to collection mapping
 FIELD_COLLECTION_MAP = {
     'atlanta': ['status', 'time', 'gps', 'latitude', 'longitude', 'speed', 
                 'date', 'ignition', 'door', 'sos', 'main_power', 'odometer',
@@ -94,11 +93,9 @@ def getDateRanges(date_range):
 def process_distance_report(df, vehicle_number):
     """Calculate total distance traveled"""
     try:
-        # Convert odometer to numeric and calculate differences
         df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
         df['Distance (km)'] = df['odometer'].diff().fillna(0)
 
-        # Calculate total distance
         total_distance = df['Distance (km)'].sum()
         
         summary_df = pd.DataFrame({
@@ -117,14 +114,11 @@ def process_distance_report(df, vehicle_number):
 def process_duration_report(df, duration_col_name):
     """Calculate duration between records in minutes"""
     try:
-        # Convert to datetime if not already
         df['date_time'] = pd.to_datetime(df['date_time'])
 
-        # Calculate time differences in minutes
         df['time_diff'] = df['date_time'].diff().dt.total_seconds().div(60).fillna(0)
         df[duration_col_name] = df['time_diff'].cumsum()
 
-        # Drop intermediate column
         df.drop('time_diff', axis=1, inplace=True)
         return df
     except Exception:
@@ -134,18 +128,14 @@ def add_speed_metrics(df):
     """Add average and maximum speed columns to DataFrame"""
     try:
         if 'speed' in df.columns:
-            # Convert speed to numeric if it's not already
             df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
 
-            # Calculate average and max speed
             avg_speed = df['speed'].mean()
             max_speed = df['speed'].max()
 
-            # Add columns to DataFrame
             df['Average Speed'] = avg_speed
             df['Maximum Speed'] = max_speed
 
-            # Move these columns next to the speed column if it exists
             if 'speed' in df.columns:
                 cols = df.columns.tolist()
                 speed_idx = cols.index('speed')
@@ -190,7 +180,7 @@ def get_fields():
     for collection, fields in FIELD_COLLECTION_MAP.items():
         all_fields.update(fields)
 
-    print(all_fields)  # Debugging line to check the fields being returned
+    print(all_fields)  
     return jsonify(sorted(list(all_fields)))
 
 @reports_bp.route('/save_custom_report', methods=['POST'])
@@ -204,17 +194,14 @@ def save_custom_report():
         if not report_name or not fields:
             return jsonify({"success": False, "message": "Invalid data provided."}), 400
 
-        # Check for duplicate report name
         if db['custom_reports'].find_one({"report_name": report_name}):
             return jsonify({"success": False, "message": "Report name already exists."}), 400
 
-        # Validate fields against FIELD_COLLECTION_MAP
         valid_fields = set(FIELD_COLLECTION_MAP['atlanta'] + FIELD_COLLECTION_MAP['vehicle_inventory'])
         invalid_fields = [field for field in fields if field not in valid_fields]
         if invalid_fields:
             return jsonify({"success": False, "message": f"Invalid fields: {', '.join(invalid_fields)}"}), 400
 
-        # Save the report
         db['custom_reports'].insert_one({
             "report_name": report_name,
             "fields": fields,
@@ -263,9 +250,7 @@ def download_custom_report():
         from_date = data.get("fromDate")
         to_date = data.get("toDate")
 
-        # Handle "all" vehicles
         if vehicle_number == "all":
-            # Get all vehicles for the user/company
             claims = get_jwt()
             user_roles = claims.get('roles', [])
             if 'admin' in user_roles:
@@ -393,11 +378,9 @@ def download_custom_report():
 
                     fields = report["fields"]
 
-                    # Separate fields by collection
                     atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
                     vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]    
 
-                    # Fetch data from vehicle_inventory
                     vehicle_inventory_data = None
                     if vehicle_inventory_fields:
                         vehicle_inventory_data = db['vehicle_inventory'].find_one(
@@ -405,7 +388,6 @@ def download_custom_report():
                             {field: 1 for field in vehicle_inventory_fields}
                         )
 
-                    # Fetch data from atlanta
                     date_filter = get_date_range_filter(date_range, from_date, to_date)
                     atlanta_query = {"imei": imei}
                     if date_filter:
@@ -417,7 +399,6 @@ def download_custom_report():
                             {field: 1 for field in atlanta_fields}
                         ).sort("date_time", 1))
 
-                    # Combine data
                     if atlanta_data and vehicle_inventory_data:
                         combined_data = []
                         for record in atlanta_data:
@@ -430,13 +411,11 @@ def download_custom_report():
                     else:
                         continue
 
-                    # Convert to DataFrame
                     df = pd.DataFrame(combined_data)
 
                     if df.empty:
                         continue
 
-                    # Process latitude and longitude if present
                     if 'date_time' in df.columns:
                         df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
@@ -459,7 +438,6 @@ def download_custom_report():
                     if 'Vehicle Number' not in df.columns:
                         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
-                    # Remove MongoDB _id if present
                     if '_id' in df.columns:
                         df.drop('_id', axis=1, inplace=True)
 
@@ -494,7 +472,6 @@ def download_custom_report():
 
         imei = vehicle["IMEI"]
 
-        # For custom reports, get the fields from the saved report
         if report_type == "custom":
             custom_report_name = data.get("reportName")
             if not custom_report_name:
@@ -509,11 +486,9 @@ def download_custom_report():
 
             fields = report["fields"]
 
-            # Separate fields by collection
             atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
             vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]    
 
-            # Fetch data from vehicle_inventory
             vehicle_inventory_data = None
             if vehicle_inventory_fields:
                 vehicle_inventory_data = db['vehicle_inventory'].find_one(
@@ -521,7 +496,6 @@ def download_custom_report():
                     {field: 1 for field in vehicle_inventory_fields}
                 )
 
-            # Fetch data from atlanta
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             atlanta_query = {"imei": imei}
             if date_filter:
@@ -533,7 +507,6 @@ def download_custom_report():
                     {field: 1 for field in atlanta_fields}
                 ).sort("date_time", 1))
 
-            # Combine data
             if atlanta_data and vehicle_inventory_data:
                 combined_data = []
                 for record in atlanta_data:
@@ -546,13 +519,11 @@ def download_custom_report():
             else:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
-            # Convert to DataFrame
             df = pd.DataFrame(combined_data)
 
             if df.empty:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
-            # Process latitude and longitude if present
             if 'date_time' in df.columns:
                 df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
@@ -574,7 +545,6 @@ def download_custom_report():
 
             df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
-            # Remove MongoDB _id if present
             if '_id' in df.columns:
                 df.drop('_id', axis=1, inplace=True)
 
@@ -584,7 +554,6 @@ def download_custom_report():
             if 'speed' in df.columns:
                 df = add_speed_metrics(df)
 
-            # Generate Excel
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=custom_report_name)
@@ -598,7 +567,6 @@ def download_custom_report():
             )
 
         else:
-            # Standard reports configuration
             report_configs = {
                 'daily-distance': {
                     'collection': 'atlanta',
@@ -657,17 +625,14 @@ def download_custom_report():
             base_query = config['query']
             post_process = config.get('post_process')
 
-            # Add date range filter
             date_filter = get_date_range_filter(date_range)
             query = {"imei": imei}
             if date_filter:
                 query.update(date_filter)
 
-            # Merge with specific query for standard reports
             query.update(base_query)
             print(query)
 
-            # Fetch data
             cursor = db[collection].find(
                 query,
                 {field: 1 for field in fields}
@@ -680,7 +645,6 @@ def download_custom_report():
             if 'date_time' in df.columns:
                 df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
-            # Process latitude and longitude if present
             if 'latitude' in df.columns and 'longitude' in df.columns:
                 df['Location'] = df.apply(
                     lambda row: geocodeInternal(row['latitude'], row['longitude'])
@@ -697,14 +661,11 @@ def download_custom_report():
                 cols.insert(lng_idx + 1, 'Location')
                 df = df[cols]
 
-            # Add vehicle number column
             df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
 
-            # Apply post-processing if defined
             if post_process:
                 df = post_process(df)
 
-            # Remove MongoDB _id if present
             if '_id' in df.columns:
                 df.drop('_id', axis=1, inplace=True)
 
@@ -714,7 +675,6 @@ def download_custom_report():
             if 'speed' in df.columns:
                 df = add_speed_metrics(df)
 
-            # Generate Excel
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
@@ -756,8 +716,6 @@ def download_panic_report():
         if not vehicle_number:
             return jsonify({"success": False, "message": "Please select a vehicle", "category": "danger"}), 400
 
-        # Get vehicle IMEI
-        # Handle "all" vehicles
         if vehicle_number == "all":
             claims = get_jwt()
             user_roles = claims.get('roles', [])
@@ -848,8 +806,6 @@ def download_panic_report():
                 as_attachment=True,
                 download_name=f"panic_report_ALL_VEHICLES.xlsx"
             )
-        # ...existing single-vehicle logic below...
-        # Get vehicle details including IMEI and LicensePlateNumber
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
@@ -859,7 +815,6 @@ def download_panic_report():
 
         imei = vehicle["IMEI"]
 
-        # Simplified query without $where
         query = {
             "imei": imei,
             "$or": [
@@ -869,12 +824,10 @@ def download_panic_report():
             ]
         }
 
-        # Add date range filter
         date_filter = get_date_range_filter(date_range)
         if date_filter:
             query.update(date_filter)
 
-        # Fetch data from sos_logs collection
         records = list(db['sos_logs'].find(
             query,
             {
@@ -888,7 +841,6 @@ def download_panic_report():
         ).sort("date_time", 1))
 
         if not records:
-            # Also check atlanta collection if no records found in sos_logs
             records = list(db['atlanta'].find(
                 query,
                 {
@@ -904,13 +856,11 @@ def download_panic_report():
             if not records:
                 return jsonify({"success": True, "message": "No panic events found", "category":"warning"}), 404
 
-        # Create DataFrame
         df = pd.DataFrame(records)
 
         if 'date_time' in df.columns:
             df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None)
 
-        # Reorder columns - Vehicle Number first, then date_time
         df.insert(0, 'Vehicle Number', vehicle["LicensePlateNumber"])
         if 'date_time' in df.columns:
             cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
@@ -949,8 +899,8 @@ def download_panic_report():
         )
 
     except Exception as e:
-        print(f"Error generating panic report: {str(e)}")  # Add this for debugging
-        traceback.print_exc()  # Add this to print full traceback
+        print(f"Error generating panic report: {str(e)}")  
+        traceback.print_exc()  
         return jsonify({"success": False, "message": str(e), "category": "danger"}), 500
 
 def get_all_vehicles(query=None):
@@ -986,7 +936,6 @@ def view_report_preview():
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             query.update(date_filter)
 
-        # Define report configurations with exact columns for each report type
         report_configs = {
             'daily-distance': {  # Travel Path Report
                 'collection': 'atlanta',
@@ -1063,11 +1012,9 @@ def view_report_preview():
                 return jsonify({"success": False, "message": "Custom report not found"}), 404
 
             fields = report["fields"]
-            # Separate fields by collection
             atlanta_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['atlanta']]
             vehicle_inventory_fields = [field for field in fields if field in FIELD_COLLECTION_MAP['vehicle_inventory']]
-            
-            # Fetch data from vehicle_inventory
+
             vehicle_inventory_data = None
             if vehicle_inventory_fields:
                 vehicle_inventory_data = db['vehicle_inventory'].find_one(
@@ -1075,14 +1022,12 @@ def view_report_preview():
                     {field: 1 for field in vehicle_inventory_fields}
                 )
 
-            # Fetch data from atlanta
             if atlanta_fields:
                 atlanta_data = list(db['atlanta'].find(
                     query,
                     {field: 1 for field in atlanta_fields}
                 ).sort("date_time", 1))
 
-            # Combine data
             if atlanta_data and vehicle_inventory_data:
                 combined_data = []
                 for record in atlanta_data:
@@ -1121,7 +1066,6 @@ def view_report_preview():
         if df.empty:
             return jsonify({"success": True, "data": []})
 
-        # Common processing for all reports
         if 'date_time' in df.columns:
             df['date_time'] = pd.to_datetime(df['date_time']).dt.tz_convert(IST).dt.tz_localize(None).astype(str)
 
@@ -1133,7 +1077,7 @@ def view_report_preview():
                 else 'Missing coordinates',
                 axis=1
             )
-            # Reorder columns to place Location after longitude
+
             cols = df.columns.tolist()
             if 'Location' in cols:
                 cols.remove('Location')
@@ -1144,13 +1088,11 @@ def view_report_preview():
         if "ignition" in df.columns:
             df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
 
-        # Add Vehicle Number as first column
         if 'Vehicle Number' not in df.columns:
             df.insert(0, 'Vehicle Number', license_plate)
 
-        # Ensure consistent column order for each report type
         if report_type in report_configs:
-            # Get all possible columns for this report type
+
             all_possible_columns = ['Vehicle Number']
             if report_type == 'odometer-daily-distance':  # Distance Report
                 all_possible_columns.extend([
@@ -1188,14 +1130,13 @@ def view_report_preview():
             df = df[existing_columns]
 
             data_records = df.fillna("").to_dict(orient="records")
-            # Build OrderedDict for each row in the desired order
+
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
             print("Final columns:", df.columns.tolist())
             print("existing_columns:", existing_columns)
             print("ordered_data:", ordered_data)
 
-            # Serialize manually to preserve order
             json_str = json.dumps({
                 "success": True,
                 "data": ordered_data

@@ -12,7 +12,6 @@ def roles_required(*required_roles):
             claims = get_jwt()
             user_roles = claims.get('roles', [])
             
-            # Check if any of the required roles are in the user's roles
             if not any(role in user_roles for role in required_roles):
                 return redirect(url_for('auth.unauthorized'))
             
@@ -40,14 +39,11 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
     collection = db[collection_name]
     vehicle_inventory = db[vehicle_inventory_name]
 
-    # Default query is an empty dictionary if no query is provided
     collection_query = collection_query or {}
 
     if 'admin' in user_roles:
-        # Admins can access all data
         results = collection.find(collection_query)
     elif 'user' in user_roles:
-        # Users can only access data for vehicles assigned to them
         inventory_data = list(vehicle_inventory.find({
             'CompanyName': userCompany,
             'AssignedUsers': ObjectId(userID)
@@ -55,7 +51,6 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         results = collection.find({"imei": {"$in": imei_list}, **collection_query})
     else:
-        # Client admins can access data for all vehicles in their company
         inventory_data = list(vehicle_inventory.find({'CompanyName': userCompany}))
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         results = collection.find({"imei": {"$in": imei_list}, **collection_query})
@@ -77,16 +72,13 @@ def get_vehicle_data():
     vehicle_inventory = db["vehicle_inventory"]
 
     if 'admin' in user_roles:
-        # Admins can access all data
         results = vehicle_inventory.find()
     elif 'user' in user_roles:
-        # Users can only access data for vehicles assigned to them
         results = vehicle_inventory.find({
             'CompanyName': userCompany,
             'AssignedUsers': ObjectId(userID)
         })
     else:
-        # Client admins can access data for all vehicles in their company
         results = vehicle_inventory.find({'CompanyName': userCompany})
 
 

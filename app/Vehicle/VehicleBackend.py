@@ -52,7 +52,6 @@ def getVehicleStatus(imei_list):
             history = item["history"]
             now = utc_now
 
-            # print(f"Processing IMEI: {imei}, Latest Date: {latest['date_time']}, History Count: {latest["date_time"] < twenty_four_hours_ago}")
             if latest["date_time"] < twenty_four_hours_ago:
                 status = "offline"
                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
@@ -60,7 +59,6 @@ def getVehicleStatus(imei_list):
             else:
                 ignition = latest.get("ignition")
                 speed = float(latest.get("speed", 0))
-                # Find when the status last changed
                 current_status = None
                 if ignition == "0":
                     current_status = "stopped"
@@ -281,7 +279,6 @@ def get_vehicles():
         user_roles = claims.get('roles', [])
         vehicles = []
 
-        # Determine inventory_data and imei_list based on role
         if 'admin' in user_roles:
             inventory_data = list(vehicle_inventory_collection.find())
         elif 'user' in user_roles:

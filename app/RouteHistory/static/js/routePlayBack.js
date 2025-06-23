@@ -83,7 +83,6 @@ function getStatus(ignition, speed) {
 }
 
 function getStatusTime(timeDelta) {
-  // status_time_delta should be in milliseconds
   let totalSeconds = Math.floor(timeDelta / 1000);
   const days = Math.floor(totalSeconds / (24 * 3600));
   totalSeconds %= 24 * 3600;
@@ -217,7 +216,6 @@ async function plotPolyLineLiveMap(liveData) {
       map: liveMaps,
     });
 
-    // Create the car marker content
     const carContent = document.createElement("img");
     carContent.src = "/static/images/car_green.png";
     carContent.style.width = "18px";
@@ -226,7 +224,6 @@ async function plotPolyLineLiveMap(liveData) {
     carContent.alt = "Car";
     carContent.style.transform = `rotate(${rotation}deg)`;
 
-    // Create the marker using google.maps.marker.AdvancedMarkerElement
     markerLive = new google.maps.marker.AdvancedMarkerElement({
       position: liveCoords[liveCoords.length - 1],
       map: liveMaps,
@@ -292,7 +289,7 @@ async function getAddressFromCoordinates(lat, lng) {
     }
 
     const data = await response.json();
-    return data.address; // Assuming the route returns an object with an 'address' field
+    return data.address; 
   } catch (error) {
     console.error("Error fetching address:", error);
     return null;
@@ -319,18 +316,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   liveTracking();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
-  const labels = recentData.map((data) => data.time); // Extract times for X-axis
-  const speeds = recentData.map((data) => data.speed); // Extract speeds for Y-axis
+  const labels = recentData.map((data) => data.time);
+  const speeds = recentData.map((data) => data.speed); 
 
   const ctx = document.getElementById("speedChart").getContext("2d");
   const speedChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: labels, // Time labels
+      labels: labels,
       datasets: [
         {
           label: "Speed (km/h)",
-          data: speeds, // Speed data
+          data: speeds, 
           borderColor: "rgba(0, 122, 255, 1)",
           backgroundColor: "rgba(0, 122, 255, 0.2)",
           borderWidth: 2,
@@ -358,7 +355,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         legend: {
           display: true,
           labels: {
-            color: "white", // Label text color
+            color: "white", 
           },
         },
       },
@@ -403,8 +400,8 @@ async function initMap() {
     mapId: mapId,
     gestureHandling: "greedy",
     zoomControl: true,
-    mapTypeControl: false, // Disable default map type buttons
-    clickableIcons: false, // Disable POI icons
+    mapTypeControl: false, 
+    clickableIcons: false, 
     zoomControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
     },
@@ -420,8 +417,8 @@ async function initMap() {
     mapId: mapId,
     gestureHandling: "greedy",
     zoomControl: true,
-    mapTypeControl: false, // Disable default map type buttons
-    clickableIcons: false, // Disable POI icons
+    mapTypeControl: false, 
+    clickableIcons: false, 
     zoomControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
     },
@@ -465,7 +462,6 @@ document
 
     const userEnteredImei = document.getElementById("imei").value.trim();
 
-    // Ensure only numeric input
     if (!/^\d+$/.test(userEnteredImei)) {
       alert("Please enter a valid numeric IMEI number.");
       return;
@@ -536,7 +532,6 @@ let deckInitialized = false;
 let carIconUrl = "/static/images/car_green.png";
 
 async function plotPathOnMap(pathCoordinates) {
-  // Clear all markers from the map before plotting new ones
   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
     window.__allMapMarkers.forEach((marker) => {
       if (marker && marker.map) marker.map = null;
@@ -546,7 +541,6 @@ async function plotPathOnMap(pathCoordinates) {
     window.__allMapMarkers = [];
   }
 
-  // Remove old deck.gl overlay if present
   if (deckOverlay) {
     deckOverlay.setProps({ layers: [] });
     deckOverlay.setMap(null);
@@ -557,19 +551,17 @@ async function plotPathOnMap(pathCoordinates) {
   if (pathPolyline) pathPolyline.setMap(null);
   if (startMarker) startMarker.map = null;
   if (endMarker) endMarker.map = null;
-  if (carMarker) carMarker.map = null; // Clear the previous car marker
+  if (carMarker) carMarker.map = null; 
 
   coords = pathCoordinates.map((item) => ({ lat: item.lat, lng: item.lng }));
   if (coords.length === 0) return;
 
-  // Fit map to bounds
   const bounds = new google.maps.LatLngBounds();
   coords.forEach(({ lat, lng }) =>
     bounds.extend(new google.maps.LatLng(lat, lng))
   );
   map.fitBounds(bounds);
 
-  // Set up timeline slider as before
   timelineSlider.min = 0;
   timelineSlider.max = coords.length - 1;
   timelineSlider.value = 0;
@@ -607,14 +599,13 @@ async function plotPathOnMap(pathCoordinates) {
   carContent.style.transform = `rotate(${pathCoordinates[0].course || 0}deg)`;
 
   carMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: coords[0], // Use the object directly
+    position: coords[0],
     map: map,
     title: "Vehicle",
     content: carContent,
   });
   window.__allMapMarkers.push(carMarker);
 
-  // --- InfoWindows and Markers for Start/End/Intermediate Points ---
   const startContent = document.createElement("div");
   startContent.style.backgroundColor = "green";
   startContent.style.color = "white";
@@ -629,9 +620,8 @@ async function plotPathOnMap(pathCoordinates) {
   endContent.style.borderRadius = "5px";
   endContent.textContent = "End";
 
-  // Markers for start and end points using AdvancedMarkerElement
   startMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: coords[0], // Use the object directly
+    position: coords[0], 
     map: map,
     title: "Start",
     content: startContent,
@@ -662,7 +652,7 @@ async function plotPathOnMap(pathCoordinates) {
   });
 
   endMarker = new google.maps.marker.AdvancedMarkerElement({
-    position: coords[coords.length - 1], // Use the object directly
+    position: coords[coords.length - 1], 
     map: map,
     title: "End",
     content: endContent,
@@ -699,7 +689,6 @@ async function plotPathOnMap(pathCoordinates) {
     });
   });
 
-  // Optionally, add intermediate arrow markers with info windows (optional, can be commented out)
   for (let index = 0; index < coords.length - 1; index++) {
     const coord = coords[index];
     const nextCoord = coords[index + 1];
@@ -718,7 +707,7 @@ async function plotPathOnMap(pathCoordinates) {
     )}deg)`;
 
     const marker = new google.maps.marker.AdvancedMarkerElement({
-      position: coord, // Use the object directly
+      position: coord, 
       map: map,
       title: "Arrow",
       content: arrowContent,
@@ -749,7 +738,6 @@ function updateCarPosition(index) {
   if (!coords.length || !carMarker) return;
   const point = coords[index];
 
-  // Calculate bearing for rotation
   const prev = coords[Math.max(0, index - 1)];
   const bearing = calculateBearing(
     prev,
@@ -799,7 +787,6 @@ function moveCar() {
           ? calculateBearing({ lat, lng }, { lat: end.lat, lng: end.lng })
           : calculateBearing({ lat, lng }, { lat: nextLat, lng: nextLng });
 
-        // Move and rotate the car marker
         if (carMarker) {
           carMarker.position = { lat, lng };
           if (carMarker.content) {
@@ -831,7 +818,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((response) => response.json())
       .then((alerts) => {
         const tbody = document.querySelector(".alarm-section tbody");
-        tbody.innerHTML = ""; // Clear existing rows
+        tbody.innerHTML = ""; 
 
         if (alerts.length === 0) {
           tbody.innerHTML =
@@ -860,7 +847,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function fetchAndDisplayAlerts(imei) {
   const alertsTableBody = document.querySelector(".alarm-section tbody");
-  alertsTableBody.innerHTML = ""; // Clear existing rows
+  alertsTableBody.innerHTML = ""; 
 
   fetch(`/routeHistory/alerts?imei=${encodeURIComponent(imei)}`)
     .then((response) => {
@@ -928,13 +915,13 @@ function startCarAnimation() {
 
 function resumeCarAnimation() {
   if (!animationInterval && currentIndex < pathCoordinates.length - 1) {
-    moveCar(); // Resume the animation from the current state
+    moveCar(); 
   }
 }
 
 function stopCarAnimation() {
   if (animationInterval) {
-    clearTimeout(animationInterval); // Use clearTimeout for setTimeout-based animation
+    clearTimeout(animationInterval); 
     animationInterval = null;
   }
 }
@@ -943,7 +930,7 @@ function setSpeed(multiplier) {
   speedMultiplier = multiplier;
 
   if (animationInterval) {
-    clearTimeout(animationInterval); // Use clearTimeout for setTimeout-based animation
+    clearTimeout(animationInterval); 
     moveCar();
   }
 }

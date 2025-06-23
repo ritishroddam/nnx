@@ -12,24 +12,20 @@ function hideAllModals() {
   document.getElementById("uploadBox").classList.add("hidden");
 }
 
-// Show manual entry modal
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   hideAllModals();
   document.getElementById("manualEntryModal").classList.remove("hidden");
 });
 
-// Close manual modal with X button
 document.querySelector("#manualEntryModal .close-btn").addEventListener("click", function() {
   hideAllModals();
 });
 
-// Close manual modal with Cancel button
 document.getElementById("cancelBtn").addEventListener("click", function () {
   hideAllModals();
   document.getElementById("manualForm").reset();
 });
 
-// Close manual modal when clicking outside
 window.addEventListener("click", function(event) {
   if (event.target === document.getElementById("manualEntryModal")) {
     hideAllModals();
@@ -44,17 +40,14 @@ document.getElementById("uploadBtn").addEventListener("click", function () {
   document.getElementById("uploadBox").classList.remove("hidden");
 });
 
-// Close modal with X button
 document.getElementById("closeUploadBtn").addEventListener("click", function () {
   hideAllModals();
 });
 
-// Close modal with Cancel button
 document.getElementById("cancelUploadBtn").addEventListener("click", function () {
   hideAllModals();
 });
 
-// Close modal when clicking outside the modal content
 window.addEventListener("click", function(event) {
   const uploadBox = document.getElementById("uploadBox");
   if (event.target === uploadBox) {
@@ -72,7 +65,6 @@ document
     var imei = document.getElementById("IMEI").value;
     var imeiError = document.getElementById("imeiError");
 
-    // IMEI validation
     if (imei.length !== 15 || isNaN(imei)) {
       imeiError.classList.remove("hidden");
       event.preventDefault();
@@ -84,15 +76,13 @@ document
 document.addEventListener("DOMContentLoaded", function () {
   const dateInInput = document.getElementById("DateIn");
 
-  // Set the max date to today
   const today = new Date().toISOString().split("T")[0];
   dateInInput.setAttribute("max", today);
 
-  // Prevent selecting future dates
   dateInInput.addEventListener("input", function () {
     if (this.value > today) {
       displayFlashMessage("Future dates are not allowed.", "warning");
-      this.value = today; // Reset to today's date
+      this.value = today; 
     }
   });
 });
@@ -128,7 +118,7 @@ function searchDevices() {
     .then(response => response.json())
     .then(data => {
       const tableBody = document.getElementById("deviceTable");
-      tableBody.innerHTML = ''; // Clear current table
+      tableBody.innerHTML = ''; 
 
       if (data.length === 0) {
         const row = document.createElement('tr');
@@ -182,16 +172,11 @@ function clearSearch() {
 
 ////////////////// Download ////////////////////////
 
-// document.getElementById("downloadExcel").addEventListener("click", function () {
-//   window.location.href = "/deviceInvy/download_excel";
-// });
-
 document.getElementById("downloadExcel").addEventListener("click", function() {
     const form = document.createElement('form');
     form.method = 'GET';
     form.action = '/deviceInvy/download_excel';
     
-    // Add hidden input for JWT token if needed
     const tokenInput = document.createElement('input');
     tokenInput.type = 'hidden';
     tokenInput.name = 'access_token';
@@ -208,9 +193,7 @@ function editDevice(deviceId) {
 
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
 
-  // Extract existing values from the row
   const imei = row.cells[0].innerText;
-  // const glNumber = row.cells[1].innerText;
   const glNumber =
     row.cells[1].innerText.trim() === "None"
       ? ""
@@ -225,8 +208,6 @@ function editDevice(deviceId) {
   const tenureValue = row.cells[11].innerText;
   const status = row.cells[12].innerText.trim();
   
-
-  // Replace row cells with editable inputs
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
   row.cells[4].innerHTML = `<input type="text" value="${deviceModel}" />`;
@@ -268,7 +249,6 @@ function editDevice(deviceId) {
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${deviceId}')">❌</button>
   `;
 
-  // Enable/disable "Tenure" based on "Package" selection
   document
     .getElementById("editPackage")
     .addEventListener("change", function () {
@@ -279,14 +259,14 @@ function editDevice(deviceId) {
 function validateIMEI(input) {
   let imei = input.value;
   if (!/^\d{0,15}$/.test(imei)) {
-    input.value = imei.slice(0, 15); // Restrict to 15 digits
+    input.value = imei.slice(0, 15); 
   }
 }
 
 function validateGLNumber(input) {
   let glNumber = input.value;
   if (!/^\d{0,13}$/.test(glNumber)) {
-    input.value = glNumber.slice(0, 13); // Restrict to 13 digits
+    input.value = glNumber.slice(0, 13); 
   }
 }
 
@@ -322,7 +302,6 @@ function saveDevice(deviceId) {
     Status: status,
   });
 
-  // Validate inputs
   if (imeiValue.length !== 15 || isNaN(imeiValue)) {
     displayFlashMessage("IMEI must be exactly 15 digits and numeric.", "warning");
     return;
@@ -402,7 +381,6 @@ function saveDevice(deviceId) {
 }
 
 function cancelEdit(deviceId) {
-  // Reload the page to reset the changes (or implement inline reset)
   location.reload();
 }
 
@@ -417,7 +395,6 @@ function deleteDevice(deviceId) {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // Remove the row from the table
           document.querySelector(`tr[data-id='${deviceId}']`).remove();
           displayFlashMessage("Device deleted successfully!", "success");
         } else {

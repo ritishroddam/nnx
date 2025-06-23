@@ -546,13 +546,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const tableBody = document.querySelector("#alertsTable tbody");
     tableBody.innerHTML = "";
 
-    // Determine if status/action columns should be shown for current alert type
     const showStatusAndAction = (
         currentEndpoint === "panic" ||
         currentEndpoint === "main_power_off"
     );
 
-    // Adjust table headers
     const tableHead = document.querySelector("#alertsTable thead tr");
     if (tableHead) {
         tableHead.innerHTML = `

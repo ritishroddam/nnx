@@ -6,18 +6,16 @@ async function fetchIMEIData() {
     if (!response.ok) throw new Error("Failed to fetch IMEI data");
 
     imeiData = await response.json();
-    populateDropdown(); // Populate dropdown on page load
+    populateDropdown(); 
   } catch (error) {
     console.error("Error fetching IMEI data:", error);
     alert("Unable to load IMEI data. Please try again later.");
   }
 }
 
-// Populate the dropdown with all IMEI numbers
 function populateDropdown() {
   let select = document.getElementById("imeiDropdown");
 
-  // Create and append a default option
   let defaultOption = document.createElement("option");
   defaultOption.textContent = "Select IMEI";
   defaultOption.value = "";
@@ -25,7 +23,6 @@ function populateDropdown() {
   defaultOption.selected = true;
   select.appendChild(defaultOption);
 
-  // Loop through options and create elements
   imeiData.forEach((device) => {
     let option = document.createElement("option");
     option.value = device.imei;
@@ -42,7 +39,7 @@ function filterTableByCompany(selectedCompany) {
     
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
-        const companyCell = row.querySelector('td:nth-child(2)'); // 2nd column
+        const companyCell = row.querySelector('td:nth-child(2)'); 
         if (!companyCell) return;
         
         const companyName = companyCell.textContent.trim();
@@ -73,7 +70,6 @@ function handleSearch() {
     });
 }
 
-// Initialize IMEI fetching
 document.addEventListener("DOMContentLoaded", function() {
   fetchIMEIData();
 
@@ -118,7 +114,6 @@ const companyFilter = document.getElementById('companyFilter');
             });
         });
         
-        // Trigger initial filter
         companyFilter.dispatchEvent(new Event('change'));
     }
 
@@ -127,7 +122,6 @@ const companyFilter = document.getElementById('companyFilter');
         searchInput.addEventListener('input', handleSearch);
     }
 
-  // Modal event listeners
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.body.classList.add("modal-open");
   document.getElementById("manualEntryModal").classList.remove("hidden");
@@ -159,7 +153,6 @@ window.addEventListener("click", function(event) {
     });
   }
 
-  // Fix for Excel download filename
   document.getElementById("downloadExcelBtn").addEventListener("click", function(e) {
     e.preventDefault();
     fetch("/vehicleDetails/download_excel")
@@ -304,7 +297,6 @@ function saveVehicle(vehicleID) {
     normalSpeed: String(normalSpeed),
   };
 
-  // Send updated data to backend
   fetch(`/vehicleDetails/edit_vehicle/${vehicleID}`, {
     method: "PATCH",
     headers: { 
@@ -316,7 +308,6 @@ function saveVehicle(vehicleID) {
     .then((response) => response.json())
     .then((result) => {
       if (result.success) {
-        // Update the row with new values
         row.cells[0].innerHTML = licensePlateNumber;
         row.cells[1].innerHTML = companyName;
         row.cells[2].innerHTML = imei;
@@ -337,7 +328,6 @@ function saveVehicle(vehicleID) {
         row.cells[17].innerHTML = slowSpeed;
         row.cells[18].innerHTML = normalSpeed;
 
-        // Reset action buttons
         row.cells[19].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
@@ -369,7 +359,6 @@ function deleteVehicle(vehicleID) {
     })
       .then((response) => {
         if (response.ok) {
-          // Remove the row from the table
           const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
           row.remove();
           alert("Vehicle deleted successfully.");
@@ -384,9 +373,8 @@ function deleteVehicle(vehicleID) {
   }
 }
 
-let simData = []; // To store SIM data from the database
+let simData = []; 
 
-// Fetch SIM data from the database
 async function fetchSIMData() {
   try {
     const response = await fetch("/vehicleDetails/get_sim_inventory");
@@ -394,7 +382,7 @@ async function fetchSIMData() {
 
     simData = await response.json();
     console.log("SIM data fetched:", simData);
-    populateSIMDropdown(); // Populate dropdown on page load
+    populateSIMDropdown();
   } catch (error) {
     console.error("Error fetching SIM data:", error);
     alert("Unable to load SIM data. Please try again later.");
@@ -404,7 +392,6 @@ async function fetchSIMData() {
 function populateSIMDropdown() {
   let select = document.getElementById("sim-Dropdown");
 
-  // Create and append a default option
   let defaultOption = document.createElement("option");
   defaultOption.textContent = "Select SIM";
   defaultOption.value = "";
@@ -412,7 +399,6 @@ function populateSIMDropdown() {
   defaultOption.selected = true;
   select.appendChild(defaultOption);
 
-  // Loop through options and create elements
   simData.forEach((sim) => {
     let option = document.createElement("option");
     option.value = sim.sim_number;
@@ -460,14 +446,12 @@ function fetchCitiesEdit(row, location){
       option.textContent = cityValue;
       citySelect.appendChild(option);
     });
-    // Initialize selectize after options are added
     $(citySelect).selectize({
       create: false,
       sortField: "text",
       searchField: ["text"],
       dropdownParent: "body"
     });
-    // Set the previous value as selected
     const selectizeInstance = $(citySelect)[0].selectize;
     selectizeInstance.setValue(location);
   });
@@ -529,7 +513,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Form submission handlers
 document.getElementById("manualForm").addEventListener("submit", async function (event) {
   event.preventDefault();
   document.querySelector(".preloader").style.display = "block";

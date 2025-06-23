@@ -12,7 +12,6 @@ from app import socketio
 
 share_location_bp = Blueprint('ShareLocation', __name__, static_folder='static', template_folder='templates')
 
-# In-memory store for demo; use DB in production
 share_links = {}
 links_collection = db['share_links']
 def create_share_link(licensePlateNumber, from_datetime, to_datetime, created_by):
@@ -57,7 +56,7 @@ def api_share_location():
 @share_location_bp.route('/<licensePlateNumber>/<token>')
 def view_share_location(licensePlateNumber, token):
     info = links_collection.find_one({"token": token})
-    now = datetime.now(timezone.utc)  # Make now timezone-aware (UTC)
+    now = datetime.now(timezone.utc)  
     
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
         return jsonify({"error": "Link expired"}), 410
@@ -80,7 +79,6 @@ def view_share_location(licensePlateNumber, token):
     if not location:
         return jsonify({"error": "Geocoding failed"}), 500
     
-    # Convert UTC datetime to IST (Asia/Kolkata)
     utc_dt = latestLocation.get("date_time")
     ist_tz = pytz.timezone("Asia/Kolkata")
     ist_dt = utc_dt.astimezone(ist_tz) if utc_dt else None

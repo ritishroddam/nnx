@@ -38,8 +38,6 @@ last_emit_time = {}
 
 gmaps = googlemaps.Client(key="AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84")
 
-# Create compound index for fast queries
-
 DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 BEARING_DEGREES = 360 / len(DIRECTIONS)
 
@@ -57,21 +55,17 @@ def validate_coordinates(lat, lng):
         raise ValueError(f"Invalid coordinates {lat} and {lng}")
     
 def nmea_to_decimal(nmea_value):
-    # Check if the string has a leading zero that should be removed
     if nmea_value.startswith('0'):
         nmea_value = nmea_value[1:]
     
-    # Find where the minutes part starts
-    if len(nmea_value) >= 5:  # At least one digit for degrees + 4 for minutes
-        degrees = float(nmea_value[:-7])  # Everything before the last 7 characters
-        minutes = float(nmea_value[-7:])  # Last 7 characters
+    if len(nmea_value) >= 5:  
+        degrees = float(nmea_value[:-7]) 
+        minutes = float(nmea_value[-7:]) 
     else:
-        # Handle potential formatting issues
         parts = nmea_value.split('.')
         degrees = float(parts[0][:-2])
         minutes = float(parts[0][-2:] + '.' + parts[1] if len(parts) > 1 else parts[0][-2:])
     
-    # Convert to decimal degrees
     decimal_degrees = degrees + (minutes / 60.0)
     return decimal_degrees
     
@@ -85,15 +79,13 @@ def geocodeInternal(lat,lng):
         return "Invalid coordinates"
 
     try:
-        # Step 1: Fast bounding box filter (0.5km range)
         nearby_entries = geoCodeCollection.find({
             "lat": {"$gte": lat - 0.0045, "$lte": lat + 0.0045},
             "lng": {"$gte": lng - 0.0045, "$lte": lng + 0.0045}
         })
 
-        # Step 2: Precise distance calculation
         nearest_entry = None
-        min_distance = 0.5  # Max search radius in km
+        min_distance = 0.5
         
         for entry in nearby_entries:
             saved_coord = (entry['lat'], entry['lng'])
@@ -112,7 +104,6 @@ def geocodeInternal(lat,lng):
             return (f"{min_distance:.2f} km {bearing} from {nearest_entry['address']}"
                       if min_distance > 0 else nearest_entry['address'])
 
-        # Step 3: Geocode new coordinates
         reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
         if not reverse_geocode_result:
             print("Geocoding API failed")
@@ -120,7 +111,6 @@ def geocodeInternal(lat,lng):
 
         address = reverse_geocode_result[0]['formatted_address']
         
-        # Step 4: Insert new entry
         geoCodeCollection.insert_one({
             'lat': lat,
             'lng': lng,
@@ -149,7 +139,7 @@ def lastEmitInitial():
     for doc in all_documents:
         last_emit_time[doc['imei']] = doc['date_time']
 
-sio = socketio.Client(ssl_verify=False)  # Disable verification for self-signed certs
+sio = socketio.Client(ssl_verify=False) 
 
 server_url = "https://localhost:5000" 
 cert_path = os.path.join("cert", "fullchain.pem")  
@@ -190,7 +180,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     @staticmethod
     def clean_imei(imei):
-    # Extract the last 15 characters of the IMEI
         return imei[-15:]
     
     @staticmethod
@@ -204,19 +193,17 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         return False
     
     def convert_to_datetime(date_str: str, time_str: str) -> datetime:
-    # Parse the date and time components
-        dt_str = date_str + time_str  # Combine both
-        dt_obj = datetime.strptime(dt_str, "%d%m%y%H%M%S")  # Convert to datetime object
+        dt_str = date_str + time_str 
+        dt_obj = datetime.strptime(dt_str, "%d%m%y%H%M%S") 
         return dt_obj
 
     def handle(self):
         receive_data = self.request.recv(4096)
         try:
             try:
-                index_03 = receive_data.find(b'\x03')  # Finds first occurrence of \x03
-                index_01 = receive_data.find(b'\x01')  # Finds first occurrence of \x01
+                index_03 = receive_data.find(b'\x03') 
+                index_01 = receive_data.find(b'\x01') 
 
-                # Get the first occurring special character
                 first_special_index = min(i for i in [index_03, index_01] if i != -1)
                 first_special_char = receive_data[first_special_index:first_special_index+1]
 
@@ -225,14 +212,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 data = receive_data.decode('utf-8').strip()
             except UnicodeDecodeError:
                 data = receive_data.decode('latin-1').strip()
-                # print("Received raw data:", data)
 
             json_data = self.parse_json_data(data)
             if json_data:
-                # print("Valid JSON data:", json_data)
 
                 sos_state = json_data.get('sos', '0')
-                # print(f"SOS state received: {sos_state}")
 
                 with MyTCPHandler.lock:
                     if sos_state == '1':
@@ -253,13 +237,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def parse_json_data(self, data):
         try:
             parts = data.split(',')
-            # print(f"Parsed data parts: {parts}")
             expected_fields_count = 35
 
             if len(parts) >= expected_fields_count:
 
                 binary_string = parts[14].strip('#')
-                # print(f"Binary string: {binary_string}")
 
                 ignition, door, sos = '0', '0', '0'
 
@@ -285,7 +267,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 latitude = parts[4] if parts[4] != '-' else ''
                 longitude = parts[6] if parts[6] != '-' else ''
                 
-                # Capture address (assuming address is passed after cellid field)
                 address = parts[25] if len(parts) > 25 else ''
 
                 speed_mph = float(parts[8]) if parts[8].replace('.', '', 1).isdigit() else 0.0
@@ -358,7 +339,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
             ensure_socket_connection()
             
-            # sio.emit('vehicle_update', json_data, room="all_data")
             if json_data['gps'] == 'A' and MyTCPHandler.should_emit(json_data['imei'],json_data['date_time']):
                 json_data['_id'] = str(json_data['_id'])
                 json_data['date_time'] = str(json_data['date_time'])
@@ -411,8 +391,7 @@ def log_data(json_data):
             'speed': json_data.get('speed', '0'),
             'timestamp': datetime.now()
         }
-        db['logs'].insert_one(log_entry)  # Store logs in 'logs' collection
-        # print("Log stored in MongoDB:", log_entry)
+        db['logs'].insert_one(log_entry)  
     except Exception as e:
         print("Error logging data to MongoDB:", e)
 

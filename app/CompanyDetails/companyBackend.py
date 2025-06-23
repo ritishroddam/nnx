@@ -23,9 +23,7 @@ def page():
     for company in customers:
         company.pop('companyLogo', None)
     return render_template('company.html', customers=customers, unique_companies=unique_companies)
-    # return render_template('company.html', customers=customers)
 
-# Route to add a new customer manually
 @company_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()
 def manual_entry():
@@ -63,7 +61,6 @@ def manual_entry():
     flash('Customer added successfully!', 'success')
     return redirect(url_for('CompanyDetails.page'))
 
-# Route to upload multiple customers from an Excel file
 @company_bp.route('/upload_customers', methods=['POST'])
 @jwt_required()
 def upload_customers():
@@ -98,7 +95,6 @@ def upload_customers():
 
     return redirect(url_for('CompanyDetails.page'))
 
-# Route to download the customer template
 @company_bp.route('/download_template')
 @jwt_required()
 def download_template():
@@ -106,7 +102,6 @@ def download_template():
     path = os.path.join(base_dir, 'templates', 'Customer_upload_template.xlsx')
     return send_file(path, as_attachment=True)
 
-# Route to edit customer details
 @company_bp.route('/edit_customer/<customer_id>', methods=['POST'])
 @jwt_required()
 def edit_customer(customer_id):
@@ -120,7 +115,6 @@ def edit_customer(customer_id):
 
         updated_data = request.json
 
-        # Validation: Ensure required fields are not empty
         required_fields = [
             'Company Name', 'Contact Person', 'Email Address', 
             'Phone Number', 'Company Address'
@@ -129,17 +123,14 @@ def edit_customer(customer_id):
             if not updated_data.get(field):
                 return jsonify({'success': False, 'message': f'{field} is required.'}), 400
 
-        # Validation: Email format
         email = updated_data.get('Email Address')
         if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
             return jsonify({'success': False, 'message': 'Invalid Email Address format.'}), 400
 
-        # Validation: Phone number length and numeric
         phone = updated_data.get('Phone Number')
         if not phone.isdigit() or len(phone) != 10:
             return jsonify({'success': False, 'message': 'Phone Number must be 10 digits.'}), 400
 
-        # Update the customer in the database
         result = customers_collection.update_one(
             {'_id': ObjectId(object_id)},
             {'$set': updated_data}
@@ -152,7 +143,6 @@ def edit_customer(customer_id):
         print(f"Error editing customer: {e}")
         return jsonify({'success': False, 'message': 'Error editing customer.'}), 500
 
-# Route to delete a customer
 @company_bp.route('/delete_customer/<customer_id>', methods=['DELETE'])
 @jwt_required()
 def delete_customer(customer_id):

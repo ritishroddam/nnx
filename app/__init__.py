@@ -48,7 +48,6 @@ def create_app(config_name='default'):
                 socketio.emit('subscription_error', {'status': 'error', 'message': 'LicensePlateNumber is required'}, room=sid)
                 return
 
-            # Add the client to a room specific to the vehicle's LicensePlateNumber
             join_room(f"vehicle_{license_plate_number}")
             print(f"Client {sid} subscribed to updates for vehicle LicensePlateNumber {license_plate_number}")
             socketio.emit('subscription_success', {'status': 'success', 'LicensePlateNumber': license_plate_number}, room=sid)
@@ -80,8 +79,7 @@ def create_app(config_name='default'):
             user_id = data.get('user_id')
             company = data.get('company')
             userRole = data.get('userRole')
-            userName = data.get('userName')            
-            # Store user session info
+            userName = data.get('userName')    
             
             user = db['users'].find_one({"_id": ObjectId(user_id)})
 
@@ -111,8 +109,7 @@ def create_app(config_name='default'):
                     flash("User does not belong to this company", "danger")
                     socketio.emit('authentication_error', {'status': 'error', 'message': f'User does not belong to this company {company}'}, room=sid)
                     return
-
-            # Add user to company room if they have one
+                
             if userRole in ['user']:
                 assignedVehicles = list(db['vehicle_inventory'].find({"AssignedUsers": ObjectId(user_id)}, {"LicensePlateNumber": 1, "_id": 0}))
                 if assignedVehicles:
@@ -136,11 +133,8 @@ def create_app(config_name='default'):
                     if company not in company_rooms:
                         company_rooms[company] = []
                     company_rooms[company].append(sid)
-                    # socketio.enter_room(sid, f"company_{company}")
                     join_room(f"company_{company}")
                 else:
-                    # Users without company see all data
-                    # socketio.enter_room(sid, "all_data")
                     join_room("all_data")
 
                 print(f"User {user_id} authenticated with company {company}")
@@ -172,18 +166,15 @@ def create_app(config_name='default'):
     @socketio.event
     def disconnect():
         sid = request.sid
-        # Clean up session data
         if sid in user_sessions:
             user_data = user_sessions[sid]
             company = user_data.get('company')
 
-            # Remove from company rooms if applicable
             if company and company in company_rooms and sid in company_rooms[company]:
                 company_rooms[company].remove(sid)
-                if not company_rooms[company]:  # If company room is empty
+                if not company_rooms[company]:  
                     del company_rooms[company]
 
-            # Remove session
             del user_sessions[sid]
 
         print(f"Client disconnected: {sid}")
@@ -191,7 +182,6 @@ def create_app(config_name='default'):
     @socketio.on('vehicle_update')
     def handle_vehicle_update(vehicle_data):
             try:
-                # Get the vehicle's company from inventory
                 imei = vehicle_data.get('imei')
                 vehicle_info = vehicle_inventory_collection.find_one({"IMEI": imei})
                 
@@ -207,11 +197,9 @@ def create_app(config_name='default'):
                 if company:
                     company = company.strip().lower()
                     if  company in company_rooms:
-                        # Broadcast to specific company room
                         print(f"Emitted {company} data for IMEI {vehicle_data['imei']}")
                         socketio.emit('vehicle_update', vehicle_data, room=f"company_{company}")
 
-                # Also send to users who should see all data
                 socketio.emit('vehicle_update', vehicle_data, room="all_data")
                 print(f"Emitted admin data for IMEI {vehicle_data['imei']}")
 
@@ -221,17 +209,14 @@ def create_app(config_name='default'):
     @socketio.on('sos_alert')
     def handle_sos_alert(sos_data):
         try:
-            # Get the vehicle's company from inventory
             imei = sos_data.get('imei')
             vehicle_info = vehicle_inventory_collection.find_one({"imei": imei})
 
             company = vehicle_info.get('CompanyName') if vehicle_info else None
 
             if company:
-                # Broadcast to specific company room
                 socketio.emit('sos_alert', sos_data, room=f"company_{company}")
 
-            # Also send to users who should see all data
             socketio.emit('sos_alert', sos_data, room="all_data")
 
         except Exception as e:
@@ -306,7 +291,6 @@ def create_app(config_name='default'):
                 claims = get_jwt()
 
                 if claims:
-                    # Check if the token is about to expire (e.g., within 30 seconds)
                     exp_timestamp = claims["exp"]
                     now = datetime.now(timezone.utc)
                     target_timestamp = datetime.timestamp(now + timedelta(days = 1))
@@ -317,12 +301,10 @@ def create_app(config_name='default'):
                             'company': claims.get('company'),
                             'user_id': claims.get('user_id'),
                         }
-                        # Create a new access token
                         new_access_token = create_access_token(
                             identity=current_user,
                             additional_claims=additional_claims
                         )
-                        # Set the new token in cookies
                         g.new_access_token = new_access_token
                 else:
                     raise NoAuthorizationError("No JWT claims found")

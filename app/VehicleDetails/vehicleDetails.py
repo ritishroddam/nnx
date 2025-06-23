@@ -23,23 +23,19 @@ company_config_collection = db['company_config']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    # Get all vehicles
     vehicles = list(vehicle_collection.find({}))
     
-    # Extract unique company names from vehicles
     company_names = set()
     for vehicle in vehicles:
         if 'CompanyName' in vehicle and vehicle['CompanyName']:
             company_names.add(vehicle['CompanyName'])
     
-    # Prepare vehicles data with string _id
     vehicle_data = []
     for vehicle in vehicles:
         vehicle_dict = dict(vehicle)
         vehicle_dict['_id'] = str(vehicle['_id'])
         vehicle_data.append(vehicle_dict)
     
-    # Prepare companies data for dropdown
     companies_data = [{"name": name} for name in sorted(company_names)]
     
     return render_template(
@@ -48,7 +44,6 @@ def page():
         companies=companies_data
     )
 
-# API to fetch IMEI Numbers
 @vehicleDetails_bp.route('/get_device_inventory', methods=['GET'])
 @jwt_required()
 def get_device_inventory():
@@ -72,7 +67,7 @@ def get_device_inventory():
 def get_companies():
     try:
         companies = list(companies_collection.find({}, {"_id": 1, "Company Name": 1}))
-        print(f"Companies fetched: {companies}")  # Debug print
+        print(f"Companies fetched: {companies}")  
         company_list = [{"id": str(company["_id"]), "name": company["Company Name"]} for company in companies]
         return jsonify(company_list), 200
     except Exception as e:
@@ -111,7 +106,7 @@ def get_sim_inventory():
 @jwt_required()
 def manual_entry():
     data = request.form.to_dict()
-    data = {key.strip(): value.strip() for key, value in data.items()}  # Clean input
+    data = {key.strip(): value.strip() for key, value in data.items()}  
     
     vehicleNumbersDict = vehicle_collection.find({}, {"LicensePlateNumber": 1})
     vehicleNumbersList = [vehicle['LicensePlateNumber'] for vehicle in vehicleNumbersDict]
@@ -120,27 +115,22 @@ def manual_entry():
         flash(f"License Plate Number {data['LicensePlateNumber']} already exists", "danger")
         return redirect(url_for('VehicleDetails.page'))
     
-    # Get unique company names from existing vehicles
     company_names = vehicle_collection.distinct('CompanyName')
     data['CompanyName'] = data.get('CompanyName', '')
     
-    # Validate company name exists
     if data['CompanyName'] and data['CompanyName'] not in company_names:
         flash("Invalid company name", "danger")
         return redirect(url_for('VehicleDetails.page'))
 
-    # Validate required fields
     required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyName', 'VehicleType']
     for field in required_fields:
         if not data.get(field):
             flash(f"{field} is required.", "danger")
             return redirect(url_for('VehicleDetails.page'))
 
-    # Additional validation for number of seats
     if data['VehicleType'] in ['bus', "sedan", "hatchback", "suv", "van"] and not data.get('NumberOfSeatsContainer'):
         flash(f"Number of seats is required {data['VehicleType']}.", "danger")
         return redirect(url_for('VehicleDetails.page'))
-    # ...existing validation code...
 
     companyId = companies_collection.find_one({"Company Name": data['CompanyName']}, {"_id": 1})
     
@@ -157,7 +147,6 @@ def manual_entry():
         data['slowSpeed'] = data['slowSpeed'] if data['slowSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}SlowSpeed", "20")
         data['normalSpeed'] = data['normalSpeed'] if data['normalSpeed'] != '' else speedConfigs.get(f"{data['VehicleType']}NormalSpeed", "60")
     
-    # Save city and state in the same column
     location = data['Location'].split(',')
     data['Location'] = f"{location[0].strip()}, {location[1].strip()}"
     
@@ -178,15 +167,13 @@ def edit_vehicle(vehicle_id):
     try:
         updated_data = request.json
 
-        # Remove empty fields to avoid overwriting existing data with empty strings
         updated_data = {key: value for key, value in updated_data.items() if value.strip()}
 
-        # Validate for duplicates only for IMEI and SIM
         if "IMEI" in updated_data:
             duplicate_imei = vehicle_collection.find_one({
                 "IMEI": updated_data["IMEI"],
                 "LicensePlateNumber": {"$ne": updated_data.get("LicensePlateNumber", "")},
-                "_id": {"$ne": ObjectId(vehicle_id)}  # Exclude the current vehicle
+                "_id": {"$ne": ObjectId(vehicle_id)} 
             })
             if duplicate_imei:
                 return jsonify({"success": False, "message": f"IMEI {updated_data['IMEI']} is already allocated to another License Plate Number."}), 400
@@ -195,12 +182,11 @@ def edit_vehicle(vehicle_id):
             duplicate_sim = vehicle_collection.find_one({
                 "SIM": updated_data["SIM"],
                 "LicensePlateNumber": {"$ne": updated_data.get("LicensePlateNumber", "")},
-                "_id": {"$ne": ObjectId(vehicle_id)}  # Exclude the current vehicle
+                "_id": {"$ne": ObjectId(vehicle_id)}  
             })
             if duplicate_sim:
                 return jsonify({"success": False, "message": f"SIM {updated_data['SIM']} is already allocated to another License Plate Number."}), 400
 
-        # Update the vehicle record
         result = vehicle_collection.update_one(
             {"_id": ObjectId(vehicle_id)},
             {"$set": updated_data}
@@ -212,8 +198,6 @@ def edit_vehicle(vehicle_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error updating vehicle: {str(e)}"}), 500
 
-
-# Delete vehicle route
 @vehicleDetails_bp.route('/delete_vehicle/<vehicle_id>', methods=['DELETE'])
 @jwt_required()
 def delete_vehicle(vehicle_id):
@@ -226,7 +210,6 @@ def delete_vehicle(vehicle_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Failed to delete vehicle: {str(e)}"}), 500
 
-# File upload route
 @vehicleDetails_bp.route('/upload_vehicle_file', methods=['POST'])
 @jwt_required()
 def upload_vehicle_file():
@@ -248,8 +231,6 @@ def upload_vehicle_file():
             'CurrentStatus', 'Location', 'OdometerReading', 'ServiceDueDate'
         ]
 
-
-        # Check if all required columns are present
         for column in required_columns:
             if column not in df.columns:
                 flash(f"Missing required column: {column}", "danger")
@@ -334,7 +315,6 @@ def upload_vehicle_file():
                 flash(f"For row {row} Company Name invalid", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
-            # Validate length of SIM and IMEI
             if len(sim) != 20:
                 flash(f"SIM {sim} must be 20 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
@@ -407,7 +387,6 @@ def upload_vehicle_file():
         print(e)
         return redirect(url_for('VehicleDetails.page'))
 
-# Download template route
 @vehicleDetails_bp.route('/download_vehicle_template')
 @jwt_required()
 def download_vehicle_template():
@@ -418,14 +397,13 @@ def download_vehicle_template():
 @vehicleDetails_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    sims = list(vehicle_collection.find({}, {"_id": 0, "AssignedUsers": 0}))  # Fetch all SIMs (excluding _id)
+    sims = list(vehicle_collection.find({}, {"_id": 0, "AssignedUsers": 0})) 
     
     if not sims:
         return "No data available", 404
 
-    df = pd.DataFrame(sims)  # Convert MongoDB data to DataFrame
+    df = pd.DataFrame(sims)  
     
-    # Convert DataFrame to Excel
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="SIM Inventory")

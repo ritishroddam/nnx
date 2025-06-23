@@ -20,21 +20,18 @@ def index():
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    # Check if already logged in (optional - remove if you want to force new login)
     try:
         verify_jwt_in_request(optional=True)
         current_user = get_jwt_identity()
         if current_user:
             return redirect(url_for('Vehicle.map'))
     except NoAuthorizationError:
-        # Handle expired or invalid tokens gracefully
         response = redirect(url_for('auth.login'))
         unset_jwt_cookies(response)
         unset_refresh_cookies(response)
         flash('Your session has expired. Please log in again.', 'warning')
         return response
     except JWTDecodeError:
-        # Handle invalid token format
         response = redirect(url_for('auth.login'))
         unset_jwt_cookies(response)
         unset_refresh_cookies(response)
@@ -69,7 +66,6 @@ def login():
         else:
             company = None
 
-        # Create both access and refresh tokens
         additional_claims = {
             'username': username,
             'user_id': str(user['_id']),
@@ -97,7 +93,6 @@ def login():
         access_token_max_age = int(access_token_exp - current_time)
         refresh_token_max_age = int(refresh_token_exp - current_time)
 
-        # Wrap the rendered template in a Response object
         if user['role'] == 'sim':
             response = redirect(url_for('SimInvy.page'))
         elif user['role'] == 'device':
@@ -117,7 +112,7 @@ def login():
 @auth_bp.route('/api/login', methods=['POST'])
 def api_login():
     """Pure API endpoint for programmatic access"""
-    username = request.json.get('username')  # Note: using .json instead of .form
+    username = request.json.get('username') 
     password = request.json.get('password')
     
     user = User.find_by_username(username)
@@ -158,14 +153,12 @@ def api_refresh():
     current_user = get_jwt_identity()
     claims = get_jwt()
     
-    # Extract the necessary claims from the refresh token
     additional_claims = {
         'roles': claims.get('roles', []),
         'company': claims.get('company'),
         'user_id': claims.get('user_id'),
     }
     
-    # Create new access token
     access_token = create_access_token(
         identity=current_user,
         additional_claims=additional_claims
@@ -194,13 +187,11 @@ def refresh():
                 'company': claims.get('company'),
                 'user_id': claims.get('user_id'),
             }
-            # Create new access token
             access_token = create_access_token(
                 identity=current_user,
                 additional_claims=additional_claims
             )
             print(f"Access Token: {access_token}")
-                # For web clients using cookies
             response = jsonify({'refresh': True})
             set_access_cookies(response, access_token)
             print(f"Response headers: {response.headers}") 
@@ -242,7 +233,7 @@ def register():
         return redirect(request.referrer or url_for('auth.login'))
 
     claims = get_jwt()
-    user_role = claims.get('roles', [])  # Assuming roles is a list and taking the first role
+    user_role = claims.get('roles', [])  
     print(f"User Role: {user_role}")
     if 'admin' in user_role:
         companies = db.customers_list.find()
@@ -286,14 +277,13 @@ def register_client_admin():
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():
-    secret_key = "your-special-admin-key"  # Change this to a secure value
+    secret_key = "your-special-admin-key" 
     
     if request.method == 'POST':
         if request.form.get('secret_key') != secret_key:
             flash('Invalid admin registration key', 'danger')
             return redirect(url_for('auth.register_admin'))
         
-        # Rest of registration logic similar to regular register
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
@@ -319,7 +309,6 @@ def register_admin():
 @roles_required('admin')
 def register_inventory():
     if request.method == 'POST':
-        # Rest of registration logic similar to regular register
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
@@ -347,7 +336,7 @@ def logout():
     try:
         verify_jwt_in_request()
     except:
-        pass  # Still allow logout even if token is expired
+        pass  
 
     response = redirect(url_for('auth.login'))
     unset_jwt_cookies(response)

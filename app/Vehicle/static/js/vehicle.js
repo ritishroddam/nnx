@@ -115,7 +115,6 @@ socket.on("disconnect", () => {
 
 socket.on("vehicle_update", async function (data) {
   try {
-    // Wait for fetchdistance to resolve and return the updated data
     const updatedData = await updateData(data);
 
     updateVehicleData(updatedData);
@@ -259,7 +258,6 @@ async function fetchVehicleData() {
         slowSpeed: vehicle.slowSpeed,
       });
     });
-    // startZoomAnimation();
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     return [];
@@ -276,7 +274,6 @@ function updateVehicleCard(data) {
   const longitude = data.longitude ? parseFloat(data.longitude) : null;
   const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
 
-  // Calculate time since last update
   const lastUpdated = convertToDate(data.date, data.time);
   const now = new Date();
   const timeDiff = Math.abs(now - lastUpdated);
@@ -284,7 +281,6 @@ function updateVehicleCard(data) {
   const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
   const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
-  // Determine status and class
   let statusText, statusClass;
   const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
   statusText = data.status;
@@ -320,7 +316,6 @@ function updateVehicleCard(data) {
   }
 
   if (vehicleCard) {
-    // Update existing vehicle card
     if (vehicleCard && vehicleCard.querySelector(".vehicle-info")) {
       vehicleCard.querySelector(".vehicle-info").innerHTML = `
       <div class="vehicle-status ${statusClass}">
@@ -419,7 +414,6 @@ function getHeadingText(filterValue) {
 }
 
 function renderVehicleCards(vehicles, filterValue = "all") {
-  // If toggle-card-switch is off, hide cards and update counter
   if (document.getElementById("toggle-card-switch").checked === false) {
     hideCard();
 
@@ -434,7 +428,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     return;
   }
 
-  // Otherwise, render the cards
   const listContainer = document.getElementById("vehicle-list");
   const vehicleCounter = document.getElementById("vehicle-counter");
   const vehicleCount = document.getElementById("vehicle-count");
@@ -453,7 +446,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     vehicleElement.setAttribute("data-imei", vehicle.imei);
     const isDarkMode = document.body.classList.contains("dark-mode");
 
-    // Status logic
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
@@ -476,22 +468,21 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     if (statusText === "offline") {
       statusText = "Offline";
-      statusColor = isDarkMode ? "#616161" : "#9e9e9e"; // Grey for offline in dark mode
+      statusColor = isDarkMode ? "#616161" : "#9e9e9e"; 
     } else if (statusText === "stopped") {
       statusText = "Stopped";
-      statusColor = isDarkMode ? "#d32f2f" : "#f44336"; // Red for stopped in dark mode
+      statusColor = isDarkMode ? "#d32f2f" : "#f44336";
     } else if (statusText === "idle") {
       statusText = "Idle";
-      statusColor = isDarkMode ? "#ff9800" : "#f57c00"; // Orange for idle in dark mode
+      statusColor = isDarkMode ? "#ff9800" : "#f57c00"; 
     }else if (statusText === "moving") {
       statusText = "Moving";
-      statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; // Green for moving in dark mode
+      statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; 
     }else {
       statusText = "Unknown";
-      statusColor = isDarkMode ? "#9e9e9e" : "#616161"; // Grey for unknown in dark mode
+      statusColor = isDarkMode ? "#9e9e9e" : "#616161"; 
     }
 
-    // Time since status
     let sinceText = "";
     if (vehicle.status_time_str) {
       sinceText = `since ${vehicle.status_time_str}`;
@@ -527,22 +518,22 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     if (ASUgsmValue == 0) {
       gsmIcon = "signal_cellular_null";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red in dark mode
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
     } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
       gsmIcon = "signal_cellular_1_bar";
-      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; // Brighter orange in dark mode
+      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800";
     } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
       gsmIcon = "signal_cellular_2_bar";
-      gsmColor = isDarkMode ? "#ffe082" : "#ffc107"; // Brighter yellow in dark mode
+      gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
     } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
       gsmIcon = "signal_cellular_3_bar";
-      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; // Brighter light green in dark mode
+      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
       gsmIcon = "signal_cellular_4_bar";
-      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; // Brighter green in dark mode
+      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; 
     } else {
       gsmIcon = "signal_cellular_off";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red for unknown state
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
     }
 
     const iconRow = `
@@ -629,7 +620,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     address || '<span class="missing-data">Location unknown</span>';
   const url = `/routeHistory/vehicle/${device.LicensePlateNumber}`;
 
-  // Status and icons
   const now = new Date();
   const lastUpdated = convertToDate(device.date, device.time);
   const timeDiff = Math.abs(now - lastUpdated);
@@ -666,7 +656,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     statusColor = "#9e9e9e";
   }
 
-  // Icons
   const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
   const iconRed = "color:#d32f2f;";
   const gpsIcon =
@@ -681,7 +670,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       : "";
   const arrowIcon = "arrow_forward";
 
-  // GSM
   const ASUgsmValue = parseInt(device.gsm);
   let gsmIcon = "signal_cellular_null";
   let gsmColor = "#d32f2f";
@@ -702,7 +690,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     gsmColor = "#d32f2f";
   }
 
-  // Bottom stats
   const distance = device.distance
     ? parseFloat(device.distance).toFixed(1)
     : "--";
@@ -719,7 +706,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
       </div>
   `;
 
-  // HTML
   const content = `
       <div class="info-content">
         <div class="info-update-row">
@@ -755,7 +741,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   infoWindow.setPosition(latLng);
 }
 
-// location sharing
 document.body.addEventListener("click", function (e) {
   if (
     e.target.classList.contains("info-bottom-action") &&
@@ -778,7 +763,6 @@ document.body.addEventListener("click", function (e) {
 });
 
 function showShareLocationPopup(plate) {
-  // Remove existing popup if any
   const oldPopup = document.getElementById("share-location-popup");
   if (oldPopup) oldPopup.remove();
 
@@ -804,14 +788,12 @@ function showShareLocationPopup(plate) {
   `;
   document.body.appendChild(popup);
 
-  // Center the popup
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
-  // Set default values for datetime fields in YYYY-MM-DDTHH:mm
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, "0");
   const toISOStringLocal = (d) =>
@@ -882,7 +864,7 @@ function updateMap() {
       device.speed != null &&
       device.course != null
     ) {
-      const latLng = parseCoordinates(device.latitude, device.longitude); // Already returns google.maps.LatLng
+      const latLng = parseCoordinates(device.latitude, device.longitude);
       const iconUrl = getCarIconBySpeed(
         device.speed,
         imei,
@@ -926,7 +908,6 @@ function updateMap() {
 
     const listener = google.maps.event.addListener(map, "idle", function () {
       if (map.getZoom() < 7) {
-        // Adjust the zoom level as needed
         map.setZoom(7);
       }
       google.maps.event.removeListener(listener);
@@ -978,8 +959,8 @@ function filterVehicles() {
     const marker = markers[imei];
     const speedKmh = marker.device.speed
       ? convertSpeedToKmh(marker.device.speed)
-      : 0; // Speed in km/h
-    const hasSOS = marker.device.sos === "1"; // Check if SOS is active
+      : 0; 
+    const hasSOS = marker.device.sos === "1"; 
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
     const slowSpeedThreshold = marker.device.slowSpeed;
@@ -1012,7 +993,6 @@ function filterVehicles() {
         break;
     }
 
-    // Set marker visibility
     marker.map = isVisible ? map : null;
 
     if (isVisible) {
@@ -1025,7 +1005,7 @@ function filterVehicles() {
 function parseCoordinates(lat, lng) {
   if (isNaN(lat) || isNaN(lng)) {
     console.error("Invalid coordinates:", lat, lng);
-    return new google.maps.LatLng(0, 0); // Return a default LatLng object
+    return new google.maps.LatLng(0, 0); 
   }
 
   return new google.maps.LatLng(lat, lng);
@@ -1048,19 +1028,16 @@ function getCarIconUrlBySpeed(speedInKmh) {
 }
 
 function convertToDate(ddmmyyyy, hhmmss) {
-  // Extract day, month, and year
   let day = ddmmyyyy.substring(0, 2);
   let month = ddmmyyyy.substring(2, 4);
   let year = ddmmyyyy.substring(4, 6);
 
   year = parseInt(year) + 2000;
 
-  // Extract hours, minutes, and seconds
   let hours = hhmmss.substring(0, 2);
   let minutes = hhmmss.substring(2, 4);
   let seconds = hhmmss.substring(4, 6);
 
-  // JavaScript Date uses month index starting from 0 (January is 0)
   let dateObj = new Date(year, month - 1, day, hours, minutes, seconds);
 
   return dateObj;
@@ -1083,7 +1060,6 @@ function getCarIconBySpeed(speed, imei, date, time) {
   return iconUrl;
 }
 
-// Function to check if data is missing for more than 1 hour
 function checkForDataTimeout(imei) {
   const now = new Date();
   const marker = markers[imei];
@@ -1093,10 +1069,8 @@ function checkForDataTimeout(imei) {
     const hoursDiff = timeDiff / (1000 * 60 * 60);
 
     if (hoursDiff >= 1) {
-      // Highlight marker by adding a red border and show tooltip on hover
-      marker.div.style.border = "2px solid red"; // Highlight vehicle
+      marker.div.style.border = "2px solid red"; 
 
-      // Add a hover event to show "Old data!" tooltip
       marker.div.addEventListener("mouseover", function () {
         const tooltip = document.createElement("div");
         tooltip.className = "old-data-tooltip";
@@ -1106,13 +1080,12 @@ function checkForDataTimeout(imei) {
         tooltip.style.color = "white";
         tooltip.style.padding = "5px";
         tooltip.style.borderRadius = "5px";
-        tooltip.style.top = "-30px"; // Position tooltip above the marker
+        tooltip.style.top = "-30px";
         tooltip.style.left = "50%";
         tooltip.style.transform = "translateX(-50%)";
         tooltip.style.zIndex = "1000";
         marker.div.appendChild(tooltip);
 
-        // Remove tooltip on mouseout
         marker.div.addEventListener("mouseout", function () {
           tooltip.remove();
         });
@@ -1123,7 +1096,7 @@ function checkForDataTimeout(imei) {
 
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
-  const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); // Already returns google.maps.LatLng
+  const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
   const iconUrl = getCarIconBySpeed(
     vehicle.speed,
     imei,
@@ -1140,8 +1113,8 @@ function updateVehicleData(vehicle) {
     const markerContent = markers[imei].content;
     const markerImage = markerContent.querySelector("img");
     if (markerImage) {
-      markerImage.src = iconUrl; // Update the icon URL
-      markerContent.style.transform = `rotate(${rotation}deg)`; // Update rotation
+      markerImage.src = iconUrl; 
+      markerContent.style.transform = `rotate(${rotation}deg)`; 
     }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
@@ -1250,7 +1223,7 @@ async function populateVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
-  tableBody.innerHTML = ""; // Clear existing rows
+  tableBody.innerHTML = ""; 
   const isDarkMode = document.body.classList.contains("dark-mode");
 
   showHidecar();
@@ -1307,22 +1280,22 @@ async function populateVehicleTable() {
 
     if (ASUgsmValue == 0) {
       gsmIcon = "signal_cellular_null";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red in dark mode
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
     } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
       gsmIcon = "signal_cellular_1_bar";
-      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; // Brighter orange in dark mode
+      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; 
     } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
       gsmIcon = "signal_cellular_2_bar";
-      gsmColor = isDarkMode ? "#ffe082" : "#ffc107"; // Brighter yellow in dark mode
+      gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
     } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
       gsmIcon = "signal_cellular_3_bar";
-      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; // Brighter light green in dark mode
+      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
       gsmIcon = "signal_cellular_4_bar";
-      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; // Brighter green in dark mode
+      gsmColor = isDarkMode ? "#81c784" : "#4caf50";
     } else {
       gsmIcon = "signal_cellular_off";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; // Brighter red for unknown state
+      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
     }    
 
     console.log(vehicle.imei);
@@ -1350,7 +1323,7 @@ async function populateVehicleTable() {
     row.insertCell(7).innerText = vehicle.distance
       ? parseFloat(vehicle.distance).toFixed(2)
       : "N/A";
-    row.insertCell(8).innerText = vehicle.odometer; // Assuming odometer reading
+    row.insertCell(8).innerText = vehicle.odometer; 
 
     const icons = `
       <div class="vehicle-table-icons">
@@ -1364,7 +1337,6 @@ async function populateVehicleTable() {
 
     row.style.cursor = "pointer";
     row.addEventListener("click", function (e) {
-      // Prevent double action if user clicks the actual link
       if (e.target.tagName.toLowerCase() === "a") return;
       window.open(url, "_blank");
     });
@@ -1430,15 +1402,14 @@ async function initMap() {
   const { Map, LatLngBounds } = await google.maps.importLibrary("maps");
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-  // Initialize Map
   map = new Map(document.getElementById("map"), {
     center: newCenter,
     mapId: mapId,
     zoom: 5,
     gestureHandling: "greedy",
     zoomControl: true,
-    mapTypeControl: false, // Disable default map type buttons
-    clickableIcons: false, // Disable POI icons
+    mapTypeControl: false, 
+    clickableIcons: false, 
     zoomControlOptions: {
       position: google.maps.ControlPosition.RIGHT_BOTTOM,
     },
@@ -1452,7 +1423,6 @@ async function initMap() {
   infoWindow = new google.maps.InfoWindow();
 }
 
-// Theme toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
 themeToggle.addEventListener("click", function () {
   setTimeout(async () => {
@@ -1464,11 +1434,10 @@ themeToggle.addEventListener("click", function () {
 function adjustFloatingCardHeight() {
   const floatingCard = document.querySelector(".floating-card");
   const mapHeight = document.getElementById("map").offsetHeight;
-  floatingCard.style.height = `${mapHeight * 0.6}px`; // 60% of map height
+  floatingCard.style.height = `${mapHeight * 0.6}px`; 
 }
 
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
-  // Ensure latLng is a google.maps.LatLng instance
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
   }
@@ -1486,7 +1455,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   markerContent.appendChild(markerImage);
 
   const marker = new google.maps.marker.AdvancedMarkerElement({
-    position: latLng, // Save as google.maps.LatLng
+    position: latLng, 
     map: map,
     title: `IMEI: ${device.imei}`,
     content: markerContent,
@@ -1505,7 +1474,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 }
 
 function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
-  // Ensure latLng is a google.maps.LatLng instance
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
   }
@@ -1522,7 +1490,7 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
   markerContent.appendChild(markerImage);
 
-  marker.position = latLng; // Save as google.maps.LatLng
+  marker.position = latLng; 
   marker.content = markerContent;
 
   const coords = {
@@ -1549,7 +1517,6 @@ function searchTable() {
   });
 }
 
-// Add this function to handle vehicle search
 function searchVehicle() {
   const searchTerm = document
     .getElementById("vehicle-search")
@@ -1559,19 +1526,16 @@ function searchVehicle() {
 
   let foundVehicle = null;
 
-  // Search through vehicleData
   vehicleData.forEach((vehicle, imei) => {
     const plateNumber = vehicle.LicensePlateNumber
       ? vehicle.LicensePlateNumber.toLowerCase()
       : "";
-    // Check full number or last 4 digits
     if (plateNumber.includes(searchTerm)) {
       foundVehicle = vehicle;
     }
   });
 
   if (foundVehicle) {
-    // Zoom to the vehicle
     const latLng = new google.maps.LatLng(
       parseFloat(foundVehicle.latitude),
       parseFloat(foundVehicle.longitude)
@@ -1579,7 +1543,6 @@ function searchVehicle() {
     map.setZoom(18);
     map.panTo(latLng);
 
-    // Highlight the vehicle
     const marker = markers[foundVehicle.imei];
     if (marker) {
       setInfoWindowContent(
@@ -1592,7 +1555,6 @@ function searchVehicle() {
       infoWindow.open(map, marker);
     }
 
-    // Scroll to the vehicle card
     const vehicleCard = document.querySelector(
       `.vehicle-card[data-imei="${foundVehicle.imei}"]`
     );
@@ -1606,7 +1568,6 @@ function searchVehicle() {
   }
 }
 
-// Add event listeners for search
 document
   .getElementById("search-button")
   .addEventListener("click", searchVehicle);
@@ -1617,18 +1578,15 @@ document.getElementById("vehicle-search").addEventListener("keypress", (e) => {
 });
 
 function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
-  // Get the current map projection
-  const scale = Math.pow(2, map.getZoom()); // Scale based on zoom level
+  const scale = Math.pow(2, map.getZoom()); 
   const worldCoordinateCenter = map.getProjection().fromLatLngToPoint(latLng);
 
-  // Apply the offset in pixels
   const pixelOffset = new google.maps.Point(offsetX / scale, offsetY / scale);
   const worldCoordinateNewCenter = new google.maps.Point(
     worldCoordinateCenter.x + pixelOffset.x,
     worldCoordinateCenter.y + pixelOffset.y
   );
 
-  // Convert back to LatLng and pan the map
   const newLatLng = map
     .getProjection()
     .fromPointToLatLng(worldCoordinateNewCenter);
@@ -1636,14 +1594,12 @@ function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
 }
 
 function addHoverListenersToCardsAndMarkers() {
-  // Add hover event to vehicle cards
   const vehicleCards = document.querySelectorAll(".vehicle-card");
   vehicleCards.forEach((card) => {
     card.addEventListener("mouseover", () => {
       const imei = card.getAttribute("data-imei");
       const marker = markers[imei];
       if (marker) {
-        // Pan and zoom the map to the marker
 
         let latLng = new google.maps.LatLng(
           marker.position.lat,
@@ -1653,7 +1609,6 @@ function addHoverListenersToCardsAndMarkers() {
         map.setZoom(20);
         panToWithOffset(latLng, -200, 0);
 
-        // Open the info window for the marker
         const coords = {
           lat: marker.position.lat,
           lon: marker.position.lng,
@@ -1676,7 +1631,6 @@ function addHoverListenersToCardsAndMarkers() {
     });
   });
 
-  // Add hover event to map markers
   Object.keys(markers).forEach((imei) => {
     const marker = markers[imei];
     if (marker) {
@@ -1685,55 +1639,52 @@ function addHoverListenersToCardsAndMarkers() {
           `.vehicle-card[data-imei="${imei}"]`
         );
         if (vehicleCard) {
-          // Scroll the floating card to the corresponding vehicle card
           vehicleCard.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
             inline: "nearest",
           });
 
-          // Highlight the vehicle card
           vehicleCard.classList.add("highlight");
 
-          // Check if dark mode is active
           const isDarkMode = document.body.classList.contains("dark-mode");
 
           if (isDarkMode) {
-            vehicleCard.style.backgroundColor = "black"; // Light background for dark mode
+            vehicleCard.style.backgroundColor = "black";
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
-              vehicleHeader.style.color = "#000000d0"; // Dark font color for dark mode
+              vehicleHeader.style.color = "#000000d0";
             }
             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
             if (vehicleInfo) {
-              vehicleInfo.style.color = "#000000d0"; // Dark font color for dark mode
+              vehicleInfo.style.color = "#000000d0"; 
 
               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
               vehicleInfoStrong.forEach((tag) => {
-                tag.style.color = "#000000d0"; // Dark font color for dark mode
+                tag.style.color = "#000000d0";
               });
               const vehicleInfoA = vehicleCard.querySelector("a");
               if (vehicleInfoA) {
-                vehicleInfoA.style.color = "#000000d0"; // Dark font color for dark mode
+                vehicleInfoA.style.color = "#000000d0"; 
               }
             }
           } else {
-            vehicleCard.style.backgroundColor = "#ccc"; // Dark background for light mode
+            vehicleCard.style.backgroundColor = "#ccc"; 
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
-              vehicleHeader.style.color = "#ccc"; // Light font color for light mode
+              vehicleHeader.style.color = "#ccc"; 
             }
             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
             if (vehicleInfo) {
-              vehicleInfo.style.color = "#ccc"; // Light font color for light mode
+              vehicleInfo.style.color = "#ccc"; 
 
               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
               vehicleInfoStrong.forEach((tag) => {
-                tag.style.color = "#ccc"; // Light font color for light mode
+                tag.style.color = "#ccc"; 
               });
               const vehicleInfoA = vehicleCard.querySelector("a");
               if (vehicleInfoA) {
-                vehicleInfoA.style.color = "#ccc"; // Light font color for light mode
+                vehicleInfoA.style.color = "#ccc"; 
               }
             }
           }
@@ -1745,27 +1696,26 @@ function addHoverListenersToCardsAndMarkers() {
           `.vehicle-card[data-imei="${imei}"]`
         );
         if (vehicleCard) {
-          // Remove the highlight from the vehicle card
           vehicleCard.classList.remove("highlight");
 
           vehicleCard.style.transition =
             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-          vehicleCard.style.backgroundColor = ""; // Reset background color
+          vehicleCard.style.backgroundColor = ""; 
           const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
           if (vehicleHeader) {
-            vehicleHeader.style.color = ""; // Reset font color
+            vehicleHeader.style.color = "";
           }
           const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
           if (vehicleInfo) {
-            vehicleInfo.style.color = ""; // Reset font color
+            vehicleInfo.style.color = ""; 
 
             const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
             vehicleInfoStrong.forEach((tag) => {
-              tag.style.color = ""; // Reset font color
+              tag.style.color = ""; 
             });
             const vehicleInfoA = vehicleCard.querySelector("a");
             if (vehicleInfoA) {
-              vehicleInfoA.style.color = ""; // Reset font color
+              vehicleInfoA.style.color = ""; 
             }
           }
         }

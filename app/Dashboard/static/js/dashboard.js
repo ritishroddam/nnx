@@ -26,7 +26,6 @@ function sortTable(column, direction) {
     let cellA = a.children[columnIndex].innerText.trim();
     let cellB = b.children[columnIndex].innerText.trim();
 
-    // Special handling for Max/Avg Speed column
     if (column === "max_avg_speed") {
       cellA = parseFloat(cellA.split("/")[0]) || 0;
       cellB = parseFloat(cellB.split("/")[0]) || 0;
@@ -70,7 +69,7 @@ function afterTableRender() {
   currentSort = { column: "distance", direction: "desc" };
 }
 
-let currentRange = "1day"; // Default
+let currentRange = "1day"; 
 
 async function fetchVehicleDistances(range = "1day") {
   try {
@@ -150,7 +149,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? "black"
         : "white";
 
-      // Update the chart to reflect the changes
       devicesChart.update();
     }
 
@@ -268,14 +266,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error("Invalid data format received");
       }
 
-      // Destroy existing chart if it exists
       if (window.pieChart) {
         window.pieChart.destroy();
       }
 
       const ctx = document.getElementById("vehiclesChart").getContext("2d");
 
-      // Create gradient colors
       const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
       gradient1.addColorStop(0, "#7bb83d");
       gradient1.addColorStop(1, "#a1d072");
@@ -323,7 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   const labels = original.call(this, chart);
                   labels.forEach((label) => {
                     label.text = label.text;
-                    label.className = "chart-label"; // Add the chart-label class
+                    label.className = "chart-label";
                   });
                   return labels;
                 },
@@ -366,8 +362,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             },
           },
-          rotation: -90,         // <-- Add this line (degrees)
-          circumference: 180,    // <-- Add this line (degrees)
+          rotation: -90,       
+          circumference: 180,   
         },
         plugins: [
           {
@@ -376,7 +372,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               const { width } = chart;
               const { top, bottom } = chart.chartArea;
               const ctx = chart.ctx;
-              // For half donut, center text lower
               const centerY = bottom - (bottom - top) / 3;
               const text = chart.config.options.plugins.centerText.text;
 
@@ -391,7 +386,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         ],
       };
 
-      // Render the chart
       window.pieChart = new Chart(ctx, chartConfig);
     } catch (error) {
       console.error("❌ Error fetching pie chart data:", error);
@@ -413,8 +407,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           borderColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBackgroundColor: isDarkMode ? "#ccc" : "#2f2f2f",
           pointBorderColor: isDarkMode ? "black" : "#fff",
-          pointRadius: 0,        // Hide all points by default
-          pointHoverRadius: 7,   // Show point on hover
+          pointRadius: 0,      
+          pointHoverRadius: 7,   
           borderWidth: 2,
           fill: true,
           tension: 0.3,
@@ -448,8 +442,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       },
       elements: {
         point: {
-          radius: 0,         // Hide all points by default
-          hoverRadius: 7     // Show point on hover
+          radius: 0,         
+          hoverRadius: 7     
         }
       },
       interaction: {
@@ -500,17 +494,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await fetchVehicleDistances();
 
-  // Download Excel button logic
   document.getElementById("downloadExcelBtn").addEventListener("click", function () {
     const table = document.querySelector(".vehicleLiveTable table");
     if (!table) return;
 
-    // Convert table to worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.table_to_sheet(table);
     XLSX.utils.book_append_sheet(wb, ws, "Vehicle Data");
 
-    // Download
     XLSX.writeFile(wb, "vehicle_data.xlsx");
   });
 

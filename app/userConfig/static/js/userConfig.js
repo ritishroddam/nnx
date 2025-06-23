@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-  // Selectize for alerts
 
   $("#alerts").selectize({
       plugins: ['remove_button'],
@@ -59,13 +58,11 @@ document.addEventListener("DOMContentLoaded", function() {
   const noneOption = alertsSelect.querySelector('option[value=""]');
 
   alertsSelect.addEventListener('change', function(e) {
-    // If "None" is selected, unselect all others
     if (noneOption.selected) {
       for (let opt of alertsSelect.options) {
         if (opt.value !== "") opt.selected = false;
       }
     } else {
-      // If any other is selected, unselect "None"
       noneOption.selected = false;
     }
   });
