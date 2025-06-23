@@ -275,33 +275,9 @@ def get_vehicle_range_data():
             driving_time = timedelta()
             idle_time = timedelta()
             number_of_stops = 0
-            total_active_time = driving_timed_delta + idle_timed_delta
-            idle_percentage = (idle_timed_delta / total_active_time) * 100 if total_active_time else 0
 
             prev_ignition = None
             prev_time = None
-            
-            optimal_speed_secs = 0
-            for i in range(1, len(recs)):
-                r = recs[i]
-                prev = recs[i - 1]
-            
-                speed = float(r["speed"]) if r["speed"] else 0
-                ignition = r["ignition"]
-                prev_time = recs[i - 1]["date_time"]
-                curr_time = r["date_time"]
-                duration = (curr_time - prev_time).total_seconds()
-            
-                if ignition == "1" and 40 <= speed <= 80:
-                    optimal_speed_secs += duration
-            
-            optimal_speed_percentage = (optimal_speed_secs / driving_timed_delta) * 100 if driving_timed_delta else 0
-            
-            # Compute driver score (out of 100)
-            score = 100
-            score -= idle_percentage * 0.5        # Penalty for idling
-            score += optimal_speed_percentage * 0.5  # Bonus for good speed
-            score = min(max(score, 0), 100)       # Clamp to 0–100
 
             for i, r in enumerate(recs):
                 curr_time = r["date_time"]
@@ -335,10 +311,7 @@ def get_vehicle_range_data():
                 "avg_speed": round(record.get("avg_speed", 0), 2),
                 "driving_time": human_readable_driving_time,
                 "idle_time": human_readable_idle_time,
-                "number_of_stops": number_of_stops,
-                "idle_percentage": round(idle_percentage, 2),
-                "optimal_speed_percentage": round(optimal_speed_percentage, 2),
-                "efficiency_score": round(score, 2)
+                "number_of_stops": number_of_stops
             })
 
         return jsonify(vehicle_data), 200
@@ -346,45 +319,6 @@ def get_vehicle_range_data():
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
         return jsonify({"error": str(e)}), 500
-
-@dashboard_bp.route('/efficiency_trend', methods=['GET'])
-@jwt_required()
-@roles_required('admin')
-def efficiency_trend():
-    imeis = list(get_vehicle_data().distinct("IMEI"))
-    now = datetime.now()
-    days = [now - timedelta(days=i) for i in range(6, -1, -1)]
-
-    data = []
-
-    for day in days:
-        start = datetime(day.year, day.month, day.day)
-        end = start + timedelta(days=1)
-
-        pipeline = [
-            {"$match": {"date_time": {"$gte": start, "$lt": end}, "imei": {"$in": imeis}}},
-            {"$group": {
-                "_id": "$imei",
-                "sum_speed": {"$sum": {"$toDouble": "$speed"}},
-                "count_speed": {"$sum": {"$cond": [{"$gt": [{"$toDouble": "$speed"}, 0]}, 1, 0]}}
-            }},
-            {"$project": {
-                "imei": "$_id",
-                "avg_speed": {
-                    "$cond": [{"$eq": ["$count_speed", 0]}, 0, {"$divide": ["$sum_speed", "$count_speed"]}]
-                }
-            }}
-        ]
-
-        result = list(atlanta_collection.aggregate(pipeline))
-        for r in result:
-            data.append({
-                "date": start.strftime("%Y-%m-%d"),
-                "imei": r["imei"],
-                "avg_speed": round(r["avg_speed"], 2)
-            })
-
-    return jsonify(data), 200
 
 
 @dashboard_bp.route('/get_status_data', methods=['GET'])
