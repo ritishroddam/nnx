@@ -1,5 +1,122 @@
 let currentSort = { column: "distance", direction: "desc" };
 
+let efficiencyChart;
+
+function renderEfficiencyChart(vehicleData) {
+  const labels = vehicleData.map(v => v.registration);
+  const scores = vehicleData.map(v => v.efficiency_score);
+
+  const ctx = document.getElementById("efficiencyChart").getContext("2d");
+
+  if (efficiencyChart) {
+    efficiencyChart.destroy();
+  }
+
+  efficiencyChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Efficiency Score",
+        data: scores,
+        backgroundColor: scores.map(score => {
+          if (score >= 80) return "#4caf50";  // green
+          else if (score >= 60) return "#ffc107"; // yellow
+          else return "#f44336";  // red
+        }),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            stepSize: 10
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `Efficiency Score: ${ctx.raw}`
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderEfficiencyGauges(vehicleData) {
+  const container = document.getElementById("gauge-container");
+  container.innerHTML = ""; // Clear existing
+
+  vehicleData.forEach(vehicle => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 200;
+    canvas.height = 200;
+    container.appendChild(canvas);
+
+    const ctx = canvas.getContext("2d");
+    new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        datasets: [{
+          data: [vehicle.efficiency_score, 100 - vehicle.efficiency_score],
+          backgroundColor: ["#4caf50", "#e0e0e0"],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '80%',
+        plugins: {
+          tooltip: { enabled: false },
+          legend: { display: false },
+          title: {
+            display: true,
+            text: vehicle.registration
+          },
+          doughnutlabel: {
+            labels: [
+              { text: vehicle.efficiency_score.toString(), font: { size: 20 } },
+              { text: 'Score' }
+            ]
+          }
+        }
+      }
+    });
+  });
+}
+
+function renderLeaderboard(vehicleData) {
+  const sorted = [...vehicleData].sort((a, b) => b.efficiency_score - a.efficiency_score);
+  const tbody = document.getElementById("leaderboardTable");
+  tbody.innerHTML = "";
+
+  sorted.forEach((vehicle, index) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${vehicle.registration}</td>
+        <td>${vehicle.efficiency_score}</td>
+      </tr>`;
+  });
+}
+
+document.getElementById("downloadPdfBtn").addEventListener("click", () => {
+  const chartCanvas = document.getElementById("efficiencyChart");
+  html2canvas(chartCanvas).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, "PNG", 10, 10, 180, 100);
+    pdf.save("efficiency_chart.pdf");
+  });
+});
+
+
 function applySortIcons(column, direction) {
   document.querySelectorAll(".vehicleLiveTable th").forEach((th) => {
     const icon = th.querySelector(".sort-icon");
@@ -76,6 +193,8 @@ async function fetchVehicleDistances(range = "1day") {
   try {
     const response = await fetch(`/dashboard/get_vehicle_range_data?range=${range}`);
     const data = await response.json();
+    const scoreColor = vehicle.efficiency_score >= 80
+  ? 'green' : vehicle.efficiency_score >= 60 ? 'orange' : 'red';
 
     let tableBody = document.getElementById("vehicleTable");
     tableBody.innerHTML = "";
@@ -88,6 +207,9 @@ async function fetchVehicleDistances(range = "1day") {
                   <td>${vehicle.idle_time}</td>
                   <td>${vehicle.number_of_stops}</td>
                   <td>${vehicle.max_speed}/${vehicle.avg_speed}</td>
+                  <td>${vehicle.idle_percentage}%</td>
+                  <td>${vehicle.optimal_speed_percentage}%</td>
+                  <td><span style="color: ${scoreColor}; font-weight: bold;">${vehicle.efficiency_score}</span></td>
               </tr>`;
       tableBody.innerHTML += row;
     });
@@ -499,6 +621,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   });  
 
   await fetchVehicleDistances();
+  renderEfficiencyChart(data);
+  renderEfficiencyGauges(data);
+  renderLeaderboard(data);
+
+
 
   // Download Excel button logic
   document.getElementById("downloadExcelBtn").addEventListener("click", function () {

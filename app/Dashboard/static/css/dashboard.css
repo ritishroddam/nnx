@@ -1004,3 +1004,9 @@
   font-size: 1.6em;
   color: #fff;
 }
+
+.graph-container {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+}

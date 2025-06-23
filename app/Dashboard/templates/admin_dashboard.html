@@ -136,6 +136,9 @@ Dashboard
                 <th data-column="idle_time">Idle Time <span class="sort-icon"></span></th>
                 <th data-column="number_of_stops">Number Of Stops <span class="sort-icon"></span></th>
                 <th data-column="max_avg_speed">Max/Avg Speed <span class="sort-icon"></span></th>
+                <th>Idle %</th>
+                <th>Optimal Speed %</th>
+                <th>Efficiency Score</th>
               </tr>
             </thead>
             <tbody id="vehicleTable">
@@ -145,6 +148,44 @@ Dashboard
       </div>
     </div>
   </div>
+
+  <div class="title-with-line">
+  <span>Driving Efficiency</span>
+  <hr>
+</div>
+<div class="dashboard-row">
+  <div class="graph-container">
+    <canvas id="efficiencyChart"></canvas>
+  </div>
+</div>
+
+<div class="title-with-line">
+  <span>Efficiency Gauges</span>
+  <hr>
+</div>
+<div id="gauge-container" class="dashboard-row">
+  <!-- JS will populate gauges here -->
+</div>
+
+<div class="title-with-line">
+  <span>Efficiency Leaderboard</span>
+  <hr>
+</div>
+<div class="vehicleLiveTable">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Vehicle</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboardTable">
+    </tbody>
+  </table>
+</div>
+<button id="downloadPdfBtn" class="btn btn-danger">Download PDF</button>
+
 
   <!-- Fixed Right Sidebar -->
   <aside class="dashboard-sidebar">
