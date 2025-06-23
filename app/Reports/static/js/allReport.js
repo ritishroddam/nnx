@@ -263,7 +263,7 @@ document.getElementById("viewReport").addEventListener("click", async function (
         headers.forEach(h => {
           const td = document.createElement("td");
           if (h === 'date_time') {
-            td.textContent = new Date(row[h]).toLocaleString();
+            td.textContent = row[h] || "";
           } else if (h === 'ignition') {
             td.textContent = row[h] === 'ON' ? 'ON' : 'OFF';
           } else if (h.endsWith('(km)') || h.endsWith('(min)')) {
