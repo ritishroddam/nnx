@@ -308,7 +308,7 @@ button {
 .info-row strong {
   text-align: right;
   flex: 1;
-  padding-left: 10px;
+  padding-left: 20px;
   word-break: break-word; /* Prevents overflow for long locations */
 }
 
