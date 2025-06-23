@@ -400,7 +400,7 @@ button {
 
 .alarm-table {
   width: 100%;
-  min-width: 600px; /* Minimum width before scrolling */
+  min-width: 550px; /* Minimum width before scrolling */
   border-collapse: collapse;
   table-layout: fixed; /* Helps with column width control */
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
