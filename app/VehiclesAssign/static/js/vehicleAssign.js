@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
       create: false,
       dropdownParent: "body"
     });
+    const selectizeControl = select.parentElement.querySelector('.selectize-control');
+    if (selectizeControl) selectizeControl.style.display = "none";
   });
 
   // Inline editing logic
