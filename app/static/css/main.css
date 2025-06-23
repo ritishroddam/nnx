@@ -448,8 +448,20 @@ body {
 
 .dark-mode .profile-hover {
   background: #232323;
-  color: #fff;
+  color: #ccc;
   box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+
+.profile-settings {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .profile-settings{
+    color: #ccc;
+    box-shadow: 0 0 10px #cccccc90;
 }
 
 .dark-mode .profile-hover {
@@ -480,7 +492,7 @@ body {
 .dark-mode .profile-hover a,
 .dark-mode .profile-hover span,
 .dark-mode .profile-hover strong {
-  color: #fff;
+  color: #ccc;
 }
 
 .profile-hover b,
