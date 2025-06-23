@@ -420,11 +420,14 @@ def download_custom_report():
                 ).sort("date_time", 1)
                 df = pd.DataFrame(list(cursor))
                 if not df.empty:
-                    for imei, group in df.groupby("imei"):
+                    for idx, (imei, group) in enumerate(df.groupby("imei")):
                         license_plate = imei_to_plate.get(imei, "")
                         group = group.drop(columns=["imei"])
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                         if processed is not None:
+                            if report_type != "odometer-daily-distance" and idx > 0:
+                                sep_row = pd.DataFrame([{processed.columns[0]: f"--- New Vehicle: {license_plate} ---", **{col: "" for col in processed.columns[1:]}}])
+                                all_dfs.append(sep_row)
                             all_dfs.append(processed)
 
             if not all_dfs:
