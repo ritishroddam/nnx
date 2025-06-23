@@ -1,5 +1,6 @@
 body {
   overflow: hidden;
+  font-family: monospace;
 }
 
 #map {
@@ -26,6 +27,7 @@ body {
 
 .floating-card h3 {
   color: #000000d0;
+  font-family: monospace;
 }
 
 .dark-mode .floating-card h3 {
