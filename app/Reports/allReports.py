@@ -1,4 +1,5 @@
-from flask import render_template, Blueprint, request, jsonify, send_file
+from flask import render_template, Blueprint, request, jsonify, send_file, Response
+import json
 from datetime import datetime, timedelta
 import traceback
 from pymongo import MongoClient
@@ -7,6 +8,7 @@ from datetime import datetime
 import pytz
 from pytz import timezone
 from io import BytesIO
+from collections import OrderedDict
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
@@ -106,7 +108,8 @@ def process_distance_report(df, vehicle_number):
             'End Odometer': [df['odometer'].iloc[-1]]
         })
 
-        # Combine with original data
+        summary_df = summary_df[['Vehicle Number', 'Total Distance (km)', 'Start Odometer', 'End Odometer']]
+        
         return summary_df
     except Exception:
         return df
@@ -1151,7 +1154,7 @@ def view_report_preview():
             all_possible_columns = ['Vehicle Number']
             if report_type == 'odometer-daily-distance':  # Distance Report
                 all_possible_columns.extend([
-                    'date_time', 'Total Distance (km)', 'Start Odometer', 'End Odometer'
+                    'Total Distance (km)', 'Start Odometer', 'End Odometer'
                 ])
             elif report_type == 'stoppage':  # Stoppage Report
                 all_possible_columns.extend([
@@ -1181,14 +1184,24 @@ def view_report_preview():
                 if report_type == 'daily':  # Daily Report
                     all_possible_columns.append('odometer')
 
-            # Reorder columns based on the defined order
             existing_columns = [col for col in all_possible_columns if col in df.columns]
             df = df[existing_columns]
 
-        return jsonify({
-            "success": True,
-            "data": df.fillna("").to_dict(orient="records")
-        })
+            data_records = df.fillna("").to_dict(orient="records")
+            # Build OrderedDict for each row in the desired order
+            ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
+
+            print("Final columns:", df.columns.tolist())
+            print("existing_columns:", existing_columns)
+            print("ordered_data:", ordered_data)
+
+            # Serialize manually to preserve order
+            json_str = json.dumps({
+                "success": True,
+                "data": ordered_data
+            }, ensure_ascii=False)
+
+            return Response(json_str, mimetype='application/json')
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
