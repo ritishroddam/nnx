@@ -47,24 +47,31 @@ Assign Vehicles to Users
       <th>Edit</th>
     </tr>
   </thead>
-  <tbody>
-    {% for user in users %}
-    <tr data-user-id="{{ user._id }}">
-      <td>{{ user.username }}</td>
-      <td>
-        {% set assigned = assignedData.get(user._id|string, []) %}
-        <span class="assigned-vehicles">
-          {% for vehicle in assigned %}
-            {{ vehicle.LicensePlateNumber }}{% if not loop.last %}, {% endif %}
-          {% endfor %}
-        </span>
-      </td>
-      <td>
-        <button class="edit-assignment-btn" data-user-id="{{ user._id }}">Edit</button>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
+    <tbody>
+      {% for user in users %}
+      <tr data-user-id="{{ user._id }}">
+        <td>{{ user.username }}</td>
+        <td>
+          <span class="assigned-vehicles">
+            {% set assigned = assignedData.get(user._id|string, []) %}
+            {% for vehicle in assigned %}
+              {{ vehicle.LicensePlateNumber }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </span>
+          <select class="edit-vehicles-select" multiple style="display:none; width: 90%;">
+            {% for vehicle in vehicles %}
+            <option value="{{ vehicle._id }}">{{ vehicle.LicensePlateNumber }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          <button class="edit-assignment-btn" data-user-id="{{ user._id }}">Edit</button>
+          <button class="save-assignment-btn" data-user-id="{{ user._id }}" style="display:none;">Save</button>
+          <button class="cancel-assignment-btn" data-user-id="{{ user._id }}" style="display:none;">Cancel</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
 </table>
 
 <!-- Edit Modal -->

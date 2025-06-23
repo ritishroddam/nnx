@@ -43,25 +43,29 @@ def assign_vehicles():
 
     elif request.method == 'POST':
         vehicle_ids = request.form.getlist('vehicle_ids')
-        user_ids = request.form.getlist('user_ids')
-
-        if not vehicle_ids or not user_ids:
-            flash("Vehicle IDs and User IDs are required.", "danger")
+        user_id = request.form.get('user_id')
+    
+        if not vehicle_ids or not user_id:
+            flash("Vehicle IDs and User ID are required.", "danger")
             return redirect(url_for('VehicleAssign.assign_vehicles'))
-
+    
         try:
+            # 1. Remove this user from all vehicles in this company
+            companyName = get_jwt().get('company')
+            vehicle_collection.update_many(
+                {"CompanyName": companyName, "AssignedUsers": ObjectId(user_id)},
+                {"$pull": {"AssignedUsers": ObjectId(user_id)}}
+            )
+            # 2. Add this user to the selected vehicles
             for vehicle_id in vehicle_ids:
-                result = vehicle_collection.update_one(
+                vehicle_collection.update_one(
                     {"_id": ObjectId(vehicle_id)},
-                    {"$set": {"AssignedUsers": [ObjectId(user_id) for user_id in user_ids]}}
+                    {"$addToSet": {"AssignedUsers": ObjectId(user_id)}}
                 )
-                if result.matched_count == 0:
-                    flash(f"Vehicle with ID {vehicle_id} not found.", "danger")
-                    return redirect(url_for('VehicleAssign.assign_vehicles'))
-
+    
             flash("Vehicles assigned successfully!", "success")
             return redirect(url_for('VehicleAssign.assign_vehicles'))
-
+    
         except Exception as e:
             print(f"Error during vehicle assignment: {e}")
             flash("An error occurred during the assignment operation.", "danger")

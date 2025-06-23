@@ -51,45 +51,59 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".edit-assignment-btn").forEach(btn => {
     btn.addEventListener("click", function () {
       const userId = this.getAttribute("data-user-id");
-      document.getElementById("editUserId").value = userId;
-
-      // Get assigned vehicles for this user from the table row
       const row = document.querySelector(`tr[data-user-id='${userId}']`);
-      const assignedText = row.querySelector(".assigned-vehicles").textContent;
-      const assignedPlates = assignedText.split(",").map(s => s.trim()).filter(Boolean);
+      const assignedSpan = row.querySelector(".assigned-vehicles");
+      const select = row.querySelector(".edit-vehicles-select");
+      const saveBtn = row.querySelector(".save-assignment-btn");
+      const cancelBtn = row.querySelector(".cancel-assignment-btn");
 
-      // Map license plates to vehicle IDs using a JS object
+      // Hide span, show select
+      assignedSpan.style.display = "none";
+      select.style.display = "inline-block";
+      this.style.display = "none";
+      saveBtn.style.display = "inline-block";
+      cancelBtn.style.display = "inline-block";
+
+      // Preselect assigned vehicles
+      const assignedPlates = assignedSpan.textContent.split(",").map(s => s.trim()).filter(Boolean);
       const vehicleOptions = window.vehicleOptions || {};
-
-      // Set selected options in the dropdown
       const selectedIds = assignedPlates.map(plate => vehicleOptions[plate]).filter(Boolean);
-      editVehiclesSelect.setValue(selectedIds);
-
-      editModal.style.display = "block";
+      Array.from(select.options).forEach(opt => {
+        opt.selected = selectedIds.includes(opt.value);
+      });
     });
   });
 
-  // Close modal
-  closeEditModal.onclick = cancelEditBtn.onclick = function () {
-    editModal.style.display = "none";
-  };
+  document.querySelectorAll(".cancel-assignment-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const userId = this.getAttribute("data-user-id");
+      const row = document.querySelector(`tr[data-user-id='${userId}']`);
+      row.querySelector(".assigned-vehicles").style.display = "inline";
+      row.querySelector(".edit-vehicles-select").style.display = "none";
+      row.querySelector(".edit-assignment-btn").style.display = "inline-block";
+      row.querySelector(".save-assignment-btn").style.display = "none";
+      row.querySelector(".cancel-assignment-btn").style.display = "none";
+    });
+  });
 
-  // Save edited assignment
-  editAssignmentForm.onsubmit = function (e) {
-    e.preventDefault();
-    const userId = document.getElementById("editUserId").value;
-    const vehicleIds = editVehiclesSelect.getValue();
+  document.querySelectorAll(".save-assignment-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const userId = this.getAttribute("data-user-id");
+      const row = document.querySelector(`tr[data-user-id='${userId}']`);
+      const select = row.querySelector(".edit-vehicles-select");
+      const vehicleIds = Array.from(select.selectedOptions).map(opt => opt.value);
 
-    fetch("/vehicleAssign/assign_vehicles", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-CSRF-TOKEN": document.querySelector("input[name='csrf_token']").value
-      },
-      body: `user_ids=${encodeURIComponent(userId)}&vehicle_ids=${vehicleIds.map(id => encodeURIComponent(id)).join("&vehicle_ids=")}`
-    })
-      .then(res => res.ok ? location.reload() : res.text().then(alert))
-      .catch(err => alert("Failed to update assignments"));
-  };
+      fetch("/vehicleAssign/assign_vehicles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRF-TOKEN": document.querySelector("input[name='csrf_token']").value
+        },
+        body: `user_id=${encodeURIComponent(userId)}&vehicle_ids=${vehicleIds.map(id => encodeURIComponent(id)).join("&vehicle_ids=")}`
+      })
+        .then(res => res.ok ? location.reload() : res.text().then(alert))
+        .catch(err => alert("Failed to update assignments"));
+    });
+  });
 
 });
