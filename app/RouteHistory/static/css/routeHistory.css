@@ -306,8 +306,10 @@ button {
 }
 
 .info-row strong {
-  color: #333;
-  font-weight: 600;
+  text-align: right;
+  flex: 1;
+  padding-left: 10px;
+  word-break: break-word; /* Prevents overflow for long locations */
 }
 
 .dark-mode .info-row strong {
@@ -579,9 +581,26 @@ button {
   }
   
   .info-row {
-    flex-direction: column;
-    gap: 5px;
-  }
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: baseline; /* Ensures text aligns properly */
+}
+
+.info-row.location-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-row span:first-child {
+  min-width: 120px; /* Gives consistent width to labels */
+  color: #666;
+}
+
+.dark-mode .info-row span:first-child {
+  color: #aaa;
+}
 
   .alarm-table th, 
   .alarm-table td {
