@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Main user and vehicle selectize for the assignment form
   const userSelect = $("#users").selectize({
     plugins: ["restore_on_backspace"],
     placeholder: "Select users...",
@@ -35,19 +36,18 @@ document.addEventListener("DOMContentLoaded", function () {
     create: false,
   });
 
-  const editModal = document.getElementById("editAssignmentModal");
-  const closeEditModal = document.getElementById("closeEditModal");
-  const cancelEditBtn = document.getElementById("cancelEditBtn");
-  const editAssignmentForm = document.getElementById("editAssignmentForm");
-  const editVehiclesSelect = $("#editVehicles").selectize({
-    plugins: ["remove_button"],
-    placeholder: "Select vehicles...",
-    searchField: "text",
-    create: false,
-    dropdownParent: "body"
-  })[0].selectize;
+  // Initialize Selectize for all inline edit dropdowns
+  document.querySelectorAll('.edit-vehicles-select').forEach(function(select) {
+    $(select).selectize({
+      plugins: ["remove_button"],
+      placeholder: "Select vehicles...",
+      searchField: "text",
+      create: false,
+      dropdownParent: "body"
+    });
+  });
 
-  // Open modal and preselect assigned vehicles
+  // Inline editing logic
   document.querySelectorAll(".edit-assignment-btn").forEach(btn => {
     btn.addEventListener("click", function () {
       const userId = this.getAttribute("data-user-id");
@@ -59,7 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Hide span, show select
       assignedSpan.style.display = "none";
-      select.style.display = "inline-block";
+      select.parentElement.querySelector('.selectize-control').style.display = "inline-block";
+      select.style.display = "none"; // hide the original select
       this.style.display = "none";
       saveBtn.style.display = "inline-block";
       cancelBtn.style.display = "inline-block";
@@ -68,9 +69,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const assignedPlates = assignedSpan.textContent.split(",").map(s => s.trim()).filter(Boolean);
       const vehicleOptions = window.vehicleOptions || {};
       const selectedIds = assignedPlates.map(plate => vehicleOptions[plate]).filter(Boolean);
-      Array.from(select.options).forEach(opt => {
-        opt.selected = selectedIds.includes(opt.value);
-      });
+
+      // Set selectize value
+      const selectize = $(select)[0].selectize;
+      selectize.setValue(selectedIds, true);
     });
   });
 
@@ -79,10 +81,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const userId = this.getAttribute("data-user-id");
       const row = document.querySelector(`tr[data-user-id='${userId}']`);
       row.querySelector(".assigned-vehicles").style.display = "inline";
-      row.querySelector(".edit-vehicles-select").style.display = "none";
       row.querySelector(".edit-assignment-btn").style.display = "inline-block";
       row.querySelector(".save-assignment-btn").style.display = "none";
       row.querySelector(".cancel-assignment-btn").style.display = "none";
+      // Hide selectize control
+      const select = row.querySelector(".edit-vehicles-select");
+      select.parentElement.querySelector('.selectize-control').style.display = "none";
     });
   });
 
@@ -91,7 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const userId = this.getAttribute("data-user-id");
       const row = document.querySelector(`tr[data-user-id='${userId}']`);
       const select = row.querySelector(".edit-vehicles-select");
-      const vehicleIds = Array.from(select.selectedOptions).map(opt => opt.value);
+      const selectize = $(select)[0].selectize;
+      const vehicleIds = selectize.getValue();
 
       fetch("/vehicleAssign/assign_vehicles", {
         method: "POST",
@@ -105,5 +110,4 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(err => alert("Failed to update assignments"));
     });
   });
-
 });
