@@ -398,7 +398,7 @@ def download_custom_report():
                     if df is not None:
                         if report_type != "odometer-daily-distance" and idx > 0:
                             # Insert a separator row
-                            sep_row = pd.DataFrame([{df.columns[0]: f"--- New Vehicle: {license_plate} ---", **{col: "" for col in df.columns[1:]}}])
+                            sep_row = pd.DataFrame([{df.columns[0]: f"--- {license_plate} ---", **{col: "" for col in df.columns[1:]}}])
                             all_dfs.append(sep_row)
                         all_dfs.append(df)
             else:
@@ -426,7 +426,7 @@ def download_custom_report():
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                         if processed is not None:
                             if report_type != "odometer-daily-distance" and idx > 0:
-                                sep_row = pd.DataFrame([{processed.columns[0]: f"--- New Vehicle: {license_plate} ---", **{col: "" for col in processed.columns[1:]}}])
+                                sep_row = pd.DataFrame([{processed.columns[0]: f"--- {license_plate} ---", **{col: "" for col in processed.columns[1:]}}])
                                 all_dfs.append(sep_row)
                             all_dfs.append(processed)
 
@@ -835,7 +835,7 @@ def view_report_preview():
                         if report_type != "odometer-daily-distance" and idx > 0:
                             # Insert a separator dict
                             sep_dict = OrderedDict((col, "") for col in df.columns)
-                            sep_dict[df.columns[0]] = f"--- New Vehicle: {license_plate} ---"
+                            sep_dict[df.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
                         all_dfs.append(df)
             else:
@@ -864,7 +864,7 @@ def view_report_preview():
                         if processed is not None:
                             if report_type != "odometer-daily-distance" and idx > 0:
                                 sep_dict = OrderedDict((col, "" ) for col in processed.columns)
-                                sep_dict[processed.columns[0]] = f"--- New Vehicle: {license_plate} ---"
+                                sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
                                 all_dfs.append(pd.DataFrame([sep_dict]))
                             all_dfs.append(processed)
 
