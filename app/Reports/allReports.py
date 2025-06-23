@@ -831,7 +831,7 @@ def view_report_preview():
                     if df is not None:
                         if report_type != "odometer-daily-distance" and idx > 0:
                             # Insert a separator dict
-                            sep_dict = OrderedDict((col, "" for col in df.columns))
+                            sep_dict = OrderedDict((col, "") for col in df.columns)
                             sep_dict[df.columns[0]] = f"--- New Vehicle: {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
                         all_dfs.append(df)
