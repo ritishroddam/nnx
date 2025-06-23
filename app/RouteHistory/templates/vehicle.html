@@ -85,24 +85,20 @@ Vehicle Data
     <div class="info-box">
       <h3>Vehicle: {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available' }} : Info</h3>
       <div class="info-row">
-        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data
-          Available'}}</strong>
+        <span>Vehicle Type:</span><strong>{{ vehicle_data[0]['Vehicle Type'] if vehicle_data else 'No Data Available'}}</strong>
       </div>
       <div class="info-row">
-        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data
-          Available'}}</strong>
+        <span>Vehicle Model:</span><strong>{{ vehicle_data[0]['Vehicle Model'] if vehicle_data else 'No Data Available'}}</strong>
       </div>
       <div class="info-row">
-        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data
-          Available'}}</strong>
+        <span>Vehicle Make:</span><strong>{{ vehicle_data[0]['Vehicle Make'] if vehicle_data else 'No Data Available'}}</strong>
       </div>
       <div class="info-row">
         <span>Location: </span><strong>{{ vehicle_data[0]['Address'] if vehicle_data else 'No Data Available'
           }}</strong>
       </div>
       <div class="info-row">
-        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data
-          Available'}}</strong>
+        <span>Status:</span><strong>{{ vehicle_data[0]['Current Status'] if vehicle_data else 'No Data Available'}}</strong>
       </div>
       <div class="info-row">
         <span>Speed:</span><strong>{{ vehicle_data[0]['Speed'] if vehicle_data else 'No Data Available'}}</strong>
@@ -127,7 +123,7 @@ Vehicle Data
       {% endif %}
     </div>
 
-    <div class="alarm-section">
+    <!-- <div class="alarm-section">
       <h3>
         {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
       </h3>
@@ -157,7 +153,50 @@ Vehicle Data
           {% endif %}
         </tbody>
       </table>
-    </div>
+    </div> -->
+
+    <div class="alarm-section">
+  <div class="alarm-header">
+    <h3>
+      <i class="fas fa-bell alarm-icon"></i>
+      {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
+    </h3>
+    <span class="alarm-count">{{ alerts|length }} active alerts</span>
+  </div>
+  
+  <div class="alarm-table-container">
+    <table class="alarm-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Location</th>
+          <th>Severity</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if alerts %}
+          {% for alert in alerts %}
+          <tr class="alarm-severity-{{ alert['severity']|lower }}">
+            <td>{{ alert["timestamp"] }}</td>
+            <td>{{ alert["location"] }}</td>
+            <td>
+              <span class="severity-badge severity-{{ alert['severity']|lower }}">
+                {{ alert["severity"] }}
+              </span>
+            </td>
+            <td>{{ alert["status"] }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="4" class="no-alerts">No alerts found for this vehicle</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
   </div>
 </div>
 
