@@ -403,8 +403,13 @@ button {
   min-width: 600px; /* Minimum width before scrolling */
   border-collapse: collapse;
   table-layout: fixed; /* Helps with column width control */
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
 }
 
+.dark-mode .alarm-table {
+  box-shadow: 0 0 10px #cccccc90;
+  color: #ccc;
+}
 .alarm-table th {
   background: #e74c3c;
   color: white;
@@ -433,7 +438,7 @@ button {
 
 .alarm-table th:nth-child(2), 
 .alarm-table td:nth-child(2) {
-  width: 35%; /* Location */
+  width: 20%; /* Location */
 }
 
 .alarm-table th:nth-child(3), 
@@ -443,7 +448,7 @@ button {
 
 .alarm-table th:nth-child(4), 
 .alarm-table td:nth-child(4) {
-  width: 25%; /* Status */
+  width: 20%; /* Status */
 }
 
 /* Severity Badges */
