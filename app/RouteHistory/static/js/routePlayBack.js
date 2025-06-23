@@ -624,6 +624,7 @@ let deckInitialized = false;
 let carIconUrl = "/static/images/car_green.png";
 
 async function plotPathOnMap(pathCoordinates) {
+  const darkMode = document.body.classList.contains("dark-mode");
   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
     window.__allMapMarkers.forEach((marker) => {
       if (marker && marker.map) marker.map = null;
@@ -666,7 +667,7 @@ async function plotPathOnMap(pathCoordinates) {
     data: [{ path: deckCoords }],
     getPath: (d) => d.path,
     getWidth: 6,
-    getColor: [80, 80, 80, 230],
+    getColor: darkMode ? [0, 191, 255, 255] : [80, 80, 80, 255],
     widthMinPixels: 3,
     widthMaxPixels: 8,
     jointRounded: true,
@@ -786,11 +787,13 @@ async function plotPathOnMap(pathCoordinates) {
     const nextCoord = coords[index + 1];
     const pathCoord = pathCoordinates[index];
 
+    const arrowColor = darkMode ? "#fff" : "#2a2a2a";
+
     const arrowContent = document.createElement("div");
     arrowContent.style.width = "10px";
     arrowContent.style.height = "10px";
     arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-    arrowContent.style.borderTop = "10px solid #2a2a2a";
+    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
     arrowContent.style.borderLeft = "5px solid transparent";
     arrowContent.style.borderRight = "5px solid transparent";
     arrowContent.style.position = "absolute";
