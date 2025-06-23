@@ -831,7 +831,7 @@ def view_report_preview():
                     if df is not None:
                         if report_type != "odometer-daily-distance" and idx > 0:
                             # Insert a separator dict
-                            sep_dict = OrderedDict((col, "" for col in df.columns))
+                            sep_dict = OrderedDict((col, "") for col in df.columns)
                             sep_dict[df.columns[0]] = f"--- New Vehicle: {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
                         all_dfs.append(df)
@@ -860,7 +860,6 @@ def view_report_preview():
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                         if processed is not None:
                             if report_type != "odometer-daily-distance" and idx > 0:
-                                from collections import OrderedDict
                                 sep_dict = OrderedDict((col, "" ) for col in processed.columns)
                                 sep_dict[processed.columns[0]] = f"--- New Vehicle: {license_plate} ---"
                                 all_dfs.append(pd.DataFrame([sep_dict]))
@@ -891,7 +890,6 @@ def view_report_preview():
             final_df = final_df[existing_columns]
 
             data_records = final_df.fillna("").to_dict(orient="records")
-            from collections import OrderedDict
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
             json_str = json.dumps({
@@ -989,7 +987,6 @@ def view_report_preview():
         df = df[existing_columns]
 
         data_records = df.fillna("").to_dict(orient="records")
-        from collections import OrderedDict
         ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
         json_str = json.dumps({
