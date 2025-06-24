@@ -36,3 +36,139 @@ button:hover {
   margin-top: 20px;
   font-weight: bold;
 }
+
+/* Table styling */
+.assigned-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.assigned-table thead {
+  background-color: #042f5d;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.assigned-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assigned-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.assigned-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.assigned-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Assigned vehicles text */
+.assigned-vehicles {
+  display: inline-block;
+  max-width: 500px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Edit/Save buttons */
+.edit-assignment-btn,
+.save-assignment-btn,
+.cancel-assignment-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.edit-assignment-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.edit-assignment-btn:hover {
+  background-color: #0069d9;
+}
+
+.save-assignment-btn {
+  background-color: #28a745;
+  color: white;
+  margin-right: 5px;
+}
+
+.save-assignment-btn:hover {
+  background-color: #218838;
+}
+
+.cancel-assignment-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-assignment-btn:hover {
+  background-color: #c82333;
+}
+
+/* Select dropdown styling */
+.edit-vehicles-select {
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* Dark mode styles */
+.dark-mode .assigned-table {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .assigned-table thead {
+  background-color: #1a365d;
+}
+
+.dark-mode .assigned-table td {
+  border-bottom-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.dark-mode .assigned-table tbody tr:nth-child(even) {
+  background-color: #2d2d2d;
+}
+
+.dark-mode .assigned-table tbody tr:hover {
+  background-color: #3a3a3a;
+}
+
+.dark-mode .edit-vehicles-select {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .assigned-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .assigned-vehicles {
+    max-width: 200px;
+  }
+}
