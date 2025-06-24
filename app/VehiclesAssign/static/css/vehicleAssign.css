@@ -79,13 +79,18 @@ button:hover {
 /* Assigned vehicles text */
 .assigned-vehicles {
   display: inline-block;
-  max-width: 500px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-wrap: break-word;
 }
 
-/* Edit/Save buttons */
+.assigned-table td:nth-child(2) { 
+  min-width: 300px; 
+  max-width: 600px; 
+}
+
 .edit-assignment-btn,
 .save-assignment-btn,
 .cancel-assignment-btn {
