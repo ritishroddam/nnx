@@ -336,7 +336,7 @@ button {
   border-collapse: collapse;
   table-layout: fixed;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-  margin-bottom: 5px; 
+  margin-bottom: 30px; 
 }
 
 .dark-mode .alarm-table {
