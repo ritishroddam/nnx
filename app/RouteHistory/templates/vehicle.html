@@ -123,41 +123,6 @@ Vehicle Data
       {% endif %}
     </div>
 
-    <!-- <div class="alarm-section">
-      <h3>
-        <i class="fas fa-bell alarm-icon"></i>
-        {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
-      </h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Location</th>
-            <th>Severity</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if alerts %}
-          {% for alert in alerts %}
-          <tr>
-            <td>{{ alert["timestamp"] }}</td>
-            <td>{{ alert["location"] }}</td>
-            <td>{{ alert["severity"] }}</td>
-            <td>{{ alert["status"] }}</td>
-          </tr>
-          {% endfor %}
-          {% else %}
-          <tr>
-            <td colspan="4">No alerts found for the selected IMEI.</td>
-          </tr>
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div> -->
-
 <div class="alarm-section">
   <div class="alarm-header">
     <h3>
