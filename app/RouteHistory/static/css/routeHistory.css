@@ -288,7 +288,7 @@ button {
   box-shadow: 0 0px 12px rgba(0,0,0,0.2);
   padding: 20px;
   margin-top: 20px;
-  min-height: 200px;
+  min-height: 300px;
 }
 
 .dark-mode .alarm-section {
@@ -307,13 +307,13 @@ button {
   position: sticky;
   top: 0;
   z-index: 10;
+  font-size: 12px;
 }
 
 .alarm-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
 }
 
 .alarm-icon {
@@ -336,7 +336,7 @@ button {
   border-collapse: collapse;
   table-layout: fixed;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-  margin-bottom: 0; 
+  margin-bottom: 5px; 
 }
 
 .dark-mode .alarm-table {
@@ -458,6 +458,7 @@ button {
 .alarm-section td {
   padding: 12px 15px;
   border-bottom: 1px solid #e0e0e0;
+  font-size: 15px;
 }
 
 .dark-mode .alarm-section td {
