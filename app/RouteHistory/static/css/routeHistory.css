@@ -297,8 +297,16 @@ button {
 
 .alarm-table-container {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; 
+  max-height: 400px; 
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.alarm-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .alarm-header {
@@ -324,16 +332,18 @@ button {
 
 .alarm-table {
   width: 100%;
-  min-width: 550px; 
+  min-width: 550px;
   border-collapse: collapse;
-  table-layout: fixed; 
+  table-layout: fixed;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  margin-bottom: 0; 
 }
 
 .dark-mode .alarm-table {
   box-shadow: 0 0 10px #cccccc90;
   color: #ccc;
 }
+
 .alarm-table th {
   background: #e74c3c;
   color: white;
