@@ -439,23 +439,19 @@ def download_custom_report():
             output.seek(0)
             
             report_name = data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report'
+            
             report_data = {
-                'user_id': get_jwt_identity(),
-                'report_name': report_name,
-                'generated_at': datetime.now(pytz.UTC),
-                'vehicle_number': vehicle_number,
-                'date_range': date_range,
-                'report_type': report_type,
-                'file_name': f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
+            'user_id': get_jwt_identity(),
+            'report_name': data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report',
+            'filename': f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx",
+            'size': len(output.getvalue()),  # Get file size in bytes
+            'generated_at': datetime.now(pytz.UTC),
+            'vehicle_number': vehicle_number,
+            'report_type': report_type
             }
             db['generated_reports'].insert_one(report_data)
-            
-            return send_file(
-            output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
-        )
+
+            return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_data['filename'])
 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
@@ -1062,7 +1058,6 @@ def get_recent_reports():
         if date_range == 'yesterday':
             query['generated_at']['$lt'] = end_date
         
-        # Delete reports older than 30 days
         db['generated_reports'].delete_many({
             'user_id': user_id,
             'generated_at': {'$lt': now - timedelta(days=30)}
