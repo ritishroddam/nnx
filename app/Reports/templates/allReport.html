@@ -90,9 +90,25 @@ All Reports
     </a>
     {% endfor %}
 
-    <!-- <div id="custom-reports-container"></div> -->
-
 </div>
+
+<div class="recent-reports">
+        <div class="recent-reports-header">
+            <h2>Recently Generated Reports</h2>
+            <div class="date-range-selector">
+                <select id="reportDateRange">
+                    <option value="today">Today</option>
+                    <option value="last24hours">Last 24 Hours</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days">Last 7 Days</option>
+                    <option value="last30days">Last 30 Days</option>
+                </select>
+            </div>
+        </div>
+        <div id="recentReportsList">
+            <p>Your generated reports will be visible here.</p>
+        </div>
+    </div>
 
 
 <div id="customReportModal" class="modal">

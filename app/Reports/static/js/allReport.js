@@ -29,6 +29,17 @@ document.addEventListener("DOMContentLoaded", function() {
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
 
+  let generatedReports = [];
+
+  loadRecentReports('today');
+
+  const reportDateRangeSelect = document.getElementById('reportDateRange');
+  if (reportDateRangeSelect) {
+      reportDateRangeSelect.addEventListener('change', function() {
+          loadRecentReports(this.value);
+      });
+  }
+
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
             customDateRange.style.display = "block";
@@ -57,6 +68,96 @@ document.addEventListener("DOMContentLoaded", function() {
     create: false,
     sortField: "text",
   });
+
+  function loadRecentReports(range) {
+    fetch(`/reports/get_recent_reports?range=${range}`)
+        .then(response => response.json())
+        .then(data => {
+            generatedReports = data.reports;
+            renderRecentReports();
+        })
+        .catch(error => {
+            console.error('Error loading recent reports:', error);
+        });
+}
+
+function renderRecentReports() {
+    const container = document.getElementById('recentReportsList');
+    
+    if (generatedReports.length === 0) {
+        container.innerHTML = '<p class="no-reports">Your generated reports will be visible here.</p>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    generatedReports.forEach(report => {
+        const reportItem = document.createElement('div');
+        reportItem.className = 'report-item';
+        
+        const reportDate = new Date(report.generated_at);
+        const formattedDate = reportDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        const formattedTime = reportDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        reportItem.innerHTML = `
+            <div class="report-info">
+                <div class="report-name">${report.report_name}</div>
+                <div class="report-meta">
+                    <span class="report-date">${formattedDate}</span>
+                    <span class="report-time">${formattedTime}</span>
+                </div>
+            </div>
+            <div class="report-actions">
+                <button class="view-report" data-id="${report._id}" title="View Report">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="download-report" data-id="${report._id}" title="Download Report">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(reportItem);
+    });
+    
+    // Add event listeners to the buttons
+    document.querySelectorAll('.view-report').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reportId = this.dataset.id;
+            viewReport(reportId);
+        });
+    });
+    
+    document.querySelectorAll('.download-report').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reportId = this.dataset.id;
+            downloadReport(reportId);
+        });
+    });
+}
+
+function viewReport(reportId) {
+    const report = generatedReports.find(r => r._id === reportId);
+    if (!report) return;
+    
+    // You can reuse your existing preview modal here
+    // Populate it with the report data
+    alert(`Viewing report: ${report.report_name}`);
+}
+
+function downloadReport(reportId) {
+    const report = generatedReports.find(r => r._id === reportId);
+    if (!report) return;
+    
+    window.location.href = `/reports/download_report/${reportId}`;
+}
 
   const vehicleSelect = document.getElementById("vehicleNumber");
   const vehicleSelectize = vehicleSelect.selectize;

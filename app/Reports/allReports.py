@@ -437,12 +437,25 @@ def download_custom_report():
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
             output.seek(0)
+            
+            report_name = data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report'
+            report_data = {
+                'user_id': get_jwt_identity(),
+                'report_name': report_name,
+                'generated_at': datetime.now(pytz.UTC),
+                'vehicle_number': vehicle_number,
+                'date_range': date_range,
+                'report_type': report_type,
+                'file_name': f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
+            }
+            db['generated_reports'].insert_one(report_data)
+            
             return send_file(
-                output,
-                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                as_attachment=True,
-                download_name=f"{report_type}_report_ALL_VEHICLES.xlsx"
-            )
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
+        )
 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
@@ -647,12 +660,25 @@ def download_panic_report():
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="Panic Report")
             output.seek(0)
+            
+            report_data = {
+            'user_id': get_jwt_identity(),
+            'report_name': 'Panic Report',
+            'generated_at': datetime.now(pytz.UTC),
+            'vehicle_number': vehicle_number,
+            'date_range': date_range if date_range else 'all',
+            'report_type': 'panic',
+            'file_name': f"panic_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
+            }
+            db['generated_reports'].insert_one(report_data)
+
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 as_attachment=True,
-                download_name=f"panic_report_ALL_VEHICLES.xlsx"
+                download_name=f"panic_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
             )
+            
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
@@ -1001,3 +1027,81 @@ def view_report_preview():
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+    
+@reports_bp.route('/get_recent_reports', methods=['GET'])
+@jwt_required()
+def get_recent_reports():
+    try:
+        date_range = request.args.get('range', 'today')
+        user_id = get_jwt_identity()
+        tz = timezone('Asia/Kolkata')  # Adjust to your timezone
+        
+        now = datetime.now(pytz.UTC)
+        now_local = now.astimezone(tz)
+        
+        if date_range == 'today':
+            start_date = datetime(now_local.year, now_local.month, now_local.day, tzinfo=tz).astimezone(pytz.UTC)
+        elif date_range == 'last24hours':
+            start_date = now - timedelta(hours=24)
+        elif date_range == 'yesterday':
+            yesterday = now_local - timedelta(days=1)
+            start_date = datetime(yesterday.year, yesterday.month, yesterday.day, tzinfo=tz).astimezone(pytz.UTC)
+            end_date = datetime(now_local.year, now_local.month, now_local.day, tzinfo=tz).astimezone(pytz.UTC)
+        elif date_range == 'last7days':
+            start_date = now - timedelta(days=7)
+        elif date_range == 'last30days':
+            start_date = now - timedelta(days=30)
+        else:
+            start_date = now - timedelta(days=1)
+        
+        query = {
+            'user_id': user_id,
+            'generated_at': {'$gte': start_date}
+        }
+        
+        if date_range == 'yesterday':
+            query['generated_at']['$lt'] = end_date
+        
+        # Delete reports older than 30 days
+        db['generated_reports'].delete_many({
+            'user_id': user_id,
+            'generated_at': {'$lt': now - timedelta(days=30)}
+        })
+        
+        reports = list(db['generated_reports'].find(
+            query,
+            {'_id': 1, 'report_name': 1, 'generated_at': 1, 'file_path': 1, 'vehicle_number': 1}
+        ).sort('generated_at', -1).limit(50))
+        
+        return jsonify({
+            'success': True,
+            'reports': [{
+                '_id': str(report['_id']),
+                'report_name': report['report_name'],
+                'generated_at': report['generated_at'].isoformat(),
+                'file_path': report.get('file_path', ''),
+                'vehicle_number': report.get('vehicle_number', '')
+            } for report in reports]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@reports_bp.route('/download_report/<report_id>', methods=['GET'])
+@jwt_required()
+def download_report(report_id):
+    try:
+        report = db['generated_reports'].find_one({
+            '_id': ObjectId(report_id),
+            'user_id': get_jwt_identity()
+        })
+        
+        if not report:
+            return jsonify({'success': False, 'message': 'Report not found'}), 404
+            
+        return send_file(
+            report['file_path'],
+            as_attachment=True,
+            download_name=report['report_name'] + '.xlsx'
+        )
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
