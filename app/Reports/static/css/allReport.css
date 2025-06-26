@@ -571,12 +571,16 @@ input[type="datetime-local"] {
 .recent-reports-container {
     flex: 1;
     width: 30%;
-    background: #fff;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 0px 12px rgba(0,0,0,0.2);
     position: sticky;
     top: 20px;
+}
+
+.dark-mode .recent-reports-container {
+    color: #fff;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .recent-reports-header {
@@ -586,9 +590,17 @@ input[type="datetime-local"] {
     margin-bottom: 15px;
 }
 
+.dark-mode .recent-reports-header {
+    color: #fff;
+}
+
 #recentReportsList {
     max-height: calc(100vh - 200px);
     overflow-y: auto;
+}
+
+.date-range-selector{
+  width: 100px;
 }
 
 .date-range-selector select {
@@ -596,6 +608,7 @@ input[type="datetime-local"] {
     border-radius: 4px;
     border: 1px solid #ddd;
     font-size: 14px;
+
 }
 
 #recentReportsList {
