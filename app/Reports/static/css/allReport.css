@@ -106,6 +106,7 @@
 
 .report-card h3 {
   margin-top: 0;
+  margin-left: -80px;
 }
 
 .report-card p {
@@ -113,8 +114,9 @@
 }
 
 .report-card i {
-  font-size: 50px;
-  margin-left: 350px;
+  font-size: 40px;
+  margin-top: 20px;
+  margin-left: 180px;
 }
 
 /* Add some basic styling for the modal */
