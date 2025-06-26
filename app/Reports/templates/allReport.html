@@ -25,77 +25,78 @@ All Reports
 {% endblock %}
 
 {% block block_container %}
-<div class="report-container">
-    <div class="report-main">
-<div class="report-header">
-    <h2>Generate a New Report</h2>
-</div>
-<div class="report-cards">
-
-    <a href="#" class="report-card" data-report="custom">
-        <h3>Custom Report</h3>
-        <i class="fa-solid fa-cogs"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="daily-distance">
-        <h3>Travel Path Report</h3>
-        <i class="fa-solid fa-route"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="odometer-daily-distance">
-        <h3>Distance Report</h3>
-        <i class="fa-solid fa-road"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="distance-speed-range">
-        <h3>Speed Report</h3>
-        <i class="fa-solid fa-gauge-high"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="stoppage">
-        <h3>Stoppage Report</h3>
-        <i class="fa-solid fa-traffic-light"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="idle">
-        <h3>Idle Report</h3>
-        <i class="fa-solid fa-hourglass-half"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="ignition">
-        <h3>Ignition Report</h3>
-        <i class="fa-solid fa-key"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="daily">
-        <h3>Daily Report</h3>
-        <i class="fa-solid fa-calendar-day"></i>
-    </a>
-
-    <a href="#" class="report-card" data-report="panic">
-        <h3>Panic Report</h3>
-        <i class="fa-solid fa-triangle-exclamation"></i>
-    </a>
-
-    {% for report in reports %}
-    <a href="#" class="report-card" data-report="custom" data-report-name="{{ report.report_name }}">
-        <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
-            <div>
-                <h3>{{ report.report_name }}</h3>
-            </div>
-            <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-top: 20px;">
-                <i class="fa-solid fa-trash delete-report" title="Delete Report"
-                   style="color: #d9534f; cursor: pointer; font-size: 1.4em; margin-left: 0;"></i>
-                <i class="fa-solid fa-file-alt" style="font-size: 2.5em;"></i>
-            </div>
+<div class="reports-layout-container">
+    <!-- Left Column - Report Cards -->
+    <div class="report-cards-container">
+        <div class="report-header">
+            <h2>Generate a New Report</h2>
         </div>
-    </a>
-    {% endfor %}
+        <div class="report-cards">
+        
+            <a href="#" class="report-card" data-report="custom">
+                <h3>Custom Report</h3>
+                <i class="fa-solid fa-cogs"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="daily-distance">
+                <h3>Travel Path Report</h3>
+                <i class="fa-solid fa-route"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="odometer-daily-distance">
+                <h3>Distance Report</h3>
+                <i class="fa-solid fa-road"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="distance-speed-range">
+                <h3>Speed Report</h3>
+                <i class="fa-solid fa-gauge-high"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="stoppage">
+                <h3>Stoppage Report</h3>
+                <i class="fa-solid fa-traffic-light"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="idle">
+                <h3>Idle Report</h3>
+                <i class="fa-solid fa-hourglass-half"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="ignition">
+                <h3>Ignition Report</h3>
+                <i class="fa-solid fa-key"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="daily">
+                <h3>Daily Report</h3>
+                <i class="fa-solid fa-calendar-day"></i>
+            </a>
+        
+            <a href="#" class="report-card" data-report="panic">
+                <h3>Panic Report</h3>
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </a>
+        
+            {% for report in reports %}
+            <a href="#" class="report-card" data-report="custom" data-report-name="{{ report.report_name }}">
+                <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+                    <div>
+                        <h3>{{ report.report_name }}</h3>
+                    </div>
+                    <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-top: 20px;">
+                        <i class="fa-solid fa-trash delete-report" title="Delete Report"
+                           style="color: #d9534f; cursor: pointer; font-size: 1.4em; margin-left: 0;"></i>
+                        <i class="fa-solid fa-file-alt" style="font-size: 2.5em;"></i>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        
+        </div>
+    </div>
 
-</div>
-</div>
-
-<div class="recent-reports">
+<div class="recent-reports-container">
         <div class="recent-reports-header">
             <h2>Recently Generated Reports</h2>
             <div class="date-range-selector">

@@ -65,10 +65,23 @@
   cursor: pointer;
 }
 
+/* Main layout container */
+.reports-layout-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Left column - Report Cards */
+.report-cards-container {
+    flex: 2;
+    width: 70%;
+}
+
 .report-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
 }
 
 .report-card {
@@ -78,6 +91,7 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   text-decoration: none;
   color: inherit;
+  text-align: center;
   transition: transform 0.2s;
 }
 
@@ -551,11 +565,28 @@ input[type="datetime-local"] {
     top: 20px;
 }
 
+/* Right column - Recent Reports */
+.recent-reports-container {
+    flex: 1;
+    width: 30%;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 20px;
+}
+
 .recent-reports-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+}
+
+#recentReportsList {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }
 
 .date-range-selector select {
@@ -692,14 +723,17 @@ input[type="datetime-local"] {
 }
 
 @media (max-width: 992px) {
-    .report-container {
+    .reports-layout-container {
         flex-direction: column;
     }
     
-    .recent-reports {
-        max-width: 100%;
+    .report-cards-container,
+    .recent-reports-container {
         width: 100%;
+    }
+    
+    .recent-reports-container {
+        position: static;
         margin-top: 20px;
-        position: static; /* Remove sticky on smaller screens */
     }
 }
