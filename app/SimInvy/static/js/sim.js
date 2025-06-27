@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
       if (!indianMobileRegex.test(mobileNumber)) {
         mobileError.textContent =
-          "Please enter a valid 10-digit Indian mobile number.";
+          "Please enter a valid 13-digit Indian mobile number.";
         mobileError.classList.remove("hidden");
         isValid = false;
       } else {
@@ -575,7 +575,7 @@ function saveSim(simId) {
   const indianMobileRegex = /^[6-9]\d{9}$/;
 
   if (!indianMobileRegex.test(updatedData.MobileNumber)) {
-    errors.push("Invalid Mobile Number: Must be a valid 10-digit Indian number.");
+    errors.push("Invalid Mobile Number: Must be a valid 13-digit Indian number.");
   }
   if (updatedData.SimNumber.length !== 20 || isNaN(updatedData.SimNumber)) {
     errors.push("Invalid SIM Number: Must be exactly 20 digits.");
