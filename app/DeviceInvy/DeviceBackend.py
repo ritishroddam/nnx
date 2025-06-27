@@ -51,39 +51,47 @@ def page():
 @device_bp.route('/search_devices')
 @jwt_required()
 def search_devices():
-    imei_query = request.args.get('imei', '').strip()
-    
-    if not imei_query:
-        return jsonify([])
-    
-    query = {
-        "$or": [
-            {"IMEI": imei_query},
-            {"IMEI": {"$regex": f"{imei_query}$"}}  
-        ]
-    }
-    
-    devices = list(collection.find(query, {"_id": 1, "IMEI": 1, "GLNumber": 1, "DeviceModel": 1, 
-                                         "DeviceMake": 1, "DateIn": 1, "Warranty": 1, 
-                                         "SentBy": 1, "OutwardTo": 1, "Package": 1, 
-                                         "Tenure": 1, "Status": 1}))
-    
-    imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
-    
-    vehiclesData = vehicle_collection.find(
-        {"IMEI": {"$in": imeiList}}, 
-        {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
-    )
-    
-    VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
-    
-    for device in devices:
-        vehicle = VehicleData[device['IMEI']]
-        device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
-        device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
-        device['_id'] = str(device['_id'])
-    
-    return jsonify(devices)
+    try:
+        imei_query = request.args.get('imei', '').strip()
+        
+        if not imei_query:
+            return jsonify([])
+        
+        query = {
+            "$or": [
+                {"IMEI": imei_query},
+                {"IMEI": {"$regex": f"{imei_query}$"}}  
+            ]
+        }
+        
+        devices = list(collection.find(query, {"_id": 1, "IMEI": 1, "GLNumber": 1, "DeviceModel": 1, 
+                                             "DeviceMake": 1, "DateIn": 1, "Warranty": 1, 
+                                             "SentBy": 1, "OutwardTo": 1, "Package": 1, 
+                                             "Tenure": 1, "Status": 1}))
+        
+        if not devices:
+            return jsonify([])
+            
+        imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
+        
+        vehiclesData = list(vehicle_collection.find(
+            {"IMEI": {"$in": imeiList}}, 
+            {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
+        ))
+        
+        VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
+        
+        for device in devices:
+            vehicle = VehicleData.get(device['IMEI'], {})
+            device['LicensePlateNumber'] = vehicle.get('LicensePlateNumber')
+            device['CompanyName'] = vehicle.get('CompanyName')
+            device['_id'] = str(device['_id'])
+        
+        return jsonify(devices)
+        
+    except Exception as e:
+        print(f"Error in search_devices: {str(e)}", file=sys.stderr)
+        return jsonify({'error': 'Failed to search devices'}), 500
 
 @device_bp.route('/manual_entry', methods=['POST'])
 @jwt_required()

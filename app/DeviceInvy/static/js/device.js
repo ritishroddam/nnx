@@ -115,12 +115,17 @@ function searchDevices() {
   }
 
   fetch(`/deviceInvy/search_devices?imei=${searchValue}`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => { throw new Error(err.error || 'Search failed'); });
+      }
+      return response.json();
+    })
     .then(data => {
       const tableBody = document.getElementById("deviceTable");
-      tableBody.innerHTML = ''; 
-
-      if (data.length === 0) {
+      tableBody.innerHTML = '';
+      
+      if (!data || data.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = `<td colspan="13" class="no-results">No devices found</td>`;
         tableBody.appendChild(row);
