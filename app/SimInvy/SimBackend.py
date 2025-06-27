@@ -151,7 +151,7 @@ def manual_entry():
     data['status'] = 'Available' 
     data['isActive'] = True  
 
-    if len(data['MobileNumber']) != 13 or len(data['MobileNumber']) != 10:
+    if len(data['MobileNumber']) not in [10, 13]:
         flash("The lenght of Mobile Number must be 13 or 10", "danger")
 
         if len(data['SimNumber']) != 20:
@@ -237,7 +237,7 @@ def upload_file():
             date_out = str(row['DateOut']).split(' ')[0].strip() if not pd.isnull(row['DateOut']) else ""
             vendor = str(row['Vendor']).strip()
 
-            if len(mobile_number) != 13 or len(mobile_number) != 10:
+            if len(mobile_number) not in [10,13]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
             if len(sim_number) != 20:
@@ -285,7 +285,7 @@ def edit_sim(sim_id):
             "status": updated_data.get("status"),
             "isActive": is_active,
             "lastEditedBy": updated_data.get("lastEditedBy"),
-            "lastEditedAt": datetime.utcnow()
+            "lastEditedAt": datetime.now()
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
