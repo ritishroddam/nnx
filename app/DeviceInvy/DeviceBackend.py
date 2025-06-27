@@ -38,9 +38,13 @@ def page():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
-        vehicle = VehicleData[device['IMEI']]
-        device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
-        device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+        vehicle = VehicleData.get(device['IMEI']) 
+        if not vehicle:
+            device['LicensePlateNumber'] = None
+            device['CompanyName'] = None
+        else:
+            device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
+            device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
     
     return render_template('device.html', devices=devices)
 
