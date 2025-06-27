@@ -39,11 +39,10 @@ def page():
     
     for device in devices:
         vehicle = VehicleData.get(device['IMEI']) 
-        if vehicle:
+        if not vehicle:
             device['LicensePlateNumber'] = None
             device['CompanyName'] = None
         else:
-            vehicle = VehicleData[device['IMEI']]
             device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
             device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
     
