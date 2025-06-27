@@ -21,6 +21,8 @@ const allowedFields = [
 ];
 
 document.addEventListener("DOMContentLoaded", function() {
+  loadRecentReports();
+  
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
   const fieldSelection = document.getElementById("fieldSelection");
@@ -28,6 +30,17 @@ document.addEventListener("DOMContentLoaded", function() {
   const customReportForm = document.getElementById("customReportForm");
   const dateRangeSelect = document.getElementById("dateRange");
   const customDateRange = document.getElementById("customDateRange");
+
+  let generatedReports = [];
+
+  loadRecentReports('today');
+
+  const reportDateRangeSelect = document.getElementById('reportDateRange');
+  if (reportDateRangeSelect) {
+      reportDateRangeSelect.addEventListener('change', function() {
+          loadRecentReports(this.value);
+      });
+  }
 
    function handleDateRangeChange() {
         if (dateRangeSelect.value === "custom") {
@@ -57,6 +70,157 @@ document.addEventListener("DOMContentLoaded", function() {
     create: false,
     sortField: "text",
   });
+
+  function loadRecentReports(range) {
+    fetch(`/reports/get_recent_reports?range=${range}`)
+        .then(response => response.json())
+        .then(data => {
+            generatedReports = data.reports;
+            renderRecentReports();
+        })
+        .catch(error => {
+            console.error('Error loading recent reports:', error);
+        });
+}
+
+function renderRecentReports() {
+    const container = document.getElementById('recentReportsList');
+    
+    if (generatedReports.length === 0) {
+        container.innerHTML = '<p class="no-reports">Your generated reports will be visible here.</p>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    generatedReports.forEach(report => {
+        const reportItem = document.createElement('div');
+        reportItem.className = 'report-item';
+        
+        const reportDate = new Date(report.generated_at);
+        const formattedDate = reportDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        const formattedTime = reportDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        reportItem.innerHTML = `
+            <div class="report-info">
+                <div class="report-name">${report.report_name}</div>
+                <div class="report-meta">
+                    <span class="report-date">${formattedDate}</span>
+                    <span class="report-time">${formattedTime}</span>
+                </div>
+            </div>
+            <div class="report-actions">
+                <button class="view-report" data-id="${report._id}" title="View Report">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="download-report" data-id="${report._id}" title="Download Report">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(reportItem);
+    });
+    
+    // Add event listeners to the buttons
+    document.querySelectorAll('.view-report').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reportId = this.dataset.id;
+            viewReport(reportId);
+        });
+    });
+    
+    document.querySelectorAll('.download-report').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reportId = this.dataset.id;
+            downloadReport(reportId);
+        });
+    });
+}
+
+function loadRecentReports() {
+    fetch('/reports/get_recent_reports')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.reports.length > 0) {
+                renderRecentReports(data.reports);
+            } else {
+                document.getElementById('recentReportsList').innerHTML = 
+                    '<p>Your generated reports will be visible here.</p>';
+            }
+        })
+        .catch(error => console.error('Error loading reports:', error));
+}
+
+function renderRecentReports(reports) {
+    const container = document.getElementById('recentReportsList');
+    container.innerHTML = '';
+    
+    reports.forEach(report => {
+        const reportItem = document.createElement('div');
+        reportItem.className = 'report-item';
+        
+        // Format file size
+        const fileSize = report.size > 1024 ? 
+            `${(report.size/1024).toFixed(1)} KB` : 
+            `${report.size} bytes`;
+            
+        // Format timestamp
+        const timeAgo = formatTimeAgo(new Date(report.generated_at));
+        
+        reportItem.innerHTML = `
+            <div class="report-info">
+                <div class="report-name">${report.filename}</div>
+                <div class="report-meta">
+                    <span class="file-size">${fileSize}</span>
+                    <span class="time-ago">${timeAgo}</span>
+                </div>
+            </div>
+            <div class="report-actions">
+                <button class="download-report" data-id="${report._id}">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(reportItem);
+    });
+}
+
+// Helper function to format time ago
+function formatTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return `${seconds} seconds ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minutes ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} days ago`;
+}
+
+function viewReport(reportId) {
+    const report = generatedReports.find(r => r._id === reportId);
+    if (!report) return;
+    
+    // You can reuse your existing preview modal here
+    // Populate it with the report data
+    alert(`Viewing report: ${report.report_name}`);
+}
+
+function downloadReport(reportId) {
+    const report = generatedReports.find(r => r._id === reportId);
+    if (!report) return;
+    
+    window.location.href = `/reports/download_report/${reportId}`;
+}
 
   const vehicleSelect = document.getElementById("vehicleNumber");
   const vehicleSelectize = vehicleSelect.selectize;
