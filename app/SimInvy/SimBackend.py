@@ -174,6 +174,10 @@ def manual_entry():
     if collection.find_one({"SimNumber": data['SimNumber']}):
         flash("SIM Number already exists", "danger")
         return redirect(url_for('SimInvy.page'))
+    
+    if 'DateIn' not in data or not data['DateIn']:
+        flash("Date In is required", "danger")
+        return redirect(url_for('SimInvy.page'))
 
     collection.insert_one(data)
     flash("SIM added successfully!", "success")

@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var simError = document.getElementById("simError");
 
       var dateInValue = dateInInput.value.trim();
-      var dateOutValue = dateOutInput.value.trim();
+      // var dateOutValue = dateOutInput.value.trim();
 
       var indianMobileRegex = /^[6-9]\d{9}$/;
 
@@ -127,27 +127,27 @@ document.addEventListener("DOMContentLoaded", function() {
       }
 
       dateInValue = formatDate(dateInValue);
-      dateOutValue = formatDate(dateOutValue);
+      // dateOutValue = formatDate(dateOutValue);
 
       const dateInObj = isValidDate(dateInValue) ? new Date(dateInValue) : null;
-      const dateOutObj = isValidDate(dateOutValue)
-        ? new Date(dateOutValue)
-        : null;
+      // const dateOutObj = isValidDate(dateOutValue)
+      //   ? new Date(dateOutValue)
+      //   : null;
 
       if (dateInObj && dateInObj > today) {
         alert("Future dates are not allowed for 'Date In'.");
         isValid = false;
       }
 
-      if (dateOutObj && dateOutObj > today) {
-        alert("Future dates are not allowed for 'Date Out'.");
-        isValid = false;
-      }
+      // if (dateOutObj && dateOutObj > today) {
+      //   alert("Future dates are not allowed for 'Date Out'.");
+      //   isValid = false;
+      // }
 
-      if (dateInObj && dateOutObj && dateInObj >= dateOutObj) {
-        alert("'Date In' must be earlier than 'Date Out'.");
-        isValid = false;
-      }
+      // if (dateInObj && dateOutObj && dateInObj >= dateOutObj) {
+      //   alert("'Date In' must be earlier than 'Date Out'.");
+      //   isValid = false;
+      // }
 
       if (!indianMobileRegex.test(mobileNumber)) {
         mobileError.textContent =
