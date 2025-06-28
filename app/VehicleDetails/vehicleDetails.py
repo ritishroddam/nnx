@@ -67,7 +67,6 @@ def get_device_inventory():
 def get_companies():
     try:
         companies = list(companies_collection.find({}, {"_id": 1, "Company Name": 1}))
-        print(f"Companies fetched: {companies}")  
         company_list = [{"id": str(company["_id"]), "name": company["Company Name"]} for company in companies]
         return jsonify(company_list), 200
     except Exception as e:
@@ -115,10 +114,11 @@ def manual_entry():
         flash(f"License Plate Number {data['LicensePlateNumber']} already exists", "danger")
         return redirect(url_for('VehicleDetails.page'))
     
-    company_names = vehicle_collection.distinct('CompanyName')
     data['CompanyName'] = data.get('CompanyName', '')
     
-    if data['CompanyName'] and data['CompanyName'] not in company_names:
+    company = db['customers_list'].find_one({"Company Name": data.get('CompanyName', '')})
+    
+    if not company:
         flash("Invalid company name", "danger")
         return redirect(url_for('VehicleDetails.page'))
 
