@@ -217,6 +217,13 @@ async function updateData(data) {
     data["status_time_delta"] = 0;
     data["status_time_str"] = "0 seconds";
 
+    if(data.imei === "863221044380259")
+    {
+      console.log("New vehicle data received:", data);
+      console.log("Last updated:", lastUpdated);
+      console.log();
+    }
+
     vehicleData.set(data.imei, data);
   }
 
