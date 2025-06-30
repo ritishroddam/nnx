@@ -464,6 +464,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     return;
   }
 
+  // let vehiclesArray = Array.isArray(vehicles) ? vehicles : Array.from(vehicles.values());
   let vehiclesArray = vehicles;
 
   if (vehicles instanceof Map) {
@@ -501,9 +502,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
   vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
 
-  vehicles.forEach((vehicle) => {
+  vehiclesArray.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
+
+    const hasSOS = vehicle.sos === "1";
+
     if (vehicle.sos === "1") {
       vehicleElement.classList.add("sos-blink-card");
       vehicleElement.style.zIndex = "10";
@@ -513,6 +517,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const now = new Date();
+    const isToday = lastUpdated.toDateString() === now.toDateString();
     const timeDiff = Math.abs(now - lastUpdated);
     const secondsDiff = Math.floor(timeDiff / 1000);
     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
@@ -530,6 +535,14 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconRed = "color:#d32f2f;";
 
     statusText = vehicle.status;
+
+    if (hasSOS) {
+      if (isToday) {
+        vehicleElement.classList.add("sos-blink-card"); // Blinking effect
+      } else {
+        vehicleElement.classList.add("sos-historic-card"); // Static indicator
+      }
+    }
 
     if (statusText === "offline") {
       statusText = "Offline";

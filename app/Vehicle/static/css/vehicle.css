@@ -1128,23 +1128,27 @@ input:checked + .slider:before {
 .sos-blink-card {
   animation: sosBlink 1s infinite;
   border: 2px solid red;
-  z-index: 10 !important;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  position: relative;
+}
+
+.sos-historic-card {
+  border-left: 4px solid #ff6b6b;
+  position: relative;
+}
+
+.sos-historic-card::before {
+  content: "⚠️";
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 1.2em;
+  color: #ff6b6b;
 }
 
 @keyframes sosBlink {
-  0% { 
-    border-color: red;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-  }
-  50% { 
-    border-color: transparent;
-    box-shadow: none;
-  }
-  100% { 
-    border-color: red;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-  }
+  0% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+  50% { border-color: transparent; box-shadow: none; }
+  100% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
 }
 
 /* Responsive for skeleton loader */
