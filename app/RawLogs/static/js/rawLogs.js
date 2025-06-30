@@ -73,25 +73,31 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Fetch and populate vehicle dropdown
-  async function fetchVehicles() {
-    const response = await fetch("/rawLogs/getVehicles");
-    const vehicles = await response.json();
-    const vehicleDropdown = document.getElementById("vehicleDropdown");
-    vehicles.forEach((vehicle) => {
-      const option = document.createElement("option");
-      option.value = vehicle.licensePlateNumber;
-      option.textContent = vehicle.licensePlateNumber;
-      vehicleDropdown.appendChild(option);
-    });
+    async function fetchVehicles() {
+      try {
+        const response = await fetch("/rawLogs/getVehicles");
+        if (!response.ok) throw new Error("Failed to fetch vehicles");
+        const vehicles = await response.json();
+        const vehicleDropdown = document.getElementById("vehicleDropdown");
+        vehicleDropdown.innerHTML = ""; // Clear existing options
+        vehicles.forEach((vehicle) => {
+          const option = document.createElement("option");
+          option.value = vehicle.LicensePlateNumber; // Ensure correct field name
+          option.textContent = vehicle.LicensePlateNumber;
+          vehicleDropdown.appendChild(option);
+        });
 
-    // Initialize selectize for the dropdown
-    $("#vehicleDropdown").selectize({
-      plugins: ["remove_button"],
-      placeholder: "Select vehicles...",
-      searchField: "text",
-      create: false,
-    });
-  }
+        $("#vehicleDropdown").selectize({
+          plugins: ["remove_button"],
+          placeholder: "Select vehicles...",
+          searchField: "text",
+          create: false,
+        });
+
+      } catch (error) {
+        console.error("Error fetching vehicles:", error);
+      }
+    }
 
   // Subscribe to vehicles
   document.getElementById("subscribeForm").addEventListener("submit", async function (e) {
