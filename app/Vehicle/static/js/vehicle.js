@@ -116,11 +116,14 @@ socket.on("disconnect", () => {
 socket.on("vehicle_update", async function (data) {
   try {
     const updatedData = await updateData(data);
-
     updateVehicleData(updatedData);
-    updateVehicleCard(updatedData);
-    if(data.sos === "1") {
+    
+    if (data.sos === "1") {
       triggerSOS(data.imei, markers[data.imei]);
+      const vehicles = Array.from(vehicleData.values());
+      renderVehicleCards(vehicles);
+    } else {
+      updateVehicleCard(updatedData);
     }
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
@@ -388,6 +391,14 @@ function triggerSOS(imei, marker) {
 
     marker.content.classList.add("vehicle-blink");
 
+    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+    if (vehicleCard) {
+      vehicleCard.classList.add("sos-blink-card");
+      // Move to top of list
+      const listContainer = document.getElementById("vehicle-list");
+      listContainer.insertBefore(vehicleCard, listContainer.firstChild);
+    }
+
     setTimeout(() => {
       removeSOS(imei);
     }, 60000);
@@ -435,6 +446,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     return;
   }
 
+  vehicles.sort((a, b) => {
+    if (a.sos === "1" && b.sos !== "1") return -1;
+    if (a.sos !== "1" && b.sos === "1") return 1;
+    return 0;
+  });
+
   const listContainer = document.getElementById("vehicle-list");
   const vehicleCounter = document.getElementById("vehicle-counter");
   const vehicleCount = document.getElementById("vehicle-count");
@@ -450,6 +467,11 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   vehicles.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
+    if (vehicle.sos === "1") {
+    vehicleElement.classList.add("sos-blink-card");
+    vehicleElement.style.zIndex = "10"; // Ensure it stays on top
+    vehicleElement.style.position = "relative";
+    }
     vehicleElement.setAttribute("data-imei", vehicle.imei);
     const isDarkMode = document.body.classList.contains("dark-mode");
 
@@ -1149,6 +1171,12 @@ function removeSOS(imei) {
   if (marker && marker.content) {
     marker.content.classList.remove("vehicle-blink");
   }
+
+  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+  if (vehicleCard) {
+    vehicleCard.classList.remove("sos-blink-card");
+  }
+
 }
 
 function formatDateTime(dateString, timeString) {
