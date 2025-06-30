@@ -41,9 +41,9 @@ Vehicle Data
         <form id="vehicle-form">
           <input type="hidden" id="imei" name="imei" value="{{ vehicle_data[0]['IMEI'] if vehicle_data else '' }}">
           <label for="start_date">Start Date:</label>
-          <input type="date" id="start_date" name="start_date" required>
+          <input type="datetime-local" id="start_date" name="start_date" required>
           <label for="end_date">End Date:</label>
-          <input type="date" id="end_date" name="end_date" required>
+          <input type="datetime-local" id="end_date" name="end_date" required>
           <button type="submit">
             <i class="fas fa-search"></i> Get Path
           </button>
