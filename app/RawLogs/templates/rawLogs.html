@@ -19,8 +19,23 @@ Raw Logs
   </div>
 </div>
 
-<div id="rawLogsView" class="view-container">
+<div id="rawLogsView" class="view-container active">
   <h2>Raw Logs</h2>
+  <form id="rawLogsForm" class="styled-form">
+    <div class="form-group">
+      <label for="licensePlateNumber">License Plate Number:</label>
+      <input type="text" id="licensePlateNumber" name="licensePlateNumber" required>
+    </div>
+    <div class="form-group">
+      <label for="fromDatetime">From:</label>
+      <input type="datetime-local" id="fromDatetime" name="fromDatetime" required>
+    </div>
+    <div class="form-group">
+      <label for="toDatetime">To:</label>
+      <input type="datetime-local" id="toDatetime" name="toDatetime" required>
+    </div>
+    <button type="submit" class="btn">Fetch Logs</button>
+  </form>
   <div id="logsContainer">
     <!-- Logs will be dynamically populated here -->
   </div>
@@ -29,9 +44,9 @@ Raw Logs
 
 <div id="subscribeView" class="view-container hidden">
   <h2>Subscribe Vehicles</h2>
-  <form id="subscribeForm">
+  <form id="subscribeForm" class="styled-form">
     <label for="vehicleDropdown">Select Vehicles:</label>
-    <select id="vehicleDropdown" name="vehicles" multiple>
+    <select id="vehicleDropdown" name="vehicles" multiple class="selectize">
       <!-- Options will be dynamically populated -->
     </select>
     <button type="submit" class="btn">Subscribe</button>
