@@ -358,6 +358,7 @@ def create_app(config_name='default'):
     from app.userConfig.userConfig import userConfigBlueprint
     from app.companyConfig.companyConfig import companyConfig_bp
     from app.MapZoomIn.mapZoomIn import mapZoomIn_bp
+    from app.RawLogs.rawLogs import rawLogs_bp
 
     app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
@@ -373,6 +374,7 @@ def create_app(config_name='default'):
     app.register_blueprint(userConfigBlueprint, url_prefix='/userConfig')
     app.register_blueprint(companyConfig_bp, url_prefix='/companyConfig')
     app.register_blueprint(mapZoomIn_bp, url_prefix='/mapZoomIn')
+    app.register_blueprint(rawLogs_bp, url_prefix='/rawLogs')
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)

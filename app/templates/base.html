@@ -133,6 +133,13 @@
                             <i class="fa-solid fa-file-alt"></i> <span class="sidebar-text">Reports</span>
                         </a>
                     </li>
+                    {% if role == 'admin' %}
+                    <li>
+                        <a href="{{url_for('RawLogs.home')}}" class="menu-item">
+                            <i class="fa-solid fa-file-alt"></i> <span class="sidebar-text">Raw Logs</span>
+                        </a>
+                    </li>
+                    {% endif %}
                     {% if role == 'clientAdmin' %}
                     <li>
                         <a href="{{ url_for('VehicleAssign.assign_vehicles') }}" class="menu-item">
