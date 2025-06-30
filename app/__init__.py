@@ -278,14 +278,14 @@ def create_app(config_name='default'):
     @jwt.expired_token_loader
     def handle_expired_token(jwt_header, jwt_payload):
         """Handle requests with expired JWTs."""
-        if request.endpoint not in ['auth.logout', 'static', None]:
+        if request.endpoint not in ['auth.logout', 'static', None, 'ShareLocation.view_share_location']:
             flash("Your session has expired. Please log in again.", "warning")
             return redirect(url_for('auth.logout'))
 
     @app.before_request
     def refresh_token_if_needed():
         print(f"Request endpoint: {request.endpoint}")
-        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', 'main.home', None]:
+        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', 'main.home', None, 'ShareLocation.view_share_location']:
             try:
                 verify_jwt_in_request(optional=True)
                 claims = get_jwt()
@@ -324,7 +324,7 @@ def create_app(config_name='default'):
         except Exception as e:
             print(f"Error setting refreshed token: {e}")
         
-        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None]:
+        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None, 'ShareLocation.view_share_location']:
             try:
                 verify_jwt_in_request(optional=True)
                 claims = get_jwt()
