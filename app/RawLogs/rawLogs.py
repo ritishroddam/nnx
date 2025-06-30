@@ -100,7 +100,7 @@ def subscribe_to_raw_log():
 @jwt_required()
 @roles_required('admin')
 def get_vehicles():
-    vehicles = list(vehicleCollection.find({}, {"LicensePlateNumber": 1}))
+    vehicles = list(vehicleCollection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return jsonify(vehicles), 200
 
 @rawLogs_bp.route('/downloadPDF', methods=['GET'])
