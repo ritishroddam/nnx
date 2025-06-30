@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Raw Logs</title>
+<link rel="stylesheet" href="{{ url_for('RawLogs.static', filename='css/rawLogs.css') }}">
+<script defer src="{{ url_for('RawLogs.static', filename='js/rawLogs.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}
+Raw Logs
+{% endblock %}
+
+{% block block_container %}
+<div class="toggle-container">
+  <div class="toggle-slider">
+    <div class="toggle-option logs-option active">Raw Logs</div>
+    <div class="toggle-option subscribe-option">Subscribe Vehicles</div>
+    <div class="slider-button"></div>
+  </div>
+</div>
+
+<div id="rawLogsView" class="view-container">
+  <h2>Raw Logs</h2>
+  <div id="logsContainer">
+    <!-- Logs will be dynamically populated here -->
+  </div>
+  <button id="downloadAllLogsBtn" class="btn">Download All Logs (PDF)</button>
+</div>
+
+<div id="subscribeView" class="view-container hidden">
+  <h2>Subscribe Vehicles</h2>
+  <form id="subscribeForm">
+    <label for="vehicleDropdown">Select Vehicles:</label>
+    <select id="vehicleDropdown" name="vehicles" multiple>
+      <!-- Options will be dynamically populated -->
+    </select>
+    <button type="submit" class="btn">Subscribe</button>
+  </form>
+</div>
+{% endblock %}

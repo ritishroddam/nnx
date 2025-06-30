@@ -1,7 +1,8 @@
-from flask import Flask, Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Flask, Blueprint, render_template, request, jsonify, flash, redirect, url_for, send_file
 from datetime import datetime, timedelta
 from pytz import timezone
 from bson.objectid import ObjectId 
+from fpdf import FPDF
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
@@ -18,19 +19,12 @@ vehicleCollection = db['vehicle_inventory']
 @jwt_required()
 @roles_required('admin')
 def home():
-    """
-    Render the home page for raw logs.
-    """
     return render_template('rawLogs/home.html')
 
 @rawLogs_bp.route('/getRawLogs', methods=['POST'])
 @jwt_required()
 @roles_required('admin')
 def get_raw_logs():
-    """
-    Fetch raw logs based on the provided filters.
-    """
-
     licensePlateNumber = request.args.get('licensePlateNumber')
     start_date = request.args.get('startDate')
     end_date = request.args.get('endDate')
@@ -60,7 +54,7 @@ def get_raw_logs():
     for log in raw_logs:
         log['timestamp'] = log['timestamp'].astimezone(timezone('UTC')).strftime('%Y-%m-%d %H:%M:%S')
 
-    return jsonify(raw_logs),200
+    return jsonify(raw_logs), 200
     
 @rawLogs_bp.route('/subscribeToRawLog', methods=['POST'])
 @jwt_required()
@@ -101,3 +95,44 @@ def subscribe_to_raw_log():
         return jsonify({"message": "Already subscribed to all provided vehicles"}), 200
 
     return jsonify({"message": "Subscribed successfully", "vehicles": subscriptions}), 201
+
+@rawLogs_bp.route('/getVehicles', methods=['GET'])
+@jwt_required()
+@roles_required('admin')
+def get_vehicles():
+    vehicles = list(vehicleCollection.find({}, {"LicensePlateNumber": 1}))
+    return jsonify(vehicles), 200
+
+@rawLogs_bp.route('/downloadPDF', methods=['GET'])
+@jwt_required()
+@roles_required('admin')
+def download_pdf():
+    vehicle = request.args.get('vehicle')
+    query = {"LicensePlateNumber": vehicle} if vehicle else {}
+    logs = list(rawLogsCollection.find(query))
+
+    # Create a PDF
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Add title
+    pdf.set_font("Arial", style="B", size=16)
+    pdf.cell(200, 10, txt="Raw Logs Report", ln=True, align="C")
+    pdf.ln(10)
+
+    # Add logs
+    pdf.set_font("Arial", size=12)
+    for log in logs:
+        pdf.cell(0, 10, txt=f"Vehicle: {log['LicensePlateNumber']}", ln=True)
+        pdf.cell(0, 10, txt=f"Timestamp: {log['timestamp']}", ln=True)
+        pdf.cell(0, 10, txt=f"Data: {log['data']}", ln=True)
+        pdf.ln(5)
+
+    # Save the PDF to a temporary file
+    pdf_path = "raw_logs_report.pdf"
+    pdf.output(pdf_path)
+
+    # Send the file as a response
+    return send_file(pdf_path, as_attachment=True)
