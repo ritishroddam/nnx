@@ -65,17 +65,18 @@
   cursor: pointer;
 }
 
-/* Main layout container */
 .reports-layout-container {
     display: flex;
     gap: 20px;
     align-items: flex-start;
+    width: 100%;
 }
 
 /* Left column - Report Cards */
 .report-cards-container {
-    flex: 2;
-    width: 70%;
+    flex: 4;
+    width: 80%;
+    max-width: 80%;
 }
 
 .report-cards {
@@ -571,7 +572,8 @@ input[type="datetime-local"] {
 /* Right column - Recent Reports */
 .recent-reports-container {
     flex: 1;
-    width: 30%;
+    width: 20%;
+    max-width: 20%;
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 0px 12px rgba(0,0,0,0.2);
@@ -746,6 +748,8 @@ input[type="datetime-local"] {
     .report-cards-container,
     .recent-reports-container {
         width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
     }
     
     .recent-reports-container {
