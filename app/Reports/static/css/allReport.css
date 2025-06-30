@@ -589,7 +589,6 @@ input[type="datetime-local"] {
 .recent-reports-header {
     align-items: center;
     margin-bottom: 15px;
-    margin-bottom: 20px;
 }
 
 .dark-mode .recent-reports-header {
@@ -610,7 +609,7 @@ input[type="datetime-local"] {
     border-radius: 4px;
     border: 1px solid #ddd;
     font-size: 14px;
-
+    margin-top: 10px;
 }
 
 #recentReportsList {
