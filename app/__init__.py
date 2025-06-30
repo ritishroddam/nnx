@@ -285,7 +285,7 @@ def create_app(config_name='default'):
     @app.before_request
     def refresh_token_if_needed():
         print(f"Request endpoint: {request.endpoint}")
-        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', 'main.home', None, 'ShareLocation.view_share_location']:
+        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', 'main.home', None, 'ShareLocation.view_share_location', 'Vehicle.static']:
             try:
                 verify_jwt_in_request(optional=True)
                 claims = get_jwt()
@@ -324,7 +324,7 @@ def create_app(config_name='default'):
         except Exception as e:
             print(f"Error setting refreshed token: {e}")
         
-        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None, 'ShareLocation.view_share_location']:
+        if request.endpoint not in ['login','auth.api_login', 'auth.login', 'auth.logout', 'static', None, 'ShareLocation.view_share_location', 'Vehicle.static']:
             try:
                 verify_jwt_in_request(optional=True)
                 claims = get_jwt()
