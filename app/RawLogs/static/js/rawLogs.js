@@ -83,6 +83,14 @@ document.addEventListener("DOMContentLoaded", function () {
       option.textContent = vehicle.licensePlateNumber;
       vehicleDropdown.appendChild(option);
     });
+
+    // Initialize selectize for the dropdown
+    $("#vehicleDropdown").selectize({
+      plugins: ["remove_button"],
+      placeholder: "Select vehicles...",
+      searchField: "text",
+      create: false,
+    });
   }
 
   // Subscribe to vehicles

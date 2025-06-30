@@ -1,3 +1,4 @@
+/* View container styling */
 .view-container {
   display: none;
   margin-top: 20px;
@@ -7,6 +8,7 @@
   display: block;
 }
 
+/* Toggle container styling */
 .toggle-container {
   display: flex;
   align-items: center;
@@ -47,6 +49,7 @@
   left: 0;
 }
 
+/* Form styling */
 .styled-form {
   margin: 20px 0;
 }
@@ -79,5 +82,77 @@
 }
 
 .styled-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Logs container styling */
+#logsContainer {
+  margin-top: 20px;
+}
+
+.log-item {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
+
+.log-item h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.log-item p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.log-item .btn {
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.log-item .btn:hover {
+  background-color: #218838;
+}
+
+/* Dropdown styling with selectize */
+.selectize-dropdown {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.selectize-dropdown .selectize-input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.selectize-dropdown .selectize-dropdown-content {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+/* Button styling */
+.btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:hover {
   background-color: #0056b3;
 }
