@@ -587,10 +587,9 @@ input[type="datetime-local"] {
 }
 
 .recent-reports-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .dark-mode .recent-reports-header {
