@@ -117,15 +117,19 @@ socket.on("vehicle_update", async function (data) {
   try {
     const updatedData = await updateData(data);
     updateVehicleData(updatedData);
-    
-    if (data.sos === "1") {
+
+    // Only trigger SOS if data is recent
+    const lastUpdated = convertToDate(data.date, data.time);
+    const now = new Date();
+    const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+    if (data.sos === "1" && hoursSinceUpdate <= 1) {
       triggerSOS(data.imei, markers[data.imei]);
+    } else if (data.sos === "1") {
+      console.log(`Old SOS alert ignored for ${data.imei}`);
     }
-    
-    // Always update the cards with current data
-    const vehiclesArray = Array.from(vehicleData.values());
-    renderVehicleCards(vehiclesArray);
-    
+
+    updateVehicleCard(updatedData);
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
   }
@@ -242,8 +246,16 @@ async function fetchVehicleData() {
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
     const data = await response.json();
+    const now = new Date();
 
     data.forEach((vehicle) => {
+      const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+      const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+      if (vehicle.sos === "1" && hoursSinceUpdate > 1) {
+        vehicle.sos = "0"; 
+      }
+
       vehicleData.set(vehicle.imei, {
         LicensePlateNumber: vehicle.LicensePlateNumber,
         VehicleType: vehicle.VehicleType,
@@ -384,22 +396,30 @@ function updateVehicleCard(data) {
 }
 
 function triggerSOS(imei, marker) {
+  const vehicle = vehicleData.get(imei);
+  if (!vehicle) return;
+
+  // Check if the data is recent (within last 1 hour)
+  const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+  const now = new Date();
+  const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+  if (hoursSinceUpdate > 1) {
+    console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
+    return;
+  }
+
   if (!sosActiveMarkers[imei]) {
+    // Add blinking effect to marker
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
 
-    const vehicle = vehicleData.get(imei);
-    if (vehicle) {
-      vehicle.sos = "1";
-      vehicleData.set(imei, vehicle);
-    }
-
     setTimeout(() => {
       removeSOS(imei);
-    }, 60000);
+    }, 60000); // 60 seconds timeout
   }
 }
 
