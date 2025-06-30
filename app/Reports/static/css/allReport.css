@@ -107,7 +107,7 @@
 
 .report-card h3 {
   margin-top: 0;
-  margin-left: -150px;
+  margin-right: 140px;
 }
 
 .report-card p {
@@ -117,7 +117,7 @@
 .report-card i {
   font-size: 40px;
   margin-top: 20px;
-  margin-left: 200px;
+  margin-left: 230px;
   color: grey;
 }
 
