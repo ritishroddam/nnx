@@ -116,12 +116,20 @@ socket.on("disconnect", () => {
 socket.on("vehicle_update", async function (data) {
   try {
     const updatedData = await updateData(data);
-
     updateVehicleData(updatedData);
-    updateVehicleCard(updatedData);
-    if(data.sos === "1") {
+
+    // Only trigger SOS if data is recent
+    const lastUpdated = convertToDate(data.date, data.time);
+    const now = new Date();
+    const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+    if (data.sos === "1" && hoursSinceUpdate <= 1) {
       triggerSOS(data.imei, markers[data.imei]);
+    } else if (data.sos === "1") {
+      console.log(`Old SOS alert ignored for ${data.imei}`);
     }
+
+    updateVehicleCard(updatedData);
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
   }
@@ -238,8 +246,16 @@ async function fetchVehicleData() {
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
     const data = await response.json();
+    const now = new Date();
 
     data.forEach((vehicle) => {
+      const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+      const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+      if (vehicle.sos === "1" && hoursSinceUpdate > 1) {
+        vehicle.sos = "0"; 
+      }
+
       vehicleData.set(vehicle.imei, {
         LicensePlateNumber: vehicle.LicensePlateNumber,
         VehicleType: vehicle.VehicleType,
@@ -380,17 +396,30 @@ function updateVehicleCard(data) {
 }
 
 function triggerSOS(imei, marker) {
+  const vehicle = vehicleData.get(imei);
+  if (!vehicle) return;
+
+  // Check if the data is recent (within last 1 hour)
+  const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+  const now = new Date();
+  const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+  if (hoursSinceUpdate > 1) {
+    console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
+    return;
+  }
+
   if (!sosActiveMarkers[imei]) {
+    // Add blinking effect to marker
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
-
     marker.content.classList.add("vehicle-blink");
 
     setTimeout(() => {
       removeSOS(imei);
-    }, 60000);
+    }, 60000); // 60 seconds timeout
   }
 }
 
@@ -428,12 +457,38 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const vehicleCount = document.getElementById("vehicle-count");
     vehicleCount.innerText = vehicles.length;
 
-    let headingText = "TOTAL VEHICLE'S";
+    let headingText = "Total Vehicles";
     headingText = getHeadingText(filterValue);
 
     vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
     return;
   }
+
+  // let vehiclesArray = Array.isArray(vehicles) ? vehicles : Array.from(vehicles.values());
+  let vehiclesArray = vehicles;
+
+  if (vehicles instanceof Map) {
+    vehiclesArray = Array.from(vehicles.values());
+  } else if (!Array.isArray(vehicles)) {
+    vehiclesArray = [];
+  }
+
+  vehiclesArray.sort((a, b) => {
+    // SOS vehicles first
+    if (a.sos === "1" && b.sos !== "1") return -1;
+    if (a.sos !== "1" && b.sos === "1") return 1;
+    
+    // Then by status (moving > idle > stopped > offline)
+    const statusOrder = { "moving": 1, "idle": 2, "stopped": 3, "offline": 4 };
+    const aStatus = statusOrder[a.status] || 5;
+    const bStatus = statusOrder[b.status] || 5;
+    if (aStatus !== bStatus) return aStatus - bStatus;
+    
+    // Then by last update time (newest first)
+    const aTime = new Date(`${a.date}T${a.time}`).getTime();
+    const bTime = new Date(`${b.date}T${b.time}`).getTime();
+    return aTime - bTime;
+  });
 
   const listContainer = document.getElementById("vehicle-list");
   const vehicleCounter = document.getElementById("vehicle-counter");
@@ -442,19 +497,27 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   listContainer.innerHTML = "";
   vehicleCount.innerText = vehicles.length;
 
-  let headingText = "TOTAL VEHICLE'S";
+  let headingText = "Total Vehicles";
   headingText = getHeadingText(filterValue);
 
   vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
 
-  vehicles.forEach((vehicle) => {
+  vehiclesArray.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
+
+    const hasSOS = vehicle.sos === "1";
+
+    if (vehicle.sos === "1") {
+      vehicleElement.classList.add("sos-blink-card");
+      vehicleElement.style.zIndex = "10";
+    }
     vehicleElement.setAttribute("data-imei", vehicle.imei);
     const isDarkMode = document.body.classList.contains("dark-mode");
 
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const now = new Date();
+    const isToday = lastUpdated.toDateString() === now.toDateString();
     const timeDiff = Math.abs(now - lastUpdated);
     const secondsDiff = Math.floor(timeDiff / 1000);
     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
@@ -472,6 +535,14 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const iconRed = "color:#d32f2f;";
 
     statusText = vehicle.status;
+
+    if (hasSOS) {
+      if (isToday) {
+        vehicleElement.classList.add("sos-blink-card"); // Blinking effect
+      } else {
+        vehicleElement.classList.add("sos-historic-card"); // Static indicator
+      }
+    }
 
     if (statusText === "offline") {
       statusText = "Offline";
@@ -921,7 +992,8 @@ function updateMap() {
     });
   }
 
-  renderVehicleCards(vehicleData);
+  const vehiclesArray = Array.from(vehicleData.values());
+  renderVehicleCards(vehiclesArray);
   hideSkeletonLoader();
   filterVehicles();
 }
@@ -1149,6 +1221,17 @@ function removeSOS(imei) {
   if (marker && marker.content) {
     marker.content.classList.remove("vehicle-blink");
   }
+
+  // Update the vehicle data to clear SOS
+  const vehicle = vehicleData.get(imei);
+  if (vehicle) {
+    vehicle.sos = "0";
+    vehicleData.set(imei, vehicle);
+  }
+
+  // Re-render cards to update positions
+  const vehiclesArray = Array.from(vehicleData.values());
+  renderVehicleCards(vehiclesArray);
 }
 
 function formatDateTime(dateString, timeString) {
