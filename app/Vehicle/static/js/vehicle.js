@@ -457,7 +457,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const vehicleCount = document.getElementById("vehicle-count");
     vehicleCount.innerText = vehicles.length;
 
-    let headingText = "TOTAL VEHICLE'S";
+    let headingText = "Total Vehicles";
     headingText = getHeadingText(filterValue);
 
     vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
@@ -497,7 +497,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   listContainer.innerHTML = "";
   vehicleCount.innerText = vehicles.length;
 
-  let headingText = "TOTAL VEHICLE'S";
+  let headingText = "Total Vehicles";
   headingText = getHeadingText(filterValue);
 
   vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
