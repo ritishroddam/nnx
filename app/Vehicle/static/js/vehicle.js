@@ -120,11 +120,12 @@ socket.on("vehicle_update", async function (data) {
     
     if (data.sos === "1") {
       triggerSOS(data.imei, markers[data.imei]);
-      const vehicles = Array.from(vehicleData.values());
-      renderVehicleCards(vehicles);
-    } else {
-      updateVehicleCard(updatedData);
     }
+    
+    // Always update the cards with current data
+    const vehiclesArray = Array.from(vehicleData.values());
+    renderVehicleCards(vehiclesArray);
+    
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
   }
@@ -388,15 +389,12 @@ function triggerSOS(imei, marker) {
     sosDiv.className = "sos-blink";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
-
     marker.content.classList.add("vehicle-blink");
 
-    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-    if (vehicleCard) {
-      vehicleCard.classList.add("sos-blink-card");
-      // Move to top of list
-      const listContainer = document.getElementById("vehicle-list");
-      listContainer.insertBefore(vehicleCard, listContainer.firstChild);
+    const vehicle = vehicleData.get(imei);
+    if (vehicle) {
+      vehicle.sos = "1";
+      vehicleData.set(imei, vehicle);
     }
 
     setTimeout(() => {
@@ -446,10 +444,29 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     return;
   }
 
-  vehicles.sort((a, b) => {
+  let vehiclesArray = vehicles;
+
+  if (vehicles instanceof Map) {
+    vehiclesArray = Array.from(vehicles.values());
+  } else if (!Array.isArray(vehicles)) {
+    vehiclesArray = [];
+  }
+
+  vehiclesArray.sort((a, b) => {
+    // SOS vehicles first
     if (a.sos === "1" && b.sos !== "1") return -1;
     if (a.sos !== "1" && b.sos === "1") return 1;
-    return 0;
+    
+    // Then by status (moving > idle > stopped > offline)
+    const statusOrder = { "moving": 1, "idle": 2, "stopped": 3, "offline": 4 };
+    const aStatus = statusOrder[a.status] || 5;
+    const bStatus = statusOrder[b.status] || 5;
+    if (aStatus !== bStatus) return aStatus - bStatus;
+    
+    // Then by last update time (newest first)
+    const aTime = new Date(`${a.date}T${a.time}`).getTime();
+    const bTime = new Date(`${b.date}T${b.time}`).getTime();
+    return aTime - bTime;
   });
 
   const listContainer = document.getElementById("vehicle-list");
@@ -468,9 +485,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     if (vehicle.sos === "1") {
-    vehicleElement.classList.add("sos-blink-card");
-    vehicleElement.style.zIndex = "10"; // Ensure it stays on top
-    vehicleElement.style.position = "relative";
+      vehicleElement.classList.add("sos-blink-card");
+      vehicleElement.style.zIndex = "10";
     }
     vehicleElement.setAttribute("data-imei", vehicle.imei);
     const isDarkMode = document.body.classList.contains("dark-mode");
@@ -943,7 +959,8 @@ function updateMap() {
     });
   }
 
-  renderVehicleCards(vehicleData);
+  const vehiclesArray = Array.from(vehicleData.values());
+  renderVehicleCards(vehiclesArray);
   hideSkeletonLoader();
   filterVehicles();
 }
@@ -1172,11 +1189,16 @@ function removeSOS(imei) {
     marker.content.classList.remove("vehicle-blink");
   }
 
-  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-  if (vehicleCard) {
-    vehicleCard.classList.remove("sos-blink-card");
+  // Update the vehicle data to clear SOS
+  const vehicle = vehicleData.get(imei);
+  if (vehicle) {
+    vehicle.sos = "0";
+    vehicleData.set(imei, vehicle);
   }
 
+  // Re-render cards to update positions
+  const vehiclesArray = Array.from(vehicleData.values());
+  renderVehicleCards(vehiclesArray);
 }
 
 function formatDateTime(dateString, timeString) {
