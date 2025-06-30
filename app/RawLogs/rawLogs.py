@@ -19,7 +19,7 @@ vehicleCollection = db['vehicle_inventory']
 @jwt_required()
 @roles_required('admin')
 def home():
-    return render_template('rawLogs/home.html')
+    return render_template('rawLogs.html')
 
 @rawLogs_bp.route('/getRawLogs', methods=['POST'])
 @jwt_required()
