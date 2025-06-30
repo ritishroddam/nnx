@@ -6,13 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const logsOption = document.querySelector(".logs-option");
   const subscribeOption = document.querySelector(".subscribe-option");
 
-  // Initialize Selectize for dropdowns
-  $('#vehicleDropdown').selectize({
-    placeholder: 'Select vehicles...',
-    allowEmptyOption: true,
-    closeAfterSelect: true,
-  });
-
   // Toggle between views
   toggleSlider.addEventListener("click", function () {
     if (rawLogsView.classList.contains("active")) {
@@ -30,6 +23,55 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Fetch raw logs based on form input
+  document.getElementById("rawLogsForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const licensePlateNumber = document.getElementById("licensePlateNumber").value.trim();
+    const fromDatetime = document.getElementById("fromDatetime").value;
+    const toDatetime = document.getElementById("toDatetime").value;
+
+    const response = await fetch("/rawLogs/getRawLogs", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+       },
+      body: JSON.stringify({
+        licensePlateNumber,
+        startDate: fromDatetime,
+        endDate: toDatetime,
+      }),
+    });
+
+    const logs = await response.json();
+    const logsContainer = document.getElementById("logsContainer");
+    logsContainer.innerHTML = "";
+
+    logs.forEach((log) => {
+      const logElement = document.createElement("div");
+      logElement.className = "log-item";
+      logElement.innerHTML = `
+        <h3>${log.vehicle}</h3>
+        <p>${log.timestamp}</p>
+        <p>${log.data}</p>
+        <button class="btn downloadLogBtn" data-vehicle="${log.vehicle}">Download PDF</button>
+      `;
+      logsContainer.appendChild(logElement);
+    });
+
+    document.querySelectorAll(".downloadLogBtn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const vehicle = this.getAttribute("data-vehicle");
+        downloadPDF(vehicle);
+      });
+    });
+  });
+
+  // Download logs as PDF
+  function downloadPDF(vehicle) {
+    window.open(`/rawLogs/downloadPDF?vehicle=${vehicle}`, "_blank");
+  }
+
   // Fetch and populate vehicle dropdown
   async function fetchVehicles() {
     const response = await fetch("/rawLogs/getVehicles");
@@ -41,13 +83,25 @@ document.addEventListener("DOMContentLoaded", function () {
       option.textContent = vehicle.licensePlateNumber;
       vehicleDropdown.appendChild(option);
     });
-
-    // Reinitialize Selectize after adding options
-    $('#vehicleDropdown')[0].selectize.addOption(vehicles.map(vehicle => ({
-      value: vehicle.licensePlateNumber,
-      text: vehicle.licensePlateNumber,
-    })));
   }
+
+  // Subscribe to vehicles
+  document.getElementById("subscribeForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const selectedVehicles = Array.from(document.getElementById("vehicleDropdown").selectedOptions).map(
+      (option) => option.value
+    );
+    const response = await fetch("/rawLogs/subscribeToRawLog", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+       },
+      body: JSON.stringify({ vehicles: selectedVehicles }),
+    });
+    const result = await response.json();
+    alert(result.message);
+  });
 
   // Initialize
   fetchVehicles();
