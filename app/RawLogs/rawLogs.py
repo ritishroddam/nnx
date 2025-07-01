@@ -43,12 +43,12 @@ def get_raw_logs():
     else:
         return jsonify({"error": "License plate number not found"}), 404
 
-    if start_date and end_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=timezone('UTC'))
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(tzinfo=timezone('UTC')) + timedelta(days=1)
+    if not start_date and not end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M').replace(tzinfo=timezone('UTC'))
+        end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M').replace(tzinfo=timezone('UTC')) + timedelta(days=1)
         query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
     else:
-        return jsonify({"error": "Start date and end date are required"}), 400
+        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
 
     raw_logs = list(rawLogsCollection.find(query).sort("timestamp", -1))
 
