@@ -25,9 +25,10 @@ def home():
 @jwt_required()
 @roles_required('admin')
 def get_raw_logs():
-    licensePlateNumber = request.args.get('licensePlateNumber')
-    start_date = request.args.get('startDate')
-    end_date = request.args.get('endDate')
+    data = request.get_json()
+    licensePlateNumber = data.get('licensePlateNumber')
+    start_date = data.get('startDate')
+    end_date = data.get('endDate')
 
     if not licensePlateNumber:
         return jsonify({"error": "License plate number is required"}), 400
@@ -42,17 +43,24 @@ def get_raw_logs():
     else:
         return jsonify({"error": "License plate number not found"}), 404
 
-    if start_date and end_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=timezone('UTC'))
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(tzinfo=timezone('UTC')) + timedelta(days=1)
+    if not start_date and not end_date:
+        now = datetime.now(timezone('UTC'))
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
         query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
     else:
-        return jsonify({"error": "Start date and end date are required"}), 400
+        start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M')
+        end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M')
+        ist = timezone('Asia/Kolkata')
+        start_date = ist.localize(start_date).astimezone(timezone('UTC'))
+        end_date = ist.localize(end_date).astimezone(timezone('UTC'))
+        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
 
     raw_logs = list(rawLogsCollection.find(query).sort("timestamp", -1))
 
     for log in raw_logs:
-        log['timestamp'] = log['timestamp'].astimezone(timezone('UTC')).strftime('%Y-%m-%d %H:%M:%S')
+        ist = timezone('Asia/Kolkata')
+        log['timestamp'] = log['timestamp'].astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
 
     return jsonify(raw_logs), 200
     
