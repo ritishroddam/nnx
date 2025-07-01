@@ -144,10 +144,13 @@ def download_pdf():
     pdf.cell(200, 10, txt="Raw Logs Report", ln=True, align="C")
     pdf.ln(10)
 
+    pdf.set_font("Arial", style="B", size=14)
+    pdf.cell(200, 10, txt=f"{vehicle}", ln=True, align="C")
+    pdf.ln(10)
+    
     # Add logs
     pdf.set_font("Arial", size=12)
     for log in logs:
-        pdf.cell(0, 10, txt=f"Vehicle: {log['LicensePlateNumber']}", ln=True)
         pdf.cell(0, 10, txt=f"Timestamp: {log['timestamp']}", ln=True)
         pdf.cell(0, 10, txt=f"Data: {log['data']}", ln=True)
         pdf.ln(5)
