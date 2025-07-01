@@ -25,9 +25,10 @@ def home():
 @jwt_required()
 @roles_required('admin')
 def get_raw_logs():
-    licensePlateNumber = request.args.get('licensePlateNumber')
-    start_date = request.args.get('startDate')
-    end_date = request.args.get('endDate')
+    data = request.get_json()
+    licensePlateNumber = data.get('licensePlateNumber')
+    start_date = data.get('startDate')
+    end_date = data.get('endDate')
 
     if not licensePlateNumber:
         return jsonify({"error": "License plate number is required"}), 400
