@@ -473,22 +473,22 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     vehiclesArray = [];
   }
 
-  vehiclesArray.sort((a, b) => {
-    // SOS vehicles first
-    if (a.sos === "1" && b.sos !== "1") return -1;
-    if (a.sos !== "1" && b.sos === "1") return 1;
+  // vehiclesArray.sort((a, b) => {
+  //   // SOS vehicles first
+  //   if (a.sos === "1" && b.sos !== "1") return -1;
+  //   if (a.sos !== "1" && b.sos === "1") return 1;
     
-    // Then by status (moving > idle > stopped > offline)
-    const statusOrder = { "moving": 1, "idle": 2, "stopped": 3, "offline": 4 };
-    const aStatus = statusOrder[a.status] || 5;
-    const bStatus = statusOrder[b.status] || 5;
-    if (aStatus !== bStatus) return aStatus - bStatus;
+  //   // Then by status (moving > idle > stopped > offline)
+  //   const statusOrder = { "moving": 1, "idle": 2, "stopped": 3, "offline": 4 };
+  //   const aStatus = statusOrder[a.status] || 5;
+  //   const bStatus = statusOrder[b.status] || 5;
+  //   if (aStatus !== bStatus) return aStatus - bStatus;
     
-    // Then by last update time (newest first)
-    const aTime = new Date(`${a.date}T${a.time}`).getTime();
-    const bTime = new Date(`${b.date}T${b.time}`).getTime();
-    return aTime - bTime;
-  });
+  //   // Then by last update time (newest first)
+  //   const aTime = new Date(`${a.date}T${a.time}`).getTime();
+  //   const bTime = new Date(`${b.date}T${b.time}`).getTime();
+  //   return aTime - bTime;
+  // });
 
   const listContainer = document.getElementById("vehicle-list");
   const vehicleCounter = document.getElementById("vehicle-counter");
