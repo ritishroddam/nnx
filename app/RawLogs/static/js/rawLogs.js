@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
           logElement.innerHTML = `
             <h3>${log.LicensePlateNumber}</h3>
             <p>${log.imei}</p>
-            <p>${log.raw_data}</p>
+            <p>${rawDataHTML}</p>
             <button class="btn downloadLogBtn" data-vehicle="${log.vehicle}">Download PDF</button>
           `;
           logsContainer.appendChild(logElement);
