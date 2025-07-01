@@ -72,7 +72,6 @@
     width: 100%;
 }
 
-/* Left column - Report Cards */
 .report-cards-container {
     flex: 4;
     width: 80%;
@@ -121,7 +120,6 @@
   color: grey;
 }
 
-/* Add some basic styling for the modal */
 .modal {
   display: none; 
   position: fixed; 
@@ -275,20 +273,6 @@
   background-color: #ccc;
 }
 
-/* .form-control {
-    display: block;
-    width: 100%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-} */
-
 .form-control {
     padding: 8px;
     border: 1px solid #ddd;
@@ -331,13 +315,11 @@ input[type="datetime-local"] {
   color: #fff !important;
 }
 
-/* If your field-selection items have a background, make it darker for contrast */
 .dark-mode .field-selection > div {
   background: #222 !important;
   color: #fff !important;
 }
 
-/* Optional: style the Remove button for dark mode */
 .dark-mode .selected-fields li button {
   background-color: #007bff;
   color: #fff;
@@ -372,7 +354,6 @@ input[type="datetime-local"] {
     margin-right: 8px;
   }
 
-/* Delete Confirmation Modal Styling */
 #deleteConfirmModal .modal-content {
   max-width: 350px;
   min-width: 280px;
@@ -446,7 +427,6 @@ input[type="datetime-local"] {
   background: #b52b27;
 }
 
-/* Modal Container */
 #reportPreviewModal .modal-content {
   width: 95%;
   max-width: 1200px;
@@ -461,7 +441,6 @@ input[type="datetime-local"] {
   margin-top: 105px;
 }
 
-/* Modal Header */
 #reportPreviewModal h2 {
   margin-bottom: 20px;
   font-size: 1.6em;
@@ -470,7 +449,6 @@ input[type="datetime-local"] {
   text-align: center;
 }
 
-/* Close Button */
 #closePreviewModal {
   position: absolute;
   right: 25px;
@@ -481,7 +459,6 @@ input[type="datetime-local"] {
   cursor: pointer;
 }
 
-/* Table Styling */
 #reportPreviewTableContainer table {
   width: 100%;
   border-collapse: collapse;
@@ -569,7 +546,6 @@ input[type="datetime-local"] {
     top: 20px;
 }
 
-/* Right column - Recent Reports */
 .recent-reports-container {
     flex: 1;
     width: 20%;
@@ -729,7 +705,6 @@ input[type="datetime-local"] {
     background-color: #f9f9f9;
 }
 
-/* Responsive for small screens */
 @media (max-width: 500px) {
   #deleteConfirmModal .modal-content {
     width: 95%;
