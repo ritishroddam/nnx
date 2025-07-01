@@ -53,10 +53,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
           let rawDataHTML = "";
 
-          log.raw_data.forEach((log) => {
+          log.raw_data.forEach((dataLog) => {
             rawDataHTML.append(
-              `<p>Data: <p>${log.data}</p></p>`
-              `<p>Time: <p>${log.timestamp}</p></p>`
+              `<p>Data: <p>${dataLog.data}</p></p>`
+              `<p>Time: <p>${dataLog.timestamp}</p></p>`
             );
           })
 
