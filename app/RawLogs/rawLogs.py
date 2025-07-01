@@ -58,10 +58,23 @@ def get_raw_logs():
 
     query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
     raw_logs = list(rawLogsCollection.find(query, {"_id": 0}).sort("timestamp", -1))
-
-    for log in raw_logs:
+    
+    if raw_logs:
+        data = {}
+        data['LicensePlateNumber'] = raw_logs[0]['LicensePlateNumber'] if raw_logs else licensePlateNumber
+        data['IMEI'] = imei
+        data['raw_data'] = []
+        
         ist = timezone('Asia/Kolkata')
-        log['timestamp'] = log['timestamp'].astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
+        
+        for log in raw_logs:
+            log['timestamp'] = log['timestamp'].astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
+            data['raw_data'].append({
+                "data": log['raw_data'],
+                "timestamp": log['timestamp']
+            })
+    else:
+        return jsonify({"error": "No raw logs found for the given criteria"}), 404
 
     return jsonify(raw_logs), 200
     
