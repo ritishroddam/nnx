@@ -54,7 +54,7 @@ def get_raw_logs():
         ist = timezone('Asia/Kolkata')
         start_date = ist.localize(start_date).astimezone(timezone('UTC'))
         end_date = ist.localize(end_date).astimezone(timezone('UTC'))
-        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
+        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}, {"_id": 0}
 
     raw_logs = list(rawLogsCollection.find(query).sort("timestamp", -1))
 
