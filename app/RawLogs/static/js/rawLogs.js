@@ -53,9 +53,10 @@ document.addEventListener("DOMContentLoaded", function () {
           const logElement = document.createElement("div");
           logElement.className = "log-item";
           logElement.innerHTML = `
-            <h3>${log.vehicle}</h3>
+            <h3>${log.LicensePlateNumber}</h3>
+            <p>${log.imei}</p>
             <p>${log.timestamp}</p>
-            <p>${log.data}</p>
+            <p>${log.raw_data}</p>
             <button class="btn downloadLogBtn" data-vehicle="${log.vehicle}">Download PDF</button>
           `;
           logsContainer.appendChild(logElement);
