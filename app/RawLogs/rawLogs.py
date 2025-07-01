@@ -177,7 +177,7 @@ def download_pdf():
     for log in logs:
         log['timestamp'] = log['timestamp'].astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
         pdf.cell(0, 10, txt=f"Timestamp: {log.get('timestamp', 'N/A')}", ln=True)
-        pdf.cell(0, 10, txt=f"Data: {log.get('raw_data', 'N/A')}", ln=True)
+        pdf.multi_cell(0, 10, txt=f"Data: {log.get('raw_data', 'N/A')}")
         pdf.ln(5)
 
     # Save the PDF to a temporary file
