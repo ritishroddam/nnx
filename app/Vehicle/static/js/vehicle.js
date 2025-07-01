@@ -1095,26 +1095,33 @@ function filterVehicles() {
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
     const status = marker.device.status;
+    const ignition = marker.device.ignition;
 
     let isVisible = false;
 
     switch (filterValue) {
-      case "0":
-        isVisible = (status === "stopped" || status === "idle") && hoursSinceLastUpdate < 24;
+      case "0": // Stationary (legacy filter)
+        isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
         break;
-      case "0-40":
-        isVisible = status === "moving" && speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
+      case "idle": // Idle (ignition on but not moving)
+        isVisible = speedKmh === 0 && ignition === "1" && hoursSinceLastUpdate < 24;
         break;
-      case "40-60":
-        isVisible = status === "moving" && speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
+      case "parked": // Parked (ignition off)
+        isVisible = speedKmh === 0 && ignition === "0" && hoursSinceLastUpdate < 24;
         break;
-      case "60+":
-        isVisible = status === "moving" && speedKmh > 60 && hoursSinceLastUpdate < 24;
+      case "0-40": // Running at slow speed
+        isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
         break;
-      case "sos":
+      case "40-60": // Moderate speed
+        isVisible = speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
+        break;
+      case "60+": // High speed
+        isVisible = speedKmh > 60 && hoursSinceLastUpdate < 24;
+        break;
+      case "sos": // SOS alert
         isVisible = hasSOS && hoursSinceLastUpdate < 24;
         break;
-      case "offline":
+      case "offline": // Offline
         isVisible = hoursSinceLastUpdate > 24 || status === "offline";
         break;
       default: // "all"
@@ -1896,13 +1903,13 @@ window.onload = async function () {
   hideSkeletonLoader();
 
   // Check for dashboard filter
-  const dashboardFilter = localStorage.getItem('dashboardFilter');
+ const dashboardFilter = localStorage.getItem('dashboardFilter');
   if (dashboardFilter) {
     // Map the dashboard filter to the vehicle map filter values
     const filterMap = {
       'running': '0-40',
-      'idle': '0',
-      'stopped': '0',
+      'idle': 'idle',
+      'parked': 'parked',
       'speed': '40-60',
       'overspeed': '60+',
       'offline': 'offline'
