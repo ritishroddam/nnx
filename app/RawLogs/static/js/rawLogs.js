@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
           "X-CSRF-TOKEN": getCookie("csrf_access_token"),
         },
         body: JSON.stringify({
-          licensePlateNumber,
+          licensePlateNumber: licensePlateNumber,
           startDate: fromDatetime,
           endDate: toDatetime,
         }),
