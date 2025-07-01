@@ -49,6 +49,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const logsContainer = document.getElementById("logsContainer");
         logsContainer.innerHTML = "";
 
+        let rawDataHTML = "";
+
+        log.raw_data.forEach((log) => {
+          rawDataHTML.append(
+            `<p>Data: <p>${log.data}</p></p>`
+            `<p>Time: <p>${log.timestamp}</p></p>`
+          );
+        })
+
         logs.forEach((log) => {
           const logElement = document.createElement("div");
           logElement.className = "log-item";
