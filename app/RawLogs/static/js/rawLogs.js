@@ -50,22 +50,25 @@ document.addEventListener("DOMContentLoaded", function () {
         logsContainer.innerHTML = "";
 
         logs.forEach((log) => {
-
           let rawDataHTML = "";
-
-          log.raw_data.forEach((dataLog) => {
-            rawDataHTML.append(
-              `<p>Data: <p>${dataLog.data}</p></p>`
-              `<p>Time: <p>${dataLog.timestamp}</p></p>`
-            );
-          })
-
+        
+          if (Array.isArray(log.raw_data)) {
+            log.raw_data.forEach((dataLog) => {
+              rawDataHTML += `
+                <p>Data: ${dataLog.data || "N/A"}</p>
+                <p>Time: ${dataLog.timestamp || "N/A"}</p>
+              `;
+            });
+          } else {
+            rawDataHTML = "<p>No raw data available</p>";
+          }
+        
           const logElement = document.createElement("div");
           logElement.className = "log-item";
           logElement.innerHTML = `
             <h3>${log.LicensePlateNumber}</h3>
             <p>${log.imei}</p>
-            <p>${rawDataHTML}</p>
+            ${rawDataHTML}
             <button class="btn downloadLogBtn" data-vehicle="${log.vehicle}">Download PDF</button>
           `;
           logsContainer.appendChild(logElement);
