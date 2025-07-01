@@ -322,6 +322,8 @@ def get_vehicle_range_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
+        utc_now = datetime.now(timezone('UTC'))
+        twenty_four_hours_ago = utc_now - timedelta(hours=24)
         now = datetime.now()
         imeis = list(get_vehicle_data().distinct("IMEI"))  
         if not imeis:
@@ -331,6 +333,7 @@ def get_status_data():
                 'parkedVehicles': 0,
                 'speedVehicles': 0,
                 'overspeedVehicles': 0,
+                'offlineVehicles': 0,
                 'disconnectedVehicles': 0,
                 'noGpsVehicles': 0,
                 'totalVehicles': 0
@@ -383,6 +386,14 @@ def get_status_data():
                         },
                         {"$count": "count"}
                     ],
+                    "offlineVehicles": [ 
+                        {
+                            "$match": {
+                                "date_time": {"$lt": twenty_four_hours_ago}
+                            }
+                        },
+                        {"$count": "count"}
+                    ],
                     "disconnectedVehicles": [
                         {"$match": {"main_power": "0"}},
                         {"$count": "count"}
@@ -404,6 +415,7 @@ def get_status_data():
                 'parkedVehicles': 0,
                 'speedVehicles': 0,
                 'overspeedVehicles': 0,
+                'offlineVehicles': 0,
                 'disconnectedVehicles': 0,
                 'noGpsVehicles': 0,
                 'totalVehicles': 0
@@ -417,6 +429,7 @@ def get_status_data():
         parked_vehicles = results.get("parkedVehicles", [{}])[0].get("count", 0) if results.get("parkedVehicles") else 0
         speed_vehicles = results.get("speedVehicles", [{}])[0].get("count", 0) if results.get("speedVehicles") else 0
         overspeed_vehicles = results.get("overspeedVehicles", [{}])[0].get("count", 0) if results.get("overspeedVehicles") else 0
+        offline_vehicles = results.get("offlineVehicles", [{}])[0].get("count", 0) if results.get("offlineVehicles") else 0
         disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0) if results.get("disconnectedVehicles") else 0
         no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0) if results.get("noGpsVehicles") else 0
 
@@ -426,6 +439,7 @@ def get_status_data():
             'parkedVehicles': parked_vehicles,
             'speedVehicles': speed_vehicles,
             'overspeedVehicles': overspeed_vehicles,
+            'offlineVehicles': offline_vehicles,
             'disconnectedVehicles': disconnected_vehicles,
             'noGpsVehicles': no_gps_vehicles,
             'totalVehicles': total_vehicles

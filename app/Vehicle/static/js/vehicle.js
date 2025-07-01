@@ -1098,6 +1098,7 @@ function filterVehicles() {
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
     const status = marker.device.status;
     const ignition = marker.device.ignition;
+    const isDisconnected = marker.device.gsm === "0"; 
 
     let isVisible = false;
 
@@ -1126,6 +1127,9 @@ function filterVehicles() {
       case "offline": // Offline
         isVisible = hoursSinceLastUpdate > 24 || status === "offline";
         break;
+      case "disconnected":
+        isVisible = isDisconnected && hoursSinceLastUpdate < 24; // Recently disconnected
+        break;  
       default: // "all"
         isVisible = true;
         break;
@@ -1914,7 +1918,9 @@ window.onload = async function () {
       'parked': 'parked',
       'speed': '40-60',
       'overspeed': '60+',
-      'offline': 'offline'
+      'offline': 'offline',
+      'disconnected': 'disconnected',  
+      'sos': 'sos'
     };
     
     const filterValue = filterMap[dashboardFilter] || 'all';

@@ -634,6 +634,9 @@ function fetchStatusData() {
         "overspeed-vehicles-count"
       ).textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
       document.getElementById(
+        "offline-vehicles-count"
+      ).textContent = `${data.offlineVehicles} / ${data.totalVehicles}`;
+      document.getElementById(
         "disconnected-vehicles-count"
       ).textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
     })
