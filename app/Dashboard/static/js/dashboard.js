@@ -1,67 +1,230 @@
 let currentSort = { column: "distance", direction: "desc" };
+let currentStatusFilter = null;
+let statusPopupTableData = [];
 
-function applySortIcons(column, direction) {
-  document.querySelectorAll(".vehicleLiveTable th").forEach((th) => {
-    const icon = th.querySelector(".sort-icon");
-    if (!icon) return;
-    if (th.dataset.column === column) {
-      icon.textContent = direction === "asc" ? "↑" : "↓";
-      th.classList.add("sorted");
-    } else {
-      icon.textContent = "";
-      th.classList.remove("sorted");
+async function fetchFilteredVehicleData(status) {
+    try {
+        const response = await fetch(`/dashboard/get_vehicle_range_data?range=${currentRange}`);
+        const data = await response.json();
+        
+        // Filter data based on status
+        const filteredData = data.filter(vehicle => {
+            switch(status) {
+                case 'running':
+                    return parseFloat(vehicle.max_speed) > 0;
+                case 'idle':
+                    return parseFloat(vehicle.max_speed) === 0 && 
+                           parseFloat(vehicle.avg_speed) === 0 &&
+                           vehicle.driving_time === "0 seconds";
+                case 'parked':
+                    return vehicle.driving_time === "0 seconds" && 
+                           vehicle.idle_time !== "0 seconds";
+                case 'speed':
+                    return parseFloat(vehicle.max_speed) >= 40 && 
+                           parseFloat(vehicle.max_speed) < 60;
+                case 'overspeed':
+                    return parseFloat(vehicle.max_speed) >= 60;
+                case 'offline':
+                    // You'll need to modify your backend to support this filter
+                    return false; // Placeholder - implement based on your data
+                default:
+                    return true;
+            }
+        });
+        
+        return filteredData;
+    } catch (error) {
+        console.error("Error fetching filtered vehicle data:", error);
+        return [];
     }
-  });
 }
 
-function sortTable(column, direction) {
-  const table = document.querySelector(".vehicleLiveTable table");
-  const tbody = table.querySelector("tbody");
-  const rows = Array.from(tbody.querySelectorAll("tr"));
-  const columnIndex = Array.from(table.querySelectorAll("th")).findIndex(
-    (th) => th.dataset.column === column
-  );
-
-  rows.sort((a, b) => {
-    let cellA = a.children[columnIndex].innerText.trim();
-    let cellB = b.children[columnIndex].innerText.trim();
-
-    if (column === "max_avg_speed") {
-      cellA = parseFloat(cellA.split("/")[0]) || 0;
-      cellB = parseFloat(cellB.split("/")[0]) || 0;
-    } else if (!isNaN(cellA) && !isNaN(cellB)) {
-      cellA = parseFloat(cellA);
-      cellB = parseFloat(cellB);
-    } else {
-      cellA = cellA.toLowerCase();
-      cellB = cellB.toLowerCase();
-    }
-
-    if (cellA < cellB) return direction === "asc" ? -1 : 1;
-    if (cellA > cellB) return direction === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  tbody.innerHTML = "";
-  rows.forEach((row) => tbody.appendChild(row));
-  applySortIcons(column, direction);
+// Add this function to show the status popup
+async function showStatusPopup(status, title) {
+    currentStatusFilter = status;
+    document.getElementById('statusPopupTitle').textContent = title;
+    
+    // Show loading state
+    document.getElementById('statusPopupTable').innerHTML = `
+        <tr>
+            <td colspan="6" style="text-align: center; padding: 20px;">
+                Loading data...
+            </td>
+        </tr>
+    `;
+    
+    // Show popup
+    document.getElementById('statusPopupOverlay').classList.add('active');
+    document.getElementById('statusPopup').classList.add('active');
+    
+    // Fetch and display data
+    const filteredData = await fetchFilteredVehicleData(status);
+    statusPopupTableData = filteredData;
+    
+    renderStatusPopupTable(filteredData);
 }
 
-function setupTableSorting() {
-  const table = document.querySelector(".vehicleLiveTable table");
-  table.querySelectorAll("th").forEach((header) => {
-    header.addEventListener("click", () => {
-      const column = header.dataset.column;
-      if (!column) return;
-      const direction =
-        currentSort.column === column && currentSort.direction === "asc"
-          ? "desc"
-          : "asc";
-      sortTable(column, direction);
-      currentSort = { column, direction };
+// Add this function to render the popup table
+function renderStatusPopupTable(data) {
+    const tableBody = document.getElementById('statusPopupTable');
+    tableBody.innerHTML = '';
+    
+    if (data.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px;">
+                    No vehicles found for this status
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    data.forEach((vehicle) => {
+        let row = `<tr>
+            <td>${vehicle.registration}</td>
+            <td>${vehicle.distance.toFixed(2)}</td>
+            <td>${vehicle.driving_time}</td>
+            <td>${vehicle.idle_time}</td>
+            <td>${vehicle.number_of_stops}</td>
+            <td>${vehicle.max_speed}/${vehicle.avg_speed}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
     });
-  });
+    
+    // Initialize sorting
+    setupTableSorting('#statusPopup table');
 }
+
+// Add this modified setupTableSorting function
+function setupTableSorting(selector = '.vehicleLiveTable table') {
+    const table = document.querySelector(selector);
+    if (!table) return;
+    
+    table.querySelectorAll("th").forEach((header) => {
+        header.addEventListener("click", () => {
+            const column = header.dataset.column;
+            if (!column) return;
+            const direction = 
+                currentSort.column === column && currentSort.direction === "asc"
+                ? "desc"
+                : "asc";
+            sortTable(column, direction, selector);
+            currentSort = { column, direction };
+        });
+    });
+}
+
+function sortTable(column, direction, selector = '.vehicleLiveTable table') {
+    const table = document.querySelector(selector);
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const columnIndex = Array.from(table.querySelectorAll("th")).findIndex(
+        (th) => th.dataset.column === column
+    );
+
+    rows.sort((a, b) => {
+        let cellA = a.children[columnIndex].innerText.trim();
+        let cellB = b.children[columnIndex].innerText.trim();
+
+        if (column === "max_avg_speed") {
+            cellA = parseFloat(cellA.split("/")[0]) || 0;
+            cellB = parseFloat(cellB.split("/")[0]) || 0;
+        } else if (!isNaN(cellA) && !isNaN(cellB)) {
+            cellA = parseFloat(cellA);
+            cellB = parseFloat(cellB);
+        } else {
+            cellA = cellA.toLowerCase();
+            cellB = cellB.toLowerCase();
+        }
+
+        if (cellA < cellB) return direction === "asc" ? -1 : 1;
+        if (cellA > cellB) return direction === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    tbody.innerHTML = "";
+    rows.forEach((row) => tbody.appendChild(row));
+    applySortIcons(column, direction, selector);
+}
+
+// Add this modified applySortIcons function
+function applySortIcons(column, direction, selector = '.vehicleLiveTable table') {
+    document.querySelectorAll(`${selector} th`).forEach((th) => {
+        const icon = th.querySelector(".sort-icon");
+        if (!icon) return;
+        if (th.dataset.column === column) {
+            icon.textContent = direction === "asc" ? "↑" : "↓";
+            th.classList.add("sorted");
+        } else {
+            icon.textContent = "";
+            th.classList.remove("sorted");
+        }
+    });
+}
+
+// function applySortIcons(column, direction) {
+//   document.querySelectorAll(".vehicleLiveTable th").forEach((th) => {
+//     const icon = th.querySelector(".sort-icon");
+//     if (!icon) return;
+//     if (th.dataset.column === column) {
+//       icon.textContent = direction === "asc" ? "↑" : "↓";
+//       th.classList.add("sorted");
+//     } else {
+//       icon.textContent = "";
+//       th.classList.remove("sorted");
+//     }
+//   });
+// }
+
+// function sortTable(column, direction) {
+//   const table = document.querySelector(".vehicleLiveTable table");
+//   const tbody = table.querySelector("tbody");
+//   const rows = Array.from(tbody.querySelectorAll("tr"));
+//   const columnIndex = Array.from(table.querySelectorAll("th")).findIndex(
+//     (th) => th.dataset.column === column
+//   );
+
+//   rows.sort((a, b) => {
+//     let cellA = a.children[columnIndex].innerText.trim();
+//     let cellB = b.children[columnIndex].innerText.trim();
+
+//     if (column === "max_avg_speed") {
+//       cellA = parseFloat(cellA.split("/")[0]) || 0;
+//       cellB = parseFloat(cellB.split("/")[0]) || 0;
+//     } else if (!isNaN(cellA) && !isNaN(cellB)) {
+//       cellA = parseFloat(cellA);
+//       cellB = parseFloat(cellB);
+//     } else {
+//       cellA = cellA.toLowerCase();
+//       cellB = cellB.toLowerCase();
+//     }
+
+//     if (cellA < cellB) return direction === "asc" ? -1 : 1;
+//     if (cellA > cellB) return direction === "asc" ? 1 : -1;
+//     return 0;
+//   });
+
+//   tbody.innerHTML = "";
+//   rows.forEach((row) => tbody.appendChild(row));
+//   applySortIcons(column, direction);
+// }
+
+// function setupTableSorting() {
+//   const table = document.querySelector(".vehicleLiveTable table");
+//   table.querySelectorAll("th").forEach((header) => {
+//     header.addEventListener("click", () => {
+//       const column = header.dataset.column;
+//       if (!column) return;
+//       const direction =
+//         currentSort.column === column && currentSort.direction === "asc"
+//           ? "desc"
+//           : "asc";
+//       sortTable(column, direction);
+//       currentSort = { column, direction };
+//     });
+//   });
+// }
 
 function afterTableRender() {
   setupTableSorting();
@@ -633,3 +796,99 @@ function fetchStatusData() {
     })
     .catch((error) => console.error("Error fetching status data:", error));
 }
+
+document.getElementById('statusPopupClose').addEventListener('click', () => {
+    document.getElementById('statusPopupOverlay').classList.remove('active');
+    document.getElementById('statusPopup').classList.remove('active');
+});
+
+document.getElementById('statusPopupOverlay').addEventListener('click', () => {
+    document.getElementById('statusPopupOverlay').classList.remove('active');
+    document.getElementById('statusPopup').classList.remove('active');
+});
+
+// Add event listeners for status cards
+document.getElementById('running-vehicles').addEventListener('click', () => {
+    showStatusPopup('running', 'Running Vehicles');
+});
+
+document.getElementById('idle-vehicles').addEventListener('click', () => {
+    showStatusPopup('idle', 'Idle Vehicles');
+});
+
+document.getElementById('parked-vehicles').addEventListener('click', () => {
+    showStatusPopup('parked', 'Parked Vehicles');
+});
+
+document.getElementById('speed-vehicles').addEventListener('click', () => {
+    showStatusPopup('speed', 'Speed Vehicles (40-60 km/h)');
+});
+
+document.getElementById('overspeed-vehicles').addEventListener('click', () => {
+    showStatusPopup('overspeed', 'Over Speed Vehicles (60+ km/h)');
+});
+
+document.getElementById('offline-vehicles').addEventListener('click', () => {
+    showStatusPopup('offline', 'Offline Vehicles');
+});
+
+// Add download functionality for Excel and PDF
+document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
+    const table = document.querySelector("#statusPopup table");
+    if (!table) return;
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
+    
+    const title = document.getElementById('statusPopupTitle').textContent;
+    XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
+});
+
+document.getElementById('statusPopupPdfBtn').addEventListener('click', function() {
+    // For PDF, we'll use jsPDF with html2canvas
+    const title = document.getElementById('statusPopupTitle').textContent;
+    const table = document.querySelector("#statusPopup table");
+    
+    if (!table) return;
+    
+    // Show loading state
+    const originalContent = table.innerHTML;
+    table.innerHTML = `
+        <tr>
+            <td colspan="6" style="text-align: center; padding: 20px;">
+                Generating PDF...
+            </td>
+        </tr>
+    `;
+    
+    // You'll need to include jsPDF and html2canvas libraries
+    if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
+        alert('PDF generation libraries not loaded. Please try again later.');
+        table.innerHTML = originalContent;
+        return;
+    }
+    
+    html2canvas(table).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 190; // A4 width in mm
+        const pageHeight = 277; // A4 height in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 10; // Top margin
+        
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        
+        pdf.save(`${title.replace(/\s+/g, '_')}.pdf`);
+        table.innerHTML = originalContent;
+    });
+});

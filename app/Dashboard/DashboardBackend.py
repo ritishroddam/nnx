@@ -171,6 +171,8 @@ def get_vehicle_range_data():
         utc_now = datetime.now(timezone('UTC'))
 
         range_param = request.args.get("range", "1day")
+        status_filter = request.args.get("status")
+        
         range_map = {
             "1hour": timedelta(hours=1),
             "6hours": timedelta(hours=6),
@@ -309,6 +311,23 @@ def get_vehicle_range_data():
                 "idle_time": human_readable_idle_time,
                 "number_of_stops": number_of_stops
             })
+            
+            if status_filter:
+                filtered_data = []
+                for vehicle in vehicle_data:
+                    speed = float(vehicle.get("max_speed", 0))
+                    if status_filter == "running" and speed > 0:
+                        filtered_data.append(vehicle)
+                    elif status_filter == "idle" and speed == 0 and vehicle.get("driving_time") == "0 seconds":
+                        filtered_data.append(vehicle)
+                    elif status_filter == "parked" and vehicle.get("driving_time") == "0 seconds" and vehicle.get("idle_time") != "0 seconds":
+                        filtered_data.append(vehicle)
+                    elif status_filter == "speed" and 40 <= speed < 60:
+                        filtered_data.append(vehicle)
+                    elif status_filter == "overspeed" and speed >= 60:
+                        filtered_data.append(vehicle)
+                    # Add more filters as needed
+                vehicle_data = filtered_data
 
         return jsonify(vehicle_data), 200
 

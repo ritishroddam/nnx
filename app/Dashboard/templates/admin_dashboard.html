@@ -12,6 +12,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 {% endblock %}
 
 {% block h1 %}
@@ -176,5 +178,38 @@ Dashboard
       <div id="map"></div>
     </div>
   </aside>
+
+  <!-- Status Popup -->
+<div id="statusPopupOverlay" class="status-popup-overlay"></div>
+<div id="statusPopup" class="status-popup">
+    <div class="status-popup-header">
+        <h2 class="status-popup-title" id="statusPopupTitle">Vehicle Status</h2>
+        <button class="status-popup-close" id="statusPopupClose">&times;</button>
+    </div>
+    <div class="status-popup-actions">
+        <button class="excel-btn" id="statusPopupExcelBtn">
+            <i class="fa fa-file-excel-o"></i> Excel
+        </button>
+        <button class="pdf-btn" id="statusPopupPdfBtn">
+            <i class="fa fa-file-pdf-o"></i> PDF
+        </button>
+    </div>
+    <div class="vehicleLiveTable">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th data-column="registration">Vehicle <span class="sort-icon"></span></th>
+                    <th data-column="distance">Distance Travelled (km) <span class="sort-icon"></span></th>
+                    <th data-column="driving_time">Driving Time <span class="sort-icon"></span></th>
+                    <th data-column="idle_time">Idle Time <span class="sort-icon"></span></th>
+                    <th data-column="number_of_stops">Number Of Stops <span class="sort-icon"></span></th>
+                    <th data-column="max_avg_speed">Max/Avg Speed <span class="sort-icon"></span></th>
+                </tr>
+            </thead>
+            <tbody id="statusPopupTable">
+            </tbody>
+        </table>
+    </div>
+</div>
 </section>
 {% endblock %}
