@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         document.querySelectorAll(".downloadLogBtn").forEach((btn) => {
-          btn.addEventListener("click", function () {
+          btn.addEventListener("click", async function () {
             const vehicle = this.getAttribute("data-vehicle");
             await downloadPDF(vehicle);
           });
