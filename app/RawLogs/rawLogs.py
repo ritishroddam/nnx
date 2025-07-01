@@ -47,16 +47,15 @@ def get_raw_logs():
         now = datetime.now(timezone('UTC'))
         start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
-        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}, {"_id": "0"}
     else:
         start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M')
         end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M')
         ist = timezone('Asia/Kolkata')
         start_date = ist.localize(start_date).astimezone(timezone('UTC'))
         end_date = ist.localize(end_date).astimezone(timezone('UTC'))
-        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}, {"_id": 0}
 
-    raw_logs = list(rawLogsCollection.find(query).sort("timestamp", -1))
+    query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
+    raw_logs = list(rawLogsCollection.find(query, {"_id": 0}).sort("timestamp", -1))
 
     for log in raw_logs:
         ist = timezone('Asia/Kolkata')
