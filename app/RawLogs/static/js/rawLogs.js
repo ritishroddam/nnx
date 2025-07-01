@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".downloadLogBtn").forEach((btn) => {
           btn.addEventListener("click", function () {
             const vehicle = this.getAttribute("data-vehicle");
-            downloadPDF(vehicle);
+            await downloadPDF(vehicle);
           });
         });
       } else if (response.status === 400) {
@@ -84,8 +84,45 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Download logs as PDF
-  function downloadPDF(vehicle) {
-    window.open(`/rawLogs/downloadPDF?vehicle=${vehicle}`, "_blank");
+  async function downloadPDF(vehicle) {
+    try {
+      const licensePlateNumber = document.getElementById("licensePlateNumber").value.trim();
+      const fromDatetime = document.getElementById("fromDatetime").value;
+      const toDatetime = document.getElementById("toDatetime").value;
+
+      const response = await fetch(`/rawLogs/downloadPDF`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({
+          licensePlateNumber: licensePlateNumber,
+          startDate: fromDatetime,
+          endDate: toDatetime,
+        }),
+      });
+
+      if (response.status === 200) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `RawLogs_${licensePlateNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else if (response.status === 404) {
+        const errorData = await response.json();
+        displayFlashMessage(errorData.error || "No logs found for the given criteria.", "danger");
+      } else {
+        displayFlashMessage(`Unexpected error: ${response.statusText}`, "danger");
+      }
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      displayFlashMessage("An unexpected error occurred while downloading the PDF.", "danger");
+    }
   }
 
   // Fetch and populate vehicle dropdown

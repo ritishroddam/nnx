@@ -125,13 +125,34 @@ def get_vehicles():
     vehicles = list(vehicleCollection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return jsonify(vehicles), 200
 
-@rawLogs_bp.route('/downloadPDF', methods=['GET'])
+@rawLogs_bp.route('/downloadPDF', methods=['POST'])
 @jwt_required()
 @roles_required('admin')
 def download_pdf():
-    vehicle = request.args.get('vehicle')
-    query = {"LicensePlateNumber": vehicle} if vehicle else {}
-    logs = list(rawLogsCollection.find(query))
+    data = request.get_json()
+    licensePlateNumber = data.get('licensePlateNumber')
+    start_date = data.get('startDate')
+    end_date = data.get('endDate')
+
+    if not licensePlateNumber:
+        return jsonify({"error": "License plate number is required"}), 400
+
+    if not start_date or not end_date:
+        now = datetime.now(timezone('UTC'))
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+    else:
+        start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M')
+        end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M')
+        ist = timezone('Asia/Kolkata')
+        start_date = ist.localize(start_date).astimezone(timezone('UTC'))
+        end_date = ist.localize(end_date).astimezone(timezone('UTC'))
+
+    query = {"LicensePlateNumber": licensePlateNumber, "timestamp": {"$gte": start_date, "$lt": end_date}}
+    logs = list(rawLogsCollection.find(query, {"_id": 0}))
+
+    if not logs:
+        return jsonify({"error": "No logs found for the given criteria"}), 404
 
     # Create a PDF
     pdf = FPDF()
@@ -145,18 +166,18 @@ def download_pdf():
     pdf.ln(10)
 
     pdf.set_font("Arial", style="B", size=14)
-    pdf.cell(200, 10, txt=f"{vehicle}", ln=True, align="C")
+    pdf.cell(200, 10, txt=f"{licensePlateNumber}", ln=True, align="C")
     pdf.ln(10)
-    
+
     # Add logs
     pdf.set_font("Arial", size=12)
     for log in logs:
-        pdf.cell(0, 10, txt=f"Timestamp: {log['timestamp']}", ln=True)
-        pdf.cell(0, 10, txt=f"Data: {log['data']}", ln=True)
+        pdf.cell(0, 10, txt=f"Timestamp: {log.get('timestamp', 'N/A')}", ln=True)
+        pdf.cell(0, 10, txt=f"Data: {log.get('data', 'N/A')}", ln=True)
         pdf.ln(5)
 
     # Save the PDF to a temporary file
-    pdf_path = os.path.join(os.getcwd(), "raw_logs_report.pdf") 
+    pdf_path = os.path.join(os.getcwd(), "raw_logs_report.pdf")
     pdf.output(pdf_path)
 
     # Send the file as a response
