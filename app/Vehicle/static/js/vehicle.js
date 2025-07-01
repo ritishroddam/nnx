@@ -1029,6 +1029,58 @@ function animateMarker(marker, newPosition, duration = 9000) {
   requestAnimationFrame(moveMarker);
 }
 
+// function filterVehicles() {
+//   const filterValue = document.getElementById("speed-filter").value;
+//   let filteredVehicles = [];
+//   const now = new Date();
+
+//   Object.keys(markers).forEach((imei) => {
+//     const marker = markers[imei];
+//     const speedKmh = marker.device.speed
+//       ? convertSpeedToKmh(marker.device.speed)
+//       : 0; 
+//     const hasSOS = marker.device.sos === "1"; 
+//     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
+//     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
+//     const slowSpeedThreshold = marker.device.slowSpeed;
+//     const normalSpeedThreshold = marker.device.normalSpeed;
+
+//     let isVisible = false;
+
+//     switch (filterValue) {
+//       case "0":
+//         isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
+//         break;
+//       case "0-40":
+//         isVisible = speedKmh > 0 && speedKmh <= slowSpeedThreshold && hoursSinceLastUpdate < 24;
+//         break;
+//       case "40-60":
+//         isVisible =
+//           speedKmh > slowSpeedThreshold && speedKmh <= normalSpeedThreshold && hoursSinceLastUpdate < 24;
+//         break;
+//       case "60+":
+//         isVisible = speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
+//         break;
+//       case "sos":
+//         isVisible = hasSOS && hoursSinceLastUpdate < 24;
+//         break;
+//       case "offline":
+//         isVisible = hoursSinceLastUpdate > 24;
+//         break;
+//       default: // "all"
+//         isVisible = true;
+//         break;
+//     }
+
+//     marker.map = isVisible ? map : null;
+
+//     if (isVisible) {
+//       filteredVehicles.push(marker.device);
+//     }
+//   });
+//   renderVehicleCards(filteredVehicles, filterValue);
+// }
+
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
   let filteredVehicles = [];
@@ -1038,34 +1090,32 @@ function filterVehicles() {
     const marker = markers[imei];
     const speedKmh = marker.device.speed
       ? convertSpeedToKmh(marker.device.speed)
-      : 0; 
-    const hasSOS = marker.device.sos === "1"; 
+      : 0;
+    const hasSOS = marker.device.sos === "1";
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
-    const slowSpeedThreshold = marker.device.slowSpeed;
-    const normalSpeedThreshold = marker.device.normalSpeed;
+    const status = marker.device.status;
 
     let isVisible = false;
 
     switch (filterValue) {
       case "0":
-        isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
+        isVisible = (status === "stopped" || status === "idle") && hoursSinceLastUpdate < 24;
         break;
       case "0-40":
-        isVisible = speedKmh > 0 && speedKmh <= slowSpeedThreshold && hoursSinceLastUpdate < 24;
+        isVisible = status === "moving" && speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
         break;
       case "40-60":
-        isVisible =
-          speedKmh > slowSpeedThreshold && speedKmh <= normalSpeedThreshold && hoursSinceLastUpdate < 24;
+        isVisible = status === "moving" && speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
         break;
       case "60+":
-        isVisible = speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
+        isVisible = status === "moving" && speedKmh > 60 && hoursSinceLastUpdate < 24;
         break;
       case "sos":
         isVisible = hasSOS && hoursSinceLastUpdate < 24;
         break;
       case "offline":
-        isVisible = hoursSinceLastUpdate > 24;
+        isVisible = hoursSinceLastUpdate > 24 || status === "offline";
         break;
       default: // "all"
         isVisible = true;
@@ -1078,6 +1128,7 @@ function filterVehicles() {
       filteredVehicles.push(marker.device);
     }
   });
+  
   renderVehicleCards(filteredVehicles, filterValue);
 }
 
@@ -1816,6 +1867,26 @@ function addHoverListenersToCardsAndMarkers() {
 
 window.filterVehicles = filterVehicles;
 
+// window.onload = async function () {
+//   document.querySelector(".block-container").style.display = "none";
+//   await initMap();
+//   await fetchVehicleData();
+//   updateMap();
+
+//   hideSkeletonLoader();
+
+//   document
+//     .getElementById("table-search-button")
+//     .addEventListener("click", searchTable);
+//   document
+//     .getElementById("table-vehicle-search")
+//     .addEventListener("keypress", (e) => {
+//       if (e.key === "Enter") {
+//         searchTable();
+//       }
+//     });
+// };
+
 window.onload = async function () {
   document.querySelector(".block-container").style.display = "none";
   await initMap();
@@ -1823,6 +1894,27 @@ window.onload = async function () {
   updateMap();
 
   hideSkeletonLoader();
+
+  // Check for dashboard filter
+  const dashboardFilter = localStorage.getItem('dashboardFilter');
+  if (dashboardFilter) {
+    // Map the dashboard filter to the vehicle map filter values
+    const filterMap = {
+      'running': '0-40',
+      'idle': '0',
+      'stopped': '0',
+      'speed': '40-60',
+      'overspeed': '60+',
+      'offline': 'offline'
+    };
+    
+    const filterValue = filterMap[dashboardFilter] || 'all';
+    document.getElementById('speed-filter').value = filterValue;
+    filterVehicles();
+    
+    // Clear the filter so it doesn't persist
+    localStorage.removeItem('dashboardFilter');
+  }
 
   document
     .getElementById("table-search-button")

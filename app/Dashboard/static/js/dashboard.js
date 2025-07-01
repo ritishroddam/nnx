@@ -14,6 +14,15 @@ function applySortIcons(column, direction) {
   });
 }
 
+function filterVehiclesOnMap(status) {
+  // Store the filter in localStorage so the vehicle map can read it
+  localStorage.setItem('dashboardFilter', status);
+  
+  // Open the vehicle map in a new tab
+  const vehicleMapUrl = '/vehicle/map';
+  window.open(vehicleMapUrl, '_blank');
+}
+
 function sortTable(column, direction) {
   const table = document.querySelector(".vehicleLiveTable table");
   const tbody = table.querySelector("tbody");
