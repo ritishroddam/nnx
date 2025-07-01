@@ -12,7 +12,7 @@ from app.geocoding import geocodeInternal
 rawLogs_bp = Blueprint('RawLogs', __name__, static_folder='static', template_folder='templates')
 
 rawLogSubscriptions = db['raw_log_subscriptions']
-rawLogsCollection = db['raw_logs']
+rawLogsCollection = db['raw_log_data']
 vehicleCollection = db['vehicle_inventory']
 
 @rawLogs_bp.route('/', methods=['GET'])
