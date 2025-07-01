@@ -171,6 +171,7 @@ async function updateData(data) {
 
     data["distance"] = String(distance);
     data["gsm"] = String(data.gsm_sig);
+    data["ignition"] = data.ignition || oldData.ignition;
 
     const lastUpdated = convertToDate(data.date, data.time);
     const now = new Date();
@@ -224,6 +225,7 @@ async function updateData(data) {
     data["status"] = statusText;
     data["status_time_delta"] = 0;
     data["status_time_str"] = "0 seconds";
+    data["ignition"] = data.ignition || "0";
 
     if(data.imei === "863221044380259")
     {
