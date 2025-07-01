@@ -70,9 +70,9 @@ def get_raw_logs():
         
         for log in raw_logs:
             log['timestamp'] = log['timestamp'].astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
-            data['raw_data'].append({
+            data['raw_data'].append(
                 f"Data String:/n{log['raw_data']}/nTime:{log['timestamp']}"
-            })
+            )
         logs.append(data)
     else:
         return jsonify({"error": "No raw logs found for the given criteria"}), 404
