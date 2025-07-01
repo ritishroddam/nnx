@@ -63,7 +63,7 @@ def get_raw_logs():
     if raw_logs:
         data = {}
         data['LicensePlateNumber'] = raw_logs[0]['LicensePlateNumber'] if raw_logs else licensePlateNumber
-        data['IMEI'] = imei
+        data['imei'] = imei
         data['raw_data'] = []
         
         ist = timezone('Asia/Kolkata')
