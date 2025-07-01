@@ -76,7 +76,7 @@ def get_raw_logs():
     else:
         return jsonify({"error": "No raw logs found for the given criteria"}), 404
 
-    return jsonify(raw_logs), 200
+    return jsonify(data), 200
     
 @rawLogs_bp.route('/subscribeToRawLog', methods=['POST'])
 @jwt_required()
