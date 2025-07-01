@@ -47,7 +47,7 @@ def get_raw_logs():
         now = datetime.now(timezone('UTC'))
         start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = now.replace(hour=23, minute=59, second=59, microsecond=999999)
-        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
+        query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}, {"_id": "0"}
     else:
         start_date = datetime.strptime(start_date, '%Y-%m-%dT%H:%M')
         end_date = datetime.strptime(end_date, '%Y-%m-%dT%H:%M')
