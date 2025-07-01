@@ -30,41 +30,56 @@ document.addEventListener("DOMContentLoaded", function () {
     const fromDatetime = document.getElementById("fromDatetime").value;
     const toDatetime = document.getElementById("toDatetime").value;
 
-    const response = await fetch("/rawLogs/getRawLogs", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-       },
-      body: JSON.stringify({
-        licensePlateNumber,
-        startDate: fromDatetime,
-        endDate: toDatetime,
-      }),
-    });
-
-    const logs = await response.json();
-    const logsContainer = document.getElementById("logsContainer");
-    logsContainer.innerHTML = "";
-
-    logs.forEach((log) => {
-      const logElement = document.createElement("div");
-      logElement.className = "log-item";
-      logElement.innerHTML = `
-        <h3>${log.vehicle}</h3>
-        <p>${log.timestamp}</p>
-        <p>${log.data}</p>
-        <button class="btn downloadLogBtn" data-vehicle="${log.vehicle}">Download PDF</button>
-      `;
-      logsContainer.appendChild(logElement);
-    });
-
-    document.querySelectorAll(".downloadLogBtn").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const vehicle = this.getAttribute("data-vehicle");
-        downloadPDF(vehicle);
+    try {
+      const response = await fetch("/rawLogs/getRawLogs", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({
+          licensePlateNumber,
+          startDate: fromDatetime,
+          endDate: toDatetime,
+        }),
       });
-    });
+
+      if (response.status === 200) {
+        const logs = await response.json();
+        const logsContainer = document.getElementById("logsContainer");
+        logsContainer.innerHTML = "";
+
+        logs.forEach((log) => {
+          const logElement = document.createElement("div");
+          logElement.className = "log-item";
+          logElement.innerHTML = `
+            <h3>${log.vehicle}</h3>
+            <p>${log.timestamp}</p>
+            <p>${log.data}</p>
+            <button class="btn downloadLogBtn" data-vehicle="${log.vehicle}">Download PDF</button>
+          `;
+          logsContainer.appendChild(logElement);
+        });
+
+        document.querySelectorAll(".downloadLogBtn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const vehicle = this.getAttribute("data-vehicle");
+            downloadPDF(vehicle);
+          });
+        });
+      } else if (response.status === 400) {
+        const errorData = await response.json();
+        displayFlashMessage(errorData.error || "Missing or invalid data.", "danger");
+      } else if (response.status === 404) {
+        const errorData = await response.json();
+        displayFlashMessage(errorData.error || "License plate number not found.", "danger");
+      } else {
+        displayFlashMessage(`Unexpected error: ${response.statusText}`, "danger");
+      }
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      displayFlashMessage("An unexpected error occurred while fetching logs.", "danger");
+    }
   });
 
   // Download logs as PDF
@@ -73,10 +88,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Fetch and populate vehicle dropdown
-    async function fetchVehicles() {
-      try {
-        const response = await fetch("/rawLogs/getVehicles");
-        if (!response.ok) throw new Error("Failed to fetch vehicles");
+  async function fetchVehicles() {
+    try {
+      const response = await fetch("/rawLogs/getVehicles");
+      if (response.status === 200) {
         const vehicles = await response.json();
         const vehicleDropdown = document.getElementById("vehicleDropdown");
         vehicleDropdown.innerHTML = ""; // Clear existing options
@@ -93,11 +108,14 @@ document.addEventListener("DOMContentLoaded", function () {
           searchField: "text",
           create: false,
         });
-
-      } catch (error) {
-        console.error("Error fetching vehicles:", error);
+      } else {
+        displayFlashMessage("Failed to fetch vehicles.", "danger");
       }
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      displayFlashMessage("An unexpected error occurred while fetching vehicles.", "danger");
     }
+  }
 
   // Subscribe to vehicles
   document.getElementById("subscribeForm").addEventListener("submit", async function (e) {
@@ -105,16 +123,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedVehicles = Array.from(document.getElementById("vehicleDropdown").selectedOptions).map(
       (option) => option.value
     );
-    const response = await fetch("/rawLogs/subscribeToRawLog", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-       },
-      body: JSON.stringify({ vehicles: selectedVehicles }),
-    });
-    const result = await response.json();
-    alert(result.message);
+
+    try {
+      const response = await fetch("/rawLogs/subscribeToRawLog", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({ vehicles: selectedVehicles }),
+      });
+
+      if (response.status === 201) {
+        const result = await response.json();
+        displayFlashMessage(result.message || "Subscribed successfully!", "success");
+      } else if (response.status === 400) {
+        const errorData = await response.json();
+        displayFlashMessage(errorData.error || "Bad Request: Missing or invalid data.", "danger");
+      } else {
+        displayFlashMessage(`Unexpected error: ${response.statusText}`, "danger");
+      }
+    } catch (error) {
+      console.error("Error subscribing to vehicles:", error);
+      displayFlashMessage("An unexpected error occurred while subscribing to vehicles.", "danger");
+    }
   });
 
   // Initialize
