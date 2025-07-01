@@ -171,7 +171,6 @@ async function updateData(data) {
 
     data["distance"] = String(distance);
     data["gsm"] = String(data.gsm_sig);
-    data["ignition"] = data.ignition || oldData.ignition;
 
     const lastUpdated = convertToDate(data.date, data.time);
     const now = new Date();
@@ -225,7 +224,6 @@ async function updateData(data) {
     data["status"] = statusText;
     data["status_time_delta"] = 0;
     data["status_time_str"] = "0 seconds";
-    data["ignition"] = data.ignition || "0";
 
     if(data.imei === "863221044380259")
     {
@@ -1031,58 +1029,6 @@ function animateMarker(marker, newPosition, duration = 9000) {
   requestAnimationFrame(moveMarker);
 }
 
-// function filterVehicles() {
-//   const filterValue = document.getElementById("speed-filter").value;
-//   let filteredVehicles = [];
-//   const now = new Date();
-
-//   Object.keys(markers).forEach((imei) => {
-//     const marker = markers[imei];
-//     const speedKmh = marker.device.speed
-//       ? convertSpeedToKmh(marker.device.speed)
-//       : 0; 
-//     const hasSOS = marker.device.sos === "1"; 
-//     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
-//     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
-//     const slowSpeedThreshold = marker.device.slowSpeed;
-//     const normalSpeedThreshold = marker.device.normalSpeed;
-
-//     let isVisible = false;
-
-//     switch (filterValue) {
-//       case "0":
-//         isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
-//         break;
-//       case "0-40":
-//         isVisible = speedKmh > 0 && speedKmh <= slowSpeedThreshold && hoursSinceLastUpdate < 24;
-//         break;
-//       case "40-60":
-//         isVisible =
-//           speedKmh > slowSpeedThreshold && speedKmh <= normalSpeedThreshold && hoursSinceLastUpdate < 24;
-//         break;
-//       case "60+":
-//         isVisible = speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
-//         break;
-//       case "sos":
-//         isVisible = hasSOS && hoursSinceLastUpdate < 24;
-//         break;
-//       case "offline":
-//         isVisible = hoursSinceLastUpdate > 24;
-//         break;
-//       default: // "all"
-//         isVisible = true;
-//         break;
-//     }
-
-//     marker.map = isVisible ? map : null;
-
-//     if (isVisible) {
-//       filteredVehicles.push(marker.device);
-//     }
-//   });
-//   renderVehicleCards(filteredVehicles, filterValue);
-// }
-
 function filterVehicles() {
   const filterValue = document.getElementById("speed-filter").value;
   let filteredVehicles = [];
@@ -1092,44 +1038,35 @@ function filterVehicles() {
     const marker = markers[imei];
     const speedKmh = marker.device.speed
       ? convertSpeedToKmh(marker.device.speed)
-      : 0;
-    const hasSOS = marker.device.sos === "1";
+      : 0; 
+    const hasSOS = marker.device.sos === "1"; 
     const lastUpdate = convertToDate(marker.device.date, marker.device.time);
     const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
-    const status = marker.device.status;
-    const ignition = marker.device.ignition;
-    const isDisconnected = marker.device.gsm === "0"; 
+    const slowSpeedThreshold = marker.device.slowSpeed;
+    const normalSpeedThreshold = marker.device.normalSpeed;
 
     let isVisible = false;
 
     switch (filterValue) {
-      case "0": // Stationary (legacy filter)
+      case "0":
         isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
         break;
-      case "idle": // Idle (ignition on but not moving)
-        isVisible = speedKmh === 0 && ignition === "1" && hoursSinceLastUpdate < 24;
+      case "0-40":
+        isVisible = speedKmh > 0 && speedKmh <= slowSpeedThreshold && hoursSinceLastUpdate < 24;
         break;
-      case "parked": // Parked (ignition off)
-        isVisible = speedKmh === 0 && ignition === "0" && hoursSinceLastUpdate < 24;
+      case "40-60":
+        isVisible =
+          speedKmh > slowSpeedThreshold && speedKmh <= normalSpeedThreshold && hoursSinceLastUpdate < 24;
         break;
-      case "0-40": // Running at slow speed
-        isVisible = speedKmh > 0 && speedKmh <= 40 && hoursSinceLastUpdate < 24;
+      case "60+":
+        isVisible = speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
         break;
-      case "40-60": // Moderate speed
-        isVisible = speedKmh > 40 && speedKmh <= 60 && hoursSinceLastUpdate < 24;
-        break;
-      case "60+": // High speed
-        isVisible = speedKmh > 60 && hoursSinceLastUpdate < 24;
-        break;
-      case "sos": // SOS alert
+      case "sos":
         isVisible = hasSOS && hoursSinceLastUpdate < 24;
         break;
-      case "offline": // Offline
-        isVisible = hoursSinceLastUpdate > 24 || status === "offline";
+      case "offline":
+        isVisible = hoursSinceLastUpdate > 24;
         break;
-      case "disconnected":
-        isVisible = isDisconnected && hoursSinceLastUpdate < 24; // Recently disconnected
-        break;  
       default: // "all"
         isVisible = true;
         break;
@@ -1141,7 +1078,6 @@ function filterVehicles() {
       filteredVehicles.push(marker.device);
     }
   });
-  
   renderVehicleCards(filteredVehicles, filterValue);
 }
 
@@ -1880,26 +1816,6 @@ function addHoverListenersToCardsAndMarkers() {
 
 window.filterVehicles = filterVehicles;
 
-// window.onload = async function () {
-//   document.querySelector(".block-container").style.display = "none";
-//   await initMap();
-//   await fetchVehicleData();
-//   updateMap();
-
-//   hideSkeletonLoader();
-
-//   document
-//     .getElementById("table-search-button")
-//     .addEventListener("click", searchTable);
-//   document
-//     .getElementById("table-vehicle-search")
-//     .addEventListener("keypress", (e) => {
-//       if (e.key === "Enter") {
-//         searchTable();
-//       }
-//     });
-// };
-
 window.onload = async function () {
   document.querySelector(".block-container").style.display = "none";
   await initMap();
@@ -1907,29 +1823,6 @@ window.onload = async function () {
   updateMap();
 
   hideSkeletonLoader();
-
-  // Check for dashboard filter
- const dashboardFilter = localStorage.getItem('dashboardFilter');
-  if (dashboardFilter) {
-    // Map the dashboard filter to the vehicle map filter values
-    const filterMap = {
-      'running': '0-40',
-      'idle': 'idle',
-      'parked': 'parked',
-      'speed': '40-60',
-      'overspeed': '60+',
-      'offline': 'offline',
-      'disconnected': 'disconnected',  
-      'sos': 'sos'
-    };
-    
-    const filterValue = filterMap[dashboardFilter] || 'all';
-    document.getElementById('speed-filter').value = filterValue;
-    filterVehicles();
-    
-    // Clear the filter so it doesn't persist
-    localStorage.removeItem('dashboardFilter');
-  }
 
   document
     .getElementById("table-search-button")
