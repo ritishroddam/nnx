@@ -1,6 +1,7 @@
 from flask import Flask, Blueprint, render_template, request, jsonify, flash, redirect, url_for, send_file
 from datetime import datetime, timedelta
 from pytz import timezone
+import os
 from bson.objectid import ObjectId 
 from fpdf import FPDF
 from app.database import db
@@ -138,7 +139,7 @@ def download_pdf():
         pdf.ln(5)
 
     # Save the PDF to a temporary file
-    pdf_path = "raw_logs_report.pdf"
+    pdf_path = os.path.join(os.getcwd(), "raw_logs_report.pdf") 
     pdf.output(pdf_path)
 
     # Send the file as a response
