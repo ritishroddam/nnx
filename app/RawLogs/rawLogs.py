@@ -59,6 +59,7 @@ def get_raw_logs():
     query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
     raw_logs = list(rawLogsCollection.find(query, {"_id": 0}).sort("timestamp", -1))
     
+    logs = []
     if raw_logs:
         data = {}
         data['LicensePlateNumber'] = raw_logs[0]['LicensePlateNumber'] if raw_logs else licensePlateNumber
@@ -73,10 +74,11 @@ def get_raw_logs():
                 "data": log['raw_data'],
                 "timestamp": log['timestamp']
             })
+        logs.append(data)
     else:
         return jsonify({"error": "No raw logs found for the given criteria"}), 404
 
-    return jsonify(data), 200
+    return jsonify(logs), 200
     
 @rawLogs_bp.route('/subscribeToRawLog', methods=['POST'])
 @jwt_required()
