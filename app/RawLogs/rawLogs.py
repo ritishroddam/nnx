@@ -59,7 +59,8 @@ def get_raw_logs():
     raw_logs = list(rawLogsCollection.find(query).sort("timestamp", -1))
 
     for log in raw_logs:
-        log['timestamp'] = log['timestamp'].astimezone(timezone('UTC')).strftime('%Y-%m-%d %H:%M:%S')
+        ist = timezone('Asia/Kolkata')
+        log['timestamp'] = log['timestamp'].astimezone(ist).strftime('%Y-%m-%d %H:%M:%S')
 
     return jsonify(raw_logs), 200
     
