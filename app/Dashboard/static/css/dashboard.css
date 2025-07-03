@@ -1027,11 +1027,12 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     padding: 20px;
-    overflow: auto;
 }
 
 .dark-mode .status-popup {
     color: #ccc;
+    background: black;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .status-popup.active {
@@ -1059,6 +1060,10 @@
     border: none;
 }
 
+.dark-mode .status-popup-close {
+    color: #ccc;
+}
+
 .status-popup-overlay {
     display: none;
     position: fixed;
@@ -1078,6 +1083,7 @@
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
+    margin-left: -225px;
 }
 
 .status-popup-actions button {
