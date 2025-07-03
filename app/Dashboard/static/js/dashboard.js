@@ -1008,48 +1008,57 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
     XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
 });
 
-document.getElementById('statusPopupPdfBtn').addEventListener('click', function() {
+// Add this at the top of your file
+const { jsPDF } = window.jspdf;
+
+// Replace your existing PDF generation code with this:
+document.getElementById('statusPopupPdfBtn').addEventListener('click', async function() {
     const title = document.getElementById('statusPopupTitle').textContent;
-    const table = document.querySelector("#statusPopup table");
+    const table = document.querySelector("#statusPopup .table-container");
     
-    if (!table) return;
+    if (!table) {
+        alert('No table found for PDF generation');
+        return;
+    }
     
     // Show loading state
     const originalContent = table.innerHTML;
     table.innerHTML = `
-        <tr>
-            <td colspan="8" style="text-align: center; padding: 20px;">
-                Generating PDF...
-            </td>
-        </tr>
+        <div style="text-align: center; padding: 20px;">
+            Generating PDF... Please wait
+        </div>
     `;
     
-    if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
-        alert('PDF generation libraries not loaded. Please try again later.');
-        table.innerHTML = originalContent;
-        return;
-    }
-    
-    html2canvas(table).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 190; // A4 width in mm
-        const pageHeight = 277; // A4 height in mm
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 10; // Top margin
-        
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+    try {
+        // Check if libraries are available
+        if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
+            throw new Error('PDF generation libraries not loaded');
         }
         
+        // Create PDF
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        
+        // Generate canvas from table
+        const canvas = await html2canvas(table, {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+        });
+        
+        // Add image to PDF
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pdf.internal.pageSize.getWidth() - 40;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
         pdf.save(`${title.replace(/\s+/g, '_')}.pdf`);
+        
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        alert(`Failed to generate PDF: ${error.message}`);
+    } finally {
+        // Restore original content
         table.innerHTML = originalContent;
-    });
+    }
 });
