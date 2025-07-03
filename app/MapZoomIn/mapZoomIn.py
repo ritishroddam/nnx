@@ -27,6 +27,6 @@ def home():
             companyLatLng = company_collection.find_one({'_id': ObjectId(companyId)}, {'_id': 0,'lat': 1, 'lng': 1})
         except Exception as e:
             print(f"[DEBUG] Error fetching company data: {e}")
-            companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
+            companyLatLng = {'lat': "15.34776", 'lng': "75.13378"}
             
     return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
