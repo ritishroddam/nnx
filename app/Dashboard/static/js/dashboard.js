@@ -59,11 +59,12 @@ function formatStatusTime(seconds) {
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
+    document.getElementById('statusPopupSubtitle').textContent = title;
     
     // Show loading state
-    document.getElementById('statusPopupTable').innerHTML = `
+    document.getElementById('statusPopupTableBody').innerHTML = `
         <tr>
-            <td colspan="8" style="text-align: center; padding: 20px;">
+            <td colspan="10" style="text-align: center; padding: 20px;">
                 Loading data...
             </td>
         </tr>
@@ -108,9 +109,9 @@ async function showStatusPopup(status, title) {
         renderStatusPopupTable(filteredData);
     } catch (error) {
         console.error("Error fetching vehicle data:", error);
-        document.getElementById('statusPopupTable').innerHTML = `
+        document.getElementById('statusPopupTableBody').innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; padding: 20px; color: red;">
+                <td colspan="10" style="text-align: center; padding: 20px; color: red;">
                     Error loading data. Please try again.
                 </td>
             </tr>
@@ -120,13 +121,13 @@ async function showStatusPopup(status, title) {
 
 // Enhanced renderStatusPopupTable function
 function renderStatusPopupTable(data) {
-    const tableBody = document.getElementById('statusPopupTable');
+    const tableBody = document.getElementById('statusPopupTableBody');
     tableBody.innerHTML = '';
     
     if (data.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; padding: 20px;">
+                <td colspan="10" style="text-align: center; padding: 20px;">
                     No vehicles found for this status
                 </td>
             </tr>
@@ -135,64 +136,78 @@ function renderStatusPopupTable(data) {
     }
     
     data.forEach((vehicle) => {
-        const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
-        const now = new Date();
-        const timeDiff = Math.abs(now - lastUpdated);
-        const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-        const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-        const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        
-        let lastUpdatedText;
-        if (daysDiff > 0) {
-            lastUpdatedText = `${daysDiff} day${daysDiff > 1 ? 's' : ''} ago`;
-        } else if (hoursDiff > 0) {
-            lastUpdatedText = `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ago`;
-        } else {
-            lastUpdatedText = `${minutesDiff} minute${minutesDiff > 1 ? 's' : ''} ago`;
-        }
-        
-        let statusText = vehicle.status || 'unknown';
-        let statusClass = '';
-        
-        switch(statusText.toLowerCase()) {
-            case 'running':
-            case 'moving':
-                statusText = 'Moving';
-                statusClass = 'status-moving';
-                break;
-            case 'idle':
-                statusText = 'Idle';
-                statusClass = 'status-idle';
-                break;
-            case 'parked':
-            case 'stopped':
-                statusText = 'Parked';
-                statusClass = 'status-parked';
-                break;
-            case 'offline':
-                statusText = 'Offline';
-                statusClass = 'status-offline';
-                break;
-            default:
-                statusText = 'Unknown';
-                statusClass = 'status-unknown';
-        }
-        
         const row = document.createElement('tr');
+        
+        const speed = vehicle.speed ? parseFloat(vehicle.speed).toFixed(2) : 0;
+        const speedCellClass = speed >= 60 ? 'speed-warning' : '';
+        
+        const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+        const iconRed = "color:#d32f2f;";
+        
+        // Determine status icons
+        const gpsIcon = vehicle.status === "offline" ? "location_disabled" : "my_location";
+        
+        let ignitionIcon, ignitionColor;
+        if (vehicle.ignition === "0") {
+            ignitionIcon = "key_off";
+            ignitionColor = "#d32f2f";
+        } else {
+            ignitionIcon = "key";
+            ignitionColor = "#4caf50";
+        }
+        
+        const sosIcon = vehicle.sos === "1" 
+            ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>` 
+            : "";
+            
+        // GSM signal icon
+        const ASUgsmValue = parseInt(vehicle.gsm || 0);
+        let gsmIcon, gsmColor;
+        if (ASUgsmValue == 0) {
+            gsmIcon = "signal_cellular_null";
+            gsmColor = "#d32f2f";
+        } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+            gsmIcon = "signal_cellular_1_bar";
+            gsmColor = "#ff9800";
+        } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+            gsmIcon = "signal_cellular_2_bar";
+            gsmColor = "#ffc107";
+        } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+            gsmIcon = "signal_cellular_3_bar";
+            gsmColor = "#cddc39";
+        } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+            gsmIcon = "signal_cellular_4_bar";
+            gsmColor = "#4caf50";
+        } else {
+            gsmIcon = "signal_cellular_off";
+            gsmColor = "#d32f2f";
+        }
+        
         row.innerHTML = `
             <td>${vehicle.LicensePlateNumber || vehicle.imei || 'N/A'}</td>
             <td>${vehicle.VehicleType || 'N/A'}</td>
-            <td>${lastUpdatedText}</td>
+            <td>${formatLastUpdatedText(vehicle.date, vehicle.time)}</td>
             <td>${vehicle.location || 'Location unknown'}</td>
-            <td>${parseFloat(vehicle.speed || 0).toFixed(1)}</td>
-            <td>${parseFloat(vehicle.distance || 0).toFixed(2)}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>${formatStatusTime(parseInt(vehicle.status_time_delta / 1000)) || 'N/A'}</td>
+            <td>${vehicle.latitude ? parseFloat(vehicle.latitude).toFixed(4) : 'N/A'}</td>
+            <td>${vehicle.longitude ? parseFloat(vehicle.longitude).toFixed(4) : 'N/A'}</td>
+            <td class="${speedCellClass}">${speed} km/h</td>
+            <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
+            <td>${vehicle.odometer || 'N/A'}</td>
+            <td>
+                <div class="vehicle-table-icons">
+                    ${sosIcon}
+                    <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+                    <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
+                    <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+                </div>
+            </td>
         `;
+        
         tableBody.appendChild(row);
     });
     
-    setupTableSorting('#statusPopup table');
+    // Initialize sorting if needed
+    setupTableSorting('#statusPopupTable');
 }
 
 // Add this modified setupTableSorting function

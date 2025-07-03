@@ -187,30 +187,37 @@ Dashboard
         <button class="status-popup-close" id="statusPopupClose">&times;</button>
     </div>
     <div class="status-popup-actions">
-        <button class="excel-btn" id="statusPopupExcelBtn" title="Download Excel">
+        <button class="excel-btn" id="statusPopupExcelBtn">
             <i class="fa fa-file-excel-o"></i> Excel
         </button>
-        <button class="pdf-btn" id="statusPopupPdfBtn" title="Download PDF">
+        <button class="pdf-btn" id="statusPopupPdfBtn">
             <i class="fa fa-file-pdf-o"></i> PDF
         </button>
     </div>
-    <div class="vehicleLiveTable">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th data-column="registration">Vehicle <span class="sort-icon"></span></th>
-                    <th data-column="type">Vehicle Type <span class="sort-icon"></span></th>
-                    <th data-column="last_updated">Last Updated <span class="sort-icon"></span></th>
-                    <th data-column="location">Location <span class="sort-icon"></span></th>
-                    <th data-column="speed">Speed (km/h) <span class="sort-icon"></span></th>
-                    <th data-column="distance">Distance (km) <span class="sort-icon"></span></th>
-                    <th data-column="status">Status <span class="sort-icon"></span></th>
-                    <th data-column="status_time">Status Duration <span class="sort-icon"></span></th>
-                </tr>
-            </thead>
-            <tbody id="statusPopupTable">
-            </tbody>
-        </table>
+    <div class="vehicle-table-container">
+        <div class="table-header-container">
+            <h3 id="statusPopupSubtitle"></h3>
+        </div>
+        <div class="table-container">
+            <table id="statusPopupTable" class="vehicle-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle Registration Number</th>
+                        <th>Vehicle Type</th>
+                        <th>Last Updated</th>
+                        <th>Location</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Speed</th>
+                        <th>Distance Traveled Today</th>
+                        <th>Odometer Reading</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="statusPopupTableBody">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

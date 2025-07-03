@@ -1123,8 +1123,30 @@
 }
 
 .status-popup {
-    max-width: 90%;
-    width: 1000px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+.status-popup .vehicle-table-container {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.status-popup .table-container {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.speed-warning {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.vehicle-table-icons {
+    display: flex;
+    gap: 5px;
 }
 
 .status-popup .vehicleLiveTable {
