@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
+  $("#licensePlateNumberRaw").selectize({
+    placeholder: "Select vehicles...",
+    searchField: "text",
+    create: false,
+  });
+
   const rawLogsView = document.getElementById("rawLogsView");
   const subscribeView = document.getElementById("subscribeView");
   const toggleSlider = document.querySelector(".toggle-slider");

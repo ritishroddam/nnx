@@ -24,7 +24,13 @@ Raw Logs
   <form id="rawLogsForm" class="styled-form">
     <div class="form-group">
       <label for="licensePlateNumber">License Plate Number:</label>
-      <input type="text" id="licensePlateNumber" name="licensePlateNumber" required>
+      <select name="licensePlateNumber" id="licensePlateNumberRaw" required>
+        <option value="" disabled selected>Select a vehicle</option>
+        {% for plate in liscensePlateNumbers %}
+          <option value="{{ plate }}">{{ plate }}</option>
+        {% endfor %}
+      </select>
+      <!-- <input type="text" id="licensePlateNumber" name="licensePlateNumber" required> -->
     </div>
     <div class="form-group">
       <label for="fromDatetime">From:</label>
