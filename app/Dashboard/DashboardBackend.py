@@ -163,13 +163,196 @@ def atlanta_distance_data():
         print(f"🚨 Error fetching distance data: {e}")
         return jsonify({"error": "Failed to fetch distance data"}), 500
 
+# @dashboard_bp.route('/get_vehicle_range_data', methods=['GET'])
+# @jwt_required()
+# @roles_required('admin', 'clientAdmin', 'user')
+# def get_vehicle_range_data():
+#     try:
+#         utc_now = datetime.now(timezone('UTC'))
+
+#         range_param = request.args.get("range", "1day")
+#         status_filter = request.args.get("status")
+        
+#         range_map = {
+#             "1hour": timedelta(hours=1),
+#             "6hours": timedelta(hours=6),
+#             "12hours": timedelta(hours=12),
+#             "1day": timedelta(days=1),
+#             "2days": timedelta(days=2),
+#             "4days": timedelta(days=4),
+#             "7days": timedelta(days=7),
+#             "14days": timedelta(days=14),
+#             "30days": timedelta(days=30),
+#         }
+#         delta = range_map.get(range_param, timedelta(days=1))
+#         start_of_day = utc_now - delta
+#         end_of_day = utc_now
+
+#         imeis = list(get_vehicle_data().distinct("IMEI"))
+
+#         vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
+#         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
+
+#         pipeline = [
+#             {"$match": {
+#                 "date_time": {
+#                     "$gte": start_of_day,
+#                     "$lt": end_of_day
+#                 },
+#                 "imei": {"$in": imeis}
+#             }},
+#             {"$sort": {"imei": 1, "date_time": 1}},
+#             {"$group": {
+#                 "_id": "$imei",
+#                 "records": {"$push": {
+#                     "date_time": "$date_time",
+#                     "ignition": "$ignition",
+#                     "speed": "$speed",
+#                     "odometer": "$odometer"
+#                 }},
+#                 "start_odometer": {"$first": {"$toDouble": "$odometer"}},
+#                 "end_odometer": {"$last": {"$toDouble": "$odometer"}},
+#                 "max_speed": {
+#                     "$max": {
+#                         "$cond": [
+#                             {"$eq": ["$ignition", "1"]},
+#                             {"$toDouble": "$speed"},
+#                             None
+#                         ]
+#                     }
+#                 },
+#                 "sum_speed": {
+#                     "$sum": {
+#                         "$cond": [
+#                             {
+#                                 "$and": [
+#                                     {"$eq": ["$ignition", "1"]},
+#                                     {"$gt": [{"$toDouble": "$speed"}, 0]}
+#                                 ]
+#                             },
+#                             {"$toDouble": "$speed"},
+#                             0
+#                         ]
+#                     }
+#                 },
+#                 "count_speed": {
+#                     "$sum": {
+#                         "$cond": [
+#                             {
+#                                 "$and": [
+#                                     {"$eq": ["$ignition", "1"]},
+#                                     {"$gt": [{"$toDouble": "$speed"}, 0]}
+#                                 ]
+#                             },
+#                             1,
+#                             0
+#                         ]
+#                     }
+#                 }
+#             }},
+#             {"$project": {
+#                 "imei": "$_id",
+#                 "distance": {"$subtract": ["$end_odometer", "$start_odometer"]},
+#                 "max_speed": 1,
+#                 "avg_speed": {
+#                     "$cond": [
+#                         {"$eq": ["$count_speed", 0]},
+#                         0,
+#                         {"$divide": ["$sum_speed", "$count_speed"]}
+#                     ]
+#                 },
+#                 "records": 1
+#             }}
+#         ]
+
+#         results = list(atlanta_collection.aggregate(pipeline))
+
+#         vehicle_data = []
+#         for record in results:
+#             recs = record["records"]
+#             if not recs:
+#                 continue
+            
+#             latest = recs[-1]
+#             imei = record["imei"]
+#             vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
+        
+#             driving_time = timedelta()
+#             idle_time = timedelta()
+#             number_of_stops = 0
+#             prev_ignition = None
+#             prev_time = None
+        
+#             for i, r in enumerate(recs):
+#                 curr_time = r["date_time"]
+#                 ignition = r.get("ignition")
+#                 speed = float(r.get("speed", 0.0))
+        
+#                 if prev_time is not None:
+#                     delta = curr_time - prev_time
+#                     if prev_ignition == "1" and speed > 0:
+#                         driving_time += delta
+#                     elif prev_ignition == "0" and speed == 0:
+#                         idle_time += delta
+        
+#                 if prev_ignition == "0" and ignition == "1":
+#                     number_of_stops += 1
+        
+#                 prev_ignition = ignition
+#                 prev_time = curr_time
+        
+#             vehicle_data.append({
+#                 "imei": imei,
+#                 "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
+#                 "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
+#                 "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
+#                 "location": vehicle_doc.get("Location", "Location unknown"),
+#                 "latitude": latest.get("latitude", "N/A"),
+#                 "longitude": latest.get("longitude", "N/A"),
+#                 "speed": latest.get("speed", "0.0"),
+#                 "ignition": latest.get("ignition", "0"),
+#                 "gsm": latest.get("gsm_sig", "0"),
+#                 "sos": latest.get("sos", "0"),
+#                 "odometer": latest.get("odometer", "N/A"),
+#                 "date": latest.get("date", None),
+#                 "time": latest.get("time", None),
+#                 "distance": round(record.get("distance", 0), 2),
+#                 "max_speed": record.get("max_speed", 0),
+#                 "avg_speed": round(record.get("avg_speed", 0), 2),
+#                 "driving_time": format_seconds(driving_time.total_seconds()),
+#                 "idle_time": format_seconds(idle_time.total_seconds()),
+#                 "number_of_stops": number_of_stops
+#             })
+            
+#             if status_filter:
+#                 filtered_data = []
+#                 for vehicle in vehicle_data:
+#                     speed = float(vehicle.get("max_speed", 0))
+#                     ignition = vehicle.get("ignition", "0")
+
+#                     if status_filter == "running" and speed > 0 and ignition == "1":
+#                         filtered_data.append(vehicle)
+#                     elif status_filter == "idle" and speed == 0 and ignition == "1" and vehicle.get("driving_time") == "0 seconds":
+#                         filtered_data.append(vehicle)
+#                     elif status_filter == "parked" and speed == 0 and ignition == "0" and vehicle.get("driving_time") == "0 seconds":
+#                         filtered_data.append(vehicle)
+#                     elif status_filter == "speed" and 40 <= speed < 60:
+#                         filtered_data.append(vehicle)
+#                     elif status_filter == "overspeed" and speed >= 60:
+#                         filtered_data.append(vehicle)
+
+#                     return jsonify(vehicle_data), 200
+
+#     except Exception as e:
+#         print(f"🚨 Error fetching vehicle distances: {e}")
+#         return jsonify({"error": str(e)}), 500
+
 @dashboard_bp.route('/get_vehicle_range_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_range_data():
     try:
         utc_now = datetime.now(timezone('UTC'))
-
         range_param = request.args.get("range", "1day")
         status_filter = request.args.get("status")
         
@@ -189,10 +372,10 @@ def get_vehicle_range_data():
         end_of_day = utc_now
 
         imeis = list(get_vehicle_data().distinct("IMEI"))
-
         vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
 
+        # Base pipeline stages
         pipeline = [
             {"$match": {
                 "date_time": {
@@ -208,7 +391,15 @@ def get_vehicle_range_data():
                     "date_time": "$date_time",
                     "ignition": "$ignition",
                     "speed": "$speed",
-                    "odometer": "$odometer"
+                    "odometer": "$odometer",
+                    "latitude": "$latitude",
+                    "longitude": "$longitude",
+                    "gsm_sig": "$gsm_sig",
+                    "sos": "$sos",
+                    "main_power": "$main_power",
+                    "gps": "$gps",
+                    "date": "$date",
+                    "time": "$time"
                 }},
                 "start_odometer": {"$first": {"$toDouble": "$odometer"}},
                 "end_odometer": {"$last": {"$toDouble": "$odometer"}},
@@ -248,7 +439,8 @@ def get_vehicle_range_data():
                             0
                         ]
                     }
-                }
+                },
+                "last_record": {"$last": "$$ROOT"}
             }},
             {"$project": {
                 "imei": "$_id",
@@ -261,11 +453,13 @@ def get_vehicle_range_data():
                         {"$divide": ["$sum_speed", "$count_speed"]}
                     ]
                 },
-                "records": 1
+                "records": 1,
+                "last_record": 1
             }}
         ]
 
         results = list(atlanta_collection.aggregate(pipeline))
+        twenty_four_hours_ago = utc_now - timedelta(hours=24)
 
         vehicle_data = []
         for record in results:
@@ -273,7 +467,7 @@ def get_vehicle_range_data():
             if not recs:
                 continue
             
-            latest = recs[-1]
+            latest = record["last_record"]
             imei = record["imei"]
             vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
         
@@ -300,8 +494,12 @@ def get_vehicle_range_data():
         
                 prev_ignition = ignition
                 prev_time = curr_time
-        
-            vehicle_data.append({
+            
+            # Determine if vehicle is offline
+            last_update = datetime.strptime(latest.get("date", "") + latest.get("time", ""), '%d%m%y%H%M%S') if latest.get("date") and latest.get("time") else None
+            is_offline = last_update is None or last_update < twenty_four_hours_ago
+            
+            vehicle_info = {
                 "imei": imei,
                 "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
                 "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
@@ -313,6 +511,8 @@ def get_vehicle_range_data():
                 "ignition": latest.get("ignition", "0"),
                 "gsm": latest.get("gsm_sig", "0"),
                 "sos": latest.get("sos", "0"),
+                "main_power": latest.get("main_power", "1"),
+                "gps": latest.get("gps", True),
                 "odometer": latest.get("odometer", "N/A"),
                 "date": latest.get("date", None),
                 "time": latest.get("time", None),
@@ -321,31 +521,49 @@ def get_vehicle_range_data():
                 "avg_speed": round(record.get("avg_speed", 0), 2),
                 "driving_time": format_seconds(driving_time.total_seconds()),
                 "idle_time": format_seconds(idle_time.total_seconds()),
-                "number_of_stops": number_of_stops
-            })
+                "number_of_stops": number_of_stops,
+                "is_offline": is_offline,
+                "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
+            }
             
-            if status_filter:
-                filtered_data = []
-                for vehicle in vehicle_data:
-                    speed = float(vehicle.get("max_speed", 0))
-                    ignition = vehicle.get("ignition", "0")
+            # Apply status filter if provided
+            if not status_filter:
+                vehicle_data.append(vehicle_info)
+            else:
+                speed = float(vehicle_info.get("speed", 0))
+                ignition = vehicle_info.get("ignition", "0")
+                is_offline = vehicle_info.get("is_offline", False)
+                main_power = vehicle_info.get("main_power", "1")
+                
+                if status_filter == "running" and ignition == "1" and speed > 0 and not is_offline:
+                    vehicle_data.append(vehicle_info)
+                elif status_filter == "idle" and ignition == "1" and speed == 0 and not is_offline:
+                    vehicle_data.append(vehicle_info)
+                elif status_filter == "parked" and ignition == "0" and speed == 0 and not is_offline:
+                    vehicle_data.append(vehicle_info)
+                elif status_filter == "speed" and ignition == "1" and 40 <= speed < 60 and not is_offline:
+                    vehicle_data.append(vehicle_info)
+                elif status_filter == "overspeed" and ignition == "1" and speed >= 60 and not is_offline:
+                    vehicle_data.append(vehicle_info)
+                elif status_filter == "offline" and is_offline:
+                    vehicle_data.append(vehicle_info)
+                elif status_filter == "disconnected" and main_power == "0":
+                    vehicle_data.append(vehicle_info)
 
-                    if status_filter == "running" and speed > 0 and ignition == "1":
-                        filtered_data.append(vehicle)
-                    elif status_filter == "idle" and speed == 0 and ignition == "1" and vehicle.get("driving_time") == "0 seconds":
-                        filtered_data.append(vehicle)
-                    elif status_filter == "parked" and speed == 0 and ignition == "0" and vehicle.get("driving_time") == "0 seconds":
-                        filtered_data.append(vehicle)
-                    elif status_filter == "speed" and 40 <= speed < 60:
-                        filtered_data.append(vehicle)
-                    elif status_filter == "overspeed" and speed >= 60:
-                        filtered_data.append(vehicle)
-
-                    return jsonify(vehicle_data), 200
+        return jsonify(vehicle_data), 200
 
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
         return jsonify({"error": str(e)}), 500
+
+def format_last_updated(date_str, time_str):
+    if not date_str or not time_str:
+        return "N/A"
+    try:
+        dt = datetime.strptime(date_str + time_str, '%d%m%y%H%M%S')
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+    except:
+        return "N/A"
 
 
 @dashboard_bp.route('/get_status_data', methods=['GET'])

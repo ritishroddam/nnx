@@ -56,6 +56,41 @@ function formatStatusTime(seconds) {
     }
 }
 
+// async function showStatusPopup(status, title) {
+//     currentStatusFilter = status;
+//     document.getElementById('statusPopupTitle').textContent = title;
+//     document.getElementById('statusPopupSubtitle').textContent = title;
+
+//     document.getElementById('statusPopupTableBody').innerHTML = `
+//         <tr>
+//             <td colspan="10" style="text-align: center; padding: 20px;">
+//                 Loading data...
+//             </td>
+//         </tr>
+//     `;
+
+//     document.getElementById('statusPopupOverlay').classList.add('active');
+//     document.getElementById('statusPopup').classList.add('active');
+
+//     try {
+//         const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
+//         const filteredData = await response.json();
+
+//         statusPopupTableData = filteredData;
+//         renderStatusPopupTable(filteredData);
+//     } catch (error) {
+//         console.error("Error fetching vehicle data:", error);
+//         document.getElementById('statusPopupTableBody').innerHTML = `
+//             <tr>
+//                 <td colspan="10" style="text-align: center; padding: 20px; color: red;">
+//                     Error loading data: ${error.message}
+//                 </td>
+//             </tr>
+//         `;
+//     }
+// }
+
+// Replace the showStatusPopup function with this:
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
@@ -63,7 +98,7 @@ async function showStatusPopup(status, title) {
 
     document.getElementById('statusPopupTableBody').innerHTML = `
         <tr>
-            <td colspan="10" style="text-align: center; padding: 20px;">
+            <td colspan="8" style="text-align: center; padding: 20px;">
                 Loading data...
             </td>
         </tr>
@@ -81,39 +116,11 @@ async function showStatusPopup(status, title) {
         console.error("Error fetching vehicle data:", error);
         document.getElementById('statusPopupTableBody').innerHTML = `
             <tr>
-                <td colspan="10" style="text-align: center; padding: 20px; color: red;">
+                <td colspan="8" style="text-align: center; padding: 20px; color: red;">
                     Error loading data: ${error.message}
                 </td>
             </tr>
         `;
-    }
-}
-
-// Add this helper function to match the backend status logic
-function matchesStatus(vehicle, status) {
-    const speed = parseFloat(vehicle.speed || 0);
-    const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
-    const now = new Date();
-    const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000);
-    
-    // Match the exact logic from get_status_data endpoint
-    switch(status) {
-        case 'running':
-            return speed > 0 && lastUpdated > twentyFourHoursAgo;
-        case 'idle':
-            return speed === 0 && vehicle.ignition === "1" && lastUpdated > twentyFourHoursAgo;
-        case 'parked':
-            return speed === 0 && vehicle.ignition === "0" && lastUpdated > twentyFourHoursAgo;
-        case 'speed':
-            return speed >= 40 && speed < 60 && lastUpdated > twentyFourHoursAgo;
-        case 'overspeed':
-            return speed >= 60 && lastUpdated > twentyFourHoursAgo;
-        case 'offline':
-            return lastUpdated < twentyFourHoursAgo;
-        case 'disconnected':
-            return vehicle.main_power === "0";
-        default:
-            return false;
     }
 }
 
