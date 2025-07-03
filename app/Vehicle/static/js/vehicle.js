@@ -201,9 +201,14 @@ async function updateData(data) {
       data["status_time_delta"] = oldData.status_time_delta + newTime;
       data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
       data["status"] = statusText;
+    } else {
+      data["status_time_delta"] = 0;
+      data["status_time_str"] = "0 seconds";
+      data["status"] = statusText;
     }
 
     vehicleData.set(data.imei, data);
+    console.log(data.LicensePlateNumber + data.status);
   } else {
     const lastUpdated = convertToDate(data.date, data.time);
     data["stoppage_time"] = "0 seconds";
@@ -242,6 +247,7 @@ async function updateData(data) {
       console.log();
     }
     vehicleData.set(data.imei, data);
+    console.log(data.LicensePlateNumber + data.status);
   }
   
   console.log(data.LicensePlateNumber + data.status);
