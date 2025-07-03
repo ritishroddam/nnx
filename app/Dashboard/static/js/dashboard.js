@@ -117,6 +117,28 @@ function matchesStatus(vehicle, status) {
     }
 }
 
+function formatLastUpdatedText(date, time) {
+    if (!date || !time) return "N/A";
+
+    try {
+        // If the date is like "020725" and time is "153025", parse it
+        const formattedDate = date.length === 6
+            ? `20${date.slice(4)}-${date.slice(2, 4)}-${date.slice(0, 2)}`
+            : date;
+
+        const formattedTime = time.length === 6
+            ? `${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`
+            : time;
+
+        const dateTime = new Date(`${formattedDate}T${formattedTime}`);
+        return dateTime.toLocaleString(); // Human-readable format
+    } catch (err) {
+        console.error("Invalid date/time format:", date, time);
+        return "Invalid";
+    }
+}
+
+
 // Enhanced renderStatusPopupTable function
 function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTableBody');
