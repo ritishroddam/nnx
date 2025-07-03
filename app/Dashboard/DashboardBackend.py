@@ -304,6 +304,18 @@ def get_vehicle_range_data():
             
             vehicle_data.append({
                 "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
+                "imei": record["imei"],
+                "VehicleType": "N/A",  # Replace with actual value if available
+                "latitude": record.get("records")[-1].get("latitude", None) if record.get("records") else None,
+                "longitude": record.get("records")[-1].get("longitude", None) if record.get("records") else None,
+                "location": "Location unknown",  # Replace with actual reverse geocode if needed
+                "date": record.get("records")[-1].get("date", None) if record.get("records") else None,
+                "time": record.get("records")[-1].get("time", None) if record.get("records") else None,
+                "odometer": record.get("records")[-1].get("odometer", None) if record.get("records") else None,
+                "sos": record.get("records")[-1].get("sos", "0") if record.get("records") else "0",
+                "ignition": record.get("records")[-1].get("ignition", "0") if record.get("records") else "0",
+                "gsm": record.get("records")[-1].get("gsm", "0") if record.get("records") else "0",
+                "speed": record.get("records")[-1].get("speed", "0") if record.get("records") else "0",
                 "distance": round(record.get("distance", 0), 2),
                 "max_speed": record.get("max_speed", 0),
                 "avg_speed": round(record.get("avg_speed", 0), 2),
