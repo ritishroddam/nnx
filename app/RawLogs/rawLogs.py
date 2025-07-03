@@ -21,7 +21,11 @@ vehicleCollection = db['vehicle_inventory']
 @jwt_required()
 @roles_required('admin')
 def home():
-    return render_template('rawLogs.html')
+    liscensePlateNumbers = rawLogsCollection.distinct("LicensePlateNumber")
+    if not liscensePlateNumbers:
+        liscensePlateNumbers = []
+        
+    return render_template('rawLogs.html', liscensePlateNumbers = liscensePlateNumbers)
 
 @rawLogs_bp.route('/getRawLogs', methods=['POST'])
 @jwt_required()
