@@ -659,9 +659,16 @@
 }
 
 .table-container {
-  background: white;
   border-radius: 8px;
   padding: 10px;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .table-container {
+  color: #ccc;
+  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 #sortBtn {
@@ -1016,12 +1023,16 @@
     width: 80%;
     max-width: 1000px;
     max-height: 80vh;
-    background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     padding: 20px;
-    overflow: auto;
+}
+
+.dark-mode .status-popup {
+    color: #ccc;
+    background: black;
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .status-popup.active {
@@ -1049,6 +1060,10 @@
     border: none;
 }
 
+.dark-mode .status-popup-close {
+    color: #ccc;
+}
+
 .status-popup-overlay {
     display: none;
     position: fixed;
@@ -1068,24 +1083,137 @@
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
+    margin-left: -225px;
 }
 
 .status-popup-actions button {
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 8px 15px;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
-.status-popup-actions .excel-btn {
-    background-color: #1d6f42;
+.status-popup-actions button i {
+    margin-right: 5px;
+}
+
+.excel-btn {
+    background-color: #2e7d32;
     color: white;
 }
 
-.status-popup-actions .pdf-btn {
-    background-color: #d33f3f;
+.pdf-btn {
+    background-color: #d32f2f;
     color: white;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+}
+
+.status-moving {
+    background-color: #4CAF50;
+}
+
+.status-idle {
+    background-color: #FF9800;
+}
+
+.status-parked {
+    background-color: #F44336;
+}
+
+.status-offline {
+    background-color: #9E9E9E;
+}
+
+.status-unknown {
+    background-color: #607D8B;
+}
+
+.status-popup .vehicle-table-container {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.speed-warning {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.vehicle-table-icons {
+    display: flex;
+    gap: 5px;
+}
+
+.status-popup .vehicleLiveTable {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.vehicle-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.vehicle-table th {
+  background-color: #f5f5f5;
+  color: #111;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px;
+  white-space: nowrap;
+  border-bottom: 2px solid #ddd;
+}
+
+.vehicle-table td {
+  background-color: #fff;
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.vehicle-table tbody tr:hover td {
+  background-color: #f9f9f9;
+}
+
+.vehicle-table-icons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.vehicle-table-icons i {
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+  transition: transform 0.2s ease;
+}
+
+.vehicle-table-icons i:hover {
+  transform: scale(1.1);
+  color: #000;
+}
+
+.dark-mode .vehicle-table th {
+  background-color: #2f2f2f;
+  color: #ccc;
+}
+
+.dark-mode .vehicle-table td {
+  background-color: #1e1e1e;
+  color: #ccc;
 }

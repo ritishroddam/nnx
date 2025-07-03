@@ -194,22 +194,30 @@ Dashboard
             <i class="fa fa-file-pdf-o"></i> PDF
         </button>
     </div>
-    <div class="vehicleLiveTable">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th data-column="registration">Vehicle <span class="sort-icon"></span></th>
-                    <th data-column="distance">Distance Travelled (km) <span class="sort-icon"></span></th>
-                    <th data-column="driving_time">Driving Time <span class="sort-icon"></span></th>
-                    <th data-column="idle_time">Idle Time <span class="sort-icon"></span></th>
-                    <th data-column="number_of_stops">Number Of Stops <span class="sort-icon"></span></th>
-                    <th data-column="max_avg_speed">Max/Avg Speed <span class="sort-icon"></span></th>
-                </tr>
-            </thead>
-            <tbody id="statusPopupTable">
-            </tbody>
-        </table>
+    <div class="vehicle-table-container">
+        <div class="table-header-container">
+            <h3 id="statusPopupSubtitle"></h3>
+        </div>
+        <div class="table-container">
+            <table id="statusPopupTable" class="vehicle-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle Registration Number</th>
+                    <th>Vehicle Type</th>
+                    <th>Last Updated</th>
+                    <th>Location</th>
+                    <th>Speed</th>
+                    <th>Distance Traveled Today</th>
+                    <th>Odometer</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="statusPopupTableBody">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
 </section>
 {% endblock %}
