@@ -39,7 +39,23 @@ async function fetchFilteredVehicleData(status) {
     }
 }
 
-// Add this function to show the status popup
+function formatStatusTime(seconds) {
+    if (seconds >= 86400) {
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        return `${days}d ${hours}h`;
+    } else if (seconds >= 3600) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return `${hours}h ${minutes}m`;
+    } else if (seconds >= 60) {
+        const minutes = Math.floor(seconds / 60);
+        return `${minutes}m`;
+    } else {
+        return `${Math.floor(seconds)}s`;
+    }
+}
+
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
@@ -47,7 +63,7 @@ async function showStatusPopup(status, title) {
     // Show loading state
     document.getElementById('statusPopupTable').innerHTML = `
         <tr>
-            <td colspan="6" style="text-align: center; padding: 20px;">
+            <td colspan="8" style="text-align: center; padding: 20px;">
                 Loading data...
             </td>
         </tr>
@@ -57,14 +73,52 @@ async function showStatusPopup(status, title) {
     document.getElementById('statusPopupOverlay').classList.add('active');
     document.getElementById('statusPopup').classList.add('active');
     
-    // Fetch and display data
-    const filteredData = await fetchFilteredVehicleData(status);
-    statusPopupTableData = filteredData;
-    
-    renderStatusPopupTable(filteredData);
+    try {
+        // Fetch all vehicle data
+        const response = await fetch('/vehicle/api/vehicles');
+        const allVehicles = await response.json();
+        
+        // Filter based on status
+        const filteredData = allVehicles.filter(vehicle => {
+            const speed = parseFloat(vehicle.speed || 0);
+            const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
+            const hoursSinceUpdate = (new Date() - lastUpdated) / (1000 * 60 * 60);
+            
+            switch(status) {
+                case 'running':
+                    return speed > 0 && hoursSinceUpdate <= 24;
+                case 'idle':
+                    return speed === 0 && vehicle.ignition === "1" && hoursSinceUpdate <= 24;
+                case 'parked':
+                    return speed === 0 && vehicle.ignition === "0" && hoursSinceUpdate <= 24;
+                case 'speed':
+                    return speed >= 40 && speed < 60 && hoursSinceUpdate <= 24;
+                case 'overspeed':
+                    return speed >= 60 && hoursSinceUpdate <= 24;
+                case 'offline':
+                    return hoursSinceUpdate > 24;
+                case 'disconnected':
+                    return vehicle.main_power === "0" && hoursSinceUpdate <= 24;
+                default:
+                    return true;
+            }
+        });
+        
+        statusPopupTableData = filteredData;
+        renderStatusPopupTable(filteredData);
+    } catch (error) {
+        console.error("Error fetching vehicle data:", error);
+        document.getElementById('statusPopupTable').innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px; color: red;">
+                    Error loading data. Please try again.
+                </td>
+            </tr>
+        `;
+    }
 }
 
-// Add this function to render the popup table
+// Enhanced renderStatusPopupTable function
 function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTable');
     tableBody.innerHTML = '';
@@ -72,7 +126,7 @@ function renderStatusPopupTable(data) {
     if (data.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 20px;">
+                <td colspan="8" style="text-align: center; padding: 20px;">
                     No vehicles found for this status
                 </td>
             </tr>
@@ -81,18 +135,63 @@ function renderStatusPopupTable(data) {
     }
     
     data.forEach((vehicle) => {
-        let row = `<tr>
-            <td>${vehicle.registration}</td>
-            <td>${vehicle.distance.toFixed(2)}</td>
-            <td>${vehicle.driving_time}</td>
-            <td>${vehicle.idle_time}</td>
-            <td>${vehicle.number_of_stops}</td>
-            <td>${vehicle.max_speed}/${vehicle.avg_speed}</td>
-        </tr>`;
-        tableBody.innerHTML += row;
+        const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
+        const now = new Date();
+        const timeDiff = Math.abs(now - lastUpdated);
+        const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+        const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
+        const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        
+        let lastUpdatedText;
+        if (daysDiff > 0) {
+            lastUpdatedText = `${daysDiff} day${daysDiff > 1 ? 's' : ''} ago`;
+        } else if (hoursDiff > 0) {
+            lastUpdatedText = `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ago`;
+        } else {
+            lastUpdatedText = `${minutesDiff} minute${minutesDiff > 1 ? 's' : ''} ago`;
+        }
+        
+        let statusText = vehicle.status || 'unknown';
+        let statusClass = '';
+        
+        switch(statusText.toLowerCase()) {
+            case 'running':
+            case 'moving':
+                statusText = 'Moving';
+                statusClass = 'status-moving';
+                break;
+            case 'idle':
+                statusText = 'Idle';
+                statusClass = 'status-idle';
+                break;
+            case 'parked':
+            case 'stopped':
+                statusText = 'Parked';
+                statusClass = 'status-parked';
+                break;
+            case 'offline':
+                statusText = 'Offline';
+                statusClass = 'status-offline';
+                break;
+            default:
+                statusText = 'Unknown';
+                statusClass = 'status-unknown';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${vehicle.LicensePlateNumber || vehicle.imei || 'N/A'}</td>
+            <td>${vehicle.VehicleType || 'N/A'}</td>
+            <td>${lastUpdatedText}</td>
+            <td>${vehicle.location || 'Location unknown'}</td>
+            <td>${parseFloat(vehicle.speed || 0).toFixed(1)}</td>
+            <td>${parseFloat(vehicle.distance || 0).toFixed(2)}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>${formatStatusTime(parseInt(vehicle.status_time_delta / 1000)) || 'N/A'}</td>
+        `;
+        tableBody.appendChild(row);
     });
     
-    // Initialize sorting
     setupTableSorting('#statusPopup table');
 }
 
@@ -832,11 +931,15 @@ document.getElementById('offline-vehicles').addEventListener('click', () => {
     showStatusPopup('offline', 'Offline Vehicles');
 });
 
-// Add download functionality for Excel and PDF
+document.getElementById('disconnected-vehicles').addEventListener('click', () => {
+    showStatusPopup('disconnected', 'Disconnected Vehicles');
+});
+
+// Enhanced download functionality
 document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
     const table = document.querySelector("#statusPopup table");
     if (!table) return;
-
+    
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.table_to_sheet(table);
     XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
@@ -846,7 +949,6 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
 });
 
 document.getElementById('statusPopupPdfBtn').addEventListener('click', function() {
-    // For PDF, we'll use jsPDF with html2canvas
     const title = document.getElementById('statusPopupTitle').textContent;
     const table = document.querySelector("#statusPopup table");
     
@@ -856,13 +958,12 @@ document.getElementById('statusPopupPdfBtn').addEventListener('click', function(
     const originalContent = table.innerHTML;
     table.innerHTML = `
         <tr>
-            <td colspan="6" style="text-align: center; padding: 20px;">
+            <td colspan="8" style="text-align: center; padding: 20px;">
                 Generating PDF...
             </td>
         </tr>
     `;
     
-    // You'll need to include jsPDF and html2canvas libraries
     if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
         alert('PDF generation libraries not loaded. Please try again later.');
         table.innerHTML = originalContent;

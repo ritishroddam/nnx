@@ -187,10 +187,10 @@ Dashboard
         <button class="status-popup-close" id="statusPopupClose">&times;</button>
     </div>
     <div class="status-popup-actions">
-        <button class="excel-btn" id="statusPopupExcelBtn">
+        <button class="excel-btn" id="statusPopupExcelBtn" title="Download Excel">
             <i class="fa fa-file-excel-o"></i> Excel
         </button>
-        <button class="pdf-btn" id="statusPopupPdfBtn">
+        <button class="pdf-btn" id="statusPopupPdfBtn" title="Download PDF">
             <i class="fa fa-file-pdf-o"></i> PDF
         </button>
     </div>
@@ -199,11 +199,13 @@ Dashboard
             <thead>
                 <tr>
                     <th data-column="registration">Vehicle <span class="sort-icon"></span></th>
-                    <th data-column="distance">Distance Travelled (km) <span class="sort-icon"></span></th>
-                    <th data-column="driving_time">Driving Time <span class="sort-icon"></span></th>
-                    <th data-column="idle_time">Idle Time <span class="sort-icon"></span></th>
-                    <th data-column="number_of_stops">Number Of Stops <span class="sort-icon"></span></th>
-                    <th data-column="max_avg_speed">Max/Avg Speed <span class="sort-icon"></span></th>
+                    <th data-column="type">Vehicle Type <span class="sort-icon"></span></th>
+                    <th data-column="last_updated">Last Updated <span class="sort-icon"></span></th>
+                    <th data-column="location">Location <span class="sort-icon"></span></th>
+                    <th data-column="speed">Speed (km/h) <span class="sort-icon"></span></th>
+                    <th data-column="distance">Distance (km) <span class="sort-icon"></span></th>
+                    <th data-column="status">Status <span class="sort-icon"></span></th>
+                    <th data-column="status_time">Status Duration <span class="sort-icon"></span></th>
                 </tr>
             </thead>
             <tbody id="statusPopupTable">
@@ -211,5 +213,6 @@ Dashboard
         </table>
     </div>
 </div>
+
 </section>
 {% endblock %}
