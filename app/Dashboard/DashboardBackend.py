@@ -353,7 +353,6 @@ def atlanta_distance_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_range_data():
     try:
-        print("Received request with params:", request.args)
         utc_now = datetime.now(timezone('UTC'))
         range_param = request.args.get("range", "1day")
         status_filter = request.args.get("status")
@@ -498,7 +497,20 @@ def get_vehicle_range_data():
                 prev_time = curr_time
             
             # Determine if vehicle is offline
-            last_update = datetime.strptime(latest.get("date", "") + latest.get("time", ""), '%d%m%y%H%M%S') if latest.get("date") and latest.get("time") else None
+            last_update = None
+            if latest.get("date") and latest.get("time"):
+                try:
+                    # Parse the naive datetime
+                    last_update = datetime.strptime(
+                        latest.get("date") + latest.get("time"), 
+                        '%d%m%y%H%M%S'
+                    )
+                    # Make it offset-aware by adding UTC timezone
+                    last_update = last_update.replace(tzinfo=timezone('UTC'))
+                except ValueError as e:
+                    print(f"Error parsing date/time: {e}")
+                    last_update = None
+                    
             is_offline = last_update is None or last_update < twenty_four_hours_ago
             
             vehicle_info = {
@@ -555,8 +567,9 @@ def get_vehicle_range_data():
         return jsonify(vehicle_data), 200
 
     except Exception as e:
-        print("Full error traceback:", traceback.format_exc())  # Get full error trace
-        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+        print(f"🚨 Error fetching vehicle distances: {e}")
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
 
 def format_last_updated(date_str, time_str):
     if not date_str or not time_str:
