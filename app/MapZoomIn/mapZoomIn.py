@@ -17,15 +17,16 @@ company_collection = db['customers_list']
 def home():
     verify_jwt_in_request(optional=True)
     claims = get_jwt()
-    company = claims.get('company_id')
-    if company is None or company.lower() == 'none':
+    company = claims.get('company')
+    companyId = claims.get('companyId')
+    if not company or company.lower() == 'none' or not companyId or companyId.lower() == 'none':
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
         company = 'Cordon Telematics Pvt Ltd'
     else:
         try:
-            companyLatLng = company_collection.find_one({'_id': ObjectId(company)}, {'_id': 0,'lat': 1, 'lng': 1})
+            companyLatLng = company_collection.find_one({'_id': ObjectId(companyId)}, {'_id': 0,'lat': 1, 'lng': 1})
         except Exception as e:
             print(f"[DEBUG] Error fetching company data: {e}")
-            companyLatLng = {'lat': "15.34776", 'lng': "75.13378"}
+            companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
             
     return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
