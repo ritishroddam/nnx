@@ -241,10 +241,10 @@ async function updateData(data) {
       console.log("Last updated:", lastUpdated);
       console.log();
     }
-
     vehicleData.set(data.imei, data);
   }
-
+  
+  console.log(data.imei + data.status);
   return data;
 }
 
