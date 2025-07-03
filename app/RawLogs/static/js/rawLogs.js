@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Download logs as PDF
   async function downloadPDF(vehicle) {
     try {
-      const licensePlateNumber = document.getElementById("licensePlateNumber").value.trim();
+      const licensePlateNumber = document.getElementById("licensePlateNumberRaw").value.trim();
       const fromDatetime = document.getElementById("fromDatetime").value;
       const toDatetime = document.getElementById("toDatetime").value;
 
