@@ -208,10 +208,8 @@ function renderStatusPopupTable(data) {
         row.innerHTML = `
             <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
             <td>${vehicle.VehicleType || 'N/A'}</td>
-            <td>${formatLastUpdatedText(vehicle.date, vehicle.time)}</td>
+            <td>${vehicle.last_updated || 'N/A'}</td>
             <td>${vehicle.location || 'Location unknown'}</td>
-            <td>${vehicle.latitude ? parseFloat(vehicle.latitude).toFixed(4) : 'N/A'}</td>
-            <td>${vehicle.longitude ? parseFloat(vehicle.longitude).toFixed(4) : 'N/A'}</td>
             <td class="${speedCellClass}">${speed} km/h</td>
             <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
             <td>${vehicle.odometer || 'N/A'}</td>
