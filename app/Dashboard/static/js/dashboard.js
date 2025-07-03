@@ -138,7 +138,6 @@ function formatLastUpdatedText(date, time) {
     }
 }
 
-
 // Enhanced renderStatusPopupTable function
 function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTableBody');
