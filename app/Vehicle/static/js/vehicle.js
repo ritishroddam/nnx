@@ -208,7 +208,6 @@ async function updateData(data) {
     }
 
     vehicleData.set(data.imei, data);
-    console.log(data.LicensePlateNumber + data.status);
   } else {
     const lastUpdated = convertToDate(data.date, data.time);
     data["stoppage_time"] = "0 seconds";
@@ -247,10 +246,8 @@ async function updateData(data) {
       console.log();
     }
     vehicleData.set(data.imei, data);
-    console.log(data.LicensePlateNumber + data.status);
   }
   
-  console.log(data.LicensePlateNumber + data.status);
   return data;
 }
 
@@ -339,7 +336,7 @@ function updateVehicleCard(data) {
     statusClass = "vehicle-status-moving";
   }
   else {
-    // statusText = "Unknown";
+    statusText = "Unknown";
     statusClass = "vehicle-status-unknown";
   }
 
@@ -556,7 +553,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       statusText = "Moving";
       statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; 
     }else {
-      // statusText = "Unknown";
+      statusText = "Unknown";
       statusColor = isDarkMode ? "#9e9e9e" : "#616161"; 
     }
 
