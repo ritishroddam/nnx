@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Fetch raw logs based on form input
   document.getElementById("rawLogsForm").addEventListener("submit", async function (e) {
     e.preventDefault();
-    const licensePlateNumber = document.getElementById("licensePlateNumber").value.trim();
+    const licensePlateNumber = document.getElementById("licensePlateNumberRaw").value.trim();
     const fromDatetime = document.getElementById("fromDatetime").value;
     const toDatetime = document.getElementById("toDatetime").value;
 
