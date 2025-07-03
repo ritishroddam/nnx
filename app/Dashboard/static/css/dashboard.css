@@ -1016,12 +1016,15 @@
     width: 80%;
     max-width: 1000px;
     max-height: 80vh;
-    background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     padding: 20px;
     overflow: auto;
+}
+
+.dark-mode .status-popup {
+    color: #ccc;
 }
 
 .status-popup.active {
@@ -1120,13 +1123,6 @@
 
 .status-unknown {
     background-color: #607D8B;
-}
-
-.status-popup {
-    width: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
-    overflow: auto;
 }
 
 .status-popup .vehicle-table-container {
