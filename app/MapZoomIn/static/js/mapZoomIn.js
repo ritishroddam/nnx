@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
     const marker = new AdvancedMarkerElement({
       map: fullMap,
-      position: { lat: parseFloat(window.lat) || 12.9716, lng: parseFloat(window.lng) || 77.5946 },
+      position: { lat: parseFloat(window.lat), lng: parseFloat(window.lng)},
     });
     const labelDiv = document.createElement("div");
     labelDiv.textContent = window.companyName || "Cordon Telematics Pvt Ltd";
