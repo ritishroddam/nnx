@@ -192,7 +192,7 @@ async function updateData(data) {
       else if(data.ignition === "1" && speed > 0){
         statusText = "moving";
       }else{
-        statusText = "unknown" + data.ignition + speed;
+        statusText = "unknown";
       }
     }
 
@@ -225,7 +225,7 @@ async function updateData(data) {
       else if(data.ignition === "1" && speed > 0){
         statusText = "moving";
       }else{
-        statusText = "unknown" + data.ignition + speed;
+        statusText = "unknown";
       }
     }
 
@@ -333,7 +333,7 @@ function updateVehicleCard(data) {
     statusClass = "vehicle-status-moving";
   }
   else {
-    statusText = "Unknown";
+    // statusText = "Unknown";
     statusClass = "vehicle-status-unknown";
   }
 
@@ -550,7 +550,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       statusText = "Moving";
       statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; 
     }else {
-      statusText = "Unknown";
+      // statusText = "Unknown";
       statusColor = isDarkMode ? "#9e9e9e" : "#616161"; 
     }
 
