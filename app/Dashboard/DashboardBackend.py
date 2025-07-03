@@ -11,7 +11,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required, get_filtered_results, get_vehicle_data
-from datetime import datetime
+
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
 
@@ -274,50 +274,37 @@ def get_vehicle_range_data():
                 continue
             
             latest = recs[-1]
-            
-            date_str = latest.get("date", "")
-            time_str = latest.get("time", "")
-            last_updated = "N/A"
-
-            if date_str and time_str and len(date_str) == 6 and len(time_str) == 6:
-                try:
-                    dt = datetime.strptime(date_str + time_str, "%d%m%y%H%M%S")
-                    last_updated = dt.strftime("%Y-%m-%d %H:%M:%S")
-                except:
-                    pass
-            
             imei = record["imei"]
             vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
-
+        
             driving_time = timedelta()
             idle_time = timedelta()
             number_of_stops = 0
             prev_ignition = None
             prev_time = None
-
+        
             for i, r in enumerate(recs):
                 curr_time = r["date_time"]
                 ignition = r.get("ignition")
                 speed = float(r.get("speed", 0.0))
-
+        
                 if prev_time is not None:
                     delta = curr_time - prev_time
                     if prev_ignition == "1" and speed > 0:
                         driving_time += delta
                     elif prev_ignition == "0" and speed == 0:
                         idle_time += delta
-
+        
                 if prev_ignition == "0" and ignition == "1":
                     number_of_stops += 1
-
+        
                 prev_ignition = ignition
                 prev_time = curr_time
-
+        
             vehicle_data.append({
                 "imei": imei,
                 "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
                 "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
-                "last_updated": last_updated,
                 "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
                 "location": vehicle_doc.get("Location", "Location unknown"),
                 "latitude": latest.get("latitude", "N/A"),
