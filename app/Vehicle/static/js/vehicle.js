@@ -354,7 +354,10 @@ function updateVehicleCard(data) {
       <strong>Distance Travelled:</strong> ${
         data.distance ? parseFloat(data.distance).toFixed(2) : "NA"
       } km <br>
-      <strong>${formatTimeAgo(vehicle.date, vehicle.time)}</strong><br>
+      <strong>Last Update:</strong> ${formatLastUpdatedText(
+        data.date,
+        data.time
+      )} <br>
       <strong>Location:</strong> ${data.address || "Location unknown"} <br>
       <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
     `;
@@ -380,41 +383,15 @@ function updateVehicleCard(data) {
             : "N/A"
         } <br>
         <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
-        <strong>${formatTimeAgo(vehicle.date, vehicle.time)}</strong><br>
+        <strong>Last Update:</strong> ${formatLastUpdatedText(
+          data.date,
+          data.time
+        )} <br>
         <strong>Location:</strong> ${data.address || "Location unknown"} <br>
         <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
       </div>
     `;
     listContainer.appendChild(vehicleElement);
-  }
-}
-
-function formatTimeAgo(date, time) {
-  if (!date || !time) return "N/A";
-
-  try {
-    const formattedDate = date.length === 6
-      ? `20${date.slice(4)}-${date.slice(2, 4)}-${date.slice(0, 2)}`
-      : date;
-    const formattedTime = time.length === 6
-      ? `${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`
-      : time;
-
-    const dateTime = new Date(`${formattedDate}T${formattedTime}`);
-    const now = new Date();
-    const diffMs = now - dateTime;
-
-    const minutes = Math.floor(diffMs / (1000 * 60));
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (days > 0) return `Last data received ${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `Last data received ${hours} hour${hours > 1 ? "s" : ""} ago`;
-    if (minutes > 0) return `Last data received ${minutes} min ago`;
-    return "Last data received just now";
-  } catch (err) {
-    console.error("Error formatting time ago:", err);
-    return "Invalid date/time";
   }
 }
 
@@ -650,7 +627,10 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         </div>
         <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
         <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
-          <strong>${formatTimeAgo(vehicle.date, vehicle.time)}</strong></span>
+          <strong> Last Update : </strong> <span class="last-updated-text">${formatLastUpdatedText(
+            vehicle.date,
+            vehicle.time
+          )}</span>
         </div>
         <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
           ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
