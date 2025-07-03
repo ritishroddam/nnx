@@ -22,7 +22,7 @@ vehicleCollection = db['vehicle_inventory']
 @roles_required('admin')
 def home():
     liscensePlateNumbers = rawLogsCollection.distinct("LicensePlateNumber")
-    if not liscensePlateNumber:
+    if not liscensePlateNumbers:
         liscensePlateNumbers = []
         
     return render_template('rawLogs.html', liscensePlateNumbers = liscensePlateNumbers)
