@@ -175,6 +175,7 @@ function updateLiveMapPolyline(updatedData) {
     lat: parseFloat(updatedData.latitude),
     lng: parseFloat(updatedData.longitude),
   };
+  const rotation = updatedData.course;
 
   liveCoords.push(updateCoords);
 

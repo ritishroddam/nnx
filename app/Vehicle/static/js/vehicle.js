@@ -168,6 +168,8 @@ async function updateData(data) {
   if (oldData) {
     let distance = parseFloat(data.odometer) - parseFloat(oldData.odometer);
     distance = (parseFloat(distance) + parseFloat(oldData.distance)).toFixed(2);
+    data["stoppage_time"] = oldData.stoppage_time;
+    data["stoppage_time_delta"] = oldData.stoppage_time_delta;
 
     data["distance"] = String(distance);
     data["gsm"] = String(data.gsm_sig);
@@ -180,15 +182,18 @@ async function updateData(data) {
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "offline";
-    } else if (data.ignition === "0") {
-      statusText = "stopped";
-    } else if (data.ignition === "1" && speed === 0) {
-      statusText = "idle";
     }
-    else if(data.ignition === "1" && speed > 0){
-      statusText = "moving";
-    }else{
-      statusText = "unknown";
+    else{
+      if (data.ignition === "0") {
+        statusText = "stopped";
+      } else if (data.ignition === "1" && speed === 0) {
+        statusText = "idle";
+      }
+      else if(data.ignition === "1" && speed > 0){
+        statusText = "moving";
+      }else{
+        statusText = "unknown" + data.ignition + speed;
+      }
     }
 
     if (statusText === oldData.status){
@@ -201,6 +206,8 @@ async function updateData(data) {
     vehicleData.set(data.imei, data);
   } else {
     const lastUpdated = convertToDate(data.date, data.time);
+    data["stoppage_time"] = "0 seconds";
+    data["stoppage_time_delta"] = 0;
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
     let statusText = data.status;
@@ -208,15 +215,18 @@ async function updateData(data) {
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "offline";
-    } else if (data.ignition === "0") {
-      statusText = "stopped";
-    } else if (data.ignition === "1" && speed === 0) {
-      statusText = "idle";
     }
-    else if(data.ignition === "1" && speed > 0){
-      statusText = "moving";
-    }else{
-      statusText = "unknown";
+    else{
+      if (data.ignition === "0") {
+        statusText = "stopped";
+      } else if (data.ignition === "1" && speed === 0) {
+        statusText = "idle";
+      }
+      else if(data.ignition === "1" && speed > 0){
+        statusText = "moving";
+      }else{
+        statusText = "unknown" + data.ignition + speed;
+      }
     }
 
     data["distance"] = "0.00";
