@@ -75,11 +75,17 @@ async function showStatusPopup(status, title) {
     document.getElementById('statusPopup').classList.add('active');
     
     try {
-        // Fetch all vehicle data
-        const response = await fetch('/vehicle/api/vehicles');
-        const allVehicles = await response.json();
+        // First get the status counts to verify data
+        const statusResponse = await fetch('/dashboard/get_status_data');
+        const statusData = await statusResponse.json();
+        console.log('Status data:', statusData);
         
-        // Filter based on status
+        // Then get all vehicles
+        const vehiclesResponse = await fetch('/vehicle/api/vehicles');
+        const allVehicles = await vehiclesResponse.json();
+        console.log('All vehicles:', allVehicles);
+        
+        // Filter based on status using same logic as status cards
         const filteredData = allVehicles.filter(vehicle => {
             const speed = parseFloat(vehicle.speed || 0);
             const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
@@ -105,17 +111,53 @@ async function showStatusPopup(status, title) {
             }
         });
         
+        console.log('Filtered vehicles:', filteredData);
+        
         statusPopupTableData = filteredData;
         renderStatusPopupTable(filteredData);
+        
+        // If counts don't match, show warning
+        const expectedCount = statusData[`${status}Vehicles`];
+        if (filteredData.length !== expectedCount) {
+            console.warn(`Count mismatch! Expected ${expectedCount} ${status} vehicles, found ${filteredData.length}`);
+        }
     } catch (error) {
         console.error("Error fetching vehicle data:", error);
         document.getElementById('statusPopupTableBody').innerHTML = `
             <tr>
                 <td colspan="10" style="text-align: center; padding: 20px; color: red;">
-                    Error loading data. Please try again.
+                    Error loading data: ${error.message}
                 </td>
             </tr>
         `;
+    }
+}
+
+// Add this helper function to match the backend status logic
+function matchesStatus(vehicle, status) {
+    const speed = parseFloat(vehicle.speed || 0);
+    const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000);
+    
+    // Match the exact logic from get_status_data endpoint
+    switch(status) {
+        case 'running':
+            return speed > 0 && lastUpdated > twentyFourHoursAgo;
+        case 'idle':
+            return speed === 0 && vehicle.ignition === "1" && lastUpdated > twentyFourHoursAgo;
+        case 'parked':
+            return speed === 0 && vehicle.ignition === "0" && lastUpdated > twentyFourHoursAgo;
+        case 'speed':
+            return speed >= 40 && speed < 60 && lastUpdated > twentyFourHoursAgo;
+        case 'overspeed':
+            return speed >= 60 && lastUpdated > twentyFourHoursAgo;
+        case 'offline':
+            return lastUpdated < twentyFourHoursAgo;
+        case 'disconnected':
+            return vehicle.main_power === "0";
+        default:
+            return false;
     }
 }
 
@@ -124,11 +166,13 @@ function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTableBody');
     tableBody.innerHTML = '';
     
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         tableBody.innerHTML = `
             <tr>
                 <td colspan="10" style="text-align: center; padding: 20px;">
-                    No vehicles found for this status
+                    No vehicles found for this status.
+                    <br>
+                    <small>Note: The status cards show cached counts that may not match current filtered results.</small>
                 </td>
             </tr>
         `;
