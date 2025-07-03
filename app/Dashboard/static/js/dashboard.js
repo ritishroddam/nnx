@@ -60,8 +60,7 @@ async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
     document.getElementById('statusPopupSubtitle').textContent = title;
-    
-    // Show loading state
+
     document.getElementById('statusPopupTableBody').innerHTML = `
         <tr>
             <td colspan="10" style="text-align: center; padding: 20px;">
@@ -69,58 +68,15 @@ async function showStatusPopup(status, title) {
             </td>
         </tr>
     `;
-    
-    // Show popup
+
     document.getElementById('statusPopupOverlay').classList.add('active');
     document.getElementById('statusPopup').classList.add('active');
-    
+
     try {
-        // First get the status counts to verify data
-        const statusResponse = await fetch('/dashboard/get_status_data');
-        const statusData = await statusResponse.json();
-        console.log('Status data:', statusData);
-        
-        // Then get all vehicles
-        const vehiclesResponse = await fetch('/vehicle/api/vehicles');
-        const allVehicles = await vehiclesResponse.json();
-        console.log('All vehicles:', allVehicles);
-        
-        // Filter based on status using same logic as status cards
-        const filteredData = allVehicles.filter(vehicle => {
-            const speed = parseFloat(vehicle.speed || 0);
-            const lastUpdated = new Date(`${vehicle.date}T${vehicle.time}`);
-            const hoursSinceUpdate = (new Date() - lastUpdated) / (1000 * 60 * 60);
-            
-            switch(status) {
-                case 'running':
-                    return speed > 0 && hoursSinceUpdate <= 24;
-                case 'idle':
-                    return speed === 0 && vehicle.ignition === "1" && hoursSinceUpdate <= 24;
-                case 'parked':
-                    return speed === 0 && vehicle.ignition === "0" && hoursSinceUpdate <= 24;
-                case 'speed':
-                    return speed >= 40 && speed < 60 && hoursSinceUpdate <= 24;
-                case 'overspeed':
-                    return speed >= 60 && hoursSinceUpdate <= 24;
-                case 'offline':
-                    return hoursSinceUpdate > 24;
-                case 'disconnected':
-                    return vehicle.main_power === "0" && hoursSinceUpdate <= 24;
-                default:
-                    return true;
-            }
-        });
-        
-        console.log('Filtered vehicles:', filteredData);
-        
+        const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
+        const filteredData = await response.json();
         statusPopupTableData = filteredData;
         renderStatusPopupTable(filteredData);
-        
-        // If counts don't match, show warning
-        const expectedCount = statusData[`${status}Vehicles`];
-        if (filteredData.length !== expectedCount) {
-            console.warn(`Count mismatch! Expected ${expectedCount} ${status} vehicles, found ${filteredData.length}`);
-        }
     } catch (error) {
         console.error("Error fetching vehicle data:", error);
         document.getElementById('statusPopupTableBody').innerHTML = `
