@@ -206,7 +206,7 @@ function renderStatusPopupTable(data) {
         }
         
         row.innerHTML = `
-            <td>${vehicle.LicensePlateNumber || vehicle.imei || 'N/A'}</td>
+            <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
             <td>${vehicle.VehicleType || 'N/A'}</td>
             <td>${formatLastUpdatedText(vehicle.date, vehicle.time)}</td>
             <td>${vehicle.location || 'Location unknown'}</td>

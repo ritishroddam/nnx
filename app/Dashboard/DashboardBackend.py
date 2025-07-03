@@ -270,57 +270,57 @@ def get_vehicle_range_data():
         vehicle_data = []
         for record in results:
             recs = record["records"]
+            if not recs:
+                continue
+            
+            latest = recs[-1]
+            imei = record["imei"]
+            vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
+        
             driving_time = timedelta()
             idle_time = timedelta()
             number_of_stops = 0
-
             prev_ignition = None
             prev_time = None
-
+        
             for i, r in enumerate(recs):
                 curr_time = r["date_time"]
-                ignition = r["ignition"]
-                speed = float(r["speed"]) if r["speed"] is not None else 0.0
-
+                ignition = r.get("ignition")
+                speed = float(r.get("speed", 0.0))
+        
                 if prev_time is not None:
                     delta = curr_time - prev_time
                     if prev_ignition == "1" and speed > 0:
                         driving_time += delta
-                    if prev_ignition == "0" and speed == 0:
+                    elif prev_ignition == "0" and speed == 0:
                         idle_time += delta
-
+        
                 if prev_ignition == "0" and ignition == "1":
                     number_of_stops += 1
-
+        
                 prev_ignition = ignition
                 prev_time = curr_time
-
-            driving_timed_delta = driving_time.total_seconds()
-            idle_timed_delta = idle_time.total_seconds()
-            
-            human_readable_driving_time = format_seconds(driving_timed_delta)
-            human_readable_idle_time = format_seconds(idle_timed_delta)
-            
-            
+        
             vehicle_data.append({
-                "registration": vehicle_map.get(record["imei"], "UNKNOWN"),
-                "imei": record["imei"],
-                "VehicleType": "N/A",  # Replace with actual value if available
-                "latitude": record.get("records")[-1].get("latitude", None) if record.get("records") else None,
-                "longitude": record.get("records")[-1].get("longitude", None) if record.get("records") else None,
-                "location": "Location unknown",  # Replace with actual reverse geocode if needed
-                "date": record.get("records")[-1].get("date", None) if record.get("records") else None,
-                "time": record.get("records")[-1].get("time", None) if record.get("records") else None,
-                "odometer": record.get("records")[-1].get("odometer", None) if record.get("records") else None,
-                "sos": record.get("records")[-1].get("sos", "0") if record.get("records") else "0",
-                "ignition": record.get("records")[-1].get("ignition", "0") if record.get("records") else "0",
-                "gsm": record.get("records")[-1].get("gsm", "0") if record.get("records") else "0",
-                "speed": record.get("records")[-1].get("speed", "0") if record.get("records") else "0",
+                "imei": imei,
+                "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
+                "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
+                "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
+                "location": vehicle_doc.get("Location", "Location unknown"),
+                "latitude": latest.get("latitude", "N/A"),
+                "longitude": latest.get("longitude", "N/A"),
+                "speed": latest.get("speed", "0.0"),
+                "ignition": latest.get("ignition", "0"),
+                "gsm": latest.get("gsm_sig", "0"),
+                "sos": latest.get("sos", "0"),
+                "odometer": latest.get("odometer", "N/A"),
+                "date": latest.get("date", None),
+                "time": latest.get("time", None),
                 "distance": round(record.get("distance", 0), 2),
                 "max_speed": record.get("max_speed", 0),
                 "avg_speed": round(record.get("avg_speed", 0), 2),
-                "driving_time": human_readable_driving_time,
-                "idle_time": human_readable_idle_time,
+                "driving_time": format_seconds(driving_time.total_seconds()),
+                "idle_time": format_seconds(idle_time.total_seconds()),
                 "number_of_stops": number_of_stops
             })
             
@@ -329,7 +329,7 @@ def get_vehicle_range_data():
                 for vehicle in vehicle_data:
                     speed = float(vehicle.get("max_speed", 0))
                     ignition = vehicle.get("ignition", "0")
-            
+
                     if status_filter == "running" and speed > 0 and ignition == "1":
                         filtered_data.append(vehicle)
                     elif status_filter == "idle" and speed == 0 and ignition == "1" and vehicle.get("driving_time") == "0 seconds":
@@ -340,7 +340,7 @@ def get_vehicle_range_data():
                         filtered_data.append(vehicle)
                     elif status_filter == "overspeed" and speed >= 60:
                         filtered_data.append(vehicle)
-            
+
                     return jsonify(vehicle_data), 200
 
     except Exception as e:
