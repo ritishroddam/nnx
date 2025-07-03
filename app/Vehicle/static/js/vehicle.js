@@ -244,7 +244,7 @@ async function updateData(data) {
     vehicleData.set(data.imei, data);
   }
   
-  console.log(data.imei + data.status);
+  console.log(data.LicensePlateNumber + data.status);
   return data;
 }
 
