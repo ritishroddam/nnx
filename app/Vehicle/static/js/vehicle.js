@@ -192,7 +192,7 @@ async function updateData(data) {
       else if(data.ignition === "1" && speed > 0){
         statusText = "moving";
       }else{
-        statusText = "unknown";
+        statusText = "unknown" + data.ignition + speed;
       }
     }
 
@@ -225,7 +225,7 @@ async function updateData(data) {
       else if(data.ignition === "1" && speed > 0){
         statusText = "moving";
       }else{
-        statusText = "unknown";
+        statusText = "unknown" + data.ignition + speed;
       }
     }
 
