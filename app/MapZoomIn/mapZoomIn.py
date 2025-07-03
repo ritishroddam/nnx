@@ -20,6 +20,7 @@ def home():
     company = claims.get('company')
     companyId = claims.get('companyId')
     if not company or company.lower() == 'none' or not companyId or companyId.lower() == 'none':
+        print("[DEBUG] No company or companyId found in JWT claims.")
         companyLatLng = {'lat': "13.0142181596867", 'lng': "77.64852894386185"}
         company = 'Cordon Telematics Pvt Ltd'
     else:
