@@ -90,7 +90,6 @@ function formatStatusTime(seconds) {
 //     }
 // }
 
-// Replace the showStatusPopup function with this:
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
@@ -109,15 +108,24 @@ async function showStatusPopup(status, title) {
 
     try {
         const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
-        const filteredData = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Ensure data is always an array
+        const filteredData = Array.isArray(data) ? data : [];
         statusPopupTableData = filteredData;
         renderStatusPopupTable(filteredData);
+        
     } catch (error) {
         console.error("Error fetching vehicle data:", error);
         document.getElementById('statusPopupTableBody').innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; padding: 20px; color: red;">
-                    Error loading data: ${error.message}
+                    ${error.message || 'Error loading data'}
                 </td>
             </tr>
         `;
@@ -149,6 +157,17 @@ function formatLastUpdatedText(date, time) {
 function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTableBody');
     tableBody.innerHTML = '';
+
+    if (!Array.isArray(data)) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px; color: red;">
+                    Invalid data format received
+                </td>
+            </tr>
+        `;
+        return;
+    }
     
     if (!data || data.length === 0) {
         tableBody.innerHTML = `

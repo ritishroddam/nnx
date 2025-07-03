@@ -1,3 +1,4 @@
+import traceback
 from flask import Blueprint, json, app, jsonify, render_template, Flask, request, redirect, url_for, session, flash, send_file
 from pymongo import MongoClient
 from datetime import datetime, timedelta
@@ -352,6 +353,7 @@ def atlanta_distance_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_range_data():
     try:
+        print("Received request with params:", request.args)
         utc_now = datetime.now(timezone('UTC'))
         range_param = request.args.get("range", "1day")
         status_filter = request.args.get("status")
@@ -553,8 +555,8 @@ def get_vehicle_range_data():
         return jsonify(vehicle_data), 200
 
     except Exception as e:
-        print(f"🚨 Error fetching vehicle distances: {e}")
-        return jsonify({"error": str(e)}), 500
+        print("Full error traceback:", traceback.format_exc())  # Get full error trace
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 def format_last_updated(date_str, time_str):
     if not date_str or not time_str:
