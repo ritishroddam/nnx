@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+<!-- {% extends "base.html" %}
 
 {% block head %}
 <title>Raw Logs</title>
@@ -30,7 +30,6 @@ Raw Logs
           <option value="{{ plate }}">{{ plate }}</option>
         {% endfor %}
       </select>
-      <!-- <input type="text" id="licensePlateNumber" name="licensePlateNumber" required> -->
     </div>
     <div class="form-group">
       <label for="fromDatetime">From:</label>
@@ -43,7 +42,7 @@ Raw Logs
     <button type="submit" class="btn">Fetch Logs</button>
   </form>
   <div id="logsContainer">
-    <!-- Logs will be dynamically populated here -->
+
   </div>
   <button id="downloadAllLogsBtn" class="btn">Download All Logs (PDF)</button>
 </div>
@@ -53,8 +52,73 @@ Raw Logs
   <form id="subscribeForm" class="styled-form">
     <label for="vehicleDropdown">Select Vehicles:</label>
     <select id="vehicleDropdown" name="vehicles" multiple class="selectize-dropdown">
-      <!-- Options will be dynamically populated -->
+
     </select>
+    <button type="submit" class="btn">Subscribe</button>
+  </form>
+</div>
+{% endblock %} -->
+
+{% extends "base.html" %}
+
+{% block head %}
+<title>Raw Logs</title>
+<link rel="stylesheet" href="{{ url_for('RawLogs.static', filename='css/rawLogs.css') }}">
+<script defer src="{{ url_for('RawLogs.static', filename='js/rawLogs.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}
+Raw Logs
+{% endblock %}
+
+{% block block_container %}
+<div class="toggle-container">
+  <div class="toggle-slider">
+    <div class="toggle-option logs-option active">Raw Logs</div>
+    <div class="toggle-option subscribe-option">Subscribe Vehicles</div>
+    <div class="slider-button"></div>
+  </div>
+</div>
+
+<div id="rawLogsView" class="view-container active">
+  <h2>Raw Logs</h2>
+  <form id="rawLogsForm" class="styled-form">
+    <div class="form-group">
+      <label for="licensePlateNumber">License Plate Number:</label>
+      <select name="licensePlateNumber" id="licensePlateNumberRaw" required>
+        <option value="" disabled selected>Select vehicles...</option>
+        {% for plate in liscensePlateNumbers %}
+          <option value="{{ plate }}">{{ plate }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="fromDatetime">From:</label>
+      <input type="datetime-local" id="fromDatetime" name="fromDatetime" required placeholder="dd-mm-yyyy --:--">
+    </div>
+    <div class="form-group">
+      <label for="toDatetime">To:</label>
+      <input type="datetime-local" id="toDatetime" name="toDatetime" required placeholder="dd-mm-yyyy --:--">
+    </div>
+    <button type="submit" class="btn">Fetch Logs</button>
+  </form>
+  <div id="logsContainer">
+    <!-- Logs will be dynamically populated here -->
+  </div>
+  <button id="downloadAllLogsBtn" class="btn">Download All Logs (PDF)</button>
+</div>
+
+<div id="subscribeView" class="view-container">
+  <h2>Subscribe Vehicles</h2>
+  <form id="subscribeForm" class="styled-form">
+    <div class="form-group">
+      <label for="vehicleDropdown">Select Vehicles:</label>
+      <select id="vehicleDropdown" name="vehicles" multiple class="selectize-dropdown">
+        {% for plate in liscensePlateNumbers %}
+          <option value="{{ plate }}">{{ plate }}</option>
+        {% endfor %}
+      </select>
+    </div>
     <button type="submit" class="btn">Subscribe</button>
   </form>
 </div>
