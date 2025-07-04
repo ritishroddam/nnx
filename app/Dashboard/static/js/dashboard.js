@@ -188,8 +188,6 @@ function renderStatusPopupTable(data) {
             <tr>
                 <td colspan="10" style="text-align: center; padding: 20px;">
                     No vehicles found for this status.
-                    <br>
-                    <small>Note: The status cards show cached counts that may not match current filtered results.</small>
                 </td>
             </tr>
         `;
