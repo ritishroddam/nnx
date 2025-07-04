@@ -283,7 +283,7 @@ h2 {
   cursor: pointer;
   transition: background-color 0.3s;
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 60px;
 }
 
 .btn:hover {
@@ -329,7 +329,7 @@ h2 {
 }
 
 .selectize-dropdown {
-  width: 100%;
+  width: 50%;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
