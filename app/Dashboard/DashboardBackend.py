@@ -581,134 +581,180 @@ def format_last_updated(date_str, time_str):
         return "N/A"
 
 
+# @dashboard_bp.route('/get_status_data', methods=['GET'])
+# @jwt_required()
+# @roles_required('admin', 'clientAdmin', 'user')
+# def get_status_data():
+#     try:
+#         utc_now = datetime.now(timezone('UTC'))
+#         twenty_four_hours_ago = utc_now - timedelta(hours=24)
+#         now = datetime.now()
+#         imeis = list(get_vehicle_data().distinct("IMEI"))  
+#         if not imeis:
+#             return jsonify({
+#                 'runningVehicles': 0,
+#                 'idleVehicles': 0,
+#                 'parkedVehicles': 0,
+#                 'speedVehicles': 0,
+#                 'overspeedVehicles': 0,
+#                 'offlineVehicles': 0,
+#                 'disconnectedVehicles': 0,
+#                 'noGpsVehicles': 0,
+#                 'totalVehicles': 0
+#             }), 200
+
+#         pipeline = [
+#             {"$match": {"imei": {"$in": imeis}}},  
+#             {
+#                 "$facet": {
+#                     "totalVehicles": [
+#                         {"$count": "count"}
+#                     ],
+#                     "runningVehicles": [
+#                         {"$match": {"speed": {"$ne": "0.0"}}},
+#                         {"$count": "count"}
+#                     ],
+#                     "idleVehicles": [
+#                         {"$match": {"speed": "0.0", "ignition": "1"}},
+#                         {"$count": "count"}
+#                     ],
+#                     "parkedVehicles": [
+#                         {
+#                             "$match": {
+#                                 "speed": "0.0",
+#                                 "ignition": "0"
+#                             }
+#                         },
+#                         {"$count": "count"}
+#                     ],
+#                     "speedVehicles": [
+#                         {
+#                             "$match": {
+#                                 "$expr": {
+#                                     "$and": [
+#                                         {"$gte": [{"$toDouble": "$speed"}, 40]},
+#                                         {"$lt": [{"$toDouble": "$speed"}, 60]}
+#                                     ]
+#                                 }
+#                             }
+#                         },
+#                         {"$count": "count"}
+#                     ],
+#                     "overspeedVehicles": [
+#                         {
+#                             "$match": {
+#                                 "$expr": {
+#                                     "$gte": [{"$toDouble": "$speed"}, 60]
+#                                 }
+#                             }
+#                         },
+#                         {"$count": "count"}
+#                     ],
+#                     "offlineVehicles": [ 
+#                         {
+#                             "$match": {
+#                                 "date_time": {"$lt": twenty_four_hours_ago}
+#                             }
+#                         },
+#                         {"$count": "count"}
+#                     ],
+#                     "disconnectedVehicles": [
+#                         {"$match": {"main_power": "0"}},
+#                         {"$count": "count"}
+#                     ],
+#                     "noGpsVehicles": [
+#                         {"$match": {"gps": False}},
+#                         {"$count": "count"}
+#                     ]
+#                 }
+#             }
+#         ]
+
+#         results = list(db["distinctAtlanta"].aggregate(pipeline))
+
+#         if not results or not results[0]:
+#             return jsonify({
+#                 'runningVehicles': 0,
+#                 'idleVehicles': 0,
+#                 'parkedVehicles': 0,
+#                 'speedVehicles': 0,
+#                 'overspeedVehicles': 0,
+#                 'offlineVehicles': 0,
+#                 'disconnectedVehicles': 0,
+#                 'noGpsVehicles': 0,
+#                 'totalVehicles': 0
+#             }), 200
+
+#         results = results[0]
+#         print(results)
+#         total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0) if results.get("totalVehicles") else 0
+#         running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0) if results.get("runningVehicles") else 0
+#         idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0) if results.get("idleVehicles") else 0
+#         parked_vehicles = results.get("parkedVehicles", [{}])[0].get("count", 0) if results.get("parkedVehicles") else 0
+#         speed_vehicles = results.get("speedVehicles", [{}])[0].get("count", 0) if results.get("speedVehicles") else 0
+#         overspeed_vehicles = results.get("overspeedVehicles", [{}])[0].get("count", 0) if results.get("overspeedVehicles") else 0
+#         offline_vehicles = results.get("offlineVehicles", [{}])[0].get("count", 0) if results.get("offlineVehicles") else 0
+#         disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0) if results.get("disconnectedVehicles") else 0
+#         no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0) if results.get("noGpsVehicles") else 0
+
+#         return jsonify({
+#             'runningVehicles': running_vehicles,
+#             'idleVehicles': idle_vehicles,
+#             'parkedVehicles': parked_vehicles,
+#             'speedVehicles': speed_vehicles,
+#             'overspeedVehicles': overspeed_vehicles,
+#             'offlineVehicles': offline_vehicles,
+#             'disconnectedVehicles': disconnected_vehicles,
+#             'noGpsVehicles': no_gps_vehicles,
+#             'totalVehicles': total_vehicles
+#         }), 200
+
+#     except Exception as e:
+#         print(f"Error fetching status data: {e}")
+#         return jsonify({"error": "Failed to fetch status data"}), 500
+
 @dashboard_bp.route('/get_status_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
-        utc_now = datetime.now(timezone('UTC'))
-        twenty_four_hours_ago = utc_now - timedelta(hours=24)
-        now = datetime.now()
-        imeis = list(get_vehicle_data().distinct("IMEI"))  
-        if not imeis:
-            return jsonify({
-                'runningVehicles': 0,
-                'idleVehicles': 0,
-                'parkedVehicles': 0,
-                'speedVehicles': 0,
-                'overspeedVehicles': 0,
-                'offlineVehicles': 0,
-                'disconnectedVehicles': 0,
-                'noGpsVehicles': 0,
-                'totalVehicles': 0
-            }), 200
+        response = dashboard_bp.view_functions['get_vehicle_range_data']()
+        all_vehicle_data = response.get_json()
+        if not isinstance(all_vehicle_data, list):
+            return jsonify({"error": "Vehicle data not available"}), 500
 
-        pipeline = [
-            {"$match": {"imei": {"$in": imeis}}},  
-            {
-                "$facet": {
-                    "totalVehicles": [
-                        {"$count": "count"}
-                    ],
-                    "runningVehicles": [
-                        {"$match": {"speed": {"$ne": "0.0"}}},
-                        {"$count": "count"}
-                    ],
-                    "idleVehicles": [
-                        {"$match": {"speed": "0.0", "ignition": "1"}},
-                        {"$count": "count"}
-                    ],
-                    "parkedVehicles": [
-                        {
-                            "$match": {
-                                "speed": "0.0",
-                                "ignition": "0"
-                            }
-                        },
-                        {"$count": "count"}
-                    ],
-                    "speedVehicles": [
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$and": [
-                                        {"$gte": [{"$toDouble": "$speed"}, 40]},
-                                        {"$lt": [{"$toDouble": "$speed"}, 60]}
-                                    ]
-                                }
-                            }
-                        },
-                        {"$count": "count"}
-                    ],
-                    "overspeedVehicles": [
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$gte": [{"$toDouble": "$speed"}, 60]
-                                }
-                            }
-                        },
-                        {"$count": "count"}
-                    ],
-                    "offlineVehicles": [ 
-                        {
-                            "$match": {
-                                "date_time": {"$lt": twenty_four_hours_ago}
-                            }
-                        },
-                        {"$count": "count"}
-                    ],
-                    "disconnectedVehicles": [
-                        {"$match": {"main_power": "0"}},
-                        {"$count": "count"}
-                    ],
-                    "noGpsVehicles": [
-                        {"$match": {"gps": False}},
-                        {"$count": "count"}
-                    ]
-                }
-            }
-        ]
+        total_vehicles = len(all_vehicle_data)
 
-        results = list(db["distinctAtlanta"].aggregate(pipeline))
-
-        if not results or not results[0]:
-            return jsonify({
-                'runningVehicles': 0,
-                'idleVehicles': 0,
-                'parkedVehicles': 0,
-                'speedVehicles': 0,
-                'overspeedVehicles': 0,
-                'offlineVehicles': 0,
-                'disconnectedVehicles': 0,
-                'noGpsVehicles': 0,
-                'totalVehicles': 0
-            }), 200
-
-        results = results[0]
-        print(results)
-        total_vehicles = results.get("totalVehicles", [{}])[0].get("count", 0) if results.get("totalVehicles") else 0
-        running_vehicles = results.get("runningVehicles", [{}])[0].get("count", 0) if results.get("runningVehicles") else 0
-        idle_vehicles = results.get("idleVehicles", [{}])[0].get("count", 0) if results.get("idleVehicles") else 0
-        parked_vehicles = results.get("parkedVehicles", [{}])[0].get("count", 0) if results.get("parkedVehicles") else 0
-        speed_vehicles = results.get("speedVehicles", [{}])[0].get("count", 0) if results.get("speedVehicles") else 0
-        overspeed_vehicles = results.get("overspeedVehicles", [{}])[0].get("count", 0) if results.get("overspeedVehicles") else 0
-        offline_vehicles = results.get("offlineVehicles", [{}])[0].get("count", 0) if results.get("offlineVehicles") else 0
-        disconnected_vehicles = results.get("disconnectedVehicles", [{}])[0].get("count", 0) if results.get("disconnectedVehicles") else 0
-        no_gps_vehicles = results.get("noGpsVehicles", [{}])[0].get("count", 0) if results.get("noGpsVehicles") else 0
+        def filter_by_status(data, status):
+            if status == "running":
+                return [v for v in data if v['ignition'] == "1" and float(v['speed']) > 0 and not v['is_offline']]
+            if status == "idle":
+                return [v for v in data if v['ignition'] == "1" and float(v['speed']) == 0 and not v['is_offline']]
+            if status == "parked":
+                return [v for v in data if v['ignition'] == "0" and float(v['speed']) == 0 and not v['is_offline']]
+            if status == "speed":
+                return [v for v in data if v['ignition'] == "1" and 40 <= float(v['speed']) < 60 and not v['is_offline']]
+            if status == "overspeed":
+                return [v for v in data if v['ignition'] == "1" and float(v['speed']) >= 60 and not v['is_offline']]
+            if status == "offline":
+                return [v for v in data if v['is_offline']]
+            if status == "disconnected":
+                return [v for v in data if v['main_power'] == "0"]
+            if status == "nogps":
+                return [v for v in data if not v['gps']]
+            return []
 
         return jsonify({
-            'runningVehicles': running_vehicles,
-            'idleVehicles': idle_vehicles,
-            'parkedVehicles': parked_vehicles,
-            'speedVehicles': speed_vehicles,
-            'overspeedVehicles': overspeed_vehicles,
-            'offlineVehicles': offline_vehicles,
-            'disconnectedVehicles': disconnected_vehicles,
-            'noGpsVehicles': no_gps_vehicles,
+            'runningVehicles': len(filter_by_status(all_vehicle_data, 'running')),
+            'idleVehicles': len(filter_by_status(all_vehicle_data, 'idle')),
+            'parkedVehicles': len(filter_by_status(all_vehicle_data, 'parked')),
+            'speedVehicles': len(filter_by_status(all_vehicle_data, 'speed')),
+            'overspeedVehicles': len(filter_by_status(all_vehicle_data, 'overspeed')),
+            'offlineVehicles': len(filter_by_status(all_vehicle_data, 'offline')),
+            'disconnectedVehicles': len(filter_by_status(all_vehicle_data, 'disconnected')),
+            'noGpsVehicles': len(filter_by_status(all_vehicle_data, 'nogps')),
             'totalVehicles': total_vehicles
         }), 200
-
     except Exception as e:
-        print(f"Error fetching status data: {e}")
+        print(f"Error in synced status data: {e}")
         return jsonify({"error": "Failed to fetch status data"}), 500
