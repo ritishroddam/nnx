@@ -968,6 +968,50 @@ document.addEventListener("DOMContentLoaded", function () {
 //     .catch((error) => console.error("Error fetching status data:", error));
 // }
 
+async function fetchStatusData() {
+    try {
+        // Show loading state if needed (optional)
+        const statusCards = document.querySelectorAll('.status-card');
+        statusCards.forEach(card => {
+            card.classList.add('loading');
+        });
+
+        const response = await fetch("/dashboard/get_status_data");
+        const data = await response.json();
+
+        // Update all status cards
+        document.getElementById("running-vehicles-count").textContent = 
+            `${data.runningVehicles} / ${data.totalVehicles}`;
+        document.getElementById("idle-vehicles-count").textContent = 
+            `${data.idleVehicles} / ${data.totalVehicles}`;
+        document.getElementById("parked-vehicles-count").textContent = 
+            `${data.parkedVehicles} / ${data.totalVehicles}`;
+        document.getElementById("speed-vehicles-count").textContent = 
+            `${data.speedVehicles} / ${data.totalVehicles}`;
+        document.getElementById("overspeed-vehicles-count").textContent = 
+            `${data.overspeedVehicles} / ${data.totalVehicles}`;
+        document.getElementById("offline-vehicles-count").textContent = 
+            `${data.offlineVehicles} / ${data.totalVehicles}`;
+        document.getElementById("disconnected-vehicles-count").textContent = 
+            `${data.disconnectedVehicles} / ${data.totalVehicles}`;
+        
+        // Remove loading state
+        statusCards.forEach(card => {
+            card.classList.remove('loading');
+        });
+        
+        // Store the counts for verification
+        window.statusCounts = data;
+    } catch (error) {
+        console.error("Error fetching status data:", error);
+        // Remove loading state even if there's an error
+        const statusCards = document.querySelectorAll('.status-card');
+        statusCards.forEach(card => {
+            card.classList.remove('loading');
+        });
+    }
+}
+
 function fetchStatusData() {
     fetch("/dashboard/get_status_data")
         .then((response) => response.json())
@@ -997,11 +1041,13 @@ function fetchStatusData() {
 document.getElementById('statusPopupClose').addEventListener('click', () => {
     document.getElementById('statusPopupOverlay').classList.remove('active');
     document.getElementById('statusPopup').classList.remove('active');
+    fetchStatusData();
 });
 
 document.getElementById('statusPopupOverlay').addEventListener('click', () => {
     document.getElementById('statusPopupOverlay').classList.remove('active');
     document.getElementById('statusPopup').classList.remove('active');
+    fetchStatusData();
 });
 
 // Add event listeners for status cards
