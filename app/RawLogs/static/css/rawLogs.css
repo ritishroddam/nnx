@@ -193,3 +193,79 @@ h2 {
     min-width: 100%;
   }
 }
+
+/* Form Container */
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+/* Form Groups */
+.form-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Labels */
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Inputs and Select */
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Date Inputs */
+.form-group input[type="datetime-local"] {
+  padding: 9px;
+}
+
+/* Select Dropdown */
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+/* Button */
+.fetch-btn {
+  background-color: #4a6baf;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  height: 40px;
+  min-width: 120px;
+}
+
+.fetch-btn:hover {
+  background-color: #3a5a9f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-container {
+    flex-direction: column;
+  }
+  
+  .form-group {
+    width: 100%;
+  }
+}
