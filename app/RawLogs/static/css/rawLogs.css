@@ -238,29 +238,31 @@ h2 {
 
 /* Form styling */
 .styled-form {
-  max-width: 600px;
-  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
-.form-group {
-  margin-bottom: 20px;
+.styled-form .form-group {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 150px;
 }
 
 .styled-form label {
   display: block;
+  margin-bottom: 5px;
   font-weight: bold;
-  margin-bottom: 8px;
-  color: #555;
 }
 
-.styled-form input[type="datetime-local"],
-.styled-form select {
+.styled-form select,
+.styled-form input[type="datetime-local"] {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
+  padding: 8px;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 16px;
-  box-sizing: border-box;
 }
 
 .styled-form select {
@@ -340,13 +342,20 @@ h2 {
   min-height: 46px;
 }
 
+.styled-form button {
+  padding: 8px 15px;
+  height: 36px; /* Match input heights */
+  margin-bottom: 5px; /* Align with inputs */
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .toggle-slider {
-    width: 250px;
+  .styled-form {
+    flex-direction: column;
+    align-items: stretch;
   }
   
-  .view-container {
-    padding: 15px;
+  .styled-form .form-group {
+    min-width: 100%;
   }
 }
