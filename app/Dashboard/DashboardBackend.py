@@ -735,11 +735,20 @@ def get_status_data():
                 'totalVehicles': 0
             }), 200
 
-        vehicle_docs = db["distinctAtlanta"].find({"imei": {"$in": imeis}})
+        # vehicle_docs = db["distinctAtlanta"].find({"imei": {"$in": imeis}})
+        latest_records = list(atlanta_collection.aggregate([
+            {"$match": {"imei": {"$in": imeis}}},
+            {"$sort": {"imei": 1, "date_time": -1}},
+            {"$group": {
+                "_id": "$imei",
+                "record": {"$first": "$$ROOT"}
+            }}
+        ]))
         total_vehicles = 0
         running = idle = parked = speed = overspeed = offline = disconnected = no_gps = 0
 
-        for v in vehicle_docs:
+        for v in latest_records:
+            record = v["record"]
             total_vehicles += 1
             speed_val = float(v.get("speed", 0))
             ignition = v.get("ignition", "0")
