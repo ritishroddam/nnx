@@ -165,7 +165,6 @@
 /* Header styling */
 h1 {
   color: #333;
-  margin-bottom: 20px;
 }
 
 h2 {
@@ -246,7 +245,7 @@ h2 {
 }
 
 .styled-form .form-group {
-  margin-bottom: 0;
+  margin-bottom: 50px;
   flex: 1;
   min-width: 150px;
 }
