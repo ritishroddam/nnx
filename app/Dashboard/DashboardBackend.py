@@ -718,43 +718,73 @@ def format_last_updated(date_str, time_str):
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
-        response = dashboard_bp.view_functions['get_vehicle_range_data']()
-        all_vehicle_data = response.get_json()
-        if not isinstance(all_vehicle_data, list):
-            return jsonify({"error": "Vehicle data not available"}), 500
+        utc_now = datetime.now(timezone('UTC'))
+        twenty_four_hours_ago = utc_now - timedelta(hours=24)
 
-        total_vehicles = len(all_vehicle_data)
+        imeis = list(get_vehicle_data().distinct("IMEI"))
+        if not imeis:
+            return jsonify({
+                'runningVehicles': 0,
+                'idleVehicles': 0,
+                'parkedVehicles': 0,
+                'speedVehicles': 0,
+                'overspeedVehicles': 0,
+                'offlineVehicles': 0,
+                'disconnectedVehicles': 0,
+                'noGpsVehicles': 0,
+                'totalVehicles': 0
+            }), 200
 
-        def filter_by_status(data, status):
-            if status == "running":
-                return [v for v in data if v['ignition'] == "1" and float(v['speed']) > 0 and not v['is_offline']]
-            if status == "idle":
-                return [v for v in data if v['ignition'] == "1" and float(v['speed']) == 0 and not v['is_offline']]
-            if status == "parked":
-                return [v for v in data if v['ignition'] == "0" and float(v['speed']) == 0 and not v['is_offline']]
-            if status == "speed":
-                return [v for v in data if v['ignition'] == "1" and 40 <= float(v['speed']) < 60 and not v['is_offline']]
-            if status == "overspeed":
-                return [v for v in data if v['ignition'] == "1" and float(v['speed']) >= 60 and not v['is_offline']]
-            if status == "offline":
-                return [v for v in data if v['is_offline']]
-            if status == "disconnected":
-                return [v for v in data if v['main_power'] == "0"]
-            if status == "nogps":
-                return [v for v in data if not v['gps']]
-            return []
+        vehicle_docs = db["distinctAtlanta"].find({"imei": {"$in": imeis}})
+        total_vehicles = 0
+        running = idle = parked = speed = overspeed = offline = disconnected = no_gps = 0
+
+        for v in vehicle_docs:
+            total_vehicles += 1
+            speed_val = float(v.get("speed", 0))
+            ignition = v.get("ignition", "0")
+            main_power = v.get("main_power", "1")
+            gps = v.get("gps", True)
+
+            dt = v.get("date", "") + v.get("time", "")
+            last_update = None
+            if len(dt) == 12:
+                try:
+                    last_update = datetime.strptime(dt, "%d%m%y%H%M%S").replace(tzinfo=timezone('UTC'))
+                except:
+                    pass
+
+            is_offline = last_update is None or last_update < twenty_four_hours_ago
+
+            if ignition == "1" and speed_val > 0 and not is_offline:
+                running += 1
+            elif ignition == "1" and speed_val == 0 and not is_offline:
+                idle += 1
+            elif ignition == "0" and speed_val == 0 and not is_offline:
+                parked += 1
+            if ignition == "1" and 40 <= speed_val < 60 and not is_offline:
+                speed += 1
+            if ignition == "1" and speed_val >= 60 and not is_offline:
+                overspeed += 1
+            if is_offline:
+                offline += 1
+            if main_power == "0":
+                disconnected += 1
+            if gps is False:
+                no_gps += 1
 
         return jsonify({
-            'runningVehicles': len(filter_by_status(all_vehicle_data, 'running')),
-            'idleVehicles': len(filter_by_status(all_vehicle_data, 'idle')),
-            'parkedVehicles': len(filter_by_status(all_vehicle_data, 'parked')),
-            'speedVehicles': len(filter_by_status(all_vehicle_data, 'speed')),
-            'overspeedVehicles': len(filter_by_status(all_vehicle_data, 'overspeed')),
-            'offlineVehicles': len(filter_by_status(all_vehicle_data, 'offline')),
-            'disconnectedVehicles': len(filter_by_status(all_vehicle_data, 'disconnected')),
-            'noGpsVehicles': len(filter_by_status(all_vehicle_data, 'nogps')),
+            'runningVehicles': running,
+            'idleVehicles': idle,
+            'parkedVehicles': parked,
+            'speedVehicles': speed,
+            'overspeedVehicles': overspeed,
+            'offlineVehicles': offline,
+            'disconnectedVehicles': disconnected,
+            'noGpsVehicles': no_gps,
             'totalVehicles': total_vehicles
         }), 200
+
     except Exception as e:
-        print(f"Error in synced status data: {e}")
+        print("❌ Status count sync failed:", e)
         return jsonify({"error": "Failed to fetch status data"}), 500
