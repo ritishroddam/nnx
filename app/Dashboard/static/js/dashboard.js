@@ -56,44 +56,9 @@ function formatStatusTime(seconds) {
     }
 }
 
-// async function showStatusPopup(status, title) {
-//     currentStatusFilter = status;
-//     document.getElementById('statusPopupTitle').textContent = title;
-//     document.getElementById('statusPopupSubtitle').textContent = title;
-
-//     document.getElementById('statusPopupTableBody').innerHTML = `
-//         <tr>
-//             <td colspan="10" style="text-align: center; padding: 20px;">
-//                 Loading data...
-//             </td>
-//         </tr>
-//     `;
-
-//     document.getElementById('statusPopupOverlay').classList.add('active');
-//     document.getElementById('statusPopup').classList.add('active');
-
-//     try {
-//         const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
-//         const filteredData = await response.json();
-
-//         statusPopupTableData = filteredData;
-//         renderStatusPopupTable(filteredData);
-//     } catch (error) {
-//         console.error("Error fetching vehicle data:", error);
-//         document.getElementById('statusPopupTableBody').innerHTML = `
-//             <tr>
-//                 <td colspan="10" style="text-align: center; padding: 20px; color: red;">
-//                     Error loading data: ${error.message}
-//                 </td>
-//             </tr>
-//         `;
-//     }
-// }
-
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
-    document.getElementById('statusPopupSubtitle').textContent = title;
 
     document.getElementById('statusPopupTableBody').innerHTML = `
         <tr>
