@@ -21,7 +21,7 @@ vehicleCollection = db['vehicle_inventory']
 @jwt_required()
 @roles_required('admin')
 def home():
-    liscensePlateNumbers = rawLogsCollection.distinct("LicensePlateNumber")
+    liscensePlateNumbers = rawLogSubscriptions.distinct("LicensePlateNumber")
     if not liscensePlateNumbers:
         liscensePlateNumbers = []
         
