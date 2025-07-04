@@ -659,16 +659,12 @@
 }
 
 .table-container {
-  border-radius: 8px;
-  padding: 10px;
   max-height: 70vh;
   overflow-y: auto;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
 .dark-mode .table-container {
   color: #ccc;
-  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 #sortBtn {
