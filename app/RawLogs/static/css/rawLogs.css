@@ -119,7 +119,6 @@ h2 {
   cursor: pointer;
   transition: background-color 0.3s;
   display: inline-block;
-  margin-top: 60px;
 }
 
 .btn:hover {
@@ -165,7 +164,7 @@ h2 {
 }
 
 .selectize-dropdown {
-  width: 50%;
+  width: 40%;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -178,8 +177,7 @@ h2 {
 
 .styled-form button {
   padding: 8px 15px;
-  height: 36px; /* Match input heights */
-  margin-bottom: 5px; /* Align with inputs */
+  height: 36px;
 }
 
 /* Responsive adjustments */
