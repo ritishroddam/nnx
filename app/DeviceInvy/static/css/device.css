@@ -488,3 +488,47 @@ tr:hover {
 #searchBtn{
   height: 35px;
 }
+
+.filter-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.status-counts {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.count-badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.count-badge.active {
+    background-color: #e6f7e6;
+    color: #2e7d32;
+}
+
+.count-badge.inactive {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.count-badge.rental {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.count-badge.package {
+    background-color: #f3e5f5;
+    color: #6a1b9a;
+}
+
+.count-badge.outrate {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
