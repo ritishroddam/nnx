@@ -548,8 +548,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       statusColor = isDarkMode ? "#d32f2f" : "#f44336";
     } else if (statusText === "idle") {
       statusText = "Idle";
-      statusColor = isDarkMode ? "#ff9800" : "#f57c00";
-      statusDisplay = `${statusText} (0 kmph) since ${sinceText}`; 
+      statusColor = isDarkMode ? "#ff9800" : "#f57c00"; 
     }else if (statusText === "moving") {
       statusText = "Moving";
       statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; 
