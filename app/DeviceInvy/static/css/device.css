@@ -469,7 +469,6 @@ tr:hover {
 .search-container {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
 }
 
 .search-container input {
@@ -499,7 +498,7 @@ tr:hover {
     display: flex;
     gap: 50px;
     flex-wrap: wrap;
-    margin-left: 350px;
+    margin-left: 300px;
 }
 
 .count-badge {
