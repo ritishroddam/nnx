@@ -104,20 +104,33 @@ function filterDevicesByStatus() {
     const selectedStatus = document.getElementById("statusFilter").value;
     const tableBody = document.getElementById("deviceTable");
     
-    // Show all devices if no filter selected
     if (!selectedStatus) {
+        // Show all devices if no filter selected
         allDevices.forEach(device => {
             device.style.display = "";
         });
         return;
     }
     
-    // Filter devices based on status
     allDevices.forEach(device => {
         if (selectedStatus === "Active" || selectedStatus === "Inactive") {
-            // For status filter
+            // For status filter - look for both button and radio inputs
             const statusCell = device.cells[12];
-            const status = statusCell.querySelector(".status-btn")?.textContent || "";
+            let status = "";
+            
+            // Check for status button
+            const statusButton = statusCell.querySelector(".status-btn");
+            if (statusButton) {
+                status = statusButton.textContent.trim();
+            } 
+            // Check for radio inputs (in edit mode)
+            else {
+                const activeRadio = statusCell.querySelector('input[type="radio"][value="Active"]');
+                const inactiveRadio = statusCell.querySelector('input[type="radio"][value="Inactive"]');
+                if (activeRadio && activeRadio.checked) status = "Active";
+                if (inactiveRadio && inactiveRadio.checked) status = "Inactive";
+            }
+            
             device.style.display = status === selectedStatus ? "" : "none";
         } else {
             // For package type filter
@@ -136,18 +149,32 @@ function updateStatusCounts() {
     let outrateCount = 0;
 
     allDevices.forEach(device => {
-        // Count statuses
-        const statusCell = device.cells[12];
-        const status = statusCell.querySelector(".status-btn")?.textContent || "";
-        if (status === "Active") activeCount++;
-        if (status === "Inactive") inactiveCount++;
-
-        // Count package types
+        // Count package types first (from column 10)
         const packageCell = device.cells[10];
         const packageType = packageCell.textContent.trim();
         if (packageType === "Rental") rentalCount++;
         if (packageType === "Package") packageCount++;
         if (packageType === "Outrate") outrateCount++;
+
+        // Count statuses (from column 12)
+        const statusCell = device.cells[12];
+        let status = "";
+        
+        // Check for status button
+        const statusButton = statusCell.querySelector(".status-btn");
+        if (statusButton) {
+            status = statusButton.textContent.trim();
+        } 
+        // Check for radio inputs (in edit mode)
+        else {
+            const activeRadio = statusCell.querySelector('input[type="radio"][value="Active"]');
+            const inactiveRadio = statusCell.querySelector('input[type="radio"][value="Inactive"]');
+            if (activeRadio && activeRadio.checked) status = "Active";
+            if (inactiveRadio && inactiveRadio.checked) status = "Inactive";
+        }
+
+        if (status === "Active") activeCount++;
+        if (status === "Inactive") inactiveCount++;
     });
 
     // Update the count displays
@@ -237,8 +264,8 @@ function searchDevices() {
         tableBody.appendChild(row);
       });
 
-        allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
-        updateStatusCounts();
+            allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+            updateStatusCounts();
     })
     .catch(error => {
       console.error('Error searching devices:', error);
