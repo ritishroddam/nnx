@@ -510,12 +510,7 @@ tr:hover {
 
 #statusFilter{
   width: 350px;
-  background: dimgray;
-}
-
-#statusFilter:hover {
-    background: #555;
-    color: white;
+  background: #555;
 }
 
 .count-badge.active {
