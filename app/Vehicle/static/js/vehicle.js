@@ -196,28 +196,16 @@ async function updateData(data) {
       }
     }
 
-    // if (statusText === oldData.status){
-    //   const newTime = convertToDate(data.date, data.time) - convertToDate(oldData.date, oldData.time);
-    //   data["status_time_delta"] = oldData.status_time_delta + newTime;
-    //   data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
-    //   data["status"] = statusText;
-    // } else {
-    //   data["status_time_delta"] = 0;
-    //   data["status_time_str"] = "0 seconds";
-    //   data["status"] = statusText;
-    // }
-
-    // vehicleData.set(data.imei, data);
-
-  if (statusText !== oldData.status) {
-      data["status_time_delta"] = 0; 
-      data["status_time_str"] = "0 seconds";
-    } else {
+    if (statusText === oldData.status){
       const newTime = convertToDate(data.date, data.time) - convertToDate(oldData.date, oldData.time);
       data["status_time_delta"] = oldData.status_time_delta + newTime;
-      data["status_time_str"] = formatTimeDelta(data["status_time_delta"]);
+      data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
+      data["status"] = statusText;
+    } else {
+      data["status_time_delta"] = 0;
+      data["status_time_str"] = "0 seconds";
+      data["status"] = statusText;
     }
-    data["status"] = statusText;
 
     vehicleData.set(data.imei, data);
   } else {
