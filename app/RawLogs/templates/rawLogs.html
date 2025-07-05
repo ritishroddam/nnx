@@ -21,40 +21,44 @@ Raw Logs
 
 <div id="rawLogsView" class="view-container active">
   <h2>Raw Logs</h2>
+  <div class="form-container">
   <form id="rawLogsForm" class="styled-form">
     <div class="form-group">
       <label for="licensePlateNumber">License Plate Number:</label>
       <select name="licensePlateNumber" id="licensePlateNumberRaw" required>
-        <option value="" disabled selected>Select a vehicle</option>
+        <option value="" disabled selected>Select vehicles...</option>
         {% for plate in liscensePlateNumbers %}
           <option value="{{ plate }}">{{ plate }}</option>
         {% endfor %}
       </select>
-      <!-- <input type="text" id="licensePlateNumber" name="licensePlateNumber" required> -->
     </div>
     <div class="form-group">
       <label for="fromDatetime">From:</label>
-      <input type="datetime-local" id="fromDatetime" name="fromDatetime" required>
+      <input type="datetime-local" id="fromDatetime" name="fromDatetime" required placeholder="dd-mm-yyyy --:--">
     </div>
     <div class="form-group">
       <label for="toDatetime">To:</label>
-      <input type="datetime-local" id="toDatetime" name="toDatetime" required>
+      <input type="datetime-local" id="toDatetime" name="toDatetime" required placeholder="dd-mm-yyyy --:--">
     </div>
-    <button type="submit" class="btn">Fetch Logs</button>
+    <button type="submit" class="btn fetch-btn">Fetch Logs</button>
   </form>
+  </div>
   <div id="logsContainer">
     <!-- Logs will be dynamically populated here -->
   </div>
-  <button id="downloadAllLogsBtn" class="btn">Download All Logs (PDF)</button>
 </div>
 
-<div id="subscribeView" class="view-container hidden">
+<div id="subscribeView" class="view-container">
   <h2>Subscribe Vehicles</h2>
   <form id="subscribeForm" class="styled-form">
-    <label for="vehicleDropdown">Select Vehicles:</label>
-    <select id="vehicleDropdown" name="vehicles" multiple class="selectize-dropdown">
-      <!-- Options will be dynamically populated -->
-    </select>
+    <div class="form-group">
+      <label for="vehicleDropdown">Select Vehicles:</label>
+      <select id="vehicleDropdown" name="vehicles" multiple class="selectize-dropdown">
+        {% for plate in liscensePlateNumbers %}
+          <option value="{{ plate }}">{{ plate }}</option>
+        {% endfor %}
+      </select>
+    </div>
     <button type="submit" class="btn">Subscribe</button>
   </form>
 </div>

@@ -73,9 +73,10 @@ document
     }
   });
 
+  let allDevices = [];
+
 document.addEventListener("DOMContentLoaded", function () {
   const dateInInput = document.getElementById("DateIn");
-
   const today = new Date().toISOString().split("T")[0];
   dateInInput.setAttribute("max", today);
 
@@ -85,7 +86,104 @@ document.addEventListener("DOMContentLoaded", function () {
       this.value = today; 
     }
   });
+  initializeStatusFilter();
 });
+
+function initializeStatusFilter() {
+    // Store all devices when page loads
+    allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+    
+    // Update counts
+    updateStatusCounts();
+    
+    // Add event listener for filter
+    document.getElementById("statusFilter").addEventListener("change", filterDevicesByStatus);
+}
+
+function filterDevicesByStatus() {
+    const selectedStatus = document.getElementById("statusFilter").value;
+    const tableBody = document.getElementById("deviceTable");
+    
+    if (!selectedStatus) {
+        // Show all devices if no filter selected
+        allDevices.forEach(device => {
+            device.style.display = "";
+        });
+        return;
+    }
+    
+    allDevices.forEach(device => {
+        if (selectedStatus === "Active" || selectedStatus === "Inactive") {
+            // For status filter - look for both button and radio inputs
+            const statusCell = device.cells[12];
+            let status = "";
+            
+            // Check for status button
+            const statusButton = statusCell.querySelector(".status-btn");
+            if (statusButton) {
+                status = statusButton.textContent.trim();
+            } 
+            // Check for radio inputs (in edit mode)
+            else {
+                const activeRadio = statusCell.querySelector('input[type="radio"][value="Active"]');
+                const inactiveRadio = statusCell.querySelector('input[type="radio"][value="Inactive"]');
+                if (activeRadio && activeRadio.checked) status = "Active";
+                if (inactiveRadio && inactiveRadio.checked) status = "Inactive";
+            }
+            
+            device.style.display = status === selectedStatus ? "" : "none";
+        } else {
+            // For package type filter
+            const packageCell = device.cells[10];
+            const packageType = packageCell.textContent.trim();
+            device.style.display = packageType === selectedStatus ? "" : "none";
+        }
+    });
+}
+
+function updateStatusCounts() {
+    let activeCount = 0;
+    let inactiveCount = 0;
+    let rentalCount = 0;
+    let packageCount = 0;
+    let outrateCount = 0;
+
+    allDevices.forEach(device => {
+        // Count package types first (from column 10)
+        const packageCell = device.cells[10];
+        const packageType = packageCell.textContent.trim();
+        if (packageType === "Rental") rentalCount++;
+        if (packageType === "Package") packageCount++;
+        if (packageType === "Outrate") outrateCount++;
+
+        // Count statuses (from column 12)
+        const statusCell = device.cells[12];
+        let status = "";
+        
+        // Check for status button
+        const statusButton = statusCell.querySelector(".status-btn");
+        if (statusButton) {
+            status = statusButton.textContent.trim();
+        } 
+        // Check for radio inputs (in edit mode)
+        else {
+            const activeRadio = statusCell.querySelector('input[type="radio"][value="Active"]');
+            const inactiveRadio = statusCell.querySelector('input[type="radio"][value="Inactive"]');
+            if (activeRadio && activeRadio.checked) status = "Active";
+            if (inactiveRadio && inactiveRadio.checked) status = "Inactive";
+        }
+
+        if (status === "Active") activeCount++;
+        if (status === "Inactive") inactiveCount++;
+    });
+
+    // Update the count displays
+    document.getElementById("activeCount").textContent = activeCount;
+    document.getElementById("inactiveCount").textContent = inactiveCount;
+    document.getElementById("rentalCount").textContent = rentalCount;
+    document.getElementById("packageCount").textContent = packageCount;
+    document.getElementById("outrateCount").textContent = outrateCount;
+}
 
 document.getElementById("Package").addEventListener("change", function () {
   var tenureContainer = document.getElementById("TenureContainer");
@@ -129,6 +227,8 @@ function searchDevices() {
         const row = document.createElement('tr');
         row.innerHTML = `<td colspan="13" class="no-results">No devices found</td>`;
         tableBody.appendChild(row);
+
+        resetCounts();
         return;
       }
 
@@ -163,6 +263,9 @@ function searchDevices() {
         `;
         tableBody.appendChild(row);
       });
+
+            allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+            updateStatusCounts();
     })
     .catch(error => {
       console.error('Error searching devices:', error);
@@ -170,8 +273,17 @@ function searchDevices() {
     });
 }
 
+function resetCounts() {
+    document.getElementById("activeCount").textContent = "0";
+    document.getElementById("inactiveCount").textContent = "0";
+    document.getElementById("rentalCount").textContent = "0";
+    document.getElementById("packageCount").textContent = "0";
+    document.getElementById("outrateCount").textContent = "0";
+}
+
 function clearSearch() {
   document.getElementById("imeiSearch").value = '';
+  document.getElementById("statusFilter").value = '';
   location.reload(); 
 }
 

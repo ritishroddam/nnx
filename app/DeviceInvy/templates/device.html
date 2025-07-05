@@ -20,6 +20,27 @@ Device Inventory
       <button id="searchBtn" class="btn">Search</button>
     </div>
 
+    <!-- Add this right after the search container -->
+    <div class="filter-container mb-4">
+        <select id="statusFilter" class="btn">
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Rental">Rental</option>
+            <option value="Package">Package</option>
+            <option value="Outrate">Outrate</option>
+        </select>
+
+        <div class="status-counts">
+            <span class="count-badge active">Active: <span id="activeCount">0</span></span>
+            <span class="count-badge inactive">Inactive: <span id="inactiveCount">0</span></span>
+            <span class="count-badge rental">Rental: <span id="rentalCount">0</span></span>
+            <span class="count-badge package">Package: <span id="packageCount">0</span></span>
+            <span class="count-badge outrate">Outrate: <span id="outrateCount">0</span></span>
+        </div>
+    </div>
+    <br>
+
     <button id="manualEntryBtn" class="btn success mb-4">
       Add New Device
     </button>
