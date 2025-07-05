@@ -497,15 +497,20 @@ tr:hover {
 
 .status-counts {
     display: flex;
-    gap: 10px;
+    gap: 50px;
     flex-wrap: wrap;
+    margin-left: 550px;
 }
 
 .count-badge {
     padding: 5px 10px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
+}
+
+#statusFilter{
+  width: 500px;
 }
 
 .count-badge.active {
