@@ -499,7 +499,7 @@ tr:hover {
     display: flex;
     gap: 50px;
     flex-wrap: wrap;
-    margin-left: 550px;
+    margin-left: 350px;
 }
 
 .count-badge {
@@ -510,7 +510,8 @@ tr:hover {
 }
 
 #statusFilter{
-  width: 500px;
+  width: 350px;
+  background: gray;
 }
 
 .count-badge.active {
