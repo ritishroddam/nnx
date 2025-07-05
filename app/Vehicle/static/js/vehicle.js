@@ -196,16 +196,28 @@ async function updateData(data) {
       }
     }
 
-    if (statusText === oldData.status){
+    // if (statusText === oldData.status){
+    //   const newTime = convertToDate(data.date, data.time) - convertToDate(oldData.date, oldData.time);
+    //   data["status_time_delta"] = oldData.status_time_delta + newTime;
+    //   data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
+    //   data["status"] = statusText;
+    // } else {
+    //   data["status_time_delta"] = 0;
+    //   data["status_time_str"] = "0 seconds";
+    //   data["status"] = statusText;
+    // }
+
+    // vehicleData.set(data.imei, data);
+
+  if (statusText !== oldData.status) {
+      data["status_time_delta"] = 0; 
+      data["status_time_str"] = "0 seconds";
+    } else {
       const newTime = convertToDate(data.date, data.time) - convertToDate(oldData.date, oldData.time);
       data["status_time_delta"] = oldData.status_time_delta + newTime;
-      data["status_time_str"] =  formatTimeDelta(data["status_time_delta"]);
-      data["status"] = statusText;
-    } else {
-      data["status_time_delta"] = 0;
-      data["status_time_str"] = "0 seconds";
-      data["status"] = statusText;
+      data["status_time_str"] = formatTimeDelta(data["status_time_delta"]);
     }
+    data["status"] = statusText;
 
     vehicleData.set(data.imei, data);
   } else {
@@ -548,7 +560,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       statusColor = isDarkMode ? "#d32f2f" : "#f44336";
     } else if (statusText === "idle") {
       statusText = "Idle";
-      statusColor = isDarkMode ? "#ff9800" : "#f57c00"; 
+      statusColor = isDarkMode ? "#ff9800" : "#f57c00";
+      statusDisplay = `${statusText} (0 kmph) since ${sinceText}`; 
     }else if (statusText === "moving") {
       statusText = "Moving";
       statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; 
