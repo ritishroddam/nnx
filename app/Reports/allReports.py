@@ -1151,7 +1151,6 @@ def download_report(report_id):
 
         # Construct the full path for the file in DigitalOcean Spaces
         file_path = report['path']  # e.g., "reports/superadmin/stoppage_report_KA72CC1586_07-Jul-2025 02:15:09 PM.xlsx"
-        full_url = f"{ENDPOINT}/{file_path}"
 
         # Download the file from DigitalOcean Spaces
         output = BytesIO()
