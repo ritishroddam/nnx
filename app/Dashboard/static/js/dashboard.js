@@ -148,22 +148,22 @@ async function showStatusPopup(status, title) {
 
 function formatLastUpdatedText(date, time) {
     if (!date || !time) return "N/A";
-
+    
     try {
-        // If the date is like "020725" and time is "153025", parse it
-        const formattedDate = date.length === 6
-            ? `20${date.slice(4)}-${date.slice(2, 4)}-${date.slice(0, 2)}`
-            : date;
-
-        const formattedTime = time.length === 6
+        let formattedDate = date;
+        if (date.length === 6) {
+            formattedDate = `20${date.slice(4)}-${date.slice(2, 4)}-${date.slice(0, 2)}`;
+        }
+        
+        const formattedTime = time.length === 6 
             ? `${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`
             : time;
-
-        const dateTime = new Date(`${formattedDate}T${formattedTime}`);
-        return dateTime.toLocaleString(); // Human-readable format
-    } catch (err) {
-        console.error("Invalid date/time format:", date, time);
-        return "Invalid";
+            
+        const dateObj = new Date(`${formattedDate}T${formattedTime}`);
+        return isNaN(dateObj.getTime()) ? "N/A" : dateObj.toLocaleString();
+    } catch (e) {
+        console.error("Error formatting date/time:", e);
+        return "N/A";
     }
 }
 
@@ -198,11 +198,11 @@ function renderStatusPopupTable(data) {
         
         const speed = vehicle.speed ? parseFloat(vehicle.speed).toFixed(2) : 0;
         const speedCellClass = speed >= 60 ? 'speed-warning' : '';
+        const lastUpdated = vehicle.last_updated || formatLastUpdatedText(vehicle.date, vehicle.time);
         
         const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
         const iconRed = "color:#d32f2f;";
         
-        // Determine status icons
         const gpsIcon = vehicle.status === "offline" ? "location_disabled" : "my_location";
         
         let ignitionIcon, ignitionColor;
@@ -218,7 +218,6 @@ function renderStatusPopupTable(data) {
             ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>` 
             : "";
             
-        // GSM signal icon
         const ASUgsmValue = parseInt(vehicle.gsm || 0);
         let gsmIcon, gsmColor;
         if (ASUgsmValue == 0) {
@@ -244,7 +243,7 @@ function renderStatusPopupTable(data) {
         row.innerHTML = `
           <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
           <td>${vehicle.VehicleType || 'N/A'}</td>
-          <td>${vehicle.last_updated || 'N/A'}</td>
+          <td>${lastUpdated}</td>
           <td>${vehicle.location || 'Location unknown'}</td>
           <td class="${speedCellClass}">${speed} km/h</td>
           <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
@@ -264,11 +263,9 @@ function renderStatusPopupTable(data) {
         tableBody.appendChild(row);
     });
     
-    // Initialize sorting if needed
     setupTableSorting('#statusPopupTable');
 }
 
-// Add this modified setupTableSorting function
 function setupTableSorting(selector = '.vehicleLiveTable table') {
     const table = document.querySelector(selector);
     if (!table) return;
@@ -320,7 +317,6 @@ function sortTable(column, direction, selector = '.vehicleLiveTable table') {
     applySortIcons(column, direction, selector);
 }
 
-// Add this modified applySortIcons function
 function applySortIcons(column, direction, selector = '.vehicleLiveTable table') {
     document.querySelectorAll(`${selector} th`).forEach((th) => {
         const icon = th.querySelector(".sort-icon");
@@ -996,16 +992,13 @@ async function fetchStatusData() {
         document.getElementById("disconnected-vehicles-count").textContent = 
             `${data.disconnectedVehicles} / ${data.totalVehicles}`;
         
-        // Remove loading state
         statusCards.forEach(card => {
             card.classList.remove('loading');
         });
         
-        // Store the counts for verification
         window.statusCounts = data;
     } catch (error) {
         console.error("Error fetching status data:", error);
-        // Remove loading state even if there's an error
         const statusCards = document.querySelectorAll('.status-card');
         statusCards.forEach(card => {
             card.classList.remove('loading');
@@ -1017,7 +1010,6 @@ function fetchStatusData() {
     fetch("/dashboard/get_status_data")
         .then((response) => response.json())
         .then((data) => {
-            // Update all status cards
             document.getElementById("running-vehicles-count").textContent = 
                 `${data.runningVehicles} / ${data.totalVehicles}`;
             document.getElementById("idle-vehicles-count").textContent = 
@@ -1033,7 +1025,6 @@ function fetchStatusData() {
             document.getElementById("disconnected-vehicles-count").textContent = 
                 `${data.disconnectedVehicles} / ${data.totalVehicles}`;
             
-            // Store the counts for verification
             window.statusCounts = data;
         })
         .catch((error) => console.error("Error fetching status data:", error));
@@ -1051,7 +1042,6 @@ document.getElementById('statusPopupOverlay').addEventListener('click', () => {
     fetchStatusData();
 });
 
-// Add event listeners for status cards
 document.getElementById('running-vehicles').addEventListener('click', () => {
     showStatusPopup('running', 'Running Vehicles');
 });
@@ -1080,45 +1070,110 @@ document.getElementById('disconnected-vehicles').addEventListener('click', () =>
     showStatusPopup('disconnected', 'Disconnected Vehicles');
 });
 
-// Replace the existing Excel download event listener with this:
+// document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
+//     const table = document.querySelector("#statusPopup table");
+//     if (!table) return;
+    
+//     const tableClone = table.cloneNode(true);
+    
+//     const statusCells = tableClone.querySelectorAll('td.status-icons');
+//     statusCells.forEach(cell => {
+//         const sos = cell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
+//         const gps = cell.getAttribute('data-gps') === 'true' ? 'GPS: Good' : 'GPS: Bad';
+//         const ignition = cell.getAttribute('data-ignition') === 'true' ? 'Ignition: On' : 'Ignition: Off';
+        
+//         const gsmValue = parseInt(cell.getAttribute('data-gsm'));
+//         let gsmStatus = 'Signal: ';
+//         if (gsmValue == 0) {
+//             gsmStatus += 'None';
+//         } else if (gsmValue > 0 && gsmValue <= 8) {
+//             gsmStatus += 'Weak';
+//         } else if (gsmValue > 8 && gsmValue <= 16) {
+//             gsmStatus += 'Fair';
+//         } else if (gsmValue > 16 && gsmValue <= 24) {
+//             gsmStatus += 'Good';
+//         } else if (gsmValue > 24 && gsmValue <= 32) {
+//             gsmStatus += 'Excellent';
+//         } else {
+//             gsmStatus += 'Unknown';
+//         }
+        
+//         cell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
+//     });
+    
+//     const wb = XLSX.utils.book_new();
+//     const ws = XLSX.utils.table_to_sheet(tableClone);
+//     XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
+    
+//     const title = document.getElementById('statusPopupTitle').textContent;
+//     XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
+// });
+
 document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
     const table = document.querySelector("#statusPopup table");
     if (!table) return;
     
-    // Clone the table to avoid modifying the original
     const tableClone = table.cloneNode(true);
     
-    // Convert icons to text in the cloned table
-    const statusCells = tableClone.querySelectorAll('td.status-icons');
-    statusCells.forEach(cell => {
-        const sos = cell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
-        const gps = cell.getAttribute('data-gps') === 'true' ? 'GPS: Good' : 'GPS: Bad';
-        const ignition = cell.getAttribute('data-ignition') === 'true' ? 'Ignition: On' : 'Ignition: Off';
+    const rows = tableClone.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = row.cells;
         
-        // Convert GSM signal to text
-        const gsmValue = parseInt(cell.getAttribute('data-gsm'));
-        let gsmStatus = 'Signal: ';
-        if (gsmValue == 0) {
-            gsmStatus += 'None';
-        } else if (gsmValue > 0 && gsmValue <= 8) {
-            gsmStatus += 'Weak';
-        } else if (gsmValue > 8 && gsmValue <= 16) {
-            gsmStatus += 'Fair';
-        } else if (gsmValue > 16 && gsmValue <= 24) {
-            gsmStatus += 'Good';
-        } else if (gsmValue > 24 && gsmValue <= 32) {
-            gsmStatus += 'Excellent';
-        } else {
-            gsmStatus += 'Unknown';
+        const statusCell = cells[cells.length - 1];
+        if (statusCell.classList.contains('status-icons')) {
+            const sos = statusCell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
+            const gps = statusCell.getAttribute('data-gps') === 'true' ? 'GPS: Good' : 'GPS: Bad';
+            const ignition = statusCell.getAttribute('data-ignition') === 'true' ? 'Ignition: On' : 'Ignition: Off';
+            
+            const gsmValue = parseInt(statusCell.getAttribute('data-gsm'));
+            let gsmStatus = 'Signal: ';
+            if (gsmValue == 0) {
+                gsmStatus += 'None';
+            } else if (gsmValue > 0 && gsmValue <= 8) {
+                gsmStatus += 'Weak';
+            } else if (gsmValue > 8 && gsmValue <= 16) {
+                gsmStatus += 'Fair';
+            } else if (gsmValue > 16 && gsmValue <= 24) {
+                gsmStatus += 'Good';
+            } else if (gsmValue > 24 && gsmValue <= 32) {
+                gsmStatus += 'Excellent';
+            } else {
+                gsmStatus += 'Unknown';
+            }
+            
+            statusCell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
         }
         
-        cell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
+        const lastUpdatedCell = cells[2]; 
+        if (lastUpdatedCell.textContent.includes('N/A')) {
+        } else {
+            const dateTime = new Date(lastUpdatedCell.textContent);
+            if (!isNaN(dateTime.getTime())) {
+                lastUpdatedCell.textContent = dateTime.toISOString(); 
+            }
+        }
     });
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.table_to_sheet(tableClone);
-    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
     
+    if (ws['!ref']) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            const cellAddress = {c: 2, r: R}; 
+            const cellRef = XLSX.utils.encode_cell(cellAddress);
+            if (ws[cellRef] && ws[cellRef].t === 's') {
+                const dateValue = new Date(ws[cellRef].v);
+                if (!isNaN(dateValue.getTime())) {
+                    ws[cellRef].t = 'n';
+                    ws[cellRef].v = dateValue;
+                    ws[cellRef].z = 'yyyy-mm-dd hh:mm:ss';
+                }
+            }
+        }
+    }
+    
+    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
     const title = document.getElementById('statusPopupTitle').textContent;
     XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
 });
