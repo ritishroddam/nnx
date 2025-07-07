@@ -939,13 +939,15 @@ function updateMap() {
       device.course != null
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
-      const iconUrl = getVehicleIconByTypeAndSpeed(
+      const iconUrl = getVehicleIconByTypeStatusAndSpeed(
         device.VehicleType,
+        device.status,
         device.speed,
         imei,
         device.date,
         device.time
       );
+
       const rotation = device.course;
 
       if (markers[imei]) {
@@ -1103,49 +1105,47 @@ function convertSpeedToKmh(speedkmh) {
 //   }
 // }
 
-function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
+function getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time) {
   let baseIcon;
-  switch(vehicleType.toLowerCase()) {
-    case 'bike':
-      baseIcon = 'bike';
-      break;
-    case 'bus':
-      baseIcon = 'bus';
-      break;
-    case 'truck':
-      baseIcon = 'truck';
-      break;
+  switch (vehicleType?.toLowerCase?.()) {
+    case 'bike': baseIcon = 'bike'; break;
+    case 'bus': baseIcon = 'bus'; break;
+    case 'truck': baseIcon = 'truck'; break;
     case 'hatchback':
     case 'sedan':
     case 'suv':
     case 'van':
+      baseIcon = 'car';
+      break;
     default:
       baseIcon = 'car';
   }
 
-  // Determine color based on speed
   let color;
-  if (speedInKmh === 0) {
-    color = 'yellow';
-  } else if (speedInKmh > 0 && speedInKmh <= 40) {
-    color = 'green';
-  } else if (speedInKmh > 40 && speedInKmh <= 60) {
-    color = 'blue';
-  } else {
-    color = 'red';
-  }
-
-  // ✅ Fix: use passed date and time, not undefined "device"
-  const now = new Date();
-  const lastUpdateTime = convertToDate(date, time);
-  const timeDiff = now - lastUpdateTime;
-  const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-
-  if (dayDiff >= 1) {
+  if (status === "offline") {
     color = 'black';
+  } else if (status === "stopped") {
+    color = 'gray';
+  } else if (status === "idle") {
+    color = 'yellow';
+  } else if (status === "moving") {
+    if (speedInKmh === 0) color = 'yellow';
+    else if (speedInKmh <= 40) color = 'green';
+    else if (speedInKmh <= 60) color = 'blue';
+    else color = 'red';
+  } else {
+    color = 'gray';
   }
 
-  return `/static/images/${baseIcon}_${color}.png`;
+  // Optional: override to black if data is old
+  if (date && time && typeof date === 'string' && typeof time === 'string') {
+    const now = new Date();
+    const lastUpdateTime = convertToDate(date, time);
+    const dayDiff = (now - lastUpdateTime) / (1000 * 60 * 60 * 24);
+    if (dayDiff >= 1) color = 'black';
+  }
+
+  return `/static/images/${baseIcon}_${status}_${color}.png`;
 }
 
 function convertToDate(ddmmyyyy, hhmmss) {
@@ -1181,9 +1181,9 @@ function convertToDate(ddmmyyyy, hhmmss) {
 //   return iconUrl;
 // }
 
-function getVehicleIconByTypeAndSpeed(vehicleType, speed, imei, date, time) {
+function getVehicleIconByTypeStatusAndSpeed(vehicleType, status, speed, imei, date, time) {
   const speedInKmh = convertSpeedToKmh(speed);
-  return getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time);
+  return getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time);
 }
 
 function checkForDataTimeout(imei) {
@@ -1223,13 +1223,15 @@ function checkForDataTimeout(imei) {
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
-  const iconUrl = getVehicleIconByTypeAndSpeed(
-    vehicle.VehicleType,
-    vehicle.speed,
+  const iconUrl = getVehicleIconByTypeStatusAndSpeed(
+    device.VehicleType,
+    device.status,
+    device.speed,
     imei,
-    vehicle.date,
-    vehicle.time
+    device.date,
+    device.time
   );
+
   const rotation = vehicle.course;
 
   if (markers[imei]) {
