@@ -21,9 +21,15 @@ h2 {
   width: 300px;
   height: 50px;
   background: #e0e0e0;
+  border: 1.5px solid #bbb;
   border-radius: 25px;
   overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .toggle-slider {
+  background: black;
+  border: 1.5px solid #333;
 }
 
 .toggle-option {
@@ -39,7 +45,7 @@ h2 {
 }
 
 .dark-mode .toggle-option {
-  color: black;
+  color: #ccc;
 }
 
 .toggle-option.active {
