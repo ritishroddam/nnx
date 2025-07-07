@@ -1543,7 +1543,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng, 
     map: map,
-    // title: `IMEI: ${device.imei}`,
+    title: `License Plate Number: ${device.LicensePlateNumber}`,
     content: markerContent,
   });
 
