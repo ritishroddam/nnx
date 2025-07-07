@@ -9,6 +9,8 @@ import pytz
 from pytz import timezone
 from io import BytesIO
 from collections import OrderedDict
+import boto3
+from botocore.client import Config
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
@@ -17,6 +19,20 @@ from app.geocoding import geocodeInternal
 
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
+
+SPACES_KEY = 'DO80126D9XH4CX283ZFW'
+SPACES_SECRET = 'fpPZRhNzbAzvMBDpzwoht2I6FDDxfp34ENUnz1h1lH8'
+SPACE_NAME = 'cordonnx'
+REGION = 'blr1'
+ENDPOINT = 'https://blr1.digitaloceanspaces.com'
+
+session = boto3.session.Session()
+s3 = session.client('s3',
+    region_name=REGION,
+    endpoint_url=ENDPOINT,
+    aws_access_key_id=SPACES_KEY,
+    aws_secret_access_key=SPACES_SECRET
+)
 
 IST = timezone('Asia/Kolkata')
 
@@ -31,7 +47,7 @@ FIELD_COLLECTION_MAP = {
                 'Average Speed', 'Maximum Speed'],
     'vehicle_inventory': ['LicensePlateNumber', 'IMEI', 'SIM', 'VehicleModel', 
                          'VehicleMake', 'YearOfManufacture', 'DateOfPurchase',
-                         'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType'
+                         'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType',
                          'Location', 'OdometerReading', 'ServiceDueDate'],
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
@@ -84,6 +100,34 @@ report_configs = {
         'sheet_name': "Daily Report"
     }
 }
+
+def save_and_return_report(output, data, report_type, vehicle_number):
+
+    # Generate unique filename
+    timestamp = datetime.now().strftime('%d%m%Y')
+    report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.xlsx"
+    remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
+
+    # Upload to Spaces
+    output.seek(0)
+    s3.upload_fileobj(output, SPACE_NAME, remote_path)
+
+    # Save metadata to MongoDB
+    report_metadata = {
+        'user_id': get_jwt_identity(),
+        'report_name': data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report',
+        'filename': report_filename,
+        'path': remote_path,
+        'size': output.getbuffer().nbytes,
+        'generated_at': datetime.now(pytz.UTC),
+        'vehicle_number': vehicle_number,
+        'report_type': report_type
+    }
+    db['generated_reports'].insert_one(report_metadata)
+
+    # Return file to user
+    output.seek(0)
+    return report_filename
 
 def process_df(df, license_plate, fields, post_process=None):
             if df.empty:
@@ -437,21 +481,10 @@ def download_custom_report():
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
             output.seek(0)
-            
-            report_name = data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report'
-            
-            report_data = {
-            'user_id': get_jwt_identity(),
-            'report_name': data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report',
-            'filename': f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx",
-            'size': len(output.getvalue()),  # Get file size in bytes
-            'generated_at': datetime.now(pytz.UTC),
-            'vehicle_number': vehicle_number,
-            'report_type': report_type
-            }
-            db['generated_reports'].insert_one(report_data)
 
-            return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_data['filename'])
+            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+            
+            return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_filename)
 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
@@ -504,11 +537,14 @@ def download_custom_report():
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=custom_report_name)
             output.seek(0)
+            
+            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+            
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                as_attachment=True,
-                download_name=f"{custom_report_name}_{vehicle_number}.xlsx"
+                as_attachment = True,
+                download_name = report_filename
             )
 
         # Standard reports for single vehicle
@@ -536,11 +572,14 @@ def download_custom_report():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
         output.seek(0)
+        
+        report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+        
         return send_file(
             output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"{report_type}_report_{vehicle_number}.xlsx"
+            mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment = True,
+            download_name = report_filename
         )
 
     except Exception as e:
@@ -657,22 +696,13 @@ def download_panic_report():
                 final_df.to_excel(writer, index=False, sheet_name="Panic Report")
             output.seek(0)
             
-            report_data = {
-            'user_id': get_jwt_identity(),
-            'report_name': 'Panic Report',
-            'generated_at': datetime.now(pytz.UTC),
-            'vehicle_number': vehicle_number,
-            'date_range': date_range if date_range else 'all',
-            'report_type': 'panic',
-            'file_name': f"panic_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
-            }
-            db['generated_reports'].insert_one(report_data)
+            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
 
             return send_file(
                 output,
-                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                as_attachment=True,
-                download_name=f"panic_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}.xlsx"
+                mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                as_attachment = True,
+                download_name = report_filename
             )
             
         vehicle = db['vehicle_inventory'].find_one(
@@ -760,11 +790,14 @@ def download_panic_report():
             df.to_excel(writer, index=False, sheet_name="Panic Report")
 
         output.seek(0)
+        
+        report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
+        
         return send_file(
             output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"panic_report_{vehicle_number}.xlsx"
+            mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment = True,
+            download_name = report_filename
         )
 
     except Exception as e:
@@ -1081,22 +1114,22 @@ def get_recent_reports():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@reports_bp.route('/download_report/<report_id>', methods=['GET'])
-@jwt_required()
-def download_report(report_id):
-    try:
-        report = db['generated_reports'].find_one({
-            '_id': ObjectId(report_id),
-            'user_id': get_jwt_identity()
-        })
+# @reports_bp.route('/download_report/<report_id>', methods=['GET'])
+# @jwt_required()
+# def download_report(report_id):
+#     try:
+#         report = db['generated_reports'].find_one({
+#             '_id': ObjectId(report_id),
+#             'user_id': get_jwt_identity()
+#         })
         
-        if not report:
-            return jsonify({'success': False, 'message': 'Report not found'}), 404
+#         if not report:
+#             return jsonify({'success': False, 'message': 'Report not found'}), 404
             
-        return send_file(
-            report['file_path'],
-            as_attachment=True,
-            download_name=report['report_name'] + '.xlsx'
-        )
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+#         return send_file(
+#             report['file_path'],
+#             as_attachment=True,
+#             download_name=report['report_name'] + '.xlsx'
+#         )
+#     except Exception as e:
+#         return jsonify({'success': False, 'message': str(e)}), 500
