@@ -20,6 +20,40 @@ const allowedFields = [
   "Maximum Speed"
 ];
 
+function downloadReport(reportId) {
+    fetch(`/reports/download_report/${reportId}`, {
+        method: "GET",
+        headers: {
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+    })
+        .then((response) => {
+            if (!response.ok) {
+                // If the response is not OK, parse the error message
+                return response.json().then((errorData) => {
+                    throw new Error(errorData.message || "Failed to download the report.");
+                });
+            }
+            return response.blob();
+        })
+        .then((blob) => {
+            // Create a download link for the file
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `report_${reportId}.xlsx`; // Default filename
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch((error) => {
+            // Display the error message using displayFlashMessage
+            console.error("Error downloading report:", error);
+            displayFlashMessage(error.message || "An unexpected error occurred while downloading the report.", "danger");
+        });
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   loadRecentReports();
   
@@ -214,41 +248,6 @@ function viewReport(reportId) {
     // Populate it with the report data
     alert(`Viewing report: ${report.report_name}`);
 }
-
-function downloadReport(reportId) {
-    fetch(`/reports/download_report/${reportId}`, {
-        method: "GET",
-        headers: {
-            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-    })
-        .then((response) => {
-            if (!response.ok) {
-                // If the response is not OK, parse the error message
-                return response.json().then((errorData) => {
-                    throw new Error(errorData.message || "Failed to download the report.");
-                });
-            }
-            return response.blob();
-        })
-        .then((blob) => {
-            // Create a download link for the file
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `report_${reportId}.xlsx`; // Default filename
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch((error) => {
-            // Display the error message using displayFlashMessage
-            console.error("Error downloading report:", error);
-            displayFlashMessage(error.message || "An unexpected error occurred while downloading the report.", "danger");
-        });
-}
-
   const vehicleSelect = document.getElementById("vehicleNumber");
   const vehicleSelectize = vehicleSelect.selectize;
 
