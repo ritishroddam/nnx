@@ -7,7 +7,6 @@ async function fetchFilteredVehicleData(status) {
         const response = await fetch(`/dashboard/get_vehicle_range_data?range=${currentRange}`);
         const data = await response.json();
         
-        // Filter data based on status
         const filteredData = data.filter(vehicle => {
             switch(status) {
                 case 'running':
@@ -25,8 +24,7 @@ async function fetchFilteredVehicleData(status) {
                 case 'overspeed':
                     return parseFloat(vehicle.max_speed) >= 60;
                 case 'offline':
-                    // You'll need to modify your backend to support this filter
-                    return false; // Placeholder - implement based on your data
+                    return false; 
                 default:
                     return true;
             }
@@ -56,52 +54,10 @@ function formatStatusTime(seconds) {
     }
 }
 
-// async function showStatusPopup(status, title) {
-//     currentStatusFilter = status;
-//     document.getElementById('statusPopupTitle').textContent = title;
-
-//     document.getElementById('statusPopupTableBody').innerHTML = `
-//         <tr>
-//             <td colspan="8" style="text-align: center; padding: 20px;">
-//                 Loading data...
-//             </td>
-//         </tr>
-//     `;
-
-//     document.getElementById('statusPopupOverlay').classList.add('active');
-//     document.getElementById('statusPopup').classList.add('active');
-
-//     try {
-//         const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
-        
-//         if (!response.ok) {
-//             throw new Error(`Server returned ${response.status}`);
-//         }
-
-//         const data = await response.json();
-        
-//         // Ensure data is always an array
-//         const filteredData = Array.isArray(data) ? data : [];
-//         statusPopupTableData = filteredData;
-//         renderStatusPopupTable(filteredData);
-        
-//     } catch (error) {
-//         console.error("Error fetching vehicle data:", error);
-//         document.getElementById('statusPopupTableBody').innerHTML = `
-//             <tr>
-//                 <td colspan="8" style="text-align: center; padding: 20px; color: red;">
-//                     ${error.message || 'Error loading data'}
-//                 </td>
-//             </tr>
-//         `;
-//     }
-// }
-
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
 
-    // Show loading state
     document.getElementById('statusPopupTableBody').innerHTML = `
         <tr>
             <td colspan="8" style="text-align: center; padding: 20px;">
@@ -124,7 +80,6 @@ async function showStatusPopup(status, title) {
         const filteredData = Array.isArray(data) ? data : [];
         statusPopupTableData = filteredData;
         
-        // Verify counts match status cards
         if (window.statusCounts) {
             const expectedCount = window.statusCounts[`${status}Vehicles`];
             if (filteredData.length !== expectedCount) {
@@ -148,26 +103,25 @@ async function showStatusPopup(status, title) {
 
 function formatLastUpdatedText(date, time) {
     if (!date || !time) return "N/A";
-
+    
     try {
-        // If the date is like "020725" and time is "153025", parse it
-        const formattedDate = date.length === 6
-            ? `20${date.slice(4)}-${date.slice(2, 4)}-${date.slice(0, 2)}`
-            : date;
-
-        const formattedTime = time.length === 6
+        let formattedDate = date;
+        if (date.length === 6) {
+            formattedDate = `20${date.slice(4)}-${date.slice(2, 4)}-${date.slice(0, 2)}`;
+        }
+        
+        const formattedTime = time.length === 6 
             ? `${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`
             : time;
-
-        const dateTime = new Date(`${formattedDate}T${formattedTime}`);
-        return dateTime.toLocaleString(); // Human-readable format
-    } catch (err) {
-        console.error("Invalid date/time format:", date, time);
-        return "Invalid";
+            
+        const dateObj = new Date(`${formattedDate}T${formattedTime}`);
+        return isNaN(dateObj.getTime()) ? "N/A" : dateObj.toLocaleString();
+    } catch (e) {
+        console.error("Error formatting date/time:", e);
+        return "N/A";
     }
 }
 
-// Enhanced renderStatusPopupTable function
 function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTableBody');
     tableBody.innerHTML = '';
@@ -199,11 +153,11 @@ function renderStatusPopupTable(data) {
         
         const speed = vehicle.speed ? parseFloat(vehicle.speed).toFixed(2) : 0;
         const speedCellClass = speed >= 60 ? 'speed-warning' : '';
+        const lastUpdated = vehicle.last_updated || formatLastUpdatedText(vehicle.date, vehicle.time);
         
         const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
         const iconRed = "color:#d32f2f;";
         
-        // Determine status icons
         const gpsIcon = vehicle.status === "offline" ? "location_disabled" : "my_location";
         
         let ignitionIcon, ignitionColor;
@@ -219,7 +173,6 @@ function renderStatusPopupTable(data) {
             ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>` 
             : "";
             
-        // GSM signal icon
         const ASUgsmValue = parseInt(vehicle.gsm || 0);
         let gsmIcon, gsmColor;
         if (ASUgsmValue == 0) {
@@ -243,31 +196,31 @@ function renderStatusPopupTable(data) {
         }
         
         row.innerHTML = `
-            <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
-            <td>${vehicle.VehicleType || 'N/A'}</td>
-            <td>${vehicle.last_updated || 'N/A'}</td>
-            <td>${vehicle.location || 'Location unknown'}</td>
-            <td class="${speedCellClass}">${speed} km/h</td>
-            <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
-            <td>${vehicle.odometer || 'N/A'}</td>
-            <td>
-                <div class="vehicle-table-icons">
-                    ${sosIcon}
-                    <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-                    <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
-                    <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
-                </div>
-            </td>
-        `;
+          <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
+          <td>${vehicle.VehicleType || 'N/A'}</td>
+          <td>${lastUpdated}</td>
+          <td>${vehicle.location || 'Location unknown'}</td>
+          <td class="${speedCellClass}">${speed} km/h</td>
+          <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
+          <td>${vehicle.odometer || 'N/A'}</td>
+          <td class="status-icons" 
+              data-sos="${vehicle.sos === '1'}" 
+              data-gps="${vehicle.gps === '1' || vehicle.gps === true}" 
+              data-ignition="${vehicle.ignition === '1'}" 
+              data-gsm="${vehicle.gsm || '0'}">
+              ${sosIcon}
+              <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+              <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
+              <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+          </td>
+      `;
         
         tableBody.appendChild(row);
     });
     
-    // Initialize sorting if needed
     setupTableSorting('#statusPopupTable');
 }
 
-// Add this modified setupTableSorting function
 function setupTableSorting(selector = '.vehicleLiveTable table') {
     const table = document.querySelector(selector);
     if (!table) return;
@@ -319,7 +272,6 @@ function sortTable(column, direction, selector = '.vehicleLiveTable table') {
     applySortIcons(column, direction, selector);
 }
 
-// Add this modified applySortIcons function
 function applySortIcons(column, direction, selector = '.vehicleLiveTable table') {
     document.querySelectorAll(`${selector} th`).forEach((th) => {
         const icon = th.querySelector(".sort-icon");
@@ -333,69 +285,6 @@ function applySortIcons(column, direction, selector = '.vehicleLiveTable table')
         }
     });
 }
-
-// function applySortIcons(column, direction) {
-//   document.querySelectorAll(".vehicleLiveTable th").forEach((th) => {
-//     const icon = th.querySelector(".sort-icon");
-//     if (!icon) return;
-//     if (th.dataset.column === column) {
-//       icon.textContent = direction === "asc" ? "↑" : "↓";
-//       th.classList.add("sorted");
-//     } else {
-//       icon.textContent = "";
-//       th.classList.remove("sorted");
-//     }
-//   });
-// }
-
-// function sortTable(column, direction) {
-//   const table = document.querySelector(".vehicleLiveTable table");
-//   const tbody = table.querySelector("tbody");
-//   const rows = Array.from(tbody.querySelectorAll("tr"));
-//   const columnIndex = Array.from(table.querySelectorAll("th")).findIndex(
-//     (th) => th.dataset.column === column
-//   );
-
-//   rows.sort((a, b) => {
-//     let cellA = a.children[columnIndex].innerText.trim();
-//     let cellB = b.children[columnIndex].innerText.trim();
-
-//     if (column === "max_avg_speed") {
-//       cellA = parseFloat(cellA.split("/")[0]) || 0;
-//       cellB = parseFloat(cellB.split("/")[0]) || 0;
-//     } else if (!isNaN(cellA) && !isNaN(cellB)) {
-//       cellA = parseFloat(cellA);
-//       cellB = parseFloat(cellB);
-//     } else {
-//       cellA = cellA.toLowerCase();
-//       cellB = cellB.toLowerCase();
-//     }
-
-//     if (cellA < cellB) return direction === "asc" ? -1 : 1;
-//     if (cellA > cellB) return direction === "asc" ? 1 : -1;
-//     return 0;
-//   });
-
-//   tbody.innerHTML = "";
-//   rows.forEach((row) => tbody.appendChild(row));
-//   applySortIcons(column, direction);
-// }
-
-// function setupTableSorting() {
-//   const table = document.querySelector(".vehicleLiveTable table");
-//   table.querySelectorAll("th").forEach((header) => {
-//     header.addEventListener("click", () => {
-//       const column = header.dataset.column;
-//       if (!column) return;
-//       const direction =
-//         currentSort.column === column && currentSort.direction === "asc"
-//           ? "desc"
-//           : "asc";
-//       sortTable(column, direction);
-//       currentSort = { column, direction };
-//     });
-//   });
-// }
 
 function afterTableRender() {
   setupTableSorting();
@@ -939,38 +828,8 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchStatusData();
 });
 
-// function fetchStatusData() {
-//   fetch("/dashboard/get_status_data")
-//     .then((response) => response.json())
-//     .then((data) => {
-//       document.getElementById(
-//         "running-vehicles-count"
-//       ).textContent = `${data.runningVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "idle-vehicles-count"
-//       ).textContent = `${data.idleVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "parked-vehicles-count"
-//       ).textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "speed-vehicles-count"
-//       ).textContent = `${data.speedVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "overspeed-vehicles-count"
-//       ).textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "offline-vehicles-count"
-//       ).textContent = `${data.offlineVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "disconnected-vehicles-count"
-//       ).textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
-//     })
-//     .catch((error) => console.error("Error fetching status data:", error));
-// }
-
 async function fetchStatusData() {
     try {
-        // Show loading state if needed (optional)
         const statusCards = document.querySelectorAll('.status-card');
         statusCards.forEach(card => {
             card.classList.add('loading');
@@ -979,7 +838,6 @@ async function fetchStatusData() {
         const response = await fetch("/dashboard/get_status_data");
         const data = await response.json();
 
-        // Update all status cards
         document.getElementById("running-vehicles-count").textContent = 
             `${data.runningVehicles} / ${data.totalVehicles}`;
         document.getElementById("idle-vehicles-count").textContent = 
@@ -995,16 +853,13 @@ async function fetchStatusData() {
         document.getElementById("disconnected-vehicles-count").textContent = 
             `${data.disconnectedVehicles} / ${data.totalVehicles}`;
         
-        // Remove loading state
         statusCards.forEach(card => {
             card.classList.remove('loading');
         });
         
-        // Store the counts for verification
         window.statusCounts = data;
     } catch (error) {
         console.error("Error fetching status data:", error);
-        // Remove loading state even if there's an error
         const statusCards = document.querySelectorAll('.status-card');
         statusCards.forEach(card => {
             card.classList.remove('loading');
@@ -1016,7 +871,6 @@ function fetchStatusData() {
     fetch("/dashboard/get_status_data")
         .then((response) => response.json())
         .then((data) => {
-            // Update all status cards
             document.getElementById("running-vehicles-count").textContent = 
                 `${data.runningVehicles} / ${data.totalVehicles}`;
             document.getElementById("idle-vehicles-count").textContent = 
@@ -1032,7 +886,6 @@ function fetchStatusData() {
             document.getElementById("disconnected-vehicles-count").textContent = 
                 `${data.disconnectedVehicles} / ${data.totalVehicles}`;
             
-            // Store the counts for verification
             window.statusCounts = data;
         })
         .catch((error) => console.error("Error fetching status data:", error));
@@ -1050,7 +903,6 @@ document.getElementById('statusPopupOverlay').addEventListener('click', () => {
     fetchStatusData();
 });
 
-// Add event listeners for status cards
 document.getElementById('running-vehicles').addEventListener('click', () => {
     showStatusPopup('running', 'Running Vehicles');
 });
@@ -1079,70 +931,69 @@ document.getElementById('disconnected-vehicles').addEventListener('click', () =>
     showStatusPopup('disconnected', 'Disconnected Vehicles');
 });
 
-// Enhanced download functionality
 document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
     const table = document.querySelector("#statusPopup table");
     if (!table) return;
     
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.table_to_sheet(table);
-    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
+    const tableClone = table.cloneNode(true);
     
-    const title = document.getElementById('statusPopupTitle').textContent;
-    XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
-});
-
-// Add this at the top of your file
-const { jsPDF } = window.jspdf;
-
-// Replace your existing PDF generation code with this:
-document.getElementById('statusPopupPdfBtn').addEventListener('click', async function() {
-    const title = document.getElementById('statusPopupTitle').textContent;
-    const table = document.querySelector("#statusPopup .table-container");
-    
-    if (!table) {
-        alert('No table found for PDF generation');
-        return;
-    }
-    
-    // Show loading state
-    const originalContent = table.innerHTML;
-    table.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            Generating PDF... Please wait
-        </div>
-    `;
-    
-    try {
-        // Check if libraries are available
-        if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
-            throw new Error('PDF generation libraries not loaded');
+    const rows = tableClone.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = row.cells;
+        
+        const statusCell = cells[cells.length - 1];
+        if (statusCell.classList.contains('status-icons')) {
+            const sos = statusCell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
+            const gps = statusCell.getAttribute('data-gps') === 'true' ? 'GPS: Good' : 'GPS: Bad';
+            const ignition = statusCell.getAttribute('data-ignition') === 'true' ? 'Ignition: On' : 'Ignition: Off';
+            
+            const gsmValue = parseInt(statusCell.getAttribute('data-gsm'));
+            let gsmStatus = 'Signal: ';
+            if (gsmValue == 0) {
+                gsmStatus += 'None';
+            } else if (gsmValue > 0 && gsmValue <= 8) {
+                gsmStatus += 'Weak';
+            } else if (gsmValue > 8 && gsmValue <= 16) {
+                gsmStatus += 'Fair';
+            } else if (gsmValue > 16 && gsmValue <= 24) {
+                gsmStatus += 'Good';
+            } else if (gsmValue > 24 && gsmValue <= 32) {
+                gsmStatus += 'Excellent';
+            } else {
+                gsmStatus += 'Unknown';
+            }
+            
+            statusCell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
         }
         
-        // Create PDF
-        const pdf = new jsPDF('p', 'pt', 'a4');
-        
-        // Generate canvas from table
-        const canvas = await html2canvas(table, {
-            scale: 2,
-            logging: false,
-            useCORS: true,
-            allowTaint: true
-        });
-        
-        // Add image to PDF
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = pdf.internal.pageSize.getWidth() - 40;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
-        pdf.save(`${title.replace(/\s+/g, '_')}.pdf`);
-        
-    } catch (error) {
-        console.error('PDF generation error:', error);
-        alert(`Failed to generate PDF: ${error.message}`);
-    } finally {
-        // Restore original content
-        table.innerHTML = originalContent;
+        const lastUpdatedCell = cells[2]; 
+        if (!lastUpdatedCell.textContent.includes('N/A')) {
+            const dateTimeStr = lastUpdatedCell.textContent;
+            lastUpdatedCell.textContent = dateTimeStr;
+        }
+    });
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(tableClone);
+    
+    if (ws['!ref']) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            const cellAddress = {c: 2, r: R}; 
+            const cellRef = XLSX.utils.encode_cell(cellAddress);
+            if (ws[cellRef] && ws[cellRef].t === 's') {
+                // Try to parse the date string
+                const dateValue = new Date(ws[cellRef].v);
+                if (!isNaN(dateValue.getTime())) {
+                    ws[cellRef].t = 'n';
+                    ws[cellRef].v = dateValue;
+                    ws[cellRef].z = 'yyyy-mm-dd hh:mm:ss';
+                }
+            }
+        }
     }
+    
+    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
+    const title = document.getElementById('statusPopupTitle').textContent;
+    XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
 });
