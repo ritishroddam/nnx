@@ -926,45 +926,6 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
-const iconSizeMap = {
-  car:     [25, 50],
-  bus:     [28, 60],
-  truck:   [26, 60],
-  bike:    [18, 45]
-};
-
-function getScaledIcon(vehicleType, iconUrl, zoom) {
-  const baseSizes = {
-    car: [25, 50],
-    bus: [28, 60],
-    truck: [26, 60],
-    bike: [18, 45],
-  };
-
-  const base = baseSizes[vehicleType?.toLowerCase()] || [25, 50];
-  const scaleFactor = Math.min(Math.max((zoom - 10) / 6, 0.6), 1.2); // between 60% and 120%
-
-  const iconSize = [base[0] * scaleFactor, base[1] * scaleFactor];
-
-  return L.icon({
-    iconUrl,
-    iconSize,
-    iconAnchor: [iconSize[0] / 2, iconSize[1]],
-    popupAnchor: [0, -iconSize[1]],
-  });
-}
-
-function getIconForVehicle(vehicleType, iconUrl) {
-  const type = vehicleType?.toLowerCase() || 'car';
-  const iconSize = iconSizeMap[type] || [25, 50]; 
-  return L.icon({
-    iconUrl,
-    iconSize,
-    iconAnchor: [iconSize[0] / 2, iconSize[1]], 
-    popupAnchor: [0, -iconSize[1]]
-  });
-}
-
 function updateMap() {
   const bounds = new google.maps.LatLngBounds();
   dataAvailable = true;
@@ -986,15 +947,6 @@ function updateMap() {
       device.date,
       device.time
       );
-
-      const zoom = map.getZoom();
-      const icon = getScaledIcon(device.VehicleType, iconUrl, zoom);
-      const marker = L.marker(latLng, {
-        icon,
-        rotationAngle: device.course,
-      });
-
-      marker.addTo(map);
 
       const rotation = device.course;
 
@@ -1153,46 +1105,27 @@ function convertSpeedToKmh(speedkmh) {
 //   }
 // }
 
-function getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time) {
+function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
   let baseIcon;
-  switch (vehicleType?.toLowerCase?.()) {
+  switch(vehicleType.toLowerCase()) {
     case 'bike': baseIcon = 'bike'; break;
     case 'bus': baseIcon = 'bus'; break;
     case 'truck': baseIcon = 'truck'; break;
-    case 'hatchback':
-    case 'sedan':
-    case 'suv':
-    case 'van':
-      baseIcon = 'car'; break;
-    default:
-      baseIcon = 'car';
+    default: baseIcon = 'car';
   }
 
   let color;
-  if (status === "offline") {
-    color = 'black';
-  } else if (status === "stopped") {
-    color = 'gray';
-  } else if (status === "idle") {
-    color = 'yellow';
-  } else if (status === "moving") {
-    if (speedInKmh === 0) color = 'yellow';
-    else if (speedInKmh <= 40) color = 'green';
-    else if (speedInKmh <= 60) color = 'blue';
-    else color = 'red';
-  } else {
-    color = 'gray';
-  }
+  if (speedInKmh === 0) color = 'yellow';
+  else if (speedInKmh <= 40) color = 'green';
+  else if (speedInKmh <= 60) color = 'blue';
+  else color = 'red';
 
-  // Optional: override to black if data is old
-  if (date && time && typeof date === 'string' && typeof time === 'string') {
-    const now = new Date();
-    const lastUpdateTime = convertToDate(date, time);
-    const dayDiff = (now - lastUpdateTime) / (1000 * 60 * 60 * 24);
-    if (dayDiff >= 1) color = 'black';
-  }
+  const now = new Date();
+  const lastUpdateTime = convertToDate(date, time);
+  const dayDiff = (now - lastUpdateTime) / (1000 * 60 * 60 * 24);
+  if (dayDiff >= 1) color = 'black';
 
-  return `/static/images/${baseIcon}_${color}.png`; // update if using status in filename
+  return `/static/images/${baseIcon}_${color}.png`; 
 }
 
 function convertToDate(ddmmyyyy, hhmmss) {
