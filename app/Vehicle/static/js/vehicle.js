@@ -678,6 +678,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
+  const isDarkMode = document.body.classList.contains("dark-mode");
   const imei = device.imei || '<span class="missing-data">N/A</span>';
   const LicensePlateNumber =
     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
