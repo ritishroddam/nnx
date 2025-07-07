@@ -558,17 +558,12 @@ input[type="datetime-local"] {
 }
 
 .dark-mode .recent-reports-container {
-    color: #fff;
     box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .recent-reports-header {
     align-items: center;
     margin-bottom: 15px;
-}
-
-.dark-mode .recent-reports-header {
-    color: #fff;
 }
 
 #recentReportsList {
@@ -606,9 +601,15 @@ input[type="datetime-local"] {
 }
 
 .report-meta {
+    display: flex;
     font-size: 0.85em;
-    color: #666;
+    color: black;
+    gap: 10px;
     margin-top: 4px;
+}
+
+.dark-mode .report-meta {
+    color: #ccc;
 }
 
 .report-actions {
@@ -621,9 +622,13 @@ input[type="datetime-local"] {
     background: none;
     border: none;
     cursor: pointer;
-    color: #555;
+    color: black;
     font-size: 1em;
     padding: 4px;
+}
+
+.dark-mode  .report-actions button {
+    color: #ccc;
 }
 
 .report-actions button:hover {
@@ -644,13 +649,6 @@ input[type="datetime-local"] {
 .report-name {
     font-weight: 600;
     margin-bottom: 4px;
-}
-
-.report-meta {
-    display: flex;
-    gap: 10px;
-    font-size: 0.85em;
-    color: #666;
 }
 
 .report-date::after {
