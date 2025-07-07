@@ -38,18 +38,30 @@ h2 {
   z-index: 1;
 }
 
+.dark-mode .toggle-option {
+  color: black;
+}
+
 .toggle-option.active {
-  color: #fff;
+  color: #ccc;
+}
+
+.dark-mode .toggle-option.active{
+  color: black;
 }
 
 .slider-button {
   position: absolute;
   width: 50%;
   height: 100%;
-  background: #4a6baf;
+  background: black;
   border-radius: 25px;
   transition: transform 0.3s ease;
   left: 0;
+}
+
+.dark-mode .slider-button{
+  background: white;
 }
 
 .toggle-slider.subscribe-active .slider-button {
@@ -107,24 +119,6 @@ h2 {
   background-size: 16px;
 }
 
-/* Button styling */
-.btn {
-  background-color: #4a6baf;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  display: inline-block;
-}
-
-.btn:hover {
-  background-color: #3a5a9f;
-}
-
 #downloadAllLogsBtn {
   background-color: #28a745;
 }
@@ -178,10 +172,6 @@ h2 {
 .styled-form button {
   padding: 8px 15px;
   height: 36px;
-}
-
-.fetch-btn{
-  margin-bottom: 50px;
 }
 
 /* Responsive adjustments */
@@ -244,10 +234,36 @@ h2 {
   background-size: 16px;
 }
 
+.btn {
+  background-color: black;
+  color: #ccc;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+
+.dark-mode .btn {
+  background-color: white;
+  color: black;
+}
+
+.btn:hover {
+  background-color: #333;
+}
+
+.dark-mode .btn:hover {
+  background-color: #ccc;
+}
+
 /* Button */
 .fetch-btn {
-  background-color: #4a6baf;
-  color: white;
+  background-color: black;
+  color: #ccc;
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
@@ -255,10 +271,21 @@ h2 {
   cursor: pointer;
   height: 40px;
   min-width: 120px;
+  margin-bottom: 50px;
+  transition: background-color 0.3s;
+}
+
+.dark-mode .fetch-btn {
+  background-color: white;
+  color: black;
 }
 
 .fetch-btn:hover {
-  background-color: #3a5a9f;
+  background-color: #333;
+}
+
+.dark-mode .fetch-btn:hover {
+  background-color: #ccc;
 }
 
 /* Responsive */
