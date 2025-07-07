@@ -484,6 +484,7 @@ def download_custom_report():
 
             report_filename = save_and_return_report(output, data, report_type, vehicle_number)
             
+            output.seek(0)
             return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_filename)
 
         # Single vehicle
@@ -540,6 +541,7 @@ def download_custom_report():
             
             report_filename = save_and_return_report(output, data, report_type, vehicle_number)
             
+            output.seek(0)
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -575,6 +577,7 @@ def download_custom_report():
         
         report_filename = save_and_return_report(output, data, report_type, vehicle_number)
         
+        output.seek(0)
         return send_file(
             output,
             mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -698,6 +701,7 @@ def download_panic_report():
             
             report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
 
+            output.seek(0)
             return send_file(
                 output,
                 mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -793,6 +797,7 @@ def download_panic_report():
         
         report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
         
+        output.seek(0)
         return send_file(
             output,
             mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
