@@ -822,7 +822,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
               </span>
             </div>
             <div class="info-bottom-actions">
-              <span class="material-symbols-outlined info-bottom-action" style="cursor:pointer;" tilte="Share Location">moved_location</span>
+              <span class="material-symbols-outlined info-bottom-action" style="cursor:pointer;" title="Share Location">moved_location</span>
             </div>
           </div>
         </div>
