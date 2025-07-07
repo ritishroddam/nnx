@@ -184,7 +184,7 @@ function renderRecentReports(reports) {
                 </div>
             </div>
             <div class="report-actions">
-                <button class="download-report" data-id="${report._id}">
+                <button class="download-report" data-id="${report._id}" onclick="downloadReport('${report._id}')" title="Download Report">
                     <i class="fas fa-download"></i>
                 </button>
             </div>
