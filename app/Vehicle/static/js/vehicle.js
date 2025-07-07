@@ -939,7 +939,7 @@ function updateMap() {
       device.course != null
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
-      const iconUrl = getVehicleIconByTypeAndSpeed(
+      const iconUrl = getVehicleIconByTypeStatusAndSpeed(
         device.VehicleType,
         device.speed,
         imei,
@@ -1103,9 +1103,9 @@ function convertSpeedToKmh(speedkmh) {
 //   }
 // }
 
-function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
+function getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time) {
   let baseIcon;
-  switch(vehicleType.toLowerCase()) {
+  switch (vehicleType.toLowerCase()) {
     case 'bike':
       baseIcon = 'bike';
       break;
@@ -1123,7 +1123,7 @@ function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
       baseIcon = 'car';
   }
 
-  // Determine color based on speed
+  // Default color based on speed
   let color;
   if (speedInKmh === 0) {
     color = 'yellow';
@@ -1135,17 +1135,34 @@ function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
     color = 'red';
   }
 
-  // ✅ Fix: use passed date and time, not undefined "device"
+  // Override with status-specific coloring
+  switch (status) {
+    case 'offline':
+      color = 'black';
+      break;
+    case 'stopped':
+      color = 'gray';
+      break;
+    case 'idle':
+      color = 'yellow';
+      break;
+    case 'moving':
+      // keep speed-based color
+      break;
+    default:
+      color = 'gray';
+  }
+
+  // Further override if last update > 24 hours
   const now = new Date();
   const lastUpdateTime = convertToDate(date, time);
   const timeDiff = now - lastUpdateTime;
   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-
   if (dayDiff >= 1) {
     color = 'black';
   }
 
-  return `/static/images/${baseIcon}_${color}.png`;
+  return `/static/images/${baseIcon}_${status}_${color}.png`;
 }
 
 function convertToDate(ddmmyyyy, hhmmss) {
@@ -1181,9 +1198,9 @@ function convertToDate(ddmmyyyy, hhmmss) {
 //   return iconUrl;
 // }
 
-function getVehicleIconByTypeAndSpeed(vehicleType, speed, imei, date, time) {
+function getVehicleIconByTypeStatusAndSpeed(vehicleType, status, speed, imei, date, time) {
   const speedInKmh = convertSpeedToKmh(speed);
-  return getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time);
+  return getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time);
 }
 
 function checkForDataTimeout(imei) {
@@ -1223,7 +1240,7 @@ function checkForDataTimeout(imei) {
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
-  const iconUrl = getVehicleIconByTypeAndSpeed(
+  const iconUrl = getVehicleIconByTypeStatusAndSpeed(
     vehicle.VehicleType,
     vehicle.speed,
     imei,
