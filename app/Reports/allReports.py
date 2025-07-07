@@ -1121,7 +1121,7 @@ def get_recent_reports():
         
         reports = list(db['generated_reports'].find(
             query,
-            {'_id': 1, 'report_name': 1, 'generated_at': 1, 'vehicle_number': 1}
+            {'_id': 1, 'report_name': 1, 'generated_at': 1, 'vehicle_number': 1, 'size': 1}
         ).sort('generated_at', -1).limit(50))
         
         return jsonify({
@@ -1130,6 +1130,7 @@ def get_recent_reports():
                 '_id': str(report['_id']),
                 'report_name': report['report_name'],
                 'generated_at': report['generated_at'].isoformat(),
+                'size': report.get('size', 0),  # Size in bytes
                 'vehicle_number': report.get('vehicle_number', '')
             } for report in reports]
         })
@@ -1151,7 +1152,6 @@ def download_report(report_id):
 
         # Construct the full path for the file in DigitalOcean Spaces
         file_path = report['path']  # e.g., "reports/superadmin/stoppage_report_KA72CC1586_07-Jul-2025 02:15:09 PM.xlsx"
-        full_url = f"{ENDPOINT}/{file_path}"
 
         # Download the file from DigitalOcean Spaces
         output = BytesIO()

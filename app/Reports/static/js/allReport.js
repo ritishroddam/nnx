@@ -184,7 +184,7 @@ function renderRecentReports(reports) {
                 </div>
             </div>
             <div class="report-actions">
-                <button class="download-report" data-id="${report._id}">
+                <button class="download-report" data-id="${report._id}" onclick="downloadReport('${report._id}')" title="Download Report">
                     <i class="fas fa-download"></i>
                 </button>
             </div>
@@ -216,10 +216,37 @@ function viewReport(reportId) {
 }
 
 function downloadReport(reportId) {
-    const report = generatedReports.find(r => r._id === reportId);
-    if (!report) return;
-    
-    window.location.href = `/reports/download_report/${reportId}`;
+    fetch(`/reports/download_report/${reportId}`, {
+        method: "GET",
+        headers: {
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+    })
+        .then((response) => {
+            if (!response.ok) {
+                // If the response is not OK, parse the error message
+                return response.json().then((errorData) => {
+                    throw new Error(errorData.message || "Failed to download the report.");
+                });
+            }
+            return response.blob();
+        })
+        .then((blob) => {
+            // Create a download link for the file
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `report_${reportId}.xlsx`; // Default filename
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch((error) => {
+            // Display the error message using displayFlashMessage
+            console.error("Error downloading report:", error);
+            displayFlashMessage(error.message || "An unexpected error occurred while downloading the report.", "danger");
+        });
 }
 
   const vehicleSelect = document.getElementById("vehicleNumber");
