@@ -612,14 +612,13 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     const iconRow = `
       <span
-      class="material-symbols-outlined"
-      style="${iconStyle}"
-      onclick="vehicleInfoPage('${
-        vehicle.LicensePlateNumber
-      }')">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}">${ignitionIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}">${gsmIcon}</span>
-      ${sosIcon || ""}
+        class="material-symbols-outlined"
+        style="${iconStyle}"
+        title="View Vehicle Info"
+        onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">arrow_forward</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="Ignition Status">${ignitionIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal">${gsmIcon}</span>
+      ${sosIcon ? `<span class="material-symbols-outlined" style="${iconStyle}" title="SOS Alert">${sosIcon}</span>` : ""}
     `;
 
     vehicleElement.innerHTML = `
@@ -772,11 +771,11 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const headerContent = document.createElement("div");
   headerContent.innerHTML = `
       <div class="info-header">
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
-        <span class="info-plate">${LicensePlateNumber}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;" title="GPS Status">${gpsIcon}</span>
+    <span class="info-plate">${LicensePlateNumber}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;" title="Direction">${arrowIcon}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;" title="Ignition Status">${ignitionIcon}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};" title="GSM Signal">${gsmIcon}</span>
       </div>
   `;
 
