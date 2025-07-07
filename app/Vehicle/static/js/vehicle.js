@@ -940,12 +940,12 @@ function updateMap() {
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
       const iconUrl = getVehicleIconByTypeStatusAndSpeed(
-        vehicle.VehicleType,
-        vehicle.status,
-        vehicle.speed,
-        imei,
-        vehicle.date,
-        vehicle.time
+      device.VehicleType,    
+      device.status,
+      device.speed,
+      imei,
+      device.date,
+      device.time
       );
 
       const rotation = device.course;
