@@ -926,6 +926,24 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
+const iconSizeMap = {
+  car:     [25, 50],
+  bus:     [28, 60],
+  truck:   [26, 60],
+  bike:    [18, 45]
+};
+
+function getIconForVehicle(vehicleType, iconUrl) {
+  const type = vehicleType?.toLowerCase() || 'car';
+  const iconSize = iconSizeMap[type] || [25, 50]; 
+  return L.icon({
+    iconUrl,
+    iconSize,
+    iconAnchor: [iconSize[0] / 2, iconSize[1]], 
+    popupAnchor: [0, -iconSize[1]]
+  });
+}
+
 function updateMap() {
   const bounds = new google.maps.LatLngBounds();
   dataAvailable = true;
@@ -947,6 +965,15 @@ function updateMap() {
       device.date,
       device.time
       );
+
+      const zoom = map.getZoom();
+      const icon = getScaledIcon(device.VehicleType, iconUrl, zoom);
+      const marker = L.marker(latLng, {
+        icon,
+        rotationAngle: device.course,
+      });
+
+      marker.addTo(map);
 
       const rotation = device.course;
 
