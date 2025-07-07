@@ -1128,13 +1128,25 @@ function filterVehicles() {
   renderVehicleCards(filteredVehicles, filterValue);
 }
 
+// function parseCoordinates(lat, lng) {
+//   if (isNaN(lat) || isNaN(lng)) {
+//     console.error("Invalid coordinates:", lat, lng);
+//     return new google.maps.LatLng(0, 0); 
+//   }
+
+//   return new google.maps.LatLng(lat, lng);
+// }
+
 function parseCoordinates(lat, lng) {
-  if (isNaN(lat) || isNaN(lng)) {
+  const parsedLat = parseFloat(lat);
+  const parsedLng = parseFloat(lng);
+
+  if (isNaN(parsedLat) || isNaN(parsedLng)) {
     console.error("Invalid coordinates:", lat, lng);
     return new google.maps.LatLng(0, 0); 
   }
 
-  return new google.maps.LatLng(lat, lng);
+  return new google.maps.LatLng(parsedLat, parsedLng);
 }
 
 function convertSpeedToKmh(speedkmh) {
