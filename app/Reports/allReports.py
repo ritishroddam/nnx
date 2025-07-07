@@ -104,7 +104,7 @@ report_configs = {
 def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     # Generate unique filename
-    timestamp = datetime.now().strftime('%d%m%Y')
+    timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
     report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.xlsx"
     remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
     print(f"[DEBUG] Generated report filename: {report_filename}")
