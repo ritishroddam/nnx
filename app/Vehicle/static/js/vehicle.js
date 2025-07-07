@@ -933,6 +933,27 @@ const iconSizeMap = {
   bike:    [18, 45]
 };
 
+function getScaledIcon(vehicleType, iconUrl, zoom) {
+  const baseSizes = {
+    car: [25, 50],
+    bus: [28, 60],
+    truck: [26, 60],
+    bike: [18, 45],
+  };
+
+  const base = baseSizes[vehicleType?.toLowerCase()] || [25, 50];
+  const scaleFactor = Math.min(Math.max((zoom - 10) / 6, 0.6), 1.2); // between 60% and 120%
+
+  const iconSize = [base[0] * scaleFactor, base[1] * scaleFactor];
+
+  return L.icon({
+    iconUrl,
+    iconSize,
+    iconAnchor: [iconSize[0] / 2, iconSize[1]],
+    popupAnchor: [0, -iconSize[1]],
+  });
+}
+
 function getIconForVehicle(vehicleType, iconUrl) {
   const type = vehicleType?.toLowerCase() || 'car';
   const iconSize = iconSizeMap[type] || [25, 50]; 
