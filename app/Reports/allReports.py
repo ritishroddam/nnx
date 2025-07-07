@@ -103,6 +103,10 @@ report_configs = {
 
 def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
+    
+    # Create a copy of the buffer content before uploading
+    buffer_content = output.getvalue()
+    
     # Generate unique filename
     timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
     report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.xlsx"
@@ -110,7 +114,10 @@ def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
 
-    s3.upload_fileobj(output, SPACE_NAME, remote_path)
+    # Create a new BytesIO object for S3 upload
+    upload_buffer = BytesIO(buffer_content)
+    s3.upload_fileobj(upload_buffer, SPACE_NAME, remote_path)
+    upload_buffer.close()
 
     # Save metadata to MongoDB
     report_metadata = {
@@ -118,7 +125,7 @@ def save_and_return_report(output, data, report_type, vehicle_number):
         'report_name': data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report',
         'filename': report_filename,
         'path': remote_path,
-        'size': output.getbuffer().nbytes,
+        'size': len(buffer_content),
         'generated_at': datetime.now(pytz.UTC),
         'vehicle_number': vehicle_number,
         'report_type': report_type
@@ -494,7 +501,7 @@ def download_custom_report():
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")  # ensure it's flushed
             output.seek(0)
-            
+
             report_filename = save_and_return_report(output, data, report_type, vehicle_number)
             output.seek(0)
             return send_file(
@@ -589,7 +596,7 @@ def download_custom_report():
 
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name=config['sheet_name'])  # ensure it's flushed
+            df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
         output.seek(0)
 
         report_filename = save_and_return_report(output, data, report_type, vehicle_number)
