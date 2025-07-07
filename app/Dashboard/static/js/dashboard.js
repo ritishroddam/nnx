@@ -1119,6 +1119,7 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
     rows.forEach(row => {
         const cells = row.cells;
         
+        // Process status icons cell
         const statusCell = cells[cells.length - 1];
         if (statusCell.classList.contains('status-icons')) {
             const sos = statusCell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
@@ -1144,27 +1145,29 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
             statusCell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
         }
         
+        // Process last updated cell (index 2)
         const lastUpdatedCell = cells[2]; 
-        if (lastUpdatedCell.textContent.includes('N/A')) {
-        } else {
-            const dateTime = new Date(lastUpdatedCell.textContent);
-            if (!isNaN(dateTime.getTime())) {
-                lastUpdatedCell.textContent = dateTime.toISOString(); 
-            }
+        if (!lastUpdatedCell.textContent.includes('N/A')) {
+            // Parse the displayed date/time string directly instead of creating new Date
+            const dateTimeStr = lastUpdatedCell.textContent;
+            lastUpdatedCell.textContent = dateTimeStr; // Keep the original format
         }
     });
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.table_to_sheet(tableClone);
     
+    // Format the date/time column in Excel
     if (ws['!ref']) {
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let R = range.s.r; R <= range.e.r; ++R) {
-            const cellAddress = {c: 2, r: R}; 
+            const cellAddress = {c: 2, r: R}; // Column 2 is the last updated column
             const cellRef = XLSX.utils.encode_cell(cellAddress);
             if (ws[cellRef] && ws[cellRef].t === 's') {
+                // Try to parse the date string
                 const dateValue = new Date(ws[cellRef].v);
                 if (!isNaN(dateValue.getTime())) {
+                    // Set as date type with custom format
                     ws[cellRef].t = 'n';
                     ws[cellRef].v = dateValue;
                     ws[cellRef].z = 'yyyy-mm-dd hh:mm:ss';
