@@ -1,9 +1,4 @@
-h1 {
-  color: #333;
-}
-
 h2 {
-  color: #444;
   margin-bottom: 15px;
   font-size: 1.5em;
 }
@@ -78,11 +73,14 @@ h2 {
 /* View container styling */
 .view-container {
   display: none;
-  background: white;
   padding: 25px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+}
+
+.dark-mode .view-container{
+  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .view-container.active {
@@ -118,6 +116,18 @@ h2 {
   border-radius: 4px;
 }
 
+.dark-mode .styled-form select,
+.dark-mode .styled-form input[type="datetime-local"] {
+  background-color: #444;
+  color: #ccc;
+  border-color: #555;
+}
+
+.dark-mode .selectize-input {
+  background-color: #444;
+  color: #ccc;
+}
+
 .styled-form select {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -151,12 +161,10 @@ h2 {
 
 .log-item h3 {
   margin: 0 0 10px 0;
-  color: #333;
 }
 
 .log-item p {
   margin: 5px 0;
-  color: #666;
 }
 
 /* Subscribe view specific styling */
@@ -213,7 +221,6 @@ h2 {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  color: #333;
 }
 
 /* Inputs and Select */
