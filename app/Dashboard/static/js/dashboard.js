@@ -167,7 +167,6 @@ function formatLastUpdatedText(date, time) {
     }
 }
 
-// Enhanced renderStatusPopupTable function
 function renderStatusPopupTable(data) {
     const tableBody = document.getElementById('statusPopupTableBody');
     tableBody.innerHTML = '';
@@ -243,22 +242,24 @@ function renderStatusPopupTable(data) {
         }
         
         row.innerHTML = `
-            <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
-            <td>${vehicle.VehicleType || 'N/A'}</td>
-            <td>${vehicle.last_updated || 'N/A'}</td>
-            <td>${vehicle.location || 'Location unknown'}</td>
-            <td class="${speedCellClass}">${speed} km/h</td>
-            <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
-            <td>${vehicle.odometer || 'N/A'}</td>
-            <td>
-                <div class="vehicle-table-icons">
-                    ${sosIcon}
-                    <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-                    <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
-                    <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
-                </div>
-            </td>
-        `;
+          <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
+          <td>${vehicle.VehicleType || 'N/A'}</td>
+          <td>${vehicle.last_updated || 'N/A'}</td>
+          <td>${vehicle.location || 'Location unknown'}</td>
+          <td class="${speedCellClass}">${speed} km/h</td>
+          <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
+          <td>${vehicle.odometer || 'N/A'}</td>
+          <td class="status-icons" 
+              data-sos="${vehicle.sos === '1'}" 
+              data-gps="${vehicle.gps === '1' || vehicle.gps === true}" 
+              data-ignition="${vehicle.ignition === '1'}" 
+              data-gsm="${vehicle.gsm || '0'}">
+              ${sosIcon}
+              <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+              <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
+              <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+          </td>
+      `;
         
         tableBody.appendChild(row);
     });
@@ -1079,70 +1080,45 @@ document.getElementById('disconnected-vehicles').addEventListener('click', () =>
     showStatusPopup('disconnected', 'Disconnected Vehicles');
 });
 
-// Enhanced download functionality
+// Replace the existing Excel download event listener with this:
 document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
     const table = document.querySelector("#statusPopup table");
     if (!table) return;
     
+    // Clone the table to avoid modifying the original
+    const tableClone = table.cloneNode(true);
+    
+    // Convert icons to text in the cloned table
+    const statusCells = tableClone.querySelectorAll('td.status-icons');
+    statusCells.forEach(cell => {
+        const sos = cell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
+        const gps = cell.getAttribute('data-gps') === 'true' ? 'GPS: Good' : 'GPS: Bad';
+        const ignition = cell.getAttribute('data-ignition') === 'true' ? 'Ignition: On' : 'Ignition: Off';
+        
+        // Convert GSM signal to text
+        const gsmValue = parseInt(cell.getAttribute('data-gsm'));
+        let gsmStatus = 'Signal: ';
+        if (gsmValue == 0) {
+            gsmStatus += 'None';
+        } else if (gsmValue > 0 && gsmValue <= 8) {
+            gsmStatus += 'Weak';
+        } else if (gsmValue > 8 && gsmValue <= 16) {
+            gsmStatus += 'Fair';
+        } else if (gsmValue > 16 && gsmValue <= 24) {
+            gsmStatus += 'Good';
+        } else if (gsmValue > 24 && gsmValue <= 32) {
+            gsmStatus += 'Excellent';
+        } else {
+            gsmStatus += 'Unknown';
+        }
+        
+        cell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
+    });
+    
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.table_to_sheet(table);
+    const ws = XLSX.utils.table_to_sheet(tableClone);
     XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
     
     const title = document.getElementById('statusPopupTitle').textContent;
     XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
-});
-
-// Add this at the top of your file
-const { jsPDF } = window.jspdf;
-
-// Replace your existing PDF generation code with this:
-document.getElementById('statusPopupPdfBtn').addEventListener('click', async function() {
-    const title = document.getElementById('statusPopupTitle').textContent;
-    const table = document.querySelector("#statusPopup .table-container");
-    
-    if (!table) {
-        alert('No table found for PDF generation');
-        return;
-    }
-    
-    // Show loading state
-    const originalContent = table.innerHTML;
-    table.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-            Generating PDF... Please wait
-        </div>
-    `;
-    
-    try {
-        // Check if libraries are available
-        if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
-            throw new Error('PDF generation libraries not loaded');
-        }
-        
-        // Create PDF
-        const pdf = new jsPDF('p', 'pt', 'a4');
-        
-        // Generate canvas from table
-        const canvas = await html2canvas(table, {
-            scale: 2,
-            logging: false,
-            useCORS: true,
-            allowTaint: true
-        });
-        
-        // Add image to PDF
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = pdf.internal.pageSize.getWidth() - 40;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
-        pdf.save(`${title.replace(/\s+/g, '_')}.pdf`);
-        
-    } catch (error) {
-        console.error('PDF generation error:', error);
-        alert(`Failed to generate PDF: ${error.message}`);
-    } finally {
-        // Restore original content
-        table.innerHTML = originalContent;
-    }
 });
