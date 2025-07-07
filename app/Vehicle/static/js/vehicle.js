@@ -1103,8 +1103,7 @@ function convertSpeedToKmh(speedkmh) {
 //   }
 // }
 
-function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh) {
-  // Determine base icon based on vehicle type
+function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
   let baseIcon;
   switch(vehicleType.toLowerCase()) {
     case 'bike':
@@ -1136,9 +1135,9 @@ function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh) {
     color = 'red';
   }
 
-  // Check if offline (more than 24 hours)
+  // ✅ Fix: use passed date and time, not undefined "device"
   const now = new Date();
-  const lastUpdateTime = convertToDate(device.date, device.time);
+  const lastUpdateTime = convertToDate(date, time);
   const timeDiff = now - lastUpdateTime;
   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
 
@@ -1184,7 +1183,7 @@ function convertToDate(ddmmyyyy, hhmmss) {
 
 function getVehicleIconByTypeAndSpeed(vehicleType, speed, imei, date, time) {
   const speedInKmh = convertSpeedToKmh(speed);
-  return getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh);
+  return getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time);
 }
 
 function checkForDataTimeout(imei) {
