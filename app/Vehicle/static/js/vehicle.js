@@ -939,7 +939,8 @@ function updateMap() {
       device.course != null
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
-      const iconUrl = getCarIconBySpeed(
+      const iconUrl = getVehicleIconByTypeStatusAndSpeed(
+        device.VehicleType,
         device.speed,
         imei,
         device.date,
@@ -1090,16 +1091,78 @@ function convertSpeedToKmh(speedkmh) {
   return parseFloat(speedkmh);
 }
 
-function getCarIconUrlBySpeed(speedInKmh) {
-  if (speedInKmh === 0) {
-    return "/static/images/car_yellow.png";
-  } else if (speedInKmh > 0 && speedInKmh <= 40) {
-    return "/static/images/car_green.png";
-  } else if (speedInKmh > 40 && speedInKmh <= 60) {
-    return "/static/images/car_blue.png";
-  } else {
-    return "/static/images/car_red.png";
+// function getCarIconUrlBySpeed(speedInKmh) {
+//   if (speedInKmh === 0) {
+//     return "/static/images/car_yellow.png";
+//   } else if (speedInKmh > 0 && speedInKmh <= 40) {
+//     return "/static/images/car_green.png";
+//   } else if (speedInKmh > 40 && speedInKmh <= 60) {
+//     return "/static/images/car_blue.png";
+//   } else {
+//     return "/static/images/car_red.png";
+//   }
+// }
+
+function getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time) {
+  let baseIcon;
+  switch (vehicleType.toLowerCase()) {
+    case 'bike':
+      baseIcon = 'bike';
+      break;
+    case 'bus':
+      baseIcon = 'bus';
+      break;
+    case 'truck':
+      baseIcon = 'truck';
+      break;
+    case 'hatchback':
+    case 'sedan':
+    case 'suv':
+    case 'van':
+    default:
+      baseIcon = 'car';
   }
+
+  // Default color based on speed
+  let color;
+  if (speedInKmh === 0) {
+    color = 'yellow';
+  } else if (speedInKmh > 0 && speedInKmh <= 40) {
+    color = 'green';
+  } else if (speedInKmh > 40 && speedInKmh <= 60) {
+    color = 'blue';
+  } else {
+    color = 'red';
+  }
+
+  // Override with status-specific coloring
+  switch (status) {
+    case 'offline':
+      color = 'black';
+      break;
+    case 'stopped':
+      color = 'gray';
+      break;
+    case 'idle':
+      color = 'yellow';
+      break;
+    case 'moving':
+      // keep speed-based color
+      break;
+    default:
+      color = 'gray';
+  }
+
+  // Further override if last update > 24 hours
+  const now = new Date();
+  const lastUpdateTime = convertToDate(date, time);
+  const timeDiff = now - lastUpdateTime;
+  const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+  if (dayDiff >= 1) {
+    color = 'black';
+  }
+
+  return `/static/images/${baseIcon}_${status}_${color}.png`;
 }
 
 function convertToDate(ddmmyyyy, hhmmss) {
@@ -1118,21 +1181,26 @@ function convertToDate(ddmmyyyy, hhmmss) {
   return dateObj;
 }
 
-function getCarIconBySpeed(speed, imei, date, time) {
+// function getCarIconBySpeed(speed, imei, date, time) {
+//   const speedInKmh = convertSpeedToKmh(speed);
+//   let iconUrl = getCarIconUrlBySpeed(speedInKmh);
+
+//   const now = new Date();
+//   const lastUpdateTime = convertToDate(date, time);
+
+//   const timeDiff = now - lastUpdateTime;
+//   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+//   if (dayDiff >= 1) {
+//     iconUrl = "/static/images/car_black.png";
+//   }
+
+//   return iconUrl;
+// }
+
+function getVehicleIconByTypeStatusAndSpeed(vehicleType, status, speed, imei, date, time) {
   const speedInKmh = convertSpeedToKmh(speed);
-  let iconUrl = getCarIconUrlBySpeed(speedInKmh);
-
-  const now = new Date();
-  const lastUpdateTime = convertToDate(date, time);
-
-  const timeDiff = now - lastUpdateTime;
-  const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-
-  if (dayDiff >= 1) {
-    iconUrl = "/static/images/car_black.png";
-  }
-
-  return iconUrl;
+  return getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time);
 }
 
 function checkForDataTimeout(imei) {
@@ -1172,7 +1240,8 @@ function checkForDataTimeout(imei) {
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
-  const iconUrl = getCarIconBySpeed(
+  const iconUrl = getVehicleIconByTypeStatusAndSpeed(
+    vehicle.VehicleType,
     vehicle.speed,
     imei,
     vehicle.date,
@@ -1218,14 +1287,12 @@ function removeSOS(imei) {
     marker.content.classList.remove("vehicle-blink");
   }
 
-  // Update the vehicle data to clear SOS
   const vehicle = vehicleData.get(imei);
   if (vehicle) {
     vehicle.sos = "0";
     vehicleData.set(imei, vehicle);
   }
 
-  // Re-render cards to update positions
   const vehiclesArray = Array.from(vehicleData.values());
   renderVehicleCards(vehiclesArray);
 }
@@ -1395,7 +1462,6 @@ async function populateVehicleTable() {
       vehicle.date,
       vehicle.time
     );
-
     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
     row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
     row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
