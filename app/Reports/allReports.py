@@ -491,15 +491,18 @@ def download_custom_report():
             final_df = pd.concat(all_dfs, ignore_index=True)
 
             output = BytesIO()
-            writer = pd.ExcelWriter(output, engine='openpyxl')
-            final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
-            writer.save()
-
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")  # ensure it's flushed
             output.seek(0)
+            
             report_filename = save_and_return_report(output, data, report_type, vehicle_number)
-
             output.seek(0)
-            return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_filename)
+            return send_file(
+                output,
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                as_attachment=True,
+                download_name=report_filename
+            )
 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
@@ -550,21 +553,18 @@ def download_custom_report():
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
             output = BytesIO()
-            writer = pd.ExcelWriter(output, engine='openpyxl')
-            df.to_excel(writer, index=False, sheet_name = custom_report_name)
-            writer.save()
-            
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name=custom_report_name)  # ensure it's flushed
             output.seek(0)
-            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
 
+            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
             output.seek(0)
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                as_attachment = True,
-                download_name = report_filename
+                as_attachment=True,
+                download_name=report_filename
             )
-
         # Standard reports for single vehicle
         if report_type not in report_configs:
             return jsonify({"success": False, "message": "Invalid report type", "category": "danger"}), 400
@@ -588,19 +588,17 @@ def download_custom_report():
             return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
 
         output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='openpyxl')
-        df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
-        writer.save()
-            
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name=config['sheet_name'])  # ensure it's flushed
         output.seek(0)
-        report_filename = save_and_return_report(output, data, report_type, vehicle_number)
 
+        report_filename = save_and_return_report(output, data, report_type, vehicle_number)
         output.seek(0)
         return send_file(
             output,
-            mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment = True,
-            download_name = report_filename
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=report_filename
         )
 
     except Exception as e:
@@ -715,19 +713,17 @@ def download_panic_report():
             final_df = pd.concat(all_dfs, ignore_index=True)
             
             output = BytesIO()
-            writer = pd.ExcelWriter(output, engine='openpyxl')
-            final_df.to_excel(writer, index=False, sheet_name="Panic Report")
-            writer.save()
-                
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                final_df.to_excel(writer, index=False, sheet_name="Panic Report")  # ensure it's flushed
             output.seek(0)
-            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
 
+            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
             output.seek(0)
             return send_file(
                 output,
-                mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                as_attachment = True,
-                download_name = report_filename
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                as_attachment=True,
+                download_name=report_filename
             )
             
         vehicle = db['vehicle_inventory'].find_one(
@@ -811,19 +807,17 @@ def download_panic_report():
 
         # Generate Excel
         output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='openpyxl')
-        df.to_excel(writer, index=False, sheet_name="Panic Report")
-        writer.save()
-            
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name="Panic Report")  # ensure it's flushed
         output.seek(0)
-        report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
 
+        report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
         output.seek(0)
         return send_file(
             output,
-            mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment = True,
-            download_name = report_filename
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=report_filename
         )
 
     except Exception as e:
