@@ -7,7 +7,6 @@ async function fetchFilteredVehicleData(status) {
         const response = await fetch(`/dashboard/get_vehicle_range_data?range=${currentRange}`);
         const data = await response.json();
         
-        // Filter data based on status
         const filteredData = data.filter(vehicle => {
             switch(status) {
                 case 'running':
@@ -25,8 +24,7 @@ async function fetchFilteredVehicleData(status) {
                 case 'overspeed':
                     return parseFloat(vehicle.max_speed) >= 60;
                 case 'offline':
-                    // You'll need to modify your backend to support this filter
-                    return false; // Placeholder - implement based on your data
+                    return false; 
                 default:
                     return true;
             }
@@ -56,52 +54,10 @@ function formatStatusTime(seconds) {
     }
 }
 
-// async function showStatusPopup(status, title) {
-//     currentStatusFilter = status;
-//     document.getElementById('statusPopupTitle').textContent = title;
-
-//     document.getElementById('statusPopupTableBody').innerHTML = `
-//         <tr>
-//             <td colspan="8" style="text-align: center; padding: 20px;">
-//                 Loading data...
-//             </td>
-//         </tr>
-//     `;
-
-//     document.getElementById('statusPopupOverlay').classList.add('active');
-//     document.getElementById('statusPopup').classList.add('active');
-
-//     try {
-//         const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
-        
-//         if (!response.ok) {
-//             throw new Error(`Server returned ${response.status}`);
-//         }
-
-//         const data = await response.json();
-        
-//         // Ensure data is always an array
-//         const filteredData = Array.isArray(data) ? data : [];
-//         statusPopupTableData = filteredData;
-//         renderStatusPopupTable(filteredData);
-        
-//     } catch (error) {
-//         console.error("Error fetching vehicle data:", error);
-//         document.getElementById('statusPopupTableBody').innerHTML = `
-//             <tr>
-//                 <td colspan="8" style="text-align: center; padding: 20px; color: red;">
-//                     ${error.message || 'Error loading data'}
-//                 </td>
-//             </tr>
-//         `;
-//     }
-// }
-
 async function showStatusPopup(status, title) {
     currentStatusFilter = status;
     document.getElementById('statusPopupTitle').textContent = title;
 
-    // Show loading state
     document.getElementById('statusPopupTableBody').innerHTML = `
         <tr>
             <td colspan="8" style="text-align: center; padding: 20px;">
@@ -124,7 +80,6 @@ async function showStatusPopup(status, title) {
         const filteredData = Array.isArray(data) ? data : [];
         statusPopupTableData = filteredData;
         
-        // Verify counts match status cards
         if (window.statusCounts) {
             const expectedCount = window.statusCounts[`${status}Vehicles`];
             if (filteredData.length !== expectedCount) {
@@ -330,69 +285,6 @@ function applySortIcons(column, direction, selector = '.vehicleLiveTable table')
         }
     });
 }
-
-// function applySortIcons(column, direction) {
-//   document.querySelectorAll(".vehicleLiveTable th").forEach((th) => {
-//     const icon = th.querySelector(".sort-icon");
-//     if (!icon) return;
-//     if (th.dataset.column === column) {
-//       icon.textContent = direction === "asc" ? "↑" : "↓";
-//       th.classList.add("sorted");
-//     } else {
-//       icon.textContent = "";
-//       th.classList.remove("sorted");
-//     }
-//   });
-// }
-
-// function sortTable(column, direction) {
-//   const table = document.querySelector(".vehicleLiveTable table");
-//   const tbody = table.querySelector("tbody");
-//   const rows = Array.from(tbody.querySelectorAll("tr"));
-//   const columnIndex = Array.from(table.querySelectorAll("th")).findIndex(
-//     (th) => th.dataset.column === column
-//   );
-
-//   rows.sort((a, b) => {
-//     let cellA = a.children[columnIndex].innerText.trim();
-//     let cellB = b.children[columnIndex].innerText.trim();
-
-//     if (column === "max_avg_speed") {
-//       cellA = parseFloat(cellA.split("/")[0]) || 0;
-//       cellB = parseFloat(cellB.split("/")[0]) || 0;
-//     } else if (!isNaN(cellA) && !isNaN(cellB)) {
-//       cellA = parseFloat(cellA);
-//       cellB = parseFloat(cellB);
-//     } else {
-//       cellA = cellA.toLowerCase();
-//       cellB = cellB.toLowerCase();
-//     }
-
-//     if (cellA < cellB) return direction === "asc" ? -1 : 1;
-//     if (cellA > cellB) return direction === "asc" ? 1 : -1;
-//     return 0;
-//   });
-
-//   tbody.innerHTML = "";
-//   rows.forEach((row) => tbody.appendChild(row));
-//   applySortIcons(column, direction);
-// }
-
-// function setupTableSorting() {
-//   const table = document.querySelector(".vehicleLiveTable table");
-//   table.querySelectorAll("th").forEach((header) => {
-//     header.addEventListener("click", () => {
-//       const column = header.dataset.column;
-//       if (!column) return;
-//       const direction =
-//         currentSort.column === column && currentSort.direction === "asc"
-//           ? "desc"
-//           : "asc";
-//       sortTable(column, direction);
-//       currentSort = { column, direction };
-//     });
-//   });
-// }
 
 function afterTableRender() {
   setupTableSorting();
@@ -936,38 +828,8 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchStatusData();
 });
 
-// function fetchStatusData() {
-//   fetch("/dashboard/get_status_data")
-//     .then((response) => response.json())
-//     .then((data) => {
-//       document.getElementById(
-//         "running-vehicles-count"
-//       ).textContent = `${data.runningVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "idle-vehicles-count"
-//       ).textContent = `${data.idleVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "parked-vehicles-count"
-//       ).textContent = `${data.parkedVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "speed-vehicles-count"
-//       ).textContent = `${data.speedVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "overspeed-vehicles-count"
-//       ).textContent = `${data.overspeedVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "offline-vehicles-count"
-//       ).textContent = `${data.offlineVehicles} / ${data.totalVehicles}`;
-//       document.getElementById(
-//         "disconnected-vehicles-count"
-//       ).textContent = `${data.disconnectedVehicles} / ${data.totalVehicles}`;
-//     })
-//     .catch((error) => console.error("Error fetching status data:", error));
-// }
-
 async function fetchStatusData() {
     try {
-        // Show loading state if needed (optional)
         const statusCards = document.querySelectorAll('.status-card');
         statusCards.forEach(card => {
             card.classList.add('loading');
@@ -976,7 +838,6 @@ async function fetchStatusData() {
         const response = await fetch("/dashboard/get_status_data");
         const data = await response.json();
 
-        // Update all status cards
         document.getElementById("running-vehicles-count").textContent = 
             `${data.runningVehicles} / ${data.totalVehicles}`;
         document.getElementById("idle-vehicles-count").textContent = 
@@ -1070,45 +931,6 @@ document.getElementById('disconnected-vehicles').addEventListener('click', () =>
     showStatusPopup('disconnected', 'Disconnected Vehicles');
 });
 
-// document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
-//     const table = document.querySelector("#statusPopup table");
-//     if (!table) return;
-    
-//     const tableClone = table.cloneNode(true);
-    
-//     const statusCells = tableClone.querySelectorAll('td.status-icons');
-//     statusCells.forEach(cell => {
-//         const sos = cell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
-//         const gps = cell.getAttribute('data-gps') === 'true' ? 'GPS: Good' : 'GPS: Bad';
-//         const ignition = cell.getAttribute('data-ignition') === 'true' ? 'Ignition: On' : 'Ignition: Off';
-        
-//         const gsmValue = parseInt(cell.getAttribute('data-gsm'));
-//         let gsmStatus = 'Signal: ';
-//         if (gsmValue == 0) {
-//             gsmStatus += 'None';
-//         } else if (gsmValue > 0 && gsmValue <= 8) {
-//             gsmStatus += 'Weak';
-//         } else if (gsmValue > 8 && gsmValue <= 16) {
-//             gsmStatus += 'Fair';
-//         } else if (gsmValue > 16 && gsmValue <= 24) {
-//             gsmStatus += 'Good';
-//         } else if (gsmValue > 24 && gsmValue <= 32) {
-//             gsmStatus += 'Excellent';
-//         } else {
-//             gsmStatus += 'Unknown';
-//         }
-        
-//         cell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
-//     });
-    
-//     const wb = XLSX.utils.book_new();
-//     const ws = XLSX.utils.table_to_sheet(tableClone);
-//     XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
-    
-//     const title = document.getElementById('statusPopupTitle').textContent;
-//     XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
-// });
-
 document.getElementById('statusPopupExcelBtn').addEventListener('click', function() {
     const table = document.querySelector("#statusPopup table");
     if (!table) return;
@@ -1119,7 +941,6 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
     rows.forEach(row => {
         const cells = row.cells;
         
-        // Process status icons cell
         const statusCell = cells[cells.length - 1];
         if (statusCell.classList.contains('status-icons')) {
             const sos = statusCell.getAttribute('data-sos') === 'true' ? 'SOS: Active' : '';
@@ -1145,29 +966,25 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
             statusCell.textContent = [sos, gps, ignition, gsmStatus].filter(Boolean).join(', ');
         }
         
-        // Process last updated cell (index 2)
         const lastUpdatedCell = cells[2]; 
         if (!lastUpdatedCell.textContent.includes('N/A')) {
-            // Parse the displayed date/time string directly instead of creating new Date
             const dateTimeStr = lastUpdatedCell.textContent;
-            lastUpdatedCell.textContent = dateTimeStr; // Keep the original format
+            lastUpdatedCell.textContent = dateTimeStr;
         }
     });
     
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.table_to_sheet(tableClone);
     
-    // Format the date/time column in Excel
     if (ws['!ref']) {
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let R = range.s.r; R <= range.e.r; ++R) {
-            const cellAddress = {c: 2, r: R}; // Column 2 is the last updated column
+            const cellAddress = {c: 2, r: R}; 
             const cellRef = XLSX.utils.encode_cell(cellAddress);
             if (ws[cellRef] && ws[cellRef].t === 's') {
                 // Try to parse the date string
                 const dateValue = new Date(ws[cellRef].v);
                 if (!isNaN(dateValue.getTime())) {
-                    // Set as date type with custom format
                     ws[cellRef].t = 'n';
                     ws[cellRef].v = dateValue;
                     ws[cellRef].z = 'yyyy-mm-dd hh:mm:ss';
