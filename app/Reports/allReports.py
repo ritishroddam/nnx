@@ -11,6 +11,7 @@ from io import BytesIO
 from collections import OrderedDict
 import boto3
 from botocore.client import Config
+from bson import ObjectId
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
@@ -1118,14 +1119,9 @@ def get_recent_reports():
         if date_range == 'yesterday':
             query['generated_at']['$lt'] = end_date
         
-        db['generated_reports'].delete_many({
-            'user_id': user_id,
-            'generated_at': {'$lt': now - timedelta(days=30)}
-        })
-        
         reports = list(db['generated_reports'].find(
             query,
-            {'_id': 1, 'report_name': 1, 'generated_at': 1, 'file_path': 1, 'vehicle_number': 1}
+            {'_id': 1, 'report_name': 1, 'generated_at': 1, 'vehicle_number': 1}
         ).sort('generated_at', -1).limit(50))
         
         return jsonify({
@@ -1134,29 +1130,40 @@ def get_recent_reports():
                 '_id': str(report['_id']),
                 'report_name': report['report_name'],
                 'generated_at': report['generated_at'].isoformat(),
-                'file_path': report.get('file_path', ''),
                 'vehicle_number': report.get('vehicle_number', '')
             } for report in reports]
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-# @reports_bp.route('/download_report/<report_id>', methods=['GET'])
-# @jwt_required()
-# def download_report(report_id):
-#     try:
-#         report = db['generated_reports'].find_one({
-#             '_id': ObjectId(report_id),
-#             'user_id': get_jwt_identity()
-#         })
+@reports_bp.route('/download_report/<report_id>', methods=['GET'])
+@jwt_required()
+def download_report(report_id):
+    try:
+        # Fetch report metadata from the database
+        report = db['generated_reports'].find_one({
+            '_id': ObjectId(report_id),
+            'user_id': get_jwt_identity()
+        })
         
-#         if not report:
-#             return jsonify({'success': False, 'message': 'Report not found'}), 404
-            
-#         return send_file(
-#             report['file_path'],
-#             as_attachment=True,
-#             download_name=report['report_name'] + '.xlsx'
-#         )
-#     except Exception as e:
-#         return jsonify({'success': False, 'message': str(e)}), 500
+        if not report:
+            return jsonify({'success': False, 'message': 'Report not found'}), 404
+
+        # Construct the full path for the file in DigitalOcean Spaces
+        file_path = report['path']  # e.g., "reports/superadmin/stoppage_report_KA72CC1586_07-Jul-2025 02:15:09 PM.xlsx"
+        full_url = f"{ENDPOINT}/{file_path}"
+
+        # Download the file from DigitalOcean Spaces
+        output = BytesIO()
+        s3.download_fileobj(SPACE_NAME, file_path, output)
+        output.seek(0)  # Reset the file pointer to the beginning
+
+        # Send the file to the user
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=report['report_name'] + '.xlsx'
+        )
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
