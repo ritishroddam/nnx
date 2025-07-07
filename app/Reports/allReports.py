@@ -110,8 +110,6 @@ def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
 
-    # Upload to Spaces
-    output.seek(0)
     s3.upload_fileobj(output, SPACE_NAME, remote_path)
 
     # Save metadata to MongoDB
@@ -128,8 +126,6 @@ def save_and_return_report(output, data, report_type, vehicle_number):
     db['generated_reports'].insert_one(report_metadata)
     print(f"[DEBUG] Report metadata saved to MongoDB: {report_metadata}")
 
-    # Return file to user
-    output.seek(0)
     return report_filename
 
 def process_df(df, license_plate, fields, post_process=None):
@@ -496,10 +492,11 @@ def download_custom_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
-                output.seek(0)
 
-                report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+            output.seek(0)
+            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
 
+            output.seek(0)
             return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_filename)
 
         # Single vehicle
@@ -552,10 +549,11 @@ def download_custom_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=custom_report_name)
-                output.seek(0)
+            
+            output.seek(0)
+            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
 
-                report_filename = save_and_return_report(output, data, report_type, vehicle_number)
-
+            output.seek(0)
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -587,10 +585,11 @@ def download_custom_report():
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
-            output.seek(0)
+            
+        output.seek(0)
+        report_filename = save_and_return_report(output, data, report_type, vehicle_number)
 
-            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
-
+        output.seek(0)
         return send_file(
             output,
             mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -711,10 +710,11 @@ def download_panic_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="Panic Report")
-                output.seek(0)
+                
+            output.seek(0)
+            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
 
-                report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
-
+            output.seek(0)
             return send_file(
                 output,
                 mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -805,10 +805,11 @@ def download_panic_report():
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Panic Report")
-            output.seek(0)
+            
+        output.seek(0)
+        report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
 
-            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
-
+        output.seek(0)
         return send_file(
             output,
             mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
