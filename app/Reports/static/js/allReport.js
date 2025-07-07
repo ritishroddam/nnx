@@ -177,7 +177,7 @@ function renderRecentReports(reports) {
         
         reportItem.innerHTML = `
             <div class="report-info">
-                <div class="report-name">${report.filename}</div>
+                <div class="report-name">${report.report_name}</div>
                 <div class="report-meta">
                     <span class="file-size">${fileSize}</span>
                     <span class="time-ago">${timeAgo}</span>
