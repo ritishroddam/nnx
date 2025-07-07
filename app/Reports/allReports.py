@@ -551,7 +551,7 @@ def download_custom_report():
 
             output = BytesIO()
             writer = pd.ExcelWriter(output, engine='openpyxl')
-            final_df.to_excel(writer, index=False, sheet_name = custom_report_name)
+            df.to_excel(writer, index=False, sheet_name = custom_report_name)
             writer.save()
             
             output.seek(0)
@@ -589,7 +589,7 @@ def download_custom_report():
 
         output = BytesIO()
         writer = pd.ExcelWriter(output, engine='openpyxl')
-        final_df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
+        df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
         writer.save()
             
         output.seek(0)
@@ -812,7 +812,7 @@ def download_panic_report():
         # Generate Excel
         output = BytesIO()
         writer = pd.ExcelWriter(output, engine='openpyxl')
-        final_df.to_excel(writer, index=False, sheet_name="Panic Report")
+        df.to_excel(writer, index=False, sheet_name="Panic Report")
         writer.save()
             
         output.seek(0)
