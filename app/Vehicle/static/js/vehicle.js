@@ -939,7 +939,7 @@ function updateMap() {
       device.course != null
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
-      const iconUrl = getCarIconBySpeed(
+      const iconUrl = getVehicleIconByTypeAndSpeed(
         device.VehicleType,
         device.speed,
         imei,
@@ -1224,7 +1224,7 @@ function checkForDataTimeout(imei) {
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
-  const iconUrl = getCarIconBySpeed(
+  const iconUrl = getVehicleIconByTypeAndSpeed(
     vehicle.VehicleType,
     vehicle.speed,
     imei,
