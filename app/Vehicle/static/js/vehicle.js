@@ -940,12 +940,12 @@ function updateMap() {
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
       const iconUrl = getVehicleIconByTypeStatusAndSpeed(
-        device.VehicleType,
-        device.status,
-        device.speed,
+        vehicle.VehicleType,
+        vehicle.status,
+        vehicle.speed,
         imei,
-        device.date,
-        device.time
+        vehicle.date,
+        vehicle.time
       );
 
       const rotation = device.course;
@@ -1224,12 +1224,12 @@ function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
   const iconUrl = getVehicleIconByTypeStatusAndSpeed(
-    device.VehicleType,
-    device.status,
-    device.speed,
+    vehicle.VehicleType,
+    vehicle.status,
+    vehicle.speed,
     imei,
-    device.date,
-    device.time
+    vehicle.date,
+    vehicle.time
   );
 
   const rotation = vehicle.course;
