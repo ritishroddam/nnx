@@ -489,9 +489,11 @@ def download_custom_report():
             if not all_dfs:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
             final_df = pd.concat(all_dfs, ignore_index=True)
+
             output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
+            writer = pd.ExcelWriter(output, engine='openpyxl')
+            final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
+            writer.save()
 
             output.seek(0)
             report_filename = save_and_return_report(output, data, report_type, vehicle_number)
@@ -546,9 +548,11 @@ def download_custom_report():
             df = process_df(df, vehicle["LicensePlateNumber"], fields)
             if df is None:
                 return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
+
             output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name=custom_report_name)
+            writer = pd.ExcelWriter(output, engine='openpyxl')
+            final_df.to_excel(writer, index=False, sheet_name = custom_report_name)
+            writer.save()
             
             output.seek(0)
             report_filename = save_and_return_report(output, data, report_type, vehicle_number)
@@ -582,9 +586,11 @@ def download_custom_report():
         df = process_df(df, vehicle["LicensePlateNumber"], fields, (lambda d: post_process(d, vehicle["LicensePlateNumber"])) if post_process else None)
         if df is None:
             return jsonify({"success": False, "message": "No data found", "category": "warning"}), 404
+
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
+        writer = pd.ExcelWriter(output, engine='openpyxl')
+        final_df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
+        writer.save()
             
         output.seek(0)
         report_filename = save_and_return_report(output, data, report_type, vehicle_number)
@@ -707,9 +713,11 @@ def download_panic_report():
             if not all_dfs:
                 return jsonify({"success": True, "message": "No panic events found", "category":"warning"}), 404
             final_df = pd.concat(all_dfs, ignore_index=True)
+            
             output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                final_df.to_excel(writer, index=False, sheet_name="Panic Report")
+            writer = pd.ExcelWriter(output, engine='openpyxl')
+            final_df.to_excel(writer, index=False, sheet_name="Panic Report")
+            writer.save()
                 
             output.seek(0)
             report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
@@ -803,8 +811,9 @@ def download_panic_report():
 
         # Generate Excel
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name="Panic Report")
+        writer = pd.ExcelWriter(output, engine='openpyxl')
+        final_df.to_excel(writer, index=False, sheet_name="Panic Report")
+        writer.save()
             
         output.seek(0)
         report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
