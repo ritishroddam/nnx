@@ -782,9 +782,9 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   headerContent.innerHTML = `
       <div class="info-header">
     <span class="material-symbols-outlined info-icon" style="font-size:22px;" title="GPS Status">${gpsIcon}</span>
-    <span class="info-plate" style="cursor:pointer;" onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">${LicensePlateNumber}</span>
+    <span class="info-plate" style="cursor:pointer;" onclick="vehicleInfoPage('${device.LicensePlateNumber}')">${LicensePlateNumber}</span>
     <span class="material-symbols-outlined info-icon" style="font-size:22px;cursor:pointer;" title="View Vehicle Info"
-      onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">${arrowIcon}</span>
+      onclick="vehicleInfoPage('${device.LicensePlateNumber}')">${arrowIcon}</span>
     <span class="material-symbols-outlined info-icon" style="font-size:22px; color:${ignitionColor}" title="Ignition Status">
       ${ignitionIcon}</span>
     <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};" title="GSM Signal">${gsmIcon}</span>
