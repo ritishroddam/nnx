@@ -242,24 +242,22 @@ function renderStatusPopupTable(data) {
         }
         
         row.innerHTML = `
-          <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
-          <td>${vehicle.VehicleType || 'N/A'}</td>
-          <td>${vehicle.last_updated || 'N/A'}</td>
-          <td>${vehicle.location || 'Location unknown'}</td>
-          <td class="${speedCellClass}">${speed} km/h</td>
-          <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
-          <td>${vehicle.odometer || 'N/A'}</td>
-          <td class="status-icons" 
-              data-sos="${vehicle.sos === '1'}" 
-              data-gps="${vehicle.gps === '1' || vehicle.gps === true}" 
-              data-ignition="${vehicle.ignition === '1'}" 
-              data-gsm="${vehicle.gsm || '0'}">
-              ${sosIcon}
-              <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-              <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
-              <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
-          </td>
-      `;
+            <td>${vehicle.registration || vehicle.imei || 'N/A'}</td>
+            <td>${vehicle.VehicleType || 'N/A'}</td>
+            <td>${vehicle.last_updated || formatLastUpdatedText(vehicle.date, vehicle.time)}</td>
+            <td>${vehicle.location || 'Location unknown'}</td>
+            <td class="${speedCellClass}">${speed} km/h</td>
+            <td>${vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : '0.00'} km</td>
+            <td>${vehicle.odometer || 'N/A'}</td>
+            <td>
+                <div class="vehicle-table-icons">
+                    ${sosIcon}
+                    <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+                    <span class="material-symbols-outlined" style="${iconStyle};color:${ignitionColor}">${ignitionIcon}</span>
+                    <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+                </div>
+            </td>
+        `;
         
         tableBody.appendChild(row);
     });
@@ -1116,9 +1114,23 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
     });
     
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.table_to_sheet(tableClone);
-    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
+    const ws = XLSX.utils.table_to_sheet(table);
     
+    // Format date cells in Excel to show both date and time
+    if (ws['!ref']) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = {c:C, r:R};
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if (ws[cell_ref] && ws[cell_ref].t === 's' && ws[cell_ref].v.match(/\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}/)) {
+                    ws[cell_ref].z = 'dd-mm-yyyy hh:mm:ss';
+                }
+            }
+        }
+    }
+    
+    XLSX.utils.book_append_sheet(wb, ws, "Vehicle Status Data");
     const title = document.getElementById('statusPopupTitle').textContent;
     XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}.xlsx`);
 });

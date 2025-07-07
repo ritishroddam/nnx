@@ -576,8 +576,10 @@ def format_last_updated(date_str, time_str):
         return "N/A"
     try:
         dt = datetime.strptime(date_str + time_str, '%d%m%y%H%M%S')
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-    except:
+        # Format as "dd-mm-yyyy HH:MM:SS"
+        return dt.strftime('%d-%m-%Y %H:%M:%S')
+    except Exception as e:
+        print(f"Error formatting last updated: {e}")
         return "N/A"
 
 
