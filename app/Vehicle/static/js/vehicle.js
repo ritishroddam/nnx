@@ -1105,27 +1105,46 @@ function convertSpeedToKmh(speedkmh) {
 //   }
 // }
 
-function getVehicleIconUrlByTypeAndSpeed(vehicleType, speedInKmh, date, time) {
+function getVehicleIconUrlByTypeStatusAndSpeed(vehicleType, status, speedInKmh, date, time) {
   let baseIcon;
-  switch(vehicleType.toLowerCase()) {
+  switch (vehicleType?.toLowerCase?.()) {
     case 'bike': baseIcon = 'bike'; break;
     case 'bus': baseIcon = 'bus'; break;
     case 'truck': baseIcon = 'truck'; break;
-    default: baseIcon = 'car';
+    case 'hatchback':
+    case 'sedan':
+    case 'suv':
+    case 'van':
+      baseIcon = 'car'; break;
+    default:
+      baseIcon = 'car';
   }
 
   let color;
-  if (speedInKmh === 0) color = 'yellow';
-  else if (speedInKmh <= 40) color = 'green';
-  else if (speedInKmh <= 60) color = 'blue';
-  else color = 'red';
+  if (status === "offline") {
+    color = 'black';
+  } else if (status === "stopped") {
+    color = 'gray';
+  } else if (status === "idle") {
+    color = 'yellow';
+  } else if (status === "moving") {
+    if (speedInKmh === 0) color = 'yellow';
+    else if (speedInKmh <= 40) color = 'green';
+    else if (speedInKmh <= 60) color = 'blue';
+    else color = 'red';
+  } else {
+    color = 'gray';
+  }
 
-  const now = new Date();
-  const lastUpdateTime = convertToDate(date, time);
-  const dayDiff = (now - lastUpdateTime) / (1000 * 60 * 60 * 24);
-  if (dayDiff >= 1) color = 'black';
+  // Optional: override to black if data is old
+  if (date && time && typeof date === 'string' && typeof time === 'string') {
+    const now = new Date();
+    const lastUpdateTime = convertToDate(date, time);
+    const dayDiff = (now - lastUpdateTime) / (1000 * 60 * 60 * 24);
+    if (dayDiff >= 1) color = 'black';
+  }
 
-  return `/static/images/${baseIcon}_${color}.png`; 
+  return `/static/images/${baseIcon}_${color}.png`; // update if using status in filename
 }
 
 function convertToDate(ddmmyyyy, hhmmss) {
