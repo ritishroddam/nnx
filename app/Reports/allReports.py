@@ -102,11 +102,13 @@ report_configs = {
 }
 
 def save_and_return_report(output, data, report_type, vehicle_number):
-
+    print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     # Generate unique filename
     timestamp = datetime.now().strftime('%d%m%Y')
     report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.xlsx"
     remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
+    print(f"[DEBUG] Generated report filename: {report_filename}")
+    print(f"[DEBUG] Uploading report to remote path: {remote_path}")
 
     # Upload to Spaces
     output.seek(0)
@@ -124,44 +126,49 @@ def save_and_return_report(output, data, report_type, vehicle_number):
         'report_type': report_type
     }
     db['generated_reports'].insert_one(report_metadata)
+    print(f"[DEBUG] Report metadata saved to MongoDB: {report_metadata}")
 
     # Return file to user
     output.seek(0)
     return report_filename
 
 def process_df(df, license_plate, fields, post_process=None):
-            if df.empty:
-                return None
-            if 'date_time' in df.columns:
-                df['date_time'] = df['date_time'].dt.tz_convert(IST).dt.strftime('%d-%b-%Y %I:%M:%S %p')
-            if 'latitude' in df.columns and 'longitude' in df.columns:
-                df['Location'] = df.apply(
-                    lambda row: geocodeInternal(row['latitude'], row['longitude'])
-                    if pd.notnull(row['latitude']) and row['latitude'] != "" and
-                       pd.notnull(row['longitude']) and row['longitude'] != ""
-                    else 'Missing coordinates',
-                    axis=1
-                )
-                cols = df.columns.tolist()
-                if 'Location' in cols:
-                    cols.remove('Location')
-                lng_idx = cols.index('longitude')
-                cols.insert(lng_idx + 1, 'Location')
-                df = df[cols]
-            if 'Vehicle Number' not in df.columns:
-                df.insert(0, 'Vehicle Number', license_plate)
-            if '_id' in df.columns:
-                df.drop('_id', axis=1, inplace=True)
-            if "ignition" in fields:
-                df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-            if 'speed' in df.columns:
-                df = add_speed_metrics(df)
-                
-            if post_process:
-                df = post_process(df)
-            return df
+    print(f"[DEBUG] Processing DataFrame for license_plate={license_plate} with fields={fields}")
+    if df.empty:
+        return None
+    if 'date_time' in df.columns:
+        df['date_time'] = df['date_time'].dt.tz_convert(IST).dt.strftime('%d-%b-%Y %I:%M:%S %p')
+    if 'latitude' in df.columns and 'longitude' in df.columns:
+        df['Location'] = df.apply(
+            lambda row: geocodeInternal(row['latitude'], row['longitude'])
+            if pd.notnull(row['latitude']) and row['latitude'] != "" and
+               pd.notnull(row['longitude']) and row['longitude'] != ""
+            else 'Missing coordinates',
+            axis=1
+        )
+        cols = df.columns.tolist()
+        if 'Location' in cols:
+            cols.remove('Location')
+        lng_idx = cols.index('longitude')
+        cols.insert(lng_idx + 1, 'Location')
+        df = df[cols]
+    if 'Vehicle Number' not in df.columns:
+        df.insert(0, 'Vehicle Number', license_plate)
+    if '_id' in df.columns:
+        df.drop('_id', axis=1, inplace=True)
+    if "ignition" in fields:
+        df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
+    if 'speed' in df.columns:
+        df = add_speed_metrics(df)
+        
+    if post_process:
+        print("[DEBUG] Applying post_process function")
+        df = post_process(df)
+    print("[DEBUG] DataFrame processing complete")
+    return df
 
 def get_date_range_filter(date_range, from_date=None, to_date=None):
+    print(f"[DEBUG] Generating date range filter for date_range={date_range}, from_date={from_date}, to_date={to_date}")
     tz = pytz.UTC
     now = datetime.now(tz)
 
@@ -278,8 +285,10 @@ def add_speed_metrics(df):
 @reports_bp.route('/')
 @jwt_required()
 def index():
+    print("[DEBUG] Accessing index endpoint")
     claims = get_jwt()
     user_roles = claims.get('roles', [])
+    print(f"[DEBUG] User roles: {user_roles}")
 
     if 'admin' in user_roles:
         vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
@@ -297,6 +306,7 @@ def index():
         vehicles = list(db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0}))
         reports = list(db['custom_reports'].find({"created_by": userName}, {"_id": 0, "report_name": 1, "fields": 1}))
         return render_template('allReport.html', vehicles=vehicles, reports=reports)
+    print("[DEBUG] Index endpoint processing complete")
 
 @reports_bp.route('/get_fields', methods=['GET'])
 @jwt_required()
@@ -310,8 +320,10 @@ def get_fields():
 @reports_bp.route('/save_custom_report', methods=['POST'])
 @jwt_required()
 def save_custom_report():
+    print("[DEBUG] Accessing save_custom_report endpoint")
     try:
         data = request.get_json()
+        print(f"[DEBUG] Received data: {data}")
         report_name = data.get("reportName")
         fields = data.get("fields")
 
@@ -333,10 +345,12 @@ def save_custom_report():
             "created_by": get_jwt_identity(),
             "company_id": get_jwt()['company_id']
         })
+        print("[DEBUG] Custom report saved successfully")
 
         return jsonify({"success": True, "message": "Report saved successfully!"}), 200
 
     except Exception as e:
+        print(f"[DEBUG] Error in save_custom_report: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
 
 @reports_bp.route('/get_custom_report', methods=['GET'])
@@ -366,8 +380,10 @@ def get_custom_report():
 @reports_bp.route('/download_custom_report', methods=['POST'])
 @jwt_required()
 def download_custom_report():
+    print("[DEBUG] Accessing download_custom_report endpoint")
     try:
         data = request.get_json()
+        print(f"[DEBUG] Received data: {data}")
         report_type = data.get("reportType")
         vehicle_number = data.get("vehicleNumber")
         date_range = data.get("dateRange", "all")
@@ -586,6 +602,7 @@ def download_custom_report():
         )
 
     except Exception as e:
+        print(f"[DEBUG] Error in download_custom_report: {str(e)}")
         return jsonify({"success": False, "message": str(e), "category": "danger"}), 500
 
 @reports_bp.route('/delete_custom_report', methods=['DELETE'])
