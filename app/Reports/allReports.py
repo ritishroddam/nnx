@@ -496,11 +496,10 @@ def download_custom_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="All Vehicles Report")
-            output.seek(0)
+                output.seek(0)
 
-            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
-            
-            output.seek(0)
+                report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+
             return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name=report_filename)
 
         # Single vehicle
@@ -553,11 +552,10 @@ def download_custom_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name=custom_report_name)
-            output.seek(0)
-            
-            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
-            
-            output.seek(0)
+                output.seek(0)
+
+                report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+
             return send_file(
                 output,
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -589,11 +587,10 @@ def download_custom_report():
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name=config['sheet_name'])
-        output.seek(0)
-        
-        report_filename = save_and_return_report(output, data, report_type, vehicle_number)
-        
-        output.seek(0)
+            output.seek(0)
+
+            report_filename = save_and_return_report(output, data, report_type, vehicle_number)
+
         return send_file(
             output,
             mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -714,11 +711,10 @@ def download_panic_report():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name="Panic Report")
-            output.seek(0)
-            
-            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
+                output.seek(0)
 
-            output.seek(0)
+                report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
+
             return send_file(
                 output,
                 mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -809,12 +805,10 @@ def download_panic_report():
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Panic Report")
+            output.seek(0)
 
-        output.seek(0)
-        
-        report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
-        
-        output.seek(0)
+            report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
+
         return send_file(
             output,
             mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
