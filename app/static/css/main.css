@@ -341,6 +341,7 @@ body {
   margin-bottom: 50px;
   z-index: 3; 
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+  backdrop-filter: blur(10px);
 }
 
 .dark-mode .topbar {

@@ -102,6 +102,50 @@ function getStatusTime(timeDelta) {
   }
 }
 
+function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
+  const basePath = "/static/images/";
+  let vehiclePrefix;
+  
+  // Determine vehicle type prefix
+  switch(vehicleType.toLowerCase()) {
+    case 'truck':
+      vehiclePrefix = 'truck';
+      break;
+    case 'bus':
+      vehiclePrefix = 'bus';
+      break;
+    case 'bike':
+      vehiclePrefix = 'bike';
+      break;
+    default: // Default to car for sedan, suv, hatchback, van, etc.
+      vehiclePrefix = 'car';
+  }
+
+  // Determine color based on speed
+  if (speedInKmh === 0) {
+    return `${basePath}${vehiclePrefix}_yellow.png`;
+  } else if (speedInKmh > 0 && speedInKmh <= 40) {
+    return `${basePath}${vehiclePrefix}_green.png`;
+  } else if (speedInKmh > 40 && speedInKmh <= 60) {
+    return `${basePath}${vehiclePrefix}_blue.png`;
+  } else {
+    return `${basePath}${vehiclePrefix}_red.png`;
+  }
+}
+
+function getVehicleIconSize(vehicleType) {
+  switch(vehicleType.toLowerCase()) {
+    case 'truck':
+      return { width: 18, height: 60 };
+    case 'bus':
+      return { width: 22, height: 50 };
+    case 'bike':
+      return { width: 14, height: 38 };
+    default: // car
+      return { width: 18, height: 32 };
+  }
+}
+
 function updateLiveMapVehicleData(updatedData) {
   const updateCoords = {
     lat: parseFloat(updatedData.latitude),
@@ -137,12 +181,16 @@ function updateLiveMapVehicleData(updatedData) {
     speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
   }
 
+  const vehicleType = updatedData.VehicleType || 'car';
+  const size = getVehicleIconSize(vehicleType);
+  const iconUrl = getVehicleIconUrlBySpeedAndType(updatedData.speed, vehicleType);
+
   const carContent = document.createElement("img");
   carContent.src = "/static/images/car_green.png";
-  carContent.style.width = "18px";
-  carContent.style.height = "32px";
+  carContent.style.width = `${size.width}px`;
+  carContent.style.height = `${size.height}px`;
   carContent.style.position = "absolute";
-  carContent.alt = "Car";
+  carContent.alt = "Vehicle"; 
   carContent.style.transform = `rotate(${rotation}deg)`;
 
   markerLive.content = carContent;
@@ -197,7 +245,6 @@ function updateLiveMapPolyline(updatedData) {
       const nextCoord = liveCoords[i + 1];
       direction = getRotation(nextCoord, coord);
     }
-    // For the last coord, rotation stays as 0 or you can use previous rotation
 
     const arrowContent = document.createElement("div");
     arrowContent.style.width = "10px";
@@ -279,12 +326,16 @@ async function plotPolyLineLiveMap(liveData) {
       map: liveMaps,
     });
 
+    const vehicleType = liveData[0]?.VehicleType || 'car';
+    const size = getVehicleIconSize(vehicleType);
+    const iconUrl = getVehicleIconUrlBySpeedAndType(liveData[0]?.speed, vehicleType);
+
     const carContent = document.createElement("img");
     carContent.src = "/static/images/car_green.png";
-    carContent.style.width = "18px";
-    carContent.style.height = "32px";
+    carContent.style.width = `${size.width}px`;
+    carContent.style.height = `${size.height}px`;
     carContent.style.position = "absolute";
-    carContent.alt = "Car";
+    carContent.alt = "Vehicle";
     carContent.style.filter = darkMode ? "brightness(1.5)" : ""; // brighten in dark mode
     carContent.style.transform = `rotate(${rotation}deg)`;
 
@@ -684,12 +735,16 @@ async function plotPathOnMap(pathCoordinates) {
   deckLayers = [pathLayer];
   deckInitialized = true;
 
+  const vehicleType = pathCoordinates[0]?.VehicleType || 'car';
+  const size = getVehicleIconSize(vehicleType);
+  const iconUrl = getVehicleIconUrlBySpeedAndType(pathCoordinates[0]?.speed, vehicleType);
+
   const carContent = document.createElement("img");
   carContent.src = "/static/images/car_green.png";
-  carContent.style.width = "18px";
-  carContent.style.height = "32px";
+  carContent.style.width = `${size.width}px`;
+  carContent.style.height = `${size.height}px`;
   carContent.style.position = "absolute";
-  carContent.alt = "Car";
+  carContent.alt = "Vehicle";
   carContent.style.transform = `rotate(${pathCoordinates[0].course || 0}deg)`;
 
   carMarker = new google.maps.marker.AdvancedMarkerElement({
