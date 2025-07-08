@@ -152,10 +152,18 @@ function updateLiveMapVehicleData(updatedData) {
     lng: parseFloat(updatedData.longitude),
   };
 
+  const vehicleType = updatedData.VehicleType || 
+                     (vehicleData && vehicleData['Vehicle Type']) || 
+                     'car';
+
   const status = getStatus(updatedData.ignition, updatedData.speed);
   const oldData = liveData[liveCoords.length - 1];
   const rotation = updatedData.course;
   updatedData["status"] = status;
+
+  const speedInKmh = parseFloat(updatedData.speed) || 0;
+  const iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
+  const size = getVehicleIconSize(vehicleType);
 
   let statusTime;
   console.log("Old Data:", oldData);
@@ -181,19 +189,15 @@ function updateLiveMapVehicleData(updatedData) {
     speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
   }
 
-  const vehicleType = updatedData.VehicleType || 'car';
-  const size = getVehicleIconSize(vehicleType);
-  const iconUrl = getVehicleIconUrlBySpeedAndType(updatedData.speed, vehicleType);
+  const vehicleContent = document.createElement("img");
+  vehicleContent.src = iconUrl;
+  vehicleContent.style.width = `${size.width}px`;
+  vehicleContent.style.height = `${size.height}px`;
+  vehicleContent.style.position = "absolute";
+  vehicleContent.alt = vehicleType;
+  vehicleContent.style.transform = `rotate(${rotation}deg)`;
 
-  const carContent = document.createElement("img");
-  carContent.src = "/static/images/car_green.png";
-  carContent.style.width = `${size.width}px`;
-  carContent.style.height = `${size.height}px`;
-  carContent.style.position = "absolute";
-  carContent.alt = "Vehicle"; 
-  carContent.style.transform = `rotate(${rotation}deg)`;
-
-  markerLive.content = carContent;
+  markerLive.content = vehicleContent;
 
   startMarkerInfo = new google.maps.InfoWindow({
     content: `<div>
@@ -301,6 +305,10 @@ async function plotPolyLineLiveMap(liveData) {
     liveMaps.fitBounds(bounds);
 
     const recentData = liveData[liveData.length - 1];
+    
+    const speedInKmh = parseFloat(recentData.speed) || 0;
+    const iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
+    const size = getVehicleIconSize(vehicleType);
 
     const status = recentData.status;
     const statusTime = recentData.status_time;
@@ -326,18 +334,14 @@ async function plotPolyLineLiveMap(liveData) {
       map: liveMaps,
     });
 
-    const vehicleType = liveData[0]?.VehicleType || 'car';
-    const size = getVehicleIconSize(vehicleType);
-    const iconUrl = getVehicleIconUrlBySpeedAndType(liveData[0]?.speed, vehicleType);
-
-    const carContent = document.createElement("img");
-    carContent.src = "/static/images/car_green.png";
-    carContent.style.width = `${size.width}px`;
-    carContent.style.height = `${size.height}px`;
-    carContent.style.position = "absolute";
-    carContent.alt = "Vehicle";
-    carContent.style.filter = darkMode ? "brightness(1.5)" : ""; // brighten in dark mode
-    carContent.style.transform = `rotate(${rotation}deg)`;
+    const vehicleContent = document.createElement("img");
+    vehicleContent.src = iconUrl;
+    vehicleContent.style.width = `${size.width}px`;
+    vehicleContent.style.height = `${size.height}px`;
+    vehicleContent.style.position = "absolute";
+    vehicleContent.alt = vehicleType;
+    vehicleContent.style.filter = darkMode ? "brightness(1.5)" : "";
+    vehicleContent.style.transform = `rotate(${recentData.course || 0}deg)`;
 
     markerLive = new google.maps.marker.AdvancedMarkerElement({
       position: liveCoords[liveCoords.length - 1],
@@ -735,17 +739,21 @@ async function plotPathOnMap(pathCoordinates) {
   deckLayers = [pathLayer];
   deckInitialized = true;
 
-  const vehicleType = pathCoordinates[0]?.VehicleType || 'car';
+  const vehicleType = pathCoordinates[0]?.VehicleType || 
+                     (vehicleData && vehicleData['Vehicle Type']) || 
+                     'car';
+  
+  const speedInKmh = parseFloat(pathCoordinates[0]?.speed) || 0;
+  const iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
   const size = getVehicleIconSize(vehicleType);
-  const iconUrl = getVehicleIconUrlBySpeedAndType(pathCoordinates[0]?.speed, vehicleType);
 
-  const carContent = document.createElement("img");
-  carContent.src = "/static/images/car_green.png";
-  carContent.style.width = `${size.width}px`;
-  carContent.style.height = `${size.height}px`;
-  carContent.style.position = "absolute";
-  carContent.alt = "Vehicle";
-  carContent.style.transform = `rotate(${pathCoordinates[0].course || 0}deg)`;
+  const vehicleContent = document.createElement("img");
+  vehicleContent.src = iconUrl;
+  vehicleContent.style.width = `${size.width}px`;
+  vehicleContent.style.height = `${size.height}px`;
+  vehicleContent.style.position = "absolute";
+  vehicleContent.alt = vehicleType;
+  vehicleContent.style.transform = `rotate(${pathCoordinates[0]?.course || 0}deg)`;
 
   carMarker = new google.maps.marker.AdvancedMarkerElement({
     position: coords[0],
