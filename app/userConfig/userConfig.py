@@ -49,6 +49,14 @@ def editDarkMode():
         "darkMode": darkMode,
     }
 
+    checkUserConfig = userConfiCollection.find_one({"userID": ObjectId(userID)})
+    
+    if not checkUserConfig:
+        createUserConfig(userID)
+    else:
+        if checkUserConfig['darkMode'] == darkMode:
+            return jsonify({"message": "User configuration updated successfully"}), 200
+    
     result = userConfiCollection.update_one(
         {"userID": ObjectId(userID)},
         {"$set": userConfig},

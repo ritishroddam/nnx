@@ -612,21 +612,20 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     const iconRow = `
       <span
-      class="material-symbols-outlined"
-      style="${iconStyle}"
-      onclick="vehicleInfoPage('${
-        vehicle.LicensePlateNumber
-      }')">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}">${ignitionIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}">${gsmIcon}</span>
-      ${sosIcon || ""}
+        class="material-symbols-outlined"
+        style="${iconStyle}cursor:pointer;"
+        title="View Vehicle Info"
+        onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">arrow_forward</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="Ignition Status">${ignitionIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal">${gsmIcon}</span>
+      ${sosIcon ? `<span class="material-symbols-outlined" style="${iconStyle}" title="SOS Alert">${sosIcon}</span>` : ""}
     `;
 
     vehicleElement.innerHTML = `
     <div style="display:flex;align-item s:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:22px;">${gpsIcon}</span>
+          <span class="material-symbols-outlined" title="GPS Status" title="GPS Status" style="font-size:22px;">${gpsIcon}</span>
           <span class="vehicle-number"
                 style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
                 onclick="vehicleInfoPage('${
@@ -666,7 +665,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       </div>
       <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
       <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
-       <span class="material-symbols-outlined info-bottom-action vertical-bar">moved_location</span>
+       <span class="material-symbols-outlined info-bottom-action vertical-bar" title="Share Location" style="cursor:pointer;">moved_location</span>
       </div>
     </div>
   `;
@@ -679,6 +678,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
+  const isDarkMode = document.body.classList.contains("dark-mode");
   const imei = device.imei || '<span class="missing-data">N/A</span>';
   const LicensePlateNumber =
     device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
@@ -734,8 +734,17 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const iconRed = "color:#d32f2f;";
   const gpsIcon =
     statusText === "Offline" ? "location_disabled" : "my_location";
-  const ignitionIcon = device.ignition === "0" ? "key_off" : "key";
-  const acIcon = "ac_unit";
+
+  let ignitionIcon, ignitionColor;
+  
+  if (device.ignition === "0") {
+    ignitionIcon = "key_off";
+    ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
+  } else {
+    ignitionIcon = "key";
+    ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+  }
+
   const sosIcon =
     device.sos === "1"
       ? `<span class="material-symbols-outlined" style="${
@@ -772,11 +781,13 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const headerContent = document.createElement("div");
   headerContent.innerHTML = `
       <div class="info-header">
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${gpsIcon}</span>
-        <span class="info-plate">${LicensePlateNumber}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${arrowIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;">${ignitionIcon}</span>
-        <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};">${gsmIcon}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;" title="GPS Status">${gpsIcon}</span>
+    <span class="info-plate" style="cursor:pointer;" onclick="vehicleInfoPage('${device.LicensePlateNumber}')">${LicensePlateNumber}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;cursor:pointer;" title="View Vehicle Info"
+      onclick="vehicleInfoPage('${device.LicensePlateNumber}')">${arrowIcon}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px; color:${ignitionColor}" title="Ignition Status">
+      ${ignitionIcon}</span>
+    <span class="material-symbols-outlined info-icon" style="font-size:22px;color:${gsmColor};" title="GSM Signal">${gsmIcon}</span>
       </div>
   `;
 
@@ -796,14 +807,22 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
           <div class="info-bottom-row">
             <div class="info-bottom-item">
               <span class="info-bottom-value">${distance}km</span>
-              <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">route</span></span>
+              <span class="info-bottom-label">
+                <span class="material-symbols-outlined info-bottom-icon" title="Distance Today">
+                  route
+                </span>
+              </span>
             </div>
             <div class="info-bottom-item">
               <span class="info-bottom-value">${stoppage}</span>
-              <span class="info-bottom-label"><span class="material-symbols-outlined info-bottom-icon">local_parking</span></span>
+              <span class="info-bottom-label">
+                <span class="material-symbols-outlined info-bottom-icon"title="Stoppage Today">
+                  local_parking
+                </span>
+              </span>
             </div>
             <div class="info-bottom-actions">
-              <span class="material-symbols-outlined info-bottom-action">moved_location</span>
+              <span class="material-symbols-outlined info-bottom-action" style="cursor:pointer;" title="Share Location">moved_location</span>
             </div>
           </div>
         </div>
@@ -1610,7 +1629,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng, 
     map: map,
-    title: `IMEI: ${device.imei}`,
+    title: `License Plate Number: ${device.LicensePlateNumber}`,
     content: markerContent,
   });
 
