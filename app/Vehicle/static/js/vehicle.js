@@ -166,6 +166,10 @@ async function updateData(data) {
   const oldData = vehicleData.get(data.imei);
 
   if (oldData) {
+    if (oldData.VehicleType) {
+      data["VehicleType"] = oldData.VehicleType;
+    }
+
     let distance = parseFloat(data.odometer) - parseFloat(oldData.odometer);
     distance = (parseFloat(distance) + parseFloat(oldData.distance)).toFixed(2);
     data["stoppage_time"] = oldData.stoppage_time;
@@ -209,6 +213,10 @@ async function updateData(data) {
 
     vehicleData.set(data.imei, data);
   } else {
+    if (!data.VehicleType) {
+      data["VehicleType"] = 'car';
+    }
+
     const lastUpdated = convertToDate(data.date, data.time);
     data["stoppage_time"] = "0 seconds";
     data["stoppage_time_delta"] = 0;
@@ -267,6 +275,10 @@ async function fetchVehicleData() {
 
       if (vehicle.sos === "1" && hoursSinceUpdate > 1) {
         vehicle.sos = "0"; 
+      }
+
+      if (!vehicle.VehicleType) {
+        vehicle.VehicleType = 'car';
       }
 
       vehicleData.set(vehicle.imei, {
@@ -1189,7 +1201,8 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
 // Replace getCarIconBySpeed with this new version
 function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
   const speedInKmh = convertSpeedToKmh(speed);
-  let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
+  const type = vehicleType || 'car'; 
+  let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, type);
 
   const now = new Date();
   const lastUpdateTime = convertToDate(date, time);
