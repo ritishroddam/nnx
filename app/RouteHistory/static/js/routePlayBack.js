@@ -709,6 +709,14 @@ async function plotPathOnMap(pathCoordinates) {
   coords = pathCoordinates.map((item) => ({ lat: item.lat, lng: item.lng }));
   if (coords.length === 0) return;
 
+  const vehicleType = pathCoordinates[0]?.VehicleType || 
+                     (vehicleData && vehicleData['Vehicle Type']) || 
+                     'car';
+  const speed = parseFloat(pathCoordinates[0]?.speed) || 0;
+  
+  const iconUrl = getVehicleIconUrlBySpeedAndType(speed, vehicleType);
+  const size = getVehicleIconSize(vehicleType);
+
   const bounds = new google.maps.LatLngBounds();
   coords.forEach(({ lat, lng }) =>
     bounds.extend(new google.maps.LatLng(lat, lng))
@@ -743,14 +751,6 @@ async function plotPathOnMap(pathCoordinates) {
   deckLayers = [pathLayer];
   deckInitialized = true;
 
-  const vehicleType = pathCoordinates[0]?.VehicleType || 
-                     (vehicleData && vehicleData['Vehicle Type']) || 
-                     'car';
-  
-  const speedInKmh = parseFloat(pathCoordinates[0]?.speed) || 0;
-  const iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
-  const size = getVehicleIconSize(vehicleType);
-
   const vehicleContent = document.createElement("img");
   vehicleContent.src = iconUrl;
   vehicleContent.style.width = `${size.width}px`;
@@ -763,7 +763,8 @@ async function plotPathOnMap(pathCoordinates) {
     position: coords[0],
     map: map,
     title: "Vehicle",
-    content: carContent,
+    content: vehicleContent,
+    zIndex: 1000,
   });
   window.__allMapMarkers.push(carMarker);
 
