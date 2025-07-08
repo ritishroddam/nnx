@@ -305,6 +305,10 @@ async function plotPolyLineLiveMap(liveData) {
     liveMaps.fitBounds(bounds);
 
     const recentData = liveData[liveData.length - 1];
+
+    const vehicleType = recentData.VehicleType || 
+                   (vehicleData && vehicleData['Vehicle Type']) || 
+                   'car';
     
     const speedInKmh = parseFloat(recentData.speed) || 0;
     const iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
