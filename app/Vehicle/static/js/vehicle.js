@@ -118,7 +118,6 @@ socket.on("vehicle_update", async function (data) {
     const updatedData = await updateData(data);
     updateVehicleData(updatedData);
 
-    // Only trigger SOS if data is recent
     const lastUpdated = convertToDate(data.date, data.time);
     const now = new Date();
     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
@@ -424,7 +423,6 @@ function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle) return;
 
-  // Check if the data is recent (within last 1 hour)
   const lastUpdated = convertToDate(vehicle.date, vehicle.time);
   const now = new Date();
   const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
@@ -435,7 +433,6 @@ function triggerSOS(imei, marker) {
   }
 
   if (!sosActiveMarkers[imei]) {
-    // Add blinking effect to marker
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
     marker.content.appendChild(sosDiv);
@@ -444,7 +441,7 @@ function triggerSOS(imei, marker) {
 
     setTimeout(() => {
       removeSOS(imei);
-    }, 60000); // 60 seconds timeout
+    }, 60000); 
   }
 }
 
@@ -489,7 +486,6 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     return;
   }
 
-  // let vehiclesArray = Array.isArray(vehicles) ? vehicles : Array.from(vehicles.values());
   let vehiclesArray = vehicles;
 
   if (vehicles instanceof Map) {
@@ -546,9 +542,9 @@ function renderVehicleCards(vehicles, filterValue = "all") {
 
     if (hasSOS) {
       if (isToday) {
-        vehicleElement.classList.add("sos-blink-card"); // Blinking effect
+        vehicleElement.classList.add("sos-blink-card"); 
       } else {
-        vehicleElement.classList.add("sos-historic-card"); // Static indicator
+        vehicleElement.classList.add("sos-historic-card"); 
       }
     }
 
@@ -1095,7 +1091,7 @@ function filterVehicles() {
       case "offline":
         isVisible = hoursSinceLastUpdate > 24;
         break;
-      default: // "all"
+      default: 
         isVisible = true;
         break;
     }
@@ -1171,7 +1167,6 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
   const basePath = "/static/images/";
   let vehiclePrefix;
   
-  // Determine vehicle type prefix
   switch(vehicleType.toLowerCase()) {
     case 'truck':
       vehiclePrefix = 'truck';
@@ -1182,11 +1177,10 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
     case 'bike':
       vehiclePrefix = 'bike';
       break;
-    default: // Default to car for sedan, suv, hatchback, van, etc.
+    default: 
       vehiclePrefix = 'car';
   }
 
-  // Determine color based on speed
   if (speedInKmh === 0) {
     return `${basePath}${vehiclePrefix}_yellow.png`;
   } else if (speedInKmh > 0 && speedInKmh <= 40) {
@@ -1198,7 +1192,6 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
   }
 }
 
-// Replace getCarIconBySpeed with this new version
 function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
   const speedInKmh = convertSpeedToKmh(speed);
   const type = vehicleType || 'car'; 
@@ -1301,14 +1294,12 @@ function removeSOS(imei) {
     marker.content.classList.remove("vehicle-blink");
   }
 
-  // Update the vehicle data to clear SOS
   const vehicle = vehicleData.get(imei);
   if (vehicle) {
     vehicle.sos = "0";
     vehicleData.set(imei, vehicle);
   }
 
-  // Re-render cards to update positions
   const vehiclesArray = Array.from(vehicleData.values());
   renderVehicleCards(vehiclesArray);
 }
