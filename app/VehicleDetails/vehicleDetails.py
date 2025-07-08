@@ -266,16 +266,20 @@ def upload_vehicle_file():
                 service_due_date = str(row['ServiceDueDate']).strip()
             slowSpeed = str(row['slowSpeed']).strip()
             normalSpeed = str(row['normalSpeed']).strip()
+            
+            if not license_plate_number or not imei or not sim or not location:
+                flash(f"For row {index} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
 
             if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
-                flash(f"In {row} Vehicle Type: {vehicle_type} is invalid.", "danger")
+                flash(f"For vehicle {license_plate_number} Vehicle Type: {vehicle_type} is invalid.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             
             companyId = companies_collection.find_one({"Company Name": companyName}, {"_id": 1})
 
             if not companyId:
-                flash(f"Company {companyName} does not exist.", "danger")
+                flash(f"For vehicle {license_plate_number}, The company {companyName} does not exist.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             speedConfigs = company_config_collection.find_one({"companyId": companyId['_id']},{"_id": 0, f"{vehicle_type}SlowSpeed": 1, f"{vehicle_type}NormalSpeed": 1})
@@ -298,10 +302,6 @@ def upload_vehicle_file():
             else:
                 slowSpeed = slowSpeed if slowSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}SlowSpeed", "20")
                 normalSpeed = normalSpeed if normalSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}NormalSpeed", "60")
-
-            if not license_plate_number or not imei or not sim or not location:
-                flash(f"For row {row} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
             
             
             pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
@@ -312,42 +312,42 @@ def upload_vehicle_file():
             
             company = db['customers_list'].find_one({"Company Name": companyName})
             if not company:
-                flash(f"For row {row} Company Name invalid", "danger")
+                flash(f"For vehcile {license_plate_number} Company Name invalid", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
             if len(sim) != 20:
-                flash(f"SIM {sim} must be 20 characters long.", "danger")
+                flash(f"For vehicle {license_plate_number}, SIM {sim} must be 20 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
                 if not number_of_seats:
-                    flash(f"In row {row} Number of seats is required for {vehicle_type}.", "danger")
+                    flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
                     return redirect(url_for('VehicleDetails.page'))
 
             if len(imei) != 15:
-                flash(f"IMEI {imei} must be 15 characters long.", "danger")
+                flash(f"For vehicle {license_plate_number}, IMEI {imei} must be 15 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             if vehicle_collection.find_one({"LicensePlateNumber": license_plate_number}):
-                flash(f"Liscense Plate Number {license_plate_number} already exists", "danger")
+                flash(f"For vehicle {license_plate_number}, Liscense Plate Number {license_plate_number} already exists", "danger")
 
             if vehicle_collection.find_one({"IMEI": imei}):
-                flash(f"IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
+                flash(f"For vehicle {license_plate_number}, IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
 
                 if vehicle_collection.find_one({"SIM": sim}):
-                    flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                    flash(f"For vehicle {license_plate_number}, Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                     return redirect(url_for('VehicleDetails.page'))
 
             if vehicle_collection.find_one({"IMEI": imei}):
-                flash(f"IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
+                flash(f"For vehicle {license_plate_number}, IMEI Number {imei} has already been allocated to another License Plate Number", "danger")
 
                 if vehicle_collection.find_one({"SIM": sim}):
-                    flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                    flash(f"For vehicle {license_plate_number}, Sim Number {sim} has already been allocated to another License Plate Number", "danger")
 
                 return redirect(url_for('VehicleDetails.page'))
     
             if vehicle_collection.find_one({"SIM": sim}):
-                flash(f"Sim Number {sim} has already been allocated to another License Plate Number", "danger")
+                flash(f"For vehicle {license_plate_number}, Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
             record = {
