@@ -939,11 +939,12 @@ function updateMap() {
       device.course != null
     ) {
       const latLng = parseCoordinates(device.latitude, device.longitude);
-      const iconUrl = getCarIconBySpeed(
+      const iconUrl = getVehicleIconBySpeed(
         device.speed,
         imei,
         device.date,
-        device.time
+        device.time,
+        device.VehicleType || 'car'
       );
       const rotation = device.course;
 
@@ -1135,6 +1136,55 @@ function getCarIconBySpeed(speed, imei, date, time) {
   return iconUrl;
 }
 
+function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
+  const basePath = "/static/images/";
+  let vehiclePrefix;
+  
+  // Determine vehicle type prefix
+  switch(vehicleType.toLowerCase()) {
+    case 'truck':
+      vehiclePrefix = 'truck';
+      break;
+    case 'bus':
+      vehiclePrefix = 'bus';
+      break;
+    case 'bike':
+      vehiclePrefix = 'bike';
+      break;
+    default: // Default to car for sedan, suv, hatchback, van, etc.
+      vehiclePrefix = 'car';
+  }
+
+  // Determine color based on speed
+  if (speedInKmh === 0) {
+    return `${basePath}${vehiclePrefix}_yellow.png`;
+  } else if (speedInKmh > 0 && speedInKmh <= 40) {
+    return `${basePath}${vehiclePrefix}_green.png`;
+  } else if (speedInKmh > 40 && speedInKmh <= 60) {
+    return `${basePath}${vehiclePrefix}_blue.png`;
+  } else {
+    return `${basePath}${vehiclePrefix}_red.png`;
+  }
+}
+
+// Replace getCarIconBySpeed with this new version
+function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
+  const speedInKmh = convertSpeedToKmh(speed);
+  let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType);
+
+  const now = new Date();
+  const lastUpdateTime = convertToDate(date, time);
+
+  const timeDiff = now - lastUpdateTime;
+  const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+  if (dayDiff >= 1) {
+    iconUrl = `/static/images/${vehicleType.toLowerCase()}_black.png`;
+  }
+
+  return iconUrl;
+}
+
 function checkForDataTimeout(imei) {
   const now = new Date();
   const marker = markers[imei];
@@ -1172,11 +1222,12 @@ function checkForDataTimeout(imei) {
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
-  const iconUrl = getCarIconBySpeed(
+  const iconUrl = getVehicleIconBySpeed(
     vehicle.speed,
     imei,
     vehicle.date,
-    vehicle.time
+    vehicle.time,
+    vehicle.VehicleType || 'car'
   );
   const rotation = vehicle.course;
 
@@ -1523,10 +1574,26 @@ function adjustFloatingCardHeight() {
   floatingCard.style.height = `${mapHeight * 0.6}px`; 
 }
 
+function getVehicleIconSize(vehicleType) {
+  switch(vehicleType.toLowerCase()) {
+    case 'truck':
+      return { width: 18, height: 60 }; 
+    case 'bus':
+      return { width: 22, height: 50 }; 
+    case 'bike':
+      return { width: 14, height: 38 }; 
+    default: // car
+      return { width: 18, height: 32 }; 
+  }
+}
+
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
   }
+
+  const vehicleType = device.VehicleType || 'car';
+  const size = getVehicleIconSize(vehicleType);
 
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
@@ -1535,8 +1602,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
   markerImage.alt = "Vehicle Icon";
-  markerImage.style.width = "18px";
-  markerImage.style.height = "32px";
+  markerImage.style.width = `${size.width}px`;
+  markerImage.style.height = `${size.height}px`;
 
   markerContent.appendChild(markerImage);
 
@@ -1564,6 +1631,9 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
   }
 
+  const vehicleType = marker.device.VehicleType || 'car';
+  const size = getVehicleIconSize(vehicleType);
+
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
   markerContent.style.transform = `rotate(${rotation}deg)`;
@@ -1571,8 +1641,8 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
   markerImage.alt = "Vehicle Icon";
-  markerImage.style.width = "18px";
-  markerImage.style.height = "32px";
+  markerImage.style.width = `${size.width}px`;
+  markerImage.style.height = `${size.height}px`;
 
   markerContent.appendChild(markerImage);
 
