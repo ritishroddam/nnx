@@ -351,7 +351,7 @@ async function plotPolyLineLiveMap(liveData) {
       position: liveCoords[liveCoords.length - 1],
       map: liveMaps,
       title: "Start",
-      content: carContent,
+      content: vehicleContent,
     });
 
     for (let i = 0; i < liveCoords.length; i++) {
