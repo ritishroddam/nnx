@@ -12,6 +12,29 @@ Sim Inventory
 
 {% block block_container %}
 
+<div class="status-counters mb-4">
+  <div class="counter active">
+    <span class="count" id="activeCount">0</span>
+    <span class="label">Active</span>
+  </div>
+  <div class="counter inactive">
+    <span class="count" id="inactiveCount">0</span>
+    <span class="label">Inactive</span>
+  </div>
+  <div class="counter rental">
+    <span class="count" id="rentalCount">0</span>
+    <span class="label">Rental</span>
+  </div>
+  <div class="counter package">
+    <span class="count" id="packageCount">0</span>
+    <span class="label">Package</span>
+  </div>
+  <div class="counter outrate">
+    <span class="count" id="outrateCount">0</span>
+    <span class="label">Outrate</span>
+  </div>
+</div>
+
 <div class="search-container mb-4">
   <label>Search:</label>
   <input type="text" id="simSearch" placeholder="Search by Mobile, SIM or IMEI..." />
@@ -24,6 +47,11 @@ Sim Inventory
     <option value="SafeCustody">Safe Custody</option>
     <option value="Suspended">Suspended</option>
   </select>
+    <select id="activeFilter" onchange="filterSims()">
+      <option value="All">All Activity</option>
+      <option value="Active">Active</option>
+      <option value="Inactive">Inactive</option>
+    </select>
 </div>
 </div>
 
