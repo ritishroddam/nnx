@@ -392,7 +392,7 @@ function updateVehicleCard(data) {
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
     vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || "Unknown"} - ${
+      <div class="vehicle-header">${data.LicensePlateNumber || data.imei} - ${
       data.status || "Unknown"
     }</div>
       <div class="vehicle-info">
@@ -689,7 +689,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
   const isDarkMode = document.body.classList.contains("dark-mode");
   const imei = device.imei || '<span class="missing-data">N/A</span>';
   const LicensePlateNumber =
-    device.LicensePlateNumber || '<span class="missing-data">N/A</span>';
+    device.LicensePlateNumber || imei;
   const speed =
     device.speed !== null && device.speed !== undefined
       ? `${convertSpeedToKmh(device.speed).toFixed(0)} kmph`
