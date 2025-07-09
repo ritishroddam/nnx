@@ -508,9 +508,12 @@ tr:hover {
     font-weight: 500;
 }
 
-#statusFilter{
+#statusFilter {
   width: 350px;
-  background: #555;
+  background: #fff;
+  color: #333;
+  border-radius: 5px;
+  border: 1px solid black;
 }
 
 .count-badge.active {
