@@ -513,7 +513,7 @@ tr:hover {
   background: #fff;
   color: #333;
   border-radius: 5px;
-  border: 2px solid black;
+  border: 1px solid black;
 }
 
 .count-badge.active {
