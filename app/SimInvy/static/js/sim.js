@@ -170,6 +170,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
+    setTimeout(() => {
+    updateCounters();
+  }, 100);
 });
 
 function searchSims() {
@@ -372,31 +375,52 @@ function filterSimsByStatus() {
 }
 
 function updateCounters() {
-  const allSims = document.querySelectorAll('#simTable tr:not([style*="display: none"])');
-  let activeCount = 0;
-  let inactiveCount = 0;
-  let availableCount = 0;
-  let allocatedCount = 0;
-  let safeCustodyCount = 0;
-  let suspendedCount = 0;
+  try {
+    const allSims = document.querySelectorAll('#simTable tr[data-id]');
+    let activeCount = 0;
+    let inactiveCount = 0;
+    let availableCount = 0;
+    let allocatedCount = 0;
+    let safeCustodyCount = 0;
+    let suspendedCount = 0;
 
-  allSims.forEach(sim => {
-    if (sim.classList.contains('available')) availableCount++;
-    if (sim.classList.contains('allocated')) allocatedCount++;
-    if (sim.classList.contains('safecustody')) safeCustodyCount++;
-    if (sim.classList.contains('suspended')) suspendedCount++;
-    
-    const isActive = sim.cells[4].textContent.trim() === 'Active';
-    if (isActive) activeCount++;
-    else inactiveCount++;
-  });
+    allSims.forEach(sim => {
+      if (sim.style.display === 'none') return;
+      
+      const statusCell = sim.cells[3];
+      const activeCell = sim.cells[4];
+      
+      if (!statusCell || !activeCell) return;
+      
+      const status = statusCell.textContent.trim();
+      const isActive = activeCell.textContent.trim() === 'Active';
 
-  document.getElementById('activeCount').textContent = activeCount;
-  document.getElementById('inactiveCount').textContent = inactiveCount;
-  document.getElementById('availableCount').textContent = availableCount;
-  document.getElementById('allocatedCount').textContent = allocatedCount;
-  document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
-  document.getElementById('suspendedCount').textContent = suspendedCount;
+      if (isActive) activeCount++;
+      else inactiveCount++;
+
+      switch(status) {
+        case 'Available': availableCount++; break;
+        case 'Allocated': allocatedCount++; break;
+        case 'SafeCustody': safeCustodyCount++; break;
+        case 'Suspended': suspendedCount++; break;
+      }
+    });
+
+    // Safely update counters
+    const updateCounter = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    updateCounter('activeCount', activeCount);
+    updateCounter('inactiveCount', inactiveCount);
+    updateCounter('availableCount', availableCount);
+    updateCounter('allocatedCount', allocatedCount);
+    updateCounter('safeCustodyCount', safeCustodyCount);
+    updateCounter('suspendedCount', suspendedCount);
+  } catch (error) {
+    console.error('Error updating counters:', error);
+  }
 }
 
 function renderSimTable(sims) {
@@ -434,6 +458,7 @@ function renderSimTable(sims) {
     
     tableBody.appendChild(row);
   });
+  updateCounters();
 }
 
 function formatDateForInput(dateStr) {
