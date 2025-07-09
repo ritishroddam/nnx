@@ -628,7 +628,12 @@ function renderVehicleCards(vehicles, filterValue = "all") {
       <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal">${gsmIcon}</span>
       ${sosIcon ? `<span class="material-symbols-outlined" style="${iconStyle}" title="SOS Alert">${sosIcon}</span>` : ""}
     `;
-
+    var listener;
+    if (vehicle.LicensePlateNumber === "Unknown"){
+      listener = vehicle.imei;
+    }else{
+      listener = vehicle.LicensePlateNumber;
+    }
     vehicleElement.innerHTML = `
     <div style="display:flex;align-item s:stretch;justify-content:space-between;">
       <div style="flex:1;">
@@ -639,7 +644,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
                 onclick="vehicleInfoPage('${
                   vehicle.LicensePlateNumber || vehicle.imei
                 }')">
-            ${vehicle.LicensePlateNumber || vehicle.imei}
+            ${listener}
           </span>
           <span style="margin-left:4px;">
             ${iconRow}
