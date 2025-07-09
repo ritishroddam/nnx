@@ -72,7 +72,6 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   setupDownloadButton();
-  updateCounters();
 
     document.getElementById('simSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim().toLowerCase();
@@ -336,54 +335,6 @@ function filterTable(searchTerm) {
     });
 }
 
-function updateCounters() {
-  const activeCount = document.querySelectorAll('tr.available, tr.allocated, tr.safecustody, tr.suspended').length;
-  const inactiveCount = document.querySelectorAll('tr:not(.available):not(.allocated):not(.safecustody):not(.suspended)').length;
-  
-  // These would need to be calculated based on your actual data
-  const rentalCount = 270; // Example value - replace with actual calculation
-  const packageCount = 0;  // Example value - replace with actual calculation
-  const outrateCount = 1;  // Example value - replace with actual calculation
-
-  document.getElementById('activeCount').textContent = activeCount;
-  document.getElementById('inactiveCount').textContent = inactiveCount;
-  document.getElementById('rentalCount').textContent = rentalCount;
-  document.getElementById('packageCount').textContent = packageCount;
-  document.getElementById('outrateCount').textContent = outrateCount;
-}
-
-// Modify the filterSims function to handle both status and active filters
-function filterSims() {
-  const status = document.getElementById('statusFilter').value;
-  const activity = document.getElementById('activeFilter').value;
-  
-  const tableBody = document.getElementById('simTable');
-  tableBody.innerHTML = '<tr><td colspan="12">Loading SIM data...</td></tr>';
-  
-  fetch(`/simInvy/get_sims_by_status/${status}/${activity}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      renderSimTable(data);
-      updateCounters();
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="12" class="error">
-            Error loading data: ${error.message}
-            <button onclick="filterSims()">Retry</button>
-          </td>
-        </tr>
-      `;
-    });
-}
-
 function filterSimsByStatus() {
   const status = document.getElementById('statusFilter').value;
   console.log(`Fetching SIMs with status: ${status}`);
@@ -404,6 +355,7 @@ function filterSimsByStatus() {
         throw new Error(data.error);
       }
       renderSimTable(data);
+      updateCounters();
     })
     .catch(error => {
       console.error('Error:', error);
@@ -415,7 +367,36 @@ function filterSimsByStatus() {
           </td>
         </tr>
       `;
+      updateCounters(); 
     });
+}
+
+function updateCounters() {
+  const allSims = document.querySelectorAll('#simTable tr:not([style*="display: none"])');
+  let activeCount = 0;
+  let inactiveCount = 0;
+  let availableCount = 0;
+  let allocatedCount = 0;
+  let safeCustodyCount = 0;
+  let suspendedCount = 0;
+
+  allSims.forEach(sim => {
+    if (sim.classList.contains('available')) availableCount++;
+    if (sim.classList.contains('allocated')) allocatedCount++;
+    if (sim.classList.contains('safecustody')) safeCustodyCount++;
+    if (sim.classList.contains('suspended')) suspendedCount++;
+    
+    const isActive = sim.cells[4].textContent.trim() === 'Active';
+    if (isActive) activeCount++;
+    else inactiveCount++;
+  });
+
+  document.getElementById('activeCount').textContent = activeCount;
+  document.getElementById('inactiveCount').textContent = inactiveCount;
+  document.getElementById('availableCount').textContent = availableCount;
+  document.getElementById('allocatedCount').textContent = allocatedCount;
+  document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
+  document.getElementById('suspendedCount').textContent = suspendedCount;
 }
 
 function renderSimTable(sims) {
@@ -424,7 +405,6 @@ function renderSimTable(sims) {
   
   if (!sims || sims.length === 0) {
     tableBody.innerHTML = '<tr><td colspan="12">No SIMs found with this status</td></tr>';
-    updateCounters();
     return;
   }
 

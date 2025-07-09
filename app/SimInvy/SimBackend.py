@@ -45,58 +45,9 @@ def page():
     
     return render_template('sim.html', sims=sims)
 
-# @sim_bp.route('/get_sims_by_status/<status>')
-# @jwt_required()
-# def get_sims_by_status(status):
-#     try:
-#         vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
-#         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
-#         sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
-
-#         all_sims = list(collection.find({}))
-        
-#         results = []
-#         for sim in all_sims:
-#             sim_number = sim.get('SimNumber', '')
-            
-#             actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
-            
-#             if status != 'All' and actual_status != status:
-#                 continue
-                
-#             sim_data = {
-#                 '_id': str(sim.get('_id', '')),
-#                 'MobileNumber': sim.get('MobileNumber', ''),
-#                 'SimNumber': sim_number,
-#                 'IMEI': sim_to_imei.get(sim_number, 'N/A'),
-#                 'status': actual_status,
-#                 'isActive': sim.get('isActive', True),
-#                 'statusDate': sim.get('statusDate', ''),
-#                 'reactivationDate': sim.get('reactivationDate', ''),
-#                 'DateIn': sim.get('DateIn', ''),
-#                 'DateOut': sim.get('DateOut', ''),
-#                 'Vendor': sim.get('Vendor', ''),
-#                 'lastEditedBy': sim.get('lastEditedBy', 'N/A')
-#             }
-            
-#             if actual_status in ['SafeCustody', 'Suspended']:
-#                 if 'statusDate' not in sim_data or not sim_data['statusDate']:
-#                     sim_data['statusDate'] = datetime.utcnow().strftime('%Y-%m-%d')
-#                 if actual_status == 'SafeCustody' and ('reactivationDate' not in sim_data or not sim_data['reactivationDate']):
-#                     reactivation_date = datetime.utcnow() + timedelta(days=90)
-#                     sim_data['reactivationDate'] = reactivation_date.strftime('%Y-%m-%d')
-            
-#             results.append(sim_data)
-        
-#         return jsonify(results)
-        
-#     except Exception as e:
-#         print(f"Error in get_sims_by_status: {str(e)}")
-#         return jsonify({'error': str(e)}), 500
-
-@sim_bp.route('/get_sims_by_status/<status>/<activity>')
+@sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
-def get_sims_by_status(status, activity):
+def get_sims_by_status(status):
     try:
         vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
@@ -109,19 +60,19 @@ def get_sims_by_status(status, activity):
             sim_number = sim.get('SimNumber', '')
             
             actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+            
             is_active = sim.get('isActive', True)
             
-            # Apply status filter
-            if status != 'All' and actual_status != status:
-                continue
+            if status != 'All':
+                if status in ['Active', 'Inactive']:
+                    # Activity filter
+                    if (status == 'Active' and not is_active) or (status == 'Inactive' and is_active):
+                        continue
+                else:
+                    # Status filter
+                    if actual_status != status:
+                        continue
                 
-            # Apply activity filter
-            if activity != 'All':
-                if activity == 'Active' and not is_active:
-                    continue
-                if activity == 'Inactive' and is_active:
-                    continue
-                    
             sim_data = {
                 '_id': str(sim.get('_id', '')),
                 'MobileNumber': sim.get('MobileNumber', ''),
