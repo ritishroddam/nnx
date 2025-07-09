@@ -12,6 +12,33 @@ Sim Inventory
 
 {% block block_container %}
 
+<div class="status-counters mb-4">
+  <div class="counter active">
+    <span class="count" id="activeCount">0</span>
+    <span class="label">Active</span>
+  </div>
+  <div class="counter inactive">
+    <span class="count" id="inactiveCount">0</span>
+    <span class="label">Inactive</span>
+  </div>
+  <div class="counter available"> 
+    <span class="count" id="availableCount">0</span>
+    <span class="label">Available</span>
+  </div>
+  <div class="counter allocated">
+    <span class="count" id="allocatedCount">0</span>
+    <span class="label">Allocated</span>
+  </div>
+  <div class="counter safecustody"> 
+    <span class="count" id="safeCustodyCount">0</span>
+    <span class="label">Safe Custody</span>
+  </div>
+  <div class="counter suspended"> 
+    <span class="count" id="suspendedCount">0</span>
+    <span class="label">Suspended</span>
+  </div>
+</div>
+
 <div class="search-container mb-4">
   <label>Search:</label>
   <input type="text" id="simSearch" placeholder="Search by Mobile, SIM or IMEI..." />
@@ -23,6 +50,8 @@ Sim Inventory
     <option value="Allocated">Allocated</option>
     <option value="SafeCustody">Safe Custody</option>
     <option value="Suspended">Suspended</option>
+    <option value="Active">Active</option>
+    <option value="Inactive">Inactive</option>
   </select>
 </div>
 </div>

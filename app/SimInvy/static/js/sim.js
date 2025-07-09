@@ -170,6 +170,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
+    setTimeout(() => {
+    updateCounters();
+  }, 100);
 });
 
 function searchSims() {
@@ -355,6 +358,7 @@ function filterSimsByStatus() {
         throw new Error(data.error);
       }
       renderSimTable(data);
+      updateCounters();
     })
     .catch(error => {
       console.error('Error:', error);
@@ -366,7 +370,57 @@ function filterSimsByStatus() {
           </td>
         </tr>
       `;
+      updateCounters(); 
     });
+}
+
+function updateCounters() {
+  try {
+    const allSims = document.querySelectorAll('#simTable tr[data-id]');
+    let activeCount = 0;
+    let inactiveCount = 0;
+    let availableCount = 0;
+    let allocatedCount = 0;
+    let safeCustodyCount = 0;
+    let suspendedCount = 0;
+
+    allSims.forEach(sim => {
+      if (sim.style.display === 'none') return;
+      
+      const statusCell = sim.cells[3];
+      const activeCell = sim.cells[4];
+      
+      if (!statusCell || !activeCell) return;
+      
+      const status = statusCell.textContent.trim();
+      const isActive = activeCell.textContent.trim() === 'Active';
+
+      if (isActive) activeCount++;
+      else inactiveCount++;
+
+      switch(status) {
+        case 'Available': availableCount++; break;
+        case 'Allocated': allocatedCount++; break;
+        case 'SafeCustody': safeCustodyCount++; break;
+        case 'Suspended': suspendedCount++; break;
+      }
+    });
+
+    // Safely update counters
+    const updateCounter = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    updateCounter('activeCount', activeCount);
+    updateCounter('inactiveCount', inactiveCount);
+    updateCounter('availableCount', availableCount);
+    updateCounter('allocatedCount', allocatedCount);
+    updateCounter('safeCustodyCount', safeCustodyCount);
+    updateCounter('suspendedCount', suspendedCount);
+  } catch (error) {
+    console.error('Error updating counters:', error);
+  }
 }
 
 function renderSimTable(sims) {
@@ -404,6 +458,7 @@ function renderSimTable(sims) {
     
     tableBody.appendChild(row);
   });
+  updateCounters();
 }
 
 function formatDateForInput(dateStr) {

@@ -61,8 +61,17 @@ def get_sims_by_status(status):
             
             actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
             
-            if status != 'All' and actual_status != status:
-                continue
+            is_active = sim.get('isActive', True)
+            
+            if status != 'All':
+                if status in ['Active', 'Inactive']:
+                    # Activity filter
+                    if (status == 'Active' and not is_active) or (status == 'Inactive' and is_active):
+                        continue
+                else:
+                    # Status filter
+                    if actual_status != status:
+                        continue
                 
             sim_data = {
                 '_id': str(sim.get('_id', '')),
@@ -70,7 +79,7 @@ def get_sims_by_status(status):
                 'SimNumber': sim_number,
                 'IMEI': sim_to_imei.get(sim_number, 'N/A'),
                 'status': actual_status,
-                'isActive': sim.get('isActive', True),
+                'isActive': is_active,
                 'statusDate': sim.get('statusDate', ''),
                 'reactivationDate': sim.get('reactivationDate', ''),
                 'DateIn': sim.get('DateIn', ''),
