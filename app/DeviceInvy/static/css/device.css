@@ -448,50 +448,56 @@ tr:hover {
 }
 
 .scrollable-table-container {
-  flex-grow: 1;
-  overflow: hidden;
-  overflow-x: auto;
-  background: white;
+  width: 100%;
+  overflow: auto;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-/* .device-table {
-  width: 100%;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border-collapse: separate;
-  border-spacing: 0;
+  margin-bottom: 20px;
+  max-height: calc(100vh - 250px);
 }
-
-.device-table th {
-  background-color: #f8f9fa;
-  padding: 12px 15px;
-  text-align: left;
-  font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #e9ecef;
-} */
 
 .device-table {
   width: 100%;
-  table-layout: fixed;
+  border-collapse: collapse;
 }
 
 .device-table thead {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #f8f9fa;
+}
+
+.device-table th {
+  background-color: #f5f5f5;
+  font-weight: 500;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .device-table tbody {
-  overflow-y: auto;
   display: block;
-  height: calc(100vh - 300px);
+  overflow-y: auto;
+  max-height: calc(100vh - 300px); 
+}
+
+.device-table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.device-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.device-table tr:hover {
+  background-color: #f9f9f9;
 }
 
 .device-table thead tr, 
@@ -501,36 +507,27 @@ tr:hover {
   table-layout: fixed;
 }
 
-/* .device-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #e9ecef;
-  color: #495057;
+.dark-mode .table-scroll-container {
+  background-color: #23272b;
 }
 
-.device-table tr:hover {
-  background-color: #f8f9fa;
+.dark-mode .device-table {
+  color: #ccc;
 }
 
-.device-table thead,
-.device-table tbody {
-    width: 100%;
+.dark-mode .device-table th {
+  background-color: #333;
+  color: #ccc;
+  border-bottom-color: #444;
 }
 
-.device-table th:last-child,
-.device-table td:last-child {
-    width: 16px;
-    min-width: 16px;
-    max-width: 16px;
-    padding: 0;
-    border: none;
-    background: transparent;
+.dark-mode .device-table td {
+  border-bottom-color: #444;
 }
 
-.device-table tbody {
-    max-height: 500px;
-    overflow-y: auto;
-    overflow-x: hidden;
-} */
+.dark-mode .device-table tr:hover {
+  background-color: #444;
+}
 
 .dark-mode .device-table tbody{
     background-color: #000;
@@ -541,12 +538,40 @@ tr:hover {
     background-color: #333;
 }
 
-.device-table th, 
-.device-table td {
-  padding: 10px 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.device-table tbody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.device-table tbody::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.device-table tbody::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.device-table tbody::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 #uploadBox{
