@@ -15,6 +15,14 @@ Device Inventory
 <section class="dashboard">
   <div>
 
+    <div class="status-counts">
+        <span class="count-badge active">Active: <span id="activeCount">0</span></span>
+        <span class="count-badge inactive">Inactive: <span id="inactiveCount">0</span></span>
+        <span class="count-badge rental">Rental: <span id="rentalCount">0</span></span>
+        <span class="count-badge package">Package: <span id="packageCount">0</span></span>
+        <span class="count-badge outrate">Outrate: <span id="outrateCount">0</span></span>
+    </div>
+
     <div class="search-container mb-4">
       <input type="text" id="imeiSearch" placeholder="Search by IMEI (full or last 5 digits)" />
       <button id="searchBtn" class="btn">Search</button>
@@ -30,14 +38,6 @@ Device Inventory
             <option value="Package">Package</option>
             <option value="Outrate">Outrate</option>
         </select>
-
-        <div class="status-counts">
-            <span class="count-badge active">Active: <span id="activeCount">0</span></span>
-            <span class="count-badge inactive">Inactive: <span id="inactiveCount">0</span></span>
-            <span class="count-badge rental">Rental: <span id="rentalCount">0</span></span>
-            <span class="count-badge package">Package: <span id="packageCount">0</span></span>
-            <span class="count-badge outrate">Outrate: <span id="outrateCount">0</span></span>
-        </div>
     </div>
     <br>
 
