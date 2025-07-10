@@ -133,14 +133,14 @@ tr:hover {
 .form-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px; /* Adds space between fields */
+  gap: 15px; 
   justify-content: space-between;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  width: 30%; /* Three columns */
+  width: 30%; 
 }
 
 .form-group label {
@@ -165,13 +165,6 @@ tr:hover {
   top: 20px;
 }
 
-/* .button-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
-} */
-
 .button-container {
   display: flex;
   gap: 10px;
@@ -195,22 +188,6 @@ tr:hover {
   background-color: #e53935;
   color: white;
 }
-
-/* .status-btn {
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: #fff;
-  cursor: default;
-}
-
-.status-active {
-  background-color: #28a745;
-}
-
-.status-inactive {
-  background-color: #dc3545;
-} */
 
 .status-btn {
   padding: 5px 10px;
@@ -284,21 +261,6 @@ tr:hover {
   opacity: 0.8;
 }
 
-/* .icon-btn {
-  background: 0 0;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.edit-icon {
-  color: #007bff;
-}
-
-.delete-icon {
-  color: #dc3545;
-} */
-
 .icon-btn {
   background: none;
   border: none;
@@ -315,7 +277,6 @@ tr:hover {
   color: #e53935;
 }
 
-/* Modal styles */
 .modal {
   display: flex;
   align-items: center;
@@ -332,21 +293,6 @@ tr:hover {
 .modal.hidden {
   display: none;
 }
-
-/* .modal-content {
-    background-color: #fff;
-    color: #222;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(44, 62, 80, 0.18), 0 1.5px 6px rgba(44, 62, 80, 0.08);
-    padding: 32px 32px 26px 28px;
-    width: 100%;
-    max-width: 600px;
-    max-height: 100vh;
-    overflow-y: auto;
-    position: relative;
-    transition: box-shadow 0.2s;
-    font-family: 'Segoe UI', Arial, sans-serif;
-} */
 
 .modal-content {
   background: white;
@@ -420,8 +366,6 @@ tr:hover {
 .dark-mode .close-btn:hover {
   color: #fff;
 }
-
-/* Scrollable tbody with fixed header */
 
 .table-scroll-container {
   width: 100%;
@@ -650,18 +594,6 @@ tr:hover {
 .device-table th:nth-child(13), .device-table td:nth-child(13) { width: 100px; }
 .device-table th:nth-child(14), .device-table td:nth-child(14) { width: 100px; }
 
-/* .search-container {
-    display: flex;
-    gap: 10px;
-}
-
-.search-container input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-} */
-
 .search-container {
   display: flex;
   gap: 10px;
@@ -701,20 +633,6 @@ tr:hover {
     margin-left: 500px;
 }
 
-/* .status-counts {
-    display: flex;
-    gap: 50px;
-    flex-wrap: wrap;
-    margin-left: 300px;
-}
-
-.count-badge {
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: 500;
-} */
-
 .status-counts {
   display: flex;
   gap: 20px;
@@ -722,54 +640,6 @@ tr:hover {
   flex-wrap: wrap;
   margin-left: 0;
 }
-
-/* .count-badge {
-  padding: 15px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  min-width: 120px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.count-badge.active {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border-left: 4px solid #2e7d32;
-}
-
-.count-badge.inactive {
-  background-color: #ffebee;
-  color: #c62828;
-  border-left: 4px solid #c62828;
-}
-
-.count-badge.rental {
-  background-color: #e3f2fd;
-  color: #1565c0;
-  border-left: 4px solid #1565c0;
-}
-
-.count-badge.package {
-  background-color: #f3e5f5;
-  color: #6a1b9a;
-  border-left: 4px solid #6a1b9a;
-}
-
-.count-badge.outrate {
-  background-color: #fff8e1;
-  color: #ff8f00;
-  border-left: 4px solid #ff8f00;
-} */
-
-/* #statusFilter {
-  width: 350px;
-  background: #fff;
-  color: #333;
-  border-radius: 5px;
-  border: 1px solid black;
-} */
 
 #statusFilter {
   padding: 10px;
@@ -779,31 +649,6 @@ tr:hover {
   color: #333;
   width: 400px;
 }
-
-/* .count-badge.active {
-    background-color: #e6f7e6;
-    color: #2e7d32;
-}
-
-.count-badge.inactive {
-    background-color: #ffebee;
-    color: #c62828;
-}
-
-.count-badge.rental {
-    background-color: #e3f2fd;
-    color: #1565c0;
-}
-
-.count-badge.package {
-    background-color: #f3e5f5;
-    color: #6a1b9a;
-}
-
-.count-badge.outrate {
-    background-color: #fff8e1;
-    color: #ff8f00;
-} */
 
 .status-counters {
   display: flex;
