@@ -454,7 +454,6 @@ tr:hover {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   background: white;
   margin-bottom: 20px;
-  max-height: calc(100vh - 250px);
 }
 
 .device-table {
@@ -633,7 +632,7 @@ tr:hover {
 .device-table th:nth-child(2), .device-table td:nth-child(2) { width: 140px; }
 .device-table th:nth-child(3), .device-table td:nth-child(3) { width: 150px; }
 .device-table th:nth-child(4), .device-table td:nth-child(4) { width: 150px; }
-.device-table th:nth-child(5), .device-table td:nth-child(5) { width: 120px; }
+.device-table th:nth-child(5), .device-table td:nth-child(5) { width: 150px; }
 .device-table th:nth-child(6), .device-table td:nth-child(6) { width: 120px; }
 .device-table th:nth-child(7), .device-table td:nth-child(7) { width: 100px; }
 .device-table th:nth-child(8), .device-table td:nth-child(8) { width: 100px; }
