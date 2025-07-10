@@ -653,7 +653,7 @@ tr:hover {
   margin-left: 0;
 }
 
-.count-badge {
+/* .count-badge {
   padding: 15px 20px;
   border-radius: 8px;
   font-size: 14px;
@@ -691,7 +691,7 @@ tr:hover {
   background-color: #fff8e1;
   color: #ff8f00;
   border-left: 4px solid #ff8f00;
-}
+} */
 
 /* #statusFilter {
   width: 350px;
