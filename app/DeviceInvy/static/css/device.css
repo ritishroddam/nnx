@@ -477,9 +477,7 @@ tr:hover {
 
 .device-table {
   width: 100%;
-  border-collapse: collapse;
   table-layout: fixed;
-  margin: 0;
 }
 
 .device-table thead {
@@ -542,14 +540,12 @@ tr:hover {
     background-color: #333;
 }
 
-.device-table th,
+.device-table th, 
 .device-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    box-sizing: border-box;
-    word-break: break-word;
-    min-width: 200px; /* Minimum width for each cell */
+  padding: 10px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #uploadBox{
