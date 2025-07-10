@@ -591,7 +591,6 @@ tr:hover {
 .search-container {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
   background: white;
   padding: 10px;
   border-radius: 8px;
@@ -739,7 +738,6 @@ tr:hover {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
 }
 
 .counter {
