@@ -457,22 +457,13 @@ tr:hover {
   flex-direction: column;
 }
 
-.table-container {
+/* .device-table {
   width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  margin-top: 20px;
-}
-
-.device-table {
-  width: auto;
-  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: auto;
 }
 
 .device-table th {
@@ -482,24 +473,32 @@ tr:hover {
   font-weight: 600;
   color: #495057;
   border-bottom: 2px solid #e9ecef;
+} */
+
+.device-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.device-table thead {
   position: sticky;
   top: 0;
-  white-space: nowrap;
+  z-index: 10;
+  background-color: #f8f9fa;
 }
 
-.device-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #e9ecef;
-  color: #495057;
-  white-space: nowrap;
+.device-table tbody {
+  overflow-y: auto;
+  display: block;
+  height: calc(100vh - 300px);
 }
 
-/* .device-table thead tr, 
+.device-table thead tr, 
 .device-table tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
-} */
+}
 
 /* .device-table td {
   padding: 12px 15px;
