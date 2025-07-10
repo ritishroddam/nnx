@@ -18,7 +18,6 @@ input[type="date"],
 input[type="file"],
 input[type="text"] {
   width: 100%;
-  max-width: 300px;
   padding: 10px;
   margin-bottom: 20px;
   border: 1px solid #ccc;
@@ -603,6 +602,7 @@ tr:hover {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  width: 400px;
 }
 
 #searchBtn {
@@ -627,7 +627,7 @@ tr:hover {
 .filter-container {
     display: flex;
     align-items: center;
-    gap: 15px;
+    margin-left: 500px;
 }
 
 /* .status-counts {
@@ -706,7 +706,7 @@ tr:hover {
   border-radius: 4px;
   background: white;
   color: #333;
-  width: 200px;
+  width: 400px;
 }
 
 /* .count-badge.active {
