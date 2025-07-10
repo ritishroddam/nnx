@@ -257,6 +257,11 @@ tr:hover {
   }
 }
 
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .action-btn {
   padding: 5px 10px;
   color: #fff;
@@ -433,13 +438,26 @@ tr:hover {
   border-radius: 4px;
 }
 
-/* .device-table {
-  min-width: 1600px; 
-  width: max-content;
-  table-layout: auto;
-} */
+.fixed-header {
+  flex-shrink: 0;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
 
-.device-table {
+.scrollable-table-container {
+  flex-grow: 1;
+  overflow: hidden;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* .device-table {
   width: 100%;
   background: white;
   border-radius: 8px;
@@ -455,9 +473,36 @@ tr:hover {
   font-weight: 600;
   color: #495057;
   border-bottom: 2px solid #e9ecef;
+} */
+
+.device-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0;
 }
 
-.device-table td {
+.device-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f8f9fa;
+}
+
+.device-table tbody {
+  overflow-y: auto;
+  display: block;
+  height: calc(100vh - 300px);
+}
+
+.device-table thead tr, 
+.device-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* .device-table td {
   padding: 12px 15px;
   border-bottom: 1px solid #e9ecef;
   color: #495057;
@@ -483,10 +528,10 @@ tr:hover {
 }
 
 .device-table tbody {
-    max-height: 500px;   /* Set your preferred height */
+    max-height: 500px;
     overflow-y: auto;
     overflow-x: hidden;
-}
+} */
 
 .dark-mode .device-table tbody{
     background-color: #000;
@@ -590,10 +635,7 @@ tr:hover {
 .search-container {
   display: flex;
   gap: 10px;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
 }
 
 .search-container input {
@@ -602,7 +644,6 @@ tr:hover {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
-  width: 400px;
 }
 
 #searchBtn {
@@ -737,6 +778,7 @@ tr:hover {
 .status-counters {
   display: flex;
   gap: 15px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
