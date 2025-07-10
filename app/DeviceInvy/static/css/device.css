@@ -448,7 +448,7 @@ tr:hover {
 
 .dark-mode .fixed-header {
   color: #ccc;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px #cccccc90;
 }
 
 .scrollable-table-container {
@@ -461,7 +461,7 @@ tr:hover {
 
 .dark-mode .scrollable-table-container {
   color: #ccc;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px #cccccc90;
 }
 
 .device-table {
