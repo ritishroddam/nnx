@@ -34,14 +34,17 @@ function downloadReport(reportId) {
                     throw new Error(errorData.message || "Failed to download the report.");
                 });
             }
-            return response.blob();
+            const contentDisposition = response.headers.get("Content-Disposition");
+            const fileNameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+            const fileName = fileNameMatch ? fileNameMatch[1] : `report_${reportId}.xlsx`; // Fallback filename
+            return response.blob().then(blob => ({ blob, fileName }));
         })
-        .then((blob) => {
+        .then(({ blob, fileName }) => {
             // Create a download link for the file
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `report_${reportId}.xlsx`; // Default filename
+            a.download = fileName; // Use the dynamic file name
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);

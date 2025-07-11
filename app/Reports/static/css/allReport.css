@@ -687,6 +687,7 @@ input[type="datetime-local"] {
     transition: background-color 0.2s;
     border-radius: 8px;
     background-color: #f1f1f1;
+    margin-bottom: 10px;
 }
 
 .dark-mode .report-item {
