@@ -5,6 +5,7 @@ import traceback
 from pymongo import MongoClient
 import pandas as pd
 from datetime import datetime
+from datetime import timezone as timeZ
 import pytz
 from pytz import timezone
 from io import BytesIO
@@ -1091,7 +1092,7 @@ def get_recent_reports():
     try:
         date_range = request.args.get('range', 'today')
         
-        now = datetime.now()
+        now = datetime.now(timeZ.utc)
         
         if date_range == 'today':
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
