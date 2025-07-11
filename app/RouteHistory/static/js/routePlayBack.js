@@ -696,6 +696,8 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
     div.style.backgroundSize = "contain";
     div.style.backgroundRepeat = "no-repeat";
     div.style.cursor = "pointer";
+    div.style.left = "2px";
+    div.style.bottom = "2px"
 
     // Add click listener for InfoWindow
     div.addEventListener("click", () => {
