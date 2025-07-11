@@ -1162,7 +1162,7 @@ def download_report(report_id):
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,
-            download_name=report['report_name'] + '.xlsx'
+            download_name=report['filename'] + '.xlsx'
         )
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
