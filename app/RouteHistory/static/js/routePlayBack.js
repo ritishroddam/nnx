@@ -859,9 +859,9 @@ async function plotPathOnMap(pathCoordinates) {
     const arrowColor = darkMode ? "#fff" : "#2a2a2a";
 
     const arrowContent = document.createElement("img");
-      arrowContent.src = "/static/images/Arrow.png";
-      arrowContent.style.width = `5px`;
-      arrowContent.style.height = `5px`;
+      arrowContent.src = "/static/images/Arrow.svg";
+      arrowContent.style.width = `20px`;
+      arrowContent.style.height = `20px`;
       arrowContent.style.position = "absolute";
       arrowContent.alt = "Arrow";
       arrowContent.style.transform = `rotate(${calculateBearingGoogle(
