@@ -1094,16 +1094,14 @@ def get_recent_reports():
         tz = timezone('Asia/Kolkata')  # Adjust to your timezone
         
         now = datetime.now(pytz.UTC)
-        now_local = now.astimezone(tz)
         
         if date_range == 'today':
-            start_date = datetime(now_local.year, now_local.month, now_local.day, tzinfo=tz).astimezone(pytz.UTC)
+            start_date = now
         elif date_range == 'last24hours':
             start_date = now - timedelta(hours=24)
         elif date_range == 'yesterday':
-            yesterday = now_local - timedelta(days=1)
-            start_date = datetime(yesterday.year, yesterday.month, yesterday.day, tzinfo=tz).astimezone(pytz.UTC)
-            end_date = datetime(now_local.year, now_local.month, now_local.day, tzinfo=tz).astimezone(pytz.UTC)
+            start_date = now
+            end_date = now - timedelta(days=1)
         elif date_range == 'last7days':
             start_date = now - timedelta(days=7)
         elif date_range == 'last30days':
