@@ -1091,7 +1091,6 @@ def get_recent_reports():
     try:
         date_range = request.args.get('range', 'today')
         user_id = get_jwt_identity()
-        tz = timezone('Asia/Kolkata')  # Adjust to your timezone
         
         now = datetime.now(pytz.UTC)
         
