@@ -1091,7 +1091,7 @@ def get_recent_reports():
     try:
         date_range = request.args.get('range', 'today')
         
-        now = datetime.now(pytz.UTC)
+        now = datetime.now()
         
         if date_range == 'today':
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -1114,6 +1114,8 @@ def get_recent_reports():
         
         if date_range == 'yesterday':
             query['generated_at']['$lt'] = end_date
+        
+        print(f"[DEBUG] Query: {query}")
         
         reports = list(db['generated_reports'].find(
             query,
