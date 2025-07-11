@@ -688,16 +688,16 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
 
   overlay.onAdd = function () {
     const div = document.createElement("div");
-    div.style.width = "10px";
-    div.style.height = "10px";
+    div.style.width = "15px";
+    div.style.height = "15px";
     div.style.position = "absolute";
     div.style.transform = `rotate(${calculateBearingGoogle(nextCoord, coord)}deg)`;
     div.style.backgroundImage = "url('/static/images/Arrow.png')";
     div.style.backgroundSize = "contain";
     div.style.backgroundRepeat = "no-repeat";
     div.style.cursor = "pointer";
-    div.style.left = "2px";
-    div.style.bottom = "2px"
+    div.style.left = "10px";
+    div.style.bottom = "10px"
 
     // Add click listener for InfoWindow
     div.addEventListener("click", () => {
