@@ -1090,7 +1090,6 @@ def view_report_preview():
 def get_recent_reports():
     try:
         date_range = request.args.get('range', 'today')
-        user_id = get_jwt_identity()
         
         now = datetime.now(pytz.UTC)
         
@@ -1109,7 +1108,7 @@ def get_recent_reports():
             start_date = now - timedelta(days=1)
         
         query = {
-            'user_id': user_id,
+            'user_id': get_jwt_identity(),
             'generated_at': {'$gte': start_date}
         }
         
