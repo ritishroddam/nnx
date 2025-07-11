@@ -1095,12 +1095,12 @@ def get_recent_reports():
         now = datetime.now(pytz.UTC)
         
         if date_range == 'today':
-            start_date = now
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
         elif date_range == 'last24hours':
             start_date = now - timedelta(hours=24)
         elif date_range == 'yesterday':
-            start_date = now
-            end_date = now - timedelta(days=1)
+            start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(hours=24)
         elif date_range == 'last7days':
             start_date = now - timedelta(days=7)
         elif date_range == 'last30days':
@@ -1127,7 +1127,7 @@ def get_recent_reports():
                 '_id': str(report['_id']),
                 'report_name': report['report_name'],
                 'generated_at': report['generated_at'].isoformat(),
-                'size': report.get('size', 0),  # Size in bytes
+                'size': report.get('size', 0),
                 'vehicle_number': report.get('vehicle_number', '')
             } for report in reports]
         })
