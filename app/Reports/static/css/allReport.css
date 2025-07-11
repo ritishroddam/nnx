@@ -120,6 +120,10 @@
   color: #34495e;
 }
 
+.dark-mode .report-card i{
+  color: #ccc;
+}
+
 .modal {
   display: none; 
   position: fixed; 
