@@ -1609,9 +1609,9 @@ function getVehicleIconSize(vehicleType) {
     case 'bus':
       return { width: 35, height: 80 }; 
     case 'bike':
-      return { width: 24, height: 64 }; 
+      return { width: 21, height: 56 }; 
     default: // car
-      return { width: 33, height: 64 }; 
+      return { width: 29, height: 56 }; 
   }
 }
 
