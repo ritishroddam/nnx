@@ -55,8 +55,6 @@ function downloadReport(reportId) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  loadRecentReports();
-  
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
   const fieldSelection = document.getElementById("fieldSelection");
@@ -107,97 +105,25 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function loadRecentReports(range) {
     fetch(`/reports/get_recent_reports?range=${range}`)
-        .then(response => response.json())
-        .then(data => {
-            generatedReports = data.reports;
-            renderRecentReports();
-        })
-        .catch(error => {
-            console.error('Error loading recent reports:', error);
-        });
-}
+      .then(response => response.json())
+      .then(data => {
+          if (data.success && data.reports.length > 0) {
+              renderRecentReports(data.reports);
+          } else {
+              document.getElementById('recentReportsList').innerHTML = 
+                  '<p>Your generated reports will be visible here.</p>';
+          }
+      })
+      .catch(error => {
+          console.error('Error loading recent reports:', error);
+      });
+  }
 
-function renderRecentReports() {
-    const container = document.getElementById('recentReportsList');
-    
-    if (generatedReports.length === 0) {
-        container.innerHTML = '<p class="no-reports">Your generated reports will be visible here.</p>';
-        return;
-    }
-    
-    container.innerHTML = '';
-    
-    generatedReports.forEach(report => {
-        const reportItem = document.createElement('div');
-        reportItem.className = 'report-item';
-        
-        const reportDate = new Date(report.generated_at);
-        const formattedDate = reportDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-        const formattedTime = reportDate.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        reportItem.innerHTML = `
-            <div class="report-info">
-                <div class="report-name">${report.report_name}</div>
-                <div class="report-meta">
-                    <span class="report-date">${formattedDate}</span>
-                    <span class="report-time">${formattedTime}</span>
-                </div>
-            </div>
-            <div class="report-actions">
-                <button class="view-report" data-id="${report._id}" title="View Report">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="download-report" data-id="${report._id}" title="Download Report">
-                    <i class="fas fa-download"></i>
-                </button>
-            </div>
-        `;
-        
-        container.appendChild(reportItem);
-    });
-    
-    // Add event listeners to the buttons
-    document.querySelectorAll('.view-report').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const reportId = this.dataset.id;
-            viewReport(reportId);
-        });
-    });
-    
-    document.querySelectorAll('.download-report').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const reportId = this.dataset.id;
-            downloadReport(reportId);
-        });
-    });
-}
+  function renderRecentReports(reports) {
+      const container = document.getElementById('recentReportsList');
+      container.innerHTML = '';
 
-function loadRecentReports() {
-    fetch('/reports/get_recent_reports')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.reports.length > 0) {
-                renderRecentReports(data.reports);
-            } else {
-                document.getElementById('recentReportsList').innerHTML = 
-                    '<p>Your generated reports will be visible here.</p>';
-            }
-        })
-        .catch(error => console.error('Error loading reports:', error));
-}
-
-function renderRecentReports(reports) {
-    const container = document.getElementById('recentReportsList');
-    container.innerHTML = '';
-    
-    reports.forEach(report => {
+      reports.forEach(report => {
         const reportItem = document.createElement('div');
         reportItem.className = 'report-item';
         
@@ -225,8 +151,8 @@ function renderRecentReports(reports) {
         `;
         
         container.appendChild(reportItem);
-    });
-}
+      });
+  }
 
 // Helper function to format time ago
 function formatTimeAgo(date) {
