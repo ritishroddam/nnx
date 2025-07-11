@@ -172,7 +172,7 @@ function viewReport(reportId) {
     
     // You can reuse your existing preview modal here
     // Populate it with the report data
-    alert(`Viewing report: ${report.report_name}`);
+    displayFlashMessage(`Viewing report: ${report.report_name}`,"sucess");
 }
   const vehicleSelect = document.getElementById("vehicleNumber");
   const vehicleSelectize = vehicleSelect.selectize;
