@@ -858,17 +858,22 @@ async function plotPathOnMap(pathCoordinates) {
 
     const arrowColor = darkMode ? "#fff" : "#2a2a2a";
 
-    const arrowContent = document.createElement("div");
-    arrowContent.style.width = "10px";
-    arrowContent.style.height = "10px";
-    arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-    arrowContent.style.borderLeft = "5px solid transparent";
-    arrowContent.style.borderRight = "5px solid transparent";
-    arrowContent.style.position = "absolute";
-    arrowContent.style.transform = `rotate(${calculateBearingGoogle(
-      nextCoord,coord
-    )}deg)`;
+    const arrowContent = document.createElement("img");
+      arrowContent.src = "/static/images/Arrow.png";
+      arrowContent.style.width = `5px`;
+      arrowContent.style.height = `5px`;
+      arrowContent.style.position = "absolute";
+      arrowContent.alt = "Arrow";
+      arrowContent.style.transform = `rotate(${calculateBearingGoogle(
+        nextCoord,coord
+      )}deg)`;
+    // arrowContent.style.width = "10px";
+    // arrowContent.style.height = "10px";
+    // arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
+    // arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+    // arrowContent.style.borderLeft = "5px solid transparent";
+    // arrowContent.style.borderRight = "5px solid transparent";
+    // arrowContent.style.position = "absolute";
 
     const marker = new google.maps.marker.AdvancedMarkerElement({
       position: coord, 
