@@ -683,6 +683,52 @@ let deckLayers = [];
 let deckInitialized = false;
 let carIconUrl = "/static/images/car_green.png";
 
+function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
+  const overlay = new google.maps.OverlayView();
+
+  overlay.onAdd = function () {
+    const div = document.createElement("div");
+    div.style.width = "10px";
+    div.style.height = "10px";
+    div.style.position = "absolute";
+    div.style.transform = `rotate(${calculateBearingGoogle(nextCoord, coord)}deg)`;
+    div.style.backgroundImage = "url('/static/images/Arrow.png')";
+    div.style.backgroundSize = "contain";
+    div.style.backgroundRepeat = "no-repeat";
+    div.style.cursor = "pointer";
+
+    // Add click listener for InfoWindow
+    div.addEventListener("click", () => {
+      const infoWindow = new google.maps.InfoWindow({
+        content: infoWindowContent,
+      });
+      infoWindow.setPosition(coord);
+      infoWindow.open(map);
+    });
+
+    this.div = div;
+    const panes = this.getPanes();
+    panes.overlayMouseTarget.appendChild(div);
+  };
+
+  overlay.draw = function () {
+    const projection = this.getProjection();
+    const position = projection.fromLatLngToDivPixel(new google.maps.LatLng(coord.lat, coord.lng));
+    this.div.style.left = `${position.x}px`;
+    this.div.style.top = `${position.y}px`;
+  };
+
+  overlay.onRemove = function () {
+    if (this.div) {
+      this.div.parentNode.removeChild(this.div);
+      this.div = null;
+    }
+  };
+
+  overlay.setMap(map);
+  return overlay;
+}
+
 async function plotPathOnMap(pathCoordinates) {
   const darkMode = document.body.classList.contains("dark-mode");
   if (window.__allMapMarkers && Array.isArray(window.__allMapMarkers)) {
@@ -855,51 +901,17 @@ async function plotPathOnMap(pathCoordinates) {
     const coord = coords[index];
     const nextCoord = coords[index + 1];
     const pathCoord = pathCoordinates[index];
-
-    const arrowColor = darkMode ? "#fff" : "#2a2a2a";
-
-    const arrowContent = document.createElement("img");
-      arrowContent.src = "/static/images/Arrow.png";
-      arrowContent.style.width = `10px`;
-      arrowContent.style.height = `10px`;
-      arrowContent.style.position = "absolute";
-      arrowContent.alt = "Arrow";
-      arrowContent.style.transform = `rotate(${calculateBearingGoogle(
-        nextCoord,coord
-      )}deg)`;
-    // arrowContent.style.width = "10px";
-    // arrowContent.style.height = "10px";
-    // arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-    // arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-    // arrowContent.style.borderLeft = "5px solid transparent";
-    // arrowContent.style.borderRight = "5px solid transparent";
-    // arrowContent.style.position = "absolute";
-
-    const marker = new google.maps.marker.AdvancedMarkerElement({
-      position: coord, 
-      map: map,
-      title: "Arrow",
-      content: arrowContent,
-    });
-    window.__allMapMarkers.push(marker);
-
-    const ignition = pathCoord.ignition === "1" ? "On" : "Off";
-
-    const infoWindow = new google.maps.InfoWindow({
-      content: `<div>
-                <h3>${pathCoord.LicensePlateNumber}</h3>
-                <p><strong>Timestamp:</strong> ${pathCoord.time}</p>
-                <p><strong>Speed:</strong> ${pathCoord.speed}</p>
-                <p><strong>Ignition:</strong> ${ignition}</p>
-              </div>`,
-    });
-
-    marker.addListener("gmp-click", () => {
-      infoWindow.open({
-        anchor: marker,
-        map: map,
-      });
-    });
+  
+    const infoWindowContent = `
+      <div>
+        <h3>${pathCoord.LicensePlateNumber}</h3>
+        <p><strong>Timestamp:</strong> ${pathCoord.time}</p>
+        <p><strong>Speed:</strong> ${pathCoord.speed}</p>
+        <p><strong>Ignition:</strong> ${pathCoord.ignition === "1" ? "On" : "Off"}</p>
+      </div>
+    `;
+  
+    createArrowOverlay(coord, nextCoord, map, infoWindowContent);
   }
 }
 
