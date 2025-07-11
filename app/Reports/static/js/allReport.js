@@ -54,6 +54,17 @@ function downloadReport(reportId) {
         });
 }
 
+function formatTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return `${seconds} seconds ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minutes ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} days ago`;
+}
+
 function loadRecentReports(range) {
   fetch(`/reports/get_recent_reports?range=${range}`)
     .then(response => response.json())
@@ -153,19 +164,6 @@ document.addEventListener("DOMContentLoaded", function() {
     create: false,
     sortField: "text",
   });
-
-// Helper function to format time ago
-function formatTimeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    if (seconds < 60) return `${seconds} seconds ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} minutes ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hours ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} days ago`;
-}
-
 function viewReport(reportId) {
     const report = generatedReports.find(r => r._id === reportId);
     if (!report) return;
