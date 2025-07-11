@@ -100,7 +100,7 @@ All Reports
         <div class="recent-reports-header">
             <h2>Recently Generated Reports</h2>
             <div class="date-range-selector">
-                <select id="reportDateRange">
+                <select id="reportDateRange" onchange="loadRecentReports(this.value)">
                     <option value="today">Today</option>
                     <option value="last24hours">Last 24 Hours</option>
                     <option value="yesterday">Yesterday</option>

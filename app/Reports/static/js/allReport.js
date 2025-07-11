@@ -54,6 +54,57 @@ function downloadReport(reportId) {
         });
 }
 
+function loadRecentReports(range) {
+  fetch(`/reports/get_recent_reports?range=${range}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.reports.length > 0) {
+            renderRecentReports(data.reports);
+        } else {
+            document.getElementById('recentReportsList').innerHTML = 
+                '<p>Your generated reports will be visible here.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading recent reports:', error);
+    });
+}
+
+function renderRecentReports(reports) {
+    const container = document.getElementById('recentReportsList');
+    container.innerHTML = '';
+
+    reports.forEach(report => {
+      const reportItem = document.createElement('div');
+      reportItem.className = 'report-item';
+      
+      // Format file size
+      const fileSize = report.size > 1024 ? 
+          `${(report.size/1024).toFixed(1)} KB` : 
+          `${report.size} bytes`;
+          
+      // Format timestamp
+      const timeAgo = formatTimeAgo(new Date(report.generated_at));
+      
+      reportItem.innerHTML = `
+          <div class="report-info">
+              <div class="report-name">${report.report_name}</div>
+              <div class="report-meta">
+                  <span class="file-size">${fileSize}</span>
+                  <span class="time-ago">${timeAgo}</span>
+              </div>
+          </div>
+          <div class="report-actions">
+              <button class="download-report" data-id="${report._id}" onclick="downloadReport('${report._id}')" title="Download Report">
+                  <i class="fas fa-download"></i>
+              </button>
+          </div>
+      `;
+      
+      container.appendChild(reportItem);
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   const reportModal = document.getElementById("reportModal");
   const customReportModal = document.getElementById("customReportModal");
@@ -102,57 +153,6 @@ document.addEventListener("DOMContentLoaded", function() {
     create: false,
     sortField: "text",
   });
-
-  function loadRecentReports(range) {
-    fetch(`/reports/get_recent_reports?range=${range}`)
-      .then(response => response.json())
-      .then(data => {
-          if (data.success && data.reports.length > 0) {
-              renderRecentReports(data.reports);
-          } else {
-              document.getElementById('recentReportsList').innerHTML = 
-                  '<p>Your generated reports will be visible here.</p>';
-          }
-      })
-      .catch(error => {
-          console.error('Error loading recent reports:', error);
-      });
-  }
-
-  function renderRecentReports(reports) {
-      const container = document.getElementById('recentReportsList');
-      container.innerHTML = '';
-
-      reports.forEach(report => {
-        const reportItem = document.createElement('div');
-        reportItem.className = 'report-item';
-        
-        // Format file size
-        const fileSize = report.size > 1024 ? 
-            `${(report.size/1024).toFixed(1)} KB` : 
-            `${report.size} bytes`;
-            
-        // Format timestamp
-        const timeAgo = formatTimeAgo(new Date(report.generated_at));
-        
-        reportItem.innerHTML = `
-            <div class="report-info">
-                <div class="report-name">${report.report_name}</div>
-                <div class="report-meta">
-                    <span class="file-size">${fileSize}</span>
-                    <span class="time-ago">${timeAgo}</span>
-                </div>
-            </div>
-            <div class="report-actions">
-                <button class="download-report" data-id="${report._id}" onclick="downloadReport('${report._id}')" title="Download Report">
-                    <i class="fas fa-download"></i>
-                </button>
-            </div>
-        `;
-        
-        container.appendChild(reportItem);
-      });
-  }
 
 // Helper function to format time ago
 function formatTimeAgo(date) {
