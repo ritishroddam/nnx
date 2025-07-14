@@ -1168,7 +1168,7 @@ function getCarIconBySpeed(speed, imei, date, time) {
   return iconUrl;
 }
 
-function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
+function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType, dayDiff) {
   const basePath = "/static/images/";
   let vehiclePrefix;
   
