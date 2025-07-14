@@ -196,7 +196,7 @@ function editVehicle(vehicleId) {
   row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
   row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
   row.cells[2].innerHTML = `<input type="text" value="${imei}" data-key="imei" data-editable />`;
-  row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="sim_number" data-editable />`;
+  row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="MobileNumber" data-editable />`;
 
   row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
     <option value="sedan" ${vehicleType === "sedan" ? "selected" : ""}>Sedan</option>
@@ -401,8 +401,8 @@ function populateSIMDropdown() {
 
   simData.forEach((sim) => {
     let option = document.createElement("option");
-    option.value = sim.sim_number;
-    option.textContent = sim.sim_number;
+    option.value = sim.MobileNumber;
+    option.textContent = sim.MobileNumber;
     select.appendChild(option);
   });
 

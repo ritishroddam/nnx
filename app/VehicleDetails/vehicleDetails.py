@@ -88,12 +88,12 @@ def get_cities():
 @jwt_required()
 def get_sim_inventory():
     try:
-        sims = sim_collection.find({}, {"SimNumber": 1, "_id": 0})
-        sim_list = [{"sim_number": sim["SimNumber"]} for sim in sims]
+        sims = sim_collection.find({}, {"MobileNumber": 1, "_id": 0})
+        sim_list = [{"MobileNumber": sim["MobileNumber"]} for sim in sims]
 
         used_sims = set(vehicle["SIM"] for vehicle in vehicle_collection.find({}, {"SIM": 1, "_id": 0}))
 
-        sim_list = [sim for sim in sim_list if sim["sim_number"] not in used_sims]
+        sim_list = [sim for sim in sim_list if sim["MobileNumber"] not in used_sims]
 
         return jsonify(sim_list), 200
 
