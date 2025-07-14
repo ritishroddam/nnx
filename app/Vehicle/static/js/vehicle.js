@@ -624,9 +624,9 @@ function renderVehicleCards(vehicles, filterValue = "all") {
         style="${iconStyle}cursor:pointer;"
         title="View Vehicle Info"
         onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="Ignition Status">${ignitionIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal">${gsmIcon}</span>
-      ${sosIcon ? `<span class="material-symbols-outlined" style="${iconStyle}" title="SOS Alert">${sosIcon}</span>` : ""}
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="${vehicle.ignition === "1" ? "Ignition On" : "Ignition Off"}">${ignitionIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal Strength">${gsmIcon}</span>
+      ${sosIcon ? `<span class="material-symbols-outlined" style="${iconStyle}" title="SOS Alert">sos</span>` : ""}
     `;
     var listener;
     if (vehicle.LicensePlateNumber === "Unknown"){
@@ -638,7 +638,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     <div style="display:flex;align-item s:stretch;justify-content:space-between;">
       <div style="flex:1;">
         <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" title="GPS Status" title="GPS Status" style="font-size:22px;">${gpsIcon}</span>
+          <span class="material-symbols-outlined" style="font-size:22px;" title="${gpsIcon === "location_disabled" ? "GPS Offline" : "GPS Active"}">${gpsIcon}</span>
           <span class="vehicle-number"
                 style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
                 onclick="vehicleInfoPage('${
