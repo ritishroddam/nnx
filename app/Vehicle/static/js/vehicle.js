@@ -1168,7 +1168,7 @@ function getCarIconBySpeed(speed, imei, date, time) {
   return iconUrl;
 }
 
-function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
+function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType, dayDiff) {
   const basePath = "/static/images/";
   let vehiclePrefix;
   
@@ -1186,7 +1186,9 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
       vehiclePrefix = 'car';
   }
 
-  if (speedInKmh === 0) {
+  if (dayDiff >= 1) {
+    return `${basePath}${vehiclePrefix}_black.png`;
+  } else if (speedInKmh === 0) {
     return `${basePath}${vehiclePrefix}_yellow.png`;
   } else if (speedInKmh > 0 && speedInKmh <= 40) {
     return `${basePath}${vehiclePrefix}_green.png`;
@@ -1200,18 +1202,15 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
 function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
   const speedInKmh = convertSpeedToKmh(speed);
   const type = vehicleType || 'car'; 
-  let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, type);
-
+  
   const now = new Date();
   const lastUpdateTime = convertToDate(date, time);
-
+  
   const timeDiff = now - lastUpdateTime;
   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-
-  if (dayDiff >= 1) {
-    iconUrl = `/static/images/${vehicleType.toLowerCase()}_black.png`;
-  }
-
+  
+  let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, type, dayDiff);
+  
   return iconUrl;
 }
 
