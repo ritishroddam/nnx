@@ -24,7 +24,7 @@ company_rooms = {}
 
 def patched_aggregate(self, pipeline, *args, **kwargs):
     kwargs['allowDiskUse'] = True  # Automatically enable allowDiskUse
-    return super(Collection, self).aggregate(pipeline, *args, **kwargs)
+    return original_aggregate(self, pipeline, *args, **kwargs)
 
 Collection.aggregate = patched_aggregate
 
