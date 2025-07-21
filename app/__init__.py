@@ -4,6 +4,7 @@ from flask import Flask, redirect, url_for, flash, jsonify, request, g, render_t
 from flask_jwt_extended import jwt_required,JWTManager, get_jwt, get_jwt_identity, verify_jwt_in_request, create_access_token, set_access_cookies, unset_jwt_cookies, unset_refresh_cookies
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from config import config
 from flask_socketio import SocketIO, join_room, leave_room, rooms
 import subprocess
@@ -20,6 +21,12 @@ pool = eventlet.GreenPool()
 
 user_sessions = {}
 company_rooms = {}
+
+def patched_aggregate(self, pipeline, *args, **kwargs):
+    kwargs['allowDiskUse'] = True  # Automatically enable allowDiskUse
+    return super(Collection, self).aggregate(pipeline, *args, **kwargs)
+
+Collection.aggregate = patched_aggregate
 
 def create_app(config_name='default'):
     app = Flask(__name__)
