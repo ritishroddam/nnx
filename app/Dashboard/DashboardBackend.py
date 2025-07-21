@@ -184,39 +184,26 @@ def get_vehicle_range_data():
             "14days": timedelta(days=14),
             "30days": timedelta(days=30),
         }
+        
         delta = range_map.get(range_param, timedelta(days=1))
         start_of_day = utc_now - delta
         end_of_day = utc_now
-
+        
         imeis = list(get_vehicle_data().distinct("IMEI"))
         vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
-
-        pipeline = [
+        
+        # OPTIMIZED: Split into multiple lightweight pipelines instead of one heavy $push pipeline
+        
+        # Pipeline 1: Statistics (distance, speed) without $push
+        stats_pipeline = [
             {"$match": {
-                "date_time": {
-                    "$gte": start_of_day,
-                    "$lt": end_of_day
-                },
+                "date_time": {"$gte": start_of_day, "$lt": end_of_day},
                 "imei": {"$in": imeis}
             }},
             {"$sort": {"imei": 1, "date_time": 1}},
             {"$group": {
                 "_id": "$imei",
-                "records": {"$push": {
-                    "date_time": "$date_time",
-                    "ignition": "$ignition",
-                    "speed": "$speed",
-                    "odometer": "$odometer",
-                    "latitude": "$latitude",
-                    "longitude": "$longitude",
-                    "gsm_sig": "$gsm_sig",
-                    "sos": "$sos",
-                    "main_power": "$main_power",
-                    "gps": "$gps",
-                    "date": "$date",
-                    "time": "$time"
-                }},
                 "start_odometer": {"$first": {"$toDouble": "$odometer"}},
                 "end_odometer": {"$last": {"$toDouble": "$odometer"}},
                 "max_speed": {
@@ -255,8 +242,7 @@ def get_vehicle_range_data():
                             0
                         ]
                     }
-                },
-                "last_record": {"$last": "$$ROOT"}
+                }
             }},
             {"$project": {
                 "imei": "$_id",
@@ -268,61 +254,105 @@ def get_vehicle_range_data():
                         0,
                         {"$divide": ["$sum_speed", "$count_speed"]}
                     ]
-                },
-                "records": 1,
-                "last_record": 1
+                }
             }}
         ]
-
-        results = list(atlanta_collection.aggregate(pipeline))
-        twenty_four_hours_ago = utc_now - timedelta(hours=24)
-
-        vehicle_data = []
-        for record in results:
-            recs = record["records"]
-            if not recs:
-                continue
-            
-            latest = record["last_record"]
-            imei = record["imei"]
-            vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
         
+        # Pipeline 2: Latest record for each IMEI
+        latest_record_pipeline = [
+            {"$match": {
+                "date_time": {"$gte": start_of_day, "$lt": end_of_day},
+                "imei": {"$in": imeis}
+            }},
+            {"$sort": {"imei": 1, "date_time": -1}},
+            {"$group": {
+                "_id": "$imei",
+                "latest": {"$first": "$$ROOT"}
+            }}
+        ]
+        
+        # Pipeline 3: Time analysis for driving/idle time and stops
+        time_analysis_pipeline = [
+            {"$match": {
+                "date_time": {"$gte": start_of_day, "$lt": end_of_day},
+                "imei": {"$in": imeis}
+            }},
+            {"$sort": {"imei": 1, "date_time": 1}},
+            {"$group": {
+                "_id": "$imei",
+                "records": {
+                    "$push": {
+                        "date_time": "$date_time",
+                        "ignition": "$ignition",
+                        "speed": {"$toDouble": "$speed"}
+                    }
+                }
+            }}
+        ]
+        
+        # Execute all pipelines
+        stats_results = list(atlanta_collection.aggregate(stats_pipeline))
+        latest_results = list(atlanta_collection.aggregate(latest_record_pipeline))
+        time_results = list(atlanta_collection.aggregate(time_analysis_pipeline))
+        
+        # Convert to dictionaries for fast lookup
+        stats_dict = {result['imei']: result for result in stats_results}
+        latest_dict = {result['_id']: result['latest'] for result in latest_results}
+        time_dict = {result['_id']: result['records'] for result in time_results}
+        
+        twenty_four_hours_ago = utc_now - timedelta(hours=24)
+        vehicle_data = []
+        
+        # Combine results for each IMEI
+        for imei in imeis:
+            stats = stats_dict.get(imei, {})
+            latest = latest_dict.get(imei, {})
+            time_records = time_dict.get(imei, [])
+            
+            if not latest:
+                continue
+                
+            vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
+            
+            # Calculate driving time, idle time, and stops from time records
             driving_time = timedelta()
             idle_time = timedelta()
             number_of_stops = 0
             prev_ignition = None
             prev_time = None
-        
-            for i, r in enumerate(recs):
-                curr_time = r["date_time"]
-                ignition = r.get("ignition")
-                speed = float(r.get("speed", 0.0))
-        
+            
+            for record in time_records:
+                curr_time = record["date_time"]
+                ignition = record.get("ignition")
+                speed = record.get("speed", 0.0)
+                
                 if prev_time is not None:
                     delta = curr_time - prev_time
+                    
                     if prev_ignition == "1" and speed > 0:
                         driving_time += delta
-                    elif prev_ignition == "0" and speed == 0:
+                    elif prev_ignition == "1" and speed == 0:
                         idle_time += delta
-        
+                
                 if prev_ignition == "0" and ignition == "1":
                     number_of_stops += 1
-        
+                
                 prev_ignition = ignition
                 prev_time = curr_time
             
+            # Parse last update time
             last_update = None
             if latest.get("date") and latest.get("time"):
                 try:
                     last_update = datetime.strptime(
-                        latest.get("date") + latest.get("time"), 
+                        latest.get("date") + latest.get("time"),
                         '%d%m%y%H%M%S'
                     )
                     last_update = last_update.replace(tzinfo=timezone('UTC'))
                 except ValueError as e:
                     print(f"Error parsing date/time: {e}")
                     last_update = None
-                    
+            
             is_offline = last_update is None or last_update < twenty_four_hours_ago
             
             vehicle_info = {
@@ -342,9 +372,9 @@ def get_vehicle_range_data():
                 "odometer": latest.get("odometer", "N/A"),
                 "date": latest.get("date", None),
                 "time": latest.get("time", None),
-                "distance": round(record.get("distance", 0), 2),
-                "max_speed": record.get("max_speed", 0),
-                "avg_speed": round(record.get("avg_speed", 0), 2),
+                "distance": round(stats.get("distance", 0), 2),
+                "max_speed": stats.get("max_speed", 0),
+                "avg_speed": round(stats.get("avg_speed", 0), 2),
                 "driving_time": format_seconds(driving_time.total_seconds()),
                 "idle_time": format_seconds(idle_time.total_seconds()),
                 "number_of_stops": number_of_stops,
@@ -352,6 +382,7 @@ def get_vehicle_range_data():
                 "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
             }
             
+            # Apply status filtering
             if not status_filter:
                 vehicle_data.append(vehicle_info)
             else:
@@ -374,9 +405,9 @@ def get_vehicle_range_data():
                     vehicle_data.append(vehicle_info)
                 elif status_filter == "disconnected" and main_power == "0":
                     vehicle_data.append(vehicle_info)
-
+        
         return jsonify(vehicle_data), 200
-
+        
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
         print(traceback.format_exc())
