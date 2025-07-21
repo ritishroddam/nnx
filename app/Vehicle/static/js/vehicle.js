@@ -1027,7 +1027,7 @@ function updateMap() {
   filterVehicles();
 }
 
-function animateMarker(marker, newPosition, duration = 10000) {
+function animateMarker(marker, newPosition, duration = 12000) {
   let startPosition = new google.maps.LatLng(
     marker.position.lat,
     marker.position.lng
