@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from config import config
 from pymongo.collection import Collection
 
+original_aggregate = Collection.aggregate
+
 def patched_aggregate(self, pipeline, *args, **kwargs):
     kwargs['allowDiskUse'] = True  # Automatically enable allowDiskUse
     return original_aggregate(self, pipeline, *args, **kwargs)

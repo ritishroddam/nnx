@@ -22,6 +22,8 @@ pool = eventlet.GreenPool()
 user_sessions = {}
 company_rooms = {}
 
+original_aggregate = Collection.aggregate
+
 def patched_aggregate(self, pipeline, *args, **kwargs):
     kwargs['allowDiskUse'] = True  # Automatically enable allowDiskUse
     return original_aggregate(self, pipeline, *args, **kwargs)
