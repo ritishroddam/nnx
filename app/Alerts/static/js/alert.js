@@ -777,42 +777,47 @@ function highlightAlertFromURL() {
   const params = new URLSearchParams(window.location.search);
   const alertId = params.get("alert_id");
   const alertType = params.get("alert_type");
-  
+  const fromNotification = params.get("from_notification");
+
   if (alertId) {
-    // First, make sure we're showing the correct alert type tab
+    // Switch to correct tab first if needed
     if (alertType) {
       const endpoint = alertType.toLowerCase().replace(/\s+/g, '_').replace('_alert', '');
       const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+      
       if (card && !card.classList.contains('active')) {
-        // Switch to the correct tab
         document.querySelectorAll('.alert-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         currentEndpoint = endpoint;
         sessionStorage.setItem("currentAlertEndpoint", currentEndpoint);
         
-        // Reload alerts for this tab
-        loadAlerts();
-        return; // We'll highlight after the reload
+        // Load alerts and then highlight
+        loadAlerts().then(() => {
+          setTimeout(() => highlightSpecificAlert(alertId, fromNotification), 300);
+        });
+        return;
       }
     }
     
-    // If we're already on the correct tab, highlight the alert
+    // If already on correct tab, just highlight
+    setTimeout(() => highlightSpecificAlert(alertId, fromNotification), 300);
+  }
+}
+
+function highlightSpecificAlert(alertId, fromNotification) {
+  const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+  if (row) {
+    // Add highlight style
+    row.style.transition = "background-color 0.5s ease";
+    row.style.backgroundColor = fromNotification ? "#fff9c4" : "#ffe082";
+    
+    // Scroll to the alert
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    
+    // Remove highlight after 5 seconds
     setTimeout(() => {
-      const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
-      if (row) {
-        // Add highlight style
-        row.style.animation = "highlight 2s ease-out";
-        row.style.backgroundColor = "#ffe082";
-        
-        // Scroll to the alert
-        row.scrollIntoView({ behavior: "smooth", block: "center" });
-        
-        // Remove highlight after animation
-        setTimeout(() => {
-          row.style.backgroundColor = "";
-        }, 2000);
-      }
-    }, 500); // Give time for the table to load
+      row.style.backgroundColor = "";
+    }, 5000);
   }
 }
 

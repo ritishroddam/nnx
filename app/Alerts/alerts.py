@@ -490,17 +490,24 @@ def notification_alerts():
         )
         vehicle_map = {vehicle["IMEI"]: vehicle for vehicle in vehicles}
         ist = pytz.timezone("Asia/Kolkata")
+        
+        acknowledged_ids = set(
+            ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
+        )
+        
         for alert in alerts:
             if str(alert["_id"]) in acknowledged_ids:
                 continue
             vehicle = vehicle_map.get(alert["imei"])
-            # Convert UTC to IST
             dt_utc = alert.get("date_time")
             if dt_utc:
                 dt_ist = dt_utc.astimezone(ist)
                 date_time_str = dt_ist.isoformat()
             else:
                 date_time_str = ""
+                
+            is_acknowledged = str(alert["_id"]) in acknowledged_ids
+                
             enriched.append({
                 "id": str(alert["_id"]),
                 "type": alert_type,
@@ -508,7 +515,7 @@ def notification_alerts():
                 "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
                 "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
                 "date_time": date_time_str,
-                "acknowledged": False
+                "acknowledged": is_acknowledged
             })
         return enriched
     

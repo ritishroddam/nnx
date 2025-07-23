@@ -240,23 +240,36 @@ async function loadNotifications() {
       } else {
         data.alerts.forEach((alert) => {
           const li = document.createElement("li");
-          li.innerHTML = `<strong>${alert.type}</strong> - ${alert.vehicle} <br><small>${new Date(
-            alert.date_time
-          ).toLocaleString()}</small>`;
+          li.className = alert.acknowledged ? "notification-read" : "notification-unread";
+          li.innerHTML = `
+            <div class="notification-content">
+              <strong>${alert.type}</strong> - ${alert.vehicle} 
+              <br><small>${new Date(alert.date_time).toLocaleString()}</small>
+              ${alert.acknowledged ? '' : '<span class="unread-badge"></span>'}
+            </div>
+          `;
           li.dataset.alertId = alert.id;
           li.dataset.alertType = alert.type;
-          li.addEventListener("click", async function (e) {
+          
+          li.addEventListener("click", async function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            // Mark as acknowledged
-            await acknowledgeNotificationAlert(alert.id);
+            // Mark as read if not already
+            if (!alert.acknowledged) {
+              await acknowledgeNotificationAlert(alert.id);
+              li.classList.remove("notification-unread");
+              li.classList.add("notification-read");
+              li.querySelector('.unread-badge')?.remove();
+              countSpan.textContent = parseInt(countSpan.textContent) - 1;
+            }
             
-            // Navigate to alerts page with the specific alert
+            // Navigate to specific alert
             window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
               alert.type
-            )}`;
+            )}&from_notification=true`;
           });
+          
           list.appendChild(li);
         });
       }
