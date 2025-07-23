@@ -566,11 +566,34 @@ def page():
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now
-    
-    return render_template('alerts.html', 
-                         vehicles=vehicles,
-                         default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
-                         default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'))
+
+    # Check for alert_id and alert_type in query params
+    alert_id = request.args.get("alert_id")
+    alert_type = request.args.get("alert_type")
+    selected_alert = None
+    if alert_id and alert_type:
+        # Try to find the alert in both collections
+        alert = db['sos_logs'].find_one({"_id": ObjectId(alert_id)})
+        if not alert:
+            alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
+        if alert:
+            selected_alert = {
+                "_id": str(alert["_id"]),
+                "vehicle_number": alert.get("LicensePlateNumber", "Unknown"),
+                "date_time": alert.get("date_time"),
+                "alert_type": alert_type,
+                "latitude": alert.get("latitude"),
+                "longitude": alert.get("longitude"),
+                "location": geocodeInternal(alert.get("latitude"), alert.get("longitude")) if alert.get("latitude") and alert.get("longitude") else None
+            }
+
+    return render_template(
+        'alerts.html',
+        vehicles=vehicles,
+        default_start_date=default_start.strftime('%Y-%m-%dT%H:%M'),
+        default_end_date=default_end.strftime('%Y-%m-%dT%H:%M'),
+        selected_alert=selected_alert
+    )
 
 @alerts_bp.route('/panic_alerts', methods=['POST'])
 @jwt_required()
