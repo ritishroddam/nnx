@@ -209,10 +209,22 @@ document.addEventListener("DOMContentLoaded", async function () {
           ).toLocaleString()}</small>`;
           li.dataset.alertId = alert.id;
           li.dataset.alertType = alert.type;
-          li.addEventListener("click", function () {
-            window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
-              alert.type
-            )}`;
+          li.addEventListener("click", async function () {
+            // Mark notification as read
+            try {
+              await fetch(`/alerts/mark_read`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+                },
+                body: JSON.stringify({ alert_id: alert.id })
+              });
+            } catch (e) {
+              console.warn("Failed to mark notification as read", e);
+            }
+            // Redirect to specific alert
+            window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(alert.type)}`;
           });
           list.appendChild(li);
         });
