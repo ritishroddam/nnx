@@ -490,24 +490,17 @@ def notification_alerts():
         )
         vehicle_map = {vehicle["IMEI"]: vehicle for vehicle in vehicles}
         ist = pytz.timezone("Asia/Kolkata")
-        
-        acknowledged_ids = set(
-            ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
-        )
-        
         for alert in alerts:
             if str(alert["_id"]) in acknowledged_ids:
                 continue
             vehicle = vehicle_map.get(alert["imei"])
+            # Convert UTC to IST
             dt_utc = alert.get("date_time")
             if dt_utc:
                 dt_ist = dt_utc.astimezone(ist)
                 date_time_str = dt_ist.isoformat()
             else:
                 date_time_str = ""
-                
-            is_acknowledged = str(alert["_id"]) in acknowledged_ids
-                
             enriched.append({
                 "id": str(alert["_id"]),
                 "type": alert_type,
@@ -515,7 +508,7 @@ def notification_alerts():
                 "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
                 "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
                 "date_time": date_time_str,
-                "acknowledged": is_acknowledged
+                "acknowledged": False
             })
         return enriched
     
@@ -639,60 +632,6 @@ def ignition_off_alerts():
 def ignition_on_alerts():
     pass
 
-# @alerts_bp.route('/acknowledge', methods=['POST'])
-# @jwt_required()
-# def acknowledge_alert():
-#     try:
-#         data = request.get_json()
-#         if not data:
-#             return jsonify({"success": False, "message": "No data provided"}), 400
-
-#         alert_id = data.get("alertId")
-#         pressed_for = data.get("pressedFor")
-#         reason = data.get("reason", "")
-#         user_id = get_jwt_identity()
-
-#         if not alert_id or not pressed_for:
-#             return jsonify({"success": False, "message": "Missing required fields"}), 400
-
-#         alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
-#         if not alert:
-#             alert = db['sos_logs'].find_one({"_id": ObjectId(alert_id)})
-#             if not alert:
-#                 return jsonify({"success": False, "message": "Alert not found"}), 404
-
-#         existing_ack = db['Ack_alerts'].find_one({"alert_id": alert_id})
-#         if existing_ack:
-#             return jsonify({"success": False, "message": "Alert already acknowledged"}), 400
-
-#         ack_data = {
-#             "alert_id": alert_id,
-#             "pressed_for": pressed_for,
-#             "reason": reason,
-#             "acknowledged_by": user_id,
-#             "acknowledged_at": datetime.now(pytz.utc),
-#             "alert_data": alert
-#         }
-        
-#         result = db['Ack_alerts'].insert_one(ack_data)
-        
-#         if not result.inserted_id:
-#             return jsonify({"success": False, "message": "Failed to save acknowledgment"}), 500
-
-#         return jsonify({
-#             "success": True,
-#             "message": "Alert acknowledged successfully",
-#             "alert_id": alert_id
-#         })
-
-#     except Exception as e:
-#         import traceback
-#         traceback.print_exc()
-#         return jsonify({
-#             "success": False,
-#             "message": f"Server error: {str(e)}"
-#         }), 500
-
 @alerts_bp.route('/acknowledge', methods=['POST'])
 @jwt_required()
 def acknowledge_alert():
@@ -706,31 +645,26 @@ def acknowledge_alert():
         reason = data.get("reason", "")
         user_id = get_jwt_identity()
 
-        if not alert_id:
+        if not alert_id or not pressed_for:
             return jsonify({"success": False, "message": "Missing required fields"}), 400
 
-        # Check if alert exists in either collection
         alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
-        source_collection = 'atlanta'
         if not alert:
             alert = db['sos_logs'].find_one({"_id": ObjectId(alert_id)})
-            source_collection = 'sos_logs'
             if not alert:
                 return jsonify({"success": False, "message": "Alert not found"}), 404
 
-        # Check if already acknowledged
         existing_ack = db['Ack_alerts'].find_one({"alert_id": alert_id})
         if existing_ack:
-            return jsonify({"success": True, "message": "Alert already acknowledged", "alert_id": alert_id})
+            return jsonify({"success": False, "message": "Alert already acknowledged"}), 400
 
         ack_data = {
             "alert_id": alert_id,
-            "pressed_for": pressed_for or "notification_click",
+            "pressed_for": pressed_for,
             "reason": reason,
             "acknowledged_by": user_id,
             "acknowledged_at": datetime.now(pytz.utc),
-            "alert_data": alert,
-            "source_collection": source_collection
+            "alert_data": alert
         }
         
         result = db['Ack_alerts'].insert_one(ack_data)
