@@ -233,7 +233,7 @@ async function loadNotifications() {
     });
     const data = await res.json();
     if (data.success) {
-      countSpan.textContent = data.alerts.length;
+      countSpan.textContent = data.alerts.filter(a => !a.acknowledged).length;
       list.innerHTML = "";
       if (data.alerts.length === 0) {
         list.innerHTML = "<li>No new alerts</li>";
@@ -247,28 +247,36 @@ async function loadNotifications() {
               <br><small>${new Date(alert.date_time).toLocaleString()}</small>
               ${alert.acknowledged ? '' : '<span class="unread-badge"></span>'}
             </div>
+            ${!alert.acknowledged ? `
+            <div class="notification-actions">
+              <button class="mark-read-btn" data-alert-id="${alert.id}">
+                <i class="fas fa-check"></i>
+              </button>
+            </div>` : ''}
           `;
-          li.dataset.alertId = alert.id;
-          li.dataset.alertType = alert.type;
           
-          li.addEventListener("click", async function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Mark as read if not already
-            if (!alert.acknowledged) {
+          li.addEventListener("click", function(e) {
+            // Only navigate if not clicking the mark-read button
+            if (!e.target.closest('.mark-read-btn')) {
+              window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
+                alert.type
+              )}&from_notification=true`;
+            }
+          });
+
+          // Add click handler for mark-read button
+          const markReadBtn = li.querySelector('.mark-read-btn');
+          if (markReadBtn) {
+            markReadBtn.addEventListener("click", async function(e) {
+              e.stopPropagation();
               await acknowledgeNotificationAlert(alert.id);
               li.classList.remove("notification-unread");
               li.classList.add("notification-read");
               li.querySelector('.unread-badge')?.remove();
+              markReadBtn.remove();
               countSpan.textContent = parseInt(countSpan.textContent) - 1;
-            }
-            
-            // Navigate to specific alert
-            window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
-              alert.type
-            )}&from_notification=true`;
-          });
+            });
+          }
           
           list.appendChild(li);
         });
@@ -291,18 +299,15 @@ async function acknowledgeNotificationAlert(alertId) {
       },
       body: JSON.stringify({
         alertId: alertId,
-        pressedFor: "notification_click",
-        reason: "Viewed in notification dropdown"
+        pressedFor: "manually_marked",
+        reason: "Marked as read in notifications"
       }),
     });
     
-    const data = await response.json();
-    if (data.success) {
-      // Reload notifications to update count
-      loadNotifications();
-    }
+    return await response.json();
   } catch (error) {
     console.error("Error acknowledging notification:", error);
+    return { success: false };
   }
 }
 
