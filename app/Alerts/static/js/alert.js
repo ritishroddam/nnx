@@ -759,19 +759,72 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setDefaultDateRange();
   
-  function highlightAlertFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    const alertId = params.get("alert_id");
-    if (alertId) {
-        setTimeout(() => {
-            const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
-            if (row) {
-                row.style.background = "#ffe082";
-                row.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-        }, 200); 
+//   function highlightAlertFromURL() {
+//     const params = new URLSearchParams(window.location.search);
+//     const alertId = params.get("alert_id");
+//     if (alertId) {
+//         setTimeout(() => {
+//             const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+//             if (row) {
+//                 row.style.background = "#ffe082";
+//                 row.scrollIntoView({ behavior: "smooth", block: "center" });
+//             }
+//         }, 200); 
+//     }
+// }
+
+function highlightAlertFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const alertId = params.get("alert_id");
+  const alertType = params.get("alert_type");
+  
+  if (alertId) {
+    // First, make sure we're showing the correct alert type tab
+    if (alertType) {
+      const endpoint = alertType.toLowerCase().replace(/\s+/g, '_').replace('_alert', '');
+      const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
+      if (card && !card.classList.contains('active')) {
+        // Switch to the correct tab
+        document.querySelectorAll('.alert-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentEndpoint = endpoint;
+        sessionStorage.setItem("currentAlertEndpoint", currentEndpoint);
+        
+        // Reload alerts for this tab
+        loadAlerts();
+        return; // We'll highlight after the reload
+      }
     }
+    
+    // If we're already on the correct tab, highlight the alert
+    setTimeout(() => {
+      const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
+      if (row) {
+        // Add highlight style
+        row.style.animation = "highlight 2s ease-out";
+        row.style.backgroundColor = "#ffe082";
+        
+        // Scroll to the alert
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+        
+        // Remove highlight after animation
+        setTimeout(() => {
+          row.style.backgroundColor = "";
+        }, 2000);
+      }
+    }, 500); // Give time for the table to load
+  }
 }
+
+// Add this CSS to your styles (or in a style tag)
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes highlight {
+    0% { background-color: #ffe082; }
+    100% { background-color: transparent; }
+  }
+`;
+document.head.appendChild(style);
 
   const originalDisplayAlerts = displayAlerts;
   displayAlerts = function (alerts) {
