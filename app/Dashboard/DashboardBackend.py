@@ -128,11 +128,11 @@ def atlanta_pie_data():
         moving_vehicles = 0
         idle_vehicles = 0
         offline_vehicles = 0
+        parked_vehicles = 0
         
         for record in latest_records:
             latest_data = record['latest']
             
-            # Parse the last update time
             try:
                 last_update = datetime.strptime(
                     latest_data["date"] + latest_data["time"],
@@ -150,23 +150,21 @@ def atlanta_pie_data():
             speed = float(latest_data.get("speed", 0))
             ignition = latest_data.get("ignition", "0")
             
-            if ignition == "1" and speed > 0:
-                moving_vehicles += 1
-            elif ignition == "1" and speed == 0:
-                idle_vehicles += 1
-            elif ignition == "0":
-                idle_vehicles += 1  # Consider parked vehicles as idle for pie chart
+            if ignition == "1":
+                if speed > 0:
+                    moving_vehicles += 1
+                else:
+                    idle_vehicles += 1  # Only count as idle if ignition is ON and speed is 0
+            else:
+                parked_vehicles += 1  # Separate count for parked vehicles
         
         return jsonify({
             "total_devices": len(imeis),
             "moving_vehicles": moving_vehicles,
             "offline_vehicles": offline_vehicles,
-            "idle_vehicles": idle_vehicles   
+            "idle_vehicles": idle_vehicles,   # This will now match the status cards
+            "parked_vehicles": parked_vehicles  # Optional: track parked separately
         }), 200
-        
-    except Exception as e:
-        print(f"🚨 Error fetching pie chart data: {e}")
-        return jsonify({"error": "Failed to fetch pie chart data"}), 500
 
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 @jwt_required()
