@@ -165,6 +165,9 @@ def atlanta_pie_data():
             "idle_vehicles": idle_vehicles,   # This will now match the status cards
             "parked_vehicles": parked_vehicles  # Optional: track parked separately
         }), 200
+    except Exception as e:
+        print(f"🚨 Error fetching pie chart data: {e}")
+        return jsonify({"error": "Failed to fetch pie chart data"}), 500
 
 @dashboard_bp.route('/atlanta_distance_data', methods=['GET'])
 @jwt_required()
