@@ -62,44 +62,108 @@ def dashboard_data():
         print(f"Error fetching dashboard data: {e}")
         return jsonify({"error": "Failed to fetch dashboard data"}), 500
 
+# @dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
+# @jwt_required()
+# @roles_required('admin', 'clientAdmin', 'user')
+# def atlanta_pie_data():
+#     try:
+#         results = list(get_filtered_results("distinctAtlanta"))
+
+#         if not results:
+#             return jsonify({
+#                 "total_devices": 0,
+#                 "moving_vehicles": 0,
+#                 "offline_vehicles": 0,
+#                 "idle_vehicles": 0
+#             }), 200
+
+#         total_devices = len(results)
+#         now = datetime.now()
+#         moving_vehicles = sum(
+#             1 for record in results 
+#             if float(record["speed"] or 0) > 0 and
+#             datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
+#         )
+#         idle_vehicles = sum(
+#             1 for record in results 
+#             if float(record["speed"] or 0) == 0 and
+#             datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
+#         )
+#         offline_vehicles = sum(
+#             1 for record in results 
+#             if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
+#         )
+        
+#         return jsonify({
+#             "total_devices": total_devices,
+#             "moving_vehicles": moving_vehicles,
+#             "offline_vehicles": offline_vehicles,
+#             "idle_vehicles": idle_vehicles   
+#         }), 200
+#     except Exception as e:
+#         print(f"🚨 Error fetching pie chart data: {e}")
+#         return jsonify({"error": "Failed to fetch pie chart data"}), 500
+
 @dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
 def atlanta_pie_data():
     try:
-        results = list(get_filtered_results("distinctAtlanta"))
-
-        if not results:
-            return jsonify({
-                "total_devices": 0,
-                "moving_vehicles": 0,
-                "offline_vehicles": 0,
-                "idle_vehicles": 0
-            }), 200
-
-        total_devices = len(results)
-        now = datetime.now()
-        moving_vehicles = sum(
-            1 for record in results 
-            if float(record["speed"] or 0) > 0 and
-            datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
-        )
-        idle_vehicles = sum(
-            1 for record in results 
-            if float(record["speed"] or 0) == 0 and
-            datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
-        )
-        offline_vehicles = sum(
-            1 for record in results 
-            if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
-        )
+        # Get all active IMEIs
+        imeis = list(get_vehicle_data().distinct("IMEI"))
+        
+        # Get latest record for each IMEI
+        latest_records = list(atlanta_collection.aggregate([
+            {"$match": {"imei": {"$in": imeis}}},
+            {"$sort": {"imei": 1, "date_time": -1}},
+            {"$group": {
+                "_id": "$imei",
+                "latest": {"$first": "$$ROOT"}
+            }}
+        ]))
+        
+        now = datetime.now(timezone('UTC'))
+        twenty_four_hours_ago = now - timedelta(hours=24)
+        
+        moving_vehicles = 0
+        idle_vehicles = 0
+        offline_vehicles = 0
+        
+        for record in latest_records:
+            latest_data = record['latest']
+            
+            # Parse the last update time
+            try:
+                last_update = datetime.strptime(
+                    latest_data["date"] + latest_data["time"],
+                    '%d%m%y%H%M%S'
+                ).replace(tzinfo=timezone('UTC'))
+            except (KeyError, ValueError):
+                last_update = None
+                
+            is_offline = last_update is None or last_update < twenty_four_hours_ago
+            
+            if is_offline:
+                offline_vehicles += 1
+                continue
+                
+            speed = float(latest_data.get("speed", 0))
+            ignition = latest_data.get("ignition", "0")
+            
+            if ignition == "1" and speed > 0:
+                moving_vehicles += 1
+            elif ignition == "1" and speed == 0:
+                idle_vehicles += 1
+            elif ignition == "0":
+                idle_vehicles += 1  # Consider parked vehicles as idle for pie chart
         
         return jsonify({
-            "total_devices": total_devices,
+            "total_devices": len(imeis),
             "moving_vehicles": moving_vehicles,
             "offline_vehicles": offline_vehicles,
             "idle_vehicles": idle_vehicles   
         }), 200
+        
     except Exception as e:
         print(f"🚨 Error fetching pie chart data: {e}")
         return jsonify({"error": "Failed to fetch pie chart data"}), 500
