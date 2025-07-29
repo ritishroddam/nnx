@@ -141,6 +141,7 @@ body {
   border-radius: 15px;
   transition: width 0.3s ease-in-out;
   z-index: 3;
+  backdrop-filter: blur(3px);
 }
 
 .dark-mode .sidebar {
@@ -341,6 +342,7 @@ body {
   margin-bottom: 50px;
   z-index: 3; 
   transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+  backdrop-filter: blur(3px);
 }
 
 .dark-mode .topbar {
