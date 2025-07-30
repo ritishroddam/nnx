@@ -80,8 +80,6 @@ var manualClose = false;
 var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
-var markerClusterer;
-var markerArray = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -1002,16 +1000,6 @@ function updateMap() {
     checkForDataTimeout(imei);
   });
 
-  if (markerClusterer) {
-    markerClusterer.clearMarkers();
-  }
-
-  markerArray = Object.values(markers);
-
-  if (markerClusterer) {
-    markerClusterer.addMarkers(markerArray);
-  }
-
   if (!bounds.isEmpty() && firstFit) {
     map.fitBounds(bounds);
     firstFit = false;
@@ -1597,46 +1585,6 @@ async function initMap() {
 
   geocoder = new google.maps.Geocoder();
   infoWindow = new google.maps.InfoWindow();
-  markerClusterer = new markerClusterer.MarkerClusterer({
-    map,
-    algorithm: new markerClusterer.GridAlgorithm({
-      gridSize: 60, 
-      maxDistance: 100 
-    })
-  });
-
-    // Custom cluster rendering
-  markerClusterer.renderer = {
-    render: ({ count, position }) => {
-      return new google.maps.Marker({
-        position,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10 + Math.sqrt(count) * 3,
-          fillColor: '#4285F4',
-          fillOpacity: 0.8,
-          strokeWeight: 2,
-          strokeColor: '#ffffff'
-        },
-        label: {
-          text: String(count),
-          color: '#ffffff',
-          fontSize: '12px'
-        }
-      });
-    }
-  };
-
-  // Cluster click handler
-  markerClusterer.addListener('click', (event) => {
-    const cluster = event.cluster;
-    const markers = cluster.markers;
-    
-    const bounds = new google.maps.LatLngBounds();
-    markers.forEach(marker => bounds.extend(marker.getPosition()));
-    map.fitBounds(bounds);
-  });
-
 }
 
 const themeToggle = document.getElementById("theme-toggle");
@@ -1690,12 +1638,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
     position: latLng, 
     map: map,
     title: `License Plate Number: ${device.LicensePlateNumber}`,
-        icon: {
-      url: iconUrl,
-      scaledSize: new google.maps.Size(size.width, size.height),
-      anchor: new google.maps.Point(size.width/2, size.height/2)
-    },
-    rotation: rotation,
     content: markerContent,
   });
 
@@ -1731,13 +1673,8 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
   markerContent.appendChild(markerImage);
 
-  marker.setPosition(latLng);
-  marker.setIcon({
-    url: iconUrl,
-    scaledSize: new google.maps.Size(size.width, size.height),
-    anchor: new google.maps.Point(size.width/2, size.height/2)
-  });
-  marker.setRotation(rotation);
+  marker.position = latLng; 
+  marker.content = markerContent;
 
   const coords = {
     lat: latLng.lat(),
