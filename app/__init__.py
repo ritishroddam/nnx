@@ -281,6 +281,13 @@ def create_app(config_name='default'):
         if request.endpoint not in ['auth.logout', 'static', None, 'ShareLocation.view_share_location']:
             flash("Your session has expired. Please log in again.", "warning")
             return redirect(url_for('auth.logout'))
+        
+    @jwt.invalid_token_loader
+    def handle_invalid_token(error_string):
+        """Handle requests with invalid JWTs."""
+        if request.endpoint not in ['auth.logout', 'static', None, 'ShareLocation.view_share_location']:
+            flash("Your session is invalid. Please log in again.", "warning")
+            return redirect(url_for('auth.logout'))
 
     @app.before_request
     def refresh_token_if_needed():

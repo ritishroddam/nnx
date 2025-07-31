@@ -2,8 +2,8 @@ import os
 from datetime import timedelta
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key-here'
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-here'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'blVyRnvtvbfGle5hnZlpXRUbrt0wZYFWGqVEZpz6eomOvQRxRzEiScBuhSwiwl96dx4AqZejIRc2cGZGv3itklaCGxfJTaV9ybN0CzAXTbRwn2O4CTnMGMBirsmzk8vK'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or '42eS1MRvewLSGjPx1ItPM0QFQsAdH2pj8Ij4CxHjNreVsZAG4OPQWIqmkqKSgKkwJ90XQYCCFnLu6pUWDaH5x1Z8sVl68D5xzAUqGTLhx0wwWrsyoAdL3BR8s5bMjie6'
     JWT_COOKIE_MAX_AGE = None
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days = 7)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days = 30) 

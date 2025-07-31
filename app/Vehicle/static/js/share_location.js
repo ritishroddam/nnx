@@ -1,6 +1,6 @@
 window.onload =  initMap;
 
-const socket = io("https://cordonnx.com:5000", {
+const socket = io("https://cordonnx.com", {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: Infinity,
