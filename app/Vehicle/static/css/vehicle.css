@@ -67,14 +67,12 @@ body {
 }
 
 .dark-mode .vehicle-card {
-  background: #1e1e1e; 
   color: #ccc; 
   box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .vehicle-card {
   position: relative;
-  background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 8px #ccc;
   margin-bottom: 14px;
