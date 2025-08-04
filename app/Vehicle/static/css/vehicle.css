@@ -59,17 +59,17 @@ body {
 }
 
 .dark-mode .divider {
-  background-color: #444; /* Darker divider color */
+  background-color: #444; 
 }
 
 .dark-mode .vehicle-card-actions span {
-  color: #ccc; /* Light icon color for actions */
+  color: #ccc; 
 }
 
 .dark-mode .vehicle-card {
-  background: #1e1e1e; /* Dark background */
-  color: #ccc; /* Light text color */
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1); /* Softer shadow */
+  background: #1e1e1e; 
+  color: #ccc; 
+  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .vehicle-card {
@@ -92,7 +92,7 @@ body {
 }
 
 .dark-mode .vehicle-card-row {
-  color: #ccc; /* Light text color */
+  color: #ccc; 
 }
 
 .vehicle-card-row:last-child {
@@ -143,7 +143,7 @@ body {
 }
 
 .dark-mode .vehicle-number {
-  color: #fff; /* Bright text for vehicle number */
+  color: #fff; 
 }
 
 .vehicle-card-stats {
@@ -157,7 +157,7 @@ body {
 }
 
 .dark-mode .vehicle-card-stats div {
-  color: #ccc; /* Light text color for stats */
+  color: #ccc;
 }
 
 .vehicle-card:last-child {
@@ -209,7 +209,7 @@ body {
 .toggle-container {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.35); /* Match topbar */
+  background: rgba(255, 255, 255, 0.35); 
   border: 1.5px solid #bbb;
   border-radius: 15px;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
@@ -772,7 +772,7 @@ input:checked + .slider:before {
 }
 
 .dark-mode .last-updated-text {
-  color: #aaa; /* Subtle text color for last updated */
+  color: #aaa; 
 }
 
 .last-updated-sub {
@@ -785,7 +785,7 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Vertically center icons */
+  justify-content: center;
   gap: 10px;
 }
 
