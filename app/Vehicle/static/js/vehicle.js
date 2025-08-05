@@ -459,9 +459,9 @@ function triggerSOS(imei, marker) {
     const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
 
-    setTimeout(() => {
-      removeSOS(imei);
-    }, 60000); 
+    // setTimeout(() => {
+    //   removeSOS(imei);
+    // }, 60000); 
   }
 }
 
@@ -528,9 +528,9 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
     content += `<p>No other vehicles found within 5km radius.</p>`;
   }
 
-  content += `
-      <button id="close-sos-popup">Close</button>
-    </div>
+ content += `
+    <button id="minimize-sos-popup">Minimize</button>
+    <button id="close-sos-popup">Close</button>
   `;
 
   popup.innerHTML = content;
@@ -549,8 +549,9 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.maxWidth = "500px";
   popup.style.width = "90%";
 
-  // Add close button handler
-  document.getElementById("close-sos-popup").onclick = () => popup.remove();
+  document.getElementById("minimize-sos-popup").onclick = () => {
+    popup.style.display = "none";
+  };
 }
 
 function vehicleInfoPage(licensePlateNumber) {
@@ -1396,6 +1397,9 @@ function updateVehicleData(vehicle) {
 }
 
 function removeSOS(imei) {
+  const popup = document.getElementById("sos-nearby-popup");
+  if (popup) popup.remove();
+
   if (sosActiveMarkers[imei]) {
     sosActiveMarkers[imei].remove();
     delete sosActiveMarkers[imei];
