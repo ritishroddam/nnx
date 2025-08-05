@@ -1147,6 +1147,45 @@ input:checked + .slider:before {
   color: #ff6b6b;
 }
 
+.sos-popup-content {
+  color: #333;
+}
+
+.sos-popup-content h3 {
+  color: #d32f2f;
+  margin-top: 0;
+}
+
+.sos-popup-content h4 {
+  margin-bottom: 8px;
+}
+
+.nearby-vehicles-list {
+  list-style-type: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.nearby-vehicles-list li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+#close-sos-popup {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+#close-sos-popup:hover {
+  background: #b71c1c;
+}
+
 @keyframes sosBlink {
   0% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
   50% { border-color: transparent; box-shadow: none; }
