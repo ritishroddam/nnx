@@ -298,6 +298,8 @@ tr:hover {
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 80%;
+  padding: 20px;
 }
 
 @media (max-width: 600px) {
@@ -349,7 +351,6 @@ tr:hover {
 }
 
 .close-btn {
-  position: absolute;
   top: 5px;
   right: 10px;
   font-size: 1.7rem;
@@ -357,6 +358,7 @@ tr:hover {
   color: #aaa;
   transition: color 0.2s;
   z-index: 2;
+  margin-left: 1170px;
 }
 
 .close-btn:hover {
