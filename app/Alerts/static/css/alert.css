@@ -67,6 +67,7 @@
 .dark-mode .alert-card.active {
     color: #000;
     border-left: 4px solid #5d6d7e;
+    background-color: slategrey;
 }
 
 .alert-card h3 {
