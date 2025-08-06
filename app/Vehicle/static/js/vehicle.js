@@ -449,37 +449,16 @@ function triggerSOS(imei, marker) {
   }
 
   if (!sosActiveMarkers[imei]) {
-
-    const sosIndicator = document.createElement('div');
-    sosIndicator.className = 'sos-indicator';
-    sosIndicator.innerHTML = 'SOS';
-    sosIndicator.style.position = 'absolute';
-    sosIndicator.style.backgroundColor = 'red';
-    sosIndicator.style.color = 'white';
-    sosIndicator.style.padding = '4px 8px';
-    sosIndicator.style.borderRadius = '4px';
-    sosIndicator.style.fontWeight = 'bold';
-    sosIndicator.style.zIndex = '1000';
-    sosIndicator.style.top = '-30px';
-    sosIndicator.style.left = '50%';
-    sosIndicator.style.transform = 'translateX(-50%)';
-
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
 
-
- if (marker && marker.element) {
-      marker.element.style.position = 'relative';
-      marker.element.appendChild(sosIndicator);
-      marker.element.classList.add("vehicle-blink");
-      sosActiveMarkers[imei] = sosIndicator;
-    }
-
-  const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
+    // Find nearby vehicles
+    const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
+
     // setTimeout(() => {
     //   removeSOS(imei);
     // }, 60000); 
@@ -522,35 +501,22 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
 
   const popup = document.createElement("div");
   popup.id = "sos-nearby-popup";
-  popup.style.position = "fixed";
-  popup.style.left = "50%";
-  popup.style.top = "50%";
-  popup.style.transform = "translate(-50%, -50%)";
-  popup.style.zIndex = "10000";
-  popup.style.backgroundColor = "white";
-  popup.style.padding = "20px";
-  popup.style.borderRadius = "8px";
-  popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-  popup.style.maxWidth = "500px";
-  popup.style.width = "90%";
-  popup.style.maxHeight = "80vh";
-  popup.style.overflowY = "auto";
-
+  
   let content = `
     <div class="sos-popup-content">
-      <h3 style="color: red; margin-top: 0;">🚨 SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
-      <div class="sos-location"><strong>Location:</strong> ${sosVehicle.address || "Unknown"}</div>
-      <div class="sos-coords"><strong>Coordinates:</strong> ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
-      <div class="sos-time"><strong>Time:</strong> ${new Date().toLocaleTimeString()}</div>
+      <h3>SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
+      <div class="sos-location">Location: ${sosVehicle.address || "Unknown"}</div>
+      <div class="sos-coords">Coordinates: ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
+      <div class="sos-time">Time: ${new Date().toLocaleTimeString()}</div>
       
       <h4>Nearby Vehicles (within 5km):</h4>
   `;
 
   if (nearbyVehicles.length > 0) {
-    content += `<ul class="nearby-vehicles-list" style="padding-left: 20px;">`;
+    content += `<ul class="nearby-vehicles-list">`;
     nearbyVehicles.forEach(vehicle => {
       content += `
-        <li style="margin-bottom: 8px;">
+        <li>
           <strong>${vehicle.vehicle.LicensePlateNumber || vehicle.vehicle.imei}</strong>
           - Distance: ${vehicle.distance} km
           - Estimated Time: ~${vehicle.estimatedTime} min
@@ -562,27 +528,29 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
     content += `<p>No other vehicles found within 5km radius.</p>`;
   }
 
-  content += `
-    <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
-      <button id="minimize-sos-popup" style="padding: 8px 16px; margin-right: 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;">Minimize</button>
-      <button id="close-sos-popup" style="padding: 8px 16px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
-    </div>
+ content += `
+    <button id="minimize-sos-popup">Minimize</button>
+    <button id="close-sos-popup">Close</button>
   `;
 
   popup.innerHTML = content;
   document.body.appendChild(popup);
 
-  // Add event listeners for buttons
+  // Style the popup
+  popup.style.position = "fixed";
+  popup.style.left = "50%";
+  popup.style.top = "50%";
+  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.zIndex = "10000";
+  popup.style.backgroundColor = "white";
+  popup.style.padding = "20px";
+  popup.style.borderRadius = "8px";
+  popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+  popup.style.maxWidth = "500px";
+  popup.style.width = "90%";
+
   document.getElementById("minimize-sos-popup").onclick = () => {
     popup.style.display = "none";
-  };
-
-  document.getElementById("close-sos-popup").onclick = () => {
-    popup.remove();
-    const marker = markers[sosVehicle.imei];
-    if (marker) {
-      removeSOS(sosVehicle.imei);
-    }
   };
 }
 
@@ -1785,7 +1753,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
     content: markerContent,
   });
 
-  marker.element = markerContent;
   marker.device = device;
 
   const coords = {
