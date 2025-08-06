@@ -1195,6 +1195,32 @@ input:checked + .slider:before {
   animation: blinker 1s linear infinite;
 }
 
+.sos-indicator {
+  position: absolute;
+  background-color: red;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 1000;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.1);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
 @keyframes blinker {
   50% {
     opacity: 0.3;
