@@ -449,16 +449,21 @@ function triggerSOS(imei, marker) {
   }
 
   if (!sosActiveMarkers[imei]) {
+        // Find nearby vehicles
+    const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
+    showNearbyVehiclesPopup(vehicle, nearbyVehicles);
+
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
 
-    // Find nearby vehicles
-    const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
-    showNearbyVehiclesPopup(vehicle, nearbyVehicles);
 
+ if (marker && marker.element) {
+      marker.element.classList.add("vehicle-blink");
+      sosActiveMarkers[imei] = true;
+    }
     // setTimeout(() => {
     //   removeSOS(imei);
     // }, 60000); 
