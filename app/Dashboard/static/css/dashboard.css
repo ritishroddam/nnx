@@ -139,7 +139,7 @@
 }
 
 .weather-container h1 {
-  display: none; /* Hide the "Weather" heading */
+  display: none; 
 }
 
 #weather {
@@ -460,18 +460,18 @@
 
 .title-with-line {
   display: flex;
-  align-items: center; /* Align text and line in the center */
-  gap: 10px; /* Space between text and line */
+  align-items: center;
+  gap: 10px; 
   padding: 15px;
   margin-bottom: 20px;
   margin-top: 20px;
 }
 
 .title-with-line hr {
-  flex-grow: 1; /* Makes the line take up remaining space */
+  flex-grow: 1;
   border: none;
   height: 1px;
-  background-color: #2f2f2f; /* Adjust the color as needed */
+  background-color: #2f2f2f;
 }
 
 .dark-mode .title-with-line hr {
@@ -483,7 +483,7 @@
 }
 
 #vehicleSetion {
-  flex: 1 1 0;               /* Make devicesChart take more space */
+  flex: 1 1 0;              
   max-width: 600px;
   min-width: 320px;
   display: flex;
@@ -605,8 +605,8 @@
 
 .vehicleLiveTable table {
   width: 100%;
-  border-collapse: separate; /* Change from collapse to separate */
-  border-spacing: 0 5px; /* Adds space between rows */
+  border-collapse: separate; 
+  border-spacing: 0 5px; 
   color: #555;
 }
 
@@ -619,7 +619,7 @@
 .vehicleLiveTable th,
 .vehicleLiveTable td {
   text-align: center;
-  padding: 10px; /* Adds more padding for better readability */
+  padding: 10px; 
   border-bottom: 0.5px solid #ddd;
   font-weight: 100;
   letter-spacing: 1px;
@@ -635,8 +635,8 @@
   background-color: #2f2f2f;
   color: #ccc;
   text-transform: uppercase;
-  padding: 10px; /* Adjust padding for better alignment */
-  vertical-align: middle; /* Centers text vertically */
+  padding: 10px;
+  vertical-align: middle; 
 }
 
 .dark-mode .vehicleLiveTable th {
@@ -646,7 +646,7 @@
 
 .vehicleLiveTable tbody tr {
   background-color: white;
-  border-radius: 5px; /* Optional rounded corners for neat look */
+  border-radius: 5px; 
 }
 
 .vehicleLiveTable tbody tr:nth-child(even) {
@@ -845,7 +845,6 @@
   background: #444;
 }
 
-/* Main dashboard layout */
 .dashboard-main-layout {
   display: flex;
   flex-direction: row;
@@ -855,7 +854,6 @@
   overflow: hidden;
 }
 
-/* Main content area */
 .dashboard-content {
   flex: 1 1 0;
   min-width: 0;
@@ -872,7 +870,6 @@
   display: none; /* Chrome, Safari */
 }
 
-/* Fixed right sidebar */
 .dashboard-sidebar {
   width: 300px;
   flex-shrink: 0;
@@ -887,11 +884,11 @@
 }
 
 .dashboard-sidebar {
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none; 
 }
 
 .dashboard-sidebar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
 .dark-mode .dashboard-sidebar {
@@ -1009,7 +1006,6 @@
   color: #fff;
 }
 
-/* Status Card Popup */
 .status-popup {
     display: none;
     background: white;
@@ -1238,12 +1234,12 @@
 
 .skeleton-center {
   position: absolute;
-  top: 75%; /* Adjusted for semi-circle */
+  top: 75%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100px;
-  height: 50px; /* Half height for semi-circle */
-  border-radius: 50% 50% 0 0; /* Semi-circle shape */
+  height: 50px; 
+  border-radius: 50% 50% 0 0; 
   background-color: #e0e0e0;
   z-index: 2;
   clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -1258,7 +1254,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 200%; /* Double height for semi-circle effect */
+  height: 200%; 
   border-radius: 50%;
   background-color: #e0e0e0;
   z-index: 1;
@@ -1272,7 +1268,6 @@
   background-size: 200% 100%;
 }
 
-/* Position the arcs for semi-circle */
 .skeleton-arc-1 {
   transform: rotate(0deg);
   clip-path: path('M 50,50 L 50,0 A 50,50 0 0 1 100,50 Z');
