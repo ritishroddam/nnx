@@ -812,7 +812,7 @@ async function fallbackToDefaultLocation() {
     const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
     map = new Map(document.getElementById("map"), {
       center: defaultLocation,
-      zoom: 13,
+      zoom: 15,
       disableDefaultUI: true,
       mapId: mapId,
     });
