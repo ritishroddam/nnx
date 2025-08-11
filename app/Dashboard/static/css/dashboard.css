@@ -1223,28 +1223,30 @@
 
 /* Pie Chart Skeleton Loader Styles */
 .pie-chart-skeleton {
-  position: relative;
+  position: absolute;
   width: 100%;
   height: 340px;
-  background-color: #f0f0f0;
+  background-color: transparent;
   border-radius: 8px;
   overflow: hidden;
+  z-index: 1;
 }
 
 .dark-mode .pie-chart-skeleton {
-  background-color: #333;
+  background-color: transparent;
 }
 
 .skeleton-center {
   position: absolute;
-  top: 50%;
+  top: 75%; /* Adjusted for semi-circle */
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100px;
-  height: 100px;
-  border-radius: 50%;
+  height: 50px; /* Half height for semi-circle */
+  border-radius: 50% 50% 0 0; /* Semi-circle shape */
   background-color: #e0e0e0;
   z-index: 2;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 }
 
 .dark-mode .skeleton-center {
@@ -1256,13 +1258,13 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 200%; /* Double height for semi-circle effect */
   border-radius: 50%;
-  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
   background-color: #e0e0e0;
   z-index: 1;
-  transform-origin: center;
+  transform-origin: 50% 50%;
   animation: shimmer 1.5s infinite;
+  clip-path: path('M 50,50 L 50,0 A 50,50 0 0 1 100,50 Z');
 }
 
 .dark-mode .skeleton-arc {
@@ -1270,40 +1272,41 @@
   background-size: 200% 100%;
 }
 
+/* Position the arcs for semi-circle */
 .skeleton-arc-1 {
   transform: rotate(0deg);
-  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
+  clip-path: path('M 50,50 L 50,0 A 50,50 0 0 1 100,50 Z');
 }
 
 .skeleton-arc-2 {
   transform: rotate(120deg);
-  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
+  clip-path: path('M 50,50 L 50,0 A 50,50 0 0 1 100,50 Z');
 }
 
 .skeleton-arc-3 {
   transform: rotate(240deg);
-  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
+  clip-path: path('M 50,50 L 50,0 A 50,50 0 0 1 100,50 Z');
 }
 
-@keyframes shimmer {
-  0% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.7;
-  }
+/* Hide/show logic */
+.graph-container {
+  position: relative;
 }
 
-/* Hide skeleton when chart is loaded */
-#vehiclesChart.loaded + .pie-chart-skeleton {
-  display: none;
+#vehiclesChart.loaded {
+  display: block;
 }
 
 #vehiclesChart:not(.loaded) {
   display: none;
+}
+
+#pieChartSkeleton.loaded {
+  display: none;
+}
+
+#pieChartSkeleton:not(.loaded) {
+  display: block;
 }
 
 @keyframes loadingDots {
