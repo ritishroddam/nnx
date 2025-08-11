@@ -476,6 +476,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function renderPieChart() {
     try {
+      document.getElementById('vehiclesChart').classList.remove('loaded');
+
       const response = await fetch("/dashboard/atlanta_pie_data");
       const data = await response.json();
 
@@ -610,8 +612,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       };
 
       window.pieChart = new Chart(ctx, chartConfig);
+      document.getElementById('vehiclesChart').classList.add('loaded');
     } catch (error) {
       console.error("❌ Error fetching pie chart data:", error);
+      document.getElementById('vehiclesChart').classList.add('loaded');
     }
   }
 
