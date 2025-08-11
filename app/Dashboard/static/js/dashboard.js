@@ -321,8 +321,6 @@ async function fetchVehicleDistances(range = "1day") {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  document.querySelector('.dashboard-main-layout').classList.add('loaded');
-
   await initMap();
 
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
@@ -704,7 +702,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // await fetchDistanceTravelledData();
+  await fetchDistanceTravelledData();
 
   document.querySelectorAll("#range-selector .range-btn").forEach((btn) => {
     btn.addEventListener("click", async function () {
@@ -717,7 +715,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });  
 
-  // await fetchVehicleDistances();
+  await fetchVehicleDistances();
 
   document.getElementById("downloadExcelBtn").addEventListener("click", function () {
     const table = document.querySelector(".vehicleLiveTable table");
@@ -734,19 +732,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(updateClockAndDate, 1000);
   updateClockAndDate();
 
-  // await fetchDashboardData();
-  // await renderPieChart();
-
-  await Promise.all([
-    fetchDistanceTravelledData(),
-    fetchVehicleDistances(),
-    fetchDashboardData(),
-    renderPieChart(),
-    fetchStatusData()
-  ]);
-
-  document.querySelector('.dashboard-main-layout').classList.add('loaded');
-
+  await fetchDashboardData();
+  await renderPieChart();
 });
 
 let map, trafficLayer, marker;
@@ -837,9 +824,8 @@ async function fallbackToDefaultLocation() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function (){
+document.addEventListener("DOMContentLoaded", function () {
   fetchStatusData();
-  document.querySelector('.dashboard-main-layout').classList.remove('loaded');
 });
 
 async function fetchStatusData() {
