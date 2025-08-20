@@ -419,6 +419,22 @@ function updateVehicleCard(data) {
   }
 }
 
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c; // Distance in km
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180);
+}
+
 function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle) return;
@@ -439,10 +455,103 @@ function triggerSOS(imei, marker) {
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
 
-    setTimeout(() => {
-      removeSOS(imei);
-    }, 60000); 
+    // Find nearby vehicles
+    const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
+    showNearbyVehiclesPopup(vehicle, nearbyVehicles);
+
+    // setTimeout(() => {
+    //   removeSOS(imei);
+    // }, 60000); 
   }
+}
+
+function findNearbyVehicles(sosVehicle, radiusKm) {
+  const nearby = [];
+  const sosLat = parseFloat(sosVehicle.latitude);
+  const sosLon = parseFloat(sosVehicle.longitude);
+
+  vehicleData.forEach((vehicle, imei) => {
+    if (imei === sosVehicle.imei) return; // Skip the SOS vehicle itself
+    
+    const vehicleLat = parseFloat(vehicle.latitude);
+    const vehicleLon = parseFloat(vehicle.longitude);
+    
+    if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
+      const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
+      if (distance <= radiusKm) {
+        // Calculate estimated time to reach (assuming average speed of 40km/h)
+        const estimatedTime = (distance / 40) * 60; // in minutes
+        nearby.push({
+          vehicle,
+          distance: distance.toFixed(2),
+          estimatedTime: estimatedTime.toFixed(0)
+        });
+      }
+    }
+  });
+
+  // Sort by distance (nearest first)
+  nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+  return nearby;
+}
+
+function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
+  const oldPopup = document.getElementById("sos-nearby-popup");
+  if (oldPopup) oldPopup.remove();
+
+  const popup = document.createElement("div");
+  popup.id = "sos-nearby-popup";
+  
+  let content = `
+    <div class="sos-popup-content">
+      <h3>SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
+      <div class="sos-location">Location: ${sosVehicle.address || "Unknown"}</div>
+      <div class="sos-coords">Coordinates: ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
+      <div class="sos-time">Time: ${new Date().toLocaleTimeString()}</div>
+      
+      <h4>Nearby Vehicles (within 5km):</h4>
+  `;
+
+  if (nearbyVehicles.length > 0) {
+    content += `<ul class="nearby-vehicles-list">`;
+    nearbyVehicles.forEach(vehicle => {
+      content += `
+        <li>
+          <strong>${vehicle.vehicle.LicensePlateNumber || vehicle.vehicle.imei}</strong>
+          - Distance: ${vehicle.distance} km
+          - Estimated Time: ~${vehicle.estimatedTime} min
+        </li>
+      `;
+    });
+    content += `</ul>`;
+  } else {
+    content += `<p>No other vehicles found within 5km radius.</p>`;
+  }
+
+ content += `
+    <button id="minimize-sos-popup">Minimize</button>
+    <button id="close-sos-popup">Close</button>
+  `;
+
+  popup.innerHTML = content;
+  document.body.appendChild(popup);
+
+  // Style the popup
+  popup.style.position = "fixed";
+  popup.style.left = "50%";
+  popup.style.top = "50%";
+  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.zIndex = "10000";
+  popup.style.backgroundColor = "white";
+  popup.style.padding = "20px";
+  popup.style.borderRadius = "8px";
+  popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+  popup.style.maxWidth = "500px";
+  popup.style.width = "90%";
+
+  document.getElementById("minimize-sos-popup").onclick = () => {
+    popup.style.display = "none";
+  };
 }
 
 function vehicleInfoPage(licensePlateNumber) {
@@ -1027,7 +1136,7 @@ function updateMap() {
   filterVehicles();
 }
 
-function animateMarker(marker, newPosition, duration = 15000) {
+function animateMarker(marker, newPosition, duration = 18000) {
   let startPosition = new google.maps.LatLng(
     marker.position.lat,
     marker.position.lng
@@ -1288,6 +1397,9 @@ function updateVehicleData(vehicle) {
 }
 
 function removeSOS(imei) {
+  const popup = document.getElementById("sos-nearby-popup");
+  if (popup) popup.remove();
+
   if (sosActiveMarkers[imei]) {
     sosActiveMarkers[imei].remove();
     delete sosActiveMarkers[imei];

@@ -67,6 +67,7 @@
 .dark-mode .alert-card.active {
     color: #000;
     border-left: 4px solid #5d6d7e;
+    background-color: slategrey;
 }
 
 .alert-card h3 {
@@ -78,6 +79,10 @@
 .alert-card i {
     margin-left: 10px;
     color: #666;
+}
+
+.dark-mode .alert-card i {
+    color: white;
 }
 
 .alert-type-header {
@@ -477,12 +482,6 @@
     display: inline-block;
 }
 
-.total-alerts {
-    font-weight: bold;
-    color: #555;
-    margin-right: 10px;
-}
-
 .error-message {
     text-align: center;
     padding: 20px;
@@ -624,7 +623,13 @@
     margin-top: 10px;
     font-weight: bold;
     color: #333;
+    margin-right: 10px;
 }
+
+.dark-mode .total-alerts {
+    color: #ccc;
+}
+
 .download-btn {
     margin-left: 2px;
 }

@@ -248,7 +248,6 @@ body.modal-open {
 
 /* Table Styles */
 .vehicle-table-container {
-  background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-top: 10px;
@@ -343,7 +342,6 @@ body.modal-open {
 
 /* Dark mode support */
 .dark-mode .vehicle-table {
-  background-color: #000;
   color: #ccc;
   box-shadow: 0px 0px 10px #cccccc90;
 }

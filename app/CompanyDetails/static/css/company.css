@@ -135,7 +135,6 @@ tr:hover {
 
 .company-table-container {
   width: 100%;
-  background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-top: 10px;
@@ -145,7 +144,6 @@ tr:hover {
 }
 
 .dark-mode .company-table-container {
-  background-color: #000;
   color: #ccc;
   box-shadow: 0px 0px 10px #cccccc90;
 }
@@ -304,7 +302,6 @@ tr:hover {
 .upload-btn-row {
   display: flex;
   gap: 12px;
-  width: 100%;
 }
 
 .upload-btn-row .btn,
