@@ -1901,7 +1901,7 @@ function addHoverListenersToCardsAndMarkers() {
           marker.position.lng
         );
 
-        map.setZoom(16);
+        map.setZoom(17);
         panToWithOffset(latLng, -200, 0);
 
         const coords = {
