@@ -1464,11 +1464,11 @@ function removeSOS(imei) {
     marker.content.classList.remove("vehicle-blink");
   }
 
-  // const vehicle = vehicleData.get(imei);
-  // if (vehicle) {
-  //   vehicle.sos = "0";
-  //   vehicleData.set(imei, vehicle);
-  // }
+  const vehicle = vehicleData.get(imei);
+  if (vehicle) {
+    vehicle.sos = "0";
+    vehicleData.set(imei, vehicle);
+  }
 
   const vehiclesArray = Array.from(vehicleData.values());
   renderVehicleCards(vehiclesArray);
