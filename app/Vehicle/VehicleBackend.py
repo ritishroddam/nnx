@@ -207,24 +207,18 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     stoppage_lookup = {item['imei']: item for item in stoppage_times}
     status_lookup = {item['imei']: item for item in statuses}
 
-    vehicleData = list(atlanta_collection.aggregate(
-        [
-            {"$match": {
-                "gps": "A",
-                "imei": {"$in":imei_list}
-                }
-            },
-            {"$sort": {"date_time": -1}},
-            {
-                "$group": {
-                    "_id": "$imei",
-                    "latest_doc": {"$first": "$$ROOT"}
-                }
-            },
-            {"$replaceRoot": {"newRoot": "$latest_doc"}},
-            {"$project": {"timestamp": 0}}
-        ]
-    ))
+    print("[DEBUG] Fetching Vehicle data from atlanta collection")
+    vehicleData = list(atlanta_collection.aggregate([
+    {"$match": {"gps": "A", "imei": {"$in": imei_list}}},
+    {"$group": {
+    "_id": "$imei",
+    "latest_doc": {"$top": {"output": "$$ROOT", "sortBy": {"date_time": -1}}}
+    }},
+    {"$replaceRoot": {"newRoot": "$latest_doc"}},
+    {"$project": {"timestamp": 0}}
+    ]))
+    
+    print("[DEBUG] Fetched data from atlanta collection, processing data")
     
     for vehicle in vehicleData:
         imei = vehicle.get('imei')
@@ -304,6 +298,8 @@ def get_vehicles():
         print("Building vehicle data")
         vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list, missingImeis)
 
+        print("[DEBUG] Processed vehicle data")
+        
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])
             lat = vehicle.get('latitude')
