@@ -462,7 +462,51 @@ function triggerSOS(imei, marker) {
     // setTimeout(() => {
     //   removeSOS(imei);
     // }, 60000); 
+  vehicle.sosActive = true;
+  vehicleData.set(imei, vehicle);
   }
+}
+
+function acknowledgeSOS(imei) {
+  const vehicle = vehicleData.get(imei);
+  if (!vehicle) return;
+
+  // Remove the visual SOS indicators
+  removeSOS(imei);
+  
+  // Update the vehicle data to mark SOS as acknowledged
+  vehicle.sos = "0";
+  vehicle.sosActive = false;
+  vehicleData.set(imei, vehicle);
+  
+  // Send acknowledgment to server
+  fetch('/alerts/acknowledge_sos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': getCookie('csrf_access_token')
+    },
+    body: JSON.stringify({
+      imei: imei,
+      licensePlate: vehicle.LicensePlateNumber
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(`SOS acknowledged for ${imei}`);
+      // Update the UI to reflect the acknowledged state
+      const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+      if (vehicleCard) {
+        vehicleCard.classList.remove('sos-blink-card');
+      }
+    } else {
+      console.error('Failed to acknowledge SOS:', data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error acknowledging SOS:', error);
+  });
 }
 
 function findNearbyVehicles(sosVehicle, radiusKm) {
@@ -529,6 +573,7 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   }
 
  content += `
+    <button id="acknowledge-sos-btn" class="sos-ack-btn">Acknowledge SOS</button>
     <button id="minimize-sos-popup">Minimize</button>
     <button id="close-sos-popup">Close</button>
   `;
@@ -549,8 +594,17 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.maxWidth = "500px";
   popup.style.width = "90%";
 
+  document.getElementById("acknowledge-sos-btn").onclick = () => {
+    acknowledgeSOS(sosVehicle.imei);
+    popup.remove();
+  };
+
   document.getElementById("minimize-sos-popup").onclick = () => {
     popup.style.display = "none";
+  };
+
+  document.getElementById("close-sos-popup").onclick = () => {
+    popup.remove();
   };
 }
 
@@ -1901,7 +1955,7 @@ function addHoverListenersToCardsAndMarkers() {
           marker.position.lng
         );
 
-        map.setZoom(20);
+        map.setZoom(17);
         panToWithOffset(latLng, -200, 0);
 
         const coords = {
