@@ -213,7 +213,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         doc = atlanta_collection.find_one(
             {"imei": imei, "gps": "A"},
             sort=[("date_time", -1)],
-            projection={"timestamp": 0}
+            projection={"timestamp": 0,}
         )
         if doc:
             vehicleData.append(doc)
