@@ -208,15 +208,15 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     status_lookup = {item['imei']: item for item in statuses}
 
     print("[DEBUG] Fetching Vehicle data from atlanta collection")
-    vehicleData = list(atlanta_collection.aggregate([
-    {"$match": {"gps": "A", "imei": {"$in": imei_list}}},
-    {"$group": {
-    "_id": "$imei",
-    "latest_doc": {"$top": {"output": "$$ROOT", "sortBy": {"date_time": -1}}}
-    }},
-    {"$replaceRoot": {"newRoot": "$latest_doc"}},
-    {"$project": {"timestamp": 0}}
-    ]))
+    vehicleData = []
+    for imei in imei_list:
+        doc = atlanta_collection.find_one(
+            {"imei": imei, "gps": "A"},
+            sort=[("date_time", -1)],
+            projection={"timestamp": 0,}
+        )
+        if doc:
+            vehicleData.append(doc)
     
     print("[DEBUG] Fetched data from atlanta collection, processing data")
     
