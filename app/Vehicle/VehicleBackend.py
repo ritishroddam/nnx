@@ -11,6 +11,7 @@ from app.geocoding import geocodeInternal
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
 atlanta_collection = db['atlanta']
+atlantaLatest_collection = db['atlantaLatest']
 vehicle_inventory_collection = db['vehicle_inventory']
 company_collection = db['customers_list']
 status_collection = db['statusAtlanta']
@@ -208,15 +209,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     status_lookup = {item['imei']: item for item in statuses}
 
     print("[DEBUG] Fetching Vehicle data from atlanta collection")
-    vehicleData = []
-    for imei in imei_list:
-        doc = atlanta_collection.find_one(
-            {"imei": imei, "gps": "A"},
-            sort=[("date_time", -1)],
-            projection={"timestamp": 0,}
-        )
-        if doc:
-            vehicleData.append(doc)
+    vehicleData = atlantaLatest_collection.find({"_id": {"$in": imei_list}}, {"timestamp": 0})
     
     print("[DEBUG] Fetched data from atlanta collection, processing data")
     
