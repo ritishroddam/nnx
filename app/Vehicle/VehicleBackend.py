@@ -164,7 +164,7 @@ def getStopTimeToday(imei):
 
         result = list(atlanta_collection.aggregate(pipeline))
         
-        missingImeis = set(imei) - {item['imei'] for item in result}
+        missingImeis = list(set(imei) - {item['imei'] for item in result})
         
         pipeline = [
                 {"$match": {
@@ -238,7 +238,7 @@ def getVehicleDistances(imei):
 
         distances = list(atlanta_collection.aggregate(pipeline))
 
-        missingImeis = set(imei) - {item['imei'] for item in distances}
+        missingImeis = list(set(imei) - {item['imei'] for item in distances})
         
         pipeline = [
             {"$match": {
