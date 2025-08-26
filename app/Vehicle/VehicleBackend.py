@@ -50,8 +50,10 @@ def getVehicleStatus(imei_list):
         results = list(status_collection.find({"_id": {"$in": imei_list}}))
         
         for imei in imei_list:
-            results.append(atlantaAis140Status_collection.find_one({"_id": imei}))
-            
+            data = atlantaAis140Status_collection.find_one({"_id": imei})
+            if not data:
+                pass
+            results.append(data)
         statuses = []
 
         print("Processing vehicle status results")
@@ -290,7 +292,8 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
 
     for imei in imei_list:
         data = atlantaAis140Latest_collection.find_one({"_id": imei})
-        vehicleData.append(atlantaAis140ToFront(data))
+        if data:
+            vehicleData.append(atlantaAis140ToFront(data))
 
     print("[DEBUG] Fetched data from atlanta collection, processing data")
     
