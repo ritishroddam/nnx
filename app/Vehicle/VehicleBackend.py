@@ -311,7 +311,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         vehicle["normalSpeed"] = float(inventory.get('normalSpeed', "0") or 60.0)
         
         print("[DEBUG] Distances")
-        print(typeOf(distances))
+        print(distances)
         vehicle["distance"] = round(distances.get(imei, 0), 2)
 
         print("[DEBUG] Stoppage")
