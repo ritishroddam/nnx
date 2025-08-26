@@ -385,6 +385,8 @@ def get_vehicles():
         print("[DEBUG] Processed vehicle data")
         
         for vehicle in vehicles:
+            print(vehicle)
+        for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])
             lat = vehicle.get('latitude')
             lng = vehicle.get('longitude')
