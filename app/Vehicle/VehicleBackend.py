@@ -309,6 +309,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         vehicle["slowSpeed"] =  float(inventory.get('slowSpeed', "0") or 40.0)
         vehicle["normalSpeed"] = float(inventory.get('normalSpeed', "0") or 60.0)
         
+        print(vehicle)
         vehicle["distance"] = round(distances.get(imei, 0), 2)
 
         stoppage_time_item = stoppage_lookup.get(imei, {})
