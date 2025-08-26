@@ -50,7 +50,7 @@ def getVehicleStatus(imei_list):
         results = list(status_collection.find({"_id": {"$in": imei_list}}))
         
         for imei in imei_list:
-            results.append(status_collection.find_one({"_id": imei}))
+            results.append(atlantaAis140Status_collection.find_one({"_id": imei}))
             
         statuses = []
 
