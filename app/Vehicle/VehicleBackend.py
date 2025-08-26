@@ -288,7 +288,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     status_lookup = {item['imei']: item for item in statuses}
 
     print("[DEBUG] Fetching Vehicle data from atlanta collection")
-    vehicleData = atlantaLatest_collection.find({"_id": {"$in": imei_list}}, {"timestamp": 0})
+    vehicleData = list(atlantaLatest_collection.find({"_id": {"$in": imei_list}}, {"timestamp": 0}))
 
     for imei in imei_list:
         data = atlantaAis140Latest_collection.find_one({"_id": imei})
