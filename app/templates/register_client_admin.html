@@ -15,35 +15,31 @@ Register Client Admin
 
 <div class="register-admins-wrapper">
     <div class="register-admins-card">
-        <div class="register-admins-left">
-            <button id="register-btn" class="btn btn-primary">Register New Client Admin</button>
-        </div>
-        <div class="register-admins-right">
-            <h2>Registered Client Admins</h2>
-            <div class="admins-table-container">
-                <table class="admins-table">
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Company</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for admin in client_admins %}
-                        <tr>
-                            <td>{{ admin.username }}</td>
-                            <td>{{ admin.email }}</td>
-                            <td>{{ admin.company_name }}</td>
-                            <td>
-                                <button class="edit-btn" data-id="{{ admin._id }}">Edit</button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <button id="register-btn" class="btn btn-primary">Register New Client Admin</button>
+        <h2>Registered Client Admins</h2>
+        <div class="admins-table-container">
+            <table class="admins-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Company</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in client_admins %}
+                    <tr>
+                        <td>{{ admin.username }}</td>
+                        <td>{{ admin.email }}</td>
+                        <td>{{ admin.company_name }}</td>
+                        <td>
+                            <button class="edit-btn" data-id="{{ admin._id }}">Edit</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -93,38 +89,24 @@ Register Client Admin
     }
     .register-admins-card {
         display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: flex-start;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
         background: #fff;
         border-radius: 16px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.08);
         padding: 40px 32px 32px 32px;
         margin: 40px 0 0 0;
         width: 90vw;
-        max-width: 1200px;
+        max-width: 900px;
         min-height: 400px;
-        gap: 48px;
+        gap: 18px;
     }
-    .register-admins-left {
-        flex: 1 1 40%;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-        margin-top: 60px;
-    }
-    .register-admins-right {
-        flex: 2 1 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-    }
-    .register-admins-right h2 {
+    .register-admins-card h2 {
         margin-bottom: 12px;
         font-size: 2rem;
         font-weight: 700;
+        align-self: flex-start;
     }
     .admins-table-container {
         width: 100%;
