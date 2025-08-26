@@ -299,6 +299,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     
     for vehicle in vehicleData:
         imei = vehicle.get('imei')
+        print(imei)
         if not imei:
             continue
 
