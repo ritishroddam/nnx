@@ -10,10 +10,10 @@ def _convert_date_time_emit(date):
     ist = date.astimezone(timezone(timedelta(hours=5, minutes=30)))
     return ist.strftime("%d%m%y"), ist.strftime("%H%M%S")
 
-async def atlantaAis140ToFront(parsedData):
+def atlantaAis140ToFront(parsedData):
     date, time = _convert_date_time_emit(parsedData.get("timestamp"))
 
-    address = await geocodeInternal(parsedData.get("gps", {}).get("lat"), parsedData.get("gps", {}).get("lon"))
+    address = geocodeInternal(parsedData.get("gps", {}).get("lat"), parsedData.get("gps", {}).get("lon"))
     json_data = {
         "imei": parsedData.get("imei"),
         "speed": parsedData.get("telemetry", {}).get("speed"),
