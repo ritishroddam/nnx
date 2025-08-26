@@ -384,7 +384,6 @@ def get_vehicles():
 
         print("[DEBUG] Processed vehicle data")
         
-
         for vehicle in vehicles:
             print(vehicle)
             vehicle['_id'] = str(vehicle['_id'])
