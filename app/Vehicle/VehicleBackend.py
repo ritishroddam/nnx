@@ -276,7 +276,7 @@ def getVehicleDistances(imei):
 
         return allDistances
     except Exception as e:
-        print(f"Error fetching distances for IMEI {imei}: {e}")
+        print(f"Error fetching distances: {e}")
         flash("Error fetching distances", "danger")
         return jsonify({"error": str(e)}), 500
 
