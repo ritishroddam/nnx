@@ -119,10 +119,13 @@ Register Client Admin
         width: 100%;
         border-collapse: collapse;
         margin-top: 8px;
-        background: #fafbfc;
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .dark-mode .admins-table {
+        color: #ccc;
+        box-shadow: 0 2px 8px rgba(255,255,255,0.03);
     }
     .admins-table th, .admins-table td {
         border: 1px solid #e0e0e0;
@@ -178,7 +181,6 @@ Register Client Admin
         background-color: rgba(0,0,0,0.4);
     }
     .modal-content {
-        background-color: #fefefe;
         margin: 5% auto;
         padding: 32px 32px 24px 32px;
         border: 1px solid #888;
@@ -187,6 +189,11 @@ Register Client Admin
         border-radius: 12px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         position: relative;
+    }
+    .dark-mode .modal-content {
+        color: #ccc;
+        box-shadow: 0 4px 24px rgba(255,255,255,0.12);
+        border: 1px solid #555;
     }
     .close {
         color: #aaa;
