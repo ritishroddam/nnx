@@ -54,8 +54,6 @@ def getVehicleStatus(imei_list):
             if data:
                 results.append(data)
         
-        print(results)
-        
         statuses = []
 
         print("Processing vehicle status results")
