@@ -304,18 +304,21 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
             continue
 
         inventory = inventory_lookup.get(imei, {})
+        print("[DEBUG] Inventory Data")
         vehicle["LicensePlateNumber"] = inventory.get('LicensePlateNumber', 'Unknown')
         vehicle["VehicleType"] = inventory.get('VehicleType', 'Unknown')
         vehicle["slowSpeed"] =  float(inventory.get('slowSpeed', "0") or 40.0)
         vehicle["normalSpeed"] = float(inventory.get('normalSpeed', "0") or 60.0)
         
-        print(vehicle)
+        print("[DEBUG] Distances")
         vehicle["distance"] = round(distances.get(imei, 0), 2)
 
+        print("[DEBUG] Stoppage")
         stoppage_time_item = stoppage_lookup.get(imei, {})
         vehicle['stoppage_time'] = stoppage_time_item.get('stoppage_time_str', '0 seconds')
         vehicle['stoppage_time_delta'] = stoppage_time_item.get('total_stoppage_seconds', 0)
 
+        print("[DEBUG] Missing IMEIS handling")
         if imei not in missingImeis:
             status_item = status_lookup.get(imei, {})
             vehicle['status'] = status_item.get('status', 'unknown')
@@ -332,6 +335,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
             vehicle['speed'] = status_item.get('speed', speed)
             vehicle['gsm_sig'] = status_item.get('gsm_sig', gsm_sig)
         else:
+            print("[DEBUG] missed")
             vehicle['status'] = 'offline'
             now = now = datetime.now(timezone('UTC')).timestamp() * 1000
             date_timeMs = vehicle.get('date_time').timestamp() * 1000
