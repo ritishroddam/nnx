@@ -51,9 +51,8 @@ def getVehicleStatus(imei_list):
         
         for imei in imei_list:
             data = atlantaAis140Status_collection.find_one({"_id": imei})
-            if not data:
-                pass
-            results.append(data)
+            if data:
+                results.append(data)
         
         print(results)
         
