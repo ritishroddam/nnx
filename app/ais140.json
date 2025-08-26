@@ -1,0 +1,77 @@
+{
+  "_id": "863070047070049",
+  "type": "LOCATION",
+  "imei": "863070047070049",
+  "LicensePlateNumber": null,
+  "timestamp": {
+    "$date": "2025-08-26T11:30:52.000Z"
+  },
+  "vendor": "ASPL",
+  "firmware": "V1.1.3",
+  "packet": {
+    "type": "NR",
+    "id": "01",
+    "status": "L",
+    "frameNumber": 342060
+  },
+  "gps": {
+    "date": "26082025",
+    "time": "113052",
+    "timestamp": {
+      "$date": "2025-08-26T11:30:52.000Z"
+    },
+    "gpsStatus": 1,
+    "lat": 13.013865,
+    "lon": 77.648621,
+    "latDir": "N",
+    "lonDir": "E",
+    "heading": 61,
+    "numSatellites": 13,
+    "altitude": 63,
+    "pdop": 0.6,
+    "hdop": 0
+  },
+  "telemetry": {
+    "speed": 0,
+    "ignition": 1,
+    "mainPower": 1,
+    "mainBatteryVoltage": 14.6,
+    "internalBatteryVoltage": 4.2,
+    "emergencyStatus": 0,
+    "tamper": "C",
+    "odometer": 25.97
+  },
+  "network": {
+    "operator": "CellOne",
+    "gsmSignal": 27,
+    "mcc": 404,
+    "mnc": 71,
+    "lac": "4268",
+    "cellId": "d3d9",
+    "nmr": "d3b0",
+    "neighbors": [
+      {
+        "cellId": "d3e2",
+        "lac": "23",
+        "nmr": "4268"
+      },
+      {
+        "cellId": "d3d7",
+        "lac": "23",
+        "nmr": "4650"
+      },
+      {
+        "cellId": "d3af",
+        "lac": "23",
+        "nmr": "4268"
+      }
+    ]
+  },
+  "io": {
+    "digitalInputs": "1011",
+    "digitalOutputs": "00",
+    "currentGeoFence": 0,
+    "RFID": ""
+  },
+  "checksum": "\\ufffd"
+}

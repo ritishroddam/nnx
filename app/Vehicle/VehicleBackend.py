@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
+from app.parser import atlantaAis140ToFront
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
@@ -15,6 +16,9 @@ atlantaLatest_collection = db['atlantaLatest']
 vehicle_inventory_collection = db['vehicle_inventory']
 company_collection = db['customers_list']
 status_collection = db['statusAtlanta']
+atlantaAis140_collection = db['atlantaAis140']
+atlantaAis140Latest_collection = db['atlantaAis140_latest']
+atlantaAis140Status_collection = db['atlantaAis140Status']
 
 @vehicle_bp.route('/map')
 @jwt_required()
@@ -44,6 +48,10 @@ def getVehicleStatus(imei_list):
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
         results = list(status_collection.find({"_id": {"$in": imei_list}}))
+        
+        for imei in imei_list:
+            results.append(status_collection.find_one({"_id": imei}))
+            
         statuses = []
 
         print("Processing vehicle status results")
@@ -153,6 +161,41 @@ def getStopTimeToday(imei):
         ]
 
         result = list(atlanta_collection.aggregate(pipeline))
+        
+        missingImeis = set(imei) - {item['imei'] for item in result}
+        
+        pipeline = [
+                {"$match": {
+                    "imei": {"$in": missingImeis},
+                    "timestamp": {"$gte": start_of_day, "$lt": end_of_day},
+                    "telemetry.speed": {"$gt": 0},
+                    "telemetry.ignition": 0
+                }},
+                {"$sort": {"imei": 1, "timestamp": -1}},
+                {"$group": {
+                    "_id": "$imei",
+                    "timestamps": {"$push": "$timestamp"}
+                }},
+                {"$project": {
+                    "imei": "$_id",
+                    "timestamps": 1
+                }},
+                {"$project": {
+                    "imei": 1,
+                    "timestamps": 1
+                }}
+        ]
+
+        distances = list(atlantaAis140_collection.aggregate(pipeline))
+
+        for distance in distances:
+            stoppageTime = timedelta(0)
+            index = 0 
+            for timestamp in distance['timestamps']:
+                stoppageTime = stoppageTime + (distance['timestamps'][index] - distance['timestamps'][index + 1] if index + 1 < len(distance['timestamps']) else timedelta(0))
+                index += 1
+            result.append({"_id": distance['_id'], "imei": distance['imei'], "total_stoppage_seconds": int(stoppageTime.total_seconds())})
+        
         for item in result:
             seconds = item.get('total_stoppage_seconds', 0)
             item['stoppage_time_str'] = format_seconds(seconds)
@@ -193,6 +236,40 @@ def getVehicleDistances(imei):
 
         distances = list(atlanta_collection.aggregate(pipeline))
 
+        missingImeis = set(imei) - {item['imei'] for item in distances}
+        
+        pipeline = [
+            {"$match": {
+                "imei": {"$in": missingImeis},
+                "timestamp": {"$gte": start_of_day, "$lt": end_of_day}
+            }},
+            {"$sort": {"timestamp": -1}},
+            {
+                "$group": {
+                    "_id": "$imei",
+                    "last_odometer": {"$first": "$telemetry.odometer"},
+                    "first_odometer": {"$last": "$telemetry.odometer"}
+                }
+            },
+            {"$project": {
+                "_id": 0,
+                "imei": "$_id",
+                "first_odometer": 1,
+                "last_odometer": 1
+            }}
+        ]
+        
+        distances_ais140 = list(atlantaAis140_collection.aggregate(pipeline))
+        
+        for distance in distances_ais140:
+            first_odometer = float(distance.get('first_odometer', 0) or 0)
+            last_odometer = float(distance.get('last_odometer', 0) or 0)
+            distance_traveled = last_odometer - first_odometer
+            distances.append({
+                'imei': distance['imei'],
+                'distance_traveled': distance_traveled
+            })
+        
         allDistances = {item['imei']: item['distance_traveled'] for item in distances}
 
         return allDistances
@@ -210,7 +287,11 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
 
     print("[DEBUG] Fetching Vehicle data from atlanta collection")
     vehicleData = atlantaLatest_collection.find({"_id": {"$in": imei_list}}, {"timestamp": 0})
-    
+
+    for imei in imei_list:
+        data = atlantaAis140Latest_collection.find_one({"_id": imei})
+        vehicleData.append(atlantaAis140ToFront(data))
+
     print("[DEBUG] Fetched data from atlanta collection, processing data")
     
     for vehicle in vehicleData:
