@@ -15,8 +15,19 @@ Register Client Admin
 
 <div class="register-admins-wrapper">
     <div class="register-admins-card">
-        <button id="register-btn" class="btn btn-primary">Register New Client Admin</button>
-        <h2>Registered Client Admins</h2>
+        <div class="filter-row">
+            <label for="company-filter">Filter by Company:</label>
+            <select id="company-filter" class="company-filter">
+                <option value="all">All Companies</option>
+                {% for company in companies %}
+                <option value="{{ company['Company Name'] }}">{{ company['Company Name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="button-row">
+            <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
+            <button id="upload-btn" class="btn btn-primary">Upload</button>
+        </div>
         <div class="admins-table-container">
             <table class="admins-table">
                 <thead>
@@ -24,18 +35,14 @@ Register Client Admin
                         <th>Username</th>
                         <th>Email</th>
                         <th>Company</th>
-                        <!-- <th>Actions</th> -->
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="admins-table-body">
                     {% for admin in client_admins %}
-                    <tr>
+                    <tr data-company="{{ admin.company_name }}">
                         <td>{{ admin.username }}</td>
                         <td>{{ admin.email }}</td>
                         <td>{{ admin.company_name }}</td>
-                        <!-- <td>
-                            <button class="edit-btn" data-id="{{ admin._id }}">Edit</button>
-                        </td> -->
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -91,26 +98,61 @@ Register Client Admin
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        align-items: center;
+        align-items: stretch;
         border-radius: 16px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-        padding: 40px 32px 32px 32px;
+        padding: 24px 24px 24px 24px;
         margin: 40px 0 0 0;
-        width: 90vw;
-        max-width: 900px;
+        width: 95vw;
+        max-width: 1200px;
         min-height: 400px;
+        background: #fff;
         gap: 18px;
     }
-    .dark-mode .register-admins-card {
-        color: #ccc;
-        box-shadow: 0 4px 24px rgba(255,255,255,0.08);
-        border: 1px solid #ccc;
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 10px;
     }
-    .register-admins-card h2 {
-        margin-bottom: 12px;
-        font-size: 2rem;
-        font-weight: 700;
-        align-self: flex-start;
+    .filter-row label {
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+    .company-filter {
+        padding: 7px 16px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        min-width: 200px;
+    }
+    .button-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+    .btn {
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-success {
+        background: #28a745;
+        color: #fff;
+    }
+    .btn-success:hover {
+        background: #218838;
+    }
+    .btn-primary {
+        background: #007bff;
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background: #0069d9;
     }
     .admins-table-container {
         width: 100%;
@@ -123,10 +165,7 @@ Register Client Admin
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    .dark-mode .admins-table {
-        color: #ccc;
-        box-shadow: 0 2px 8px rgba(255,255,255,0.03);
+        background: #fff;
     }
     .admins-table th, .admins-table td {
         border: 1px solid #e0e0e0;
@@ -135,38 +174,8 @@ Register Client Admin
         font-size: 1rem;
     }
     .admins-table th {
+        background: #f5f5f5;
         font-weight: 600;
-    }
-    .edit-btn {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 6px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background 0.2s;
-    }
-    .edit-btn:hover {
-        background-color: #45a049;
-    }
-    #register-btn {
-        margin-bottom: 20px;
-        padding: 14px 32px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 1.2rem;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0,123,255,0.08);
-        transition: background 0.2s;
-        width: 100%;
-        max-width: 500px;
-    }
-    #register-btn:hover {
-        background-color: #0069d9;
     }
     /* Modal Styles */
     .modal {
@@ -183,19 +192,13 @@ Register Client Admin
     .modal-content {
         margin: 5% auto;
         padding: 32px 32px 24px 32px;
-        background-color: white;
+        background-color: #fff;
         border: 1px solid #888;
         width: 90vw;
         max-width: 420px;
         border-radius: 12px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         position: relative;
-    }
-    .dark-mode .modal-content {
-        color: #ccc;
-        background-color: black;
-        box-shadow: 0 0px 10px #cccccc90;
-        border: 1px solid #ccc;
     }
     .close {
         color: #aaa;
@@ -246,13 +249,11 @@ Register Client Admin
     }
     @media (max-width: 900px) {
         .register-admins-card {
+            padding: 12px 2px;
+        }
+        .filter-row, .button-row {
             flex-direction: column;
             align-items: stretch;
-            gap: 24px;
-            padding: 24px 8px;
-        }
-        .register-admins-left, .register-admins-right {
-            margin-top: 0;
         }
     }
     @media (max-width: 600px) {
@@ -260,52 +261,43 @@ Register Client Admin
             padding: 16px 4px 12px 4px;
         }
         .register-admins-card {
-            padding: 8px 2px;
+            padding: 4px 1px;
         }
         .admins-table th, .admins-table td {
             padding: 8px 6px;
             font-size: 0.95rem;
         }
-        .register-admins-right h2 {
-            font-size: 1.2rem;
-        }
     }
 </style>
 
 <script>
-    // Get the modal
+    // Modal logic
     const modal = document.getElementById("register-modal");
-    
-    // Get the button that opens the modal
     const btn = document.getElementById("register-btn");
-    
-    // Get the <span> element that closes the modal
     const span = document.getElementsByClassName("close")[0];
-    
-    // When the user clicks the button, open the modal 
     btn.onclick = function() {
         modal.style.display = "block";
     }
-    
-    // When the user clicks on <span> (x), close the modal
     span.onclick = function() {
         modal.style.display = "none";
     }
-    
-    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
     }
-    
-    // Edit button functionality
-    document.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const adminId = this.getAttribute('data-id');
-            // Implement your edit functionality here
-            // This could open another modal or redirect to an edit page
-            alert('Edit functionality for admin ID: ' + adminId);
+
+    // Filter logic
+    const filter = document.getElementById('company-filter');
+    const tableBody = document.getElementById('admins-table-body');
+    filter.addEventListener('change', function() {
+        const value = this.value;
+        Array.from(tableBody.children).forEach(row => {
+            if (value === 'all' || row.getAttribute('data-company') === value) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
         });
     });
 </script>
