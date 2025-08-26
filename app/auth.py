@@ -11,6 +11,7 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
+from bson import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -244,10 +245,54 @@ def register():
         flash('Unauthorized access', 'danger')
         return redirect(url_for('auth.unauthorized'))
 
+# @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
+# @jwt_required()
+# @roles_required('admin')
+# def register_client_admin():
+    
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         email = request.form.get('email')
+#         password = request.form.get('password')
+#         company = request.form.get('company')
+
+#         if not all([username, email, password, company]):
+#             flash('All fields are required', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+
+#         if User.find_by_username(username):
+#             flash('Username already exists', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+            
+#         if User.find_by_email(email):
+#             flash('Email already registered', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+        
+#         User.create_user(username, email, password, company, role='clientAdmin')
+#         flash('Admin registration successful. Please login.', 'success')
+#         return redirect(request.referrer or url_for('auth.login'))
+
+#     companies = db.customers_list.find()
+    
+#     return render_template('register_client_admin.html', companies=companies)
+
 @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
 @jwt_required()
 @roles_required('admin')
 def register_client_admin():
+    # Get all client admins for display
+    client_admins = []
+    for user in db.users.find({"role": "clientAdmin"}):
+        # Get company name
+        company = db.customers_list.find_one({"_id": ObjectId(user.get("company", ""))})
+        company_name = company["Company Name"] if company else "Unknown Company"
+        
+        client_admins.append({
+            "_id": user["_id"],
+            "username": user["username"],
+            "email": user["email"],
+            "company_name": company_name
+        })
     
     if request.method == 'POST':
         username = request.form.get('username')
@@ -273,7 +318,9 @@ def register_client_admin():
 
     companies = db.customers_list.find()
     
-    return render_template('register_client_admin.html', companies=companies)
+    return render_template('register_client_admin.html', 
+                          companies=companies, 
+                          client_admins=client_admins)
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():

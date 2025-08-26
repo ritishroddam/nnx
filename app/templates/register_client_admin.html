@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block head %}
@@ -11,34 +12,284 @@ Register Client Admin
 {% block block_container %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
-<div class="container">
-    <div class="register-container">
-        <h2>Register</h2>
-        <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <label for="company">Company</label>
-                <select id="company" name="company" required>
-                    <option value="" disabled selected>Select Company</option>
-                    {% for company in companies %}
-                    <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+
+<div class="register-admins-wrapper">
+    <div class="register-admins-card">
+        <div class="button-row">
+            <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
+        </div>
+        <div class="admins-table-container">
+            <table class="admins-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Company</th>
+                    </tr>
+                </thead>
+                <tbody id="admins-table-body">
+                    {% for admin in client_admins %}
+                    <tr data-company="{{ admin.company_name }}">
+                        <td>{{ admin.username }}</td>
+                        <td>{{ admin.email }}</td>
+                        <td>{{ admin.company_name }}</td>
+                    </tr>
                     {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn">Register</button>
-        </form>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Popup Registration Form -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Register Client Admin</h2>
+            <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="company">Company</label>
+                    <select id="company" name="company" required>
+                        <option value="" disabled selected>Select Company</option>
+                        {% for company in companies %}
+                        <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn">Register</button>
+            </form>
+        </div>
     </div>
 </div>
+
+<style>
+    .register-admins-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        width: 100vw;
+        background: transparent;
+    }
+    .register-admins-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        padding: 24px 24px 24px 24px;
+        margin: 40px 0 0 0;
+        width: 95vw;
+        max-width: 1200px;
+        min-height: 400px;
+        background: #fff;
+        gap: 18px;
+    }
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 10px;
+    }
+    .filter-row label {
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+    .company-filter {
+        padding: 7px 16px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        min-width: 200px;
+    }
+    .button-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+    .btn {
+        width: auto;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-success {
+        background: #28a745;
+        color: #fff;
+    }
+    .btn-success:hover {
+        background: #218838;
+    }
+    .btn-primary {
+        background: #007bff;
+        color: #fff;
+    }
+    .btn-primary:hover {
+        background: #0069d9;
+    }
+    .admins-table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .admins-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        background: #fff;
+    }
+    .admins-table th, .admins-table td {
+        border: 1px solid #e0e0e0;
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 1rem;
+    }
+    .admins-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        margin: 5% auto;
+        padding: 32px 32px 24px 32px;
+        background-color: #fff;
+        border: 1px solid #888;
+        width: 90vw;
+        max-width: 420px;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        position: relative;
+    }
+    .close {
+        color: #aaa;
+        position: absolute;
+        right: 18px;
+        top: 12px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .close:hover {
+        color: #333;
+    }
+    .modal-content .form-group {
+        margin-bottom: 18px;
+    }
+    .modal-content label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    .modal-content input,
+    .modal-content select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 1rem;
+    }
+    .modal-content .btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 8px;
+        transition: background 0.2s;
+    }
+    .modal-content .btn:hover {
+        background-color: #218838;
+    }
+    @media (max-width: 900px) {
+        .register-admins-card {
+            padding: 12px 2px;
+        }
+        .filter-row, .button-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+    @media (max-width: 600px) {
+        .modal-content {
+            padding: 16px 4px 12px 4px;
+        }
+        .register-admins-card {
+            padding: 4px 1px;
+        }
+        .admins-table th, .admins-table td {
+            padding: 8px 6px;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<script>
+    // Modal logic
+    const modal = document.getElementById("register-modal");
+    const btn = document.getElementById("register-btn");
+    const span = document.getElementsByClassName("close")[0];
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Filter logic
+    const filter = document.getElementById('company-filter');
+    const tableBody = document.getElementById('admins-table-body');
+    filter.addEventListener('change', function() {
+        const value = this.value;
+        Array.from(tableBody.children).forEach(row => {
+            if (value === 'all' || row.getAttribute('data-company') === value) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}
