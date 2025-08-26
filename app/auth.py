@@ -11,6 +11,7 @@ from app import db
 from datetime import datetime, timezone, timedelta
 import requests
 from app.userConfig.userConfig import userConfiCollection
+from bson import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
