@@ -15,15 +15,6 @@ Register Client Admin
 
 <div class="register-admins-wrapper">
     <div class="register-admins-card">
-        <div class="filter-row">
-            <label for="company-filter">Filter by Company:</label>
-            <select id="company-filter" class="company-filter">
-                <option value="all">All Companies</option>
-                {% for company in companies %}
-                <option value="{{ company['Company Name'] }}">{{ company['Company Name'] }}</option>
-                {% endfor %}
-            </select>
-        </div>
         <div class="button-row">
             <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
             <button id="upload-btn" class="btn btn-primary">Upload</button>
