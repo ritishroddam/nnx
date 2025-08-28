@@ -105,8 +105,6 @@ def view_share_location(licensePlateNumber, token):
         "to_datetime": to_datetime,
         "created_by": created_by
     }
-
-    print(latestLocation.get("speed"))
     
     vehicleDetails =  {
         "latitude": latestLocation.get("latitude"),
