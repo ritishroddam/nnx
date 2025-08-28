@@ -82,7 +82,7 @@ def getVehicleStatus(imei_list):
 
                 last_change_time = latest["date_time"]
                 for h in history[1:]:
-                    h_ignition = h.get("ignition")
+                    h_ignition = str(h.get("ignition"))
                     h_speed = float(h.get("speed", 0))
                     if current_status == "moving" and not (h_ignition == "1" and h_speed > 0):
                         break

@@ -163,7 +163,7 @@ function formatTimeDelta(timeDelta){
 
 async function updateData(data) {
   const oldData = vehicleData.get(data.imei);
-
+  data["ignition"] = String(data.ignition);
   if (oldData) {
     if (oldData.VehicleType) {
       data["VehicleType"] = oldData.VehicleType;
