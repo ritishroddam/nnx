@@ -39,7 +39,7 @@ socket.on("vehicle_live_update", (data) => {
     latitude: data.latitude,
     longitude: data.longitude,
     location: data.address || "",
-    speed: data.speed || 0,
+    speed: (data.speed !== null && data.speed !== undefined) ? data.speed : null,
     date_time: data.date_time || ""
   }
 
@@ -63,9 +63,17 @@ function updateMarkerPostion(latitude, longitude) {
 }
 
 function updateVehicleData(vehicleData) {
-  document.getElementById("location").textContent = vehicleData.location || "Unknown Location";
-  document.getElementById("speed").textContent = vehicleData.speed || "Unknown Speed";
-  document.getElementById("lastUpdate").textContent = vehicleData.date_time || "Unknown Date/Time";
+  document.getElementById("location").textContent =
+    vehicleData.location || "Unknown Location";
+
+  const speedText =
+    (vehicleData.speed !== null && vehicleData.speed !== undefined)
+      ? `${vehicleData.speed} km/h`
+      : "Unknown Speed";
+  document.getElementById("speed").textContent = speedText;
+
+  document.getElementById("lastUpdate").textContent =
+    vehicleData.date_time || "Unknown Date/Time";
 }
 
 async function initMap() {
