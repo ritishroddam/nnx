@@ -72,7 +72,7 @@ def view_share_location(licensePlateNumber, token):
     )
     
     if not latestLocation:
-        doc = db['atlantaAis140Latest'].find_one({"_id": vehicle.get("IMEI")})
+        doc = db['atlantaAis140_latest'].find_one({"_id": vehicle.get("IMEI")})
         if doc and "gps" in doc and "telemetry" in doc:
             latestLocation = {
             "latitude": doc["gps"].get("lat"),
