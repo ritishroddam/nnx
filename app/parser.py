@@ -15,6 +15,7 @@ def atlantaAis140ToFront(parsedData):
 
     address = geocodeInternal(parsedData.get("gps", {}).get("lat"), parsedData.get("gps", {}).get("lon"))
     json_data = {
+        "_id": parsedData.get("_id"),
         "imei": parsedData.get("imei"),
         "speed": parsedData.get("telemetry", {}).get("speed"),
         "latitude": parsedData.get("gps", {}).get("lat"),
