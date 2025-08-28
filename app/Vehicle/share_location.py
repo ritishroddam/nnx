@@ -66,18 +66,30 @@ def view_share_location(licensePlateNumber, token):
     if not vehicle:
         return jsonify({"error": "Vehicle not found"}), 404
     
-    latestLocation = db['distinctAtlanta'].find_one(
-        {"imei": vehicle.get("IMEI")},
+    latestLocation = db['atlantaLatest'].find_one(
+        {"_id": vehicle.get("IMEI")},
         {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1},
     )
     
+    if not latestLocation:
+        doc = db['atlantaAis140Latest'].find_one({"_id": vehicle.get("IMEI")})
+        if doc and "gps" in doc and "telemetry" in doc:
+            latestLocation = {
+            "latitude": doc["gps"].get("lat"),
+            "longitude": doc["gps"].get("lon"),
+            "speed": doc["telemetry"].get("speed"),
+            "date_time": doc["timestamp"],
+            }
+        else:
+            latestLocation = None
+
     if not latestLocation:
         return jsonify({"error": "No location data found for this vehicle"}), 404
     
     location = geocodeInternal(latestLocation.get("latitude"), latestLocation.get("longitude"))
     
     if not location:
-        return jsonify({"error": "Geocoding failed"}), 500
+        return jsonify({"error": "Failed to fetch location"}), 500
     
     utc_dt = latestLocation.get("date_time")
     ist_tz = pytz.timezone("Asia/Kolkata")
