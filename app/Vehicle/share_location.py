@@ -102,7 +102,7 @@ def view_share_location(licensePlateNumber, token):
     userInfo ={
         "licensePlateNumber": licensePlateNumber,
         "from_datetime": from_datetime,
-        "to_datetime": to_datetime,
+        "to_datetime": to_datetime.replace(tzinfo=None),
         "created_by": created_by
     }
     
