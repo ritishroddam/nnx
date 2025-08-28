@@ -322,7 +322,8 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         print("[DEBUG] Missing IMEIS handling")
         if imei not in missingImeis:
             status_item = status_lookup.get(imei, {})
-            print(status_item.get('status'), imei)
+            if imei == "863070047070049":
+                print(status_item.get('status'), imei)
             vehicle['status'] = status_item.get('status', 'unknown')
             vehicle['status_time_str'] = status_item.get('status_time_str', '0 seconds')
             vehicle['status_time_delta'] = status_item.get('status_time_delta', 0)
