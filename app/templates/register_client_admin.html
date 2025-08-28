@@ -212,6 +212,11 @@ Register Client Admin
         box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         position: relative;
     }
+    .dark-mode .modal-content {
+        background: #2c2c2c;
+        color: #ccc;
+        border: 1px solid #444;
+    }
     .close {
         color: #aaa;
         position: absolute;
@@ -222,8 +227,14 @@ Register Client Admin
         cursor: pointer;
         transition: color 0.2s;
     }
+    .dark-mode .close {
+        color: #ccc;
+    }
     .close:hover {
         color: #333;
+    }
+    .dark-mode .close:hover {
+        color: #fff;
     }
     .modal-content .form-group {
         margin-bottom: 18px;
