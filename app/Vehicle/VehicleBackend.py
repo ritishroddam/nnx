@@ -68,7 +68,7 @@ def getVehicleStatus(imei_list):
                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
                 status_time_str = format_seconds(status_time_delta)
             else:
-                ignition = latest.get("ignition")
+                ignition = str(latest.get("ignition"))
                 speed = float(latest.get("speed", 0))
                 current_status = None
                 if ignition == "0":
