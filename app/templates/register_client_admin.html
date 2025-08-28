@@ -99,6 +99,11 @@ Register Client Admin
         background: #fff;
         gap: 18px;
     }
+    .dark-mode .register-admins-card {
+        background: #1e1e1e;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        color: #ccc;
+    }
     .filter-row {
         display: flex;
         align-items: center;
@@ -149,6 +154,13 @@ Register Client Admin
         width: 100%;
         overflow-x: auto;
     }
+    .dark-mode .admins-table-container {
+        background: #2c2c2c;
+        border-radius: 8px;
+        padding: 8px;
+        color: #ccc;
+        border: 1px solid;
+    }
     .admins-table {
         width: 100%;
         border-collapse: collapse;
@@ -157,6 +169,11 @@ Register Client Admin
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         background: #fff;
+    }
+    .dark-mode .admins-table {
+        background: #2c2c2c;
+        color: #ccc;
+        border: 1px solid #444;
     }
     .admins-table th, .admins-table td {
         border: 1px solid #e0e0e0;
@@ -167,6 +184,10 @@ Register Client Admin
     .admins-table th {
         background: #f5f5f5;
         font-weight: 600;
+    }
+    .dark-mode .admins-table th {
+        background: #5a5a5a;
+        color: #ccc;
     }
     /* Modal Styles */
     .modal {
@@ -191,6 +212,11 @@ Register Client Admin
         box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         position: relative;
     }
+    .dark-mode .modal-content {
+        background: #2c2c2c;
+        color: #ccc;
+        border: 1px solid #444;
+    }
     .close {
         color: #aaa;
         position: absolute;
@@ -201,8 +227,14 @@ Register Client Admin
         cursor: pointer;
         transition: color 0.2s;
     }
+    .dark-mode .close {
+        color: #ccc;
+    }
     .close:hover {
         color: #333;
+    }
+    .dark-mode .close:hover {
+        color: #fff;
     }
     .modal-content .form-group {
         margin-bottom: 18px;
