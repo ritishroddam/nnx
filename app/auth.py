@@ -229,7 +229,7 @@ def register():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register'))
         
-        User.create_user(username, email, password, company, role = 'user')
+        User.create_user(username, email, password, company, role = 'user', disabled=0)
         flash('Registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
 
