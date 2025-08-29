@@ -209,7 +209,7 @@ def atlanta_distance_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_range_data():
     try:
-        utc_now = datetime.now(timezone('UTC'))
+        utc_now = datetime.now(timezone.utc)
         range_param = request.args.get("range", "1day")
         status_filter = request.args.get("status")
         
@@ -388,7 +388,7 @@ def get_vehicle_range_data():
                         latest.get("date") + latest.get("time"),
                         '%d%m%y%H%M%S'
                     )
-                    last_update = last_update.replace(tzinfo=timezone('UTC'))
+                    last_update = last_update.replace(tzinfo=timezone.utc)
                 except ValueError as e:
                     print(f"Error parsing date/time: {e}")
                     last_update = None
@@ -467,7 +467,7 @@ def format_last_updated(date_str, time_str):
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
-        utc_now = datetime.now(timezone('UTC'))
+        utc_now = datetime.now(timezone.utc)
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
         response = get_vehicle_range_data()
