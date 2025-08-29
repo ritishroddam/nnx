@@ -1,3 +1,15 @@
+from flask import request
+# --- AJAX endpoint for enabling/disabling client admin ---
+@auth_bp.route('/api/client-admin/<user_id>/toggle-disable', methods=['POST'])
+@jwt_required()
+@roles_required('admin')
+def toggle_client_admin_disable(user_id):
+    user = db.users.find_one({"_id": ObjectId(user_id)})
+    if not user or user.get('role') != 'clientAdmin':
+        return jsonify({"success": False, "error": "User not found or not a client admin."}), 404
+    new_disabled = not user.get('disabled', False)
+    db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"disabled": new_disabled}})
+    return jsonify({"success": True, "disabled": new_disabled})
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_jwt_extended import (
     get_csrf_token, get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
