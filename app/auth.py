@@ -229,7 +229,7 @@ def register():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register'))
         
-        User.create_user(username, email, password, company, role = 'user', disabled=0)
+        User.create_user(username, email, password, company, role = 'user')
         flash('Registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
 
@@ -284,22 +284,14 @@ def register_client_admin():
     client_admins = []
     for user in db.users.find({"role": "clientAdmin"}):
         # Get company name
-        company_name = "Unknown Company"
-        company_id = user.get("company", "")
-        
-        if company_id and company_id != "none":
-            try:
-                company = db.customers_list.find_one({"_id": ObjectId(user.get("company", ""))})
-                company_name = company["Company Name"] if company else "Unknown Company"
-            except:
-                company_name = "Invalid Company ID"
+        company = db.customers_list.find_one({"_id": ObjectId(user.get("company", ""))})
+        company_name = company["Company Name"] if company else "Unknown Company"
         
         client_admins.append({
             "_id": user["_id"],
             "username": user["username"],
             "email": user["email"],
-            "company_name": company_name,
-            "disabled": user.get("disabled", 0)
+            "company_name": company_name
         })
     
     if request.method == 'POST':
@@ -320,7 +312,7 @@ def register_client_admin():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
-        User.create_user(username, email, password, company, role='clientAdmin', disabled=0)
+        User.create_user(username, email, password, company, role='clientAdmin')
         flash('Admin registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
 
@@ -329,32 +321,6 @@ def register_client_admin():
     return render_template('register_client_admin.html', 
                           companies=companies, 
                           client_admins=client_admins)
-    
-@auth_bp.route('/api/client-admin/<user_id>/toggle-disable', methods=['POST'])
-@jwt_required()
-@roles_required('admin')
-def toggle_disable_client_admin(user_id):
-    try:
-        user = db.users.find_one({"_id": ObjectId(user_id)})
-        if not user:
-            return jsonify({"success": False, "error": "User not found"}), 404
-            
-        # Toggle disabled status (0 = active, 1 = disabled)
-        new_disabled_status = 1 if user.get('disabled', 0) == 0 else 0
-        
-        db.users.update_one(
-            {"_id": ObjectId(user_id)},
-            {"$set": {"disabled": new_disabled_status}}
-        )
-        
-        return jsonify({
-            "success": True, 
-            "disabled": new_disabled_status == 1,
-            "message": "User status updated successfully"
-        })
-        
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500   
 
 @auth_bp.route('/register-admin', methods=['GET', 'POST'])
 def register_admin():
@@ -380,7 +346,7 @@ def register_admin():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
-        User.create_user(username, email, password, role='admin', disabled=0)
+        User.create_user(username, email, password, role='admin')
         flash('Admin registration successful. Please login.', 'success')
         return redirect(url_for('auth.login'))
     
@@ -406,7 +372,7 @@ def register_inventory():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
-        User.create_user(username, email, password, "none", role, disabled=0)
+        User.create_user(username, email, password, "none", role)
         flash('Admin registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
     
