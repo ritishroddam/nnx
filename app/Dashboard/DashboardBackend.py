@@ -128,7 +128,7 @@ def atlanta_distance_data():
         distanceKeys = {}
 
         startTime = datetime.now()
-        for i in range(0, 7):
+        for i in range(6, -1, -1):
             date = datetime.now(timezone.utc) - timedelta(days=i)
             start_of_day = date.replace(hour=0, minute=0, second=0, microsecond=0)
             end_of_day = date.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -233,9 +233,6 @@ def get_vehicle_range_data():
         vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
         vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
         
-        # OPTIMIZED: Split into multiple lightweight pipelines instead of one heavy $push pipeline
-        
-        # Pipeline 1: Statistics (distance, speed) without $push
         stats_pipeline = [
             {"$match": {
                 "date_time": {"$gte": start_of_day, "$lt": end_of_day},
