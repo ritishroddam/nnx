@@ -284,8 +284,15 @@ def register_client_admin():
     client_admins = []
     for user in db.users.find({"role": "clientAdmin"}):
         # Get company name
-        company = db.customers_list.find_one({"_id": ObjectId(user.get("company", ""))})
-        company_name = company["Company Name"] if company else "Unknown Company"
+        company_name = "Unknown Company"
+        company_id = user.get("company", "")
+        
+        if company_id and company_id != "none":
+            try:
+                company = db.customers_list.find_one({"_id": ObjectId(user.get("company", ""))})
+                company_name = company["Company Name"] if company else "Unknown Company"
+            except:
+                company_name = "Invalid Company ID"
         
         client_admins.append({
             "_id": user["_id"],
