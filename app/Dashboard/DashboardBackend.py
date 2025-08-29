@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required, get_filtered_results, get_vehicle_data
 from app.parser import atlantaAis140ToFront
+from app.Dashboard.dashboardHelper import getDistanceBasedOnTime
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -132,59 +133,12 @@ def atlanta_distance_data():
             date = datetime.now(timezone.utc) - timedelta(days=i)
             start_of_day = date.replace(hour=0, minute=0, second=0, microsecond=0)
             end_of_day = date.replace(hour=23, minute=59, second=59, microsecond=999999)
-            pipeline = [
-                {"$match": {
-                    "date_time": {
-                        "$gte": start_of_day,
-                        "$lt": end_of_day
-                    },
-                    "imei": {"$in":imeis}
-                }},
-                {"$sort": {"date_time": -1}},
-                {"$group": {
-                    "_id": "$imei",
-                    "last_odometer": {"$first": "$odometer"},
-                    "first_odometer": {"$last": "$odometer"}
-                }},
-                {"$project": {
-                    "_id": 0,
-                    "imei": "$_id",
-                    "first_odometer": 1,
-                    "last_odometer": 1
-                }}
-            ]
 
-            distances_atlanta = list(atlanta_collection.aggregate(pipeline))
-
-            pipeline = [
-                    {"$match": {
-                        "imei": {"$in": imeis},
-                        "gps.timestamp": {"$gte": start_of_day, "$lt": end_of_day}
-                    }},
-                    {"$sort": {"gps.timestamp": -1}},
-                    {
-                        "$group": {
-                            "_id": "$imei",
-                            "last_odometer": {"$first": "$telemetry.odometer"},
-                            "first_odometer": {"$last": "$telemetry.odometer"}
-                        }
-                    },
-                    {"$project": {
-                        "_id": 0,
-                        "imei": "$_id",
-                        "first_odometer": 1,
-                        "last_odometer": 1
-                    }}
-                ]
-
-            distances_ais140 = list(atlantaAis140Collection.aggregate(pipeline))
-
-            for dist in distances_ais140:
-                distances_atlanta.append(dist)
+            distances = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
 
             distance = 0
 
-            for dist in distances_atlanta:
+            for dist in distances:
                 first_odometer = float(dist.get('first_odometer', 0))
                 last_odometer = float(dist.get('last_odometer', 0))
                 distance_traveled = last_odometer - first_odometer
@@ -230,8 +184,6 @@ def get_vehicle_range_data():
         end_of_day = utc_now
         
         imeis = list(get_vehicle_data().distinct("IMEI"))
-        vehicle_map_cursor = vehicle_inventory.find({"IMEI": {"$in": imeis}}, {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0})
-        vehicle_map = {vehicle["IMEI"]: vehicle["LicensePlateNumber"] for vehicle in vehicle_map_cursor}
         
         stats_pipeline = [
             {"$match": {
@@ -294,21 +246,7 @@ def get_vehicle_range_data():
                 }
             }}
         ]
-        
-        # Pipeline 2: Latest record for each IMEI
-        latest_record_pipeline = [
-            {"$match": {
-                "date_time": {"$gte": start_of_day, "$lt": end_of_day},
-                "imei": {"$in": imeis}
-            }},
-            {"$sort": {"imei": 1, "date_time": -1}},
-            {"$group": {
-                "_id": "$imei",
-                "latest": {"$first": "$$ROOT"}
-            }}
-        ]
-        
-        # Pipeline 3: Time analysis for driving/idle time and stops
+
         time_analysis_pipeline = [
             {"$match": {
                 "date_time": {"$gte": start_of_day, "$lt": end_of_day},
@@ -329,12 +267,19 @@ def get_vehicle_range_data():
         
         # Execute all pipelines
         stats_results = list(atlanta_collection.aggregate(stats_pipeline))
-        latest_results = list(atlanta_collection.aggregate(latest_record_pipeline))
         time_results = list(atlanta_collection.aggregate(time_analysis_pipeline))
+        
+        latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
+        
+        atlantaAis140LatestResults = atlantaAis140LatestCollection.find({"_id" : {"$in": imeis}})
+        
+        for doc in atlantaAis140LatestResults:
+            data = atlantaAis140ToFront(doc)
+            latest_results.append(data)
         
         # Convert to dictionaries for fast lookup
         stats_dict = {result['imei']: result for result in stats_results}
-        latest_dict = {result['_id']: result['latest'] for result in latest_results}
+        latest_dict = {result['_id']: result for result in latest_results}
         time_dict = {result['_id']: result['records'] for result in time_results}
         
         twenty_four_hours_ago = utc_now - timedelta(hours=24)

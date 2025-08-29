@@ -8,6 +8,7 @@ from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
 from app.parser import atlantaAis140ToFront
+from app.Dashboard.dashboardHelper import getDistanceBasedOnTime
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
 
@@ -213,30 +214,9 @@ def getVehicleDistances(imei):
         utc_now = datetime.now(timezone('UTC'))
         start_of_day = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_day = utc_now.replace(hour=23, minute=59, second=59, microsecond=999999)
-        pipeline = [
-            {"$match": {
-                "date_time": {
-                    "$gte": start_of_day,
-                    "$lt": end_of_day
-                },
-                "imei": {"$in":imei}
-            }},
-            {"$sort": {"date_time": -1}},
-            {"$group": {
-                "_id": "$imei",
-                "last_odometer": {"$first": "$odometer"},
-                "first_odometer": {"$last": "$odometer"}
-            }},
-            {"$project": {
-                "_id": 0,
-                "imei": "$_id",
-                "first_odometer": 1,
-                "last_odometer": 1
-            }}
-        ]
 
-        distances_atlanta = list(atlanta_collection.aggregate(pipeline))
-        
+        distances_atlanta = getDistanceBasedOnTime(imei, start_of_day, end_of_day)
+
         distances = []
         
         for distance in distances_atlanta:
