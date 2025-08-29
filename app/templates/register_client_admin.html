@@ -24,6 +24,7 @@ Register Client Admin
                         <th>Username</th>
                         <th>Email</th>
                         <th>Company</th>
+                        <th>Status</th> 
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -33,10 +34,14 @@ Register Client Admin
                         <td class="username-cell">{{ admin.username }}</td>
                         <td class="email-cell">{{ admin.email }}</td>
                         <td class="company-cell">{{ admin.company_name }}</td>
+                        <td class="status-cell">{{ "Active" if admin.disabled == 0 else "Inactive" }}</td>
                         <td class="actions-cell">
                             <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
-                            <button class="icon-btn disable-btn" title="{{ admin.disabled|default(false) and 'Enable' or 'Disable' }}">
+                            <!-- <button class="icon-btn disable-btn" title="{{ admin.disabled|default(false) and 'Enable' or 'Disable' }}">
                                 <i class="fa {{ admin.disabled|default(false) and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
+                            </button> -->
+                            <button class="icon-btn disable-btn" title="{{ admin.disabled|default(0) == 1 and 'Enable' or 'Disable' }}">
+                                <i class="fa {{ admin.disabled|default(0) == 1 and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
                             </button>
                         </td>
                     </tr>
@@ -80,6 +85,15 @@ Register Client Admin
 </div>
 
 <style>
+    .status-cell {
+        font-weight: bold;
+    }
+    .status-cell:contains("Active") {
+        color: #28a745;
+    }
+    .status-cell:contains("Inactive") {
+        color: #dc3545;
+    }
     .register-admins-wrapper {
         display: flex;
         flex-direction: column;
@@ -402,8 +416,8 @@ Register Client Admin
             row.classList.remove('editing');
             row.querySelector('.actions-cell').innerHTML = `
                 <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
-                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === 'true' ? 'Enable' : 'Disable'}">
-                    <i class="fa ${row.getAttribute('data-disabled') === 'true' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === '1' ? 'Enable' : 'Disable'}">
+                    <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
                 </button>
             `;
         }
@@ -418,16 +432,18 @@ Register Client Admin
             row.classList.remove('editing');
             row.querySelector('.actions-cell').innerHTML = `
                 <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
-                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === 'true' ? 'Enable' : 'Disable'}">
-                    <i class="fa ${row.getAttribute('data-disabled') === 'true' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === '1' ? 'Enable' : 'Disable'}">
+                    <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
                 </button>
             `;
         }
         // Disable/Enable button
         else if (e.target.closest('.disable-btn')) {
-            const isDisabled = row.getAttribute('data-disabled') === 'true';
+            const isDisabled = row.getAttribute('data-disabled') === '1';
             const btn = e.target.closest('.disable-btn');
             const icon = btn.querySelector('i');
+            const statusCell = row.querySelector('.status-cell');
+            
             // AJAX call to backend
             fetch(`/auth/api/client-admin/${row.getAttribute('data-id')}/toggle-disable`, {
                 method: 'POST',
@@ -440,7 +456,13 @@ Register Client Admin
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    row.setAttribute('data-disabled', data.disabled ? 'true' : 'false');
+                    const newDisabledStatus = data.disabled ? '1' : '0';
+                    row.setAttribute('data-disabled', newDisabledStatus);
+                    
+                    // Update status cell
+                    statusCell.textContent = newDisabledStatus === '1' ? 'Inactive' : 'Active';
+                    statusCell.style.color = newDisabledStatus === '1' ? '#dc3545' : '#28a745';
+                    
                     if (data.disabled) {
                         btn.title = 'Enable';
                         btn.classList.add('enabled');
