@@ -1,17 +1,20 @@
 from app import db
+from datetime import datetime
+from werkzeug.security import generate_password_hash
 from bson.objectid import ObjectId
 import bcrypt
 
 class User:
     @staticmethod
-    def create_user(username, email, password, company = 'none', role='user'):
+    def create_user(cls, username, email, password, company = 'none', role='user', disabled=0):
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         return db.users.insert_one({
             'username': username,
             'email': email,
             'password': hashed,
             'company': company,
-            'role': role
+            'role': role,
+            "disabled": disabled
         })
     
     @staticmethod

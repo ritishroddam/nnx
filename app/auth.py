@@ -373,7 +373,7 @@ def register_admin():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
-        User.create_user(username, email, password, role='admin')
+        User.create_user(username, email, password, role='admin', disabled=0)
         flash('Admin registration successful. Please login.', 'success')
         return redirect(url_for('auth.login'))
     
@@ -399,7 +399,7 @@ def register_inventory():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_client_admin'))
         
-        User.create_user(username, email, password, "none", role)
+        User.create_user(username, email, password, "none", role, disabled=0)
         flash('Admin registration successful. Please login.', 'success')
         return redirect(request.referrer or url_for('auth.login'))
     
