@@ -68,7 +68,7 @@ def view_share_location(licensePlateNumber, token):
     
     latestLocation = db['atlantaLatest'].find_one(
         {"_id": vehicle.get("IMEI")},
-        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1},
+        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1},
     )
     
     if not latestLocation:
@@ -79,6 +79,7 @@ def view_share_location(licensePlateNumber, token):
             "longitude": doc["gps"].get("lon"),
             "speed": doc["telemetry"].get("speed"),
             "date_time": doc["timestamp"],
+            "ignition": doc["telemetry"].get("ignition"),
             }
         else:
             latestLocation = None
@@ -102,7 +103,7 @@ def view_share_location(licensePlateNumber, token):
     userInfo ={
         "licensePlateNumber": licensePlateNumber,
         "from_datetime": from_datetime,
-        "to_datetime": to_datetime,
+        "to_datetime": to_datetime.replace(tzinfo=None),
         "created_by": created_by
     }
     

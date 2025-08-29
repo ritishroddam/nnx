@@ -25,8 +25,14 @@
         <div class="info">
             <p><strong>Link Expires at:</strong> <span id="expires-at">{{ info.to_datetime }}</span></p>
             <p><strong>Last Update:</strong> <span id="lastUpdate">{{ vehicle.date_time }}</span></p>
-            <p><strong>Location:</strong> <span id="location"></span>{{ vehicle.location|default("Unknown Location") }}</p>
-            <p><strong>Speed:</strong> <span id="speed">{{ vehicle.speed|default("Unknown Speed") }} km/h</span></p>
+            <p><strong>Location:</strong> <span id="location">{{ vehicle.location|default("Unknown Location") }}</span></p>
+            <p><strong>Speed:</strong> <span id="speed">
+                {% if vehicle.speed is not none and vehicle.speed != '' %}
+                  {{ vehicle.speed }} km/h
+                {% else %}
+                  Unknown Speed
+                {% endif %}
+            </span></p>
             <button id="route-btn">Open in Google Maps</button>
         </div>
     </div>
