@@ -14,7 +14,6 @@ Register Client Admin
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 
 <div class="register-admins-wrapper">
-    <div class="register-admins-card">
         <div class="button-row">
             <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
         </div>
@@ -25,20 +24,26 @@ Register Client Admin
                         <th>Username</th>
                         <th>Email</th>
                         <th>Company</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="admins-table-body">
                     {% for admin in client_admins %}
-                    <tr data-company="{{ admin.company_name }}">
-                        <td>{{ admin.username }}</td>
-                        <td>{{ admin.email }}</td>
-                        <td>{{ admin.company_name }}</td>
+                    <tr data-company="{{ admin.company_name }}" data-id="{{ admin._id }}" data-disabled="{{ admin.disabled|default(false) }}">
+                        <td class="username-cell">{{ admin.username }}</td>
+                        <td class="email-cell">{{ admin.email }}</td>
+                        <td class="company-cell">{{ admin.company_name }}</td>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                            <button class="icon-btn disable-btn" title="{{ admin.disabled|default(false) and 'Enable' or 'Disable' }}">
+                                <i class="fa {{ admin.disabled|default(false) and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
 
     <!-- Popup Registration Form -->
     <div id="register-modal" class="modal">
@@ -79,9 +84,8 @@ Register Client Admin
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         min-height: 80vh;
-        width: 100vw;
+        width: 90vw;
         background: transparent;
     }
     .register-admins-card {
@@ -125,9 +129,10 @@ Register Client Admin
         display: flex;
         gap: 12px;
         margin-bottom: 10px;
+        margin-right: 1080px;
     }
     .btn {
-        width: auto;
+        width: 300px;
         padding: 10px 24px;
         border-radius: 6px;
         font-size: 1rem;
@@ -154,13 +159,6 @@ Register Client Admin
         width: 100%;
         overflow-x: auto;
     }
-    .dark-mode .admins-table-container {
-        background: #2c2c2c;
-        border-radius: 8px;
-        padding: 8px;
-        color: #ccc;
-        border: 1px solid;
-    }
     .admins-table {
         width: 100%;
         border-collapse: collapse;
@@ -173,7 +171,6 @@ Register Client Admin
     .dark-mode .admins-table {
         background: #2c2c2c;
         color: #ccc;
-        border: 1px solid #444;
     }
     .admins-table th, .admins-table td {
         border: 1px solid #e0e0e0;
@@ -270,6 +267,46 @@ Register Client Admin
     .modal-content .btn:hover {
         background-color: #218838;
     }
+    .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.3rem;
+        margin-right: 8px;
+        color: #007bff;
+        transition: color 0.2s;
+    }
+    .icon-btn:last-child {
+        margin-right: 0;
+    }
+    .icon-btn:hover {
+        color: #0056b3;
+    }
+    .disable-btn {
+        color: #dc3545;
+    }
+    .disable-btn.enabled {
+        color: #28a745;
+    }
+    .edit-row-input {
+        width: 95%;
+        padding: 4px 8px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .save-btn, .cancel-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        margin-right: 8px;
+        color: #28a745;
+        transition: color 0.2s;
+    }
+    .cancel-btn {
+        color: #dc3545;
+    }
     @media (max-width: 900px) {
         .register-admins-card {
             padding: 12px 2px;
@@ -313,15 +350,114 @@ Register Client Admin
     // Filter logic
     const filter = document.getElementById('company-filter');
     const tableBody = document.getElementById('admins-table-body');
-    filter.addEventListener('change', function() {
-        const value = this.value;
-        Array.from(tableBody.children).forEach(row => {
-            if (value === 'all' || row.getAttribute('data-company') === value) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+    if (filter) {
+        filter.addEventListener('change', function() {
+            const value = this.value;
+            Array.from(tableBody.children).forEach(row => {
+                if (value === 'all' || row.getAttribute('data-company') === value) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
+    }
+
+    // Inline edit and enable/disable logic
+    tableBody.addEventListener('click', function(e) {
+        const row = e.target.closest('tr');
+        if (!row) return;
+        const id = row.getAttribute('data-id');
+        // Edit button
+        if (e.target.closest('.edit-btn')) {
+            if (row.classList.contains('editing')) return;
+            row.classList.add('editing');
+            const usernameCell = row.querySelector('.username-cell');
+            const emailCell = row.querySelector('.email-cell');
+            const companyCell = row.querySelector('.company-cell');
+            const actionsCell = row.querySelector('.actions-cell');
+            const oldUsername = usernameCell.textContent;
+            const oldEmail = emailCell.textContent;
+            const oldCompany = companyCell.textContent;
+            usernameCell.innerHTML = `<input class='edit-row-input' value='${oldUsername}'>`;
+            emailCell.innerHTML = `<input class='edit-row-input' value='${oldEmail}'>`;
+            companyCell.innerHTML = `<input class='edit-row-input' value='${oldCompany}'>`;
+            actionsCell.innerHTML = `
+                <button class="save-btn" title="Save"><i class="fa fa-check"></i></button>
+                <button class="cancel-btn" title="Cancel"><i class="fa fa-times"></i></button>
+            `;
+        }
+        // Save button
+        else if (e.target.closest('.save-btn')) {
+            const usernameCell = row.querySelector('.username-cell');
+            const emailCell = row.querySelector('.email-cell');
+            const companyCell = row.querySelector('.company-cell');
+            const newUsername = usernameCell.querySelector('input').value;
+            const newEmail = emailCell.querySelector('input').value;
+            const newCompany = companyCell.querySelector('input').value;
+            // TODO: AJAX call to update user info on backend
+            usernameCell.textContent = newUsername;
+            emailCell.textContent = newEmail;
+            companyCell.textContent = newCompany;
+            row.classList.remove('editing');
+            row.querySelector('.actions-cell').innerHTML = `
+                <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === 'true' ? 'Enable' : 'Disable'}">
+                    <i class="fa ${row.getAttribute('data-disabled') === 'true' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                </button>
+            `;
+        }
+        // Cancel button
+        else if (e.target.closest('.cancel-btn')) {
+            const usernameCell = row.querySelector('.username-cell');
+            const emailCell = row.querySelector('.email-cell');
+            const companyCell = row.querySelector('.company-cell');
+            usernameCell.textContent = usernameCell.querySelector('input').defaultValue;
+            emailCell.textContent = emailCell.querySelector('input').defaultValue;
+            companyCell.textContent = companyCell.querySelector('input').defaultValue;
+            row.classList.remove('editing');
+            row.querySelector('.actions-cell').innerHTML = `
+                <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === 'true' ? 'Enable' : 'Disable'}">
+                    <i class="fa ${row.getAttribute('data-disabled') === 'true' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                </button>
+            `;
+        }
+        // Disable/Enable button
+        else if (e.target.closest('.disable-btn')) {
+            const isDisabled = row.getAttribute('data-disabled') === 'true';
+            const btn = e.target.closest('.disable-btn');
+            const icon = btn.querySelector('i');
+            // AJAX call to backend
+            fetch(`/auth/api/client-admin/${row.getAttribute('data-id')}/toggle-disable`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCookie('csrf_access_token')
+                },
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    row.setAttribute('data-disabled', data.disabled ? 'true' : 'false');
+                    if (data.disabled) {
+                        btn.title = 'Enable';
+                        btn.classList.add('enabled');
+                        icon.classList.remove('fa-toggle-off');
+                        icon.classList.add('fa-toggle-on');
+                    } else {
+                        btn.title = 'Disable';
+                        btn.classList.remove('enabled');
+                        icon.classList.remove('fa-toggle-on');
+                        icon.classList.add('fa-toggle-off');
+                    }
+                } else {
+                    alert('Failed to update user status: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(() => alert('Failed to update user status.'));
+        }
     });
 </script>
 {% endblock %}
