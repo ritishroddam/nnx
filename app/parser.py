@@ -41,6 +41,6 @@ def atlantaAis140ToFront(parsedData):
         "mobNetworkCode": parsedData.get("network", {}).get("mnc"),
         "localAreaCode": parsedData.get("network", {}).get("lac"),
         "cellid": parsedData.get("network", {}).get("cellId"),
-        "date_time": parsedData.get("timestamp"),
+        "date_time": parsedData.get("gps", {}).get("timestamp"),
     }
     return json_data

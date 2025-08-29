@@ -1,17 +1,11 @@
 import traceback
-from flask import Blueprint, json, app, jsonify, render_template, Flask, request, redirect, url_for, session, flash, send_file
-from pymongo import MongoClient
-from datetime import datetime, timedelta
-from pytz import timezone
-from bson.objectid import ObjectId
-import bcrypt
-import os
-from werkzeug.utils import secure_filename
-import pandas as pd
+from flask import Blueprint, jsonify, render_template, request
+from datetime import datetime, timedelta, timezone
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required, get_filtered_results, get_vehicle_data
+from app.parser import atlantaAis140ToFront
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -22,9 +16,12 @@ def page():
     return render_template('admin_dashboard.html')
 
 atlanta_collection = db["atlanta"]
+atlantaLatestCollection = db["atlantaLatest"]
 collection = db['distinctAtlanta']
 distance_travelled_collection = db['distanceTravelled']
 vehicle_inventory = db["vehicle_inventory"]
+atlantaAis140Collection = db["atlantaAis140"]
+atlantaAis140LatestCollection = db["atlantaAis140_latest"]
 
 def format_seconds(seconds):
     if seconds >= 86400:
@@ -62,48 +59,6 @@ def dashboard_data():
         print(f"Error fetching dashboard data: {e}")
         return jsonify({"error": "Failed to fetch dashboard data"}), 500
 
-# @dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
-# @jwt_required()
-# @roles_required('admin', 'clientAdmin', 'user')
-# def atlanta_pie_data():
-#     try:
-#         results = list(get_filtered_results("distinctAtlanta"))
-
-#         if not results:
-#             return jsonify({
-#                 "total_devices": 0,
-#                 "moving_vehicles": 0,
-#                 "offline_vehicles": 0,
-#                 "idle_vehicles": 0
-#             }), 200
-
-#         total_devices = len(results)
-#         now = datetime.now()
-#         moving_vehicles = sum(
-#             1 for record in results 
-#             if float(record["speed"] or 0) > 0 and
-#             datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
-#         )
-#         idle_vehicles = sum(
-#             1 for record in results 
-#             if float(record["speed"] or 0) == 0 and
-#             datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') > now - timedelta(hours=24)
-#         )
-#         offline_vehicles = sum(
-#             1 for record in results 
-#             if datetime.strptime(record["date"] + record['time'], '%d%m%y%H%M%S') < now - timedelta(hours=24)
-#         )
-        
-#         return jsonify({
-#             "total_devices": total_devices,
-#             "moving_vehicles": moving_vehicles,
-#             "offline_vehicles": offline_vehicles,
-#             "idle_vehicles": idle_vehicles   
-#         }), 200
-#     except Exception as e:
-#         print(f"🚨 Error fetching pie chart data: {e}")
-#         return jsonify({"error": "Failed to fetch pie chart data"}), 500
-
 @dashboard_bp.route('/atlanta_pie_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
@@ -113,16 +68,15 @@ def atlanta_pie_data():
         imeis = list(get_vehicle_data().distinct("IMEI"))
         
         # Get latest record for each IMEI
-        latest_records = list(atlanta_collection.aggregate([
-            {"$match": {"imei": {"$in": imeis}}},
-            {"$sort": {"imei": 1, "date_time": -1}},
-            {"$group": {
-                "_id": "$imei",
-                "latest": {"$first": "$$ROOT"}
-            }}
-        ]))
-        
-        now = datetime.now(timezone('UTC'))
+        latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
+
+        atlantaAis140Records = list(atlantaAis140Collection.find({"_id": {"$in": imeis}}))
+
+        for doc in atlantaAis140Records:
+            data = atlantaAis140ToFront(doc)
+            latest_records.append(data)
+
+        now = datetime.now(timezone.utc)
         twenty_four_hours_ago = now - timedelta(hours=24)
         
         moving_vehicles = 0
@@ -130,14 +84,9 @@ def atlanta_pie_data():
         offline_vehicles = 0
         parked_vehicles = 0
         
-        for record in latest_records:
-            latest_data = record['latest']
-            
+        for latest_data in latest_records:
             try:
-                last_update = datetime.strptime(
-                    latest_data["date"] + latest_data["time"],
-                    '%d%m%y%H%M%S'
-                ).replace(tzinfo=timezone('UTC'))
+                last_update = latest_data["date_time"]
             except (KeyError, ValueError):
                 last_update = None
                 
@@ -176,51 +125,77 @@ def atlanta_distance_data():
     try:
         imeis = list(get_vehicle_data().distinct("IMEI"))
 
-        pipeline = [
-            {
-                "$match": {
+        distanceKeys = {}
+
+        startTime = datetime.now()
+        for i in range(0, 7):
+            date = datetime.now(timezone.utc) - timedelta(days=i)
+            start_of_day = date.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_of_day = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+            pipeline = [
+                {"$match": {
                     "date_time": {
-                        "$gte": datetime.now() - timedelta(days=7),
-                        "$lt": datetime.now()
+                        "$gte": start_of_day,
+                        "$lt": end_of_day
                     },
-                    "imei": {"$in": imeis}
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date_time"}}, 
-                        "imei": "$imei"
+                    "imei": {"$in":imeis}
+                }},
+                {"$sort": {"date_time": -1}},
+                {"$group": {
+                    "_id": "$imei",
+                    "last_odometer": {"$first": "$odometer"},
+                    "first_odometer": {"$last": "$odometer"}
+                }},
+                {"$project": {
+                    "_id": 0,
+                    "imei": "$_id",
+                    "first_odometer": 1,
+                    "last_odometer": 1
+                }}
+            ]
+
+            distances_atlanta = list(atlanta_collection.aggregate(pipeline))
+
+            pipeline = [
+                    {"$match": {
+                        "imei": {"$in": imeis},
+                        "gps.timestamp": {"$gte": start_of_day, "$lt": end_of_day}
+                    }},
+                    {"$sort": {"gps.timestamp": -1}},
+                    {
+                        "$group": {
+                            "_id": "$imei",
+                            "last_odometer": {"$first": "$telemetry.odometer"},
+                            "first_odometer": {"$last": "$telemetry.odometer"}
+                        }
                     },
-                    "start_odometer": {"$min": {"$toDouble": "$odometer"}},
-                    "end_odometer": {"$max": {"$toDouble": "$odometer"}}
-                }
-            },
-            {
-                "$project": {
-                    "date": "$_id.date",
-                    "imei": "$_id.imei",
-                    "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
-                }
-            },
-            {
-                "$group": {
-                    "_id": "$date",
-                    "total_distance": {"$sum": "$distance_traveled"}
-                }
-            },
-            {
-                "$sort": {"_id": 1}  
-            }
-        ]
+                    {"$project": {
+                        "_id": 0,
+                        "imei": "$_id",
+                        "first_odometer": 1,
+                        "last_odometer": 1
+                    }}
+                ]
 
-        results = list(atlanta_collection.aggregate(pipeline))
+            distances_ais140 = list(atlantaAis140Collection.aggregate(pipeline))
 
-        distances = {result["_id"]: result["total_distance"] for result in results}
+            for dist in distances_ais140:
+                distances_atlanta.append(dist)
+
+            distance = 0
+
+            for dist in distances_atlanta:
+                first_odometer = float(dist.get('first_odometer', 0))
+                last_odometer = float(dist.get('last_odometer', 0))
+                distance_traveled = last_odometer - first_odometer
+                distance += distance_traveled if distance_traveled >= 0 else 0
+            label = date.strftime("%Y-%m-%d")
+
+            distanceKeys[label] = distance
 
         distancesJson = {
-            "labels": list(distances.keys()),
-            "distances": list(distances.values())
+            "labels": list(distanceKeys.keys()),
+            "distances": list(distanceKeys.values())
         }
 
         return jsonify(distancesJson), 200
@@ -234,7 +209,7 @@ def atlanta_distance_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_range_data():
     try:
-        utc_now = datetime.now(timezone('UTC'))
+        utc_now = datetime.now(timezone.utc)
         range_param = request.args.get("range", "1day")
         status_filter = request.args.get("status")
         
@@ -413,7 +388,7 @@ def get_vehicle_range_data():
                         latest.get("date") + latest.get("time"),
                         '%d%m%y%H%M%S'
                     )
-                    last_update = last_update.replace(tzinfo=timezone('UTC'))
+                    last_update = last_update.replace(tzinfo=timezone.utc)
                 except ValueError as e:
                     print(f"Error parsing date/time: {e}")
                     last_update = None
@@ -492,7 +467,7 @@ def format_last_updated(date_str, time_str):
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
-        utc_now = datetime.now(timezone('UTC'))
+        utc_now = datetime.now(timezone.utc)
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
         response = get_vehicle_range_data()

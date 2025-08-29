@@ -169,14 +169,14 @@ def getStopTimeToday(imei):
         pipeline = [
                 {"$match": {
                     "imei": {"$in": missingImeis},
-                    "timestamp": {"$gte": start_of_day, "$lt": end_of_day},
+                    "gps.timestamp": {"$gte": start_of_day, "$lt": end_of_day},
                     "telemetry.speed": {"$gt": 0},
                     "telemetry.ignition": 0
                 }},
-                {"$sort": {"imei": 1, "timestamp": -1}},
+                {"$sort": {"imei": 1, "gps.timestamp": -1}},
                 {"$group": {
                     "_id": "$imei",
-                    "timestamps": {"$push": "$timestamp"}
+                    "timestamps": {"$push": "$gps.timestamp"}
                 }},
                 {"$project": {
                     "imei": "$_id",
@@ -221,31 +221,41 @@ def getVehicleDistances(imei):
                 },
                 "imei": {"$in":imei}
             }},
-            {"$project": {  
-                "imei": 1,
-                "odometer": {"$toDouble": "$odometer"} 
-            }},
+            {"$sort": {"date_time": -1}},
             {"$group": {
                 "_id": "$imei",
-                "start_odometer": {"$min": "$odometer"},
-                "end_odometer": {"$max": "$odometer"}
+                "last_odometer": {"$first": "$odometer"},
+                "first_odometer": {"$last": "$odometer"}
             }},
             {"$project": {
+                "_id": 0,
                 "imei": "$_id",
-                "distance_traveled": {"$subtract": ["$end_odometer", "$start_odometer"]}
+                "first_odometer": 1,
+                "last_odometer": 1
             }}
         ]
 
-        distances = list(atlanta_collection.aggregate(pipeline))
+        distances_atlanta = list(atlanta_collection.aggregate(pipeline))
+        
+        distances = []
+        
+        for distance in distances_atlanta:
+            first_odometer = float(distance.get('first_odometer', 0) or 0)
+            last_odometer = float(distance.get('last_odometer', 0) or 0)
+            distance_traveled = last_odometer - first_odometer
+            distances.append({
+                'imei': distance['imei'],
+                'distance_traveled': distance_traveled if distance_traveled >= 0 else 0
+            })
 
         missingImeis = list(set(imei) - {item['imei'] for item in distances})
         
         pipeline = [
             {"$match": {
                 "imei": {"$in": missingImeis},
-                "timestamp": {"$gte": start_of_day, "$lt": end_of_day}
+                "gps.timestamp": {"$gte": start_of_day, "$lt": end_of_day}
             }},
-            {"$sort": {"timestamp": -1}},
+            {"$sort": {"gps.timestamp": -1}},
             {
                 "$group": {
                     "_id": "$imei",
