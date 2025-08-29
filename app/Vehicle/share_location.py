@@ -9,6 +9,7 @@ from app.utils import roles_required # type: ignore
 from app.geocoding import geocodeInternal # type: ignore
 from flask_socketio import emit, join_room
 from app import socketio
+from app.parser import atlantaAis140ToFront
 
 share_location_bp = Blueprint('ShareLocation', __name__, static_folder='static', template_folder='templates')
 
@@ -78,7 +79,7 @@ def view_share_location(licensePlateNumber, token):
             "latitude": doc["gps"].get("lat"),
             "longitude": doc["gps"].get("lon"),
             "speed": doc["telemetry"].get("speed"),
-            "date_time": doc["timestamp"],
+            "date_time": doc["gps"].get("timestamp"),
             "ignition": doc["telemetry"].get("ignition"),
             }
         else:
