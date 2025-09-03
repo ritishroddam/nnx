@@ -81,10 +81,15 @@ Register Sub Account
         text-align: left;
         border-bottom: 1px solid #e0e0e0;
         color: #333;
+        position: relative;
     }
     
     .admin-table tr:hover {
         background-color: #f8f9fa;
+    }
+    
+    .admin-table tr.editing {
+        background-color: #fff3cd;
     }
     
     .status-badge {
@@ -131,6 +136,26 @@ Register Sub Account
         background-color: #e0a800;
     }
     
+    .btn-save {
+        background-color: #28a745;
+        color: white;
+        display: none;
+    }
+    
+    .btn-save:hover {
+        background-color: #218838;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        display: none;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #5a6268;
+    }
+    
     .btn-delete {
         background-color: #dc3545;
         color: white;
@@ -141,12 +166,29 @@ Register Sub Account
     }
     
     .btn-toggle {
-        background-color: #28a745;
+        background-color: #17a2b8;
         color: white;
     }
     
     .btn-toggle:hover {
-        background-color: #218838;
+        background-color: #138496;
+    }
+    
+    .editable-field {
+        display: none;
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .view-field {
+        display: block;
+    }
+    
+    .company-select {
+        display: none;
+        width: 100%;
     }
     
     .modal {
@@ -248,6 +290,15 @@ Register Sub Account
         color: #6c757d;
         font-style: italic;
     }
+    
+    .password-field {
+        display: none;
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="admin-container">
@@ -310,10 +361,28 @@ Register Sub Account
         </thead>
         <tbody>
             {% for user in existing_users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.company_name }}</td>
+            <tr id="user-row-{{ user._id }}" data-user-id="{{ user._id }}">
+                <td>
+                    <span class="view-field username-view">{{ user.username }}</span>
+                    <input type="text" class="editable-field username-edit" value="{{ user.username }}" data-original-value="{{ user.username }}">
+                </td>
+                <td>
+                    <span class="view-field email-view">{{ user.email }}</span>
+                    <input type="email" class="editable-field email-edit" value="{{ user.email }}" data-original-value="{{ user.email }}">
+                </td>
+                <td>
+                    <span class="view-field company-view">{{ user.company_name }}</span>
+                    {% if role == 'admin' %}
+                    <select class="editable-field company-edit" data-original-value="{{ user.company_id }}">
+                        <option value="" disabled>Select Company</option>
+                        {% for company in companies %}
+                        <option value="{{ company._id }}" {% if user.company_id == company._id|string %}selected{% endif %}>{{ company['Company Name'] }}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <span class="view-field">{{ user.company_name }}</span>
+                    {% endif %}
+                </td>
                 <td>
                     <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
                           data-user-id="{{ user._id }}" 
@@ -326,11 +395,14 @@ Register Sub Account
                         <button class="btn-action btn-edit" data-user-id="{{ user._id }}">
                             <i class="fas fa-edit"></i>
                         </button>
+                        <button class="btn-action btn-save" data-user-id="{{ user._id }}">
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <button class="btn-action btn-cancel" data-user-id="{{ user._id }}">
+                            <i class="fas fa-times"></i>
+                        </button>
                         <button class="btn-action btn-delete" data-user-id="{{ user._id }}">
                             <i class="fas fa-trash"></i>
-                        </button>
-                        <button class="btn-action btn-toggle" data-user-id="{{ user._id }}">
-                            <i class="fas fa-check"></i>
                         </button>
                     </div>
                 </td>
@@ -345,59 +417,12 @@ Register Sub Account
     {% endif %}
 </div>
 
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Edit User</h3>
-            <button class="close">&times;</button>
-        </div>
-        <form id="edit-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <input type="hidden" id="edit-user-id" name="user_id">
-            <div class="form-group">
-                <label for="edit-username">Username</label>
-                <input type="text" id="edit-username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="edit-email">Email</label>
-                <input type="email" id="edit-email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="edit-password">Password (leave blank to keep current)</label>
-                <input type="password" id="edit-password" name="password">
-            </div>
-            {% if role == 'admin' %}
-            <div class="form-group">
-                <label for="edit-company">Company</label>
-                <select id="edit-company" name="company" required>
-                    <option value="" disabled selected>Select Company</option>
-                    {% for company in companies %}
-                    <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% else %}
-            <input type="hidden" id="edit-company" name="company" value="{{ company_id }}">
-            {% endif %}
-            <button type="submit" class="btn-submit">Update User</button>
-        </form>
-    </div>
-</div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Modal functionality
         const modal = document.getElementById('register-modal');
         const btn = document.getElementById('add-admin-btn');
         const closeBtn = document.querySelector('.close');
-
-        const editButtons = document.querySelectorAll('.btn-edit');
-        const editModal = document.getElementById('edit-modal');
-        const editForm = document.getElementById('edit-form');
-        const editUserId = document.getElementById('edit-user-id');
-        const editUsername = document.getElementById('edit-username');
-        const editEmail = document.getElementById('edit-email');
-        const editPassword = document.getElementById('edit-password');
-        const editCompany = document.getElementById('edit-company');
         
         btn.addEventListener('click', function() {
             modal.style.display = 'block';
@@ -480,86 +505,158 @@ Register Sub Account
             });
         });
         
+        // Edit button functionality - make row editable
+        const editButtons = document.querySelectorAll('.btn-edit');
+        
         editButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-user-id');
+                const row = document.getElementById(`user-row-${userId}`);
                 
-                // Fetch user details
+                // Enable editing mode
+                row.classList.add('editing');
+                
+                // Show editable fields, hide view fields
+                row.querySelectorAll('.view-field').forEach(field => {
+                    field.style.display = 'none';
+                });
+                row.querySelectorAll('.editable-field').forEach(field => {
+                    field.style.display = 'block';
+                });
+                
+                // Show save/cancel buttons, hide edit button
+                this.style.display = 'none';
+                row.querySelector('.btn-save').style.display = 'flex';
+                row.querySelector('.btn-cancel').style.display = 'flex';
+            });
+        });
+        
+        // Cancel button functionality
+        const cancelButtons = document.querySelectorAll('.btn-cancel');
+        
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const row = document.getElementById(`user-row-${userId}`);
+                
+                // Disable editing mode
+                row.classList.remove('editing');
+                
+                // Restore original values
+                row.querySelectorAll('.editable-field').forEach(field => {
+                    if (field.tagName === 'INPUT') {
+                        field.value = field.getAttribute('data-original-value');
+                    } else if (field.tagName === 'SELECT') {
+                        field.value = field.getAttribute('data-original-value');
+                    }
+                });
+                
+                // Show view fields, hide editable fields
+                row.querySelectorAll('.view-field').forEach(field => {
+                    field.style.display = 'block';
+                });
+                row.querySelectorAll('.editable-field').forEach(field => {
+                    field.style.display = 'none';
+                });
+                
+                // Show edit button, hide save/cancel buttons
+                row.querySelector('.btn-edit').style.display = 'flex';
+                this.style.display = 'none';
+                row.querySelector('.btn-save').style.display = 'none';
+            });
+        });
+        
+        // Save button functionality
+        const saveButtons = document.querySelectorAll('.btn-save');
+        
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const row = document.getElementById(`user-row-${userId}`);
+                
+                // Get updated values
+                const username = row.querySelector('.username-edit').value;
+                const email = row.querySelector('.email-edit').value;
+                let company = null;
+                
+                if (row.querySelector('.company-edit')) {
+                    company = row.querySelector('.company-edit').value;
+                }
+                
+                // Validate inputs
+                if (!username || !email) {
+                    alert('Username and email are required');
+                    return;
+                }
+                
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                // Prepare update data
+                const updateData = {
+                    username: username,
+                    email: email
+                };
+                
+                if (company) {
+                    updateData.company = company;
+                }
+                
+                // Send update request
                 fetch(`/api/user/${userId}`, {
-                    method: 'GET',
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token }}'
-                    }
+                    },
+                    body: JSON.stringify(updateData)
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Populate form with user data
-                        editUserId.value = data.user._id;
-                        editUsername.value = data.user.username;
-                        editEmail.value = data.user.email;
+                        // Update view fields with new values
+                        row.querySelector('.username-view').textContent = username;
+                        row.querySelector('.email-view').textContent = email;
                         
-                        // Set company if admin
-                        if (editCompany.tagName === 'SELECT') {
-                            editCompany.value = data.user.company_id;
+                        // Update original values
+                        row.querySelector('.username-edit').setAttribute('data-original-value', username);
+                        row.querySelector('.email-edit').setAttribute('data-original-value', email);
+                        
+                        if (company) {
+                            row.querySelector('.company-edit').setAttribute('data-original-value', company);
+                            // Update company name display
+                            const selectedOption = row.querySelector('.company-edit').options[row.querySelector('.company-edit').selectedIndex];
+                            row.querySelector('.company-view').textContent = selectedOption.text;
                         }
                         
-                        // Clear password field
-                        editPassword.value = '';
+                        // Disable editing mode
+                        row.classList.remove('editing');
                         
-                        // Show edit modal
-                        editModal.style.display = 'block';
+                        // Show view fields, hide editable fields
+                        row.querySelectorAll('.view-field').forEach(field => {
+                            field.style.display = 'block';
+                        });
+                        row.querySelectorAll('.editable-field').forEach(field => {
+                            field.style.display = 'none';
+                        });
+                        
+                        // Show edit button, hide save/cancel buttons
+                        row.querySelector('.btn-edit').style.display = 'flex';
+                        row.querySelector('.btn-save').style.display = 'none';
+                        row.querySelector('.btn-cancel').style.display = 'none';
+                        
+                        alert('User updated successfully');
                     } else {
-                        alert('Error loading user: ' + data.error);
+                        alert('Error updating user: ' + data.error);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error loading user');
+                    alert('Error updating user');
                 });
-            });
-        });
-        
-        // Edit form submission
-        editForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const userId = editUserId.value;
-            const formData = new FormData(this);
-            const jsonData = {};
-            
-            // Convert form data to JSON
-            for (const [key, value] of formData.entries()) {
-                if (value) { // Only include fields with values
-                    jsonData[key] = value;
-                }
-            }
-            
-            // Remove csrf_token from JSON data (it's in headers)
-            delete jsonData['csrf_token'];
-            
-            fetch(`/api/user/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token }}'
-                },
-                body: JSON.stringify(jsonData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('User updated successfully');
-                    editModal.style.display = 'none';
-                    location.reload(); // Reload page to see changes
-                } else {
-                    alert('Error updating user: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error updating user');
             });
         });
         
@@ -582,7 +679,15 @@ Register Sub Account
                     .then(data => {
                         if (data.success) {
                             alert('User deleted successfully');
-                            location.reload(); // Reload page to see changes
+                            // Remove the row from the table
+                            document.getElementById(`user-row-${userId}`).remove();
+                            
+                            // Check if table is empty and show message
+                            if (document.querySelectorAll('.admin-table tbody tr').length === 0) {
+                                document.querySelector('.admin-table').insertAdjacentHTML('afterend', 
+                                    '<div class="no-data"><p>No client admins found.</p></div>');
+                                document.querySelector('.admin-table').remove();
+                            }
                         } else {
                             alert('Error deleting user: ' + data.error);
                         }
@@ -593,18 +698,6 @@ Register Sub Account
                     });
                 }
             });
-        });
-        
-        // Close edit modal
-        const editCloseBtn = editModal.querySelector('.close');
-        editCloseBtn.addEventListener('click', function() {
-            editModal.style.display = 'none';
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == editModal) {
-                editModal.style.display = 'none';
-            }
         });
     });
 </script>
