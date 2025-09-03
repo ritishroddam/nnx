@@ -345,12 +345,59 @@ Register Sub Account
     {% endif %}
 </div>
 
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit User</h3>
+            <button class="close">&times;</button>
+        </div>
+        <form id="edit-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" id="edit-user-id" name="user_id">
+            <div class="form-group">
+                <label for="edit-username">Username</label>
+                <input type="text" id="edit-username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-email">Email</label>
+                <input type="email" id="edit-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-password">Password (leave blank to keep current)</label>
+                <input type="password" id="edit-password" name="password">
+            </div>
+            {% if role == 'admin' %}
+            <div class="form-group">
+                <label for="edit-company">Company</label>
+                <select id="edit-company" name="company" required>
+                    <option value="" disabled selected>Select Company</option>
+                    {% for company in companies %}
+                    <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% else %}
+            <input type="hidden" id="edit-company" name="company" value="{{ company_id }}">
+            {% endif %}
+            <button type="submit" class="btn-submit">Update User</button>
+        </form>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Modal functionality
         const modal = document.getElementById('register-modal');
         const btn = document.getElementById('add-admin-btn');
         const closeBtn = document.querySelector('.close');
+
+        const editButtons = document.querySelectorAll('.btn-edit');
+        const editModal = document.getElementById('edit-modal');
+        const editForm = document.getElementById('edit-form');
+        const editUserId = document.getElementById('edit-user-id');
+        const editUsername = document.getElementById('edit-username');
+        const editEmail = document.getElementById('edit-email');
+        const editPassword = document.getElementById('edit-password');
+        const editCompany = document.getElementById('edit-company');
         
         btn.addEventListener('click', function() {
             modal.style.display = 'block';
@@ -433,38 +480,131 @@ Register Sub Account
             });
         });
         
-        // Edit button functionality
-        const editButtons = document.querySelectorAll('.btn-edit');
         editButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-user-id');
-                alert('Edit functionality for user ID: ' + userId);
-                // Implement edit functionality here
+                
+                // Fetch user details
+                fetch(`/api/user/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Populate form with user data
+                        editUserId.value = data.user._id;
+                        editUsername.value = data.user.username;
+                        editEmail.value = data.user.email;
+                        
+                        // Set company if admin
+                        if (editCompany.tagName === 'SELECT') {
+                            editCompany.value = data.user.company_id;
+                        }
+                        
+                        // Clear password field
+                        editPassword.value = '';
+                        
+                        // Show edit modal
+                        editModal.style.display = 'block';
+                    } else {
+                        alert('Error loading user: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading user');
+                });
+            });
+        });
+        
+        // Edit form submission
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const userId = editUserId.value;
+            const formData = new FormData(this);
+            const jsonData = {};
+            
+            // Convert form data to JSON
+            for (const [key, value] of formData.entries()) {
+                if (value) { // Only include fields with values
+                    jsonData[key] = value;
+                }
+            }
+            
+            // Remove csrf_token from JSON data (it's in headers)
+            delete jsonData['csrf_token'];
+            
+            fetch(`/api/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('User updated successfully');
+                    editModal.style.display = 'none';
+                    location.reload(); // Reload page to see changes
+                } else {
+                    alert('Error updating user: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating user');
             });
         });
         
         // Delete button functionality
         const deleteButtons = document.querySelectorAll('.btn-delete');
+        
         deleteButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-user-id');
-                if (confirm('Are you sure you want to delete this user?')) {
-                    alert('Delete functionality for user ID: ' + userId);
-                    // Implement delete functionality here
+                
+                if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                    fetch(`/api/user/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('User deleted successfully');
+                            location.reload(); // Reload page to see changes
+                        } else {
+                            alert('Error deleting user: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error deleting user');
+                    });
                 }
             });
         });
         
-        // Toggle button functionality (same as status badge)
-        const toggleButtons = document.querySelectorAll('.btn-toggle');
-        toggleButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                const statusBadge = document.querySelector(`.status-badge[data-user-id="${userId}"]`);
-                if (statusBadge) {
-                    statusBadge.click();
-                }
-            });
+        // Close edit modal
+        const editCloseBtn = editModal.querySelector('.close');
+        editCloseBtn.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target == editModal) {
+                editModal.style.display = 'none';
+            }
         });
     });
 </script>

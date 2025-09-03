@@ -324,6 +324,91 @@ def register():
         flash('Unauthorized access', 'danger')
         return redirect(url_for('auth.unauthorized'))
 
+# Add these new API endpoints for edit and delete operations
+@auth_bp.route('/api/user/<user_id>', methods=['GET', 'PUT', 'DELETE'])
+@jwt_required()
+@roles_required('admin', 'clientAdmin')
+def user_operations(user_id):
+    try:
+        claims = get_jwt()
+        user_role = claims.get('roles', [])
+        user_company_id = claims.get('company_id', '')
+        
+        # Check if user exists
+        user = db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"success": False, "error": "User not found"}), 404
+        
+        # For clientAdmin, ensure they can only modify users from their company
+        if 'clientAdmin' in user_role and user.get('company') != user_company_id:
+            return jsonify({"success": False, "error": "Unauthorized access"}), 403
+        
+        if request.method == 'GET':
+            # Get user details for editing
+            company_name = "Unknown Company"
+            company_id = user.get("company", "")
+            
+            if company_id and company_id != "none":
+                try:
+                    company = db.customers_list.find_one({"_id": ObjectId(user.get("company", ""))})
+                    company_name = company["Company Name"] if company else "Unknown Company"
+                except:
+                    company_name = "Invalid Company ID"
+            
+            return jsonify({
+                "success": True,
+                "user": {
+                    "_id": str(user["_id"]),
+                    "username": user["username"],
+                    "email": user["email"],
+                    "company_id": user.get("company", ""),
+                    "company_name": company_name,
+                    "disabled": user.get("disabled", 0)
+                }
+            })
+            
+        elif request.method == 'PUT':
+            # Update user details
+            data = request.json
+            update_data = {}
+            
+            if 'username' in data:
+                # Check if username is already taken by another user
+                existing_user = db.users.find_one({"username": data['username'], "_id": {"$ne": ObjectId(user_id)}})
+                if existing_user:
+                    return jsonify({"success": False, "error": "Username already taken"}), 400
+                update_data['username'] = data['username']
+            
+            if 'email' in data:
+                # Check if email is already registered by another user
+                existing_email = db.users.find_one({"email": data['email'], "_id": {"$ne": ObjectId(user_id)}})
+                if existing_email:
+                    return jsonify({"success": False, "error": "Email already registered"}), 400
+                update_data['email'] = data['email']
+            
+            if 'company' in data and 'admin' in user_role:
+                update_data['company'] = data['company']
+            
+            if 'password' in data and data['password']:
+                # Hash the new password
+                hashed_password = generate_password_hash(data['password'])
+                update_data['password'] = hashed_password
+            
+            db.users.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": update_data}
+            )
+            
+            return jsonify({"success": True, "message": "User updated successfully"})
+            
+        elif request.method == 'DELETE':
+            # Delete user
+            db.users.delete_one({"_id": ObjectId(user_id)})
+            return jsonify({"success": True, "message": "User deleted successfully"})
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
 # @jwt_required()
 # @roles_required('admin')
