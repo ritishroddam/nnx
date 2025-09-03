@@ -186,11 +186,6 @@ Register Sub Account
         display: block;
     }
     
-    .company-select {
-        display: none;
-        width: 100%;
-    }
-    
     .modal {
         display: none;
         position: fixed;
@@ -290,15 +285,6 @@ Register Sub Account
         color: #6c757d;
         font-style: italic;
     }
-    
-    .password-field {
-        display: none;
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-top: 5px;
-    }
 </style>
 
 <div class="admin-container">
@@ -371,17 +357,7 @@ Register Sub Account
                     <input type="email" class="editable-field email-edit" value="{{ user.email }}" data-original-value="{{ user.email }}">
                 </td>
                 <td>
-                    <span class="view-field company-view">{{ user.company_name }}</span>
-                    {% if role == 'admin' %}
-                    <select class="editable-field company-edit" data-original-value="{{ user.company_id }}">
-                        <option value="" disabled>Select Company</option>
-                        {% for company in companies %}
-                        <option value="{{ company._id }}" {% if user.company_id == company._id|string %}selected{% endif %}>{{ company['Company Name'] }}</option>
-                        {% endfor %}
-                    </select>
-                    {% else %}
                     <span class="view-field">{{ user.company_name }}</span>
-                    {% endif %}
                 </td>
                 <td>
                     <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
@@ -544,11 +520,7 @@ Register Sub Account
                 
                 // Restore original values
                 row.querySelectorAll('.editable-field').forEach(field => {
-                    if (field.tagName === 'INPUT') {
-                        field.value = field.getAttribute('data-original-value');
-                    } else if (field.tagName === 'SELECT') {
-                        field.value = field.getAttribute('data-original-value');
-                    }
+                    field.value = field.getAttribute('data-original-value');
                 });
                 
                 // Show view fields, hide editable fields
@@ -577,11 +549,6 @@ Register Sub Account
                 // Get updated values
                 const username = row.querySelector('.username-edit').value;
                 const email = row.querySelector('.email-edit').value;
-                let company = null;
-                
-                if (row.querySelector('.company-edit')) {
-                    company = row.querySelector('.company-edit').value;
-                }
                 
                 // Validate inputs
                 if (!username || !email) {
@@ -600,10 +567,6 @@ Register Sub Account
                     username: username,
                     email: email
                 };
-                
-                if (company) {
-                    updateData.company = company;
-                }
                 
                 // Send update request
                 fetch(`/api/user/${userId}`, {
@@ -624,13 +587,6 @@ Register Sub Account
                         // Update original values
                         row.querySelector('.username-edit').setAttribute('data-original-value', username);
                         row.querySelector('.email-edit').setAttribute('data-original-value', email);
-                        
-                        if (company) {
-                            row.querySelector('.company-edit').setAttribute('data-original-value', company);
-                            // Update company name display
-                            const selectedOption = row.querySelector('.company-edit').options[row.querySelector('.company-edit').selectedIndex];
-                            row.querySelector('.company-view').textContent = selectedOption.text;
-                        }
                         
                         // Disable editing mode
                         row.classList.remove('editing');
