@@ -160,13 +160,13 @@ Register Sub Account
 </style>
 
 <div class="container">
-    <button id="add-admin-btn" class="btn-primary">Add New Client Admin</button>
+    <button id="add-admin-btn" class="btn-primary">Add New Sub Account</button>
     
     <!-- Modal for registration form -->
     <div id="register-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Register Client Admin</h2>
+            <h2>Register Sub Account</h2>
             <form id="register-form" method="POST" action="{{ url_for('auth.register') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <div class="form-group">
@@ -199,7 +199,8 @@ Register Sub Account
         </div>
     </div>
     
-    {% if client_admins %}
+    {% if existing_users %}
+    <h3>Existing Sub Accounts</h3>
     <table class="admin-table">
         <thead>
             <tr>
@@ -211,16 +212,16 @@ Register Sub Account
             </tr>
         </thead>
         <tbody>
-            {% for admin in client_admins %}
+            {% for user in existing_users %}
             <tr>
-                <td>{{ admin.username }}</td>
-                <td>{{ admin.email }}</td>
-                <td>{{ admin.company_name }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.company_name }}</td>
                 <td>
-                    <span class="status-toggle {% if admin.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
-                          data-user-id="{{ admin._id }}" 
-                          data-current-status="{{ admin.disabled }}">
-                        {% if admin.disabled == 0 %}Active{% else %}Inactive{% endif %}
+                    <span class="status-toggle {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
+                          data-user-id="{{ user._id }}" 
+                          data-current-status="{{ user.disabled }}">
+                        {% if user.disabled == 0 %}Active{% else %}Inactive{% endif %}
                     </span>
                 </td>
                 <td>
@@ -232,7 +233,7 @@ Register Sub Account
         </tbody>
     </table>
     {% else %}
-    <p>No client admins found.</p>
+    <p>No sub accounts found.</p>
     {% endif %}
 </div>
 
