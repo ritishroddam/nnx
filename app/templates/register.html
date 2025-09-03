@@ -93,6 +93,7 @@ Register Sub Account
         border-radius: 12px;
         font-size: 14px;
         font-weight: 500;
+        cursor: pointer;
     }
     
     .status-active {
@@ -105,9 +106,47 @@ Register Sub Account
         color: #721c24;
     }
     
-    .action-check {
-        color: #28a745;
-        font-size: 18px;
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-edit {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-edit:hover {
+        background-color: #e0a800;
+    }
+    
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background-color: #c82333;
+    }
+    
+    .btn-toggle {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-toggle:hover {
+        background-color: #218838;
     }
     
     .modal {
@@ -276,12 +315,24 @@ Register Sub Account
                 <td>{{ user.email }}</td>
                 <td>{{ user.company_name }}</td>
                 <td>
-                    <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}">
+                    <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
+                          data-user-id="{{ user._id }}" 
+                          data-current-status="{{ user.disabled }}">
                         {% if user.disabled == 0 %}Active{% else %}Inactive{% endif %}
                     </span>
                 </td>
                 <td>
-                    <span class="action-check">✅️</span>
+                    <div class="action-buttons">
+                        <button class="btn-action btn-edit" data-user-id="{{ user._id }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete" data-user-id="{{ user._id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="btn-action btn-toggle" data-user-id="{{ user._id }}">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
@@ -338,6 +389,82 @@ Register Sub Account
             }
             
             return true;
+        });
+        
+        // Status toggle functionality
+        const statusBadges = document.querySelectorAll('.status-badge');
+        
+        statusBadges.forEach(badge => {
+            badge.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const currentStatus = this.getAttribute('data-current-status');
+                const newStatus = currentStatus === '0' ? '1' : '0';
+                
+                fetch(`/api/client-admin/${userId}/toggle-disable`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI
+                        this.setAttribute('data-current-status', newStatus);
+                        
+                        if (newStatus === '0') {
+                            this.classList.remove('status-inactive');
+                            this.classList.add('status-active');
+                            this.textContent = 'Active';
+                        } else {
+                            this.classList.remove('status-active');
+                            this.classList.add('status-inactive');
+                            this.textContent = 'Inactive';
+                        }
+                    } else {
+                        alert('Error updating status: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating status');
+                });
+            });
+        });
+        
+        // Edit button functionality
+        const editButtons = document.querySelectorAll('.btn-edit');
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                alert('Edit functionality for user ID: ' + userId);
+                // Implement edit functionality here
+            });
+        });
+        
+        // Delete button functionality
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                if (confirm('Are you sure you want to delete this user?')) {
+                    alert('Delete functionality for user ID: ' + userId);
+                    // Implement delete functionality here
+                }
+            });
+        });
+        
+        // Toggle button functionality (same as status badge)
+        const toggleButtons = document.querySelectorAll('.btn-toggle');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const statusBadge = document.querySelector(`.status-badge[data-user-id="${userId}"]`);
+                if (statusBadge) {
+                    statusBadge.click();
+                }
+            });
         });
     });
 </script>
