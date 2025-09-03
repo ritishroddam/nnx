@@ -20,34 +20,78 @@ Register Sub Account
 <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 <style>
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .add-admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .add-admin-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .btn-add-admin {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-add-admin:hover {
+        background-color: #0069d9;
+    }
+    
     .admin-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
         background-color: white;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .admin-table th, .admin-table td {
-        padding: 12px 15px;
-        text-align: left;
-        border-bottom: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
     }
     
     .admin-table th {
         background-color: #f8f9fa;
         font-weight: 600;
+        padding: 16px;
+        text-align: left;
+        border-bottom: 2px solid #e0e0e0;
+        color: #495057;
+    }
+    
+    .admin-table td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+        color: #333;
     }
     
     .admin-table tr:hover {
-        background-color: #f5f5f5;
+        background-color: #f8f9fa;
     }
     
-    .status-toggle {
-        cursor: pointer;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 12px;
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 14px;
         font-weight: 500;
     }
     
@@ -61,22 +105,9 @@ Register Sub Account
         color: #721c24;
     }
     
-    .action-btn {
-        padding: 5px 10px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-right: 5px;
-    }
-    
-    .btn-edit {
-        background-color: #ffc107;
-        color: #212529;
-    }
-    
-    .btn-delete {
-        background-color: #dc3545;
-        color: white;
+    .action-check {
+        color: #28a745;
+        font-size: 18px;
     }
     
     .modal {
@@ -94,79 +125,107 @@ Register Sub Account
     .modal-content {
         background-color: #fefefe;
         margin: 10% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 50%;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 25px;
+        border: none;
+        width: 500px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
     }
     
     .close {
         color: #aaa;
-        float: right;
         font-size: 28px;
         font-weight: bold;
         cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
     }
     
     .close:hover {
-        color: black;
+        color: #000;
     }
     
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
     
     .form-group label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         font-weight: 500;
+        color: #333;
     }
     
     .form-group input, .form-group select {
         width: 100%;
-        padding: 8px;
+        padding: 12px;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
     }
     
-    .btn-primary {
+    .form-group input:focus, .form-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+    
+    .btn-submit {
         background-color: #007bff;
         color: white;
-        padding: 10px 15px;
+        padding: 12px 20px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
-        margin-bottom: 20px;
-    }
-    
-    .btn-primary:hover {
-        background-color: #0069d9;
-    }
-    
-    .btn {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
+        font-weight: 500;
         width: 100%;
+        font-size: 16px;
     }
     
-    .btn:hover {
+    .btn-submit:hover {
         background-color: #0069d9;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+        font-style: italic;
     }
 </style>
 
-<div class="container">
-    <button id="add-admin-btn" class="btn-primary">Add New Sub Account</button>
+<div class="admin-container">
+    <div class="add-admin-header">
+        <h2 class="add-admin-title">Add New Client Admin</h2>
+        <button id="add-admin-btn" class="btn-add-admin">
+            <i class="fas fa-plus"></i> Add New
+        </button>
+    </div>
     
     <!-- Modal for registration form -->
     <div id="register-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Register Sub Account</h2>
+            <div class="modal-header">
+                <h3 class="modal-title">Register Client Admin</h3>
+                <button class="close">&times;</button>
+            </div>
             <form id="register-form" method="POST" action="{{ url_for('auth.register') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <div class="form-group">
@@ -194,13 +253,12 @@ Register Sub Account
                     </select>
                 </div>
                 {% endif %}
-                <button type="submit" class="btn">Register</button>
+                <button type="submit" class="btn-submit">Register</button>
             </form>
         </div>
     </div>
     
     {% if existing_users %}
-    <h3>Existing Sub Accounts</h3>
     <table class="admin-table">
         <thead>
             <tr>
@@ -218,22 +276,21 @@ Register Sub Account
                 <td>{{ user.email }}</td>
                 <td>{{ user.company_name }}</td>
                 <td>
-                    <span class="status-toggle {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
-                          data-user-id="{{ user._id }}" 
-                          data-current-status="{{ user.disabled }}">
+                    <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}">
                         {% if user.disabled == 0 %}Active{% else %}Inactive{% endif %}
                     </span>
                 </td>
                 <td>
-                    <button class="action-btn btn-edit">Edit</button>
-                    <button class="action-btn btn-delete">Delete</button>
+                    <span class="action-check">✅️</span>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p>No sub accounts found.</p>
+    <div class="no-data">
+        <p>No client admins found.</p>
+    </div>
     {% endif %}
 </div>
 
@@ -242,62 +299,45 @@ Register Sub Account
         // Modal functionality
         const modal = document.getElementById('register-modal');
         const btn = document.getElementById('add-admin-btn');
-        const span = document.getElementsByClassName('close')[0];
+        const closeBtn = document.querySelector('.close');
         
-        btn.onclick = function() {
+        btn.addEventListener('click', function() {
             modal.style.display = 'block';
-        }
+        });
         
-        span.onclick = function() {
+        closeBtn.addEventListener('click', function() {
             modal.style.display = 'none';
-        }
+        });
         
-        window.onclick = function(event) {
+        window.addEventListener('click', function(event) {
             if (event.target == modal) {
                 modal.style.display = 'none';
             }
-        }
+        });
         
-        // Status toggle functionality
-        const statusToggles = document.querySelectorAll('.status-toggle');
-        
-        statusToggles.forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                const currentStatus = this.getAttribute('data-current-status');
-                const newStatus = currentStatus === '0' ? '1' : '0';
-                
-                fetch(`/api/client-admin/${userId}/toggle-disable`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update UI
-                        this.setAttribute('data-current-status', newStatus);
-                        
-                        if (newStatus === '0') {
-                            this.classList.remove('status-inactive');
-                            this.classList.add('status-active');
-                            this.textContent = 'Active';
-                        } else {
-                            this.classList.remove('status-active');
-                            this.classList.add('status-inactive');
-                            this.textContent = 'Inactive';
-                        }
-                    } else {
-                        alert('Error updating status: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error updating status');
-                });
-            });
+        // Form submission handling
+        const form = document.getElementById('register-form');
+        form.addEventListener('submit', function(e) {
+            // Basic validation
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !email || !password) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+                return false;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address');
+                return false;
+            }
+            
+            return true;
         });
     });
 </script>
