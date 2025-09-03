@@ -19,38 +19,285 @@ Register Sub Account
 {% block block_container %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
+<style>
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .admin-table th, .admin-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .admin-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .admin-table tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .status-toggle {
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .action-btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    
+    .btn-edit {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close:hover {
+        color: black;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0069d9;
+    }
+    
+    .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .btn:hover {
+        background-color: #0069d9;
+    }
+</style>
+
 <div class="container">
-    <div class="register-container">
-        <h2>Register</h2>
-        <form method="POST" action="{{ url_for('auth.register') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            {% if role == 'clientAdmin' %}
-            <input type="hidden" name="company" value="{{ company_id }}">
-            {% elif role == 'admin' %}
-            <div class="form-group">
-                <label for="company">Company</label>
-                <select id="company" name="company" required>
-                    <option value="" disabled selected>Select Company</option>
-                    {% for company in companies %}
-                    <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% endif %}
-            <button type="submit" class="btn">Register</button>
-        </form>
+    <button id="add-admin-btn" class="btn-primary">Add New Client Admin</button>
+    
+    <!-- Modal for registration form -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Register Client Admin</h2>
+            <form id="register-form" method="POST" action="{{ url_for('auth.register') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                {% if role == 'clientAdmin' %}
+                <input type="hidden" name="company" value="{{ company_id }}">
+                {% elif role == 'admin' %}
+                <div class="form-group">
+                    <label for="company">Company</label>
+                    <select id="company" name="company" required>
+                        <option value="" disabled selected>Select Company</option>
+                        {% for company in companies %}
+                        <option value="{{ company._id }}">{{ company['Company Name'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <button type="submit" class="btn">Register</button>
+            </form>
+        </div>
     </div>
+    
+    {% if client_admins %}
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for admin in client_admins %}
+            <tr>
+                <td>{{ admin.username }}</td>
+                <td>{{ admin.email }}</td>
+                <td>{{ admin.company_name }}</td>
+                <td>
+                    <span class="status-toggle {% if admin.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
+                          data-user-id="{{ admin._id }}" 
+                          data-current-status="{{ admin.disabled }}">
+                        {% if admin.disabled == 0 %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <button class="action-btn btn-edit">Edit</button>
+                    <button class="action-btn btn-delete">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No client admins found.</p>
+    {% endif %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal functionality
+        const modal = document.getElementById('register-modal');
+        const btn = document.getElementById('add-admin-btn');
+        const span = document.getElementsByClassName('close')[0];
+        
+        btn.onclick = function() {
+            modal.style.display = 'block';
+        }
+        
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Status toggle functionality
+        const statusToggles = document.querySelectorAll('.status-toggle');
+        
+        statusToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const currentStatus = this.getAttribute('data-current-status');
+                const newStatus = currentStatus === '0' ? '1' : '0';
+                
+                fetch(`/api/client-admin/${userId}/toggle-disable`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI
+                        this.setAttribute('data-current-status', newStatus);
+                        
+                        if (newStatus === '0') {
+                            this.classList.remove('status-inactive');
+                            this.classList.add('status-active');
+                            this.textContent = 'Active';
+                        } else {
+                            this.classList.remove('status-active');
+                            this.classList.add('status-inactive');
+                            this.textContent = 'Inactive';
+                        }
+                    } else {
+                        alert('Error updating status: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating status');
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}
