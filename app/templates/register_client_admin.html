@@ -118,12 +118,15 @@ Register Client Admin
     }
     
     .register-admins-wrapper {
-        display: flex;
+        /* display: flex;
         flex-direction: column;
         align-items: center;
         min-height: 80vh;
         width: 90vw;
         background: transparent;
+        padding: 20px; */
+        max-width: 1200px;
+        margin: 0 auto;
         padding: 20px;
     }
     
@@ -382,7 +385,7 @@ Register Client Admin
     // Filter logic
     const filter = document.getElementById('company-filter');
     const tableBody = document.getElementById('admins-table-body');
-    
+
     if (filter && tableBody) {
         filter.addEventListener('change', function() {
             const value = this.value;
