@@ -14,41 +14,39 @@ Register Client Admin
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 
 <div class="register-admins-wrapper">
+    <div class="header-container">
+        <h2>Add New Client Admin</h2>
         <div class="button-row">
             <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
         </div>
-        <div class="admins-table-container">
-            <table class="admins-table">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Company</th>
-                        <th>Status</th> 
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="admins-table-body">
-                    {% for admin in client_admins %}
-                    <tr data-company="{{ admin.company_name }}" data-id="{{ admin._id }}" data-disabled="{{ admin.disabled|default(false) }}">
-                        <td class="username-cell">{{ admin.username }}</td>
-                        <td class="email-cell">{{ admin.email }}</td>
-                        <td class="company-cell">{{ admin.company_name }}</td>
-                        <td class="status-cell">{{ "Active" if admin.disabled == 0 else "Inactive" }}</td>
-                        <td class="actions-cell">
-                            <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
-                            <!-- <button class="icon-btn disable-btn" title="{{ admin.disabled|default(false) and 'Enable' or 'Disable' }}">
-                                <i class="fa {{ admin.disabled|default(false) and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
-                            </button> -->
-                            <button class="icon-btn disable-btn" title="{{ admin.disabled|default(0) == 1 and 'Enable' or 'Disable' }}">
-                                <i class="fa {{ admin.disabled|default(0) == 1 and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    </div>
+    
+    <div class="admins-table-container">
+        <table class="admins-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Status</th> 
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="admins-table-body">
+                {% for admin in client_admins %}
+                <tr data-company="{{ admin.company_name }}" data-id="{{ admin._id }}" data-disabled="{{ admin.disabled|default(false) }}">
+                    <td class="username-cell">{{ admin.username }}</td>
+                    <td class="email-cell">{{ admin.email }}</td>
+                    <td class="company-cell">{{ admin.company_name }}</td>
+                    <td class="status-cell">{{ "Active" if admin.disabled == 0 else "Inactive" }}</td>
+                    <td class="actions-cell">
+                        <span class="currency-actions">💶 💷 💸</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Popup Registration Form -->
     <div id="register-modal" class="modal">
@@ -85,15 +83,37 @@ Register Client Admin
 </div>
 
 <style>
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .header-container h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .dark-mode .header-container h2 {
+        color: #ccc;
+    }
+    
     .status-cell {
         font-weight: bold;
     }
+    
     .status-cell:contains("Active") {
         color: #28a745;
     }
+    
     .status-cell:contains("Inactive") {
         color: #dc3545;
     }
+    
     .register-admins-wrapper {
         display: flex;
         flex-direction: column;
@@ -101,52 +121,16 @@ Register Client Admin
         min-height: 80vh;
         width: 90vw;
         background: transparent;
+        padding: 20px;
     }
-    .register-admins-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-        padding: 24px 24px 24px 24px;
-        margin: 40px 0 0 0;
-        width: 95vw;
-        max-width: 1200px;
-        min-height: 400px;
-        background: #fff;
-        gap: 18px;
-    }
-    .dark-mode .register-admins-card {
-        background: #1e1e1e;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-        color: #ccc;
-    }
-    .filter-row {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 10px;
-    }
-    .filter-row label {
-        font-weight: 500;
-        font-size: 1.1rem;
-    }
-    .company-filter {
-        padding: 7px 16px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 1rem;
-        min-width: 200px;
-    }
+    
     .button-row {
         display: flex;
         gap: 12px;
         margin-bottom: 10px;
-        margin-right: 1080px;
     }
+    
     .btn {
-        width: 300px;
         padding: 10px 24px;
         border-radius: 6px;
         font-size: 1rem;
@@ -155,51 +139,68 @@ Register Client Admin
         cursor: pointer;
         transition: background 0.2s;
     }
+    
     .btn-success {
         background: #28a745;
         color: #fff;
     }
+    
     .btn-success:hover {
         background: #218838;
     }
-    .btn-primary {
-        background: #007bff;
-        color: #fff;
-    }
-    .btn-primary:hover {
-        background: #0069d9;
-    }
+    
     .admins-table-container {
         width: 100%;
         overflow-x: auto;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    
+    .dark-mode .admins-table-container {
+        background: #2c2c2c;
+    }
+    
     .admins-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 8px;
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-        background: #fff;
     }
-    .dark-mode .admins-table {
-        background: #2c2c2c;
-        color: #ccc;
-    }
-    .admins-table th, .admins-table td {
-        border: 1px solid #e0e0e0;
-        padding: 12px 16px;
-        text-align: left;
-        font-size: 1rem;
-    }
+    
     .admins-table th {
-        background: #f5f5f5;
+        background: #f8f9fa;
         font-weight: 600;
+        padding: 16px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
     }
+    
     .dark-mode .admins-table th {
-        background: #5a5a5a;
+        background: #3c3c3c;
+        color: #ccc;
+        border-bottom: 2px solid #555;
+    }
+    
+    .admins-table td {
+        padding: 16px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .dark-mode .admins-table td {
+        border-bottom: 1px solid #555;
         color: #ccc;
     }
+    
+    .admins-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .currency-actions {
+        font-size: 1.4rem;
+        letter-spacing: 5px;
+    }
+    
     /* Modal Styles */
     .modal {
         display: none;
@@ -212,6 +213,7 @@ Register Client Admin
         overflow: auto;
         background-color: rgba(0,0,0,0.4);
     }
+    
     .modal-content {
         margin: 5% auto;
         padding: 32px 32px 24px 32px;
@@ -223,11 +225,13 @@ Register Client Admin
         box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         position: relative;
     }
+    
     .dark-mode .modal-content {
         background: #2c2c2c;
         color: #ccc;
         border: 1px solid #444;
     }
+    
     .close {
         color: #aaa;
         position: absolute;
@@ -238,24 +242,30 @@ Register Client Admin
         cursor: pointer;
         transition: color 0.2s;
     }
+    
     .dark-mode .close {
         color: #ccc;
     }
+    
     .close:hover {
         color: #333;
     }
+    
     .dark-mode .close:hover {
         color: #fff;
     }
+    
     .modal-content .form-group {
         margin-bottom: 18px;
     }
+    
     .modal-content label {
         display: block;
         margin-bottom: 6px;
         font-weight: 600;
         font-size: 1rem;
     }
+    
     .modal-content input,
     .modal-content select {
         width: 100%;
@@ -265,6 +275,7 @@ Register Client Admin
         box-sizing: border-box;
         font-size: 1rem;
     }
+    
     .modal-content .btn {
         width: 100%;
         padding: 12px;
@@ -278,68 +289,42 @@ Register Client Admin
         margin-top: 8px;
         transition: background 0.2s;
     }
+    
     .modal-content .btn:hover {
         background-color: #218838;
     }
-    .icon-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.3rem;
-        margin-right: 8px;
-        color: #007bff;
-        transition: color 0.2s;
-    }
-    .icon-btn:last-child {
-        margin-right: 0;
-    }
-    .icon-btn:hover {
-        color: #0056b3;
-    }
-    .disable-btn {
-        color: #dc3545;
-    }
-    .disable-btn.enabled {
-        color: #28a745;
-    }
-    .edit-row-input {
-        width: 95%;
-        padding: 4px 8px;
-        font-size: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    .save-btn, .cancel-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.2rem;
-        margin-right: 8px;
-        color: #28a745;
-        transition: color 0.2s;
-    }
-    .cancel-btn {
-        color: #dc3545;
-    }
+    
     @media (max-width: 900px) {
-        .register-admins-card {
-            padding: 12px 2px;
-        }
-        .filter-row, .button-row {
+        .header-container {
             flex-direction: column;
-            align-items: stretch;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .button-row {
+            width: 100%;
+        }
+        
+        .btn {
+            width: 100%;
         }
     }
+    
     @media (max-width: 600px) {
-        .modal-content {
-            padding: 16px 4px 12px 4px;
+        .register-admins-wrapper {
+            padding: 10px;
+            width: 95vw;
         }
-        .register-admins-card {
-            padding: 4px 1px;
+        
+        .admins-table th, 
+        .admins-table td {
+            padding: 12px 8px;
+            font-size: 0.9rem;
         }
-        .admins-table th, .admins-table td {
-            padding: 8px 6px;
-            font-size: 0.95rem;
+        
+        .currency-actions {
+            font-size: 1.2rem;
+            letter-spacing: 3px;
         }
     }
 </style>
@@ -349,12 +334,19 @@ Register Client Admin
     const modal = document.getElementById("register-modal");
     const btn = document.getElementById("register-btn");
     const span = document.getElementsByClassName("close")[0];
-    btn.onclick = function() {
-        modal.style.display = "block";
+
+    if (btn) {
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
     }
-    span.onclick = function() {
-        modal.style.display = "none";
+    
+    if (span) {
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
     }
+    
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
