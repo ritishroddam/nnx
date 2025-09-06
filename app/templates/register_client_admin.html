@@ -40,7 +40,10 @@ Register Client Admin
                     <td class="company-cell">{{ admin.company_name }}</td>
                     <td class="status-cell">{{ "Active" if admin.disabled == 0 else "Inactive" }}</td>
                     <td class="actions-cell">
-                        <span class="currency-actions">💶 💷 💸</span>
+                        <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                        <button class="icon-btn disable-btn" title="{{ admin.disabled|default(0) == 1 and 'Enable' or 'Disable' }}">
+                            <i class="fa {{ admin.disabled|default(0) == 1 and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -106,12 +109,12 @@ Register Client Admin
         font-weight: bold;
     }
     
-    .status-cell:contains("Active") {
-        color: #28a745;
+    tr[data-disabled="1"] .status-cell {
+        color: #dc3545;
     }
     
-    .status-cell:contains("Inactive") {
-        color: #dc3545;
+    tr[data-disabled="0"] .status-cell {
+        color: #28a745;
     }
     
     .register-admins-wrapper {
@@ -174,6 +177,7 @@ Register Client Admin
         padding: 16px;
         text-align: left;
         border-bottom: 2px solid #dee2e6;
+        color: #495057;
     }
     
     .dark-mode .admins-table th {
@@ -185,6 +189,7 @@ Register Client Admin
     .admins-table td {
         padding: 16px;
         border-bottom: 1px solid #dee2e6;
+        color: #212529;
     }
     
     .dark-mode .admins-table td {
@@ -196,9 +201,31 @@ Register Client Admin
         border-bottom: none;
     }
     
-    .currency-actions {
-        font-size: 1.4rem;
-        letter-spacing: 5px;
+    .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.3rem;
+        margin-right: 8px;
+        color: #007bff;
+        transition: color 0.2s;
+        padding: 5px;
+    }
+    
+    .icon-btn:last-child {
+        margin-right: 0;
+    }
+    
+    .icon-btn:hover {
+        color: #0056b3;
+    }
+    
+    .disable-btn {
+        color: #dc3545;
+    }
+    
+    .disable-btn.enabled {
+        color: #28a745;
     }
     
     /* Modal Styles */
@@ -322,9 +349,8 @@ Register Client Admin
             font-size: 0.9rem;
         }
         
-        .currency-actions {
-            font-size: 1.2rem;
-            letter-spacing: 3px;
+        .icon-btn {
+            font-size: 1.1rem;
         }
     }
 </style>
@@ -356,7 +382,8 @@ Register Client Admin
     // Filter logic
     const filter = document.getElementById('company-filter');
     const tableBody = document.getElementById('admins-table-body');
-    if (filter) {
+    
+    if (filter && tableBody) {
         filter.addEventListener('change', function() {
             const value = this.value;
             Array.from(tableBody.children).forEach(row => {
