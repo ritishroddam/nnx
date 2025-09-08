@@ -1,4 +1,5 @@
 import traceback
+from unittest import result
 from flask import Blueprint, jsonify, render_template, request
 from datetime import datetime, timedelta, timezone
 from app.database import db
@@ -6,7 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required, get_filtered_results, get_vehicle_data
 from app.parser import atlantaAis140ToFront
-from app.Dashboard.dashboardHelper import getDistanceBasedOnTime
+from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -185,68 +186,6 @@ def get_vehicle_range_data():
         
         imeis = list(get_vehicle_data().distinct("IMEI"))
         
-        stats_pipeline = [
-            {"$match": {
-                "date_time": {"$gte": start_of_day, "$lt": end_of_day},
-                "imei": {"$in": imeis}
-            }},
-            {"$sort": {"imei": 1, "date_time": 1}},
-            {"$group": {
-                "_id": "$imei",
-                "start_odometer": {"$first": {"$toDouble": "$odometer"}},
-                "end_odometer": {"$last": {"$toDouble": "$odometer"}},
-                "max_speed": {
-                    "$max": {
-                        "$cond": [
-                            {"$eq": ["$ignition", "1"]},
-                            {"$toDouble": "$speed"},
-                            None
-                        ]
-                    }
-                },
-                "sum_speed": {
-                    "$sum": {
-                        "$cond": [
-                            {
-                                "$and": [
-                                    {"$eq": ["$ignition", "1"]},
-                                    {"$gt": [{"$toDouble": "$speed"}, 0]}
-                                ]
-                            },
-                            {"$toDouble": "$speed"},
-                            0
-                        ]
-                    }
-                },
-                "count_speed": {
-                    "$sum": {
-                        "$cond": [
-                            {
-                                "$and": [
-                                    {"$eq": ["$ignition", "1"]},
-                                    {"$gt": [{"$toDouble": "$speed"}, 0]}
-                                ]
-                            },
-                            1,
-                            0
-                        ]
-                    }
-                }
-            }},
-            {"$project": {
-                "imei": "$_id",
-                "distance": {"$subtract": ["$end_odometer", "$start_odometer"]},
-                "max_speed": 1,
-                "avg_speed": {
-                    "$cond": [
-                        {"$eq": ["$count_speed", 0]},
-                        0,
-                        {"$divide": ["$sum_speed", "$count_speed"]}
-                    ]
-                }
-            }}
-        ]
-
         time_analysis_pipeline = [
             {"$match": {
                 "date_time": {"$gte": start_of_day, "$lt": end_of_day},
@@ -266,8 +205,12 @@ def get_vehicle_range_data():
         ]
         
         # Execute all pipelines
-        stats_results = list(atlanta_collection.aggregate(stats_pipeline))
+        distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
+        speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)
         time_results = list(atlanta_collection.aggregate(time_analysis_pipeline))
+        
+        for result in distance_results:
+            result['distanceTravelled'] = result['last_odometer'] - result['first_odometer']
         
         latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
         
@@ -278,7 +221,8 @@ def get_vehicle_range_data():
             latest_results.append(data)
         
         # Convert to dictionaries for fast lookup
-        stats_dict = {result['imei']: result for result in stats_results}
+        speed_dict = {result['imei']: result for result in speed_results}
+        distance_dict = {result['imei']: result for result in distance_results}
         latest_dict = {result['_id']: result for result in latest_results}
         time_dict = {result['_id']: result['records'] for result in time_results}
         
@@ -287,7 +231,8 @@ def get_vehicle_range_data():
         
         # Combine results for each IMEI
         for imei in imeis:
-            stats = stats_dict.get(imei, {})
+            distance = distance_dict.get(imei, {})
+            speeds = speed_dict.get(imei, {})
             latest = latest_dict.get(imei, {})
             time_records = time_dict.get(imei, [])
             
@@ -354,9 +299,9 @@ def get_vehicle_range_data():
                 "odometer": latest.get("odometer", "N/A"),
                 "date": latest.get("date", None),
                 "time": latest.get("time", None),
-                "distance": round(stats.get("distance", 0), 2),
-                "max_speed": stats.get("max_speed", 0),
-                "avg_speed": round(stats.get("avg_speed", 0), 2),
+                "distance": round(distance.get("distanceTravelled", 0), 2),
+                "max_speed": speeds.get("max_speed", 0),
+                "avg_speed": round(speeds.get("avg_speed", 0), 2),
                 "driving_time": format_seconds(driving_time.total_seconds()),
                 "idle_time": format_seconds(idle_time.total_seconds()),
                 "number_of_stops": number_of_stops,
