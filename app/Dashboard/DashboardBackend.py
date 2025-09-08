@@ -210,7 +210,8 @@ def get_vehicle_range_data():
         time_results = list(atlanta_collection.aggregate(time_analysis_pipeline))
         
         for result in distance_results:
-            result['distanceTravelled'] = result['last_odometer'] - result['first_odometer']
+            distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
+            result['distanceTravelled '] = distanceTravelled if distanceTravelled >= 0 else 0
         
         latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
         
