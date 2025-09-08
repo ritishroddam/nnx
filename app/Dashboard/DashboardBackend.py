@@ -212,7 +212,6 @@ def get_vehicle_range_data():
         for result in distance_results:
             distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
             result['distanceTravelled'] = distanceTravelled if distanceTravelled >= 0 else 0
-            print(result['distanceTravelled'])
         
         latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
         
@@ -310,8 +309,6 @@ def get_vehicle_range_data():
                 "is_offline": is_offline,
                 "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
             }
-            
-            print(distance.get("distanceTravelled", 0))
             
             # Apply status filtering
             if not status_filter:
