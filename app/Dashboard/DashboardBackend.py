@@ -211,7 +211,7 @@ def get_vehicle_range_data():
         
         for result in distance_results:
             distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
-            result['distanceTravelled '] = distanceTravelled if distanceTravelled >= 0 else 0
+            result['distanceTravelled'] = distanceTravelled if distanceTravelled >= 0 else 0
             print(result['distanceTravelled'])
         
         latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
