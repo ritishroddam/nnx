@@ -708,6 +708,7 @@
   min-width: 120px;
   padding: 0 12px;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .dark-mode .status-container {
