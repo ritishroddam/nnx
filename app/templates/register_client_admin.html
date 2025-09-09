@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block head %}
@@ -14,10 +13,41 @@ Register Client Admin
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 
 <div class="register-admins-wrapper">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="card-value">{{ total_users }}</div>
+            <div class="card-label">Total Users</div>
+        </div>
+        <div class="summary-card">
+            <div class="card-value">{{ active_users }}</div>
+            <div class="card-label">Active Users</div>
+        </div>
+        <div class="summary-card">
+            <div class="card-value">{{ inactive_users }}</div>
+            <div class="card-label">Inactive Users</div>
+        </div>
+    </div>
+
     <div class="header-container">
         <h2>Add New Client Admin</h2>
-        <div class="button-row">
-            <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
+        <div class="controls-container">
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search by username, email, or company...">
+                    <i class="fa fa-search"></i>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="status-filter">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-row">
+                <button id="register-btn" class="btn btn-success">Add New Client Admin</button>
+            </div>
         </div>
     </div>
     <hr style="margin-bottom: 20px; color: gray;">
@@ -87,10 +117,52 @@ Register Client Admin
 </div>
 
 <style>
+    .summary-cards {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .summary-card {
+        flex: 1;
+        min-width: 150px;
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .dark-mode .summary-card {
+        background: #2c2c2c;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .card-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #28a745;
+    }
+    
+    .dark-mode .card-value {
+        color: #3acf5e;
+    }
+    
+    .card-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .dark-mode .card-label {
+        color: #aaa;
+    }
+    
     .header-container {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        gap: 15px;
         width: 100%;
         margin-bottom: 20px;
     }
@@ -103,6 +175,60 @@ Register Client Admin
     }
     
     .dark-mode .header-container h2 {
+        color: #ccc;
+    }
+    
+    .controls-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .search-filter-container {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-box input {
+        padding: 10px 15px 10px 35px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        min-width: 250px;
+    }
+    
+    .dark-mode .search-box input {
+        background: #3c3c3c;
+        border-color: #555;
+        color: #ccc;
+    }
+    
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        color: #6c757d;
+    }
+    
+    .filter-dropdown select {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        background: white;
+    }
+    
+    .dark-mode .filter-dropdown select {
+        background: #3c3c3c;
+        border-color: #555;
         color: #ccc;
     }
     
@@ -119,13 +245,6 @@ Register Client Admin
     }
     
     .register-admins-wrapper {
-        /* display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 80vh;
-        width: 90vw;
-        background: transparent;
-        padding: 20px; */
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
@@ -325,10 +444,18 @@ Register Client Admin
     }
     
     @media (max-width: 900px) {
-        .header-container {
+        .controls-container {
             flex-direction: column;
             align-items: flex-start;
-            gap: 15px;
+        }
+        
+        .search-filter-container {
+            width: 100%;
+        }
+        
+        .search-box input {
+            min-width: 200px;
+            width: 100%;
         }
         
         .button-row {
@@ -344,6 +471,10 @@ Register Client Admin
         .register-admins-wrapper {
             padding: 10px;
             width: 95vw;
+        }
+        
+        .summary-cards {
+            flex-direction: column;
         }
         
         .admins-table th, 
@@ -382,21 +513,52 @@ Register Client Admin
         }
     }
 
-    // Filter logic
-    const filter = document.getElementById('company-filter');
+    // Search and filter logic
+    const searchInput = document.getElementById('search-input');
+    const statusFilter = document.getElementById('status-filter');
     const tableBody = document.getElementById('admins-table-body');
 
-    if (filter && tableBody) {
-        filter.addEventListener('change', function() {
-            const value = this.value;
-            Array.from(tableBody.children).forEach(row => {
-                if (value === 'all' || row.getAttribute('data-company') === value) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+    function filterTable() {
+        const searchText = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        
+        Array.from(tableBody.children).forEach(row => {
+            const username = row.querySelector('.username-cell').textContent.toLowerCase();
+            const email = row.querySelector('.email-cell').textContent.toLowerCase();
+            const company = row.querySelector('.company-cell').textContent.toLowerCase();
+            const status = row.querySelector('.status-cell').textContent.toLowerCase();
+            const isDisabled = row.getAttribute('data-disabled') === '1';
+            
+            // Check search text
+            const matchesSearch = searchText === '' || 
+                username.includes(searchText) || 
+                email.includes(searchText) || 
+                company.includes(searchText);
+                
+            // Check status filter
+            let matchesStatus = true;
+            if (statusValue === 'active') {
+                matchesStatus = !isDisabled;
+            } else if (statusValue === 'inactive') {
+                matchesStatus = isDisabled;
+            }
+            
+            // Show or hide row based on filters
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
         });
+    }
+
+    // Add event listeners for search and filter
+    if (searchInput) {
+        searchInput.addEventListener('input', filterTable);
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterTable);
     }
 
     // Inline edit and enable/disable logic
@@ -496,6 +658,9 @@ Register Client Admin
                         icon.classList.remove('fa-toggle-on');
                         icon.classList.add('fa-toggle-off');
                     }
+                    
+                    // Update the summary counts if needed
+                    // This would require a page refresh or more complex logic
                 } else {
                     alert('Failed to update user status: ' + (data.error || 'Unknown error'));
                 }
