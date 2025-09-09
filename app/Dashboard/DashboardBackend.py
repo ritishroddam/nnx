@@ -185,25 +185,7 @@ def get_vehicle_range_data():
         end_of_day = utc_now
         
         imeis = list(get_vehicle_data().distinct("IMEI"))
-        
-        time_analysis_pipeline = [
-            {"$match": {
-                "date_time": {"$gte": start_of_day, "$lt": end_of_day},
-                "imei": {"$in": imeis}
-            }},
-            {"$sort": {"imei": 1, "date_time": 1}},
-            {"$group": {
-                "_id": "$imei",
-                "records": {
-                    "$push": {
-                        "date_time": "$date_time",
-                        "ignition": "$ignition",
-                        "speed": {"$toDouble": "$speed"}
-                    }
-                }
-            }}
-        ]
-        
+   
         # Execute all pipelines
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
         speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)
