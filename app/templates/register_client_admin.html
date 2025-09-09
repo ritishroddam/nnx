@@ -16,15 +16,15 @@ Register Client Admin
     <!-- Summary Cards -->
     <div class="summary-cards">
         <div class="summary-card">
-            <div class="card-value">{{ total_users }}</div>
+            <div class="card-value" id="total-users-count">{{ client_admins|length }}</div>
             <div class="card-label">Total Users</div>
         </div>
         <div class="summary-card">
-            <div class="card-value">{{ active_users }}</div>
+            <div class="card-value" id="active-users-count">{{ client_admins|selectattr('disabled', 'equalto', 0)|list|length }}</div>
             <div class="card-label">Active Users</div>
         </div>
         <div class="summary-card">
-            <div class="card-value">{{ inactive_users }}</div>
+            <div class="card-value" id="inactive-users-count">{{ client_admins|selectattr('disabled', 'equalto', 1)|list|length }}</div>
             <div class="card-label">Inactive Users</div>
         </div>
     </div>
@@ -65,15 +65,15 @@ Register Client Admin
             </thead>
             <tbody id="admins-table-body">
                 {% for admin in client_admins %}
-                <tr data-company="{{ admin.company_name }}" data-id="{{ admin._id }}" data-disabled="{{ admin.disabled|default(false) }}">
+                <tr data-company="{{ admin.company_name }}" data-id="{{ admin._id }}" data-disabled="{{ admin.disabled|default(0) }}">
                     <td class="username-cell">{{ admin.username }}</td>
                     <td class="email-cell">{{ admin.email }}</td>
                     <td class="company-cell">{{ admin.company_name }}</td>
                     <td class="status-cell">{{ "Active" if admin.disabled == 0 else "Inactive" }}</td>
                     <td class="actions-cell">
                         <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
-                        <button class="icon-btn disable-btn" title="{{ admin.disabled|default(0) == 1 and 'Enable' or 'Disable' }}">
-                            <i class="fa {{ admin.disabled|default(0) == 1 and 'fa-toggle-on' or 'fa-toggle-off' }}"></i>
+                        <button class="icon-btn disable-btn" title="{{ 'Enable' if admin.disabled == 1 else 'Disable' }}">
+                            <i class="fa {{ 'fa-toggle-on' if admin.disabled == 1 else 'fa-toggle-off' }}"></i>
                         </button>
                     </td>
                 </tr>
@@ -517,16 +517,22 @@ Register Client Admin
     const searchInput = document.getElementById('search-input');
     const statusFilter = document.getElementById('status-filter');
     const tableBody = document.getElementById('admins-table-body');
+    const totalUsersCount = document.getElementById('total-users-count');
+    const activeUsersCount = document.getElementById('active-users-count');
+    const inactiveUsersCount = document.getElementById('inactive-users-count');
 
     function filterTable() {
         const searchText = searchInput.value.toLowerCase();
         const statusValue = statusFilter.value;
         
+        let activeCount = 0;
+        let inactiveCount = 0;
+        let visibleCount = 0;
+        
         Array.from(tableBody.children).forEach(row => {
             const username = row.querySelector('.username-cell').textContent.toLowerCase();
             const email = row.querySelector('.email-cell').textContent.toLowerCase();
             const company = row.querySelector('.company-cell').textContent.toLowerCase();
-            const status = row.querySelector('.status-cell').textContent.toLowerCase();
             const isDisabled = row.getAttribute('data-disabled') === '1';
             
             // Check search text
@@ -546,10 +552,23 @@ Register Client Admin
             // Show or hide row based on filters
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
+                visibleCount++;
+                
+                // Update counts for summary
+                if (isDisabled) {
+                    inactiveCount++;
+                } else {
+                    activeCount++;
+                }
             } else {
                 row.style.display = 'none';
             }
         });
+        
+        // Update the summary counts with filtered results
+        totalUsersCount.textContent = visibleCount;
+        activeUsersCount.textContent = activeCount;
+        inactiveUsersCount.textContent = inactiveCount;
     }
 
     // Add event listeners for search and filter
@@ -659,8 +678,8 @@ Register Client Admin
                         icon.classList.add('fa-toggle-off');
                     }
                     
-                    // Update the summary counts if needed
-                    // This would require a page refresh or more complex logic
+                    // Update the summary counts
+                    filterTable();
                 } else {
                     alert('Failed to update user status: ' + (data.error || 'Unknown error'));
                 }
@@ -668,5 +687,12 @@ Register Client Admin
             .catch(() => alert('Failed to update user status.'));
         }
     });
+
+    // Helper function to get cookie value
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
 </script>
 {% endblock %}
