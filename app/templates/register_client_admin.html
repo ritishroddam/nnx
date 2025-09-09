@@ -13,7 +13,10 @@ Register Client Admin
 <script src="{{ url_for('static', filename='js/register.js') }}"></script>
 
 <div class="register-admins-wrapper">
-    <!-- Summary Cards -->
+
+    <div class="header-container">
+        <h2>Add New Client Admin</h2>
+            <!-- Summary Cards -->
     <div class="summary-cards">
         <div class="summary-card">
             <div class="card-value" id="total-users-count">{{ client_admins|length }}</div>
@@ -28,9 +31,6 @@ Register Client Admin
             <div class="card-label">Inactive Users</div>
         </div>
     </div>
-
-    <div class="header-container">
-        <h2>Add New Client Admin</h2>
         <div class="controls-container">
             <div class="search-filter-container">
                 <div class="search-box">
@@ -127,16 +127,14 @@ Register Client Admin
     .summary-card {
         flex: 1;
         min-width: 150px;
-        background: #fff;
         border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         text-align: center;
     }
     
     .dark-mode .summary-card {
-        background: #2c2c2c;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 0 8px #ccc;
     }
     
     .card-value {
