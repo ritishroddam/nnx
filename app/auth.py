@@ -550,6 +550,32 @@ def register_admin():
     
     return render_template('register_admin.html') 
 
+# @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
+# @roles_required('admin')
+# def register_inventory():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         email = request.form.get('email')
+#         password = request.form.get('password')
+#         role = request.form.get('role')
+
+#         existing_user = User.find_by_username(username)
+#         existing_email = User.find_by_email(email)
+
+#         if existing_user:
+#             flash('Username already exists', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+            
+#         if existing_email:
+#             flash('Email already registered', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+        
+#         User.create_user(username, email, password, "none", role, disabled=0)
+#         flash('Admin registration successful. Please login.', 'success')
+#         return redirect(request.referrer or url_for('auth.login'))
+    
+#     return render_template('register_inventory.html') 
+
 @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
 @roles_required('admin')
 def register_inventory():
@@ -564,17 +590,85 @@ def register_inventory():
 
         if existing_user:
             flash('Username already exists', 'danger')
-            return redirect(url_for('auth.register_client_admin'))
+            return redirect(url_for('auth.register_inventory'))
             
         if existing_email:
             flash('Email already registered', 'danger')
-            return redirect(url_for('auth.register_client_admin'))
+            return redirect(url_for('auth.register_inventory'))
         
         User.create_user(username, email, password, "none", role, disabled=0)
-        flash('Admin registration successful. Please login.', 'success')
-        return redirect(request.referrer or url_for('auth.login'))
+        flash('Inventory user registration successful.', 'success')
+        return redirect(url_for('auth.inventory_users'))
     
-    return render_template('register_inventory.html') 
+    # For GET requests, show the inventory users page
+    users = User.query.filter(User.role.in_(['device', 'sim', 'vehicle'])).all()
+    return render_template('register_inventory.html', users=users)
+
+
+@auth_bp.route('/inventory-users')
+@roles_required('admin')
+def inventory_users():
+    # Fetch all inventory users from the database
+    users = User.query.filter(User.role.in_(['device', 'sim', 'vehicle'])).all()
+    return render_template('register_inventory.html', users=users)
+
+
+@auth_bp.route('/update-inventory-user', methods=['POST'])
+@roles_required('admin')
+def update_inventory_user():
+    user_id = request.form.get('user_id')
+    username = request.form.get('username')
+    email = request.form.get('email')
+    role = request.form.get('role')
+    status = request.form.get('status')
+    
+    user = User.query.get(user_id)
+    if user:
+        # Check if username already exists (excluding current user)
+        existing_user = User.query.filter(
+            User.username == username, 
+            User.id != user_id
+        ).first()
+        if existing_user:
+            flash('Username already exists', 'danger')
+            return redirect(url_for('auth.inventory_users'))
+            
+        # Check if email already exists (excluding current user)
+        existing_email = User.query.filter(
+            User.email == email, 
+            User.id != user_id
+        ).first()
+        if existing_email:
+            flash('Email already registered', 'danger')
+            return redirect(url_for('auth.inventory_users'))
+        
+        user.username = username
+        user.email = email
+        user.role = role
+        user.disabled = (status == 'inactive')
+        db.session.commit()
+        flash('User updated successfully', 'success')
+    else:
+        flash('User not found', 'danger')
+    
+    return redirect(url_for('auth.inventory_users'))
+
+
+@auth_bp.route('/delete-inventory-user', methods=['POST'])
+@roles_required('admin')
+def delete_inventory_user():
+    user_id = request.form.get('user_id')
+    user = User.query.get(user_id)
+    
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        flash('User deleted successfully', 'success')
+    else:
+        flash('User not found', 'danger')
+    
+    return redirect(url_for('auth.inventory_users'))
+
 
 @auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():
