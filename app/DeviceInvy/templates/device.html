@@ -137,7 +137,7 @@ Device Inventory
           <div class="form-container">
             <!-- Keep all your existing form fields here -->
             <div class="form-group">
-              <label for="IMEI">IMEI</label>
+              <label for="IMEI">IMEI<span style="size: 12px; color: red;">*</span></label>
               <input type="text" name="IMEI" id="IMEI" required />
               <div id="imeiError" class="error hidden">
                 IMEI must be 15 digits long.
@@ -148,15 +148,15 @@ Device Inventory
             <input type="text" name="GLNumber" id="GLNumber" />
           </div>
           <div class="form-group">
-            <label for="DeviceModel">Device Model</label>
+            <label for="DeviceModel">Device Model<span style="size: 12px; color: red;">*</span></label>
             <input type="text" name="DeviceModel" id="DeviceModel" required />
           </div>
           <div class="form-group">
-            <label for="DeviceMake">Device Make</label>
+            <label for="DeviceMake">Device Make<span style="size: 12px; color: red;">*</span></label>
             <input type="text" name="DeviceMake" id="DeviceMake" required />
           </div>
           <div class="form-group">
-            <label for="DateIn">Date In</label>
+            <label for="DateIn">Date In<span style="size: 12px; color: red;">*</span></label>
             <input type="date" name="DateIn" id="DateIn" required max="" />
           </div>
           <div class="form-group">
@@ -164,7 +164,7 @@ Device Inventory
             <input type="date" name="Warranty" id="Warranty" required readonly />
           </div>
           <div class="form-group">
-            <label for="SentBy">Sent By</label>
+            <label for="SentBy">Sent By<span style="size: 12px; color: red;">*</span></label>
             <input type="text" name="SentBy" id="SentBy" required />
           </div>
           <div class="form-group">
@@ -172,7 +172,7 @@ Device Inventory
             <input type="date" name="OutwardTo" id="OutwardTo" />
           </div>
           <div class="form-group">
-            <label for="Package">Package</label>
+            <label for="Package">Package<span style="size: 12px; color: red;">*</span></label>
             <select name="Package" id="Package" required>
               <option value="">Select Package</option>
               <option value="Rental">Rental</option>
@@ -185,7 +185,7 @@ Device Inventory
             <input type="text" name="Tenure" id="Tenure" />
           </div>
           <div class="form-group">
-            <label for="Status">Status</label>
+            <label for="Status">Status<span style="size: 12px; color: red;">*</span></label>
             <select name="Status" required>
               <option value="">Select Status</option>
               <option value="Active">Active</option>
