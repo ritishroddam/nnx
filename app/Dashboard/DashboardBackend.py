@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required, get_filtered_results, get_vehicle_data
 from app.parser import atlantaAis140ToFront
-from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime
+from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime, getTimeAnalysisBasedOnTime
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -207,7 +207,7 @@ def get_vehicle_range_data():
         # Execute all pipelines
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
         speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)
-        time_results = list(atlanta_collection.aggregate(time_analysis_pipeline))
+        time_results = getTimeAnalysisBasedOnTime(imeis, start_of_day, end_of_day)
         
         for result in distance_results:
             distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
