@@ -39,37 +39,37 @@ Company Details
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-container">
         <div class="form-group">
-          <label for="CompanyName">Company Name</label>
+          <label for="CompanyName">Company Name<span style="size: 12px; color: red;">*</span></label>
           <input type="text" name="CompanyName" id="CompanyName" required />
           <div id="companyNameError" class="error hidden">Company Name is required.</div>
         </div>
         <div class="form-group">
-          <label for="ContactPerson">Contact Person</label>
+          <label for="ContactPerson">Contact Person<span style="size: 12px; color: red;">*</span></label>
           <input type="text" name="ContactPerson" id="ContactPerson" required />
           <div id="contactPersonError" class="error hidden">Contact Person is required.</div>
         </div>
         <div class="form-group">
-          <label for="EmailAddress">Email Address</label>
+          <label for="EmailAddress">Email Address<span style="size: 12px; color: red;">*</span></label>
           <input type="email" name="EmailAddress" id="EmailAddress" required />
           <div id="emailAddressError" class="error hidden">Email Address is required.</div>
         </div>
         <div class="form-group">
-          <label for="PhoneNumber">Phone Number</label>
+          <label for="PhoneNumber">Phone Number<span style="size: 12px; color: red;">*</span></label>
           <input type="text" name="PhoneNumber" id="PhoneNumber" required />
           <div id="phoneNumberError" class="error hidden">Phone Number is required.</div>
         </div>
         <div class="form-group">
-          <label for="CompanyAddress">Company Address</label>
+          <label for="CompanyAddress">Company Address<span style="size: 12px; color: red;">*</span></label>
           <input type="text" name="CompanyAddress" id="CompanyAddress" required />
           <div id="companyAddressError" class="error hidden">Company Address is required.</div>
         </div>
         <div class="form-group">
-          <label for="lat">Latitude Of Company</label>
-          <input type="text" name="lat" id="lat"/>
+          <label for="lat">Latitude Of Company<span style="size: 12px; color: red;">*</span></label>
+          <input type="text" name="lat" id="lat" required/>
         </div>
         <div class="form-group">
-          <label for="lng">Longitude Of Company</label>
-          <input type="text" name="lng" id="lng"/>
+          <label for="lng">Longitude Of Company<span style="size: 12px; color: red;">*</span></label>
+          <input type="text" name="lng" id="lng" required/>
         </div>
         <div class="form-group">
           <label for="CompanyLogo">Company Logo (JPG/PNG only)</label>
