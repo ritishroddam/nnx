@@ -576,6 +576,28 @@ def register_admin():
     
 #     return render_template('register_inventory.html') 
 
+# In your User model class:
+
+@classmethod
+def get_all_users(cls, session):
+    """Get all users from the database"""
+    return session.query(cls).all()
+
+@classmethod
+def find_by_id(cls, session, user_id):
+    """Find a user by their ID"""
+    return session.query(cls).filter_by(id=user_id).first()
+
+def save(self, session):
+    """Save the current user instance to the database"""
+    session.add(self)
+    session.commit()
+
+def delete(self, session):
+    """Delete the current user from the database"""
+    session.delete(self)
+    session.commit()
+    
 @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
 @roles_required('admin')
 def register_inventory():
@@ -601,16 +623,18 @@ def register_inventory():
         return redirect(url_for('auth.inventory_users'))
     
     # For GET requests, show the inventory users page
-    users = User.query.filter(User.role.in_(['device', 'sim', 'vehicle'])).all()
-    return render_template('register_inventory.html', users=users)
+    users = User.get_all_users()
+    inventory_users = [user for user in users if user.role in ['device', 'sim', 'vehicle']]
+    return render_template('register_inventory.html', users=inventory_users)
 
 
 @auth_bp.route('/inventory-users')
 @roles_required('admin')
 def inventory_users():
     # Fetch all inventory users from the database
-    users = User.query.filter(User.role.in_(['device', 'sim', 'vehicle'])).all()
-    return render_template('register_inventory.html', users=users)
+    users = User.get_all_users()
+    inventory_users = [user for user in users if user.role in ['device', 'sim', 'vehicle']]
+    return render_template('register_inventory.html', users=inventory_users)
 
 
 @auth_bp.route('/update-inventory-user', methods=['POST'])
@@ -622,31 +646,30 @@ def update_inventory_user():
     role = request.form.get('role')
     status = request.form.get('status')
     
-    user = User.query.get(user_id)
+    user = User.find_by_id(user_id)
     if user:
         # Check if username already exists (excluding current user)
-        existing_user = User.query.filter(
-            User.username == username, 
-            User.id != user_id
-        ).first()
+        all_users = User.get_all_users()
+        existing_user = next((u for u in all_users if u.username == username and u.id != user_id), None)
         if existing_user:
             flash('Username already exists', 'danger')
             return redirect(url_for('auth.inventory_users'))
             
         # Check if email already exists (excluding current user)
-        existing_email = User.query.filter(
-            User.email == email, 
-            User.id != user_id
-        ).first()
+        existing_email = next((u for u in all_users if u.email == email and u.id != user_id), None)
         if existing_email:
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.inventory_users'))
         
+        # Update user
         user.username = username
         user.email = email
         user.role = role
-        user.disabled = (status == 'inactive')
-        db.session.commit()
+        user.disabled = 1 if status == 'inactive' else 0
+        
+        # Save changes
+        user.save()
+        
         flash('User updated successfully', 'success')
     else:
         flash('User not found', 'danger')
@@ -658,17 +681,16 @@ def update_inventory_user():
 @roles_required('admin')
 def delete_inventory_user():
     user_id = request.form.get('user_id')
-    user = User.query.get(user_id)
+    user = User.find_by_id(user_id)
     
     if user:
-        db.session.delete(user)
-        db.session.commit()
+        # Delete user
+        user.delete()
         flash('User deleted successfully', 'success')
     else:
         flash('User not found', 'danger')
     
-    return redirect(url_for('auth.inventory_users'))
-
+    return redirect(url_for('auth.inventory_users'))    
 
 @auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():
