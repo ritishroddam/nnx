@@ -53,7 +53,7 @@ Vehicle Details
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="modal-form-grid">
       <div class="form-group">
-        <label for="LicensePlateNumber">License Plate Number</label>
+        <label for="LicensePlateNumber">License Plate Number<span style="size: 12px; color: red;">*</span></label>
         <input type="text" name="LicensePlateNumber" id="LicensePlateNumber" required
           pattern="^[A-Z]{2}\d{2}[A-Z]*\d{4}$|^\d{2}BH\d{4}[A-Z]{2}$" />
         <div id="licensePlateNumberError" class="error hidden">
@@ -62,7 +62,7 @@ Vehicle Details
       </div>
 
       <div class="form-group">
-        <label for="CompanyName">Company</label>
+        <label for="CompanyName">Company<span style="size: 12px; color: red;">*</span></label>
         <select id="CompanyName" name="CompanyName" required>
           <option value="">Select Company</option>
         </select>
