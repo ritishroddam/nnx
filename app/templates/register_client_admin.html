@@ -588,11 +588,6 @@ Register Client Admin
         inactiveUsersCount.textContent = inactiveCount;
     }
 
-    // Run filter on page load to ensure initial state is correct
-    document.addEventListener('DOMContentLoaded', function() {
-        filterTable();
-    });
-
     // Add event listeners for search and filter
     if (searchInput) {
         searchInput.addEventListener('input', filterTable);
