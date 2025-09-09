@@ -186,7 +186,7 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
         {
             "$match": {
                 "imei": {"$in": imeis},
-                "date_time": {"$gte": fromDate, "$lt": toDate},
+                "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                 "telemetry.ignition": 1,
                 "telemetry.speed": {"$gt": 0}
             },
@@ -224,3 +224,63 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
     
 
     return speed_data_atlanta
+
+def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
+    pipeline = [
+        {
+            "$match": 
+            {
+                "date_time": {"$gte": fromDate, "$lt": toDate},
+                "imei": {"$in": imeis}
+            }
+        },
+        {"$sort": {"imei": 1, "date_time": 1}},
+        {
+            "$group": 
+            {
+                "_id": "$imei",
+                "records": 
+                {
+                    "$push": {
+                        "date_time": "$date_time",
+                        "ignition": "$ignition",
+                        "speed": {"$toDouble": "$speed"}
+                    }
+                }
+            }
+        }
+    ]
+    
+    timeAnalysisData = list(atlanta_collection.aggregate(pipeline))
+    
+    pipepline = [
+        {
+            "$match": 
+            {
+                "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
+                "imei": {"$in": imeis}
+            }
+        },
+        {"$sort": {"imei": 1, "gps.timestamp": 1}},
+        {
+            "$group": 
+            {
+                "_id": "$imei",
+                "records": 
+                {
+                    "$push": {
+                        "timestamp": "$gps.timestamp",
+                        "ignition": "$telemetry.ignition",
+                        "speed": "$telemetry.speed"
+                    }
+                }
+            }
+        }
+    ]
+    
+    timeAnalysisDataAtlantaAis140 = list(atlantaAis140Collection.aggregate(pipeline))
+    
+    for record in timeAnalysisDataAtlantaAis140:
+        timeAnalysisData.append(record)
+        
+    return timeAnalysisData
