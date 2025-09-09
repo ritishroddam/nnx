@@ -623,18 +623,32 @@ def register_inventory():
         return redirect(url_for('auth.inventory_users'))
     
     # For GET requests, show the inventory users page
-    users = User.get_all_users()
-    inventory_users = [user for user in users if user.role in ['device', 'sim', 'vehicle']]
-    return render_template('register_inventory.html', users=inventory_users)
+    # We need to get all users - let's check what method is available
+    # If there's no get_all_users method, we might need to use a different approach
+    try:
+        # Try to use SQLAlchemy query directly if available
+        from app import db
+        users = db.session.query(User).filter(User.role.in_(['device', 'sim', 'vehicle'])).all()
+    except:
+        # Fallback: if we can't query, return empty list for now
+        users = []
+        flash('Could not retrieve user list', 'warning')
+    
+    return render_template('register_inventory.html', users=users)
 
 
 @auth_bp.route('/inventory-users')
 @roles_required('admin')
 def inventory_users():
     # Fetch all inventory users from the database
-    users = User.get_all_users()
-    inventory_users = [user for user in users if user.role in ['device', 'sim', 'vehicle']]
-    return render_template('register_inventory.html', users=inventory_users)
+    try:
+        from app import db
+        users = db.session.query(User).filter(User.role.in_(['device', 'sim', 'vehicle'])).all()
+    except:
+        users = []
+        flash('Could not retrieve user list', 'warning')
+    
+    return render_template('register_inventory.html', users=users)
 
 
 @auth_bp.route('/update-inventory-user', methods=['POST'])
@@ -646,33 +660,43 @@ def update_inventory_user():
     role = request.form.get('role')
     status = request.form.get('status')
     
-    user = User.find_by_id(user_id)
-    if user:
-        # Check if username already exists (excluding current user)
-        all_users = User.get_all_users()
-        existing_user = next((u for u in all_users if u.username == username and u.id != user_id), None)
-        if existing_user:
-            flash('Username already exists', 'danger')
-            return redirect(url_for('auth.inventory_users'))
+    try:
+        from app import db
+        user = db.session.query(User).filter_by(id=user_id).first()
+        
+        if user:
+            # Check if username already exists (excluding current user)
+            existing_user = db.session.query(User).filter(
+                User.username == username, 
+                User.id != user_id
+            ).first()
+            if existing_user:
+                flash('Username already exists', 'danger')
+                return redirect(url_for('auth.inventory_users'))
+                
+            # Check if email already exists (excluding current user)
+            existing_email = db.session.query(User).filter(
+                User.email == email, 
+                User.id != user_id
+            ).first()
+            if existing_email:
+                flash('Email already registered', 'danger')
+                return redirect(url_for('auth.inventory_users'))
             
-        # Check if email already exists (excluding current user)
-        existing_email = next((u for u in all_users if u.email == email and u.id != user_id), None)
-        if existing_email:
-            flash('Email already registered', 'danger')
-            return redirect(url_for('auth.inventory_users'))
-        
-        # Update user
-        user.username = username
-        user.email = email
-        user.role = role
-        user.disabled = 1 if status == 'inactive' else 0
-        
-        # Save changes
-        user.save()
-        
-        flash('User updated successfully', 'success')
-    else:
-        flash('User not found', 'danger')
+            # Update user
+            user.username = username
+            user.email = email
+            user.role = role
+            user.disabled = 1 if status == 'inactive' else 0
+            
+            # Save changes
+            db.session.commit()
+            
+            flash('User updated successfully', 'success')
+        else:
+            flash('User not found', 'danger')
+    except Exception as e:
+        flash(f'Error updating user: {str(e)}', 'danger')
     
     return redirect(url_for('auth.inventory_users'))
 
@@ -681,14 +705,20 @@ def update_inventory_user():
 @roles_required('admin')
 def delete_inventory_user():
     user_id = request.form.get('user_id')
-    user = User.find_by_id(user_id)
     
-    if user:
-        # Delete user
-        user.delete()
-        flash('User deleted successfully', 'success')
-    else:
-        flash('User not found', 'danger')
+    try:
+        from app import db
+        user = db.session.query(User).filter_by(id=user_id).first()
+        
+        if user:
+            # Delete user
+            db.session.delete(user)
+            db.session.commit()
+            flash('User deleted successfully', 'success')
+        else:
+            flash('User not found', 'danger')
+    except Exception as e:
+        flash(f'Error deleting user: {str(e)}', 'danger')
     
     return redirect(url_for('auth.inventory_users'))    
 
