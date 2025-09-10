@@ -15,6 +15,7 @@ rawLogs_bp = Blueprint('RawLogs', __name__, static_folder='static', template_fol
 
 rawLogSubscriptions = db['raw_log_subscriptions']
 rawLogsCollection = db['raw_log_data']
+rawLogsAtlantaAis140Collection = db['rawLogAtlantaAis140']
 vehicleCollection = db['vehicle_inventory']
 
 @rawLogs_bp.route('/', methods=['GET'])
@@ -62,6 +63,8 @@ def get_raw_logs():
 
     query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
     raw_logs = list(rawLogsCollection.find(query, {"_id": 0}).sort("timestamp", -1))
+    if not raw_logs:
+        raw_logs = list(rawLogsAtlantaAis140Collection.find(query, {"_id": 0}).sort("timestamp", -1))
     
     logs = []
     if raw_logs:
@@ -157,6 +160,9 @@ def download_pdf():
     query = {"LicensePlateNumber": licensePlateNumber, "timestamp": {"$gte": start_date, "$lt": end_date}}
     logs = list(rawLogsCollection.find(query, {"_id": 0}))
 
+    if not logs:
+        logs = list(rawLogsAtlantaAis140Collection.find(query, {"_id": 0}))
+    
     if not logs:
         return jsonify({"error": "No logs found for the given criteria"}), 404
 
