@@ -26,6 +26,80 @@ Register Sub Account
         padding: 20px;
     }
     
+    /* Summary Cards */
+    .summary-cards {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .summary-card {
+        flex: 1;
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .summary-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .summary-card .count {
+        font-size: 32px;
+        font-weight: 700;
+        color: #333;
+    }
+    
+    /* Search and Filter Section */
+    .search-filter-section {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .search-container {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+    
+    .search-container input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    
+    .search-container i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
+    .filter-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .filter-container select {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: white;
+    }
+    
     .add-admin-header {
         display: flex;
         justify-content: space-between;
@@ -288,11 +362,50 @@ Register Sub Account
 </style>
 
 <div class="admin-container">
-    <div class="add-admin-header">
-        <h2 class="add-admin-title">Add New Client Admin</h2>
-        <button id="add-admin-btn" class="btn-add-admin">
-            <i class="fas fa-plus"></i> Add New
-        </button>
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <h3>Total Users</h3>
+            <div class="count" id="total-users-count">{{ existing_users|length if existing_users else 0 }}</div>
+        </div>
+        <div class="summary-card">
+            <h3>Active Users</h3>
+            <div class="count" id="active-users-count">
+                {% if existing_users %}
+                    {{ existing_users|selectattr('disabled', 'equalto', 0)|list|length }}
+                {% else %}
+                    0
+                {% endif %}
+            </div>
+        </div>
+        <div class="summary-card">
+            <h3>Inactive Users</h3>
+            <div class="count" id="inactive-users-count">
+                {% if existing_users %}
+                    {{ existing_users|selectattr('disabled', 'equalto', 1)|list|length }}
+                {% else %}
+                    0
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="user-search" placeholder="Search by username, email, or company...">
+        </div>
+        <div class="filter-container">
+            <select id="status-filter">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <button id="add-admin-btn" class="btn-add-admin">
+                <i class="fas fa-plus"></i> Add New Client Admin
+            </button>
+        </div>
     </div>
     
     <!-- Modal for registration form -->
@@ -345,9 +458,9 @@ Register Sub Account
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="users-table-body">
             {% for user in existing_users %}
-            <tr id="user-row-{{ user._id }}" data-user-id="{{ user._id }}">
+            <tr id="user-row-{{ user._id }}" data-user-id="{{ user._id }}" data-status="{{ 'active' if user.disabled == 0 else 'inactive' }}">
                 <td>
                     <span class="view-field username-view">{{ user.username }}</span>
                     <input type="text" class="editable-field username-edit" value="{{ user.username }}" data-original-value="{{ user.username }}">
@@ -357,7 +470,7 @@ Register Sub Account
                     <input type="email" class="editable-field email-edit" value="{{ user.email }}" data-original-value="{{ user.email }}">
                 </td>
                 <td>
-                    <span class="view-field">{{ user.company_name }}</span>
+                    <span class="view-field company-view">{{ user.company_name }}</span>
                 </td>
                 <td>
                     <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
@@ -439,6 +552,56 @@ Register Sub Account
             return true;
         });
         
+        // Search functionality
+        const searchInput = document.getElementById('user-search');
+        const statusFilter = document.getElementById('status-filter');
+        const userRows = document.querySelectorAll('#users-table-body tr');
+        
+        function filterUsers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            
+            let activeCount = 0;
+            let inactiveCount = 0;
+            let visibleCount = 0;
+            
+            userRows.forEach(row => {
+                const username = row.querySelector('.username-view').textContent.toLowerCase();
+                const email = row.querySelector('.email-view').textContent.toLowerCase();
+                const company = row.querySelector('.company-view').textContent.toLowerCase();
+                const status = row.getAttribute('data-status');
+                
+                const matchesSearch = username.includes(searchTerm) || 
+                                    email.includes(searchTerm) || 
+                                    company.includes(searchTerm);
+                
+                const matchesStatus = statusValue === 'all' || 
+                                    (statusValue === 'active' && status === 'active') || 
+                                    (statusValue === 'inactive' && status === 'inactive');
+                
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                    visibleCount++;
+                    
+                    if (status === 'active') {
+                        activeCount++;
+                    } else {
+                        inactiveCount++;
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update summary counts
+            document.getElementById('total-users-count').textContent = visibleCount;
+            document.getElementById('active-users-count').textContent = activeCount;
+            document.getElementById('inactive-users-count').textContent = inactiveCount;
+        }
+        
+        searchInput.addEventListener('input', filterUsers);
+        statusFilter.addEventListener('change', filterUsers);
+        
         // Status toggle functionality
         const statusBadges = document.querySelectorAll('.status-badge');
         
@@ -465,11 +628,16 @@ Register Sub Account
                             this.classList.remove('status-inactive');
                             this.classList.add('status-active');
                             this.textContent = 'Active';
+                            this.closest('tr').setAttribute('data-status', 'active');
                         } else {
                             this.classList.remove('status-active');
                             this.classList.add('status-inactive');
                             this.textContent = 'Inactive';
+                            this.closest('tr').setAttribute('data-status', 'inactive');
                         }
+                        
+                        // Update summary counts
+                        filterUsers();
                     } else {
                         alert('Error updating status: ' + data.error);
                     }
@@ -637,6 +805,9 @@ Register Sub Account
                             alert('User deleted successfully');
                             // Remove the row from the table
                             document.getElementById(`user-row-${userId}`).remove();
+                            
+                            // Update summary counts
+                            filterUsers();
                             
                             // Check if table is empty and show message
                             if (document.querySelectorAll('.admin-table tbody tr').length === 0) {
