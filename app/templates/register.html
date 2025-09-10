@@ -360,8 +360,8 @@ Register Sub Account
         font-style: italic;
     }
 
-    #status-filter{
-        width: 100px;
+    .filter{
+        max-width: 100px;
     }
 </style>
 
@@ -399,12 +399,16 @@ Register Sub Account
         <div class="search-container">
             <i class="fas fa-search"></i>
             <input type="text" id="user-search" placeholder="Search by username, email, or company...">
+        </div>
+        
+        <div class="filter">
             <select id="status-filter">
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
             </select>
         </div>
+
         <div class="filter-container">
             <button id="add-admin-btn" class="btn-add-admin">
                 <i class="fas fa-plus"></i> Add New Client Admin
