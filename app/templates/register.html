@@ -26,7 +26,6 @@ Register Sub Account
         padding: 20px;
     }
     
-    /* Summary Cards */
     .summary-cards {
         display: flex;
         gap: 20px;
@@ -35,33 +34,11 @@ Register Sub Account
     
     .summary-card {
         flex: 1;
+        background-color: white;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         text-align: center;
-    }
-
-    .summary-card:nth-child(1) .card-value {
-        color: #007bff;
-    }
-    
-    .dark-mode .summary-card:nth-child(1) .card-value {
-        color: #87CEEB;
-    }
-    
-    .summary-card:nth-child(2) .card-value {
-        color: #28a745;
-    }
-    
-    .dark-mode .summary-card:nth-child(2) .card-value {
-        color: #90EE90;
-    }
-    
-    .summary-card:nth-child(3) .card-value {
-        color: #dc3545;
-    }
-    
-    .dark-mode .summary-card:nth-child(3) .card-value {
-        color: #e35d6a;
     }
     
     .summary-card h3 {
@@ -74,10 +51,32 @@ Register Sub Account
     .summary-card .count {
         font-size: 32px;
         font-weight: 700;
-        color: #333;
     }
     
-    /* Search and Filter Section */
+    .summary-card:nth-child(1) .count {
+        color: #007bff;
+    }
+    
+    .summary-card:nth-child(2) .count {
+        color: #28a745;
+    }
+    
+    .summary-card:nth-child(3) .count {
+        color: #dc3545;
+    }
+    
+    .dark-mode .summary-card:nth-child(1) .count {
+        color: #87CEEB;
+    }
+    
+    .dark-mode .summary-card:nth-child(2) .count {
+        color: #90EE90;
+    }
+    
+    .dark-mode .summary-card:nth-child(3) .count {
+        color: #e35d6a;
+    }
+    
     .search-filter-section {
         display: flex;
         justify-content: space-between;
@@ -534,7 +533,6 @@ Register Sub Account
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Modal functionality
         const modal = document.getElementById('register-modal');
         const btn = document.getElementById('add-admin-btn');
         const closeBtn = document.querySelector('.close');
@@ -553,10 +551,8 @@ Register Sub Account
             }
         });
         
-        // Form submission handling
         const form = document.getElementById('register-form');
         form.addEventListener('submit', function(e) {
-            // Basic validation
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -567,7 +563,6 @@ Register Sub Account
                 return false;
             }
             
-            // Email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 e.preventDefault();
@@ -578,7 +573,6 @@ Register Sub Account
             return true;
         });
         
-        // Search functionality
         const searchInput = document.getElementById('user-search');
         const statusFilter = document.getElementById('status-filter');
         const userRows = document.querySelectorAll('#users-table-body tr');
@@ -619,7 +613,6 @@ Register Sub Account
                 }
             });
             
-            // Update summary counts
             document.getElementById('total-users-count').textContent = visibleCount;
             document.getElementById('active-users-count').textContent = activeCount;
             document.getElementById('inactive-users-count').textContent = inactiveCount;
@@ -628,7 +621,6 @@ Register Sub Account
         searchInput.addEventListener('input', filterUsers);
         statusFilter.addEventListener('change', filterUsers);
         
-        // Status toggle functionality
         const statusBadges = document.querySelectorAll('.status-badge');
         
         statusBadges.forEach(badge => {
@@ -647,7 +639,6 @@ Register Sub Account
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update UI
                         this.setAttribute('data-current-status', newStatus);
                         
                         if (newStatus === '0') {
@@ -662,7 +653,6 @@ Register Sub Account
                             this.closest('tr').setAttribute('data-status', 'inactive');
                         }
                         
-                        // Update summary counts
                         filterUsers();
                     } else {
                         alert('Error updating status: ' + data.error);
@@ -675,7 +665,6 @@ Register Sub Account
             });
         });
         
-        // Edit button functionality - make row editable
         const editButtons = document.querySelectorAll('.btn-edit');
         
         editButtons.forEach(button => {
@@ -683,10 +672,8 @@ Register Sub Account
                 const userId = this.getAttribute('data-user-id');
                 const row = document.getElementById(`user-row-${userId}`);
                 
-                // Enable editing mode
                 row.classList.add('editing');
                 
-                // Show editable fields, hide view fields
                 row.querySelectorAll('.view-field').forEach(field => {
                     field.style.display = 'none';
                 });
@@ -694,14 +681,12 @@ Register Sub Account
                     field.style.display = 'block';
                 });
                 
-                // Show save/cancel buttons, hide edit button
                 this.style.display = 'none';
                 row.querySelector('.btn-save').style.display = 'flex';
                 row.querySelector('.btn-cancel').style.display = 'flex';
             });
         });
         
-        // Cancel button functionality
         const cancelButtons = document.querySelectorAll('.btn-cancel');
         
         cancelButtons.forEach(button => {
@@ -709,15 +694,12 @@ Register Sub Account
                 const userId = this.getAttribute('data-user-id');
                 const row = document.getElementById(`user-row-${userId}`);
                 
-                // Disable editing mode
                 row.classList.remove('editing');
                 
-                // Restore original values
                 row.querySelectorAll('.editable-field').forEach(field => {
                     field.value = field.getAttribute('data-original-value');
                 });
                 
-                // Show view fields, hide editable fields
                 row.querySelectorAll('.view-field').forEach(field => {
                     field.style.display = 'block';
                 });
@@ -725,14 +707,12 @@ Register Sub Account
                     field.style.display = 'none';
                 });
                 
-                // Show edit button, hide save/cancel buttons
                 row.querySelector('.btn-edit').style.display = 'flex';
                 this.style.display = 'none';
                 row.querySelector('.btn-save').style.display = 'none';
             });
         });
         
-        // Save button functionality
         const saveButtons = document.querySelectorAll('.btn-save');
         
         saveButtons.forEach(button => {
@@ -740,11 +720,9 @@ Register Sub Account
                 const userId = this.getAttribute('data-user-id');
                 const row = document.getElementById(`user-row-${userId}`);
                 
-                // Get updated values
                 const username = row.querySelector('.username-edit').value;
                 const email = row.querySelector('.email-edit').value;
                 
-                // Validate inputs
                 if (!username || !email) {
                     alert('Username and email are required');
                     return;
@@ -756,13 +734,11 @@ Register Sub Account
                     return;
                 }
                 
-                // Prepare update data
                 const updateData = {
                     username: username,
                     email: email
                 };
                 
-                // Send update request
                 fetch(`/api/user/${userId}`, {
                     method: 'PUT',
                     headers: {
@@ -774,18 +750,14 @@ Register Sub Account
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update view fields with new values
                         row.querySelector('.username-view').textContent = username;
                         row.querySelector('.email-view').textContent = email;
                         
-                        // Update original values
                         row.querySelector('.username-edit').setAttribute('data-original-value', username);
                         row.querySelector('.email-edit').setAttribute('data-original-value', email);
                         
-                        // Disable editing mode
                         row.classList.remove('editing');
                         
-                        // Show view fields, hide editable fields
                         row.querySelectorAll('.view-field').forEach(field => {
                             field.style.display = 'block';
                         });
@@ -793,7 +765,6 @@ Register Sub Account
                             field.style.display = 'none';
                         });
                         
-                        // Show edit button, hide save/cancel buttons
                         row.querySelector('.btn-edit').style.display = 'flex';
                         row.querySelector('.btn-save').style.display = 'none';
                         row.querySelector('.btn-cancel').style.display = 'none';
@@ -810,7 +781,6 @@ Register Sub Account
             });
         });
         
-        // Delete button functionality
         const deleteButtons = document.querySelectorAll('.btn-delete');
         
         deleteButtons.forEach(button => {
@@ -829,13 +799,10 @@ Register Sub Account
                     .then(data => {
                         if (data.success) {
                             alert('User deleted successfully');
-                            // Remove the row from the table
                             document.getElementById(`user-row-${userId}`).remove();
                             
-                            // Update summary counts
                             filterUsers();
                             
-                            // Check if table is empty and show message
                             if (document.querySelectorAll('.admin-table tbody tr').length === 0) {
                                 document.querySelector('.admin-table').insertAdjacentHTML('afterend', 
                                     '<div class="no-data"><p>No client admins found.</p></div>');
