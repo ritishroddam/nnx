@@ -596,11 +596,11 @@ def register_inventory():
 
         if existing_user:
             flash('Username already exists', 'danger')
-            return redirect(url_for('auth.register_inventory'))
+            return redirect(url_for('auth.register_inventory'))  # Fixed redirect
             
         if existing_email:
             flash('Email already registered', 'danger')
-            return redirect(url_for('auth.register_inventory'))
+            return redirect(url_for('auth.register_inventory'))  # Fixed redirect
         
         User.create_user(username, email, password, "none", role, disabled=0)
         flash('Inventory user registration successful.', 'success')
