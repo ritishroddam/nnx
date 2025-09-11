@@ -606,8 +606,27 @@ def register_inventory():
         flash('Inventory user registration successful.', 'success')
         return redirect(url_for('auth.register_inventory'))
     
-    # Use MongoDB's $in operator to get users with specific roles
-    inventory_users = User.objects(role__in=['device', 'sim', 'vehicle']).all()
+    # Try different query methods that might be available
+    try:
+        # Option A: Try find_all or similar method
+        all_users = User.find_all()  # If you have such a method
+        inventory_users = [user for user in all_users if user.role in ['device', 'sim', 'vehicle']]
+    except AttributeError:
+        try:
+            # Option B: Try get_all or similar method
+            all_users = User.get_all()  # If you have such a method
+            inventory_users = [user for user in all_users if user.role in ['device', 'sim', 'vehicle']]
+        except AttributeError:
+            try:
+                # Option C: Try querying each role individually using find_by_role if it exists
+                device_users = User.find_by_role('device') or []
+                sim_users = User.find_by_role('sim') or []
+                vehicle_users = User.find_by_role('vehicle') or []
+                inventory_users = device_users + sim_users + vehicle_users
+            except AttributeError:
+                # Option D: As a last resort, get all users and filter manually
+                all_users = User.get_all_users()  # Try common method names
+                inventory_users = [user for user in all_users if user.role in ['device', 'sim', 'vehicle']]
     
     return render_template('register_inventory.html', inventory_users=inventory_users)
 
