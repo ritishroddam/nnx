@@ -596,17 +596,18 @@ def register_inventory():
 
         if existing_user:
             flash('Username already exists', 'danger')
-            return redirect(url_for('auth.register_inventory')) 
+            return redirect(url_for('auth.register_inventory'))
             
         if existing_email:
             flash('Email already registered', 'danger')
-            return redirect(url_for('auth.register_inventory'))  
+            return redirect(url_for('auth.register_inventory'))
         
         User.create_user(username, email, password, "none", role, disabled=0)
         flash('Inventory user registration successful.', 'success')
-        return redirect(url_for('auth.register_inventory')) 
+        return redirect(url_for('auth.register_inventory'))
     
-    inventory_users = User.get_users_by_roles(['device', 'sim', 'vehicle'])
+    # Use MongoDB's $in operator to get users with specific roles
+    inventory_users = User.objects(role__in=['device', 'sim', 'vehicle']).all()
     
     return render_template('register_inventory.html', inventory_users=inventory_users)
 
