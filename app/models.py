@@ -7,6 +7,7 @@ import bcrypt
 class User:
     @staticmethod
     def create_user(cls, username, email, password, company = 'none', role='user', disabled=0):
+        print(f"UserName: {username}, email: {email}, password: {password}, role: {role}")
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         return db.users.insert_one({
             'username': username,
