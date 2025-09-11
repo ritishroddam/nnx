@@ -550,6 +550,38 @@ def register_admin():
     
     return render_template('register_admin.html') 
 
+# @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
+# @roles_required('admin')
+# def register_inventory():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         email = request.form.get('email')
+#         password = request.form.get('password')
+#         role = request.form.get('role')
+
+#         existing_user = User.find_by_username(username)
+#         existing_email = User.find_by_email(email)
+
+#         if existing_user:
+#             flash('Username already exists', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+            
+#         if existing_email:
+#             flash('Email already registered', 'danger')
+#             return redirect(url_for('auth.register_client_admin'))
+        
+#         User.create_user(username, email, password, "none", role, disabled=0)
+#         flash('Admin registration successful. Please login.', 'success')
+#         return redirect(request.referrer or url_for('auth.login'))
+    
+#     return render_template('register_inventory.html') 
+
+# In your User model class
+@classmethod
+def get_users_by_roles(cls, roles):
+    """Get all users with specified roles"""
+    return cls.objects(role__in=roles).all()
+
 @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
 @roles_required('admin')
 def register_inventory():
@@ -564,17 +596,19 @@ def register_inventory():
 
         if existing_user:
             flash('Username already exists', 'danger')
-            return redirect(url_for('auth.register_client_admin'))
+            return redirect(url_for('auth.register_inventory')) 
             
         if existing_email:
             flash('Email already registered', 'danger')
-            return redirect(url_for('auth.register_client_admin'))
+            return redirect(url_for('auth.register_inventory'))  
         
         User.create_user(username, email, password, "none", role, disabled=0)
-        flash('Admin registration successful. Please login.', 'success')
-        return redirect(request.referrer or url_for('auth.login'))
+        flash('Inventory user registration successful.', 'success')
+        return redirect(url_for('auth.register_inventory')) 
     
-    return render_template('register_inventory.html') 
+    inventory_users = User.get_users_by_roles(['device', 'sim', 'vehicle'])
+    
+    return render_template('register_inventory.html', inventory_users=inventory_users)
 
 @auth_bp.route('/update-user-status/<user_id>', methods=['POST'])
 @roles_required('admin')
