@@ -1,3 +1,4 @@
+import dis
 from app import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash
@@ -44,5 +45,5 @@ class User:
         return db.users.find({"role": role})
     
     @staticmethod
-    def disable_user_by_id(userID):
-        return db.users.update_one({'_id': ObjectId(userID)}, {'$set': {'disabled': 1}})
+    def disable_user_by_id(userID, disabled):
+        return db.users.update_one({'_id': ObjectId(userID)}, {'$set': {'disabled': disabled}})

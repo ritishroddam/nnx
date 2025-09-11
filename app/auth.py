@@ -623,15 +623,15 @@ def update_user_status(user_id):
         data = request.get_json()
         disabled = data.get('disabled', 0)
         
-        # Update user status in database
-        user = User.get_user_by_id(user_id)
-        print(user)
-        if user:
-            user['disabled'] = disabled
-            User.disable_user_by_id(user_id)
-            return jsonify({'success': True})
-        else:
+        status = User.disable_user_by_id(user_id, disabled)
+            
+        if status.matched_count == 0:
             return jsonify({'success': False, 'error': 'User not found'}), 404
+        elif status.modified_count == 0:
+            return jsonify({'success': False, 'error': 'Account state was not changed'}), 500
+                
+        return jsonify({'success': True}), 200
+
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
