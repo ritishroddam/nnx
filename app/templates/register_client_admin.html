@@ -84,8 +84,10 @@ Register Client Admin
     <!-- Popup Registration Form -->
     <div id="register-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Register Client Admin</h2>
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>Register Client Admin</h2>
+            </div>
             <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <div class="form-group">
@@ -398,6 +400,15 @@ Register Client Admin
         border-radius: 12px;
         box-shadow: 0 4px 24px rgba(0,0,0,0.12);
         position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
     }
     
     .dark-mode .modal-content {
