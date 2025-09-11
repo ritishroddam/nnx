@@ -627,14 +627,15 @@ def update_user_status(user_id):
         
         # Update user status in database
         user = User.get_user_by_id(user_id)
+        print(user)
         if user:
             user.disabled = disabled
             user.save()
             return jsonify({'success': True})
         else:
-            return jsonify({'success': False, 'error': 'User not found'})
+            return jsonify({'success': False, 'error': 'User not found'}), 404
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():
