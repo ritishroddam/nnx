@@ -155,13 +155,14 @@
                             <span class="arrow">&#x25BC;</span>
                         </a>
                         <ul class="submenu">
-                            <li><a href="{{ url_for('auth.register_client_admin') }}">Clients</a> <i
-                                    class="fa-solid fa-id-card" style='white-space:pre'></i></li>
-                            <li><a href="{{ url_for('auth.register') }}">Sub-Accounts</a> <i
-                                    class="fa-solid fa-user" style='white-space:pre'></i>
+                            <li><i class="fa-solid fa-id-card" style='white-space:pre'></i>
+                                <a href="{{ url_for('auth.register_client_admin') }}">Clients</a> 
+                                </li>
+                            <li><i class="fa-solid fa-user" style='white-space:pre'></i>
+                                <a href="{{ url_for('auth.register') }}">Sub-Accounts</a> 
                             </li>
-                            <li><a href="{{ url_for('auth.register_inventory') }}">Inventory Accounts</a> <i
-                                    class="fa-solid fa-user" style='white-space:pre'></i>
+                            <li><i class="fa-solid fa-user" style='white-space:pre'></i>
+                                <a href="{{ url_for('auth.register_inventory') }}">Inventory Accounts</a> 
                             </li>
                         </ul>
                     </li>
@@ -180,36 +181,36 @@
                         </a>
                         <ul class="submenu">
                             <li>
+                                <i class="fa-solid fa-building" style='white-space:pre'></i>
                                 <a href="{{url_for('CompanyDetails.page')}}">
                                     Company Details
-                                    <i class="fa-solid fa-building" style='white-space:pre'></i>
                                 </a>
                             </li>
                         </ul>
 
                         <ul class="submenu">
                             <li>
+                                <i class="fa-solid fa-microchip" style='white-space:pre'></i>
                                 <a href="{{url_for('DeviceInvy.page')}}">
                                     Device Inventory
-                                    <i class="fa-solid fa-microchip" style='white-space:pre'></i>
                                 </a>
                             </li>
                         </ul>
 
                         <ul class="submenu">
                             <li>
+                                <i class="fa-solid fa-sim-card" style='white-space:pre'></i>
                                 <a href="{{url_for('SimInvy.page')}}">
                                     Sim Inventory
-                                    <i class="fa-solid fa-sim-card" style='white-space:pre'></i>
                                 </a>
                             </li>
                         </ul>
 
                         <ul class="submenu">
                             <li>
+                                <i class="fa-solid fa-warehouse" style='white-space:pre'></i>
                                 <a href="{{url_for('VehicleDetails.page')}}">
                                     Vehicle Details
-                                    <i class="fa-solid fa-warehouse" style='white-space:pre'></i>
                                 </a>
                             </li>
                         </ul>
