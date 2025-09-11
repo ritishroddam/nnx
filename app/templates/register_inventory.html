@@ -663,7 +663,7 @@ Manage Inventory Accounts
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token}}'
+                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
                 },
                 body: JSON.stringify({ disabled: newStatus })
             })
