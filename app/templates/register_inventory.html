@@ -690,7 +690,7 @@ Manage Inventory Accounts
                     // Update counters
                     filterTable();
                 } else {
-                    alert('Error updating user status');
+                    displayFlashMessage(data.error)
                 }
             })
             .catch(error => {
