@@ -85,8 +85,8 @@ Register Client Admin
     <div id="register-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="close">&times;</span>
-                <h2>Register Client Admin</h2>
+                <h3 class="modal-title">Register Client Admin</h3>
+                <button class="close">&times;</button>
             </div>
             <form method="POST" action="{{ url_for('auth.register_client_admin') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -409,6 +409,12 @@ Register Client Admin
         margin-bottom: 20px;
         padding-bottom: 15px;
         border-bottom: 1px solid #e0e0e0;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
     }
     
     .dark-mode .modal-content {
