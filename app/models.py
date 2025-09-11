@@ -24,6 +24,7 @@ class User:
     
     @staticmethod
     def find_by_email(email):
+        print(email)
         return db.users.find_one({'email': email})
     
     @staticmethod
