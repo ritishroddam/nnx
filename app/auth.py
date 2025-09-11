@@ -576,6 +576,24 @@ def register_inventory():
     
     return render_template('register_inventory.html') 
 
+@auth_bp.route('/update-user-status/<user_id>', methods=['POST'])
+@roles_required('admin')
+def update_user_status(user_id):
+    try:
+        data = request.get_json()
+        disabled = data.get('disabled', 0)
+        
+        # Update user status in database
+        user = User.find_by_id(user_id)
+        if user:
+            user.disabled = disabled
+            user.save()
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'User not found'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 @auth_bp.route('/logout', methods=['POST', 'GET'])
 def logout():
     try:
