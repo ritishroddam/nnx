@@ -590,6 +590,8 @@ def register_inventory():
         email = request.form.get('email')
         password = request.form.get('password')
         role = request.form.get('role')
+        
+        print(f"UserName: {username}, email: {email}, password: {password}, role: {role}")
 
         existing_user = User.find_by_username(username)
         existing_email = User.find_by_email(email)
