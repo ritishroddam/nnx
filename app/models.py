@@ -42,3 +42,7 @@ class User:
     @staticmethod
     def find_by_role(role):
         return db.users.find({"role": role})
+    
+    @staticmethod
+    def disable_user_by_id(userID):
+        return db.users.update_one({'_id': ObjectId(userID)}, {'$set': {'disabled': 1}})

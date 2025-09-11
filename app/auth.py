@@ -590,8 +590,6 @@ def register_inventory():
         email = request.form.get('email')
         password = request.form.get('password')
         role = request.form.get('role')
-        
-        print(f"UserName: {username}, email: {email}, password: {password}, role: {role}")
 
         existing_user = User.find_by_username(username)
         existing_email = User.find_by_email(email)
@@ -629,8 +627,8 @@ def update_user_status(user_id):
         user = User.get_user_by_id(user_id)
         print(user)
         if user:
-            user.disabled = disabled
-            user.save()
+            user['disabled'] = disabled
+            User.disable_user_by_id(user_id)
             return jsonify({'success': True})
         else:
             return jsonify({'success': False, 'error': 'User not found'}), 404
