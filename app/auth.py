@@ -626,7 +626,7 @@ def update_user_status(user_id):
         disabled = data.get('disabled', 0)
         
         # Update user status in database
-        user = User.find_by_id(user_id)
+        user = User.get_user_by_id(user_id)
         if user:
             user.disabled = disabled
             user.save()
