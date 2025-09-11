@@ -604,7 +604,7 @@ def register_inventory():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register_inventory'))  # Fixed redirect
         
-        User.create_user(username = username, email = email, password = password, company = "none", role = role, disabled = 0)
+        User.create_user(username, email, password, company = "none", role = role, disabled = 0)
         flash('Inventory user registration successful.', 'success')
         return redirect(url_for('auth.register_inventory'))
     
