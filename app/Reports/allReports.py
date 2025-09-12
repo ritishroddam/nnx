@@ -270,16 +270,22 @@ def add_speed_metrics(df):
             avg_speed = df['speed'].mean()
             max_speed = df['speed'].max()
 
-            df['Average Speed'] = avg_speed
-            df['Maximum Speed'] = max_speed
+            # Prepare a summary row as the first row
+            summary = {col: "" for col in df.columns}
+            summary['Average Speed'] = round(avg_speed, 2) if not pd.isna(avg_speed) else ""
+            summary['Maximum Speed'] = round(max_speed, 2) if not pd.isna(max_speed) else ""
+            summary_row = pd.DataFrame([summary])
 
-            if 'speed' in df.columns:
-                cols = df.columns.tolist()
+            # Insert summary row at the top
+            df = pd.concat([summary_row, df], ignore_index=True)
+
+            # Ensure columns order: speed, Average Speed, Maximum Speed (if present)
+            cols = df.columns.tolist()
+            if 'speed' in cols:
                 speed_idx = cols.index('speed')
-                if 'Average Speed' in cols:
-                    cols.remove('Average Speed')
-                if 'Maximum Speed' in cols:
-                    cols.remove('Maximum Speed')
+                for metric in ['Average Speed', 'Maximum Speed']:
+                    if metric in cols:
+                        cols.remove(metric)
                 cols.insert(speed_idx + 1, 'Average Speed')
                 cols.insert(speed_idx + 2, 'Maximum Speed')
                 df = df[cols]
