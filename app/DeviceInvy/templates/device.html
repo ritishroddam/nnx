@@ -131,7 +131,10 @@ Device Inventory
 
     <div id="manualEntryModal" class="modal hidden">
       <div class="modal-content">
-        <span class="close-btn">&times;</span>
+          <div class="modal-header">
+              <h3 class="modal-title">Add a New Device</h3>
+              <span class="close-btn">&times;</span>
+          </div>    
         <form id="manualForm" action="{{ url_for('DeviceInvy.manual_entry')}}" method="post">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="form-container">

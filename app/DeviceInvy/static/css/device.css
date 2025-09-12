@@ -601,7 +601,6 @@ tr:hover {
 .search-container {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
 }
 
 .search-container input {
@@ -744,4 +743,23 @@ tr:hover {
 .counter.inactive {
   background-color: #fff3f3;
   border: 1px solid #f44336;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.dark-mode .modal-title {
+    color: #fff;
 }
