@@ -329,22 +329,6 @@ def register():
         flash('Unauthorized access', 'danger')
         return redirect(url_for('auth.unauthorized'))
     
-@auth_bp.route('/update-user-status/<user_id>', methods=['POST'])
-@roles_required('admin', 'clientAdmin')
-def update_user_status(user_id):
-    try:
-        data = request.get_json()
-        disabled = data.get('disabled', 0)
-        
-        # Update the user status in the database
-        db.users.update_one(
-            {"_id": ObjectId(user_id)},
-            {"$set": {"disabled": int(disabled)}}
-        )
-        
-        return jsonify({"success": True, "message": "User status updated successfully"})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
 
 # Add these new API endpoints for edit and delete operations
 @auth_bp.route('/api/user/<user_id>', methods=['GET', 'PUT', 'DELETE'])
