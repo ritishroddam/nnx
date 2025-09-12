@@ -892,5 +892,63 @@ Register Sub Account
             });
         });
     });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-btn')) {
+            const row = e.target.closest('tr');
+            const userId = row.getAttribute('data-id');
+            // Implement edit functionality
+            alert('Edit functionality for user ID: ' + userId);
+        }
+        
+        if (e.target.closest('.disable-btn')) {
+            const row = e.target.closest('tr');
+            const userId = row.getAttribute('data-id');
+            const isDisabled = row.getAttribute('data-disabled') === '1';
+            
+            // Toggle disabled status
+            const newStatus = isDisabled ? 0 : 1;
+            
+            // Send AJAX request to update status
+            fetch(`/update-user-status/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+                },
+                body: JSON.stringify({ disabled: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    row.setAttribute('data-disabled', newStatus);
+                    const statusCell = row.querySelector('.status-cell');
+                    const disableBtn = row.querySelector('.disable-btn');
+                    const icon = disableBtn.querySelector('i');
+                    
+                    statusCell.textContent = newStatus === 1 ? 'Inactive' : 'Active';
+                    disableBtn.title = newStatus === 1 ? 'Enable' : 'Disable';
+                    
+                    if (newStatus === 1) {
+                        icon.className = 'fa fa-toggle-off';
+                        disableBtn.classList.remove('enabled');
+                    } else {
+                        icon.className = 'fa fa-toggle-on';
+                        disableBtn.classList.add('enabled');
+                    }
+                    
+                    // Update counters
+                    filterTable();
+                } else {
+                    displayFlashMessage(data.error)
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating user status');
+            });
+        }
+    });
 </script>
 {% endblock %}
