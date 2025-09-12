@@ -560,6 +560,9 @@ Register Sub Account
                         <button class="btn-action btn-delete" data-user-id="{{ user._id }}">
                             <i class="fas fa-trash"></i>
                         </button>
+                        <button class="icon-btn disable-btn" title="{{ 'Enable' if user.disabled == 1 else 'Disable' }}">
+                            <i class="fa {{ 'fa-toggle-on' if user.disabled == 1 else 'fa-toggle-off' }}"></i>
+                        </button>
                     </div>
                 </td>
             </tr>
