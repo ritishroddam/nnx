@@ -427,19 +427,19 @@ Register Sub Account
     .status-cell {
     font-weight: bold;
     }
-    
+
     tr[data-disabled="1"] .status-cell .status-inactive {
         color: #dc3545;
     }
-    
+
     tr[data-disabled="0"] .status-cell .status-active {
         color: #28a745;
     }
-    
+
     .dark-mode tr[data-disabled="1"] .status-cell .status-inactive {
         color: #ff7f7f;
     }
-    
+
     .dark-mode tr[data-disabled="0"] .status-cell .status-active {
         color: lightgreen;
     }
@@ -924,8 +924,8 @@ document.addEventListener('click', function(e) {
         // Toggle disabled status
         const newStatus = isDisabled ? 0 : 1;
         
-        // Send AJAX request to update status
-        fetch(`/update-user-status/${userId}`, {
+        // Send AJAX request to update status - UPDATED URL
+        fetch(`/auth/update-user-status/${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

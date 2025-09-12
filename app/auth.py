@@ -329,7 +329,7 @@ def register():
         flash('Unauthorized access', 'danger')
         return redirect(url_for('auth.unauthorized'))
     
-@app.route('/update-user-status/<user_id>', methods=['POST'])
+@auth_bp.route('/update-user-status/<user_id>', methods=['POST'])
 @roles_required('admin', 'clientAdmin')
 def update_user_status(user_id):
     try:
