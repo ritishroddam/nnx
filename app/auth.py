@@ -581,12 +581,6 @@ def register_admin():
     
 #     return render_template('register_inventory.html') 
 
-# In your User model class
-@classmethod
-def get_users_by_roles(cls, roles):
-    """Get all users with specified roles"""
-    return cls.objects(role__in=roles).all()
-
 @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
 @roles_required('admin')
 def register_inventory():
