@@ -424,6 +424,26 @@ Register Sub Account
         font-style: italic;
     }
 
+    .status-cell {
+    font-weight: bold;
+    }
+    
+    tr[data-disabled="1"] .status-cell .status-inactive {
+        color: #dc3545;
+    }
+    
+    tr[data-disabled="0"] .status-cell .status-active {
+        color: #28a745;
+    }
+    
+    .dark-mode tr[data-disabled="1"] .status-cell .status-inactive {
+        color: #ff7f7f;
+    }
+    
+    .dark-mode tr[data-disabled="0"] .status-cell .status-active {
+        color: lightgreen;
+    }
+
     .icon-btn {
         background: none;
         border: none;
@@ -554,7 +574,7 @@ Register Sub Account
         </thead>
         <tbody id="users-table-body">
             {% for user in existing_users %}
-            <tr id="user-row-{{ user._id }}" data-user-id="{{ user._id }}" data-status="{{ 'active' if user.disabled == 0 else 'inactive' }}">
+            <tr id="user-row-{{ user._id }}" data-id="{{ user._id }}" data-disabled="{{ user.disabled|default(0) }}">
                 <td>
                     <span class="view-field username-view">{{ user.username }}</span>
                     <input type="text" class="editable-field username-edit" value="{{ user.username }}" data-original-value="{{ user.username }}">
@@ -566,7 +586,7 @@ Register Sub Account
                 <td>
                     <span class="view-field company-view">{{ user.company_name }}</span>
                 </td>
-                <td>
+                <td class="status-cell">
                     <span class="status-badge {% if user.disabled == 0 %}status-active{% else %}status-inactive{% endif %}" 
                           data-user-id="{{ user._id }}" 
                           data-current-status="{{ user.disabled }}">
@@ -587,6 +607,7 @@ Register Sub Account
                         <button class="btn-action btn-delete" data-user-id="{{ user._id }}">
                             <i class="fas fa-trash"></i>
                         </button>
+                        <!-- Add the disable button -->
                         <button class="icon-btn disable-btn" title="{{ 'Enable' if user.disabled == 1 else 'Disable' }}">
                             <i class="fa {{ 'fa-toggle-on' if user.disabled == 1 else 'fa-toggle-off' }}"></i>
                         </button>
@@ -893,62 +914,76 @@ Register Sub Account
         });
     });
 
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-btn')) {
-            const row = e.target.closest('tr');
-            const userId = row.getAttribute('data-id');
-            // Implement edit functionality
-            alert('Edit functionality for user ID: ' + userId);
-        }
+    // Add this to the existing JavaScript in register.html
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.disable-btn')) {
+        const row = e.target.closest('tr');
+        const userId = row.getAttribute('data-id');
+        const isDisabled = row.getAttribute('data-disabled') === '1';
         
-        if (e.target.closest('.disable-btn')) {
-            const row = e.target.closest('tr');
-            const userId = row.getAttribute('data-id');
-            const isDisabled = row.getAttribute('data-disabled') === '1';
-            
-            // Toggle disabled status
-            const newStatus = isDisabled ? 0 : 1;
-            
-            // Send AJAX request to update status
-            fetch(`/update-user-status/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-                },
-                body: JSON.stringify({ disabled: newStatus })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update UI
-                    row.setAttribute('data-disabled', newStatus);
-                    const statusCell = row.querySelector('.status-cell');
-                    const disableBtn = row.querySelector('.disable-btn');
-                    const icon = disableBtn.querySelector('i');
-                    
-                    statusCell.textContent = newStatus === 1 ? 'Inactive' : 'Active';
-                    disableBtn.title = newStatus === 1 ? 'Enable' : 'Disable';
-                    
-                    if (newStatus === 1) {
-                        icon.className = 'fa fa-toggle-off';
-                        disableBtn.classList.remove('enabled');
-                    } else {
-                        icon.className = 'fa fa-toggle-on';
-                        disableBtn.classList.add('enabled');
-                    }
-                    
-                    // Update counters
-                    filterTable();
+        // Toggle disabled status
+        const newStatus = isDisabled ? 0 : 1;
+        
+        // Send AJAX request to update status
+        fetch(`/update-user-status/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify({ disabled: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update UI
+                row.setAttribute('data-disabled', newStatus);
+                const statusBadge = row.querySelector('.status-badge');
+                const disableBtn = row.querySelector('.disable-btn');
+                const icon = disableBtn.querySelector('i');
+                
+                // Update status badge
+                if (newStatus === 1) {
+                    statusBadge.textContent = 'Inactive';
+                    statusBadge.classList.remove('status-active');
+                    statusBadge.classList.add('status-inactive');
+                    statusBadge.setAttribute('data-current-status', '1');
+                    row.setAttribute('data-status', 'inactive');
                 } else {
-                    displayFlashMessage(data.error)
+                    statusBadge.textContent = 'Active';
+                    statusBadge.classList.remove('status-inactive');
+                    statusBadge.classList.add('status-active');
+                    statusBadge.setAttribute('data-current-status', '0');
+                    row.setAttribute('data-status', 'active');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error updating user status');
-            });
-        }
-    });
+                
+                // Update disable button
+                disableBtn.title = newStatus === 1 ? 'Enable' : 'Disable';
+                
+                if (newStatus === 1) {
+                    icon.className = 'fa fa-toggle-off';
+                } else {
+                    icon.className = 'fa fa-toggle-on';
+                }
+                
+                // Update counters
+                filterUsers();
+            } else {
+                alert('Error updating user status: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating user status');
+        });
+    }
+});
+
+// Add the getCookie function if it doesn't exist
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
 </script>
 {% endblock %}
