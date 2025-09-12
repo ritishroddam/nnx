@@ -15,10 +15,6 @@ from bson import ObjectId
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route("/serverType")
-def index():
-    return f"Server: {request.environ.get('SERVER_SOFTWARE', 'Unknown')}"
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     try:
@@ -52,8 +48,17 @@ def login():
             return redirect(url_for('auth.login'))
 
         user = User.find_by_username(username)
-        if not user or not User.verify_password(user, password):
-            flash('Invalid username or password', 'danger')
+        
+        if not user:
+            flash('Inavlid Username')
+            return redirect(url_for('auth.login'))
+        
+        if user['disabled'] == 1:
+            flash('Your account has been disabled. Please contact the administrator.', 'danger')
+            return redirect(url_for('auth.login'))
+        
+        if not User.verify_password(user, password):
+            flash('Incorrect Password', 'danger')
             return redirect(url_for('auth.login'))
         
         user_config = userConfiCollection.find_one({"userID": user['_id']})
