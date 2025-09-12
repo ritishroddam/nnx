@@ -53,6 +53,7 @@ def login():
             flash('Inavlid Username')
             return redirect(url_for('auth.login'))
         
+        print(user)
         if user['disabled'] == 1:
             flash('Your account has been disabled. Please contact the administrator.', 'danger')
             return redirect(url_for('auth.login'))
