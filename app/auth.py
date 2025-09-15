@@ -328,6 +328,7 @@ def register():
     else:
         flash('Unauthorized access', 'danger')
         return redirect(url_for('auth.unauthorized'))
+    
 
 # Add these new API endpoints for edit and delete operations
 @auth_bp.route('/api/user/<user_id>', methods=['GET', 'PUT', 'DELETE'])

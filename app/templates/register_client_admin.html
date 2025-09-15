@@ -327,8 +327,9 @@ Register Client Admin
         font-weight: 600;
         padding: 16px;
         text-align: left;
-        border-bottom: 2px solid #dee2e6;
+        border-bottom: 2px solid #e0e0e0;
         color: #495057;
+        background: f8f9fa;
     }
     
     .dark-mode .admins-table th {
@@ -503,6 +504,29 @@ Register Client Admin
     #search-input{
         width: 320px;
     }
+
+    .save-btn{
+        background: transparent;
+        color: green;
+        border: none;
+        margin-right: 15px;
+        font-size: 20px;
+    }
+
+    .save-btn:hover{
+        color: darkgreen;
+    }
+
+    .cancel-btn{
+        background: transparent;
+        color: gray;
+        border: none;
+        font-size: 20px;
+    }
+
+    .cancel-btn:hover{
+        color: #555;
+    }
     
     @media (max-width: 900px) {
         .controls-container {
@@ -661,7 +685,7 @@ Register Client Admin
             emailCell.innerHTML = `<input class='edit-row-input' value='${oldEmail}'>`;
             companyCell.innerHTML = `<input class='edit-row-input' value='${oldCompany}'>`;
             actionsCell.innerHTML = `
-                <button class="save-btn" title="Save"><i class="fa fa-check"></i></button>
+                <button class="save-btn" title="Save"><i class="fa fa-save"></i></button>
                 <button class="cancel-btn" title="Cancel"><i class="fa fa-times"></i></button>
             `;
         }
