@@ -50,7 +50,7 @@ def login():
         user = User.find_by_username(username)
         
         if not user:
-            flash('Inavlid Username')
+            flash('Inavlid Username', 'danger')
             return redirect(url_for('auth.login'))
 
         if user['disabled'] == 1:
