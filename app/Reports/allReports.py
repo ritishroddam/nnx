@@ -311,7 +311,7 @@ def index():
         reports = []
         return render_template('allReport.html', vehicles=vehicles, reports=reports)
     
-@reports_bp.route('/view_report_preview', methods=['POST'])
+@reports_bp.route('/generate_report', methods=['POST'])
 @jwt_required()
 def view_report_preview():
     try:
