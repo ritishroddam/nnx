@@ -572,7 +572,7 @@ Register Sub Account
         </thead>
         <tbody id="users-table-body">
             {% for user in existing_users %}
-            <tr id="user-row-{{ user._id }}" data-id="{{ user._id }}" data-disabled="{{ user.disabled|default(0) }}">
+            <tr id="user-row-{{ user._id }}" data-id="{{ user._id }}" data-disabled="{{ user.disabled|default(0) }}" data-status="{{ 'active' if user.disabled == 0 else 'inactive' }}">
                 <td>
                     <span class="view-field username-view">{{ user.username }}</span>
                     <input type="text" class="editable-field username-edit" value="{{ user.username }}" data-original-value="{{ user.username }}">
