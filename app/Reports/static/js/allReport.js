@@ -328,7 +328,7 @@ document.getElementById("viewReport").addEventListener("click", async function (
   }
 
   try {
-    const response = await fetch("/reports/view_report_preview", {
+    const response = await fetch("/reports/generate_report", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
