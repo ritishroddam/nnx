@@ -62,7 +62,6 @@ def process_travel_path_report(df):
             summary[0] = "Total Distance"
             summary[1] = round(total_distance, 3) if pd.notnull(total_distance) else ""
             
-            df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
             df['distance'] = df['odometer'].diff().fillna(0).abs()
             df['distance'] = pd.to_numeric(df['distance'], errors='coerce').round(3)
             df = pd.concat([summary_row, df], ignore_index=True)
