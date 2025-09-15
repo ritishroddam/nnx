@@ -57,7 +57,7 @@ def process_travel_path_report(df):
     try:
         if 'odometer' in df.columns and not df.empty:
             df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-            total_distance = df['odometer'].iloc[-1] - df['odometer'].iloc[0]
+            total_distance = df['odometer'].iloc[-1] - df['odometer'].iloc[1]
             summary = [""] * len(df.columns)
             summary[0] = "Total Distance"
             summary[1] = round(total_distance, 3) if pd.notnull(total_distance) else ""
