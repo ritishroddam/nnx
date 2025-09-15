@@ -1,3 +1,4 @@
+from ast import Lambda
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
@@ -52,12 +53,17 @@ FIELD_COLLECTION_MAP = {
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
 
+# def process_travel_path_rep(df):
+#     try:
+        
+
 report_configs = {
     'daily-distance': {
         'collection': 'atlanta',
         'fields': ["date_time", "latitude", "longitude", "speed"],
         'query': {"gps": "A"},
-        'sheet_name': "Travel Path Report"
+        'sheet_name': "Travel Path Report",
+        # 'post_process': lambda df, _: process_travel_path_report(df)
     },
     'odometer-daily-distance': {
         'collection': 'atlanta',
@@ -106,8 +112,7 @@ def get_all_vehicles(query=None):
     if query is None:
         query = {}
     return list(db['vehicle_inventory'].find(query, {"LicensePlateNumber": 1, "IMEI": 1, "_id": 0}))
-
-
+    
 def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     
@@ -252,7 +257,9 @@ def process_distance_report(df, vehicle_number):
         return summary_df
     except Exception:
         return df
-    
+
+        
+
 def process_duration_report(df, duration_col_name):
     """Calculate duration between records in minutes"""
     try:
