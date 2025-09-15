@@ -733,7 +733,7 @@ Register Client Admin
             const statusCell = row.querySelector('.status-cell');
             
             // AJAX call to backend
-            fetch(`/auth/api/client-admin/${row.getAttribute('data-id')}/toggle-disable`, {
+            fetch(`/api/client-admin/${row.getAttribute('data-id')}/toggle-disable`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
