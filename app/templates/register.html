@@ -923,7 +923,7 @@ document.addEventListener('click', function(e) {
         const newStatus = isDisabled ? 0 : 1;
         
         // Send AJAX request to update status - UPDATED URL
-        fetch(`/auth/update-user-status/${userId}`, {
+        fetch(`/update-user-status/${userId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
