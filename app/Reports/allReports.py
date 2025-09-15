@@ -400,8 +400,6 @@ def view_report_preview():
                     all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
                     if report_type == 'daily':
                         all_possible_columns.append('odometer')
-        existing_columns = [col for col in all_possible_columns if col in df.columns]
-        df = df[existing_columns]
 
             existing_columns = [col for col in all_possible_columns if col in final_df.columns]
             final_df = final_df[existing_columns]
@@ -467,8 +465,6 @@ def view_report_preview():
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
                 if report_type == 'daily':
                     all_possible_columns.append('odometer')
-        existing_columns = [col for col in all_possible_columns if col in df.columns]
-        df = df[existing_columns]
 
         existing_columns = [col for col in all_possible_columns if col in df.columns]
         df = df[existing_columns]
