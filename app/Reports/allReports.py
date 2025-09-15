@@ -58,6 +58,7 @@ def process_travel_path_report(df):
         if 'odometer' in df.columns:
             df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
             df['distance'] = df['odometer'].diff().fillna(0).abs()
+            f['distance'] = pd.to_numeric(df['distance'], errors='coerce').round(3)
         return df
     except:
         return
@@ -167,6 +168,8 @@ def process_df(df, license_plate, fields, post_process=None):
             else 'Missing coordinates',
             axis=1
         )
+        df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce').round(3)
+        df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce').round(3)
         cols = df.columns.tolist()
         if 'Location' in cols:
             cols.remove('Location')
