@@ -645,57 +645,61 @@ Register Sub Account
         const form = document.getElementById('register-form');
         form.addEventListener('submit', function(e) {
             const username = document.getElementById('username').value;
-        if (e.target.closest('.disable-btn')) {
-            const row = e.target.closest('tr');
-            const userId = row.getAttribute('data-id');
-            const isDisabled = row.getAttribute('data-disabled') === '1';
-            const newStatus = isDisabled ? 0 : 1;
-            const statusBadge = row.querySelector('.status-badge');
-            const disableBtn = row.querySelector('.disable-btn');
-            const icon = disableBtn.querySelector('i');
-
-            fetch(`/update-user-status/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-                },
-                body: JSON.stringify({ disabled: newStatus })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    row.setAttribute('data-disabled', newStatus);
-                    // Update status badge
-                    if (newStatus === 1) {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.classList.remove('status-active');
-                        statusBadge.classList.add('status-inactive');
-                        statusBadge.setAttribute('data-current-status', '1');
-                        row.setAttribute('data-status', 'inactive');
-                        disableBtn.title = 'Enable';
-                        disableBtn.classList.add('enabled');
-                        icon.className = 'fa fa-toggle-off';
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !email || !password) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+                return false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address');
+                return false;
+            }
+            
+            return true;
+        });
+        
+        const searchInput = document.getElementById('user-search');
+        const statusFilter = document.getElementById('status-filter');
+        const userRows = document.querySelectorAll('#users-table-body tr');
+        
+        function filterUsers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            
+            let activeCount = 0;
+            let inactiveCount = 0;
+            let visibleCount = 0;
+            
+            userRows.forEach(row => {
+                const username = row.querySelector('.username-view').textContent.toLowerCase();
+                const email = row.querySelector('.email-view').textContent.toLowerCase();
+                const company = row.querySelector('.company-view').textContent.toLowerCase();
+                const status = row.getAttribute('data-status');
+                
+                const matchesSearch = username.includes(searchTerm) || 
+                                    email.includes(searchTerm) || 
+                                    company.includes(searchTerm);
+                
+                const matchesStatus = statusValue === 'all' || 
+                                    (statusValue === 'active' && status === 'active') || 
+                                    (statusValue === 'inactive' && status === 'inactive');
+                
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                    visibleCount++;
+                    
+                    if (status === 'active') {
+                        activeCount++;
                     } else {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.classList.remove('status-inactive');
-                        statusBadge.classList.add('status-active');
-                        statusBadge.setAttribute('data-current-status', '0');
-                        row.setAttribute('data-status', 'active');
-                        disableBtn.title = 'Disable';
-                        disableBtn.classList.remove('enabled');
-                        icon.className = 'fa fa-toggle-on';
+                        inactiveCount++;
                     }
-                    filterUsers();
                 } else {
-                    alert('Error updating user status: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error updating user status');
-            });
-        }
                     row.style.display = 'none';
                 }
             });
