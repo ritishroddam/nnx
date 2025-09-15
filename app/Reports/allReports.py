@@ -390,13 +390,13 @@ def view_report_preview():
             elif report_type_for_columns == 'stoppage':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Stoppage Duration (min)'])
             elif report_type_for_columns == 'idle':
-                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed', 'ignition', 'Idle Duration (min)'])
+                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
             elif report_type_for_columns == 'ignition':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
             else:
-                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
-                if report_type_for_columns == 'daily':
-                    all_possible_columns.append('odometer')
+                all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
+                # if report_type_for_columns == 'daily':
+                #     all_possible_columns.append('odometer')
 
             existing_columns = [col for col in all_possible_columns if col in final_df.columns]
             final_df = final_df[existing_columns]
