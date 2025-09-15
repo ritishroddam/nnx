@@ -394,9 +394,14 @@ def view_report_preview():
             elif report_type_for_columns == 'ignition':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
             else:
-                all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
-                # if report_type_for_columns == 'daily':
-                #     all_possible_columns.append('odometer')
+                if report_type == 'daily-distance':
+                    all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
+                else:
+                    all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
+                    if report_type == 'daily':
+                        all_possible_columns.append('odometer')
+        existing_columns = [col for col in all_possible_columns if col in df.columns]
+        df = df[existing_columns]
 
             existing_columns = [col for col in all_possible_columns if col in final_df.columns]
             final_df = final_df[existing_columns]
@@ -455,9 +460,15 @@ def view_report_preview():
         elif report_type == 'ignition':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
         else:
-            all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
-            if report_type == 'daily':
-                all_possible_columns.append('odometer')
+            # Include odometer + distance for travel path ('daily-distance')
+            if report_type == 'daily-distance':
+                all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
+            else:
+                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
+                if report_type == 'daily':
+                    all_possible_columns.append('odometer')
+        existing_columns = [col for col in all_possible_columns if col in df.columns]
+        df = df[existing_columns]
 
         existing_columns = [col for col in all_possible_columns if col in df.columns]
         df = df[existing_columns]
