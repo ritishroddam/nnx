@@ -53,17 +53,23 @@ FIELD_COLLECTION_MAP = {
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
 }
 
-# def process_travel_path_rep(df):
-#     try:
+def process_travel_path_report(df):
+    try:
+        if 'odometer' in df.columns:
+            df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+            df['distance'] = df['odometer'].diff().fillna(0).abs()
+        return df
+    except:
+        return
         
 
 report_configs = {
     'daily-distance': {
         'collection': 'atlanta',
-        'fields': ["date_time", "latitude", "longitude", "speed"],
+        'fields': ["date_time", "odometer", "latitude", "longitude", "speed"],
         'query': {"gps": "A"},
         'sheet_name': "Travel Path Report",
-        # 'post_process': lambda df, _: process_travel_path_report(df)
+        'post_process': lambda df, _: process_travel_path_report(df)
     },
     'odometer-daily-distance': {
         'collection': 'atlanta',
