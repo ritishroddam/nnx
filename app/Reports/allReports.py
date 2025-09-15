@@ -294,32 +294,18 @@ def add_speed_metrics(df):
     """Add a summary row with Average Speed and Maximum Speed as the first row, not as columns."""
     try:
         if 'speed' in df.columns:
-            if 'speed' in df.columns:
-                df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
-                avg_speed = df['speed'].mean()
-                max_speed = df['speed'].max()
-                # Prepare summary row: ["Average Speed", value, "Maximum Speed", value, ...empty...]
-                summary = [""] * len(df.columns)
-                summary[2] = "Average Speed"
-                summary[3] = round(avg_speed, 2) if not pd.isna(avg_speed) else ""
-                summary[4] = "Maximum Speed"
-                summary[5] = round(max_speed, 2) if not pd.isna(max_speed) else ""
-                summary_row = pd.DataFrame([summary], columns=df.columns)
-                # Insert summary row at the top
-                df = pd.concat([summary_row, df], ignore_index=True)
-            else:
-                df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
-                avg_speed = df['speed'].mean()
-                max_speed = df['speed'].max()
-                # Prepare summary row: ["Average Speed", value, "Maximum Speed", value, ...empty...]
-                summary = [""] * len(df.columns)
-                summary[0] = "Average Speed"
-                summary[1] = round(avg_speed, 2) if not pd.isna(avg_speed) else ""
-                summary[2] = "Maximum Speed"
-                summary[3] = round(max_speed, 2) if not pd.isna(max_speed) else ""
-                summary_row = pd.DataFrame([summary], columns=df.columns)
-                # Insert summary row at the top
-                df = pd.concat([summary_row, df], ignore_index=True)
+            df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
+            avg_speed = df['speed'].mean()
+            max_speed = df['speed'].max()
+            # Prepare summary row: ["Average Speed", value, "Maximum Speed", value, ...empty...]
+            summary = [""] * len(df.columns)
+            summary[0] = "Average Speed"
+            summary[1] = round(avg_speed, 2) if not pd.isna(avg_speed) else ""
+            summary[2] = "Maximum Speed"
+            summary[3] = round(max_speed, 2) if not pd.isna(max_speed) else ""
+            summary_row = pd.DataFrame([summary], columns=df.columns)
+            # Insert summary row at the top
+            df = pd.concat([summary_row, df], ignore_index=True)
     except Exception as e:
         print(f"Error adding speed metrics: {str(e)}")
     return df
