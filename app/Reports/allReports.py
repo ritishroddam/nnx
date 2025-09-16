@@ -58,8 +58,8 @@ def process_travel_path_report(df):
         if 'odometer' in df.columns and not df.empty:
             df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
             df['distance'] = df['odometer'].diff().fillna(0).abs()
-            df['distance'] = pd.to_numeric(df['distance'], errors='coerce').round(3)
             df['distance'] = df['distance'].cumsum()
+            df['distance'] = pd.to_numeric(df['distance'], errors='coerce').round(3)
             df.loc[df.index[-1], 'distance'] = ""  # Ignore the 0th row for distance
             
             df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
