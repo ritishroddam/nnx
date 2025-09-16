@@ -1,4 +1,5 @@
 from ast import Lambda
+import re
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
@@ -290,23 +291,42 @@ def process_duration_report(df, duration_col_name):
     except Exception:
         return df   
     
-def add_speed_metrics(df):
-    """Add a summary row with Average Speed and Maximum Speed as the first row, not as columns."""
+def add_speed_metrics(rows):
     try:
-        sp_series = pd.to_numeric(df['speed'], errors='coerce').fillna(0)
-        if not sp_series.empty:
-            avg_speed = round(sp_series.mean(), 2)
-            max_speed = round(sp_series.max(), 2)
-            summary_row = []
-            summary_row[0] = "Average Speed"
-            summary_row[1] = avg_speed
-            summary_row[2] = "Maximum Speed"
-            summary_row[3] = max_speed
-            df.insert(summary_row)
-            return df
-        return df
+        if not rows:
+            return rows
+        
+        speeds = []
+        for r in rows:
+            value = r.get('speed')
+            
+            if value in (None, "", " "):
+                value = 0
+            
+            value = float(value)
+            speeds.append(value)
+            
+        if not speeds:
+            return rows
+        
+        avg_speed = round(sum(speeds) / len(speeds), 2)
+        max_speed = round(max(speeds), 2)
+        
+        columns = list(rows[0].keys())
+        
+        summary = OrderedDict()
+        
+        summary[columns[0]] = "Average Speed"
+        summary[columns[1]] = avg_speed
+        summary[columns[2]] = "Maximum Speed"
+        summary[columns[3]] = max_speed
+        for i in range(4, len(columns)):
+            summary[columns[i]] = ""
+            
+        return rows + [summary]
     except Exception as e:
         print(f"[DEBUG] Skipping speed summary (single): {e}")
+        return e
 
 @reports_bp.route('/')
 @jwt_required()
