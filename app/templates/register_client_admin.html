@@ -746,6 +746,7 @@ Register Client Admin
                             <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
                         </button>
                     `;
+                    displayFlashMessage('User updated successfully!', 'success');
                 } else {
                     alert('Error updating user: ' + (data.error || 'Unknown error'));
                 }
