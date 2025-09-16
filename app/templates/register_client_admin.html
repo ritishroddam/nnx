@@ -58,6 +58,7 @@ Register Client Admin
                     <th>Username</th>
                     <th>Email</th>
                     <th>Company</th>
+                    <th class="password-header" style="display:none;">New Password</th>
                     <th>Status</th> 
                     <th>Actions</th>
                 </tr>
@@ -575,7 +576,6 @@ Register Client Admin
 </style>
 
 <script>
-    // Modal logic
     const modal = document.getElementById("register-modal");
     const btn = document.getElementById("register-btn");
     const span = document.getElementsByClassName("close")[0];
@@ -598,7 +598,6 @@ Register Client Admin
         }
     }
 
-    // Search and filter logic
     const searchInput = document.getElementById('search-input');
     const statusFilter = document.getElementById('status-filter');
     const tableBody = document.getElementById('admins-table-body');
@@ -620,13 +619,11 @@ Register Client Admin
             const company = row.querySelector('.company-cell').textContent.toLowerCase();
             const isDisabled = row.getAttribute('data-disabled') === '1';
             
-            // Check search text
             const matchesSearch = searchText === '' || 
                 username.includes(searchText) || 
                 email.includes(searchText) || 
                 company.includes(searchText);
                 
-            // Check status filter
             let matchesStatus = true;
             if (statusValue === 'active') {
                 matchesStatus = !isDisabled;
@@ -634,12 +631,10 @@ Register Client Admin
                 matchesStatus = isDisabled;
             }
             
-            // Show or hide row based on filters
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleCount++;
                 
-                // Update counts for summary
                 if (isDisabled) {
                     inactiveCount++;
                 } else {
@@ -650,13 +645,11 @@ Register Client Admin
             }
         });
         
-        // Update the summary counts with filtered results
         totalUsersCount.textContent = visibleCount;
         activeUsersCount.textContent = activeCount;
         inactiveUsersCount.textContent = inactiveCount;
     }
 
-    // Add event listeners for search and filter
     if (searchInput) {
         searchInput.addEventListener('input', filterTable);
     }
@@ -665,13 +658,17 @@ Register Client Admin
         statusFilter.addEventListener('change', filterTable);
     }
 
-    // Inline edit and enable/disable logic
     tableBody.addEventListener('click', function(e) {
+        function updatePasswordHeaderVisibility() {
+            const anyEditing = Array.from(tableBody.querySelectorAll('tr')).some(row => row.classList.contains('editing'));
+            const passwordHeader = document.querySelector('.password-header');
+            if (passwordHeader) passwordHeader.style.display = anyEditing ? '' : 'none';
+        }
         const row = e.target.closest('tr');
         if (!row) return;
         const id = row.getAttribute('data-id');
-        // Edit button
         if (e.target.closest('.edit-btn')) {
+            updatePasswordHeaderVisibility();
             if (row.classList.contains('editing')) return;
             row.classList.add('editing');
             const usernameCell = row.querySelector('.username-cell');
@@ -681,42 +678,89 @@ Register Client Admin
             const oldUsername = usernameCell.textContent;
             const oldEmail = emailCell.textContent;
             const oldCompany = companyCell.textContent;
+
+            let passwordCell = row.querySelector('.password-cell');
+            if (!passwordCell) {
+                passwordCell = document.createElement('td');
+                passwordCell.className = 'password-cell';
+                passwordCell.innerHTML = `<input class='edit-row-input' type='password' placeholder='New Password'>`;
+                row.insertBefore(passwordCell, actionsCell);
+            } else {
+                passwordCell.innerHTML = `<input class='edit-row-input' type='password' placeholder='New Password'>`;
+                passwordCell.style.display = '';
+            }
+
             usernameCell.innerHTML = `<input class='edit-row-input' value='${oldUsername}'>`;
             emailCell.innerHTML = `<input class='edit-row-input' value='${oldEmail}'>`;
-            companyCell.innerHTML = `<input class='edit-row-input' value='${oldCompany}'>`;
+            companyCell.textContent = oldCompany;
             actionsCell.innerHTML = `
                 <button class="save-btn" title="Save"><i class="fa fa-save"></i></button>
                 <button class="cancel-btn" title="Cancel"><i class="fa fa-times"></i></button>
             `;
         }
-        // Save button
+
         else if (e.target.closest('.save-btn')) {
+            updatePasswordHeaderVisibility();
             const usernameCell = row.querySelector('.username-cell');
             const emailCell = row.querySelector('.email-cell');
             const companyCell = row.querySelector('.company-cell');
-            const newUsername = usernameCell.querySelector('input').value;
-            const newEmail = emailCell.querySelector('input').value;
-            const newCompany = companyCell.querySelector('input').value;
-            // TODO: AJAX call to update user info on backend
-            usernameCell.textContent = newUsername;
-            emailCell.textContent = newEmail;
-            companyCell.textContent = newCompany;
-            row.classList.remove('editing');
-            row.querySelector('.actions-cell').innerHTML = `
-                <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
-                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === '1' ? 'Enable' : 'Disable'}">
-                    <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
-                </button>
-            `;
+            const passwordCell = row.querySelector('.password-cell');
+            const newUsername = usernameCell.querySelector('input').value.trim();
+            const newEmail = emailCell.querySelector('input').value.trim();
+            const newPassword = passwordCell ? passwordCell.querySelector('input').value : '';
+
+            if (!newUsername || !newEmail) {
+                alert('Username and email are required');
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newEmail)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            const updateData = {
+                username: newUsername,
+                email: newEmail
+            };
+            if (newPassword) updateData.password = newPassword;
+
+            fetch(`/api/user/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCookie('csrf_access_token')
+                },
+                body: JSON.stringify(updateData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    usernameCell.textContent = newUsername;
+                    emailCell.textContent = newEmail;
+                    if (passwordCell) passwordCell.style.display = 'none';
+                    row.classList.remove('editing');
+                    row.querySelector('.actions-cell').innerHTML = `
+                        <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                        <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === '1' ? 'Enable' : 'Disable'}">
+                            <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                        </button>
+                    `;
+                } else {
+                    alert('Error updating user: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(() => alert('Error updating user'));
         }
-        // Cancel button
         else if (e.target.closest('.cancel-btn')) {
+            updatePasswordHeaderVisibility();
             const usernameCell = row.querySelector('.username-cell');
             const emailCell = row.querySelector('.email-cell');
             const companyCell = row.querySelector('.company-cell');
+            const passwordCell = row.querySelector('.password-cell');
             usernameCell.textContent = usernameCell.querySelector('input').defaultValue;
             emailCell.textContent = emailCell.querySelector('input').defaultValue;
-            companyCell.textContent = companyCell.querySelector('input').defaultValue;
+            if (passwordCell) passwordCell.style.display = 'none';
             row.classList.remove('editing');
             row.querySelector('.actions-cell').innerHTML = `
                 <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
@@ -725,14 +769,12 @@ Register Client Admin
                 </button>
             `;
         }
-        // Disable/Enable button
         else if (e.target.closest('.disable-btn')) {
             const isDisabled = row.getAttribute('data-disabled') === '1';
             const btn = e.target.closest('.disable-btn');
             const icon = btn.querySelector('i');
             const statusCell = row.querySelector('.status-cell');
             
-            // AJAX call to backend
             fetch(`/api/client-admin/${row.getAttribute('data-id')}/toggle-disable`, {
                 method: 'POST',
                 headers: {
@@ -747,7 +789,6 @@ Register Client Admin
                     const newDisabledStatus = data.disabled ? '1' : '0';
                     row.setAttribute('data-disabled', newDisabledStatus);
                     
-                    // Update status cell
                     statusCell.textContent = newDisabledStatus === '1' ? 'Inactive' : 'Active';
                     statusCell.style.color = newDisabledStatus === '1' ? '#dc3545' : '#28a745';
                     
@@ -763,7 +804,6 @@ Register Client Admin
                         icon.classList.add('fa-toggle-off');
                     }
                     
-                    // Update the summary counts
                     filterTable();
                 } else {
                     alert('Failed to update user status: ' + (data.error || 'Unknown error'));
@@ -773,7 +813,6 @@ Register Client Admin
         }
     });
 
-    // Helper function to get cookie value
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
