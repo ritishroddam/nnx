@@ -305,7 +305,7 @@ def add_speed_metrics(df, existing_columns):
                 summary_row[existing_columns[2]] = "Maximum Speed"
             if len(existing_columns) > 3:
                 summary_row[existing_columns[3]] = max_speed
-            df.insert(-1, summary_row)
+            df.insert(summary_row)
             return df
         return df
     except Exception as e:
