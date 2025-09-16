@@ -470,7 +470,6 @@ def view_report_preview():
         elif report_type == 'ignition':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
         else:
-            # Include odometer + distance for travel path ('daily-distance')
             if report_type == 'daily-distance':
                 all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
             else:
