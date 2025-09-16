@@ -290,25 +290,26 @@ def process_duration_report(df, duration_col_name):
     except Exception:
         return df   
     
-def add_speed_metrics(df):
+def add_speed_metrics(df, existing_columns):
     """Add a summary row with Average Speed and Maximum Speed as the first row, not as columns."""
     try:
-        if 'speed' in df.columns:
-            df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
-            avg_speed = df['speed'].mean()
-            max_speed = df['speed'].max()
-            # Prepare summary row: ["Average Speed", value, "Maximum Speed", value, ...empty...]
-            summary = [""] * len(df.columns)
-            summary[0] = "Average Speed"
-            summary[1] = round(avg_speed, 2) if not pd.isna(avg_speed) else ""
-            summary[2] = "Maximum Speed"
-            summary[3] = round(max_speed, 2) if not pd.isna(max_speed) else ""
-            summary_row = pd.DataFrame([summary], columns=df.columns)
-            # Insert summary row at the top
-            df = pd.concat([df, summary_row], ignore_index=True)
+        sp_series = pd.to_numeric(df['speed'], errors='coerce').fillna(0)
+        if not sp_series.empty:
+            avg_speed = round(sp_series.mean(), 2)
+            max_speed = round(sp_series.max(), 2)
+            summary_row = OrderedDict((c, "") for c in existing_columns)
+            summary_row[existing_columns[0]] = "Average Speed"
+            if len(existing_columns) > 1:
+                summary_row[existing_columns[1]] = avg_speed
+            if len(existing_columns) > 2:
+                summary_row[existing_columns[2]] = "Maximum Speed"
+            if len(existing_columns) > 3:
+                summary_row[existing_columns[3]] = max_speed
+            df.insert(-1, summary_row)
+            return df
+        return df
     except Exception as e:
-        print(f"Error adding speed metrics: {str(e)}")
-    return df
+        print(f"[DEBUG] Skipping speed summary (single): {e}")
 
 @reports_bp.route('/')
 @jwt_required()
@@ -418,8 +419,8 @@ def view_report_preview():
             data_records = final_df.fillna("").to_dict(orient="records")
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
             
-            if 'speed' in ordered_data.columns:
-                ordered_data = add_speed_metrics(ordered_data)
+            if 'speed' in existing_columns:
+                ordered_data = add_speed_metrics(ordered_data, existing_columns)
 
             json_str = json.dumps({
                 "success": True,
@@ -485,8 +486,8 @@ def view_report_preview():
         data_records = df.fillna("").to_dict(orient="records")
         ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
-        if 'speed' in ordered_data.columns:
-            ordered_data = add_speed_metrics(ordered_data)
+        if 'speed' in existing_columns:
+            ordered_data = add_speed_metrics(ordered_data, existing_columns)
         
         json_str = json.dumps({
             "success": True,
