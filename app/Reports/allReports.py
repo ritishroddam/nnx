@@ -63,7 +63,7 @@ def process_travel_path_report(df):
             df.loc[df.index[0], 'distance'] = ""  # Ignore the 0th row for distance
             
             df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-            total_distance = df['odometer'].iloc[-1] - df['odometer'].iloc[1]
+            total_distance = df['odometer'].iloc[-2] - df['odometer'].iloc[0]
             summary = [""] * len(df.columns)
             summary[0] = "Total Distance"
             summary[1] = round(total_distance, 3) if pd.notnull(total_distance) else ""
@@ -376,7 +376,7 @@ def view_report_preview():
             cursor = db[collection].find(
                 query,
                 {field: 1 for field in fields + ["imei"]}
-            ).sort("date_time", 1)
+            ).sort("date_time", -1)
             df = pd.DataFrame(list(cursor))
             if not df.empty:
                 for idx, (imei, group) in enumerate(df.groupby("imei")):
