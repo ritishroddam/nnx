@@ -52,28 +52,7 @@ FIELD_COLLECTION_MAP = {
                          'InsuranceNumber', 'DriverName', 'CurrentStatus','VehicleType',
                          'Location', 'OdometerReading', 'ServiceDueDate'],
     'sos_logs': ['imei', 'date', 'time', 'latitude', 'longitude', 'date_time', 'timestamp']
-}
-
-def process_travel_path_report(df):
-    try:
-        if 'odometer' in df.columns and not df.empty:
-            df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-            df['distance'] = df['odometer'].diff().fillna(0).abs()
-            df['distance'] = df['distance'].cumsum()
-            df['distance'] = pd.to_numeric(df['distance'], errors='coerce').round(3)
-            df.loc[df.index[-1], 'distance'] = ""  # Ignore the 0th row for distance
-            
-            # df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-            # total_distance = df['odometer'].iloc[0] - df['odometer'].iloc[-2]
-            # summary = [""] * len(df.columns)
-            # summary[0] = "Total Distance"
-            # summary[1] = round(total_distance, 3) if pd.notnull(total_distance) else ""
-            # summary_row = pd.DataFrame([summary], columns=df.columns)
-            # df = pd.concat([df, summary_row], ignore_index=True)
-        return df
-    except:
-        return
-        
+}       
 
 report_configs = {
     'daily-distance': {
@@ -276,7 +255,24 @@ def process_distance_report(df, vehicle_number):
     except Exception:
         return df
 
-        
+def process_travel_path_report(df):
+    try:
+        if 'odometer' in df.columns and not df.empty:
+            df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+            df['distance'] = df['odometer'].diff().fillna(0).abs()
+            df['distance'] = df['distance'].cumsum()
+            df['distance'] = pd.to_numeric(df['distance'], errors='coerce').round(3)
+            
+            # df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+            # total_distance = df['odometer'].iloc[0] - df['odometer'].iloc[-2]
+            # summary = [""] * len(df.columns)
+            # summary[0] = "Total Distance"
+            # summary[1] = round(total_distance, 3) if pd.notnull(total_distance) else ""
+            # summary_row = pd.DataFrame([summary], columns=df.columns)
+            # df = pd.concat([df, summary_row], ignore_index=True)
+        return df
+    except:
+        return   
 
 def process_duration_report(df, duration_col_name):
     """Calculate duration between records in minutes"""
