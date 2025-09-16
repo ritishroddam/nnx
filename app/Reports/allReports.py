@@ -297,14 +297,11 @@ def add_speed_metrics(df, existing_columns):
         if not sp_series.empty:
             avg_speed = round(sp_series.mean(), 2)
             max_speed = round(sp_series.max(), 2)
-            summary_row = OrderedDict((c, "") for c in existing_columns)
-            summary_row[existing_columns[0]] = "Average Speed"
-            if len(existing_columns) > 1:
-                summary_row[existing_columns[1]] = avg_speed
-            if len(existing_columns) > 2:
-                summary_row[existing_columns[2]] = "Maximum Speed"
-            if len(existing_columns) > 3:
-                summary_row[existing_columns[3]] = max_speed
+            summary_row = []
+            summary_row[0] = "Average Speed"
+            summary_row[1] = avg_speed
+            summary_row[2] = "Maximum Speed"
+            summary_row[3] = max_speed
             df.insert(summary_row)
             return df
         return df
