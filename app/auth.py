@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from .models import User
+from werkzeug.security import generate_password_hash
 from .utils import roles_required
 from app import db
 from datetime import datetime, timezone, timedelta
