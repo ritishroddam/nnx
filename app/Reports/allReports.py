@@ -68,7 +68,7 @@ def process_travel_path_report(df):
             summary[0] = "Total Distance"
             summary[1] = round(total_distance, 3) if pd.notnull(total_distance) else ""
             summary_row = pd.DataFrame([summary], columns=df.columns)
-            df = pd.concat([summary_row, df], ignore_index=True)
+            df = pd.concat([df, summary_row], ignore_index=True)
         return df
     except:
         return
@@ -307,7 +307,7 @@ def add_speed_metrics(df):
             summary[3] = round(max_speed, 2) if not pd.isna(max_speed) else ""
             summary_row = pd.DataFrame([summary], columns=df.columns)
             # Insert summary row at the top
-            df = pd.concat([summary_row, df], ignore_index=True)
+            df = pd.concat([df, summary_row], ignore_index=True)
     except Exception as e:
         print(f"Error adding speed metrics: {str(e)}")
     return df
