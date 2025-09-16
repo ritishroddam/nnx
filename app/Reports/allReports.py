@@ -192,8 +192,6 @@ def process_df(df, license_plate, fields, post_process=None):
         df.drop('_id', axis=1, inplace=True)
     if "ignition" in fields:
         df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-    if 'speed' in df.columns:
-        df = add_speed_metrics(df)
         
     if post_process:
         print("[DEBUG] Applying post_process function")
@@ -419,6 +417,9 @@ def view_report_preview():
 
             data_records = final_df.fillna("").to_dict(orient="records")
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
+            
+            if 'speed' in ordered_data.columns:
+                ordered_data = add_speed_metrics(ordered_data)
 
             json_str = json.dumps({
                 "success": True,
@@ -467,14 +468,14 @@ def view_report_preview():
         elif report_type == 'stoppage':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Stoppage Duration (min)'])
         elif report_type == 'idle':
-            all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed', 'ignition', 'Idle Duration (min)'])
+            all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
         elif report_type == 'ignition':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
         else:
             if report_type == 'daily-distance':
                 all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
             else:
-                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
+                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed'])
                 if report_type == 'daily':
                     all_possible_columns.append('odometer')
 
@@ -484,6 +485,9 @@ def view_report_preview():
         data_records = df.fillna("").to_dict(orient="records")
         ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
+        if 'speed' in ordered_data.columns:
+            ordered_data = add_speed_metrics(ordered_data)
+        
         json_str = json.dumps({
             "success": True,
             "data": ordered_data
