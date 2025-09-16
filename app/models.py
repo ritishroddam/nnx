@@ -17,6 +17,11 @@ class User:
             'role': role,
             "disabled": disabled
         })
+        
+    @staticmethod
+    def change_password(password):
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        return hashed
     
     @staticmethod
     def find_by_username(username):

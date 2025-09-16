@@ -1,3 +1,4 @@
+from curses.ascii import US
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_jwt_extended import (
     get_csrf_token, get_jwt, verify_jwt_in_request, create_access_token, create_refresh_token,
@@ -6,7 +7,6 @@ from flask_jwt_extended import (
 )
 from flask_jwt_extended.exceptions import NoAuthorizationError, JWTDecodeError
 from .models import User
-from werkzeug.security import generate_password_hash
 from .utils import roles_required
 from app import db
 from datetime import datetime, timezone, timedelta
@@ -398,7 +398,7 @@ def user_operations(user_id):
             
             if 'password' in data and data['password']:
                 # Hash the new password
-                hashed_password = generate_password_hash(data['password'])
+                hashed_password = User.change_password(data['password'])
                 update_data['password'] = hashed_password
             
             db.users.update_one(
