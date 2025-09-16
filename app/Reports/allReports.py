@@ -290,7 +290,7 @@ def process_duration_report(df, duration_col_name):
     except Exception:
         return df   
     
-def add_speed_metrics(df, existing_columns):
+def add_speed_metrics(df):
     """Add a summary row with Average Speed and Maximum Speed as the first row, not as columns."""
     try:
         sp_series = pd.to_numeric(df['speed'], errors='coerce').fillna(0)
@@ -417,7 +417,7 @@ def view_report_preview():
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
             
             if 'speed' in existing_columns:
-                ordered_data = add_speed_metrics(ordered_data, existing_columns)
+                ordered_data = add_speed_metrics(ordered_data)
 
             json_str = json.dumps({
                 "success": True,
@@ -484,7 +484,7 @@ def view_report_preview():
         ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
 
         if 'speed' in existing_columns:
-            ordered_data = add_speed_metrics(ordered_data, existing_columns)
+            ordered_data = add_speed_metrics(ordered_data)
         
         json_str = json.dumps({
             "success": True,
