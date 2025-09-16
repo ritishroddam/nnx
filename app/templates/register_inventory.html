@@ -519,6 +519,23 @@ Manage Inventory Accounts
     #search-input{
         width: 320px;
     }
+
+    .save-btn{
+        background: transparent;
+        color: green;
+        border: none;
+        margin-right: 15px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .cancel-btn{
+        background: transparent;
+        color: gray;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
     
     @media (max-width: 900px) {
         .controls-container {
@@ -642,24 +659,148 @@ Manage Inventory Accounts
     if (statusFilter) statusFilter.addEventListener('change', filterTable);
     if (roleFilter) roleFilter.addEventListener('change', filterTable);
 
-    // Edit and disable functionality
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-btn')) {
-            const row = e.target.closest('tr');
-            const userId = row.getAttribute('data-id');
-            // Implement edit functionality
-            alert('Edit functionality for user ID: ' + userId);
+    // Inline edit and disable functionality for inventory users
+    function updatePasswordHeaderAndCells() {
+        const table = document.querySelector('.admins-table');
+        const anyEditing = Array.from(tableBody.querySelectorAll('tr')).some(row => row.classList.contains('editing'));
+        let passwordHeader = table.querySelector('.password-header');
+        if (!passwordHeader) {
+            // Insert header if not present
+            const th = document.createElement('th');
+            th.className = 'password-header';
+            th.style.display = 'none';
+            th.textContent = 'New Password';
+            table.querySelector('thead tr').insertBefore(th, table.querySelector('thead tr').children[4]);
+            passwordHeader = th;
         }
-        
-        if (e.target.closest('.disable-btn')) {
-            const row = e.target.closest('tr');
-            const userId = row.getAttribute('data-id');
+        passwordHeader.style.display = anyEditing ? '' : 'none';
+        Array.from(tableBody.querySelectorAll('.password-cell')).forEach(cell => {
+            const row = cell.closest('tr');
+            cell.style.display = row.classList.contains('editing') ? '' : 'none';
+        });
+    }
+
+    updatePasswordHeaderAndCells();
+
+    tableBody.addEventListener('click', function(e) {
+        const row = e.target.closest('tr');
+        if (!row) return;
+        const userId = row.getAttribute('data-id');
+        // Edit button
+        if (e.target.closest('.edit-btn')) {
+            if (row.classList.contains('editing')) return;
+            row.classList.add('editing');
+            const usernameCell = row.querySelector('.username-cell');
+            const emailCell = row.querySelector('.email-cell');
+            const roleCell = row.querySelector('.role-cell');
+            const actionsCell = row.querySelector('.actions-cell');
+            const oldUsername = usernameCell.textContent;
+            const oldEmail = emailCell.textContent;
+            const oldRole = roleCell.textContent;
+
+            // Insert new password cell if not present
+            let passwordCell = row.querySelector('.password-cell');
+            if (!passwordCell) {
+                passwordCell = document.createElement('td');
+                passwordCell.className = 'password-cell';
+                passwordCell.innerHTML = `<input class='edit-row-input' type='password' placeholder='New Password'>`;
+                row.insertBefore(passwordCell, actionsCell);
+            } else {
+                passwordCell.innerHTML = `<input class='edit-row-input' type='password' placeholder='New Password'>`;
+            }
+            passwordCell.style.display = '';
+
+            usernameCell.innerHTML = `<input class='edit-row-input' value='${oldUsername}'>`;
+            emailCell.innerHTML = `<input class='edit-row-input' value='${oldEmail}'>`;
+            // Role cell remains plain text (not editable)
+            roleCell.textContent = oldRole;
+            actionsCell.innerHTML = `
+                <button class="save-btn" title="Save"><i class="fa fa-save"></i></button>
+                <button class="cancel-btn" title="Cancel"><i class="fa fa-times"></i></button>
+            `;
+            updatePasswordHeaderAndCells();
+        }
+        // Save button
+        else if (e.target.closest('.save-btn')) {
+            row.classList.remove('editing');
+            updatePasswordHeaderAndCells();
+            const usernameCell = row.querySelector('.username-cell');
+            const emailCell = row.querySelector('.email-cell');
+            const roleCell = row.querySelector('.role-cell');
+            const passwordCell = row.querySelector('.password-cell');
+            const newUsername = usernameCell.querySelector('input').value.trim();
+            const newEmail = emailCell.querySelector('input').value.trim();
+            const newPassword = passwordCell ? passwordCell.querySelector('input').value : '';
+
+            if (!newUsername || !newEmail) {
+                displayFlashMessage('Username and email are required', 'danger');
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newEmail)) {
+                displayFlashMessage('Please enter a valid email address', 'danger');
+                return;
+            }
+
+            const updateData = {
+                username: newUsername,
+                email: newEmail
+            };
+            if (newPassword) updateData.password = newPassword;
+
+            fetch(`/api/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCookie('csrf_access_token')
+                },
+                body: JSON.stringify(updateData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    usernameCell.textContent = newUsername;
+                    emailCell.textContent = newEmail;
+                    if (passwordCell) passwordCell.style.display = 'none';
+                    row.querySelector('.actions-cell').innerHTML = `
+                        <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                        <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === '1' ? 'Enable' : 'Disable'}">
+                            <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                        </button>
+                    `;
+                    displayFlashMessage('User updated successfully!', 'success');
+                } else {
+                    displayFlashMessage('Error updating user: ' + (data.error || 'Unknown error'), 'danger');
+                }
+            })
+            .catch(() => displayFlashMessage('Error updating user', 'danger'));
+        }
+        // Cancel button
+        else if (e.target.closest('.cancel-btn')) {
+            row.classList.remove('editing');
+            updatePasswordHeaderAndCells();
+            const usernameCell = row.querySelector('.username-cell');
+            const emailCell = row.querySelector('.email-cell');
+            const roleCell = row.querySelector('.role-cell');
+            const passwordCell = row.querySelector('.password-cell');
+            usernameCell.textContent = usernameCell.querySelector('input').defaultValue;
+            emailCell.textContent = emailCell.querySelector('input').defaultValue;
+            // Role cell remains plain text
+            if (passwordCell) passwordCell.style.display = 'none';
+            row.querySelector('.actions-cell').innerHTML = `
+                <button class="icon-btn edit-btn" title="Edit"><i class="fa fa-edit"></i></button>
+                <button class="icon-btn disable-btn" title="${row.getAttribute('data-disabled') === '1' ? 'Enable' : 'Disable'}">
+                    <i class="fa ${row.getAttribute('data-disabled') === '1' ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                </button>
+            `;
+        }
+        // Disable/Enable button
+        else if (e.target.closest('.disable-btn')) {
             const isDisabled = row.getAttribute('data-disabled') === '1';
-            
-            // Toggle disabled status
+            const disableBtn = row.querySelector('.disable-btn');
+            const icon = disableBtn.querySelector('i');
+            const statusCell = row.querySelector('.status-cell');
             const newStatus = isDisabled ? 0 : 1;
-            
-            // Send AJAX request to update status
             fetch(`/update-user-status/${userId}`, {
                 method: 'POST',
                 headers: {
@@ -671,15 +812,9 @@ Manage Inventory Accounts
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Update UI
                     row.setAttribute('data-disabled', newStatus);
-                    const statusCell = row.querySelector('.status-cell');
-                    const disableBtn = row.querySelector('.disable-btn');
-                    const icon = disableBtn.querySelector('i');
-                    
                     statusCell.textContent = newStatus === 1 ? 'Inactive' : 'Active';
                     disableBtn.title = newStatus === 1 ? 'Enable' : 'Disable';
-                    
                     if (newStatus === 1) {
                         icon.className = 'fa fa-toggle-off';
                         disableBtn.classList.remove('enabled');
@@ -687,16 +822,14 @@ Manage Inventory Accounts
                         icon.className = 'fa fa-toggle-on';
                         disableBtn.classList.add('enabled');
                     }
-                    
-                    // Update counters
                     filterTable();
                 } else {
-                    displayFlashMessage(data.error)
+                    displayFlashMessage(data.error, 'danger');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error updating user status');
+                displayFlashMessage('Error updating user status', 'danger');
             });
         }
     });
