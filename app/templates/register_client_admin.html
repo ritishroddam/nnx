@@ -658,17 +658,26 @@ Register Client Admin
         statusFilter.addEventListener('change', filterTable);
     }
 
+    // Utility to show/hide password header and cells
+    function updatePasswordHeaderAndCells() {
+        const anyEditing = Array.from(tableBody.querySelectorAll('tr')).some(row => row.classList.contains('editing'));
+        const passwordHeader = document.querySelector('.password-header');
+        if (passwordHeader) passwordHeader.style.display = anyEditing ? '' : 'none';
+        // Hide all password cells unless editing
+        Array.from(tableBody.querySelectorAll('.password-cell')).forEach(cell => {
+            const row = cell.closest('tr');
+            cell.style.display = row.classList.contains('editing') ? '' : 'none';
+        });
+    }
+
+    // Hide password header and cells on page load
+    updatePasswordHeaderAndCells();
+
     tableBody.addEventListener('click', function(e) {
-        function updatePasswordHeaderVisibility() {
-            const anyEditing = Array.from(tableBody.querySelectorAll('tr')).some(row => row.classList.contains('editing'));
-            const passwordHeader = document.querySelector('.password-header');
-            if (passwordHeader) passwordHeader.style.display = anyEditing ? '' : 'none';
-        }
         const row = e.target.closest('tr');
         if (!row) return;
         const id = row.getAttribute('data-id');
         if (e.target.closest('.edit-btn')) {
-            updatePasswordHeaderVisibility();
             if (row.classList.contains('editing')) return;
             row.classList.add('editing');
             const usernameCell = row.querySelector('.username-cell');
@@ -687,8 +696,9 @@ Register Client Admin
                 row.insertBefore(passwordCell, actionsCell);
             } else {
                 passwordCell.innerHTML = `<input class='edit-row-input' type='password' placeholder='New Password'>`;
-                passwordCell.style.display = '';
             }
+            // Show password cell for this row only
+            passwordCell.style.display = '';
 
             usernameCell.innerHTML = `<input class='edit-row-input' value='${oldUsername}'>`;
             emailCell.innerHTML = `<input class='edit-row-input' value='${oldEmail}'>`;
@@ -697,10 +707,12 @@ Register Client Admin
                 <button class="save-btn" title="Save"><i class="fa fa-save"></i></button>
                 <button class="cancel-btn" title="Cancel"><i class="fa fa-times"></i></button>
             `;
+            updatePasswordHeaderAndCells();
         }
 
         else if (e.target.closest('.save-btn')) {
-            updatePasswordHeaderVisibility();
+            row.classList.remove('editing');
+            updatePasswordHeaderAndCells();
             const usernameCell = row.querySelector('.username-cell');
             const emailCell = row.querySelector('.email-cell');
             const companyCell = row.querySelector('.company-cell');
@@ -754,7 +766,8 @@ Register Client Admin
             .catch(() => alert('Error updating user'));
         }
         else if (e.target.closest('.cancel-btn')) {
-            updatePasswordHeaderVisibility();
+            row.classList.remove('editing');
+            updatePasswordHeaderAndCells();
             const usernameCell = row.querySelector('.username-cell');
             const emailCell = row.querySelector('.email-cell');
             const companyCell = row.querySelector('.company-cell');
