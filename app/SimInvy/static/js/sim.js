@@ -619,8 +619,8 @@ function saveSim(simId) {
     reactivationDate: row.cells[6].querySelector("input")?.value.trim() || null,
     DateIn: row.cells[7].querySelector("input").value.trim(),
     DateOut: row.cells[8].querySelector("input").value.trim(),
-    Vendor: row.cells[9].querySelector("input").value.trim(),
-    lastEditedBy: row.cells[10].querySelector("input").value.trim()
+    Vendor: row.cells[9].querySelector("input").value.trim()
+    // lastEditedBy and lastEditedAt are set by backend
   };
 
   const errors = [];

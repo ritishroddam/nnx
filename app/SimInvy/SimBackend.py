@@ -65,11 +65,9 @@ def get_sims_by_status(status):
             
             if status != 'All':
                 if status in ['Active', 'Inactive']:
-                    # Activity filter
                     if (status == 'Active' and not is_active) or (status == 'Inactive' and is_active):
                         continue
                 else:
-                    # Status filter
                     if actual_status != status:
                         continue
                 
@@ -358,12 +356,10 @@ def download_excel():
         for sim in sims:
             sim_number = sim.get('SimNumber', '')
             last_edited_at = sim.get('lastEditedAt', '')
-            # Format lastEditedAt as dd-mm-YYYY HH:MM if it's a datetime
             if last_edited_at:
                 if hasattr(last_edited_at, 'strftime'):
                     last_edited_at = last_edited_at.strftime('%d-%m-%Y %H:%M')
                 else:
-                    # Try to parse ISO string
                     try:
                         dt = datetime.fromisoformat(str(last_edited_at))
                         last_edited_at = dt.strftime('%d-%m-%Y %H:%M')
