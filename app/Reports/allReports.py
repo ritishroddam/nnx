@@ -504,7 +504,8 @@ def view_report_preview():
                 {field: 1 for field in fields}
             ).sort("date_time", -1)
             df = pd.DataFrame(list(cursor))
-            df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+        
+        df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
 
         if df is None or df.empty:
             return jsonify({"success": True, "data": []})
