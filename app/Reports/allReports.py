@@ -342,7 +342,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             if cursor:
                 data.append(list(cursor))
             print(vehicle.get('LicensePlateNumber'))
-
+        print(data)
         df = pd.DataFrame(data)
         return df
     except Exception as e:
