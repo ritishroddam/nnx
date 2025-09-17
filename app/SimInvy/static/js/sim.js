@@ -649,23 +649,8 @@ function saveSim(simId) {
     })
     .then((data) => {
       if (data.success) {
-        row.cells[0].innerText = updatedData.MobileNumber;
-        row.cells[1].innerText = updatedData.SimNumber;
-        row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
-        row.cells[3].innerText = updatedData.status;
-        row.cells[4].innerText = updatedData.isActive === 'true' ? 'Active' : 'Inactive';
-        row.cells[5].innerText = updatedData.statusDate || '';
-        row.cells[6].innerText = updatedData.reactivationDate || '';
-        row.cells[7].innerText = updatedData.DateIn;
-        row.cells[8].innerText = updatedData.DateOut || '';
-        row.cells[9].innerText = updatedData.Vendor;
-        row.cells[10].innerText = updatedData.lastEditedBy;
-
-        row.cells[11].innerHTML = `
-          <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
-        `;
-        
-        row.className = updatedData.status.toLowerCase();
+        // Reload the page to reflect the latest data for all users
+        window.location.reload();
       } else {
         alert(data.message || "Failed to save the changes. Please try again.");
       }
