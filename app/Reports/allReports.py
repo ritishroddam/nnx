@@ -332,7 +332,8 @@ def process_speed_report(imeis, vehicles, date_filter):
 
         data = []
         for imei in imeis:
-            query = {"imei": imei, "speed": {"$gt": vehicles.get(imei)['normalSpeed']}}
+            vehicle = vehicle.get(imei)
+            query = {"imei": imei, "speed": {"$gt": vehicle['normalSpeed']}}
             query.update(date_filter)
             cursor = db["atlanta"].find(
                 query,
@@ -386,7 +387,6 @@ def view_report_preview():
             vehicles = list(get_vehicle_data())
 
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
-            print(imei_to_plate.get("863221045280391"))
             imeis = list(imei_to_plate.keys())
             all_dfs = []
 
