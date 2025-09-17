@@ -17,7 +17,7 @@ from bson import ObjectId
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
-from app.utils import roles_required
+from app.utils import roles_required, get_vehicle_data
 from app.geocoding import geocodeInternal
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
@@ -389,13 +389,7 @@ def view_report_preview():
         to_date = data.get("toDate")
 
         if vehicle_number == "all":
-            claims = get_jwt()
-            user_roles = claims.get('roles', [])
-            userCompany = claims.get('company')
-            if 'admin' in user_roles:
-                vehicles = get_all_vehicles()
-            else:
-                vehicles = get_all_vehicles({"CompanyName": userCompany})
+            vehicles = get_vehicle_data()
 
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
@@ -485,8 +479,7 @@ def view_report_preview():
 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
-            {"LicensePlateNumber": vehicle_number},
-            {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
+            {"LicensePlateNumber": vehicle_number}
         )
         if not vehicle:
             return jsonify({"success": False, "message": "Vehicle not found"}), 404
