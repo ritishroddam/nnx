@@ -331,6 +331,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             return df
 
         data = []
+        i = 0 
         for imei in imeis:
             vehicle = vehicles.get(imei)
             query = {"imei": imei, "speed": {"$gt": float(vehicle['normalSpeed'])}}
@@ -341,8 +342,11 @@ def process_speed_report(imeis, vehicles, date_filter):
             ).sort("date_time", -1)
             cursor = list(cursor)
             if cursor:
+                i += 1
+                print(i)
                 print(cursor)
                 data.append(cursor)
+        print(data)
         df = pd.DataFrame(data)
         return df
     except Exception as e:
