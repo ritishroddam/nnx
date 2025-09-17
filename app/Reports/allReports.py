@@ -383,7 +383,7 @@ def view_report_preview():
         to_date = data.get("toDate")
 
         if vehicle_number == "all":
-            vehicles = get_vehicle_data()
+            vehicles = list(get_vehicle_data())
 
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
