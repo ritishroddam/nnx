@@ -420,8 +420,8 @@ def view_report_preview():
                 df = pd.DataFrame(list(cursor))
                 
             if not df.empty:
-                print(df)
-                df.groupby("imei")
+                for i in df:
+                    print(i)
                 for idx, (imei, group) in enumerate(df.groupby("imei")):
                     vehicle = imei_to_plate.get(imei, "")
                     
