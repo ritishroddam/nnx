@@ -549,6 +549,7 @@ def view_report_preview():
         return Response(json_str, mimetype='application/json')
 
     except Exception as e:
+        print(e)
         return jsonify({"success": False, "message": str(e)}), 500
     
 @reports_bp.route('/get_recent_reports', methods=['GET'])
