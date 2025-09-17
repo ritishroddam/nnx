@@ -321,7 +321,7 @@ def add_speed_metrics(rows):
 def process_speed_report(imeis, vehicles, date_filter):
     try:
         if not isinstance(imeis, list):
-            query = {"imei": imeis, "speed": {"$gt": vehicles['normalSpeed']}}
+            query = {"imei": imeis, "speed": {"$gt": float(vehicles['normalSpeed'])}}
             query.update(date_filter)
             cursor = db["atlanta"].find(
                 query,
@@ -334,7 +334,7 @@ def process_speed_report(imeis, vehicles, date_filter):
         for imei in imeis:
             vehicle = vehicles.get(imei)
             print(vehicle)
-            query = {"imei": imei, "speed": {"$gt": vehicle['normalSpeed']}}
+            query = {"imei": imei, "speed": {"$gt": float(vehicle['normalSpeed'])}}
             query.update(date_filter)
             cursor = db["atlanta"].find(
                 query,
