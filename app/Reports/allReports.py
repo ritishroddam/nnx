@@ -341,6 +341,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             ).sort("date_time", -1)
             cursor = list(cursor)
             if cursor:
+                print(cursor)
                 data.append(cursor)
         df = pd.DataFrame(data)
         return df
@@ -419,8 +420,6 @@ def view_report_preview():
                 df = pd.DataFrame(list(cursor))
                 
             if not df.empty:
-                # Print the entire DataFrame for debugging
-                print(df.to_string())
                 for idx, (imei, group) in enumerate(df.groupby("imei")):
                     vehicle = imei_to_plate.get(imei, "")
                     
