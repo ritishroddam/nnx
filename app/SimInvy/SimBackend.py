@@ -357,14 +357,17 @@ def download_excel():
             sim_number = sim.get('SimNumber', '')
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
-                if hasattr(last_edited_at, 'strftime'):
-                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
-                else:
-                    try:
+                try:
+                    if hasattr(last_edited_at, 'strftime'):
+                        dt = last_edited_at
+                    else:
                         dt = datetime.fromisoformat(str(last_edited_at))
-                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
-                    except:
-                        pass
+                    # Convert UTC to IST (UTC+5:30)
+                    from datetime import timedelta
+                    dt_ist = dt + timedelta(hours=5, minutes=30)
+                    last_edited_at = dt_ist.strftime('%d-%m-%Y %I:%M %p')
+                except:
+                    pass
             row = {
                 'MobileNumber': sim.get('MobileNumber', ''),
                 'SimNumber': sim_number,
@@ -424,14 +427,16 @@ def download_excel_filtered():
         for sim in sims:
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
-                if hasattr(last_edited_at, 'strftime'):
-                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
-                else:
-                    try:
+                try:
+                    if hasattr(last_edited_at, 'strftime'):
+                        dt = last_edited_at
+                    else:
                         dt = datetime.fromisoformat(str(last_edited_at))
-                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
-                    except:
-                        pass
+                    from datetime import timedelta
+                    dt_ist = dt + timedelta(hours=5, minutes=30)
+                    last_edited_at = dt_ist.strftime('%d-%m-%Y %I:%M %p')
+                except:
+                    pass
             cleaned.append({col: str(sim.get(col, '')).strip() if col != 'lastEditedAt' else last_edited_at for col in columns})
 
         df = pd.DataFrame(cleaned, columns=columns)
