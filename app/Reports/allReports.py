@@ -333,6 +333,7 @@ def process_speed_report(imeis, vehicles, date_filter):
         data = []
         for imei in imeis:
             vehicle = vehicles.get(imei)
+            print(vehicle)
             query = {"imei": imei, "speed": {"$gt": vehicle['normalSpeed']}}
             query.update(date_filter)
             cursor = db["atlanta"].find(
