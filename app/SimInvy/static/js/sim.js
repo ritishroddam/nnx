@@ -627,9 +627,6 @@ function saveSim(simId) {
   if (!updatedData.Vendor) {
     errors.push("Vendor is required.");
   }
-  if (!updatedData.lastEditedBy) {
-    errors.push("Editor name is required.");
-  }
 
   if (errors.length > 0) {
     alert(errors.join("\n"));
