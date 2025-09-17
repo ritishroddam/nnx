@@ -324,6 +324,15 @@ def add_speed_metrics(rows):
         print(f"[DEBUG] Skipping speed summary (single): {e}")
         return e
 
+def process_speed_report(imeis, vehicle, date_filter):
+    query = {"imei": {"$in": imeis}, "speed": {"$gt": vehicle['overSpeed']}}
+    query.update(date_filter)
+    cursor = db['atlanta'].find(
+        query, 
+        {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1})
+    df = pd.DataFrame(list(cursor))
+    return df
+
 @reports_bp.route('/')
 @jwt_required()
 def index():
@@ -369,30 +378,43 @@ def view_report_preview():
             else:
                 vehicles = get_all_vehicles({"CompanyName": userCompany})
 
-            imei_to_plate = {v["IMEI"]: v["LicensePlateNumber"] for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
+            imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
             all_dfs = []
 
             if report_type not in report_configs:
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
-            config = report_configs[report_type]
-            fields = config['fields']
-            collection = config['collection']
-            base_query = config['query']
-            post_process = config.get('post_process')
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
-            query = {"imei": {"$in": imeis}}
-            if date_filter:
-                query.update(date_filter)
-            query.update(base_query)
-            cursor = db[collection].find(
-                query,
-                {field: 1 for field in fields + ["imei"]}
-            ).sort("date_time", -1)
-            df = pd.DataFrame(list(cursor))
+            
+            if report_type == "distance-speed-range":
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                df = process_speed_report(imeis, vehicle, date_filter)
+            
+            else:
+                config = report_configs[report_type]
+                fields = config['fields']
+                collection = config['collection']
+                base_query = config['query']
+                post_process = config.get('post_process')
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                query = {"imei": {"$in": imeis}}
+                if date_filter:
+                    query.update(date_filter)
+                query.update(base_query)
+                cursor = db[collection].find(
+                    query,
+                    {field: 1 for field in fields + ["imei"]}
+                ).sort("date_time", -1)
+                df = pd.DataFrame(list(cursor))
+                
             if not df.empty:
                 for idx, (imei, group) in enumerate(df.groupby("imei")):
-                    license_plate = imei_to_plate.get(imei, "")
+                    vehicle = imei_to_plate.get(imei, "")
+                    
+                    if vehicle:
+                        license_plate = vehicle["LicensePlateNumber"]
+                    else:
+                        license_plate = ""
+                    
                     group = group.drop(columns=["imei"])
                     processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                     if processed is not None:
