@@ -293,7 +293,7 @@ def edit_sim(sim_id):
             "Vendor": updated_data.get("Vendor"),
             "status": updated_data.get("status"),
             "isActive": is_active,
-            "lastEditedBy": updated_data.get("lastEditedBy"),
+            "lastEditedBy": get_jwt_identity(),
             "lastEditedAt": datetime.now()
         }
         
