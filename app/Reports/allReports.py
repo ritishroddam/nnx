@@ -346,7 +346,7 @@ def process_speed_report(imeis, vehicles, date_filter):
                 print(i)
                 data.append(cursor)
         df = pd.DataFrame(data)
-        print(df)
+        print(df.to_string)
         return df
     except Exception as e:
         print(e)
