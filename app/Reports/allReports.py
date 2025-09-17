@@ -345,7 +345,6 @@ def process_speed_report(imeis, vehicles, date_filter):
                 i += 1
                 print(i)
                 data.append(cursor)
-        print(data)
         df = pd.DataFrame(data)
         print(df)
         return df
