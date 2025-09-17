@@ -326,7 +326,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             cursor = db["atlanta"].find(
                 query,
                 {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-            ) 
+            ).sort("date_time", -1)
             df = pd.DataFrame(list(cursor))
             return df
 
@@ -338,7 +338,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             cursor = db["atlanta"].find(
                 query,
                 {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-            ) 
+            ).sort("date_time", -1)
             data.append(list(cursor))
 
         df = pd.DataFrame(data)
