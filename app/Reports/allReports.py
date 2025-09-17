@@ -394,6 +394,8 @@ def view_report_preview():
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
             
             if report_type == "distance-speed-range":
+                config = report_configs[report_type]
+                fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
                 df = process_speed_report(imeis, imei_to_plate, date_filter)
             
@@ -486,8 +488,10 @@ def view_report_preview():
             return jsonify({"success": False, "message": "Invalid report type"}), 400
         
         if report_type == "distance-speed-range":
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
-                df = process_speed_report(imei, vehicle, date_filter)
+            config = report_configs[report_type]
+            fields = config['fields']
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
+            df = process_speed_report(imei, vehicle, date_filter)
         else:
             config = report_configs[report_type]
             fields = config['fields']
