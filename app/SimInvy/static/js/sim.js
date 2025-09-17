@@ -483,7 +483,6 @@ function editSim(simId) {
   for (let i = 0; i < 11; i++) {
     row.setAttribute(`data-original-col-${i}`, row.cells[i].innerText);
   }
-
   row.setAttribute("data-original-mobile", row.cells[0].innerText);
   row.setAttribute("data-original-sim", row.cells[1].innerText);
   row.setAttribute("data-original-imei", row.cells[2].innerText);
@@ -495,10 +494,19 @@ function editSim(simId) {
   row.setAttribute("data-original-date-out", row.cells[8].innerText);
   row.setAttribute("data-original-vendor", row.cells[9].innerText);
   row.setAttribute("data-original-editor", row.cells[10].innerText);
+  row.setAttribute("data-original-edited-date", row.cells[11].innerText);
 
   row.classList.add('editing');
 
-  row.setAttribute("data-original-mobile", row.cells[0].innerText);
+  // Hide Last Edited By and Last Edited Date headers and cells
+  const table = row.closest('table');
+  const thead = table.querySelector('thead tr');
+  const lastEditedByTh = thead.children[10];
+  const lastEditedDateTh = thead.children[11];
+  lastEditedByTh.style.display = 'none';
+  lastEditedDateTh.style.display = 'none';
+  row.cells[10].style.display = 'none';
+  row.cells[11].style.display = 'none';
 
   const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
     .map(opt => `<option value="${opt}" ${row.cells[3].innerText === opt ? 'selected' : ''}>${opt}</option>`)
@@ -524,16 +532,8 @@ function editSim(simId) {
   row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
   row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
 
-  row.cells[10].innerHTML = `
-    <input type="text" 
-           value="${row.getAttribute("data-original-editor") || ''}" 
-           required 
-           placeholder="Your name"
-           style="width: 100%"
-    />
-`;
-
-  row.cells[11].innerHTML = `
+  // Actions cell (now at index 12 after hiding 10 and 11)
+  row.cells[12].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
   `;
@@ -575,21 +575,32 @@ function cancelEdit(simId) {
   if (row) {
     row.classList.remove('editing');
 
-  row.cells[0].innerText = row.getAttribute("data-original-mobile");
-  row.cells[1].innerText = row.getAttribute("data-original-sim");
-  row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
-  row.cells[3].innerText = row.getAttribute("data-original-status");
-  row.cells[4].innerText = row.getAttribute("data-original-active") === 'true' ? 'Active' : 'Inactive';
-  row.cells[5].innerText = row.getAttribute("data-original-status-date");
-  row.cells[6].innerText = row.getAttribute("data-original-reactivation-date");
-  row.cells[7].innerText = row.getAttribute("data-original-date-in");
-  row.cells[8].innerText = row.getAttribute("data-original-date-out");
-  row.cells[9].innerText = row.getAttribute("data-original-vendor");
-  row.cells[10].innerText = row.getAttribute("data-original-editor") || 'N/A';
+    row.cells[0].innerText = row.getAttribute("data-original-mobile");
+    row.cells[1].innerText = row.getAttribute("data-original-sim");
+    row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
+    row.cells[3].innerText = row.getAttribute("data-original-status");
+    row.cells[4].innerText = row.getAttribute("data-original-active") === 'true' ? 'Active' : 'Inactive';
+    row.cells[5].innerText = row.getAttribute("data-original-status-date");
+    row.cells[6].innerText = row.getAttribute("data-original-reactivation-date");
+    row.cells[7].innerText = row.getAttribute("data-original-date-in");
+    row.cells[8].innerText = row.getAttribute("data-original-date-out");
+    row.cells[9].innerText = row.getAttribute("data-original-vendor");
+    row.cells[10].innerText = row.getAttribute("data-original-editor") || 'N/A';
+    row.cells[11].innerText = row.getAttribute("data-original-edited-date") || 'N/A';
 
-  row.cells[11].innerHTML = `
-    <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
-  `;
+    row.cells[12].innerHTML = `
+      <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
+    `;
+
+    // Restore Last Edited By and Last Edited Date headers and cells
+    const table = row.closest('table');
+    const thead = table.querySelector('thead tr');
+    const lastEditedByTh = thead.children[10];
+    const lastEditedDateTh = thead.children[11];
+    lastEditedByTh.style.display = '';
+    lastEditedDateTh.style.display = '';
+    row.cells[10].style.display = '';
+    row.cells[11].style.display = '';
   }
 }
 
@@ -608,8 +619,8 @@ function saveSim(simId) {
     reactivationDate: row.cells[6].querySelector("input")?.value.trim() || null,
     DateIn: row.cells[7].querySelector("input").value.trim(),
     DateOut: row.cells[8].querySelector("input").value.trim(),
-    Vendor: row.cells[9].querySelector("input").value.trim(),
-    lastEditedBy: row.cells[10].querySelector("input").value.trim()
+    Vendor: row.cells[9].querySelector("input").value.trim()
+    // lastEditedBy and lastEditedAt are set by backend
   };
 
   const errors = [];
@@ -626,9 +637,6 @@ function saveSim(simId) {
   }
   if (!updatedData.Vendor) {
     errors.push("Vendor is required.");
-  }
-  if (!updatedData.lastEditedBy) {
-    errors.push("Editor name is required.");
   }
 
   if (errors.length > 0) {
@@ -652,23 +660,8 @@ function saveSim(simId) {
     })
     .then((data) => {
       if (data.success) {
-        row.cells[0].innerText = updatedData.MobileNumber;
-        row.cells[1].innerText = updatedData.SimNumber;
-        row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
-        row.cells[3].innerText = updatedData.status;
-        row.cells[4].innerText = updatedData.isActive === 'true' ? 'Active' : 'Inactive';
-        row.cells[5].innerText = updatedData.statusDate || '';
-        row.cells[6].innerText = updatedData.reactivationDate || '';
-        row.cells[7].innerText = updatedData.DateIn;
-        row.cells[8].innerText = updatedData.DateOut || '';
-        row.cells[9].innerText = updatedData.Vendor;
-        row.cells[10].innerText = updatedData.lastEditedBy;
-
-        row.cells[11].innerHTML = `
-          <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
-        `;
-        
-        row.className = updatedData.status.toLowerCase();
+        // Reload the page to reflect the latest data for all users
+        window.location.reload();
       } else {
         alert(data.message || "Failed to save the changes. Please try again.");
       }

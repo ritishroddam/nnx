@@ -65,11 +65,9 @@ def get_sims_by_status(status):
             
             if status != 'All':
                 if status in ['Active', 'Inactive']:
-                    # Activity filter
                     if (status == 'Active' and not is_active) or (status == 'Inactive' and is_active):
                         continue
                 else:
-                    # Status filter
                     if actual_status != status:
                         continue
                 
@@ -293,7 +291,7 @@ def edit_sim(sim_id):
             "Vendor": updated_data.get("Vendor"),
             "status": updated_data.get("status"),
             "isActive": is_active,
-            "lastEditedBy": updated_data.get("lastEditedBy"),
+            "lastEditedBy": get_jwt_identity(),
             "lastEditedAt": datetime.now()
         }
         
@@ -347,15 +345,26 @@ def download_excel():
         vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
         sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
 
+
         export_columns = [
             'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
             'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
-            'Vendor', 'lastEditedBy'
+            'Vendor', 'lastEditedBy', 'lastEditedAt'
         ]
 
         processed_data = []
         for sim in sims:
             sim_number = sim.get('SimNumber', '')
+            last_edited_at = sim.get('lastEditedAt', '')
+            if last_edited_at:
+                if hasattr(last_edited_at, 'strftime'):
+                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
+                else:
+                    try:
+                        dt = datetime.fromisoformat(str(last_edited_at))
+                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
+                    except:
+                        pass
             row = {
                 'MobileNumber': sim.get('MobileNumber', ''),
                 'SimNumber': sim_number,
@@ -367,7 +376,8 @@ def download_excel():
                 'DateIn': str(sim.get('DateIn', '')).split('T')[0] if sim.get('DateIn') else '',
                 'DateOut': str(sim.get('DateOut', '')).split('T')[0] if sim.get('DateOut') else '',
                 'Vendor': sim.get('Vendor', ''),
-                'lastEditedBy': sim.get('lastEditedBy', 'N/A')
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A'),
+                'lastEditedAt': last_edited_at or ''
             }
             processed_data.append(row)
 
@@ -403,15 +413,26 @@ def download_excel_filtered():
         if not sims:
             return jsonify({"error": "No SIM data received"}), 400
 
+
         columns = [
             'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
             'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
-            'Vendor', 'lastEditedBy'
+            'Vendor', 'lastEditedBy', 'lastEditedAt'
         ]
 
         cleaned = []
         for sim in sims:
-            cleaned.append({col: str(sim.get(col, '')).strip() for col in columns})
+            last_edited_at = sim.get('lastEditedAt', '')
+            if last_edited_at:
+                if hasattr(last_edited_at, 'strftime'):
+                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
+                else:
+                    try:
+                        dt = datetime.fromisoformat(str(last_edited_at))
+                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
+                    except:
+                        pass
+            cleaned.append({col: str(sim.get(col, '')).strip() if col != 'lastEditedAt' else last_edited_at for col in columns})
 
         df = pd.DataFrame(cleaned, columns=columns)
 
