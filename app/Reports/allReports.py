@@ -344,7 +344,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             if cursor:
                 i += 1
                 print(i)
-                data.append(cursor)
+                data.extend(cursor)
         print(data)
         df = pd.DataFrame(data)
         print(df.to_string)
