@@ -340,6 +340,7 @@ def process_speed_report(imeis, vehicles, date_filter):
                 {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
             ).sort("date_time", -1)
             data.append(list(cursor))
+            print(vehicle.get('LicensePlateNumber'))
 
         df = pd.DataFrame(data)
         return df
@@ -393,12 +394,14 @@ def view_report_preview():
             if report_type not in report_configs:
                 return jsonify({"success": False, "message": "Invalid report type"}), 400
             
+            post_process = None
+            
             if report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
                 df = process_speed_report(imeis, imei_to_plate, date_filter)
-            
+                print("[DEBUG] Speed Data Retrevied")
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
