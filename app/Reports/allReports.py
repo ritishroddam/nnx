@@ -339,10 +339,9 @@ def process_speed_report(imeis, vehicles, date_filter):
                 query,
                 {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
             ).sort("date_time", -1)
-            if cursor:
+            if list(cursor):
                 data.append(list(cursor))
             print(vehicle.get('LicensePlateNumber'))
-        print(data)
         df = pd.DataFrame(data)
         return df
     except Exception as e:
@@ -420,7 +419,6 @@ def view_report_preview():
                 df = pd.DataFrame(list(cursor))
                 
             if not df.empty:
-                print(df)
                 df.groupby("imei")
                 for idx, (imei, group) in enumerate(df.groupby("imei")):
                     vehicle = imei_to_plate.get(imei, "")
