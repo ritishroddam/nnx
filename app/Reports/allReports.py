@@ -324,13 +324,29 @@ def add_speed_metrics(rows):
         print(f"[DEBUG] Skipping speed summary (single): {e}")
         return e
 
-def process_speed_report(imeis, vehicle, date_filter):
-    query = {"imei": {"$in": imeis}, "speed": {"$gt": vehicle['overSpeed']}}
-    query.update(date_filter)
-    cursor = db['atlanta'].find(
-        query, 
-        {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1})
-    df = pd.DataFrame(list(cursor))
+def process_speed_report(imeis, vehicles, date_filter):
+    query = {"imei": {"$in": imeis}, "speed": {"$gt": vehicles['overSpeed']}}
+    if not isinstance(imeis, list):
+        query = {"imei": imeis, "speed": {"$gt": vehicles.get(imeis)['overSpeed']}}
+        query.update(date_filter)
+        cursor = db["atlanta"].find(
+            query,
+            {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+        ) 
+        df = pd.DataFrame(list(cursor))
+        return df
+    
+    data = []
+    for imei in imeis:
+        query = {"imei": imei, "speed": {"$gt": vehicles.get(imei)['overSpeed']}}
+        query.update(date_filter)
+        cursor = db["atlanta"].find(
+            query,
+            {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+        ) 
+        data.append(list(cursor))
+    
+    df = pd.DataFrame(data)
     return df
 
 @reports_bp.route('/')
@@ -387,7 +403,7 @@ def view_report_preview():
             
             if report_type == "distance-speed-range":
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
-                df = process_speed_report(imeis, vehicle, date_filter)
+                df = process_speed_report(imeis, imei_to_plate, date_filter)
             
             else:
                 config = report_configs[report_type]
