@@ -384,6 +384,7 @@ def view_report_preview():
 
         if vehicle_number == "all":
             vehicles = list(get_vehicle_data())
+            print(vehicles)
 
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
