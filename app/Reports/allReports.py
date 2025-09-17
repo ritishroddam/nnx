@@ -487,6 +487,8 @@ def view_report_preview():
         if report_type not in report_configs:
             return jsonify({"success": False, "message": "Invalid report type"}), 400
         
+        post_process = None
+        
         if report_type == "distance-speed-range":
             config = report_configs[report_type]
             fields = config['fields']
