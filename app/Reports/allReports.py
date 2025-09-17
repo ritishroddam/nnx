@@ -325,9 +325,8 @@ def add_speed_metrics(rows):
         return e
 
 def process_speed_report(imeis, vehicles, date_filter):
-    query = {"imei": {"$in": imeis}, "speed": {"$gt": vehicles['overSpeed']}}
     if not isinstance(imeis, list):
-        query = {"imei": imeis, "speed": {"$gt": vehicles.get(imeis)['overSpeed']}}
+        query = {"imei": imeis, "speed": {"$gt": vehicles['overSpeed']}}
         query.update(date_filter)
         cursor = db["atlanta"].find(
             query,
@@ -493,22 +492,27 @@ def view_report_preview():
 
         if report_type not in report_configs:
             return jsonify({"success": False, "message": "Invalid report type"}), 400
-        config = report_configs[report_type]
-        fields = config['fields']
-        collection = config['collection']
-        base_query = config['query']
-        post_process = config.get('post_process')
-        date_filter = get_date_range_filter(date_range, from_date, to_date)
-        query = {"imei": imei}
-        if date_filter:
-            query.update(date_filter)
-        query.update(base_query)
-        cursor = db[collection].find(
-            query,
-            {field: 1 for field in fields}
-        ).sort("date_time", -1)
-        df = pd.DataFrame(list(cursor))
-        df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+        
+        if report_type == "distance-speed-range":
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                df = process_speed_report(imei, vehicle, date_filter)
+        else:
+            config = report_configs[report_type]
+            fields = config['fields']
+            collection = config['collection']
+            base_query = config['query']
+            post_process = config.get('post_process')
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
+            query = {"imei": imei}
+            if date_filter:
+                query.update(date_filter)
+            query.update(base_query)
+            cursor = db[collection].find(
+                query,
+                {field: 1 for field in fields}
+            ).sort("date_time", -1)
+            df = pd.DataFrame(list(cursor))
+            df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
 
         if df is None or df.empty:
             return jsonify({"success": True, "data": []})
