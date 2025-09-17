@@ -108,7 +108,7 @@ def get_all_vehicles(query=None):
     """Return a list of all vehicles' LicensePlateNumber and IMEI."""
     if query is None:
         query = {}
-    return list(db['vehicle_inventory'].find(query, {"LicensePlateNumber": 1, "IMEI": 1, "_id": 0}))
+    return list(db['vehicle_inventory'].find(query, {"LicensePlateNumber": 1, "IMEI": 1, "_id": 0, "overSpeed": 1}))
     
 def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
