@@ -401,7 +401,6 @@ def view_report_preview():
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
                 df = process_speed_report(imeis, imei_to_plate, date_filter)
-                print("[DEBUG] Speed Data Retrevied")
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
@@ -420,6 +419,9 @@ def view_report_preview():
                 df = pd.DataFrame(list(cursor))
                 
             if not df.empty:
+                for i in df:
+                    print(i)
+                    df.groupby("imei")
                 for idx, (imei, group) in enumerate(df.groupby("imei")):
                     vehicle = imei_to_plate.get(imei, "")
                     
