@@ -325,28 +325,32 @@ def add_speed_metrics(rows):
         return e
 
 def process_speed_report(imeis, vehicles, date_filter):
-    if not isinstance(imeis, list):
-        query = {"imei": imeis, "speed": {"$gt": vehicles['overSpeed']}}
-        query.update(date_filter)
-        cursor = db["atlanta"].find(
-            query,
-            {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-        ) 
-        df = pd.DataFrame(list(cursor))
+    try:
+        if not isinstance(imeis, list):
+            query = {"imei": imeis, "speed": {"$gt": vehicles['overSpeed']}}
+            query.update(date_filter)
+            cursor = db["atlanta"].find(
+                query,
+                {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+            ) 
+            df = pd.DataFrame(list(cursor))
+            return df
+
+        data = []
+        for imei in imeis:
+            query = {"imei": imei, "speed": {"$gt": vehicles.get(imei)['overSpeed']}}
+            query.update(date_filter)
+            cursor = db["atlanta"].find(
+                query,
+                {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+            ) 
+            data.append(list(cursor))
+
+        df = pd.DataFrame(data)
         return df
-    
-    data = []
-    for imei in imeis:
-        query = {"imei": imei, "speed": {"$gt": vehicles.get(imei)['overSpeed']}}
-        query.update(date_filter)
-        cursor = db["atlanta"].find(
-            query,
-            {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-        ) 
-        data.append(list(cursor))
-    
-    df = pd.DataFrame(data)
-    return df
+    except Exception as e:
+        print(e)
+        return e
 
 @reports_bp.route('/')
 @jwt_required()
