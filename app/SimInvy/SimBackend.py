@@ -358,11 +358,11 @@ def download_excel():
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
                 if hasattr(last_edited_at, 'strftime'):
-                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %H:%M')
+                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
                 else:
                     try:
                         dt = datetime.fromisoformat(str(last_edited_at))
-                        last_edited_at = dt.strftime('%d-%m-%Y %H:%M')
+                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
                     except:
                         pass
             row = {
@@ -425,11 +425,11 @@ def download_excel_filtered():
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
                 if hasattr(last_edited_at, 'strftime'):
-                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %H:%M')
+                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
                 else:
                     try:
                         dt = datetime.fromisoformat(str(last_edited_at))
-                        last_edited_at = dt.strftime('%d-%m-%Y %H:%M')
+                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
                     except:
                         pass
             cleaned.append({col: str(sim.get(col, '')).strip() if col != 'lastEditedAt' else last_edited_at for col in columns})
