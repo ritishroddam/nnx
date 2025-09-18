@@ -3,6 +3,7 @@ import re
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
+from pymongo import ASCENDING, DESCENDING
 import traceback
 import pandas as pd
 from datetime import datetime
@@ -231,26 +232,36 @@ def getDateRanges(date_range):
 def process_distance_report(imei, vehicle_number, date_filter):
     """Calculate total distance traveled"""
     try:
-        
-        df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
+        query = {
+            "imei": imei,
+        },
+        query.update(date_filter)
+        start_odometer = db["atlanta"].find_one(
+            query, {"_id": 0, "odometer": 1},
+            sort=[("date_time", ASCENDING)]
+        )
+        end_odometer = db["atlanta"].find_one(
+            query, {"_id": 0, "odometer": 1},
+            sort=[("date_time", DESCENDING)]
+        )
 
-        if not df.empty:
-            total_distance = abs(df['odometer'].iloc[-1] - df['odometer'].iloc[0])
+        if start_odometer and end_odometer:
+            total_distance = abs(end_odometer - start_odometer)
         else:
             total_distance = 0
         
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
-            'Start Odometer': [df['odometer'].iloc[0]],
-            'End Odometer': [df['odometer'].iloc[-1]]
+            'Start Odometer': [start_odometer],
+            'End Odometer': [end_odometer]
         })
 
         summary_df = summary_df[['Vehicle Number', 'Total Distance (km)', 'Start Odometer', 'End Odometer']]
         
         return summary_df
-    except Exception:
-        return df
+    except Exception as e:
+        return e
 
 def process_travel_path_report(df):
     try:
@@ -402,11 +413,6 @@ def view_report_preview():
             
             post_process = None
             
-            if report_type == "distance-speed-range":
-                config = report_configs[report_type]
-                fields = config['fields']
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
-                df = process_speed_report(imeis, imei_to_plate, date_filter)
             if report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
                 fields = config['fields']
@@ -419,38 +425,42 @@ def view_report_preview():
                     else:
                         license_plate = ""
                     
-                    process_distance_report(imei, license_plate, date_filter)
-                    
-                    return
+                    df = process_distance_report(imei, license_plate, date_filter)
+                    all_dfs.append(df)
             else:
-                config = report_configs[report_type]
-                fields = config['fields']
-                collection = config['collection']
-                base_query = config['query']
-                post_process = config.get('post_process')
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
-                query = {"imei": {"$in": imeis}}
-                if date_filter:
-                    query.update(date_filter)
-                query.update(base_query)
-                cursor = db[collection].find(
-                    query,
-                    {field: 1 for field in fields + ["imei"]}
-                ).sort("date_time", -1)
-                df = pd.DataFrame(list(cursor))
-                
-            if not df.empty:
-                for idx, (imei, group) in enumerate(df.groupby("imei")):
-                    vehicle = imei_to_plate.get(imei, "")
-                    
-                    if vehicle:
-                        license_plate = vehicle["LicensePlateNumber"]
-                    else:
-                        license_plate = ""
-                    
-                    group = group.drop(columns=["imei"])
-                    
-                    if report_type not in ["odometer-daily-distance"]:
+                if report_type == "distance-speed-range":
+                    config = report_configs[report_type]
+                    fields = config['fields']
+                    date_filter = get_date_range_filter(date_range, from_date, to_date)
+                    df = process_speed_report(imeis, imei_to_plate, date_filter)
+                else:
+                    config = report_configs[report_type]
+                    fields = config['fields']
+                    collection = config['collection']
+                    base_query = config['query']
+                    post_process = config.get('post_process')
+                    date_filter = get_date_range_filter(date_range, from_date, to_date)
+                    query = {"imei": {"$in": imeis}}
+                    if date_filter:
+                        query.update(date_filter)
+                    query.update(base_query)
+                    cursor = db[collection].find(
+                        query,
+                        {field: 1 for field in fields + ["imei"]}
+                    ).sort("date_time", -1)
+                    df = pd.DataFrame(list(cursor))
+
+                if not df.empty:
+                    for idx, (imei, group) in enumerate(df.groupby("imei")):
+                        vehicle = imei_to_plate.get(imei, "")
+
+                        if vehicle:
+                            license_plate = vehicle["LicensePlateNumber"]
+                        else:
+                            license_plate = ""
+
+                        group = group.drop(columns=["imei"])
+
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                         print(report_type)
                         if processed is not None:
@@ -458,10 +468,6 @@ def view_report_preview():
                             sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
                             all_dfs.append(processed)
-                        continue
-                    
-                    processed = process_distance_report(group, license_plate)
-                    all_dfs.append(processed)
 
             if not all_dfs:
                 return jsonify({"success": True, "data": []})
@@ -518,32 +524,31 @@ def view_report_preview():
         
         post_process = None
         
-        if report_type == "distance-speed-range":
-            config = report_configs[report_type]
-            fields = config['fields']
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
-            df = process_speed_report(imei, vehicle, date_filter)
+        if report_type != "odometer-daily-distance":
+            df = process_distance_report(imei, license_plate, date_filter)
         else:
-            config = report_configs[report_type]
-            fields = config['fields']
-            collection = config['collection']
-            base_query = config['query']
-            post_process = config.get('post_process')
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
-            query = {"imei": imei}
-            if date_filter:
-                query.update(date_filter)
-            query.update(base_query)
-            cursor = db[collection].find(
-                query,
-                {field: 1 for field in fields}
-            ).sort("date_time", -1)
-            df = pd.DataFrame(list(cursor))
-        
-        if report_type not in ["odometer-daily-distance"]:
+            if report_type == "distance-speed-range":
+                config = report_configs[report_type]
+                fields = config['fields']
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                df = process_speed_report(imei, vehicle, date_filter)
+            else:
+                config = report_configs[report_type]
+                fields = config['fields']
+                collection = config['collection']
+                base_query = config['query']
+                post_process = config.get('post_process')
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                query = {"imei": imei}
+                if date_filter:
+                    query.update(date_filter)
+                query.update(base_query)
+                cursor = db[collection].find(
+                    query,
+                    {field: 1 for field in fields}
+                ).sort("date_time", -1)
+                df = pd.DataFrame(list(cursor))
             df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
-        else:
-            df = process_distance_report(df, license_plate)
 
         
         if df is None or df.empty:
