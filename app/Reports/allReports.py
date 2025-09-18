@@ -248,10 +248,7 @@ def process_distance_report(imei, vehicle_number, date_filter):
         start_odometer = start_doc["odometer"] if start_doc and "odometer" in start_doc else 0
         end_odometer = end_doc["odometer"] if end_doc and "odometer" in end_doc else 0
         
-        if start_odometer and end_odometer:
-            total_distance = abs(end_odometer["odometer"] - start_odometer["odometer"])
-        else:
-            total_distance = 0
+        total_distance = abs(float(end_odometer) - float(start_odometer))
         
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
