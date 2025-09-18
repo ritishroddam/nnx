@@ -1,5 +1,6 @@
 from ast import Lambda
 import re
+from tracemalloc import start
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
@@ -235,17 +236,20 @@ def process_distance_report(imei, vehicle_number, date_filter):
             "imei": imei,
         }
         query.update(date_filter)
-        start_odometer = db["atlanta"].find_one(
+        start_doc = db["atlanta"].find_one(
             query, {"_id": 0, "odometer": 1},
             sort=[("date_time", ASCENDING)]
         )
-        end_odometer = db["atlanta"].find_one(
+        end_doc = db["atlanta"].find_one(
             query, {"_id": 0, "odometer": 1},
             sort=[("date_time", DESCENDING)]
         )
 
+        start_odometer = start_doc["odometer"] if start_doc and "odometer" in start_doc else 0
+        end_odometer = end_doc["odometer"] if end_doc and "odometer" in end_doc else 0
+        
         if start_odometer and end_odometer:
-            total_distance = abs(end_odometer - start_odometer)
+            total_distance = abs(end_odometer["odometer"] - start_odometer["odometer"])
         else:
             total_distance = 0
         
