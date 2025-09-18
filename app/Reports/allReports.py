@@ -234,10 +234,7 @@ def process_distance_report(df, vehicle_number):
         df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
         df['Distance (km)'] = df['odometer'].diff().fillna(0)
 
-        if not df.empty:
-            total_distance = abs(df['odometer'].iloc[-1] - df['odometer'].iloc[0])
-        else:
-            total_distance = 0
+        total_distance = df['Distance (km)'].sum()
         
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
