@@ -233,7 +233,7 @@ def process_distance_report(imei, vehicle_number, date_filter):
     try:
         query = {
             "imei": imei,
-        },
+        }
         query.update(date_filter)
         start_odometer = db["atlanta"].find_one(
             query, {"_id": 0, "odometer": 1},
@@ -260,8 +260,8 @@ def process_distance_report(imei, vehicle_number, date_filter):
         
         return summary_df
     except Exception as e:
-        print(f"[ERROR] process_distance_report: {e}")
-        return pd.DataFrame()  
+        print(e)
+        return e
 
 def process_travel_path_report(df):
     try:
