@@ -435,9 +435,9 @@ def view_report_preview():
                     group = group.drop(columns=["imei"])
                     processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                     
-                    print(report_type)
                     if report_type not in ["odometer-daily-distance"]:
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+                        print(report_type)
                         if processed is not None:
                             sep_dict = OrderedDict((col, "" ) for col in processed.columns)
                             sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
