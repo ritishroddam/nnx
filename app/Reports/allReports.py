@@ -240,13 +240,18 @@ def process_distance_report(imei, vehicle_number, date_filter):
             query, {"_id": 0, "odometer": 1},
             sort=[("date_time", ASCENDING)]
         )
+        if not start_doc:
+            return None
         end_doc = db["atlanta"].find_one(
             query, {"_id": 0, "odometer": 1},
             sort=[("date_time", DESCENDING)]
         )
+        if not end_doc:
+            return None
 
-        start_odometer = start_doc["odometer"] if start_doc and "odometer" in start_doc else 0
-        end_odometer = end_doc["odometer"] if end_doc and "odometer" in end_doc else 0
+        
+        start_odometer = start_doc["odometer"]
+        end_odometer = end_doc["odometer"]
         
         total_distance = abs(float(end_odometer) - float(start_odometer))
         
@@ -427,6 +432,8 @@ def view_report_preview():
                         license_plate = ""
                     
                     df = process_distance_report(imei, license_plate, date_filter)
+                    if not df:
+                        continue
                     all_dfs.append(df)
             else:
                 if report_type == "distance-speed-range":
