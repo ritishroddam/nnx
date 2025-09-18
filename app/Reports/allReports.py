@@ -526,9 +526,9 @@ def view_report_preview():
             df = pd.DataFrame(list(cursor))
         
         if report_type not in ["odometer-daily-distance"]:
-            df = process_distance_report(group, license_plate)
-        else:
             df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+        else:
+            df = process_distance_report(group, license_plate)
 
         
         if df is None or df.empty:
