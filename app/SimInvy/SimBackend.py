@@ -27,15 +27,15 @@ def format_date(date_str):
 @jwt_required()
 def page():
     vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+    vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
     
-    sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') 
-                  for v in vehicles if 'sim_number' in v}
+    sim_to_imei = {v['SIM']: v.get('imei', 'N/A') 
+                  for v in vehicles if 'SIM' in v}
     
     sims = list(collection.find({}))
     for sim in sims:
-        if sim['SimNumber'] in sim_to_imei:
-            sim['IMEI'] = sim_to_imei[sim['SimNumber']]
+        if sim['MobileNumber'] in sim_to_imei:
+            sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
             sim['status'] = 'Allocated'
             sim['isActive'] = True
         else:
