@@ -101,88 +101,61 @@ function initializeStatusFilter() {
 }
 
 function filterDevicesByStatus() {
-    const selectedStatus = document.getElementById("statusFilter").value;
-    const tableBody = document.getElementById("deviceTable");
-    
-    if (!selectedStatus) {
-        // Show all devices if no filter selected
-        allDevices.forEach(device => {
-            device.style.display = "";
-        });
-        return;
-    }
-    
+  const selectedStatus = document.getElementById("statusFilter").value;
+  if (!selectedStatus) {
     allDevices.forEach(device => {
-        if (selectedStatus === "Active" || selectedStatus === "Inactive") {
-            // For status filter - look for both button and radio inputs
-            const statusCell = device.cells[12];
-            let status = "";
-            
-            // Check for status button
-            const statusButton = statusCell.querySelector(".status-btn");
-            if (statusButton) {
-                status = statusButton.textContent.trim();
-            } 
-            // Check for radio inputs (in edit mode)
-            else {
-                const activeRadio = statusCell.querySelector('input[type="radio"][value="Active"]');
-                const inactiveRadio = statusCell.querySelector('input[type="radio"][value="Inactive"]');
-                if (activeRadio && activeRadio.checked) status = "Active";
-                if (inactiveRadio && inactiveRadio.checked) status = "Inactive";
-            }
-            
-            device.style.display = status === selectedStatus ? "" : "none";
-        } else {
-            // For package type filter
-            const packageCell = device.cells[10];
-            const packageType = packageCell.textContent.trim();
-            device.style.display = packageType === selectedStatus ? "" : "none";
-        }
+      device.style.display = "";
     });
+    return;
+  }
+  allDevices.forEach(device => {
+    // Status is now in cell 11 (0-based)
+    if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
+      const statusCell = device.cells[11];
+      let status = statusCell.textContent.trim();
+      device.style.display = status === selectedStatus ? "" : "none";
+    } else {
+      // For package type filter
+      const packageCell = device.cells[9];
+      const packageType = packageCell.textContent.trim();
+      device.style.display = packageType === selectedStatus ? "" : "none";
+    }
+  });
 }
 
 function updateStatusCounts() {
-    let activeCount = 0;
-    let inactiveCount = 0;
-    let rentalCount = 0;
-    let packageCount = 0;
-    let outrateCount = 0;
+  let newStockCount = 0;
+  let inUseCount = 0;
+  let availableCount = 0;
+  let discardedCount = 0;
+  let rentalCount = 0;
+  let packageCount = 0;
+  let outrateCount = 0;
 
-    allDevices.forEach(device => {
-        // Count package types first (from column 10)
-        const packageCell = device.cells[10];
-        const packageType = packageCell.textContent.trim();
-        if (packageType === "Rental") rentalCount++;
-        if (packageType === "Package") packageCount++;
-        if (packageType === "Outrate") outrateCount++;
+  allDevices.forEach(device => {
+    // Count package types (from column 9)
+    const packageCell = device.cells[9];
+    const packageType = packageCell.textContent.trim();
+    if (packageType === "Rental") rentalCount++;
+    if (packageType === "Package") packageCount++;
+    if (packageType === "Outrate") outrateCount++;
 
-        // Count statuses (from column 12)
-        const statusCell = device.cells[12];
-        let status = "";
-        
-        // Check for status button
-        const statusButton = statusCell.querySelector(".status-btn");
-        if (statusButton) {
-            status = statusButton.textContent.trim();
-        } 
-        // Check for radio inputs (in edit mode)
-        else {
-            const activeRadio = statusCell.querySelector('input[type="radio"][value="Active"]');
-            const inactiveRadio = statusCell.querySelector('input[type="radio"][value="Inactive"]');
-            if (activeRadio && activeRadio.checked) status = "Active";
-            if (inactiveRadio && inactiveRadio.checked) status = "Inactive";
-        }
+    // Count statuses (from column 11)
+    const statusCell = device.cells[11];
+    let status = statusCell.textContent.trim();
+    if (status === "New Stock") newStockCount++;
+    if (status === "In use") inUseCount++;
+    if (status === "Available") availableCount++;
+    if (status === "Discarded") discardedCount++;
+  });
 
-        if (status === "Active") activeCount++;
-        if (status === "Inactive") inactiveCount++;
-    });
-
-    // Update the count displays
-    document.getElementById("activeCount").textContent = activeCount;
-    document.getElementById("inactiveCount").textContent = inactiveCount;
-    document.getElementById("rentalCount").textContent = rentalCount;
-    document.getElementById("packageCount").textContent = packageCount;
-    document.getElementById("outrateCount").textContent = outrateCount;
+  document.getElementById("newStockCount").textContent = newStockCount;
+  document.getElementById("inUseCount").textContent = inUseCount;
+  document.getElementById("availableCount").textContent = availableCount;
+  document.getElementById("discardedCount").textContent = discardedCount;
+  document.getElementById("rentalCount").textContent = rentalCount;
+  document.getElementById("packageCount").textContent = packageCount;
+  document.getElementById("outrateCount").textContent = outrateCount;
 }
 
 document.getElementById("Package").addEventListener("change", function () {
@@ -222,16 +195,13 @@ function searchDevices() {
     .then(data => {
       const tableBody = document.getElementById("deviceTable");
       tableBody.innerHTML = '';
-      
       if (!data || data.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="13" class="no-results">No devices found</td>`;
+        row.innerHTML = `<td colspan="16" class="no-results">No devices found</td>`;
         tableBody.appendChild(row);
-
         resetCounts();
         return;
       }
-
       data.forEach(device => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', device._id);
@@ -244,17 +214,12 @@ function searchDevices() {
           <td>${device.DeviceMake}</td>
           <td>${device.DateIn}</td>
           <td>${device.Warranty}</td>
-          <td>${device.SentBy}</td>
-          <td>${device.OutwardTo}</td>
+          <td>${device.OutwardTo || ''}</td>
           <td>${device.Package}</td>
           <td>${device.Package === 'Package' ? device.Tenure || '' : ''}</td>
-          <td>
-            ${device.Status === 'Active' ? 
-              '<button class="status-btn status-active" disabled>Active</button>' : 
-              device.Status === 'Inactive' ? 
-              '<button class="status-btn status-inactive" disabled>Inactive</button>' : 
-              ''}
-          </td>
+          <td><span class="status-label">${device.Status || 'New Stock'}</span></td>
+          <td>${device.LastEditedBy || ''}</td>
+          <td>${device.LastEditedDate || ''}</td>
           <td>
             <button class="icon-btn edit-icon" onclick="editDevice('${device._id}')">✏️</button>
             <button class="icon-btn delete-icon" onclick="deleteDevice('${device._id}')">🗑️</button>
@@ -263,9 +228,8 @@ function searchDevices() {
         `;
         tableBody.appendChild(row);
       });
-
-            allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
-            updateStatusCounts();
+      allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+      updateStatusCounts();
     })
     .catch(error => {
       console.error('Error searching devices:', error);
@@ -274,11 +238,13 @@ function searchDevices() {
 }
 
 function resetCounts() {
-    document.getElementById("activeCount").textContent = "0";
-    document.getElementById("inactiveCount").textContent = "0";
-    document.getElementById("rentalCount").textContent = "0";
-    document.getElementById("packageCount").textContent = "0";
-    document.getElementById("outrateCount").textContent = "0";
+  document.getElementById("newStockCount").textContent = "0";
+  document.getElementById("inUseCount").textContent = "0";
+  document.getElementById("availableCount").textContent = "0";
+  document.getElementById("discardedCount").textContent = "0";
+  document.getElementById("rentalCount").textContent = "0";
+  document.getElementById("packageCount").textContent = "0";
+  document.getElementById("outrateCount").textContent = "0";
 }
 
 function clearSearch() {
@@ -306,71 +272,51 @@ document.getElementById("downloadExcel").addEventListener("click", function() {
 });
 
 function editDevice(deviceId) {
-  console.log("Edit button clicked for device ID:", deviceId);
-
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
-
   const imei = row.cells[0].innerText;
-  const glNumber =
-    row.cells[1].innerText.trim() === "None"
-      ? ""
-      : row.cells[1].innerText.trim();
+  const glNumber = row.cells[1].innerText.trim() === "None" ? "" : row.cells[1].innerText.trim();
   const deviceModel = row.cells[4].innerText;
   const deviceMake = row.cells[5].innerText;
   const dateIn = row.cells[6].innerText;
   const warranty = row.cells[7].innerText;
-  const sentBy = row.cells[8].innerText;
-  const outwardTo = row.cells[9].innerText;
-  const packageValue = row.cells[10].innerText;
-  const tenureValue = row.cells[11].innerText;
-  const status = row.cells[12].innerText.trim();
-  
+  const outwardTo = row.cells[8].innerText;
+  const packageValue = row.cells[9].innerText;
+  const tenureValue = row.cells[10].innerText;
+  const status = row.cells[11].innerText.trim();
+  // Hide Last Edited By and Last Edited Date columns (12, 13)
+  row.cells[12].style.display = 'none';
+  row.cells[13].style.display = 'none';
+
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
   row.cells[4].innerHTML = `<input type="text" value="${deviceModel}" />`;
   row.cells[5].innerHTML = `<input type="text" value="${deviceMake}" />`;
-
   row.cells[6].innerHTML = `<input type="date" value="${dateIn}" />`;
   row.cells[7].innerHTML = `<input type="date" value="${warranty}" />`;
-  row.cells[8].innerHTML = `<input type="text" value="${sentBy}" />`;
-  row.cells[9].innerHTML = `<input type="date" value="${outwardTo}" />`;
-  row.cells[10].innerHTML = `
+  row.cells[8].innerHTML = `<input type="date" value="${outwardTo}" />`;
+  row.cells[9].innerHTML = `
     <select id="editPackage">
-      <option value="Rental" ${
-        packageValue === "Rental" ? "selected" : ""
-      }>Rental</option>
-      <option value="Package" ${
-        packageValue === "Package" ? "selected" : ""
-      }>Package</option>
-      <option value="Outrate" ${
-        packageValue === "Outrate" ? "selected" : ""
-      }>Outrate</option>
+      <option value="Rental" ${packageValue === "Rental" ? "selected" : ""}>Rental</option>
+      <option value="Package" ${packageValue === "Package" ? "selected" : ""}>Package</option>
+      <option value="Outrate" ${packageValue === "Outrate" ? "selected" : ""}>Outrate</option>
     </select>
   `;
-
-  row.cells[11].innerHTML = `<input type="text" id="editTenure" value="${tenureValue}" ${
-    packageValue === "Package" ? "" : "disabled"
-  } />`;
-
-  row.cells[12].innerHTML = `
-    <input type="radio" name="status-${deviceId}" value="Active" ${
-    status === "Active" ? "checked" : ""
-  } /> Active
-    <input type="radio" name="status-${deviceId}" value="Inactive" ${
-    status === "Inactive" ? "checked" : ""
-  } /> Inactive
+  row.cells[10].innerHTML = `<input type="text" id="editTenure" value="${tenureValue}" ${packageValue === "Package" ? "" : "disabled"} />`;
+  row.cells[11].innerHTML = `
+    <select id="editStatus">
+      <option value="New Stock" ${status === "New Stock" ? "selected" : ""}>New Stock</option>
+      <option value="In use" ${status === "In use" ? "selected" : ""}>In use</option>
+      <option value="Available" ${status === "Available" ? "selected" : ""}>Available</option>
+      <option value="Discarded" ${status === "Discarded" ? "selected" : ""}>Discarded</option>
+    </select>
   `;
-
-  row.cells[13].innerHTML = `
+  row.cells[14].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveDevice('${deviceId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEdit('${deviceId}')">❌</button>
   `;
-
-  document
-    .getElementById("editPackage")
-    .addEventListener("change", function () {
-      document.getElementById("editTenure").disabled = this.value !== "Package";
-    });
+  document.getElementById("editPackage").addEventListener("change", function () {
+    document.getElementById("editTenure").disabled = this.value !== "Package";
+  });
 }
 
 function validateIMEI(input) {
@@ -389,7 +335,6 @@ function validateGLNumber(input) {
 
 function saveDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
-
   const imeiValue = row.cells[0].querySelector("input").value.trim();
   const glNumberValue = row.cells[1].querySelector("input").value.trim();
   const deviceModel = row.cells[4].querySelector("input").value.trim();
@@ -397,47 +342,32 @@ function saveDevice(deviceId) {
   const dateIn = row.cells[6].querySelector("input").value.trim();
   const today = new Date().toISOString().split("T")[0];
   const warranty = row.cells[7].querySelector("input").value.trim();
-  const sentBy = row.cells[8].querySelector("input").value.trim();
-  const outwardTo = row.cells[9].querySelector("input").value.trim();
-  const packageValue = row.cells[10].querySelector("select").value;
-  const tenureValue = row.cells[11].querySelector("input").value.trim();
-  const status = row.cells[12]
-    .querySelector(`input[name="status-${deviceId}"]:checked`)
-    .value.trim();
-
-  console.log("Updated Data:", {
-    IMEI: imeiValue,
-    GLNumber: glNumberValue || null,
-    DeviceModel: deviceModel,
-    DeviceMake: deviceMake,
-    DateIn: dateIn,
-    Warranty: warranty,
-    SentBy: sentBy,
-    OutwardTo: outwardTo,
-    Package: packageValue,
-    Tenure: tenureValue || null,
-    Status: status,
-  });
+  const outwardTo = row.cells[8].querySelector("input").value.trim();
+  const packageValue = row.cells[9].querySelector("select").value;
+  const tenureValue = row.cells[10].querySelector("input").value.trim();
+  const status = row.cells[11].querySelector("select").value;
 
   if (imeiValue.length !== 15 || isNaN(imeiValue)) {
     displayFlashMessage("IMEI must be exactly 15 digits and numeric.", "warning");
     return;
   }
-
   if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {
     displayFlashMessage("SL Number must be exactly 13 digits if entered.", "warning");
     return;
   }
-
   if (dateIn > today) {
     displayFlashMessage("Future dates are not allowed for Date In.", "warning");
     return;
   }
-
   if (packageValue === "Package" && tenureValue.trim() === "") {
     displayFlashMessage("Tenure is required when Package is selected.", "warning");
     return;
   }
+
+  // Get username from localStorage or cookie (assume JWT username is stored)
+  let username = localStorage.getItem('username') || getCookie('username') || 'Unknown';
+  let now = new Date();
+  let lastEditedDate = now.toLocaleString();
 
   const updatedData = {
     IMEI: imeiValue,
@@ -446,11 +376,12 @@ function saveDevice(deviceId) {
     DeviceMake: deviceMake,
     DateIn: dateIn,
     Warranty: warranty,
-    SentBy: sentBy,
     OutwardTo: outwardTo,
     Package: packageValue,
     Tenure: tenureValue || null,
     Status: status,
+    LastEditedBy: username,
+    LastEditedDate: lastEditedDate
   };
 
   fetch(`/deviceInvy/edit_device/${deviceId}`, {
@@ -475,18 +406,20 @@ function saveDevice(deviceId) {
         row.cells[5].innerText = updatedData.DeviceMake;
         row.cells[6].innerText = updatedData.DateIn;
         row.cells[7].innerText = updatedData.Warranty;
-        row.cells[8].innerText = updatedData.SentBy;
-        row.cells[9].innerText = updatedData.OutwardTo;
-        row.cells[10].innerText = updatedData.Package;
-        row.cells[11].innerText = updatedData.Tenure || "";
-        row.cells[12].innerHTML = `<button class="status-btn ${
-          updatedData.Status === "Active" ? "status-active" : "status-inactive"
-        }" disabled>${updatedData.Status}</button>`;
-        row.cells[13].innerHTML = `
+        row.cells[8].innerText = updatedData.OutwardTo;
+        row.cells[9].innerText = updatedData.Package;
+        row.cells[10].innerText = updatedData.Tenure || "";
+        row.cells[11].innerHTML = `<span class="status-label">${updatedData.Status}</span>`;
+        row.cells[12].innerText = updatedData.LastEditedBy;
+        row.cells[13].innerText = updatedData.LastEditedDate;
+        row.cells[12].style.display = '';
+        row.cells[13].style.display = '';
+        row.cells[14].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
           <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
         `;
         displayFlashMessage("Changes saved successfully!", "success");
+        updateStatusCounts();
       } else {
         displayFlashMessage("Failed to save changes. Please try again.");
       }

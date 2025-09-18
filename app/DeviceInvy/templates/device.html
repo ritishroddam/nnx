@@ -17,13 +17,21 @@ Device Inventory
 
   <div class="status-counters mb-4">
     <div class="status-counts">
-      <div class="counter active">
-        <span class="count" id="activeCount">0</span>
-        <span class="count-badge active label">Active</span> 
+      <div class="counter new-stock">
+        <span class="count" id="newStockCount">0</span>
+        <span class="count-badge new-stock label">New Stock</span> 
       </div>
-      <div class="counter inactive">
-        <span class="count" id="inactiveCount">0</span>
-        <span class="count-badge inactive label">Inactive</span>
+      <div class="counter in-use">
+        <span class="count" id="inUseCount">0</span>
+        <span class="count-badge in-use label">In use</span>
+      </div>
+      <div class="counter available">
+        <span class="count" id="availableCount">0</span>
+        <span class="count-badge available label">Available</span>
+      </div>
+      <div class="counter discarded">
+        <span class="count" id="discardedCount">0</span>
+        <span class="count-badge discarded label">Discarded</span>
       </div>
       <div class="counter rental">
         <span class="count" id="rentalCount">0</span>
@@ -45,14 +53,16 @@ Device Inventory
       <input type="text" id="imeiSearch" placeholder="Search by IMEI (full or last 5 digits)" />
       <button id="searchBtn" class="btn">Search</button>
     <div class="filter-container mb-4">
-        <select id="statusFilter" class="btn">
-            <option value="">All Statuses</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Rental">Rental</option>
-            <option value="Package">Package</option>
-            <option value="Outrate">Outrate</option>
-        </select>
+    <select id="statusFilter" class="btn">
+      <option value="">All Statuses</option>
+      <option value="New Stock">New Stock</option>
+      <option value="In use">In use</option>
+      <option value="Available">Available</option>
+      <option value="Discarded">Discarded</option>
+      <option value="Rental">Rental</option>
+      <option value="Package">Package</option>
+      <option value="Outrate">Outrate</option>
+    </select>
     </div>
   </div>
   </div>  
@@ -83,11 +93,12 @@ Device Inventory
             <th>Device Make</th>
             <th>Date In</th>
             <th>Warranty</th>
-            <th>Sent By</th>
             <th>Outward Date</th>
             <th>Package</th>
             <th>Tenure</th>
             <th>Status</th>
+            <th>Last Edited By</th>
+            <th>Last Edited Date</th>
             <th>Actions</th>
             <th style="width:16px; padding:0; border:none; background:transparent"></th>
           </tr>
@@ -103,23 +114,14 @@ Device Inventory
             <td>{{ device['DeviceMake'] if device['DeviceMake'] else '' }}</td>
             <td>{{ device['DateIn'] if device['DateIn'] else '' }}</td>
             <td>{{ device['Warranty'] if device['Warranty'] else '' }}</td>
-            <td>{{ device['SentBy'] if device['SentBy'] else '' }}</td>
             <td>{{ device['OutwardTo'] if device['OutwardTo'] else '' }}</td>
             <td>{{ device['Package'] if device['Package'] else '' }}</td>
-            <td>{{ device['Tenure'] if device[Package] == 'Package' else '' }}</td>
+            <td>{{ device['Tenure'] if device['Package'] == 'Package' else '' }}</td>
             <td>
-              {% if device['Status'] == 'Active' %}
-              <button class="status-btn status-active" disabled>
-                {{ device['Status'] }}
-              </button>
-              {% elif device['Status'] == 'Inactive' %}
-              <button class="status-btn status-inactive" disabled>
-                {{ device['Status'] }}
-              </button>
-              {% else %}
-  
-              {% endif %}
+              <span class="status-label">{{ device['Status'] if device['Status'] else 'New Stock' }}</span>
             </td>
+            <td>{{ device['LastEditedBy'] if device['LastEditedBy'] else '' }}</td>
+            <td>{{ device['LastEditedDate'] if device['LastEditedDate'] else '' }}</td>
             <td>
               <button class="icon-btn edit-icon" onclick="editDevice('{{ device._id }}')">✏️</button>
               <button class="icon-btn delete-icon" onclick="deleteDevice('{{ device._id }}')">🗑️</button>
@@ -140,7 +142,6 @@ Device Inventory
         <form id="manualForm" action="{{ url_for('DeviceInvy.manual_entry')}}" method="post">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="form-container">
-            <!-- Keep all your existing form fields here -->
             <div class="form-group">
               <label for="IMEI">IMEI<span style="size: 12px; color: red;">*</span></label>
               <input type="text" name="IMEI" id="IMEI" required />
@@ -169,10 +170,6 @@ Device Inventory
             <input type="date" name="Warranty" id="Warranty" required readonly />
           </div>
           <div class="form-group">
-            <label for="SentBy">Sent By<span style="size: 12px; color: red;">*</span></label>
-            <input type="text" name="SentBy" id="SentBy" required />
-          </div>
-          <div class="form-group">
             <label for="OutwardTo">Outward To</label>
             <input type="date" name="OutwardTo" id="OutwardTo" />
           </div>
@@ -191,10 +188,11 @@ Device Inventory
           </div>
           <div class="form-group">
             <label for="Status">Status<span style="size: 12px; color: red;">*</span></label>
-            <select name="Status" required>
-              <option value="">Select Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
+            <select name="Status" id="Status" required>
+              <option value="New Stock" selected>New Stock</option>
+              <option value="In use">In use</option>
+              <option value="Available">Available</option>
+              <option value="Discarded">Discarded</option>
             </select>
           </div>
           <div class="button-container">
