@@ -525,8 +525,12 @@ def view_report_preview():
             ).sort("date_time", -1)
             df = pd.DataFrame(list(cursor))
         
-        df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+        if report_type not in ["odometer-daily-distance"]:
+            df = process_distance_report(group, license_plate)
+        else:
+            df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
 
+        
         if df is None or df.empty:
             return jsonify({"success": True, "data": []})
 
