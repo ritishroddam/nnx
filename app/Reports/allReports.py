@@ -68,7 +68,6 @@ report_configs = {
         'fields': ["date_time", "odometer", "latitude", "longitude"],
         'query': {"gps": "A"},
         'sheet_name': "Distance Report",
-        'post_process': lambda df, license_plate: process_distance_report(df, license_plate)
     },
     'distance-speed-range': {
         'collection': 'atlanta',
