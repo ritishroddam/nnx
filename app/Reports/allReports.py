@@ -434,12 +434,18 @@ def view_report_preview():
                     
                     group = group.drop(columns=["imei"])
                     processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
-                    if processed is not None:
-                        if report_type != "odometer-daily-distance" and idx > 0:
+                    
+                    if report_type not in ["odometer-daily-distance"]:
+                        processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+                        if processed is not None:
                             sep_dict = OrderedDict((col, "" ) for col in processed.columns)
                             sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
-                        all_dfs.append(processed)
+                            all_dfs.append(processed)
+                        continue
+                    
+                    processed = process_distance_report(group, license_plate)
+                    all_dfs.append(processed)
 
             if not all_dfs:
                 return jsonify({"success": True, "data": []})
