@@ -524,6 +524,7 @@ def view_report_preview():
         post_process = None
         
         if report_type != "odometer-daily-distance":
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_distance_report(imei, license_plate, date_filter)
         else:
             if report_type == "distance-speed-range":
