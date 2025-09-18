@@ -228,9 +228,10 @@ def getDateRanges(date_range):
         return f"{(now - timedelta(days=30)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}"
     return f"Hi"
 
-def process_distance_report(df, vehicle_number):
+def process_distance_report(imei, vehicle_number, date_filter):
     """Calculate total distance traveled"""
     try:
+        
         df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
 
         if not df.empty:
@@ -406,6 +407,21 @@ def view_report_preview():
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
                 df = process_speed_report(imeis, imei_to_plate, date_filter)
+            if report_type == "odometer-daily-distance":
+                config = report_configs[report_type]
+                fields = config['fields']
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                for imei in imeis:
+                    vehicle = imei_to_plate.get(imei, "")
+                    
+                    if vehicle:
+                        license_plate = vehicle["LicensePlateNumber"]
+                    else:
+                        license_plate = ""
+                    
+                    process_distance_report(imei, license_plate, date_filter)
+                    
+                    return
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
