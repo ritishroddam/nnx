@@ -260,7 +260,8 @@ def process_distance_report(imei, vehicle_number, date_filter):
         
         return summary_df
     except Exception as e:
-        return e
+        print(f"[ERROR] process_distance_report: {e}")
+        return pd.DataFrame()  
 
 def process_travel_path_report(df):
     try:
