@@ -425,7 +425,7 @@ function saveDevice(deviceId) {
   }
 
   if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {
-    displayFlashMessage("GL Number must be exactly 13 digits if entered.", "warning");
+    displayFlashMessage("SL Number must be exactly 13 digits if entered.", "warning");
     return;
   }
 
