@@ -435,6 +435,7 @@ def view_report_preview():
                     group = group.drop(columns=["imei"])
                     processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                     
+                    print(report_type)
                     if report_type not in ["odometer-daily-distance"]:
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
                         if processed is not None:
