@@ -232,9 +232,11 @@ def process_distance_report(df, vehicle_number):
     """Calculate total distance traveled"""
     try:
         df['odometer'] = pd.to_numeric(df['odometer'], errors='coerce')
-        df['Distance (km)'] = df['odometer'].diff().fillna(0)
 
-        total_distance = df['Distance (km)'].sum()
+        if not df.empty:
+            total_distance = abs(df['odometer'].iloc[-1] - df['odometer'].iloc[0])
+        else:
+            total_distance = 0
         
         summary_df = pd.DataFrame({
             'Vehicle Number': [vehicle_number],
@@ -431,13 +433,19 @@ def view_report_preview():
                         license_plate = ""
                     
                     group = group.drop(columns=["imei"])
-                    processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
-                    if processed is not None:
-                        if report_type != "odometer-daily-distance" and idx > 0:
+                    
+                    if report_type not in ["odometer-daily-distance"]:
+                        processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+                        print(report_type)
+                        if processed is not None:
                             sep_dict = OrderedDict((col, "" ) for col in processed.columns)
                             sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
-                        all_dfs.append(processed)
+                            all_dfs.append(processed)
+                        continue
+                    
+                    processed = process_distance_report(group, license_plate)
+                    all_dfs.append(processed)
 
             if not all_dfs:
                 return jsonify({"success": True, "data": []})
@@ -516,8 +524,12 @@ def view_report_preview():
             ).sort("date_time", -1)
             df = pd.DataFrame(list(cursor))
         
-        df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+        if report_type not in ["odometer-daily-distance"]:
+            df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+        else:
+            df = process_distance_report(df, license_plate)
 
+        
         if df is None or df.empty:
             return jsonify({"success": True, "data": []})
 
