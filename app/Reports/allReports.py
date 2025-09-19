@@ -237,21 +237,24 @@ def process_distance_report(imei, vehicle_number, date_filter):
         }
         query.update(date_filter)
         start_doc = db["atlanta"].find_one(
-            query, {"_id": 0, "odometer": 1},
+            query, {"_id": 0, "odometer": 1, "latitude": 1, "longitude": 1},
             sort=[("date_time", ASCENDING)]
         )
         if not start_doc:
             return None
         end_doc = db["atlanta"].find_one(
-            query, {"_id": 0, "odometer": 1},
+            query, {"_id": 0, "odometer": 1, "latitude": 1, "longitude": 1},
             sort=[("date_time", DESCENDING)]
         )
         if not end_doc:
             return None
 
+        start_location = geocodeInternal(float(start_doc['latitude']), float(start_doc['longitude']))
+        end_location = geocodeInternal(float(end_doc['latitude']), float(end_doc['longitude']))
         
         start_odometer = start_doc["odometer"]
         end_odometer = end_doc["odometer"]
+        
         
         total_distance = abs(float(end_odometer) - float(start_odometer))
         
@@ -259,10 +262,13 @@ def process_distance_report(imei, vehicle_number, date_filter):
             'Vehicle Number': [vehicle_number],
             'Total Distance (km)': [total_distance],
             'Start Odometer': [start_odometer],
-            'End Odometer': [end_odometer]
+            'Start Location': [start_location],
+            'End Odometer': [end_odometer],
+            'End Location': [end_location]
         })
 
-        summary_df = summary_df[['Vehicle Number', 'Total Distance (km)', 'Start Odometer', 'End Odometer']]
+        summary_df = summary_df[['Vehicle Number', 'Total Distance (km)', 'Start Odometer','Start Location', 
+                                 'End Odometer', 'End Location']]
         
         return summary_df
     except Exception as e:
@@ -486,7 +492,8 @@ def view_report_preview():
             report_type_for_columns = report_type
             all_possible_columns = ['Vehicle Number']
             if report_type_for_columns == 'odometer-daily-distance':
-                all_possible_columns.extend(['Total Distance (km)', 'Start Odometer', 'End Odometer'])
+                all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
+                                 'End Odometer', 'End Location'])
             elif report_type_for_columns == 'stoppage':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Stoppage Duration (min)'])
             elif report_type_for_columns == 'idle':
@@ -566,7 +573,8 @@ def view_report_preview():
         # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
         if report_type == 'odometer-daily-distance':
-            all_possible_columns.extend(['Total Distance (km)', 'Start Odometer', 'End Odometer'])
+            all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
+                                 'End Odometer', 'End Location'])
         elif report_type == 'stoppage':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Stoppage Duration (min)'])
         elif report_type == 'idle':
