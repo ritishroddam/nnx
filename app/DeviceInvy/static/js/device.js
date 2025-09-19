@@ -339,6 +339,9 @@ function saveDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
   const imeiValue = row.cells[0].querySelector("input").value.trim();
   const glNumberValue = row.cells[1].querySelector("input").value.trim();
+  // Assigned Vehicle and Company
+  const licensePlateNumber = row.cells[2] ? row.cells[2].innerText.trim() : "";
+  const companyName = row.cells[3] ? row.cells[3].innerText.trim() : "";
   const deviceModel = row.cells[4].querySelector("input").value.trim();
   const deviceMake = row.cells[5].querySelector("input").value.trim();
   const dateIn = row.cells[6].querySelector("input").value.trim();
@@ -367,6 +370,8 @@ function saveDevice(deviceId) {
     body: JSON.stringify({
       IMEI: imeiValue,
       GLNumber: glNumberValue,
+      LicensePlateNumber: licensePlateNumber,
+      CompanyName: companyName,
       DeviceModel: deviceModel,
       DeviceMake: deviceMake,
       DateIn: dateIn,
