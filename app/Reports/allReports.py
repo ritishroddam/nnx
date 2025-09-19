@@ -127,7 +127,7 @@ def save_and_return_report(output, report_type, vehicle_number):
         'report_name': report_type.replace('-', ' ').title() + ' Report',
         'filename': report_filename,
         'path': remote_path,
-        'size': len(buffer_content),
+        'size': len(output),
         'generated_at': datetime.now(pytz.UTC),
         'vehicle_number': vehicle_number,
         'report_type': report_type
