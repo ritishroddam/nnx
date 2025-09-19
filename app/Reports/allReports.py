@@ -597,6 +597,8 @@ def view_report_preview():
             "success": True,
             "data": ordered_data
         }, ensure_ascii=False)
+        
+        db["data"].insert_one(json_str)
 
         return Response(json_str, mimetype='application/json')
 
