@@ -121,7 +121,6 @@ function filterDevicesByStatus() {
       device.style.display = packageType === selectedStatus ? "" : "none";
     }
   });
-}
 
 function updateStatusCounts() {
   let newStockCount = 0;
@@ -283,9 +282,9 @@ function editDevice(deviceId) {
   const packageValue = row.cells[9].innerText;
   const tenureValue = row.cells[10].innerText;
   const status = row.cells[11].innerText.trim();
-  // Hide Last Edited By and Last Edited Date columns (12, 13)
-  row.cells[12].style.display = 'none';
-  row.cells[13].style.display = 'none';
+    // Do not hide Last Edited By/Date columns
+    row.cells[12].style.display = '';
+    row.cells[13].style.display = '';
 
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
@@ -430,31 +429,60 @@ function saveDevice(deviceId) {
     });
 }
 
-function cancelEdit(deviceId) {
-  location.reload();
-}
+function saveDevice(deviceId) {
+  const row = document.querySelector(`tr[data-id='${deviceId}']`);
+  const imeiValue = row.cells[0].querySelector("input").value.trim();
+  const glNumberValue = row.cells[1].querySelector("input").value.trim();
+  const deviceModel = row.cells[4].querySelector("input").value.trim();
+  const deviceMake = row.cells[5].querySelector("input").value.trim();
+  const dateIn = row.cells[6].querySelector("input").value.trim();
+  const today = new Date().toISOString().split("T")[0];
+  const warranty = row.cells[7].querySelector("input").value.trim();
+  const outwardTo = row.cells[8].querySelector("input").value.trim();
+  const packageValue = row.cells[9].querySelector("select").value;
+  const tenureValue = row.cells[10].querySelector("input").value.trim();
+  const status = row.cells[11].querySelector("select").value;
 
-function deleteDevice(deviceId) {
-  if (confirm("Are you sure you want to delete this device?")) {
-    fetch(`/deviceInvy/delete_device/${deviceId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  if (imeiValue.length !== 15 || isNaN(imeiValue)) {/* ...existing code... */}
+  if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {/* ...existing code... */}
+  if (dateIn > today) {/* ...existing code... */}
+  if (packageValue === "Package" && tenureValue.trim() === "") {/* ...existing code... */}
+
+  // Username and date will be set by backend using JWT
+  let now = new Date();
+  let lastEditedDate = now.toISOString();
+
+  fetch(`/deviceInvy/edit_device/${deviceId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem('access_token') || getCookie('access_token')}`
+    },
+    body: JSON.stringify({
+      IMEI: imeiValue,
+      GLNumber: glNumberValue,
+      DeviceModel: deviceModel,
+      DeviceMake: deviceMake,
+      DateIn: dateIn,
+      Warranty: warranty,
+      OutwardTo: outwardTo,
+      Package: packageValue,
+      Tenure: tenureValue,
+      Status: status,
+      LastEditedDate: lastEditedDate
+      // LastEditedBy will be set by backend
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          document.querySelector(`tr[data-id='${deviceId}']`).remove();
-          displayFlashMessage("Device deleted successfully!", "success");
-        } else {
-          displayFlashMessage("Failed to delete device. Please try again.");
-          console.error("Error deleting device:", data.message);
-        }
-      })
-      .catch((error) => {
-        displayFlashMessage("An error occurred while deleting the device.");
-        console.error("Error deleting device:", error);
-      });
-  }
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.message || "Failed to update device.");
+      }
+    })
+    .catch(error => {
+      alert("Error updating device.");
+    });
 }
+};
