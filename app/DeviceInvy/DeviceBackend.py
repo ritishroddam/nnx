@@ -299,16 +299,3 @@ def edit_device(device_id):
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return jsonify({'success': False, 'message': 'Error updating device.'}), 500
-
-@device_bp.route('/delete_device/<device_id>', methods=['DELETE'])
-@jwt_required()
-def delete_device(device_id):
-    try:
-        result = collection.delete_one({"_id": ObjectId(device_id)})
-
-        if result.deleted_count == 1:
-            return jsonify({'success': True, 'message': 'Device deleted successfully'})
-        else:
-            return jsonify({'success': False, 'message': 'Device not found'}), 404
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500

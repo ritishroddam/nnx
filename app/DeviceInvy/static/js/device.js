@@ -222,7 +222,6 @@ function searchDevices() {
           <td>${device.LastEditedDate || ''}</td>
           <td>
             <button class="icon-btn edit-icon" onclick="editDevice('${device._id}')">✏️</button>
-            <button class="icon-btn delete-icon" onclick="deleteDevice('${device._id}')">🗑️</button>
           </td>
           <td></td>
         `;
@@ -416,7 +415,6 @@ function saveDevice(deviceId) {
         row.cells[13].style.display = '';
         row.cells[14].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
         `;
         displayFlashMessage("Changes saved successfully!", "success");
         updateStatusCounts();
