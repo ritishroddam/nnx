@@ -105,15 +105,15 @@ report_configs = {
     }
 }
     
-def save_and_return_report(output, data, report_type, vehicle_number):
+def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     
     # Create a copy of the buffer content before uploading
-    buffer_content = output.getvalue()
+    buffer_content = BytesIO(json.dumps(output).encode('utf-8'))
     
     # Generate unique filename
     timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
-    report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.xlsx"
+    report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.json"
     remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
@@ -126,7 +126,7 @@ def save_and_return_report(output, data, report_type, vehicle_number):
     # Save metadata to MongoDB
     report_metadata = {
         'user_id': get_jwt_identity(),
-        'report_name': data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report',
+        'report_name': report_type.replace('-', ' ').title() + ' Report',
         'filename': report_filename,
         'path': remote_path,
         'size': len(buffer_content),
@@ -517,11 +517,7 @@ def view_report_preview():
                 "data": ordered_data
             }, ensure_ascii=False)
             
-            db["data"].insert_one({
-            "success": True,
-            "data": ordered_data,
-            "json": json_str
-            })
+            save_and_return_report(json_str, report_type, vehicle_number)
 
             return Response(json_str, mimetype='application/json')
 
@@ -604,11 +600,7 @@ def view_report_preview():
             "data": ordered_data
         }, ensure_ascii=False)
         
-        db["data"].insert_one({
-            "success": True,
-            "data": ordered_data,
-            "json": json_str
-        })
+        save_and_return_report(json_str, report_type, vehicle_number)
 
         return Response(json_str, mimetype='application/json')
 
