@@ -516,6 +516,12 @@ def view_report_preview():
                 "success": True,
                 "data": ordered_data
             }, ensure_ascii=False)
+            
+            db["data"].insert_one({
+            "success": True,
+            "data": ordered_data,
+            "json": json_str
+            })
 
             return Response(json_str, mimetype='application/json')
 
@@ -598,7 +604,11 @@ def view_report_preview():
             "data": ordered_data
         }, ensure_ascii=False)
         
-        db["data"].insert_one(json_str)
+        db["data"].insert_one({
+            "success": True,
+            "data": ordered_data,
+            "json": json_str
+        })
 
         return Response(json_str, mimetype='application/json')
 
