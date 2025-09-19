@@ -277,6 +277,7 @@ def edit_device(device_id):
         package_type = updated_data.get("Package", "")
         tenure = updated_data.get("Tenure", "").strip() if package_type == "Package" else None
 
+        # Defensive: allow missing SentBy/OutwardTo
         result = collection.update_one(
             {'_id': object_id},
             {'$set': {
@@ -286,8 +287,8 @@ def edit_device(device_id):
                 "DeviceMake": updated_data.get("DeviceMake"),
                 "DateIn": updated_data.get("DateIn"),
                 "Warranty": updated_data.get("Warranty"),
-                "SentBy": updated_data.get("SentBy"),
-                "OutwardTo": updated_data.get("OutwardTo"),
+                "SentBy": updated_data.get("SentBy", None),
+                "OutwardTo": updated_data.get("OutwardTo", None),
                 "Package": package_type,
                 "Tenure": tenure,
                 "Status": updated_data.get("Status"),
