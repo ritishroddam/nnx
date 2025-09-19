@@ -121,6 +121,7 @@ function filterDevicesByStatus() {
       device.style.display = packageType === selectedStatus ? "" : "none";
     }
   });
+}
 
 function updateStatusCounts() {
   let newStockCount = 0;
@@ -332,102 +333,7 @@ function validateGLNumber(input) {
   }
 }
 
-function saveDevice(deviceId) {
-  const row = document.querySelector(`tr[data-id='${deviceId}']`);
-  const imeiValue = row.cells[0].querySelector("input").value.trim();
-  const glNumberValue = row.cells[1].querySelector("input").value.trim();
-  const deviceModel = row.cells[4].querySelector("input").value.trim();
-  const deviceMake = row.cells[5].querySelector("input").value.trim();
-  const dateIn = row.cells[6].querySelector("input").value.trim();
-  const today = new Date().toISOString().split("T")[0];
-  const warranty = row.cells[7].querySelector("input").value.trim();
-  const outwardTo = row.cells[8].querySelector("input").value.trim();
-  const packageValue = row.cells[9].querySelector("select").value;
-  const tenureValue = row.cells[10].querySelector("input").value.trim();
-  const status = row.cells[11].querySelector("select").value;
 
-  if (imeiValue.length !== 15 || isNaN(imeiValue)) {
-    displayFlashMessage("IMEI must be exactly 15 digits and numeric.", "warning");
-    return;
-  }
-  if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {
-    displayFlashMessage("SL Number must be exactly 13 digits if entered.", "warning");
-    return;
-  }
-  if (dateIn > today) {
-    displayFlashMessage("Future dates are not allowed for Date In.", "warning");
-    return;
-  }
-  if (packageValue === "Package" && tenureValue.trim() === "") {
-    displayFlashMessage("Tenure is required when Package is selected.", "warning");
-    return;
-  }
-
-  // Get username from localStorage or cookie (assume JWT username is stored)
-  let username = localStorage.getItem('username') || getCookie('username') || 'Unknown';
-  let now = new Date();
-  let lastEditedDate = now.toLocaleString();
-
-  const updatedData = {
-    IMEI: imeiValue,
-    GLNumber: glNumberValue || null,
-    DeviceModel: deviceModel,
-    DeviceMake: deviceMake,
-    DateIn: dateIn,
-    Warranty: warranty,
-    OutwardTo: outwardTo,
-    Package: packageValue,
-    Tenure: tenureValue || null,
-    Status: status,
-    LastEditedBy: username,
-    LastEditedDate: lastEditedDate
-  };
-
-  fetch(`/deviceInvy/edit_device/${deviceId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-    },
-    body: JSON.stringify(updatedData),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (data.success) {
-        row.cells[0].innerText = updatedData.IMEI;
-        row.cells[1].innerText = updatedData.GLNumber || "";
-        row.cells[4].innerText = updatedData.DeviceModel;
-        row.cells[5].innerText = updatedData.DeviceMake;
-        row.cells[6].innerText = updatedData.DateIn;
-        row.cells[7].innerText = updatedData.Warranty;
-        row.cells[8].innerText = updatedData.OutwardTo;
-        row.cells[9].innerText = updatedData.Package;
-        row.cells[10].innerText = updatedData.Tenure || "";
-        row.cells[11].innerHTML = `<span class="status-label">${updatedData.Status}</span>`;
-        row.cells[12].innerText = updatedData.LastEditedBy;
-        row.cells[13].innerText = updatedData.LastEditedDate;
-        row.cells[12].style.display = '';
-        row.cells[13].style.display = '';
-        row.cells[14].innerHTML = `
-          <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteDevice('${deviceId}')">🗑️</button>
-        `;
-        displayFlashMessage("Changes saved successfully!", "success");
-        updateStatusCounts();
-      } else {
-        displayFlashMessage("Failed to save changes. Please try again.");
-      }
-    })
-    .catch((error) => {
-      console.error("Error updating device:", error);
-      displayFlashMessage("An error occurred. Please try again.");
-    });
-}
 
 function saveDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
@@ -485,4 +391,3 @@ function saveDevice(deviceId) {
       alert("Error updating device.");
     });
 }
-};
