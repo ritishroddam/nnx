@@ -250,8 +250,7 @@ def process_distance_report(imei, vehicle_number, date_filter):
         )
         if not end_doc:
             return None
-        print(vehicle_number)
-        print()
+        
         start_location = geocodeInternal(float(start_doc['latitude']), float(start_doc['longitude']))
         end_location = geocodeInternal(float(end_doc['latitude']), float(end_doc['longitude']))
         
