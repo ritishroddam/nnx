@@ -262,22 +262,10 @@ def edit_device(device_id):
 
         updated_data = request.json
         print("Received Data:", updated_data) 
-
-        # Get username from JWT
-        try:
-            claims = get_jwt()
-            username = claims.get('username') or get_jwt_identity() or 'Unknown'
-        except Exception:
-            username = 'Unknown'
-
-        # Use LastEditedDate from request or server time
-        from datetime import datetime
-        last_edited_date = updated_data.get("LastEditedDate") or datetime.now().isoformat()
-
+        
         package_type = updated_data.get("Package", "")
         tenure = updated_data.get("Tenure", "").strip() if package_type == "Package" else None
 
-        # Defensive: allow missing SentBy/OutwardTo
         result = collection.update_one(
             {'_id': object_id},
             {'$set': {
@@ -287,13 +275,11 @@ def edit_device(device_id):
                 "DeviceMake": updated_data.get("DeviceMake"),
                 "DateIn": updated_data.get("DateIn"),
                 "Warranty": updated_data.get("Warranty"),
-                "SentBy": updated_data.get("SentBy", None),
-                "OutwardTo": updated_data.get("OutwardTo", None),
+                "SentBy": updated_data.get("SentBy"),
+                "OutwardTo": updated_data.get("OutwardTo"),
                 "Package": package_type,
                 "Tenure": tenure,
                 "Status": updated_data.get("Status"),
-                "LastEditedBy": username,
-                "LastEditedDate": last_edited_date
             }}
         )
 

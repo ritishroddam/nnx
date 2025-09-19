@@ -81,26 +81,27 @@ Device Inventory
     </div>
     
      
-    <div class="table-responsive" style="overflow-x:auto; max-width:100vw;">
-      <table class="device-table" style="min-width:1200px; width:100%; table-layout:fixed;">
+    <div class="scrollable-table-container" style="overflow:auto; max-height: 70vh;">
+      <table class="device-table" style="table-layout:fixed; width:1800px; min-width:100%;">
         <colgroup>
-          <col style="width: 130px;" />
-          <col style="width: 110px;" />
-          <col style="width: 130px;" />
-          <col style="width: 130px;" />
-          <col style="width: 120px;" />
-          <col style="width: 120px;" />
-          <col style="width: 110px;" />
-          <col style="width: 110px;" />
-          <col style="width: 110px;" />
-          <col style="width: 100px;" />
-          <col style="width: 90px;" />
-          <col style="width: 100px;" />
-          <col style="width: 120px;" />
-          <col style="width: 140px;" />
-          <col style="width: 80px;" />
+          <col style="width: 120px;" /> <!-- IMEI -->
+          <col style="width: 90px;" /> <!-- SL Number -->
+          <col style="width: 110px;" /> <!-- Assigned Vehicle -->
+          <col style="width: 120px;" /> <!-- Assigned Company -->
+          <col style="width: 110px;" /> <!-- Device Model -->
+          <col style="width: 110px;" /> <!-- Device Make -->
+          <col style="width: 90px;" /> <!-- Date In -->
+          <col style="width: 90px;" /> <!-- Warranty -->
+          <col style="width: 90px;" /> <!-- Outward Date -->
+          <col style="width: 80px;" /> <!-- Package -->
+          <col style="width: 70px;" /> <!-- Tenure -->
+          <col style="width: 90px;" /> <!-- Status -->
+          <col style="width: 110px;" /> <!-- Last Edited By -->
+          <col style="width: 130px;" /> <!-- Last Edited Date -->
+          <col style="width: 70px;" /> <!-- Actions -->
+          <col style="width:16px; padding:0; border:none; background:transparent" />
         </colgroup>
-        <thead>
+        <thead style="position:sticky;top:0;z-index:2;background:#fff;">
           <tr>
             <th>IMEI</th>
             <th>SL Number</th>
@@ -117,6 +118,7 @@ Device Inventory
             <th>Last Edited By</th>
             <th>Last Edited Date</th>
             <th>Actions</th>
+            <th style="width:16px; padding:0; border:none; background:transparent"></th>
           </tr>
         </thead>
         <tbody id="deviceTable">
@@ -141,6 +143,7 @@ Device Inventory
             <td>
               <button class="icon-btn edit-icon" onclick="editDevice('{{ device._id }}')">✏️</button>
             </td>
+            <td></td>
           </tr>
           {% endfor %}
         </tbody>
