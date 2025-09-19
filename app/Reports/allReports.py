@@ -109,7 +109,7 @@ def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     
     # Create a copy of the buffer content before uploading
-    buffer_content = BytesIO(output.encode('utf-8'))
+    buffer_content = BytesIO(json.dumps(output).encode('utf-8'))
     
     # Generate unique filename
     timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
@@ -515,7 +515,7 @@ def view_report_preview():
                 "data": ordered_data
             }, ensure_ascii=False)
             
-            save_and_return_report(json_str, report_type, vehicle_number)
+            save_and_return_report(ordered_data, report_type, vehicle_number)
 
             return Response(json_str, mimetype='application/json')
 
