@@ -118,10 +118,8 @@ def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
 
-    # Create a new BytesIO object for S3 upload
-    upload_buffer = BytesIO(buffer_content)
-    s3.upload_fileobj(upload_buffer, SPACE_NAME, remote_path)
-    upload_buffer.close()
+    s3.upload_fileobj(buffer_content, SPACE_NAME, remote_path)
+    buffer_content.close()
 
     # Save metadata to MongoDB
     report_metadata = {
