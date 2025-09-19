@@ -432,7 +432,7 @@ def view_report_preview():
                         license_plate = ""
                     
                     df = process_distance_report(imei, license_plate, date_filter)
-                    if not df:
+                    if df is None or df.empty:
                         continue
                     all_dfs.append(df)
             else:
