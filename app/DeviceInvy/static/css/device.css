@@ -473,26 +473,31 @@ tr:hover {
 }
 
 /* Remove or adjust column widths for less congestion: */
-.device-table th,
-.device-table td {
-  min-width: 120px;
+
+/* Unified column sizing for better scroll and visibility */
+.device-table th, .device-table td {
+  min-width: 100px;
+  max-width: 220px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.device-table th:nth-child(1), .device-table td:nth-child(1) { min-width: 180px; }
-.device-table th:nth-child(2), .device-table td:nth-child(2) { min-width: 180px; }
-.device-table th:nth-child(3), .device-table td:nth-child(3) { min-width: 140px; }
-.device-table th:nth-child(4), .device-table td:nth-child(4) { min-width: 180px; }
-.device-table th:nth-child(5), .device-table td:nth-child(5) { min-width: 120px; }
-.device-table th:nth-child(6), .device-table td:nth-child(6) { min-width: 120px; }
-.device-table th:nth-child(7), .device-table td:nth-child(7) { min-width: 120px; }
-.device-table th:nth-child(8), .device-table td:nth-child(8) { min-width: 120px; }
-.device-table th:nth-child(9), .device-table td:nth-child(9) { min-width: 120px; }
-.device-table th:nth-child(10), .device-table td:nth-child(10) { min-width: 100px; }
-.device-table th:nth-child(11), .device-table td:nth-child(11) { min-width: 100px; }
-.device-table th:nth-child(12), .device-table td:nth-child(12) { min-width: 120px; }
-.device-table th:nth-child(13), .device-table td:nth-child(13) { min-width: 150px; }
-.device-table th:nth-child(14), .device-table td:nth-child(14) { min-width: 150px; }
-.device-table th:nth-child(15), .device-table td:nth-child(15) { min-width: 50px; }
+/* Make sure the Actions column is always visible and not squeezed */
+.device-table th:nth-last-child(2), .device-table td:nth-last-child(2) {
+  min-width: 90px;
+  max-width: 120px;
+  text-align: center;
+}
+
+/* Last (empty) column for spacing/scrollbar */
+.device-table th:last-child, .device-table td:last-child {
+  min-width: 24px;
+  max-width: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
 
 .device-table tr:hover {
   background-color: #f9f9f9;
