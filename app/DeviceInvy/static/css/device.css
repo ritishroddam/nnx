@@ -507,7 +507,8 @@ tr:hover {
   table-layout: fixed;
 }
 
-.dark-mode .device-table tr{
+.dark-mode .device-table thead tr,
+.dark-mode .device-table tbody tr {
     color: #ccc;
 }
 
