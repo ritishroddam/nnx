@@ -507,6 +507,10 @@ tr:hover {
   table-layout: fixed;
 }
 
+.dark-mode .device-table tr{
+    color: #ccc;
+}
+
 .dark-mode .table-scroll-container {
   background-color: #23272b;
 }
