@@ -465,7 +465,6 @@ tr:hover {
   max-width: 220px;
   white-space: nowrap;
   text-overflow: ellipsis;
-  overflow: hidden;
 }
 
 /* Make sure the Actions column is always visible and not squeezed */
