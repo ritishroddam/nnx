@@ -412,6 +412,7 @@ tr:hover {
 }
 
 .device-table th {
+  background-color: lightgray;
   font-weight: 500;
   position: sticky;
   top: 0;
