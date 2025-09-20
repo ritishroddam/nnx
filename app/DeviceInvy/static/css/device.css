@@ -526,16 +526,11 @@ tr:hover {
   border-bottom-color: #444;
 }
 
-.dark-mode .device-table td {
-  border-bottom-color: #444;
-}
-
 .dark-mode .device-table tr:hover {
   background-color: #444;
 }
 
 .dark-mode .device-table tbody{
-    background-color: #000;
     color: #ccc;
 }
 
