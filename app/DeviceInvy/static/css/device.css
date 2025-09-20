@@ -632,20 +632,20 @@ tr:hover {
   justify-content: flex-end;
 }
 
-.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 160px; }
-.device-table th:nth-child(2), .device-table td:nth-child(2) { width: 140px; }
-.device-table th:nth-child(3), .device-table td:nth-child(3) { width: 150px; }
-.device-table th:nth-child(4), .device-table td:nth-child(4) { width: 150px; }
-.device-table th:nth-child(5), .device-table td:nth-child(5) { width: 150px; }
-.device-table th:nth-child(6), .device-table td:nth-child(6) { width: 120px; }
-.device-table th:nth-child(7), .device-table td:nth-child(7) { width: 100px; }
-.device-table th:nth-child(8), .device-table td:nth-child(8) { width: 100px; }
-.device-table th:nth-child(9), .device-table td:nth-child(9) { width: 100px; }
+.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 170px; }
+.device-table th:nth-child(2), .device-table td:nth-child(2) { width: 150px; }
+.device-table th:nth-child(3), .device-table td:nth-child(3) { width: 160px; }
+.device-table th:nth-child(4), .device-table td:nth-child(4) { width: 170px; }
+.device-table th:nth-child(5), .device-table td:nth-child(5) { width: 170px; }
+.device-table th:nth-child(6), .device-table td:nth-child(6) { width: 125px; }
+.device-table th:nth-child(7), .device-table td:nth-child(7) { width: 120px; }
+.device-table th:nth-child(8), .device-table td:nth-child(8) { width: 120px; }
+.device-table th:nth-child(9), .device-table td:nth-child(9) { width: 120px; }
 .device-table th:nth-child(10), .device-table td:nth-child(10) { width: 120px; }
 .device-table th:nth-child(11), .device-table td:nth-child(11) { width: 100px; }
-.device-table th:nth-child(12), .device-table td:nth-child(12) { width: 100px; }
-.device-table th:nth-child(13), .device-table td:nth-child(13) { width: 100px; }
-.device-table th:nth-child(14), .device-table td:nth-child(14) { width: 100px; }
+.device-table th:nth-child(12), .device-table td:nth-child(12) { width: 120px; }
+.device-table th:nth-child(13), .device-table td:nth-child(13) { width: 150px; }
+.device-table th:nth-child(14), .device-table td:nth-child(14) { width: 150px; }
 
 .search-container {
   display: flex;
