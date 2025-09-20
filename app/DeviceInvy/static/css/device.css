@@ -26,7 +26,6 @@ input[type="text"] {
 }
 
 table {
-    background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
@@ -37,7 +36,6 @@ table {
 }
 
 .dark-mode .table {
-    background-color: #000;
     color: #ccc;
     box-shadow: 0px 0px 10px #cccccc90;
 }
@@ -50,12 +48,10 @@ th {
 }
 
 th {
-    background-color: #f5f5f5;
     font-weight: 500;
 }
 
 .dark-mode th {
-    background-color: #333;
     color: #ccc;
 }
 
