@@ -398,7 +398,7 @@ tr:hover {
 
 .scrollable-table-container {
   width: 100%;
-  overflow: auto;
+  overflow-x: auto;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 20px;
@@ -412,42 +412,88 @@ tr:hover {
 
 .device-table {
   width: 100%;
+  min-width: 1800px;
+  table-layout: fixed;
   border-collapse: collapse;
+  color: #333;
 }
 
-.device-table thead {
+/* .device-table thead {
   position: sticky;
   top: 0;
   z-index: 10;
-}
+} */
 
-.device-table th {
+/* .device-table th {
   background-color: #f5f5f5;
   font-weight: 500;
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #ddd;
   white-space: nowrap;
-}
+} */
 
-.device-table tbody {
+/* .device-table tbody {
   display: block;
   overflow-y: auto;
   max-height: calc(100vh - 300px); 
-}
+} */
 
-.device-table tr {
+/* .device-table tr {
   display: table;
   width: 100%;
   table-layout: fixed;
-}
+} */
 
-.device-table td {
+/* .device-table td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #eee;
   white-space: nowrap;
+} */
+
+.device-table th, .device-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.device-table th {
+  background-color: #f5f5f5;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.device-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Remove or adjust column widths for less congestion: */
+.device-table th,
+.device-table td {
+  min-width: 120px;
+}
+
+.device-table th:nth-child(1), .device-table td:nth-child(1) { min-width: 140px; }
+.device-table th:nth-child(2), .device-table td:nth-child(2) { min-width: 120px; }
+.device-table th:nth-child(3), .device-table td:nth-child(3) { min-width: 140px; }
+.device-table th:nth-child(4), .device-table td:nth-child(4) { min-width: 140px; }
+.device-table th:nth-child(5), .device-table td:nth-child(5) { min-width: 120px; }
+.device-table th:nth-child(6), .device-table td:nth-child(6) { min-width: 120px; }
+.device-table th:nth-child(7), .device-table td:nth-child(7) { min-width: 120px; }
+.device-table th:nth-child(8), .device-table td:nth-child(8) { min-width: 120px; }
+.device-table th:nth-child(9), .device-table td:nth-child(9) { min-width: 100px; }
+.device-table th:nth-child(10), .device-table td:nth-child(10) { min-width: 100px; }
+.device-table th:nth-child(11), .device-table td:nth-child(11) { min-width: 100px; }
+.device-table th:nth-child(12), .device-table td:nth-child(12) { min-width: 120px; }
+.device-table th:nth-child(13), .device-table td:nth-child(13) { min-width: 120px; }
+.device-table th:nth-child(14), .device-table td:nth-child(14) { min-width: 100px; }
+.device-table th:nth-child(15), .device-table td:nth-child(15) { min-width: 30px; }
 
 .device-table tr:hover {
   background-color: #f9f9f9;
