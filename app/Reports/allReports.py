@@ -679,7 +679,7 @@ def download_report(report_id):
 
         return send_file(
             output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            mimetype="application/json",
             as_attachment=True,
             download_name=report['filename']
         )
