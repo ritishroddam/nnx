@@ -384,6 +384,12 @@ input[type="date"] {
   text-overflow: ellipsis;
 }
 
+.dark-mode .sim-table th, 
+.dark-mode .sim-table td {
+  border-color: #444;
+  color: #ccc;
+}
+
 /* Column widths - adjust as needed */
 .sim-table th:nth-child(1), .sim-table td:nth-child(1) { width: 120px; min-width: 120px; }
 .sim-table th:nth-child(2), .sim-table td:nth-child(2) { width: 150px; min-width: 150px; }
