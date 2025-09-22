@@ -10,6 +10,8 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
+from datetime import datetime
+import pytz
 
 from config import config
 
@@ -268,8 +270,10 @@ def edit_device(device_id):
 
         # Fetch username from JWT
         username = get_jwt_identity() or "Unknown"
-        from datetime import datetime
-        last_edited_date = datetime.now().strftime("%d-%m-%Y %I:%M %p")
+        # Use IST timezone for last edited date
+        ist = pytz.timezone("Asia/Kolkata")
+        now_ist = datetime.now(ist)
+        last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M %p")
 
         result = collection.update_one(
             {'_id': object_id},
