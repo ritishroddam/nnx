@@ -417,8 +417,9 @@ function saveDevice(deviceId) {
         row.cells[9].innerText = updatedData.Package;
         row.cells[10].innerText = updatedData.Tenure || "";
         row.cells[11].innerHTML = `<span class="status-label">${updatedData.Status}</span>`;
-        row.cells[12].innerText = updatedData.LastEditedBy;
-        row.cells[13].innerText = updatedData.LastEditedDate;
+        // Use backend values for LastEditedBy and LastEditedDate
+        row.cells[12].innerText = data.LastEditedBy || "Unknown";
+        row.cells[13].innerText = data.LastEditedDate || "";
         row.cells[12].style.display = '';
         row.cells[13].style.display = '';
         row.cells[14].innerHTML = `
