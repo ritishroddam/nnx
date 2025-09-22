@@ -666,7 +666,7 @@ tr:hover {
 }
 
 .counter.new-stock {
-  background-color: #bcd6e3;
+  background-color: #c2ddeb;
   border: 1px solid #015f6b;
 }
 
@@ -677,7 +677,7 @@ tr:hover {
 }
 
 .counter.in-use{
-  background-color: #d9c696;
+  background-color: #e5d1a0;
   border: 1px solid #ff5900;
 }
 
