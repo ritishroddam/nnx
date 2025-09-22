@@ -476,8 +476,50 @@ function editSim(simId) {
 
 // Save and Cancel handlers (basic stubs)
 function saveSim(simId) {
-  // Implement AJAX save logic here
-  location.reload(); // For now, just reload to reset
+  const row = document.querySelector(`tr[data-id='${simId}']`);
+  if (!row) return;
+
+  const mobile = row.cells[0].querySelector("input").value.trim();
+  const simNumber = row.cells[1].querySelector("input").value.trim();
+  const imei = row.cells[2].querySelector("input").value.trim();
+  const dateIn = row.cells[3].querySelector("input").value;
+  const dateOut = row.cells[4].querySelector("input").value;
+  const vendor = row.cells[5].querySelector("input").value.trim();
+  const status = row.cells[6].querySelector("select").value;
+
+  // Optionally, add validation here
+
+  const updatedData = {
+    MobileNumber: mobile,
+    SimNumber: simNumber,
+    IMEI: imei,
+    DateIn: dateIn,
+    DateOut: dateOut,
+    Vendor: vendor,
+    status: status
+  };
+
+  fetch(`/simInvy/edit_sim/${simId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+    },
+    body: JSON.stringify(updatedData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Optionally update the row inline, or just reload:
+        location.reload();
+      } else {
+        alert(data.message || "Failed to save changes.");
+      }
+    })
+    .catch((error) => {
+      alert("An error occurred. Please try again.");
+      console.error("Error updating SIM:", error);
+    });
 }
 
 function cancelEditSim(simId) {
