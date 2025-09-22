@@ -152,10 +152,9 @@ def search_sims():
 @jwt_required()
 def manual_entry():
     data = request.form.to_dict()
-
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    data['status'] = 'Available' 
+    data['status'] = 'New Stock'  # Default status 
     data['isActive'] = True  
 
     if len(data['MobileNumber']) not in [10, 13]:
@@ -260,6 +259,7 @@ def upload_file():
                 "DateIn": date_in,
                 "DateOut": date_out,
                 "Vendor": vendor,
+                "status": "New Stock"  # Default status for upload
             }
             records.append(record)
 

@@ -13,27 +13,27 @@ Sim Inventory
 {% block block_container %}
 
 <div class="status-counters mb-4">
-  <div class="counter active">
-    <span class="count" id="activeCount">0</span>
-    <span class="label">Active</span>
+  <div class="counter new-stock">
+    <span class="count" id="newStockCount">0</span>
+    <span class="label">New Stock</span>
   </div>
-  <div class="counter inactive">
-    <span class="count" id="inactiveCount">0</span>
-    <span class="label">Inactive</span>
+  <div class="counter in-use">
+    <span class="count" id="inUseCount">0</span>
+    <span class="label">In Use</span>
   </div>
-  <div class="counter available"> 
+  <div class="counter available">
     <span class="count" id="availableCount">0</span>
     <span class="label">Available</span>
   </div>
-  <div class="counter allocated">
-    <span class="count" id="allocatedCount">0</span>
-    <span class="label">Allocated</span>
+  <div class="counter scrap">
+    <span class="count" id="scrapCount">0</span>
+    <span class="label">Scrap</span>
   </div>
-  <div class="counter safecustody"> 
+  <div class="counter safecustody">
     <span class="count" id="safeCustodyCount">0</span>
     <span class="label">Safe Custody</span>
   </div>
-  <div class="counter suspended"> 
+  <div class="counter suspended">
     <span class="count" id="suspendedCount">0</span>
     <span class="label">Suspended</span>
   </div>
@@ -44,16 +44,16 @@ Sim Inventory
   <input type="text" id="simSearch" placeholder="Search by Mobile, SIM or IMEI..." />
 
   <div class="filter-container mb-4">
-  <select id="statusFilter" onchange="filterSimsByStatus()">
-    <option value="All">All SIMs</option>
-    <option value="Available">Available</option>
-    <option value="Allocated">Allocated</option>
-    <option value="SafeCustody">Safe Custody</option>
-    <option value="Suspended">Suspended</option>
-    <option value="Active">Active</option>
-    <option value="Inactive">Inactive</option>
-  </select>
-</div>
+    <select id="statusFilter" onchange="filterSimsByStatus()">
+      <option value="All">All Status</option>
+      <option value="New Stock">New Stock</option>
+      <option value="In Use">In Use</option>
+      <option value="Available">Available</option>
+      <option value="Scrap">Scrap</option>
+      <option value="Safe Custody">Safe Custody</option>
+      <option value="Suspended">Suspended</option>
+    </select>
+  </div>
 </div>
 
 <!-- Action Buttons -->
@@ -131,39 +131,33 @@ Sim Inventory
       <th>Mobile Number</th>
       <th>SIM Number</th>
       <th>IMEI Number</th>
-      <th>Status</th>
-      <th>Active</th>
-      <th>Status Date</th>
-      <th>Reactivation Date</th>
       <th>Date In</th>
       <th>Date Out</th>
       <th>Vendor</th>
-  <th>Last Edited By</th>
-  <th>Last Edited Date</th>
-  <th>Actions</th>
+      <th>Status</th>
+      <th>Last Edited By</th>
+      <th>Last Edited Date</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody id="simTable">
     {% for sim in sims %}
-    <tr data-id="{{ sim._id }}" class="{% if sim.status == 'Available' and sim.isActive %}available{% elif sim.status == 'Allocated' %}allocated{% elif sim.status == 'SafeCustody' %}safecustody{% elif sim.status == 'Suspended' %}suspended{% endif %}">
+    <tr data-id="{{ sim._id }}">
       <td>{{ sim.MobileNumber }}</td>
       <td>{{ sim.SimNumber }}</td>
       <td>{{ sim.IMEI if 'IMEI' in sim else 'N/A' }}</td>
-      <td>{{ sim.status }}</td>
-      <td>{{ 'Active' if sim.isActive else 'Inactive' }}</td>
-      <td>{{ sim.statusDate if sim.statusDate else '' }}</td>
-      <td>{{ sim.reactivationDate if sim.reactivationDate else '' }}</td>
       <td>{{ sim.DateIn }}</td>
       <td>{{ sim.DateOut if sim.DateOut else '' }}</td>
       <td>{{ sim.Vendor }}</td>
+      <td>{{ sim.status if sim.status else 'New Stock' }}</td>
       <td>{{ sim.lastEditedBy if 'lastEditedBy' in sim else 'N/A' }}</td>
-  <td>{% if 'lastEditedAt' in sim and sim.lastEditedAt %}{{ sim.lastEditedAt.strftime('%d-%m-%Y %I:%M %p') if sim.lastEditedAt.__class__.__name__ == 'datetime' else sim.lastEditedAt }}{% else %}N/A{% endif %}</td>
+      <td>{% if 'lastEditedAt' in sim and sim.lastEditedAt %}{{ sim.lastEditedAt.strftime('%d-%m-%Y %I:%M %p') if sim.lastEditedAt.__class__.__name__ == 'datetime' else sim.lastEditedAt }}{% else %}N/A{% endif %}</td>
       <td>
         <button class="icon-btn edit-icon" onclick="editSim('{{ sim._id }}')">✏️</button>
       </td>
     </tr>
     {% endfor %}
-</tbody>
+  </tbody>
 </table>
 </div>
 {% endblock %}
