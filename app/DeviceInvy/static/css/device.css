@@ -665,14 +665,25 @@ tr:hover {
   text-transform: uppercase;
 }
 
+.counter.new-stock {
+  background-color: #e6f7ff;
+  border: 1px solid #015f6b;
+}
+
+.dark-mode .counter.new-stock {
+  background-color: #018da0;
+  border: 1px solid #018da0;
+  color: #fff;
+}
+
 .counter.in-use{
   background-color: #fff8e6;
-  border: 1px solid #ff9800;
+  border: 1px solid #ff5900;
 }
 
 .dark-mode .counter.in-use{
-  background-color: #ff9800;
-  border: 1px solid #ff9800;
+  background-color: #be7201;
+  border: 1px solid #be7201;
   color: #fff;
 }
 
