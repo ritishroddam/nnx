@@ -676,7 +676,7 @@ tr:hover {
   color: #fff;
 }
 
-.counter .discarded {
+.counter.discarded {
   background-color: #fff3f3;
   border: 1px solid #f44336;
 }
