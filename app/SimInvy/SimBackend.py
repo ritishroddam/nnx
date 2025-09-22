@@ -284,6 +284,8 @@ def edit_sim(sim_id):
         if isinstance(is_active, str):
             is_active = is_active.lower() == 'true'
         
+        ist = pytz.timezone("Asia/Kolkata")
+        now_ist = datetime.now(ist)
         update_fields = {
             "MobileNumber": updated_data.get("MobileNumber"),
             "SimNumber": updated_data.get("SimNumber"),
@@ -293,7 +295,7 @@ def edit_sim(sim_id):
             "status": updated_data.get("status"),
             "isActive": is_active,
             "lastEditedBy": get_jwt_identity(),
-            "lastEditedAt": datetime.now()
+            "lastEditedAt": now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
