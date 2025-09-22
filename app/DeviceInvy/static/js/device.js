@@ -286,6 +286,14 @@ function editDevice(deviceId) {
   row.cells[12].style.display = 'none';
   row.cells[13].style.display = 'none';
 
+  // Hide the corresponding table headers
+  const table = row.closest('table');
+  const thead = table.querySelector('thead tr');
+  if (thead && thead.children[12] && thead.children[13]) {
+    thead.children[12].style.display = 'none';
+    thead.children[13].style.display = 'none';
+  }
+
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
   row.cells[4].innerHTML = `<input type="text" value="${deviceModel}" />`;
