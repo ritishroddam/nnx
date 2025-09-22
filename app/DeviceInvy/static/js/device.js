@@ -420,26 +420,7 @@ function saveDevice(deviceId) {
     })
     .then((data) => {
       if (data.success) {
-        row.cells[0].innerText = updatedData.IMEI;
-        row.cells[1].innerText = updatedData.GLNumber || "";
-        row.cells[4].innerText = updatedData.DeviceModel;
-        row.cells[5].innerText = updatedData.DeviceMake;
-        row.cells[6].innerText = updatedData.DateIn;
-        row.cells[7].innerText = updatedData.Warranty;
-        row.cells[8].innerText = updatedData.OutwardTo;
-        row.cells[9].innerText = updatedData.Package;
-        row.cells[10].innerText = updatedData.Tenure || "";
-        row.cells[11].innerHTML = `<span class="status-label">${updatedData.Status}</span>`;
-        // Use backend values for LastEditedBy and LastEditedDate
-        row.cells[12].innerText = data.LastEditedBy || "Unknown";
-        row.cells[13].innerText = data.LastEditedDate || "";
-        row.cells[12].style.display = '';
-        row.cells[13].style.display = '';
-        row.cells[14].innerHTML = `
-          <button class="icon-btn edit-icon" onclick="editDevice('${deviceId}')">✏️</button>
-        `;
-        displayFlashMessage("Changes saved successfully!", "success");
-        updateStatusCounts();
+        location.reload();
       } else {
         displayFlashMessage("Failed to save changes. Please try again.");
       }
