@@ -37,7 +37,8 @@ def page():
     for sim in sims:
         if sim['MobileNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
-            sim['status'] = 'Allocated'
+            # Remove this line to allow manual status changes:
+            # sim['status'] = 'Allocated'
             sim['isActive'] = True
         else:
             sim.setdefault('status', 'Available')
