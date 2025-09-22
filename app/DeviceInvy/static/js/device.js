@@ -314,7 +314,7 @@ function editDevice(deviceId) {
       <option value="New Stock" ${status === "New Stock" ? "selected" : ""}>New Stock</option>
       <option value="In use" ${status === "In use" ? "selected" : ""}>In use</option>
       <option value="Available" ${status === "Available" ? "selected" : ""}>Available</option>
-      <option value="Discarded" ${status === "Discarded" ? "selected" : ""}>Discarded</option>
+      <option value="Scrap" ${status === "Scrap" || status === "Discarded" ? "selected" : ""}>Scrap</option>
     </select>
   `;
   row.cells[14].innerHTML = `
