@@ -625,7 +625,7 @@ tr:hover {
 .status-counts {
   display: flex;
   gap: 20px;
-  margin: 20px 0;
+  margin-bottom: 20px;
   flex-wrap: wrap;
   margin-left: 0;
 }
