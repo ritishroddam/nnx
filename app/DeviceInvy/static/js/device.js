@@ -298,7 +298,7 @@ function editDevice(deviceId) {
   row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
   row.cells[4].innerHTML = `<input type="text" value="${deviceModel}" />`;
   row.cells[5].innerHTML = `<input type="text" value="${deviceMake}" />`;
-  row.cells[6].innerHTML = `<input type="date" value="${dateIn}" />`;
+  row.cells[6].innerHTML = `<input type="date" value="${dateIn}" id="editDateIn" />`;
   row.cells[7].innerHTML = `<input type="date" value="${warranty}" />`;
   row.cells[8].innerHTML = `<input type="date" value="${outwardTo}" />`;
   row.cells[9].innerHTML = `
@@ -324,6 +324,19 @@ function editDevice(deviceId) {
   document.getElementById("editPackage").addEventListener("change", function () {
     document.getElementById("editTenure").disabled = this.value !== "Package";
   });
+
+  // Set max date for Date In input to today
+  const today = new Date().toISOString().split("T")[0];
+  const editDateInInput = row.cells[6].querySelector("#editDateIn");
+  if (editDateInInput) {
+    editDateInInput.setAttribute("max", today);
+    editDateInInput.addEventListener("input", function () {
+      if (this.value > today) {
+        this.value = today;
+        displayFlashMessage("Future dates are not allowed for Date In.", "warning");
+      }
+    });
+  }
 }
 
 function validateIMEI(input) {
