@@ -613,12 +613,12 @@ input[type="date"] {
   color: #fff;
 }
 
-.counter.inactive {
+.counter.scrap {
   background-color: #fff3f3;
   border: 1px solid #f44336;
 }
 
-.dark-mode .counter.inactive {
+.dark-mode .counter.scrap {
   background-color: #c62828;
   border: 1px solid #f44336;
   color: #fff;
