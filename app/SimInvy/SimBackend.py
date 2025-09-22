@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: i
 from app.models import User # type: ignore
 from app.utils import roles_required # type: ignore
 from datetime import datetime, timedelta
+import pytz
 
 
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
@@ -452,3 +453,7 @@ def download_excel_filtered():
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Export failed", "details": str(e)}), 500
+
+ist = pytz.timezone("Asia/Kolkata")
+now_ist = datetime.now(ist)
+last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
