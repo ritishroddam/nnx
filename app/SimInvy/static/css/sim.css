@@ -465,7 +465,7 @@ input[type="date"] {
 }
 
 .dark-mode .sim-table tr:hover {
-    background-color: #ccc;
+    background-color: #555;
 }
 
 .search-container {
