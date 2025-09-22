@@ -665,12 +665,12 @@ tr:hover {
   text-transform: uppercase;
 }
 
-.counter.active {
+.counter.available {
   background-color: #e6f7e6;
   border: 1px solid #4CAF50;
 }
 
-.dark-mode .counter.active {
+.dark-mode .counter.available {
   background-color: #2e7d32;
   border: 1px solid #4CAF50;
   color: #fff;
