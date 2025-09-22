@@ -26,21 +26,16 @@ input[type="text"] {
 }
 
 table {
-    background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
     margin-bottom: 20px;
     max-height: calc(100vh - 250px);
     position: relative;
-    width:auto !important;
-    max-width: auto !important;
     border-collapse: collapse;
     color: #333;
 }
 
 .dark-mode .table {
-    background-color: #000;
     color: #ccc;
     box-shadow: 0px 0px 10px #cccccc90;
 }
@@ -53,12 +48,10 @@ th {
 }
 
 th {
-    background-color: #f5f5f5;
     font-weight: 500;
 }
 
 .dark-mode th {
-    background-color: #333;
     color: #ccc;
 }
 
@@ -398,7 +391,7 @@ tr:hover {
 
 .scrollable-table-container {
   width: 100%;
-  overflow: auto;
+  overflow-x: auto;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 20px;
@@ -412,41 +405,43 @@ tr:hover {
 
 .device-table {
   width: 100%;
+  width: 2200px;
+  table-layout: fixed;
   border-collapse: collapse;
-}
-
-.device-table thead {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  color: #333;
 }
 
 .device-table th {
   background-color: #f5f5f5;
   font-weight: 500;
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.device-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.device-table th, .device-table td {
+  min-width: 100px;
+  max-width: 220px;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.device-table tbody {
-  display: block;
-  overflow-y: auto;
-  max-height: calc(100vh - 300px); 
+.device-table th:nth-last-child(2), .device-table td:nth-last-child(2) {
+  min-width: 90px;
+  max-width: 120px;
+  text-align: center;
 }
 
-.device-table tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.device-table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  white-space: nowrap;
+.device-table th:last-child, .device-table td:last-child {
+  min-width: 24px;
+  max-width: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .device-table tr:hover {
@@ -458,6 +453,11 @@ tr:hover {
   display: table;
   width: 100%;
   table-layout: fixed;
+}
+
+.dark-mode .device-table thead tr,
+.dark-mode .device-table tbody tr {
+    color: #ccc;
 }
 
 .dark-mode .table-scroll-container {
@@ -474,16 +474,7 @@ tr:hover {
   border-bottom-color: #444;
 }
 
-.dark-mode .device-table td {
-  border-bottom-color: #444;
-}
-
-.dark-mode .device-table tr:hover {
-  background-color: #444;
-}
-
 .dark-mode .device-table tbody{
-    background-color: #000;
     color: #ccc;
 }
 
@@ -496,12 +487,10 @@ tr:hover {
 }
 
 .device-table tbody::-webkit-scrollbar-track {
-  background: #f1f1f1;
   border-radius: 4px;
 }
 
 .device-table tbody::-webkit-scrollbar-thumb {
-  background: #888;
   border-radius: 4px;
 }
 
@@ -514,12 +503,10 @@ tr:hover {
 }
 
 .table-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
   border-radius: 4px;
 }
 
 .table-scroll-container::-webkit-scrollbar-thumb {
-  background: #888;
   border-radius: 4px;
 }
 
@@ -582,20 +569,20 @@ tr:hover {
   justify-content: flex-end;
 }
 
-.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 160px; }
-.device-table th:nth-child(2), .device-table td:nth-child(2) { width: 140px; }
-.device-table th:nth-child(3), .device-table td:nth-child(3) { width: 150px; }
-.device-table th:nth-child(4), .device-table td:nth-child(4) { width: 150px; }
-.device-table th:nth-child(5), .device-table td:nth-child(5) { width: 150px; }
-.device-table th:nth-child(6), .device-table td:nth-child(6) { width: 120px; }
-.device-table th:nth-child(7), .device-table td:nth-child(7) { width: 100px; }
-.device-table th:nth-child(8), .device-table td:nth-child(8) { width: 100px; }
-.device-table th:nth-child(9), .device-table td:nth-child(9) { width: 100px; }
+.device-table th:nth-child(1), .device-table td:nth-child(1) { width: 170px; }
+.device-table th:nth-child(2), .device-table td:nth-child(2) { width: 150px; }
+.device-table th:nth-child(3), .device-table td:nth-child(3) { width: 160px; }
+.device-table th:nth-child(4), .device-table td:nth-child(4) { width: 170px; }
+.device-table th:nth-child(5), .device-table td:nth-child(5) { width: 170px; }
+.device-table th:nth-child(6), .device-table td:nth-child(6) { width: 125px; }
+.device-table th:nth-child(7), .device-table td:nth-child(7) { width: 120px; }
+.device-table th:nth-child(8), .device-table td:nth-child(8) { width: 120px; }
+.device-table th:nth-child(9), .device-table td:nth-child(9) { width: 120px; }
 .device-table th:nth-child(10), .device-table td:nth-child(10) { width: 120px; }
 .device-table th:nth-child(11), .device-table td:nth-child(11) { width: 100px; }
-.device-table th:nth-child(12), .device-table td:nth-child(12) { width: 100px; }
-.device-table th:nth-child(13), .device-table td:nth-child(13) { width: 100px; }
-.device-table th:nth-child(14), .device-table td:nth-child(14) { width: 100px; }
+.device-table th:nth-child(12), .device-table td:nth-child(12) { width: 120px; }
+.device-table th:nth-child(13), .device-table td:nth-child(13) { width: 150px; }
+.device-table th:nth-child(14), .device-table td:nth-child(14) { width: 160px; }
 
 .search-container {
   display: flex;
@@ -638,7 +625,7 @@ tr:hover {
 .status-counts {
   display: flex;
   gap: 20px;
-  margin: 20px 0;
+  margin-bottom: 20px;
   flex-wrap: wrap;
   margin-left: 0;
 }
@@ -678,23 +665,45 @@ tr:hover {
   text-transform: uppercase;
 }
 
-.counter.active {
+.counter.new-stock {
+  background-color: #bcd6e3;
+  border: 1px solid #015f6b;
+}
+
+.dark-mode .counter.new-stock {
+  background-color: #018da0;
+  border: 1px solid #018da0;
+  color: #fff;
+}
+
+.counter.in-use{
+  background-color: #d9c696;
+  border: 1px solid #ff5900;
+}
+
+.dark-mode .counter.in-use{
+  background-color: #be7201;
+  border: 1px solid #be7201;
+  color: #fff;
+}
+
+.counter.available {
   background-color: #e6f7e6;
   border: 1px solid #4CAF50;
 }
 
-.dark-mode .counter.active {
+.dark-mode .counter.available {
   background-color: #2e7d32;
   border: 1px solid #4CAF50;
   color: #fff;
 }
 
-.counter.inactive {
+.counter.discarded {
   background-color: #fff3f3;
   border: 1px solid #f44336;
 }
 
-.dark-mode .counter.inactive {
+.dark-mode .counter.discarded {
   background-color: #c62828;
   border: 1px solid #f44336;
   color: #fff;

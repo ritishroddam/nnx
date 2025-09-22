@@ -338,84 +338,73 @@ function filterTable(searchTerm) {
     });
 }
 
-function filterSimsByStatus() {
-  const status = document.getElementById('statusFilter').value;
-  console.log(`Fetching SIMs with status: ${status}`);
-  
+function renderSimTable(sims) {
   const tableBody = document.getElementById('simTable');
-  tableBody.innerHTML = '<tr><td colspan="12">Loading SIM data...</td></tr>';
+  tableBody.innerHTML = '';
   
-  fetch(`/simInvy/get_sims_by_status/${status}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Received data:', data);
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      renderSimTable(data);
-      updateCounters();
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="12" class="error">
-            Error loading data: ${error.message}
-            <button onclick="filterSimsByStatus()">Retry</button>
-          </td>
-        </tr>
-      `;
-      updateCounters(); 
-    });
+  if (!sims || sims.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="10">No SIMs found with this status</td></tr>';
+    return;
+  }
+
+  sims.forEach(sim => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', sim._id);
+
+    const status = sim.status || 'New Stock';
+    row.className = status.toLowerCase().replace(/\s/g, '-');
+
+    row.innerHTML = `
+      <td>${sim.MobileNumber}</td>
+      <td>${sim.SimNumber}</td>
+      <td>${sim.IMEI || 'N/A'}</td>
+      <td>${sim.DateIn || ''}</td>
+      <td>${sim.DateOut || ''}</td>
+      <td>${sim.Vendor || ''}</td>
+      <td>${status}</td>
+      <td>${sim.lastEditedBy || 'N/A'}</td>
+      <td>${sim.lastEditedAt || 'N/A'}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+  updateCounters();
 }
 
 function updateCounters() {
   try {
     const allSims = document.querySelectorAll('#simTable tr[data-id]');
-    let activeCount = 0;
-    let inactiveCount = 0;
+    let newStockCount = 0;
+    let inUseCount = 0;
     let availableCount = 0;
-    let allocatedCount = 0;
+    let scrapCount = 0;
     let safeCustodyCount = 0;
     let suspendedCount = 0;
 
     allSims.forEach(sim => {
       if (sim.style.display === 'none') return;
-      
-      const statusCell = sim.cells[3];
-      const activeCell = sim.cells[4];
-      
-      if (!statusCell || !activeCell) return;
-      
+      const statusCell = sim.cells[6];
+      if (!statusCell) return;
       const status = statusCell.textContent.trim();
-      const isActive = activeCell.textContent.trim() === 'Active';
-
-      if (isActive) activeCount++;
-      else inactiveCount++;
-
-      switch(status) {
-        case 'Available': availableCount++; break;
-        case 'Allocated': allocatedCount++; break;
-        case 'SafeCustody': safeCustodyCount++; break;
-        case 'Suspended': suspendedCount++; break;
-      }
+      if (status === "New Stock") newStockCount++;
+      if (status === "In Use") inUseCount++;
+      if (status === "Available") availableCount++;
+      if (status === "Scrap") scrapCount++;
+      if (status === "Safe Custody") safeCustodyCount++;
+      if (status === "Suspended") suspendedCount++;
     });
 
-    // Safely update counters
     const updateCounter = (id, value) => {
       const el = document.getElementById(id);
       if (el) el.textContent = value;
     };
 
-    updateCounter('activeCount', activeCount);
-    updateCounter('inactiveCount', inactiveCount);
+    updateCounter('newStockCount', newStockCount);
+    updateCounter('inUseCount', inUseCount);
     updateCounter('availableCount', availableCount);
-    updateCounter('allocatedCount', allocatedCount);
+    updateCounter('scrapCount', scrapCount);
     updateCounter('safeCustodyCount', safeCustodyCount);
     updateCounter('suspendedCount', suspendedCount);
   } catch (error) {
@@ -423,226 +412,92 @@ function updateCounters() {
   }
 }
 
-function renderSimTable(sims) {
+function filterSimsByStatus() {
+  const status = document.getElementById('statusFilter').value;
   const tableBody = document.getElementById('simTable');
-  tableBody.innerHTML = '';
-  
-  if (!sims || sims.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="12">No SIMs found with this status</td></tr>';
-    return;
-  }
+  const allRows = Array.from(tableBody.querySelectorAll('tr[data-id]'));
 
-  sims.forEach(sim => {
-    const row = document.createElement('tr');
-    row.setAttribute('data-id', sim._id);
-    
-    const status = sim.status || 'Available';
-    row.className = status.toLowerCase();
-    
-    row.innerHTML = `
-      <td>${sim.MobileNumber}</td>
-      <td>${sim.SimNumber}</td>
-      <td>${sim.IMEI || 'N/A'}</td>
-      <td>${status}</td>
-      <td>${sim.isActive ? 'Active' : 'Inactive'}</td>
-      <td>${sim.statusDate || ''}</td>
-      <td>${sim.reactivationDate || ''}</td>
-      <td>${sim.DateIn || ''}</td>
-      <td>${sim.DateOut || ''}</td>
-      <td>${sim.Vendor || ''}</td>
-      <td>${sim.lastEditedBy || 'N/A'}</td>
-      <td>
-        <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
-      </td>
-    `;
-    
-    tableBody.appendChild(row);
-  });
+  if (status === "All") {
+    allRows.forEach(row => row.style.display = '');
+  } else {
+    allRows.forEach(row => {
+      const statusCell = row.cells[6];
+      if (statusCell && statusCell.textContent.trim() === status) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
   updateCounters();
 }
 
-function formatDateForInput(dateStr) {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
-  }
-  return dateStr;
-}
-
 function editSim(simId) {
-
-  const currentlyEditing = document.querySelector('tr.editing');
-  if (currentlyEditing) {
-    const editingId = currentlyEditing.getAttribute('data-id');
-    cancelEdit(editingId);
-  }
-
   const row = document.querySelector(`tr[data-id='${simId}']`);
+  if (!row) return;
 
-  for (let i = 0; i < 11; i++) {
-    row.setAttribute(`data-original-col-${i}`, row.cells[i].innerText);
-  }
-  row.setAttribute("data-original-mobile", row.cells[0].innerText);
-  row.setAttribute("data-original-sim", row.cells[1].innerText);
-  row.setAttribute("data-original-imei", row.cells[2].innerText);
-  row.setAttribute("data-original-status", row.cells[3].innerText);
-  row.setAttribute("data-original-active", row.cells[4].innerText === 'Active');
-  row.setAttribute("data-original-status-date", row.cells[5].innerText);
-  row.setAttribute("data-original-reactivation-date", row.cells[6].innerText);
-  row.setAttribute("data-original-date-in", row.cells[7].innerText);
-  row.setAttribute("data-original-date-out", row.cells[8].innerText);
-  row.setAttribute("data-original-vendor", row.cells[9].innerText);
-  row.setAttribute("data-original-editor", row.cells[10].innerText);
-  row.setAttribute("data-original-edited-date", row.cells[11].innerText);
-
+  // Prevent multiple edits at once
+  if (row.classList.contains('editing')) return;
   row.classList.add('editing');
 
-  // Hide Last Edited By and Last Edited Date headers and cells
-  const table = row.closest('table');
-  const thead = table.querySelector('thead tr');
-  const lastEditedByTh = thead.children[10];
-  const lastEditedDateTh = thead.children[11];
-  lastEditedByTh.style.display = 'none';
-  lastEditedDateTh.style.display = 'none';
-  row.cells[10].style.display = 'none';
-  row.cells[11].style.display = 'none';
+  // Get current values
+  const mobile = row.cells[0].innerText;
+  const simNumber = row.cells[1].innerText;
+  const imei = row.cells[2].innerText;
+  const dateIn = row.cells[3].innerText;
+  const dateOut = row.cells[4].innerText;
+  const vendor = row.cells[5].innerText;
+  const status = row.cells[6].innerText;
 
-  const statusOptions = ['Available', 'Allocated', 'SafeCustody', 'Suspended']
-    .map(opt => `<option value="${opt}" ${row.cells[3].innerText === opt ? 'selected' : ''}>${opt}</option>`)
-    .join('');
+  // Status options
+  const statusOptions = [
+    "New Stock", "In Use", "Available", "Scrap", "Safe Custody", "Suspended"
+  ];
 
-  row.cells[0].innerHTML = `<input type="text" value="${row.getAttribute("data-original-mobile")}" style="min-width: 120px"/>`;
-  row.cells[1].innerHTML = `<input type="text" value="${row.getAttribute("data-original-sim")}" style="min-width: 120px"/>`;
-  row.cells[2].innerHTML = `<span>${row.getAttribute("data-original-imei") || 'N/A'}</span>`;
-  row.cells[3].innerHTML = `
-    <select id="editStatus">
-      ${statusOptions}
+  // Render editable fields
+  row.cells[0].innerHTML = `<input type="text" value="${mobile}" />`;
+  row.cells[1].innerHTML = `<input type="text" value="${simNumber}" />`;
+  row.cells[2].innerHTML = `<input type="text" value="${imei}" />`;
+  row.cells[3].innerHTML = `<input type="date" value="${dateIn}" />`;
+  row.cells[4].innerHTML = `<input type="date" value="${dateOut}" />`;
+  row.cells[5].innerHTML = `<input type="text" value="${vendor}" />`;
+  row.cells[6].innerHTML = `
+    <select>
+      ${statusOptions.map(opt => `<option value="${opt}" ${opt === status ? "selected" : ""}>${opt}</option>`).join("")}
     </select>
   `;
-  row.cells[4].innerHTML = `
-    <select id="editActive">
-      <option value="true" ${row.getAttribute("data-original-active") === 'true' ? 'selected' : ''}>Active</option>
-      <option value="false" ${row.getAttribute("data-original-active") === 'false' ? 'selected' : ''}>Inactive</option>
-    </select>
-  `;
-  row.cells[5].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-status-date"))}" id="editStatusDate" />`;
-  row.cells[6].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-reactivation-date"))}" id="editReactivationDate" />`;
-  row.cells[7].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-in"))}" />`;
-  row.cells[8].innerHTML = `<input type="date" value="${formatDateForInput(row.getAttribute("data-original-date-out"))}" />`;
-  row.cells[9].innerHTML = `<input type="text" value="${row.getAttribute("data-original-vendor")}" />`;
 
-  // Actions cell (now at index 12 after hiding 10 and 11)
-  row.cells[12].innerHTML = `
+  // Actions: Save and Cancel
+  row.cells[9].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
-    <button class="icon-btn cancel-icon" onclick="cancelEdit('${simId}')">❌</button>
+    <button class="icon-btn cancel-icon" onclick="cancelEditSim('${simId}')">❌</button>
   `;
-
-  row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-  const statusSelect = row.cells[3].querySelector('#editStatus');
-  const statusDateInput = row.cells[5].querySelector('#editStatusDate');
-  const reactivationDateInput = row.cells[6].querySelector('#editReactivationDate');
-
-  updateStatusFieldsVisibility(statusSelect.value, statusDateInput, reactivationDateInput);
-  
-  statusSelect.addEventListener('change', function() {
-    updateStatusFieldsVisibility(this.value, statusDateInput, reactivationDateInput);
-  });
 }
 
-function updateStatusFieldsVisibility(status, statusDateInput, reactivationDateInput) {
-  if (status === 'SafeCustody' || status === 'Suspended') {
-    statusDateInput.style.display = 'block';
-    if (status === 'SafeCustody') {
-      reactivationDateInput.style.display = 'block';
-      const today = new Date();
-      const reactivationDate = new Date();
-      reactivationDate.setDate(today.getDate() + 90);
-      reactivationDateInput.value = reactivationDate.toISOString().split('T')[0];
-    } else {
-      reactivationDateInput.style.display = 'none';
-    }
-  } else {
-    statusDateInput.style.display = 'none';
-    reactivationDateInput.style.display = 'none';
-  }
-}
-
-function cancelEdit(simId) {
-  const row = document.querySelector(`tr[data-id='${simId}']`);
-
-  if (row) {
-    row.classList.remove('editing');
-
-    row.cells[0].innerText = row.getAttribute("data-original-mobile");
-    row.cells[1].innerText = row.getAttribute("data-original-sim");
-    row.cells[2].innerText = row.getAttribute("data-original-imei") || 'N/A';
-    row.cells[3].innerText = row.getAttribute("data-original-status");
-    row.cells[4].innerText = row.getAttribute("data-original-active") === 'true' ? 'Active' : 'Inactive';
-    row.cells[5].innerText = row.getAttribute("data-original-status-date");
-    row.cells[6].innerText = row.getAttribute("data-original-reactivation-date");
-    row.cells[7].innerText = row.getAttribute("data-original-date-in");
-    row.cells[8].innerText = row.getAttribute("data-original-date-out");
-    row.cells[9].innerText = row.getAttribute("data-original-vendor");
-    row.cells[10].innerText = row.getAttribute("data-original-editor") || 'N/A';
-    row.cells[11].innerText = row.getAttribute("data-original-edited-date") || 'N/A';
-
-    row.cells[12].innerHTML = `
-      <button class="icon-btn edit-icon" onclick="editSim('${simId}')">✏️</button>
-    `;
-
-    // Restore Last Edited By and Last Edited Date headers and cells
-    const table = row.closest('table');
-    const thead = table.querySelector('thead tr');
-    const lastEditedByTh = thead.children[10];
-    const lastEditedDateTh = thead.children[11];
-    lastEditedByTh.style.display = '';
-    lastEditedDateTh.style.display = '';
-    row.cells[10].style.display = '';
-    row.cells[11].style.display = '';
-  }
-}
-
+// Save and Cancel handlers (basic stubs)
 function saveSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
+  if (!row) return;
 
-  if (row) {
-    row.classList.remove('editing');
+  const mobile = row.cells[0].querySelector("input").value.trim();
+  const simNumber = row.cells[1].querySelector("input").value.trim();
+  const imei = row.cells[2].querySelector("input").value.trim();
+  const dateIn = row.cells[3].querySelector("input").value;
+  const dateOut = row.cells[4].querySelector("input").value;
+  const vendor = row.cells[5].querySelector("input").value.trim();
+  const status = row.cells[6].querySelector("select").value;
+
+  // Optionally, add validation here
 
   const updatedData = {
-    MobileNumber: row.cells[0].querySelector("input").value.trim(),
-    SimNumber: row.cells[1].querySelector("input").value.trim(),
-    status: row.cells[3].querySelector("select").value,
-    isActive: row.cells[4].querySelector("select").value,
-    statusDate: row.cells[5].querySelector("input")?.value.trim() || null,
-    reactivationDate: row.cells[6].querySelector("input")?.value.trim() || null,
-    DateIn: row.cells[7].querySelector("input").value.trim(),
-    DateOut: row.cells[8].querySelector("input").value.trim(),
-    Vendor: row.cells[9].querySelector("input").value.trim()
-    // lastEditedBy and lastEditedAt are set by backend
+    MobileNumber: mobile,
+    SimNumber: simNumber,
+    IMEI: imei,
+    DateIn: dateIn,
+    DateOut: dateOut,
+    Vendor: vendor,
+    status: status
   };
-
-  const errors = [];
-  var indianMobileRegex = /^\d{10}$|^\d{13}$/;
-
-  if (!indianMobileRegex.test(updatedData.MobileNumber)) {
-    errors.push("Please enter a valid 10-digit or 13-digit mobile number.");
-  }
-  if (updatedData.SimNumber.length !== 20 || isNaN(updatedData.SimNumber)) {
-    errors.push("Invalid SIM Number: Must be exactly 20 digits.");
-  }
-  if (!updatedData.DateIn) {
-    errors.push("Date In is required.");
-  }
-  if (!updatedData.Vendor) {
-    errors.push("Vendor is required.");
-  }
-
-  if (errors.length > 0) {
-    alert(errors.join("\n"));
-    return;
-  }
 
   fetch(`/simInvy/edit_sim/${simId}`, {
     method: "POST",
@@ -652,23 +507,21 @@ function saveSim(simId) {
     },
     body: JSON.stringify(updatedData),
   })
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then(err => { throw err; });
-      }
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Reload the page to reflect the latest data for all users
-        window.location.reload();
+        // Optionally update the row inline, or just reload:
+        location.reload();
       } else {
-        alert(data.message || "Failed to save the changes. Please try again.");
+        alert(data.message || "Failed to save changes.");
       }
     })
     .catch((error) => {
+      alert("An error occurred. Please try again.");
       console.error("Error updating SIM:", error);
-      alert(error.message || "An error occurred. Please try again.");
     });
 }
+
+function cancelEditSim(simId) {
+  location.reload(); // For now, just reload to reset
 }

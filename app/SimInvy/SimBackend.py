@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: i
 from app.models import User # type: ignore
 from app.utils import roles_required # type: ignore
 from datetime import datetime, timedelta
+import pytz
 
 
 sim_bp = Blueprint('SimInvy', __name__, static_folder='static', template_folder='templates')
@@ -36,7 +37,8 @@ def page():
     for sim in sims:
         if sim['MobileNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
-            sim['status'] = 'Allocated'
+            # Remove this line to allow manual status changes:
+            # sim['status'] = 'Allocated'
             sim['isActive'] = True
         else:
             sim.setdefault('status', 'Available')
@@ -152,10 +154,9 @@ def search_sims():
 @jwt_required()
 def manual_entry():
     data = request.form.to_dict()
-
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    data['status'] = 'Available' 
+    data['status'] = 'New Stock'  # Default status 
     data['isActive'] = True  
 
     if len(data['MobileNumber']) not in [10, 13]:
@@ -260,6 +261,7 @@ def upload_file():
                 "DateIn": date_in,
                 "DateOut": date_out,
                 "Vendor": vendor,
+                "status": "New Stock"  # Default status for upload
             }
             records.append(record)
 
@@ -283,6 +285,8 @@ def edit_sim(sim_id):
         if isinstance(is_active, str):
             is_active = is_active.lower() == 'true'
         
+        ist = pytz.timezone("Asia/Kolkata")
+        now_ist = datetime.now(ist)
         update_fields = {
             "MobileNumber": updated_data.get("MobileNumber"),
             "SimNumber": updated_data.get("SimNumber"),
@@ -292,7 +296,7 @@ def edit_sim(sim_id):
             "status": updated_data.get("status"),
             "isActive": is_active,
             "lastEditedBy": get_jwt_identity(),
-            "lastEditedAt": datetime.now()
+            "lastEditedAt": now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
         }
         
         if updated_data.get("status") in ['SafeCustody', 'Suspended']:
@@ -452,3 +456,7 @@ def download_excel_filtered():
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Export failed", "details": str(e)}), 500
+
+ist = pytz.timezone("Asia/Kolkata")
+now_ist = datetime.now(ist)
+last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
