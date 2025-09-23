@@ -609,33 +609,34 @@ Register Client Admin
     function filterTable() {
         const searchText = searchInput.value.toLowerCase();
         const statusValue = statusFilter.value;
-        
+
         let activeCount = 0;
         let inactiveCount = 0;
         let visibleCount = 0;
-        
+
         Array.from(tableBody.children).forEach(row => {
             const username = row.querySelector('.username-cell').textContent.toLowerCase();
             const email = row.querySelector('.email-cell').textContent.toLowerCase();
             const company = row.querySelector('.company-cell').textContent.toLowerCase();
             const isDisabled = row.getAttribute('data-disabled') === '1';
-            
-            const matchesSearch = searchText === '' || 
-                username.includes(searchText) || 
-                email.includes(searchText) || 
+
+            const matchesSearch = searchText === '' ||
+                username.includes(searchText) ||
+                email.includes(searchText) ||
                 company.includes(searchText);
-                
+
             let matchesStatus = true;
             if (statusValue === 'active') {
                 matchesStatus = !isDisabled;
             } else if (statusValue === 'inactive') {
                 matchesStatus = isDisabled;
+            } else if (statusValue === 'all') {
+                matchesStatus = true;
             }
-            
+
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleCount++;
-                
                 if (isDisabled) {
                     inactiveCount++;
                 } else {
@@ -645,7 +646,8 @@ Register Client Admin
                 row.style.display = 'none';
             }
         });
-        
+
+        // Update summary cards to show only filtered data
         totalUsersCount.textContent = visibleCount;
         activeUsersCount.textContent = activeCount;
         inactiveUsersCount.textContent = inactiveCount;
@@ -654,7 +656,7 @@ Register Client Admin
     if (searchInput) {
         searchInput.addEventListener('input', filterTable);
     }
-    
+
     if (statusFilter) {
         statusFilter.addEventListener('change', filterTable);
     }
