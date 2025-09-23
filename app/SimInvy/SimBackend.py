@@ -247,6 +247,11 @@ def upload_file():
             vendor = str(row['Vendor']).strip()
             status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
 
+            # Vendor validation
+            if vendor not in ["Airtel", "Vodafone"]:
+                flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone'.", "danger")
+                return redirect(url_for('SimInvy.page'))
+
             if len(mobile_number) not in [10,13]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
@@ -263,7 +268,7 @@ def upload_file():
                 "DateIn": date_in,
                 "DateOut": date_out,
                 "Vendor": vendor,
-                "status": status  # Use status from Excel or default
+                "status": status
             }
             records.append(record)
 
