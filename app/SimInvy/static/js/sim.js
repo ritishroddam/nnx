@@ -175,6 +175,90 @@ document.addEventListener("DOMContentLoaded", function() {
   }, 100);
 });
 
+const ROWS_PER_PAGE = 100;
+let currentPage = 1;
+let paginatedSims = [];
+
+function paginateSims(sims, page = 1, rowsPerPage = ROWS_PER_PAGE) {
+  const start = (page - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  return sims.slice(start, end);
+}
+
+function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const paginationDiv = document.getElementById('simPagination');
+  if (!paginationDiv) return;
+
+  if (totalPages <= 1) {
+    paginationDiv.innerHTML = '';
+    return;
+  }
+
+  let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
+
+  html += `<button class="btn" id="simPrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+  html += `<span>Page ${currentPage} of ${totalPages}</span>`;
+  html += `<button class="btn" id="simNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+
+  html += `</div>`;
+  paginationDiv.innerHTML = html;
+
+  document.getElementById('simPrevPage').onclick = function() {
+    if (currentPage > 1) {
+      currentPage--;
+      renderSimTable(paginatedSims, currentPage);
+    }
+  };
+  document.getElementById('simNextPage').onclick = function() {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderSimTable(paginatedSims, currentPage);
+    }
+  };
+}
+
+// Override renderSimTable to support pagination
+function renderSimTable(sims, page = 1) {
+  paginatedSims = sims;
+  currentPage = page;
+  const tableBody = document.getElementById('simTable');
+  tableBody.innerHTML = '';
+
+  if (!sims || sims.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="10">No SIMs found with this status</td></tr>';
+    renderPaginationControls(0, 1, ROWS_PER_PAGE);
+    return;
+  }
+
+  const pageSims = paginateSims(sims, page, ROWS_PER_PAGE);
+  pageSims.forEach(sim => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', sim._id);
+
+    const status = sim.status || 'New Stock';
+    row.className = status.toLowerCase().replace(/\s/g, '-');
+
+    row.innerHTML = `
+      <td>${sim.MobileNumber}</td>
+      <td>${sim.SimNumber}</td>
+      <td>${sim.IMEI || 'N/A'}</td>
+      <td>${sim.DateIn || ''}</td>
+      <td>${sim.DateOut || ''}</td>
+      <td>${sim.Vendor || ''}</td>
+      <td>${status}</td>
+      <td>${sim.lastEditedBy || 'N/A'}</td>
+      <td>${sim.lastEditedAt || 'N/A'}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+  renderPaginationControls(sims.length, page, ROWS_PER_PAGE);
+  updateCounters();
+}
+
 function searchSims() {
     const searchValue = document.getElementById("simSearch").value.trim().toLowerCase();
     if (!searchValue) {
@@ -338,16 +422,20 @@ function filterTable(searchTerm) {
     });
 }
 
-function renderSimTable(sims) {
+function renderSimTable(sims, page = 1) {
+  paginatedSims = sims;
+  currentPage = page;
   const tableBody = document.getElementById('simTable');
   tableBody.innerHTML = '';
-  
+
   if (!sims || sims.length === 0) {
     tableBody.innerHTML = '<tr><td colspan="10">No SIMs found with this status</td></tr>';
+    renderPaginationControls(0, 1, ROWS_PER_PAGE);
     return;
   }
 
-  sims.forEach(sim => {
+  const pageSims = paginateSims(sims, page, ROWS_PER_PAGE);
+  pageSims.forEach(sim => {
     const row = document.createElement('tr');
     row.setAttribute('data-id', sim._id);
 
@@ -370,6 +458,7 @@ function renderSimTable(sims) {
     `;
     tableBody.appendChild(row);
   });
+  renderPaginationControls(sims.length, page, ROWS_PER_PAGE);
   updateCounters();
 }
 
