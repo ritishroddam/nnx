@@ -614,11 +614,13 @@ Register Client Admin
         let inactiveCount = 0;
         let visibleCount = 0;
 
+
         Array.from(tableBody.children).forEach(row => {
             const username = row.querySelector('.username-cell').textContent.toLowerCase();
             const email = row.querySelector('.email-cell').textContent.toLowerCase();
             const company = row.querySelector('.company-cell').textContent.toLowerCase();
-            const isDisabled = row.getAttribute('data-disabled') === '1';
+            // Fix: getAttribute returns string, so compare strictly to '1' or '0'
+            const isDisabled = String(row.getAttribute('data-disabled')) === '1';
 
             const matchesSearch = searchText === '' ||
                 username.includes(searchText) ||
