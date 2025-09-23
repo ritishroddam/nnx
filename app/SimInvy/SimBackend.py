@@ -156,7 +156,8 @@ def manual_entry():
     data = request.form.to_dict()
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    data['status'] = 'New Stock'  # Default status 
+    # Accept status from form, default to 'New Stock' if not provided
+    data['status'] = data.get('Status', 'New Stock')
     data['isActive'] = True  
 
     if len(data['MobileNumber']) not in [10, 13]:
@@ -244,6 +245,7 @@ def upload_file():
             date_in = str(row['DateIn']).split(' ')[0].strip()
             date_out = str(row['DateOut']).split(' ')[0].strip() if not pd.isnull(row['DateOut']) else ""
             vendor = str(row['Vendor']).strip()
+            status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
 
             if len(mobile_number) not in [10,13]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
@@ -261,7 +263,7 @@ def upload_file():
                 "DateIn": date_in,
                 "DateOut": date_out,
                 "Vendor": vendor,
-                "status": "New Stock"  # Default status for upload
+                "status": status  # Use status from Excel or default
             }
             records.append(record)
 
