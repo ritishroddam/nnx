@@ -173,6 +173,25 @@ document.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => {
     updateCounters();
   }, 100);
+
+  // Build allSimsData from the table rows rendered by Jinja
+  allSimsData = Array.from(document.querySelectorAll('#simTable tr[data-id]')).map(row => {
+    return {
+      _id: row.getAttribute('data-id'),
+      MobileNumber: row.cells[0].textContent.trim(),
+      SimNumber: row.cells[1].textContent.trim(),
+      IMEI: row.cells[2].textContent.trim(),
+      DateIn: row.cells[3].textContent.trim(),
+      DateOut: row.cells[4].textContent.trim(),
+      Vendor: row.cells[5].textContent.trim(),
+      status: row.cells[6].textContent.trim(),
+      lastEditedBy: row.cells[7].textContent.trim(),
+      lastEditedAt: row.cells[8].textContent.trim()
+    };
+  });
+
+  // Render the table with pagination on initial load
+  renderSimTable(allSimsData, 1);
 });
 
 const ROWS_PER_PAGE = 100;
