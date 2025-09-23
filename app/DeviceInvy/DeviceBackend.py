@@ -10,8 +10,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone, timedelta
 
 from config import config
 
@@ -40,6 +39,8 @@ def page():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
+        date = device['LastEditedDate'].astimezone(timezone(timedelta(hours=5, minutes=30)))
+        device['LastEditedDate'] = date.strftime('%d-%m-%Y %I:%M %p')
         vehicle = VehicleData.get(device['IMEI']) 
         if not vehicle:
             device['LicensePlateNumber'] = None
@@ -106,6 +107,29 @@ def manual_entry():
         flash("Invalid IMEI length", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
+    if not data['DateIn']:
+        flash("Date In is required", "danger")
+        return redirect(url_for('DeviceInvy.page'))
+    
+    if not data['DeviceModel']:
+        flash("Device Model is required", "danger")
+    
+    if not data['DeviceMake']:
+        flash("Device Make is required", "danger")
+        return redirect(url_for('DeviceInvy.page'))
+    
+    if not data['Package']:
+        flash("Package is required", "danger")
+        return redirect(url_for('DeviceInvy.page'))
+    
+    if data['Package'] == 'Package':
+        if data['Tenure']:
+            flash("Tenure is required when Package is selected for Package Type")
+            return redirect(url_for('DeviceInvy.page'))
+        
+    
+    if not data['Status']:
+        data['Status'] = 'New Stock'
 
     print(data['GLNumber'])
 
@@ -113,11 +137,12 @@ def manual_entry():
     if collection.find_one({"IMEI": data['IMEI']}):
         flash("IMEI already exists", "danger")
         return redirect(url_for('DeviceInvy.page'))
+    
     if data['GLNumber']:
         if collection.find_one({"GLNumber": data['GLNumber']}):
-            flash("GL Number already exists", "danger")
+            flash("SL Number already exists", "danger")
             return redirect(url_for('DeviceInvy.page'))
-
+    
     if data.get('OutwardTo'):
         data['Status'] = 'Active'
 
@@ -126,6 +151,9 @@ def manual_entry():
 
     data["Package"] = package_type
     data["Tenure"] = tenure
+    
+    data['LastEditedBy'] = get_jwt_identity()
+    data['LastEditedDate'] = datetime.now(timezone.utc)
 
     collection.insert_one(data)
     flash("Device added successfully!", "success")
@@ -153,13 +181,41 @@ def upload_file():
             imei = str(row['IMEI']).strip()
             gl_number = str(row.get('GLNumber', '')).strip() 
 
-            if len(imei) != 15:
-                flash(f"Invalid data at row {index + 2}", "danger")
+            if not imei or len(imei) != 15:
+                flash(f"Invalid IMEI at row no.: {index + 2}", "danger")
+                return redirect(url_for('DeviceInvy.page'))
+            
+            if not row['DateIn']:
+                flash(f"Date In is required at row no.: {index + 2}", "danger")
                 return redirect(url_for('DeviceInvy.page'))
 
-            if collection.find_one({"IMEI": imei}) or collection.find_one({"GLNumber": gl_number}):
-                flash(f"Duplicate data at row {index + 2}", "danger")
+            if not row['Warranty']:
+                flash(f"Warranty is required at row no.: {index + 2}", "danger")
                 return redirect(url_for('DeviceInvy.page'))
+            
+            if not row['DeviceModel']:
+                flash(f"Device Model is required at row no.: {index + 2}", "danger")
+                return redirect(url_for('DeviceInvy.page'))
+            
+            if not row['DeviceMake']:
+                flash(f"Device Make is required at row no.: {index + 2}", "danger")
+                return redirect(url_for('DeviceInvy.page'))
+
+            if not row['Package']:
+                flash(f"Package is required at row no.: {index + 2}", "danger")
+                return redirect(url_for('DeviceInvy.page'))
+
+            if collection.find_one({"IMEI": imei}):
+                flash(f"Duplicate IMEI at row {index + 2}", "danger")
+                return redirect(url_for('DeviceInvy.page'))
+            
+            if gl_number:
+                if collection.find_one({"GLNumber": gl_number}):
+                    flash(f"Duplicate SL Number at row {index + 2}", "danger")
+                    return redirect(url_for('DeviceInvy.page'))
+                
+            if not row['Status']:
+                row['Status'] = 'New Stock'
 
             package_type = str(row.get("Package", "")).strip()
             tenure = str(row.get("Tenure", "")).strip() if package_type == "Package" else None
@@ -171,11 +227,12 @@ def upload_file():
                 "DeviceMake": row['Device Make'],
                 "DateIn": str(row['DateIn']).split(' ')[0],
                 "Warranty": str(row['Warranty']).split(' ')[0],
-                "SentBy": row['Sent By'],
                 "OutwardTo": row.get('Outward to', ''),
                 "Package": package_type,
                 "Tenure": tenure,
                 "Status": row.get('Status', 'Inactive'),
+                "LastEditedBy": get_jwt_identity(), 
+                "LastEditedDate": datetime.now(timezone.utc)
             }
             records.append(record)
 
@@ -275,10 +332,8 @@ def edit_device(device_id):
 
         # Fetch username from JWT
         username = get_jwt_identity() or "Unknown"
-        # Use IST timezone for last edited date
-        ist = pytz.timezone("Asia/Kolkata")
-        now_ist = datetime.now(ist)
-        last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M %p")
+
+        now_ist = datetime.now(timezone.utc)
 
         result = collection.update_one(
             {'_id': object_id},
