@@ -459,6 +459,49 @@ def download_excel_filtered():
         traceback.print_exc()
         return jsonify({"error": "Export failed", "details": str(e)}), 500
 
+@sim_bp.route('/get_sims_paginated')
+@jwt_required()
+def get_sims_paginated():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 100))
+        skip = (page - 1) * per_page
+
+        total = collection.count_documents({})
+        sims = list(collection.find({}).skip(skip).limit(per_page))
+
+        vehicle_collection = db['vehicle_inventory']
+        vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
+        sim_to_imei = {v['SIM']: v.get('imei', 'N/A') for v in vehicles if 'SIM' in v}
+
+        for sim in sims:
+            sim['IMEI'] = sim_to_imei.get(sim.get('MobileNumber', ''), 'N/A')
+            sim['_id'] = str(sim['_id'])
+            sim['status'] = sim.get('status', 'New Stock')
+            sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
+            sim['lastEditedAt'] = sim.get('lastEditedAt', '')
+
+        return jsonify({
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "sims": sims
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@sim_bp.route('/sim_status_counts')
+@jwt_required()
+def sim_status_counts():
+    try:
+        pipeline = [
+            {"$group": {"_id": "$status", "count": {"$sum": 1}}}
+        ]
+        counts = {doc['_id']: doc['count'] for doc in collection.aggregate(pipeline)}
+        return jsonify(counts)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 ist = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(ist)
 last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
