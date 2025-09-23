@@ -78,14 +78,34 @@ function editCustomer(customerId) {
 function saveCustomer(customerId) {
   const row = document.querySelector(`tr[data-id='${customerId}']`);
 
+  const phone = row.cells[3].querySelector("input").value.trim();
+  const lat = row.cells[5].querySelector("input").value.trim();
+  const lng = row.cells[6].querySelector("input").value.trim();
+
+  // Phone number validation
+  if (!/^\d{10}$/.test(phone)) {
+    displayFlashMessage("Phone Number must be exactly 10 digits.", "danger");
+    return;
+  }
+  // Latitude validation
+  if (!/^\d{2}\.\d{4,}$/.test(lat)) {
+    displayFlashMessage("Latitude must be in format 12.1234 (two digits, dot, at least four digits).", "danger");
+    return;
+  }
+  // Longitude validation
+  if (!/^\d{2}\.\d{4,}$/.test(lng)) {
+    displayFlashMessage("Longitude must be in format 12.1234 (two digits, dot, at least four digits).", "danger");
+    return;
+  }
+
   const updatedData = {
     "Company Name": row.cells[0].querySelector("input").value.trim(),
     "Contact Person": row.cells[1].querySelector("input").value.trim(),
     "Email Address": row.cells[2].querySelector("input").value.trim(),
-    "Phone Number": row.cells[3].querySelector("input").value.trim(),
+    "Phone Number": phone,
     "Company Address": row.cells[4].querySelector("input").value.trim(),
-    "lat": String(row.cells[5].querySelector("input").value.trim()),
-    "lng": String(row.cells[6].querySelector("input").value.trim()),
+    "lat": lat,
+    "lng": lng,
     "Number of GPS Devices": row.cells[7].querySelector("input").value.trim(),
     "Number of Vehicles": row.cells[8].querySelector("input").value.trim(),
     "Number of Drivers": row.cells[9].querySelector("input").value.trim(),
