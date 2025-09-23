@@ -620,12 +620,14 @@ Register Client Admin
                 username.includes(searchText) || 
                 email.includes(searchText) || 
                 company.includes(searchText);
+
             let matchesStatus = true;
             if (statusValue === 'active') {
                 matchesStatus = !isDisabled;
             } else if (statusValue === 'inactive') {
                 matchesStatus = isDisabled;
-            }
+            } // else 'all', so matchesStatus remains true
+
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleCount++;
