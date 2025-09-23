@@ -315,3 +315,77 @@ document.addEventListener("DOMContentLoaded", function() {
   fetchAndRenderSims(1);
   updateCountersFromServer();
 });
+
+function editSim(simId) {
+  const row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
+  if (!row) return;
+
+  // Populate the modal fields with the current data
+  document.getElementById("editMobileNumber").value = row.cells[0].innerText.trim();
+  document.getElementById("editSimNumber").value = row.cells[1].innerText.trim();
+  document.getElementById("editImei").value = row.cells[2].innerText.trim();
+  document.getElementById("editDateIn").value = row.cells[3].innerText.trim();
+  document.getElementById("editDateOut").value = row.cells[4].innerText.trim();
+  document.getElementById("editVendor").value = row.cells[5].innerText.trim();
+  document.getElementById("editStatus").value = row.cells[6].innerText.trim();
+  document.getElementById("editLastEditedBy").value = row.cells[7].innerText.trim();
+  document.getElementById("editLastEditedAt").value = row.cells[8].innerText.trim();
+
+  // Show the edit modal
+  document.getElementById("editSimModal").classList.remove("hidden");
+
+  // Save changes event
+  document.getElementById("saveEditBtn").onclick = async function() {
+    const updatedData = {
+      _id: simId,
+      MobileNumber: document.getElementById("editMobileNumber").value.trim(),
+      SimNumber: document.getElementById("editSimNumber").value.trim(),
+      IMEI: document.getElementById("editImei").value.trim(),
+      DateIn: document.getElementById("editDateIn").value.trim(),
+      DateOut: document.getElementById("editDateOut").value.trim(),
+      Vendor: document.getElementById("editVendor").value.trim(),
+      status: document.getElementById("editStatus").value.trim(),
+      lastEditedBy: document.getElementById("editLastEditedBy").value.trim(),
+      lastEditedAt: document.getElementById("editLastEditedAt").value.trim()
+    };
+
+    try {
+      const response = await fetch('/simInvy/update_sim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify(updatedData)
+      });
+      const result = await response.json();
+      if (result.success) {
+        // Update the row in the table
+        const index = originalTableRows.findIndex(r => r.getAttribute('data-id') === simId);
+        if (index !== -1) {
+          originalTableRows[index].cells[0].innerText = updatedData.MobileNumber;
+          originalTableRows[index].cells[1].innerText = updatedData.SimNumber;
+          originalTableRows[index].cells[2].innerText = updatedData.IMEI;
+          originalTableRows[index].cells[3].innerText = updatedData.DateIn;
+          originalTableRows[index].cells[4].innerText = updatedData.DateOut;
+          originalTableRows[index].cells[5].innerHTML = `
+            <select id="editVendor">
+              <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
+              <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
+            </select>
+          `;
+          originalTableRows[index].cells[6].innerText = updatedData.status;
+          originalTableRows[index].cells[7].innerText = updatedData.lastEditedBy;
+          originalTableRows[index].cells[8].innerText = updatedData.lastEditedAt;
+        }
+
+        // Close the modal
+        document.getElementById("editSimModal").classList.add("hidden");
+      } else {
+        alert("Failed to update SIM data: " + (result.message || "Unknown error"));
+      }
+    } catch (err) {
+      alert("Error updating SIM data: " + err.message);
+    }
+  };
+}

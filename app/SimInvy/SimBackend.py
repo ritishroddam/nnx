@@ -477,7 +477,6 @@ def get_sims_paginated():
         for sim in sims:
             sim['IMEI'] = sim_to_imei.get(sim.get('MobileNumber', ''), 'N/A')
             sim['_id'] = str(sim['_id'])
-            sim['status'] = sim.get('status', 'New Stock')
             sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
             sim['lastEditedAt'] = sim.get('lastEditedAt', '')
 
