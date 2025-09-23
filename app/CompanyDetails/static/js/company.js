@@ -60,8 +60,8 @@ function editCustomer(customerId) {
   row.cells[2].innerHTML = `<input type="email" value="${emailAddress}" />`;
   row.cells[3].innerHTML = `<input type="text" value="${phoneNumber}" />`;
   row.cells[4].innerHTML = `<input type="text" value="${companyAddress}" />`;
-  row.cells[5].innerHTML = `<input type="number" step="any" value="${lat}" placeholder="Latitude" />`;
-  row.cells[6].innerHTML = `<input type="number" step="any" value="${lng}" placeholder="Longitude" />`;
+  row.cells[5].innerHTML = `<input type="text" value="${lat}" placeholder="Latitude" />`;
+  row.cells[6].innerHTML = `<input type="text" value="${lng}" placeholder="Longitude" />`;
   row.cells[7].innerHTML = `<input type="number" value="${gpsDevices}" />`;
   row.cells[8].innerHTML = `<input type="number" value="${vehicles}" />`;
   row.cells[9].innerHTML = `<input type="number" value="${drivers}" />`;
