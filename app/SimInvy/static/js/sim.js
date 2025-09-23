@@ -483,7 +483,7 @@ function renderSimTable(sims, page = 1) {
 
 function updateCounters() {
   try {
-    const allSims = document.querySelectorAll('#simTable tr[data-id]');
+    // Use allSimsData for total counts, not just visible rows
     let newStockCount = 0;
     let inUseCount = 0;
     let availableCount = 0;
@@ -491,11 +491,8 @@ function updateCounters() {
     let safeCustodyCount = 0;
     let suspendedCount = 0;
 
-    allSims.forEach(sim => {
-      if (sim.style.display === 'none') return;
-      const statusCell = sim.cells[6];
-      if (!statusCell) return;
-      const status = statusCell.textContent.trim();
+    allSimsData.forEach(sim => {
+      const status = (sim.status || '').trim();
       if (status === "New Stock") newStockCount++;
       if (status === "In Use") inUseCount++;
       if (status === "Available") availableCount++;
