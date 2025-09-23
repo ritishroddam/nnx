@@ -211,7 +211,7 @@ async function fetchAndRenderSims(page = 1) {
     totalRows = data.total;
     renderSimTable(data.sims);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-    updateCounters(data.sims, data.total);
+    // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
