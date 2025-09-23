@@ -505,14 +505,6 @@ Register Sub Account
             <i class="fas fa-search"></i>
             <input type="text" id="user-search" placeholder="Search by username, email, or company...">
         </div>
-        
-        <div class="filter">
-            <select id="status-filter">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-        </div>
 
         <div class="filter-container">
             <button id="add-admin-btn" class="btn-add-admin">
@@ -666,7 +658,6 @@ Register Sub Account
         });
         
         const searchInput = document.getElementById('user-search');
-        const statusFilter = document.getElementById('status-filter');
         const userRows = document.querySelectorAll('#users-table-body tr');
         
         function filterUsers() {
