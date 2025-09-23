@@ -159,3 +159,18 @@ window.addEventListener("click", function(event) {
     modal.classList.add("hidden");
   }
 });
+
+document.getElementById("manualForm").addEventListener("submit", function(event) {
+  const phoneInput = document.getElementById("PhoneNumber");
+  const phoneError = document.getElementById("phoneNumberError");
+  const phoneValue = phoneInput.value.trim();
+
+  if (!/^\d{10}$/.test(phoneValue)) {
+    phoneError.textContent = "Phone Number must be exactly 10 digits.";
+    phoneError.classList.remove("hidden");
+    event.preventDefault();
+    return false;
+  } else {
+    phoneError.classList.add("hidden");
+  }
+});
