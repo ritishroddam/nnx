@@ -291,6 +291,27 @@ function updateCounters(currentPageSims, total) {
   document.getElementById('suspendedCount').textContent = suspendedCount;
 }
 
+async function updateCountersFromServer() {
+  try {
+    const response = await fetch('/simInvy/sim_status_counts', {
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      }
+    });
+    const counts = await response.json();
+    document.getElementById('newStockCount').textContent = counts["New Stock"] || 0;
+    document.getElementById('inUseCount').textContent = counts["In Use"] || 0;
+    document.getElementById('availableCount').textContent = counts["Available"] || 0;
+    document.getElementById('scrapCount').textContent = counts["Scrap"] || 0;
+    document.getElementById('safeCustodyCount').textContent = counts["Safe Custody"] || 0;
+    document.getElementById('suspendedCount').textContent = counts["Suspended"] || 0;
+  } catch (err) {
+    // Optionally handle error
+  }
+}
+
+// Call this after page load and after any action that changes SIM data
 document.addEventListener("DOMContentLoaded", function() {
   fetchAndRenderSims(1);
+  updateCountersFromServer();
 });
