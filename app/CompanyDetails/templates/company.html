@@ -171,7 +171,6 @@ Company Details
         <td>{{ customer['Remarks'] if customer['Remarks'] else ""}}</td>
         <td>
           <button class="icon-btn edit-icon" onclick="editCustomer('{{ customer._id }}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteCustomer('{{ customer._id }}')">🗑️</button>
         </td>
       </tr>
       {% endfor %}
