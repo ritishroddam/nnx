@@ -38,13 +38,6 @@ Register Client Admin
                     <i class="fa fa-search"></i>
                 </div>
             </div>
-                <div class="filter-dropdown">
-                    <select id="status-filter">
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
             <div class="button-row">
                 <button id="register-btn" class="btn btn-success">+ Add New Client Admin</button>
             </div>
@@ -600,7 +593,6 @@ Register Client Admin
     }
 
     const searchInput = document.getElementById('search-input');
-    const statusFilter = document.getElementById('status-filter');
     const tableBody = document.getElementById('admins-table-body');
     const totalUsersCount = document.getElementById('total-users-count');
     const activeUsersCount = document.getElementById('active-users-count');
