@@ -621,6 +621,19 @@ input[type="date"] {
   border: 1px solid #ddd;
 }
 
+.sim-pagination {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+.sim-pagination .btn {
+  margin: 0 2px;
+  padding: 6px 16px;
+  font-size: 14px;
+}
+
 @media (max-width: 768px) {
   .table-container {
     border: 1px solid #ddd;

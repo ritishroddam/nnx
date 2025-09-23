@@ -247,6 +247,11 @@ def upload_file():
             vendor = str(row['Vendor']).strip()
             status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
 
+            # Vendor validation
+            if vendor not in ["Airtel", "Vodafone"]:
+                flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone'.", "danger")
+                return redirect(url_for('SimInvy.page'))
+
             if len(mobile_number) not in [10,13]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
@@ -263,7 +268,7 @@ def upload_file():
                 "DateIn": date_in,
                 "DateOut": date_out,
                 "Vendor": vendor,
-                "status": status  # Use status from Excel or default
+                "status": status
             }
             records.append(record)
 
@@ -458,6 +463,48 @@ def download_excel_filtered():
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Export failed", "details": str(e)}), 500
+
+@sim_bp.route('/get_sims_paginated')
+@jwt_required()
+def get_sims_paginated():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 100))
+        skip = (page - 1) * per_page
+
+        total = collection.count_documents({})
+        sims = list(collection.find({}).skip(skip).limit(per_page))
+
+        vehicle_collection = db['vehicle_inventory']
+        vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
+        sim_to_imei = {v['SIM']: v.get('imei', 'N/A') for v in vehicles if 'SIM' in v}
+
+        for sim in sims:
+            sim['IMEI'] = sim_to_imei.get(sim.get('MobileNumber', ''), 'N/A')
+            sim['_id'] = str(sim['_id'])
+            sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
+            sim['lastEditedAt'] = sim.get('lastEditedAt', '')
+
+        return jsonify({
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "sims": sims
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@sim_bp.route('/sim_status_counts')
+@jwt_required()
+def sim_status_counts():
+    try:
+        pipeline = [
+            {"$group": {"_id": "$status", "count": {"$sum": 1}}}
+        ]
+        counts = {doc['_id']: doc['count'] for doc in collection.aggregate(pipeline)}
+        return jsonify(counts)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 ist = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(ist)
