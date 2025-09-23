@@ -16,7 +16,8 @@
 }
 input[type="date"],
 input[type="file"],
-input[type="text"] {
+input[type="text"],
+select {
   width: 100%;
   max-width: 300px;
   padding: 10px;
@@ -45,7 +46,7 @@ select {
 }
 
 /* Input fields in edit mode */
-input[type="text"], input[type="date"] {
+input[type="text"], input[type="date"], select {
   width: 100%;
   box-sizing: border-box;
 }
