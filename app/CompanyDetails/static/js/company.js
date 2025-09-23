@@ -117,26 +117,6 @@ function saveCustomer(customerId) {
     });
 }
 
-function deleteCustomer(customerId) {
-  if (confirm("Are you sure you want to delete this customer?")) {
-    fetch(`/companyDetails/delete_customer/${customerId}`, {
-      method: "DELETE",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          document.querySelector(`tr[data-id='${customerId}']`).remove();
-        } else {
-          alert("Failed to delete the customer.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error deleting customer:", error);
-        alert("An error occurred. Please try again.");
-      });
-  }
-}
-
 function cancelEdit() {
   location.reload(); 
 }
