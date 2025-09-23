@@ -106,11 +106,16 @@ def manual_entry():
         flash("Invalid IMEI length", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
-    print (data['GLNumber'])
 
-    if(data['GLNumber'] != ""):
-        if collection.find_one({"IMEI": data['IMEI']}) or collection.find_one({"GLNumber": data['GLNumber']}):
-            flash("IMEI or GL Number already exists", "danger")
+    print(data['GLNumber'])
+
+    # Only check for duplicate IMEI always, and duplicate GLNumber only if provided
+    if collection.find_one({"IMEI": data['IMEI']}):
+        flash("IMEI already exists", "danger")
+        return redirect(url_for('DeviceInvy.page'))
+    if data['GLNumber']:
+        if collection.find_one({"GLNumber": data['GLNumber']}):
+            flash("GL Number already exists", "danger")
             return redirect(url_for('DeviceInvy.page'))
 
     if data.get('OutwardTo'):
