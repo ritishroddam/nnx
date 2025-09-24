@@ -294,7 +294,7 @@ let totalRows = 0;
 
 async function fetchAndRenderCustomers(page = 1) {
   try {
-    const response = await fetch(`/CompanyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
       method: "GET",
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
