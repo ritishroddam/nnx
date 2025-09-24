@@ -136,8 +136,6 @@ def manual_entry():
     if not data['Status']:
         data['Status'] = 'New Stock'
 
-    print(data['GLNumber'])
-
     # Only check for duplicate IMEI always, and duplicate GLNumber only if provided
     if collection.find_one({"IMEI": data['IMEI']}):
         flash("IMEI already exists", "danger")
