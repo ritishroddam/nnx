@@ -179,6 +179,7 @@ def upload_file():
         df = pd.read_excel(file)
         records = []
         imeis = []
+        gl_numbers = []
         for index, row in df.iterrows():
             row = row.where(pd.notnull(row), None)
             imei = str(row['IMEI']).strip()
@@ -245,6 +246,10 @@ def upload_file():
             }
             
             if gl_number:
+                if gl_number in gl_numbers:
+                    flash(f"Duplicate SL Number at row {index + 2}", "danger")
+                    return redirect(url_for('DeviceInvy.page'))
+                gl_numbers.append(gl_number)                    
                 record["GLNumber"] =  gl_number
             
             records.append(record)
