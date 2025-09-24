@@ -155,3 +155,26 @@ def delete_customer(customer_id):
     except Exception as e:
         print(f"Error deleting customer: {e}")
         return jsonify({'success': False, 'message': 'Error deleting customer.'}), 500
+
+@company_bp.route('/get_customers_paginated')
+@jwt_required()
+def get_customers_paginated():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 100))
+        skip = (page - 1) * per_page
+
+        total = customers_collection.count_documents({})
+        customers = list(customers_collection.find({}).skip(skip).limit(per_page))
+
+        for customer in customers:
+            customer['_id'] = str(customer['_id'])
+
+        return jsonify({
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "customers": customers
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

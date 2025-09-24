@@ -217,3 +217,83 @@ document.getElementById("manualForm").addEventListener("submit", function(event)
     return false;
   }
 });
+
+let currentPage = 1;
+const ROWS_PER_PAGE = 100;
+let totalRows = 0;
+
+async function fetchAndRenderCustomers(page = 1) {
+  try {
+    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      }
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    totalRows = data.total;
+    renderCustomerTable(data.customers);
+    renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
+  } catch (err) {
+    document.getElementById('customerTable').innerHTML = `<tr><td colspan="14">Failed to load data</td></tr>`;
+  }
+}
+
+function renderCustomerTable(customers) {
+  const tableBody = document.getElementById('customerTable');
+  tableBody.innerHTML = '';
+  if (!customers || customers.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="14">No customers found</td></tr>';
+    return;
+  }
+  customers.forEach(customer => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', customer._id);
+    row.innerHTML = `
+      <td>${customer['Company Name'] || ''}</td>
+      <td>${customer['Contact Person'] || ''}</td>
+      <td>${customer['Email Address'] || ''}</td>
+      <td>${customer['Phone Number'] || ''}</td>
+      <td>${customer['Company Address'] || ''}</td>
+      <td>${customer['lat'] || ''}</td>
+      <td>${customer['lng'] || ''}</td>
+      <td>${customer['Number of GPS Devices'] || ''}</td>
+      <td>${customer['Number of Vehicles'] || ''}</td>
+      <td>${customer['Number of Drivers'] || ''}</td>
+      <td>${customer['Payment Status'] || ''}</td>
+      <td>${customer['Support Contact'] || ''}</td>
+      <td>${customer['Remarks'] || ''}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editCustomer('${customer._id}')">✏️</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const paginationDiv = document.getElementById('companyPagination');
+  if (!paginationDiv) return;
+  if (totalPages <= 1) {
+    paginationDiv.innerHTML = '';
+    return;
+  }
+  let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
+  html += `<button class="btn" id="companyPrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+  html += `<span>Page ${currentPage} of ${totalPages}</span>`;
+  html += `<button class="btn" id="companyNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+  html += `</div>`;
+  paginationDiv.innerHTML = html;
+  document.getElementById('companyPrevPage').onclick = function() {
+    if (currentPage > 1) fetchAndRenderCustomers(currentPage - 1);
+  };
+  document.getElementById('companyNextPage').onclick = function() {
+    if (currentPage < totalPages) fetchAndRenderCustomers(currentPage + 1);
+  };
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  fetchAndRenderCustomers(1);
+});
