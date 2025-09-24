@@ -21,6 +21,7 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
 from app.geocoding import geocodeInternal
+import tempfile
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -672,10 +673,25 @@ def download_report(report_id):
         # Construct the full path for the file in DigitalOcean Spaces
         file_path = report['path'] 
 
-        # Download the file from DigitalOcean Spaces
         output = BytesIO()
         s3.download_fileobj(SPACE_NAME, file_path, output)
         output.seek(0)
+        # Read the JSON data from the output buffer
+
+        output.seek(0)
+        json_data = json.load(output)
+        data = json_data.get("data", [])
+
+        # Create a DataFrame and write to Excel in memory
+        df = pd.DataFrame(data)
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Report')
+        excel_buffer.seek(0)
+
+        # Replace output with the Excel buffer for sending
+        output.close()
+        output = excel_buffer
 
         return send_file(
             output,
