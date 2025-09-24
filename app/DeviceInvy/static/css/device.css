@@ -582,7 +582,7 @@ tr:hover {
 .device-table th:nth-child(11), .device-table td:nth-child(11) { width: 100px; }
 .device-table th:nth-child(12), .device-table td:nth-child(12) { width: 120px; }
 .device-table th:nth-child(13), .device-table td:nth-child(13) { width: 180px; }
-.device-table th:nth-child(14), .device-table td:nth-child(14) { width: 180px; }
+.device-table th:nth-child(14), .device-table td:nth-child(14) { width: 160px; }
 
 .search-container {
   display: flex;
