@@ -169,6 +169,7 @@ def get_customers_paginated():
 
         for customer in customers:
             customer['_id'] = str(customer['_id'])
+            customer.pop('companyLogo', None)
 
         return jsonify({
             "total": total,
