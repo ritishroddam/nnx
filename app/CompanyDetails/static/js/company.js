@@ -215,6 +215,40 @@ document.getElementById("manualForm").addEventListener("submit", function(event)
   }
 });
 
+async function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+  const container = document.getElementById("companyPagination");
+  if (!container) return;
+
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+  container.innerHTML = "";
+
+  const makeBtn = (label, page, disabled = false, active = false) => {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.className = "btn";
+    if (active) btn.classList.add("active");
+    btn.disabled = disabled;
+    btn.addEventListener("click", async () => await fetchAndRenderCustomers(page));
+    return btn;
+  };
+
+  container.appendChild(makeBtn("« Prev", Math.max(1, currentPage - 1), currentPage === 1));
+
+  // windowed page numbers
+  const windowSize = 5;
+  const start = Math.max(1, currentPage - Math.floor(windowSize / 2));
+  const end = Math.min(totalPages, start + windowSize - 1);
+  for (let p = start; p <= end; p++) {
+    container.appendChild(makeBtn(String(p), p, false, p === currentPage));
+  }
+
+  container.appendChild(makeBtn("Next »", Math.min(totalPages, currentPage + 1), currentPage === totalPages));
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetchAndRenderCustomers(1);
+});
+
 let currentPage = 1;
 const ROWS_PER_PAGE = 100;
 let totalRows = 0;
@@ -238,6 +272,7 @@ async function fetchAndRenderCustomers(page = 1) {
     if (data.error) throw new Error(data.error);
 
     totalRows = data.total;
+    currentPage = data.page || page;
     renderCustomerTable(data.customers);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
   } catch (err) {
