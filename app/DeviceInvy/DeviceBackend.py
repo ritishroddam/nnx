@@ -181,7 +181,9 @@ def upload_file():
         for index, row in df.iterrows():
             row = row.where(pd.notnull(row), None)
             imei = str(row['IMEI']).strip()
-            gl_number = str(row.get('GLNumber', '')).strip() 
+            
+            gl_number = row.get('GLNumber', None)
+            gl_number = str(gl_number) if gl_number else None
             
             
             if not imei or not imei.isdigit() or len(imei) not in [15, 16, 18]:
