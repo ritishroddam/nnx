@@ -215,6 +215,45 @@ document.getElementById("manualForm").addEventListener("submit", function(event)
   }
 });
 
+function renderCustomerTable(customers) {
+  const tableBody = document.getElementById('customerTable');
+  if (!tableBody) {
+    console.error('customerTable element not found');
+    return;
+  }
+  
+  tableBody.innerHTML = '';
+  
+  if (!customers || customers.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="14">No customers found</td></tr>';
+    return;
+  }
+  
+  customers.forEach(customer => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', customer._id);
+    row.innerHTML = `
+      <td>${customer['Company Name'] || ''}</td>
+      <td>${customer['Contact Person'] || ''}</td>
+      <td>${customer['Email Address'] || ''}</td>
+      <td>${customer['Phone Number'] || ''}</td>
+      <td>${customer['Company Address'] || ''}</td>
+      <td>${customer['lat'] || ''}</td>
+      <td>${customer['lng'] || ''}</td>
+      <td>${customer['Number of GPS Devices'] || ''}</td>
+      <td>${customer['Number of Vehicles'] || ''}</td>
+      <td>${customer['Number of Drivers'] || ''}</td>
+      <td>${customer['Payment Status'] || ''}</td>
+      <td>${customer['Support Contact'] || ''}</td>
+      <td>${customer['Remarks'] || ''}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editCustomer('${customer._id}')">✏️</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
 async function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   const container = document.getElementById("companyPagination");
   if (!container) return;
@@ -255,7 +294,7 @@ let totalRows = 0;
 
 async function fetchAndRenderCustomers(page = 1) {
   try {
-    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+    const response = await fetch(`/CompanyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
       method: "GET",
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
