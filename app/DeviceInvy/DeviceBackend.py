@@ -179,10 +179,10 @@ def upload_file():
         df = pd.read_excel(file)
         records = []
         for index, row in df.iterrows():
+            row = row.where(pd.notnull(row), None)
             imei = str(row['IMEI']).strip()
             gl_number = str(row.get('GLNumber', '')).strip() 
             
-            row = row.where(pd.notnull(row), None)
             
             if not imei or not imei.isdigit() or len(imei) not in [15, 16, 18]:
                 flash("Invalid IMEI length", "danger")
