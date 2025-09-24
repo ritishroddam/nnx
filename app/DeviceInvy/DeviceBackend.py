@@ -178,9 +178,14 @@ def upload_file():
     if file and file.filename.endswith(('.xls', '.xlsx')):
         df = pd.read_excel(file)
         records = []
+        imeis = []
         for index, row in df.iterrows():
             row = row.where(pd.notnull(row), None)
             imei = str(row['IMEI']).strip()
+            
+            if imei in imeis:
+                flash(f"Duplicate IMEI at row {index + 2}", "danger")
+                return redirect(url_for('DeviceInvy.page'))
             
             gl_number = row.get('GLNumber', None)
             gl_number = str(gl_number).strip if gl_number else None
@@ -243,6 +248,8 @@ def upload_file():
                 record["GLNumber"] =  gl_number
             
             records.append(record)
+            
+            imeis.append(imei)
 
         if records:
             collection.insert_many(records)
