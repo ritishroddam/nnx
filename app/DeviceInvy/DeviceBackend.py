@@ -227,7 +227,6 @@ def upload_file():
 
             record = {
                 "IMEI": imei,
-                "GLNumber": gl_number,
                 "DeviceModel": row['DeviceModel'],
                 "DeviceMake": row['DeviceMake'],
                 "DateIn": str(row['DateIn']).split(' ')[0],
@@ -239,6 +238,10 @@ def upload_file():
                 "LastEditedBy": get_jwt_identity(), 
                 "LastEditedDate": datetime.now(timezone.utc)
             }
+            
+            if gl_number:
+                record["GLNumber"] =  gl_number
+            
             records.append(record)
 
         if records:
