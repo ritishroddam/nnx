@@ -106,7 +106,6 @@ def download_template():
 @jwt_required()
 def edit_customer(customer_id):
     try:
-
         try:
             object_id = ObjectId(customer_id)
         except Exception:
@@ -132,7 +131,7 @@ def edit_customer(customer_id):
             return jsonify({'success': False, 'message': 'Phone Number must be 10 digits.'}), 400
 
         result = customers_collection.update_one(
-            {'_id': ObjectId(object_id)},
+            {'_id': object_id},   # fixed: do not wrap ObjectId again
             {'$set': updated_data}
         )
         if result.modified_count > 0:
