@@ -265,8 +265,8 @@ tr:hover {
   box-shadow: 0 4px 24px rgba(44,62,80,0.18), 0 1.5px 6px rgba(44,62,80,0.08);
   padding: 20px 30px 30px 30px;
   width: 100%;
-  max-width: 1000px;
-  max-height: none;
+  max-width: 1200px;
+  max-height: 680px;
   overflow-y: visible;
   position: relative;
   display: flex;
@@ -279,7 +279,7 @@ tr:hover {
   font-size: 1.7rem;
   cursor: pointer;
   color: #aaa;
-  margin-left: 900px;
+  margin-left: 1100px;
   transition: color 0.2s;
 }
 
@@ -387,7 +387,6 @@ tr:hover {
 .form-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
   justify-content: space-between;
 }
 
@@ -413,7 +412,6 @@ tr:hover {
 .company-modal-content .form-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 24px 32px;
   margin-bottom: 24px;
 }
 

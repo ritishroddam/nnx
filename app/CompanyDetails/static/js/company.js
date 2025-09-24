@@ -88,16 +88,6 @@ function saveCustomer(customerId) {
     displayFlashMessage("Phone Number must be exactly 10 digits.", "danger");
     return;
   }
-  // Latitude validation
-  if (!/^\d{2}\.\d{4,}$/.test(lat)) {
-    displayFlashMessage("Latitude must be in format 12.1234 (two digits, dot, at least four digits).", "danger");
-    return;
-  }
-  // Longitude validation
-  if (!/^\d{2}\.\d{4,}$/.test(lng)) {
-    displayFlashMessage("Longitude must be in format 12.1234 (two digits, dot, at least four digits).", "danger");
-    return;
-  }
 
   const updatedData = {
     "Company Name": row.cells[0].querySelector("input").value.trim(),
@@ -171,42 +161,6 @@ document.getElementById("manualForm").addEventListener("submit", function(event)
     valid = false;
   } else {
     phoneError.classList.add("hidden");
-  }
-
-  // Latitude validation
-  const latInput = document.getElementById("lat");
-  const latValue = latInput.value.trim();
-  let latError = document.getElementById("latError");
-  if (!latError) {
-    latError = document.createElement("div");
-    latError.id = "latError";
-    latError.className = "error hidden";
-    latInput.parentNode.appendChild(latError);
-  }
-  if (!/^\d{2}\.\d{4,}$/.test(latValue)) {
-    latError.textContent = "Latitude must be in format 12.1234 (two digits, dot, at least four digits).";
-    latError.classList.remove("hidden");
-    valid = false;
-  } else {
-    latError.classList.add("hidden");
-  }
-
-  // Longitude validation
-  const lngInput = document.getElementById("lng");
-  const lngValue = lngInput.value.trim();
-  let lngError = document.getElementById("lngError");
-  if (!lngError) {
-    lngError = document.createElement("div");
-    lngError.id = "lngError";
-    lngError.className = "error hidden";
-    lngInput.parentNode.appendChild(lngError);
-  }
-  if (!/^\d{2}\.\d{4,}$/.test(lngValue)) {
-    lngError.textContent = "Longitude must be in format 12.1234 (two digits, dot, at least four digits).";
-    lngError.classList.remove("hidden");
-    valid = false;
-  } else {
-    lngError.classList.add("hidden");
   }
 
   if (!valid) {
