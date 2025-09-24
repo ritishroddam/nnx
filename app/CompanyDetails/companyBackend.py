@@ -39,6 +39,26 @@ def manual_entry():
         )
     else:
         logo_id = ObjectId("683970cc1ae3f41668357362")
+    
+    required_fields = [
+        'CompanyName', 'ContactPerson', 'EmailAddress',
+        'PhoneNumber', 'CompanyAddress'
+    ]
+    
+    for field in required_fields:
+        if not request.form.get(field):
+            flash(f'{field} is required.', 'danger')
+            return redirect(url_for('CompanyDetails.page'))
+
+    email = request.form.get('EmailAddress')
+    if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+        flash('Invalid Email Address format.', 'danger')
+        return redirect(url_for('CompanyDetails.page'))
+
+    phone = request.form.get('PhoneNumber')
+    if not phone.isdigit() or len(phone) != 10:
+        flash('Phone Number must be 10 digits.', 'danger')
+        return redirect(url_for('CompanyDetails.page'))
 
     customer = {
         'Company Name': request.form.get('CompanyName'),
@@ -75,21 +95,43 @@ def upload_customers():
 
     try:
         df = pd.read_excel(file)
-        
+
+        # Replace NaN/None with empty string
+        df = df.fillna("")
+
         logo_id = ObjectId("683970cc1ae3f41668357362")
 
         if 'lat' in df.columns:
             df['lat'] = df['lat'].astype(str)
         if 'lng' in df.columns:
             df['lng'] = df['lng'].astype(str)
-        
+
         records = df.to_dict(orient="records")
 
+        required_fields = [
+            'Company Name', 'Contact Person', 'Email Address',
+            'Phone Number', 'Company Address'
+        ]
+
+        valid_records = []
         for record in records:
             record['companyLogo'] = logo_id
-        
-        customers_collection.insert_many(records)
-        flash('Customers uploaded successfully!', 'success')
+            # Ensure required fields are present and not empty
+            row_num = records.index(record) + 2  # +2 for header and 0-indexing
+            missing_fields = [field for field in required_fields if not record.get(field, "")]
+            if missing_fields:
+                flash(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}", "danger")
+            missing_fields = [field for field in required_fields if not record.get(field, "")]
+            if missing_fields:
+                flash(f"Missing required fields in record: {', '.join(missing_fields)}", "danger")
+            if all(record.get(field, "") != "" for field in required_fields):
+                valid_records.append(record)
+
+        if not valid_records:
+            flash('No valid records to upload. Required fields missing.', 'danger')
+        else:
+            customers_collection.insert_many(valid_records)
+            flash('Customers uploaded successfully!', 'success')
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
 
