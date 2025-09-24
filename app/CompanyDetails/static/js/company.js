@@ -275,11 +275,16 @@ function renderCustomerTable(customers) {
 function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   const totalPages = Math.ceil(totalRows / rowsPerPage);
   const paginationDiv = document.getElementById('companyPagination');
-  if (!paginationDiv) return;
+  if (!paginationDiv) {
+    console.error('companyPagination element not found');
+    return;
+  }
+
   if (totalPages <= 1) {
     paginationDiv.innerHTML = '';
     return;
   }
+
   let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
   html += `<button class="btn" id="companyPrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
   html += `<span>Page ${currentPage} of ${totalPages}</span>`;
@@ -295,5 +300,6 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+  console.log('DOM loaded, initializing company page...');
   fetchAndRenderCustomers(1);
 });
