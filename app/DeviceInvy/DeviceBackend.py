@@ -102,7 +102,11 @@ def search_devices():
 def manual_entry():
     data = request.form.to_dict()
     data['IMEI'] = data['IMEI'].strip()
-    data['GLNumber'] = data.get('GLNumber', '').strip() 
+    gl_number = data.get('GLNumber', '')
+    if gl_number is None or str(gl_number).strip() == '':
+        data.pop('GLNumber', None)
+    else:
+        data['GLNumber'] = str(gl_number).strip()
     
     if not data['IMEI'].isdigit() and len(data['IMEI']) not in [15, 16, 18]:
         flash("Invalid IMEI length", "danger")
