@@ -1,3 +1,4 @@
+from curses.ascii import isdigit
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, send_file, Response
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -102,8 +103,8 @@ def manual_entry():
     data = request.form.to_dict()
     data['IMEI'] = data['IMEI'].strip()
     data['GLNumber'] = data.get('GLNumber', '').strip() 
-
-    if len(data['IMEI']) != 15:
+    
+    if not data['IMEI'].isdigit() and len(data['IMEI']) not in [15, 16, 18]:
         flash("Invalid IMEI length", "danger")
         return redirect(url_for('DeviceInvy.page'))
 
@@ -180,9 +181,11 @@ def upload_file():
         for index, row in df.iterrows():
             imei = str(row['IMEI']).strip()
             gl_number = str(row.get('GLNumber', '')).strip() 
-
-            if not imei or len(imei) != 15:
-                flash(f"Invalid IMEI at row no.: {index + 2}", "danger")
+            
+            row = row.where(pd.notnull(row), None)
+            
+            if not imei or not imei.isdigit() or len(imei) not in [15, 16, 18]:
+                flash("Invalid IMEI length", "danger")
                 return redirect(url_for('DeviceInvy.page'))
             
             if not row['DateIn']:
@@ -230,7 +233,7 @@ def upload_file():
                 "OutwardTo": row.get('Outward To', ''),
                 "Package": package_type,
                 "Tenure": tenure,
-                "Status": row.get('Status', 'Inactive'),
+                "Status": row.get('Status', 'New Stock'),
                 "LastEditedBy": get_jwt_identity(), 
                 "LastEditedDate": datetime.now(timezone.utc)
             }
