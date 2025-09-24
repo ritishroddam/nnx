@@ -105,6 +105,7 @@ def manual_entry():
     gl_number = data.get('GLNumber', '')
     if gl_number is None or str(gl_number).strip() == '':
         data.pop('GLNumber', None)
+        gl_number = None
     else:
         data['GLNumber'] = str(gl_number).strip()
     
@@ -141,8 +142,8 @@ def manual_entry():
         flash("IMEI already exists", "danger")
         return redirect(url_for('DeviceInvy.page'))
     
-    if data['GLNumber']:
-        if collection.find_one({"GLNumber": data['GLNumber']}):
+    if gl_number:
+        if collection.find_one({"GLNumber": gl_number}):
             flash("SL Number already exists", "danger")
             return redirect(url_for('DeviceInvy.page'))
     
