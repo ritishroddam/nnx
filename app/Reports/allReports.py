@@ -12,6 +12,7 @@ from datetime import timezone as timeZ
 import pytz
 from pytz import timezone
 from io import BytesIO
+import os
 from collections import OrderedDict
 import boto3
 from botocore.client import Config
@@ -685,19 +686,18 @@ def download_report(report_id):
         # Create a DataFrame and write to Excel in memory
         df = pd.DataFrame(data)
         excel_buffer = BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Report')
         excel_buffer.seek(0)
 
         # Replace output with the Excel buffer for sending
-        output.close()
-        output = excel_buffer
+        xlsx_name = os.path.splitext(report['filename'])[0] + '.xlsx'
 
         return send_file(
-            output,
-            mimetype="application/json",
+            excel_buffer,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,
-            download_name=report['filename']
+            download_name=xlsx_name
         )
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
