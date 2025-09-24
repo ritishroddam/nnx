@@ -166,13 +166,10 @@ def get_customers_paginated():
 
         total = customers_collection.count_documents({})
         customers = list(customers_collection.find({}).skip(skip).limit(per_page))
-        
-        customers_collection = db['customers_list']
-        customers = list(customers_collection.find({}, {'companyname': 1, 'Contact Person': 1,'Phone Number': 1, 'Company Address': 1}).skip(skip).limit(per_page))
 
         for customer in customers:
             customer['_id'] = str(customer['_id'])
-            customer.pop('companyLogo', None)
+            customer.pop('companyname', None)
 
         return jsonify({
             "total": total,
