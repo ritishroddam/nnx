@@ -113,6 +113,27 @@ async function fetchAndRenderDevices(page = 1) {
   }
 }
 
+async function updateCountersFromServer() {
+  try {
+    const response = await fetch('/deviceInvy/device_status_counts', {
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      }
+    });
+    const counts = await response.json();
+    
+    document.getElementById("newStockCount").textContent = counts["New Stock"] || 0;
+    document.getElementById("inUseCount").textContent = counts["In use"] || 0;
+    document.getElementById("availableCount").textContent = counts["Available"] || 0;
+    document.getElementById("discardedCount").textContent = counts["Discarded"] || 0;
+    
+    // For package counts, we need to fetch separately or calculate from all data
+    // For now, we'll keep the DOM-based counting for package types
+  } catch (err) {
+    console.error('Error fetching device counts:', err);
+  }
+}
+
 function renderDeviceTable(devices) {
   const tableBody = document.getElementById("deviceTable");
   tableBody.innerHTML = '';
@@ -215,7 +236,7 @@ function filterDevicesByStatus() {
   });
 }
 
-function updateStatusCounts() {
+function updateStatusCounts(devicesData = null) {
   let newStockCount = 0;
   let inUseCount = 0;
   let availableCount = 0;
@@ -258,6 +279,7 @@ function updateStatusCounts() {
     if (status === "Discarded") discardedCount++;
   });
   }
+  
   document.getElementById("newStockCount").textContent = newStockCount;
   document.getElementById("inUseCount").textContent = inUseCount;
   document.getElementById("availableCount").textContent = availableCount;
