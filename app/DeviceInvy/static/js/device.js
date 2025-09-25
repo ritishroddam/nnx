@@ -73,7 +73,10 @@ document
     }
   });
 
-  let allDevices = [];
+let allDevices = [];
+let currentPage = 1;
+const ROWS_PER_PAGE = 100;
+let totalRows = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
   const dateInInput = document.getElementById("DateIn");
@@ -86,8 +89,97 @@ document.addEventListener("DOMContentLoaded", function () {
       this.value = today; 
     }
   });
+  fetchAndRenderDevices(1);
+  updateCountersFromServer();
   initializeStatusFilter();
 });
+
+async function fetchAndRenderDevices(page = 1) {
+  try {
+    const response = await fetch(`/deviceInvy/get_devices_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      }
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    totalRows = data.total;
+    renderDeviceTable(data.devices);
+    renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
+    updateStatusCounts(data.devices);
+  } catch (err) {
+    document.getElementById('deviceTable').innerHTML = `<tr><td colspan="16">Failed to load data</td></tr>`;
+  }
+}
+
+function renderDeviceTable(devices) {
+  const tableBody = document.getElementById("deviceTable");
+  tableBody.innerHTML = '';
+  
+  if (!devices || devices.length === 0) {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td colspan="16" class="no-results">No devices found</td>`;
+    tableBody.appendChild(row);
+    return;
+  }
+  
+  devices.forEach(device => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', device._id);
+    row.innerHTML = `
+      <td>${device.IMEI}</td>
+      <td>${device.GLNumber || ''}</td>
+      <td>${device.LicensePlateNumber || ''}</td>
+      <td>${device.CompanyName || ''}</td>
+      <td>${device.DeviceModel}</td>
+      <td>${device.DeviceMake}</td>
+      <td>${device.DateIn}</td>
+      <td>${device.Warranty}</td>
+      <td>${device.OutwardTo || ''}</td>
+      <td>${device.Package}</td>
+      <td>${device.Package === 'Package' ? device.Tenure || '' : ''}</td>
+      <td><span class="status-label">${device.Status || 'New Stock'}</span></td>
+      <td>${device.LastEditedBy || ''}</td>
+      <td>${device.LastEditedDate || ''}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editDevice('${device._id}')">✏️</button>
+      </td>
+      <td></td>
+    `;
+    tableBody.appendChild(row);
+  });
+  
+  // Store all devices for filtering
+  allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+}
+
+function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const paginationDiv = document.getElementById('devicePagination');
+  if (!paginationDiv) return;
+  
+  if (totalPages <= 1) {
+    paginationDiv.innerHTML = '';
+    return;
+  }
+  
+  let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
+  html += `<button class="btn" id="devicePrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+  html += `<span>Page ${currentPage} of ${totalPages}</span>`;
+  html += `<button class="btn" device="btn" id="deviceNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+  html += `</div>`;
+  
+  paginationDiv.innerHTML = html;
+  
+  document.getElementById('devicePrevPage').onclick = function() {
+    if (currentPage > 1) fetchAndRenderDevices(currentPage - 1);
+  };
+  
+  document.getElementById('deviceNextPage').onclick = function() {
+    if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1);
+  };
+}
 
 function initializeStatusFilter() {
     // Store all devices when page loads
@@ -132,6 +224,23 @@ function updateStatusCounts() {
   let packageCount = 0;
   let outrateCount = 0;
 
+  if (devicesData && Array.isArray(devicesData)) {
+    // Count from data objects (used for search results/paginated data)
+    devicesData.forEach(device => {
+      const packageType = device.Package || '';
+      const status = device.Status || '';
+      
+      if (packageType === "Rental") rentalCount++;
+      if (packageType === "Package") packageCount++;
+      if (packageType === "Outrate") outrateCount++;
+      
+      if (status === "New Stock") newStockCount++;
+      if (status === "In use") inUseCount++;
+      if (status === "Available") availableCount++;
+      if (status === "Discarded") discardedCount++;
+    });
+  } else {
+
   allDevices.forEach(device => {
     // Count package types (from column 9)
     const packageCell = device.cells[9];
@@ -148,7 +257,7 @@ function updateStatusCounts() {
     if (status === "Available") availableCount++;
     if (status === "Discarded") discardedCount++;
   });
-
+  }
   document.getElementById("newStockCount").textContent = newStockCount;
   document.getElementById("inUseCount").textContent = inUseCount;
   document.getElementById("availableCount").textContent = availableCount;
@@ -195,6 +304,7 @@ function searchDevices() {
     .then(data => {
       const tableBody = document.getElementById("deviceTable");
       tableBody.innerHTML = '';
+
       if (!data || data.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = `<td colspan="16" class="no-results">No devices found</td>`;
@@ -202,6 +312,7 @@ function searchDevices() {
         resetCounts();
         return;
       }
+
       data.forEach(device => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', device._id);
@@ -228,6 +339,8 @@ function searchDevices() {
         tableBody.appendChild(row);
       });
       allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+
+      document.getElementById('devicePagination').innerHTML = '';
       updateStatusCounts();
     })
     .catch(error => {
@@ -249,7 +362,41 @@ function resetCounts() {
 function clearSearch() {
   document.getElementById("imeiSearch").value = '';
   document.getElementById("statusFilter").value = '';
-  location.reload(); 
+  // location.reload(); 
+  fetchAndRenderDevices(1);
+}
+
+function updateStatusCountsFromData(devices) {
+  let newStockCount = 0;
+  let inUseCount = 0;
+  let availableCount = 0;
+  let discardedCount = 0;
+  let rentalCount = 0;
+  let packageCount = 0;
+  let outrateCount = 0;
+
+  devices.forEach(device => {
+    // Count package types
+    const packageType = device.Package || '';
+    if (packageType === "Rental") rentalCount++;
+    if (packageType === "Package") packageCount++;
+    if (packageType === "Outrate") outrateCount++;
+
+    // Count statuses
+    const status = device.Status || '';
+    if (status === "New Stock") newStockCount++;
+    if (status === "In use") inUseCount++;
+    if (status === "Available") availableCount++;
+    if (status === "Discarded") discardedCount++;
+  });
+
+  document.getElementById("newStockCount").textContent = newStockCount;
+  document.getElementById("inUseCount").textContent = inUseCount;
+  document.getElementById("availableCount").textContent = availableCount;
+  document.getElementById("discardedCount").textContent = discardedCount;
+  document.getElementById("rentalCount").textContent = rentalCount;
+  document.getElementById("packageCount").textContent = packageCount;
+  document.getElementById("outrateCount").textContent = outrateCount;
 }
 
 ////////////////// Download ////////////////////////

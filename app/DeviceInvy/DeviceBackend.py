@@ -29,7 +29,14 @@ vehicle_collection = db['vehicle_inventory']
 @device_bp.route('/page')
 @jwt_required()
 def page():
+    # Get pagination parameters
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 100))
+    skip = (page - 1) * per_page
+    
+    total_devices = collection.count_documents({})
     devices = list(collection.find({}))
+    
     imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
     
     vehiclesData = vehicle_collection.find(
@@ -50,7 +57,50 @@ def page():
             device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
             device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
     
-    return render_template('device.html', devices=devices)
+    return render_template('device.html', devices=devices, total_devices=total_devices, current_page=page, per_page=per_page)
+
+@device_bp.route('/get_devices_paginated')
+@jwt_required()
+def get_devices_paginated():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 100))
+        skip = (page - 1) * per_page
+
+        # Get total count and paginated devices
+        total = collection.count_documents({})
+        devices = list(collection.find({}).skip(skip).limit(per_page))
+        
+        imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
+        
+        vehiclesData = vehicle_collection.find(
+            {"IMEI": {"$in": imeiList}}, 
+            {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
+        )
+        
+        VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
+        
+        for device in devices:
+            date = device['LastEditedDate'].astimezone(timezone(timedelta(hours=5, minutes=30)))
+            device['LastEditedDate'] = date.strftime('%d-%m-%Y %I:%M %p')
+            vehicle = VehicleData.get(device['IMEI']) 
+            if not vehicle:
+                device['LicensePlateNumber'] = None
+                device['CompanyName'] = None
+            else:
+                device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
+                device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+            device['_id'] = str(device['_id'])
+
+        return jsonify({
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "devices": devices
+        })
+    except Exception as e:
+        print(f"Error in get_devices_paginated: {str(e)}", file=sys.stderr)
+        return jsonify({"error": str(e)}), 500
 
 @device_bp.route('/search_devices')
 @jwt_required()
@@ -398,3 +448,15 @@ def edit_device(device_id):
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return jsonify({'success': False, 'message': 'Error updating device.'}), 500
+    
+@device_bp.route('/device_status_counts')
+@jwt_required()
+def device_status_counts():
+    try:
+        pipeline = [
+            {"$group": {"_id": "$Status", "count": {"$sum": 1}}}
+        ]
+        counts = {doc['_id']: doc['count'] for doc in collection.aggregate(pipeline)}
+        return jsonify(counts)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
