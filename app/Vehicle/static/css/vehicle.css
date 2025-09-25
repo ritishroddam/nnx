@@ -397,11 +397,11 @@ body {
 
 .custom-marker {
   position: absolute;
-  width: 18px;
-  height: 32px;
-  background-size: 18px 32px;
+  background-size: contain;
   transform-origin: center;
   transition: transform 0.3s ease;
+  width: auto;
+  height: auto;
 }
 
 .sos-blink {
