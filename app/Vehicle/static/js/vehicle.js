@@ -1431,8 +1431,12 @@ function updateVehicleData(vehicle) {
     const markerContent = markers[imei].content;
     const markerImage = markerContent.querySelector("img");
     if (markerImage) {
-      markerImage.src = iconUrl; 
-      markerContent.style.transform = `rotate(${rotation}deg)`; 
+    markerImage.src = iconUrl;
+    const size = getVehicleIconSize(vehicle.VehicleType || 'car');
+    const markerContent = markers[imei].content;
+    markerContent.style.width = `${size.width}px`;
+    markerContent.style.height = `${size.height}px`;
+    markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
     }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
@@ -1787,16 +1791,19 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   const vehicleType = device.VehicleType || 'car';
   const size = getVehicleIconSize(vehicleType);
-
+  
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
-  markerContent.style.transform = `rotate(${rotation}deg)`;
+  markerImage.style.width = `${size.width}px`;
+  markerImage.style.height = `${size.height}px`;
+  markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
   markerImage.alt = "Vehicle Icon";
-  markerImage.style.width = `${size.width}px`;
-  markerImage.style.height = `${size.height}px`;
+  markerImage.style.width = "100%";
+  markerImage.style.height = "100%";
+  markerImage.style.display = "block";
 
   markerContent.appendChild(markerImage);
 
@@ -1829,13 +1836,16 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
-  markerContent.style.transform = `rotate(${rotation}deg)`;
+  markerImage.style.width = `${size.width}px`;
+  markerImage.style.height = `${size.height}px`;
+  markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
   markerImage.alt = "Vehicle Icon";
-  markerImage.style.width = `${size.width}px`;
-  markerImage.style.height = `${size.height}px`;
+  markerImage.style.width = "100%";
+  markerImage.style.height = "100%";
+  markerImage.style.display = "block";
 
   markerContent.appendChild(markerImage);
 
