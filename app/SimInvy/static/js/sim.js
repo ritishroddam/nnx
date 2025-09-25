@@ -405,3 +405,7 @@ function saveSim(simId) {
       console.error("Error updating SIM:", error);
     });
 }
+
+function cancelEditSim(simId) {
+  location.reload();
+}
