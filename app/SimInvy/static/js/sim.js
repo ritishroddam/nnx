@@ -71,8 +71,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("uploadModal").classList.remove("hidden");
   });
 
-  setupDownloadButton();
-
     document.getElementById('simSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim().toLowerCase();
         filterTable(searchTerm);
