@@ -168,9 +168,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
-    setTimeout(() => {
-    updateCounters();
-  }, 100);
+  //   setTimeout(() => {
+  //   updateCounters();
+  // }, 100);
 
   // Build allSimsData from the table rows rendered by Jinja
   allSimsData = Array.from(document.querySelectorAll('#simTable tr[data-id]')).map(row => {
@@ -203,13 +203,13 @@ async function fetchAndRenderSims(page = 1) {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
     });
+
     const data = await response.json();
     if (data.error) throw new Error(data.error);
 
     totalRows = data.total;
     renderSimTable(data.sims);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-    // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
@@ -269,8 +269,11 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 
 // Update counters using all data (optional: you may want a separate endpoint for total counts)
 function updateCounters(currentPageSims, total) {
-  // You may want to fetch all counts from a separate endpoint for accuracy
-  // For now, just count from current page
+  if (!currentPageSims || !Array.isArray(currentPageSims)) {
+    console.warn('updateCounters: currentPageSims is not a valid array');
+    return;
+  }
+
   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
   currentPageSims.forEach(sim => {
     const status = (sim.status || '').trim();
@@ -281,6 +284,7 @@ function updateCounters(currentPageSims, total) {
     if (status === "Safe Custody") safeCustodyCount++;
     if (status === "Suspended") suspendedCount++;
   });
+
   document.getElementById('newStockCount').textContent = newStockCount;
   document.getElementById('inUseCount').textContent = inUseCount;
   document.getElementById('availableCount').textContent = availableCount;
