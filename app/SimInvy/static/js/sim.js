@@ -59,6 +59,14 @@ document.addEventListener("DOMContentLoaded", function() {
         filterTable(searchTerm);
     });
 
+  document.getElementById('clearSearchBtn').addEventListener('click', function() {
+    document.getElementById('simSearch').value = '';
+    document.getElementById('statusFilter').value = 'All';
+    document.getElementById('clearSearchBtn').style.display = 'none';
+    fetchAndRenderSims(1);
+    updateCountersFromServer();
+});
+
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
 
@@ -75,8 +83,102 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById('simSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim().toLowerCase();
-        filterTable(searchTerm);
+        const clearBtn = document.getElementById('clearSearchBtn');
+        clearBtn.style.display = this.value.trim() ? 'block' : 'none';
+
+    if (searchTerm.length === 0) {
+        fetchAndRenderSims(currentPage);
+        return;
+    }
+
+        searchSims(searchTerm);
     });
+
+async function searchSims(searchTerm) {
+    try {
+        const response = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(searchTerm)}`, {
+            headers: {
+                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            }
+        });
+        
+        if (!response.ok) throw new Error('Search failed');
+        
+        const searchResults = await response.json();
+        
+        // Render the search results directly
+        renderSimTable(searchResults);
+        
+        // Hide pagination controls when searching
+        document.getElementById('simPagination').innerHTML = '';
+        
+        // Update counters based on search results
+        updateCountersFromSearch(searchResults);
+        
+    } catch (err) {
+        console.error('Search error:', err);
+        document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Search failed: ${err.message}</td></tr>`;
+    }
+}
+
+function updateCountersFromSearch(sims) {
+    let newStockCount = 0, inUseCount = 0, availableCount = 0, 
+        scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
+    
+    sims.forEach(sim => {
+        const status = (sim.status || '').trim();
+        if (status === "New Stock") newStockCount++;
+        else if (status === "In Use") inUseCount++;
+        else if (status === "Available") availableCount++;
+        else if (status === "Scrap") scrapCount++;
+        else if (status === "Safe Custody") safeCustodyCount++;
+        else if (status === "Suspended") suspendedCount++;
+    });
+    
+    document.getElementById('newStockCount').textContent = newStockCount;
+    document.getElementById('inUseCount').textContent = inUseCount;
+    document.getElementById('availableCount').textContent = availableCount;
+    document.getElementById('scrapCount').textContent = scrapCount;
+    document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
+    document.getElementById('suspendedCount').textContent = suspendedCount;
+}
+
+function filterSimsByStatus() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const searchTerm = document.getElementById('simSearch').value.trim().toLowerCase();
+    
+    if (searchTerm) {
+        // If there's a search term, filter the current search results by status
+        searchSims(searchTerm); // This will automatically apply status filter on backend
+    } else if (statusFilter === 'All') {
+        // If no filter or "All", show normal paginated view
+        fetchAndRenderSims(1);
+    } else {
+        // Filter by status only
+        filterByStatus(statusFilter);
+    }
+}
+
+async function filterByStatus(status) {
+    try {
+        const response = await fetch(`/simInvy/get_sims_by_status/${encodeURIComponent(status)}`, {
+            headers: {
+                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            }
+        });
+        
+        if (!response.ok) throw new Error('Filter failed');
+        
+        const filteredSims = await response.json();
+        renderSimTable(filteredSims);
+        document.getElementById('simPagination').innerHTML = '';
+        updateCountersFromSearch(filteredSims);
+        
+    } catch (err) {
+        console.error('Filter error:', err);
+        document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Filter failed: ${err.message}</td></tr>`;
+    }
+}
 
   document.querySelectorAll(".close-modal").forEach(btn => {
     btn.addEventListener("click", function() {
