@@ -125,7 +125,25 @@ def upload_customers():
             if missing_fields:
                 flash(f"Missing required fields in record: {', '.join(missing_fields)}", "danger")
             if all(record.get(field, "") != "" for field in required_fields):
-                valid_records.append(record)
+                customer = {
+                    'Company Name': record.get('Company Name', ""),
+                    'Contact Person': record.get('Contact Person', ""),
+                    'Email Address': record.get('Email Address', ""),
+                    'Phone Number': record.get('Phone Number', ""),
+                    'Company Address': record.get('Company Address', ""),
+                    'Number of GPS Devices': record.get('Number of GPS Devices', ""),
+                    'Number of Vehicles': record.get('Number of Vehicles', ""),
+                    'Number of Drivers': record.get('Number of Drivers', ""),
+                    'Payment Status': record.get('Payment Status', ""),
+                    'Support Contact': record.get('Support Contact', ""),
+                    'Remarks': record.get('Remarks', ""),
+                    'lat': record.get('lat', ""),
+                    'lng': record.get('lng', ""),
+                    "companyLogo": logo_id,
+                }
+                valid_records.append(customer)
+                
+            
 
         if not valid_records:
             flash('No valid records to upload. Required fields missing.', 'danger')
