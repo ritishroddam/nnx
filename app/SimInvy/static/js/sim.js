@@ -59,14 +59,6 @@ document.addEventListener("DOMContentLoaded", function() {
         filterTable(searchTerm);
     });
 
-  document.getElementById('clearSearchBtn').addEventListener('click', function() {
-    document.getElementById('simSearch').value = '';
-    document.getElementById('statusFilter').value = 'All';
-    document.getElementById('clearSearchBtn').style.display = 'none';
-    fetchAndRenderSims(1);
-    updateCountersFromServer();
-});
-
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
 
@@ -83,102 +75,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById('simSearch').addEventListener('input', function() {
         const searchTerm = this.value.trim().toLowerCase();
-        const clearBtn = document.getElementById('clearSearchBtn');
-        clearBtn.style.display = this.value.trim() ? 'block' : 'none';
-
-    if (searchTerm.length === 0) {
-        fetchAndRenderSims(currentPage);
-        return;
-    }
-
-        searchSims(searchTerm);
+        filterTable(searchTerm);
     });
-
-async function searchSims(searchTerm) {
-    try {
-        const response = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(searchTerm)}`, {
-            headers: {
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-            }
-        });
-        
-        if (!response.ok) throw new Error('Search failed');
-        
-        const searchResults = await response.json();
-        
-        // Render the search results directly
-        renderSimTable(searchResults);
-        
-        // Hide pagination controls when searching
-        document.getElementById('simPagination').innerHTML = '';
-        
-        // Update counters based on search results
-        updateCountersFromSearch(searchResults);
-        
-    } catch (err) {
-        console.error('Search error:', err);
-        document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Search failed: ${err.message}</td></tr>`;
-    }
-}
-
-function updateCountersFromSearch(sims) {
-    let newStockCount = 0, inUseCount = 0, availableCount = 0, 
-        scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
-    
-    sims.forEach(sim => {
-        const status = (sim.status || '').trim();
-        if (status === "New Stock") newStockCount++;
-        else if (status === "In Use") inUseCount++;
-        else if (status === "Available") availableCount++;
-        else if (status === "Scrap") scrapCount++;
-        else if (status === "Safe Custody") safeCustodyCount++;
-        else if (status === "Suspended") suspendedCount++;
-    });
-    
-    document.getElementById('newStockCount').textContent = newStockCount;
-    document.getElementById('inUseCount').textContent = inUseCount;
-    document.getElementById('availableCount').textContent = availableCount;
-    document.getElementById('scrapCount').textContent = scrapCount;
-    document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
-    document.getElementById('suspendedCount').textContent = suspendedCount;
-}
-
-function filterSimsByStatus() {
-    const statusFilter = document.getElementById('statusFilter').value;
-    const searchTerm = document.getElementById('simSearch').value.trim().toLowerCase();
-    
-    if (searchTerm) {
-        // If there's a search term, filter the current search results by status
-        searchSims(searchTerm); // This will automatically apply status filter on backend
-    } else if (statusFilter === 'All') {
-        // If no filter or "All", show normal paginated view
-        fetchAndRenderSims(1);
-    } else {
-        // Filter by status only
-        filterByStatus(statusFilter);
-    }
-}
-
-async function filterByStatus(status) {
-    try {
-        const response = await fetch(`/simInvy/get_sims_by_status/${encodeURIComponent(status)}`, {
-            headers: {
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-            }
-        });
-        
-        if (!response.ok) throw new Error('Filter failed');
-        
-        const filteredSims = await response.json();
-        renderSimTable(filteredSims);
-        document.getElementById('simPagination').innerHTML = '';
-        updateCountersFromSearch(filteredSims);
-        
-    } catch (err) {
-        console.error('Filter error:', err);
-        document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Filter failed: ${err.message}</td></tr>`;
-    }
-}
 
   document.querySelectorAll(".close-modal").forEach(btn => {
     btn.addEventListener("click", function() {
@@ -419,95 +317,75 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function editSim(simId) {
-  const row = document.querySelector(`tr[data-id='${simId}']`);
+  const row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
   if (!row) return;
 
-  // Prevent multiple edits at once
-  if (row.classList.contains('editing')) return;
-  row.classList.add('editing');
+  // Populate the modal fields with the current data
+  document.getElementById("editMobileNumber").value = row.cells[0].innerText.trim();
+  document.getElementById("editSimNumber").value = row.cells[1].innerText.trim();
+  document.getElementById("editImei").value = row.cells[2].innerText.trim();
+  document.getElementById("editDateIn").value = row.cells[3].innerText.trim();
+  document.getElementById("editDateOut").value = row.cells[4].innerText.trim();
+  document.getElementById("editVendor").value = row.cells[5].innerText.trim();
+  document.getElementById("editStatus").value = row.cells[6].innerText.trim();
+  document.getElementById("editLastEditedBy").value = row.cells[7].innerText.trim();
+  document.getElementById("editLastEditedAt").value = row.cells[8].innerText.trim();
 
-  // Get current values
-  const mobile = row.cells[0].innerText;
-  const simNumber = row.cells[1].innerText;
-  const imei = row.cells[2].innerText;
-  const dateIn = row.cells[3].innerText;
-  const dateOut = row.cells[4].innerText;
-  const vendor = row.cells[5].innerText;
-  const status = row.cells[6].innerText;
+  // Show the edit modal
+  document.getElementById("editSimModal").classList.remove("hidden");
 
-  // Status options
-  const statusOptions = [
-    "New Stock", "In Use", "Available", "Scrap", "Safe Custody", "Suspended"
-  ];
+  // Save changes event
+  document.getElementById("saveEditBtn").onclick = async function() {
+    const updatedData = {
+      _id: simId,
+      MobileNumber: document.getElementById("editMobileNumber").value.trim(),
+      SimNumber: document.getElementById("editSimNumber").value.trim(),
+      IMEI: document.getElementById("editImei").value.trim(),
+      DateIn: document.getElementById("editDateIn").value.trim(),
+      DateOut: document.getElementById("editDateOut").value.trim(),
+      Vendor: document.getElementById("editVendor").value.trim(),
+      status: document.getElementById("editStatus").value.trim(),
+      lastEditedBy: document.getElementById("editLastEditedBy").value.trim(),
+      lastEditedAt: document.getElementById("editLastEditedAt").value.trim()
+    };
 
-  // Render editable fields
-  row.cells[0].innerHTML = `<input type="text" value="${mobile}" />`;
-  row.cells[1].innerHTML = `<input type="text" value="${simNumber}" />`;
-  row.cells[2].innerHTML = `<input type="text" value="${imei}" />`;
-  row.cells[3].innerHTML = `<input type="date" value="${dateIn}" />`;
-  row.cells[4].innerHTML = `<input type="date" value="${dateOut}" />`;
-  row.cells[5].innerHTML = `<input type="text" value="${vendor}" />`;
-  row.cells[6].innerHTML = `
-    <select>
-      ${statusOptions.map(opt => `<option value="${opt}" ${opt === status ? "selected" : ""}>${opt}</option>`).join("")}
-    </select>
-  `;
+    try {
+      const response = await fetch('/simInvy/update_sim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify(updatedData)
+      });
+      const result = await response.json();
+      if (result.success) {
+        // Update the row in the table
+        const index = originalTableRows.findIndex(r => r.getAttribute('data-id') === simId);
+        if (index !== -1) {
+          originalTableRows[index].cells[0].innerText = updatedData.MobileNumber;
+          originalTableRows[index].cells[1].innerText = updatedData.SimNumber;
+          originalTableRows[index].cells[2].innerText = updatedData.IMEI;
+          originalTableRows[index].cells[3].innerText = updatedData.DateIn;
+          originalTableRows[index].cells[4].innerText = updatedData.DateOut;
+          originalTableRows[index].cells[5].innerHTML = `
+            <select id="editVendor">
+              <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
+              <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
+            </select>
+          `;
+          originalTableRows[index].cells[6].innerText = updatedData.status;
+          originalTableRows[index].cells[7].innerText = updatedData.lastEditedBy;
+          originalTableRows[index].cells[8].innerText = updatedData.lastEditedAt;
+        }
 
-  // Actions: Save and Cancel
-  row.cells[9].innerHTML = `
-    <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
-    <button class="icon-btn cancel-icon" onclick="cancelEditSim('${simId}')">❌</button>
-  `;
-}
-
-function saveSim(simId) {
-  const row = document.querySelector(`tr[data-id='${simId}']`);
-  if (!row) return;
-
-  const mobile = row.cells[0].querySelector("input").value.trim();
-  const simNumber = row.cells[1].querySelector("input").value.trim();
-  const imei = row.cells[2].querySelector("input").value.trim();
-  const dateIn = row.cells[3].querySelector("input").value;
-  const dateOut = row.cells[4].querySelector("input").value;
-  const vendor = row.cells[5].querySelector("input").value.trim();
-  const status = row.cells[6].querySelector("select").value;
-
-  // Optionally, add validation here
-
-  const updatedData = {
-    MobileNumber: mobile,
-    SimNumber: simNumber,
-    IMEI: imei,
-    DateIn: dateIn,
-    DateOut: dateOut,
-    Vendor: vendor,
-    status: status
-  };
-
-  fetch(`/simInvy/edit_sim/${simId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-    },
-    body: JSON.stringify(updatedData),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        // Optionally update the row inline, or just reload:
-        location.reload();
+        // Close the modal
+        document.getElementById("editSimModal").classList.add("hidden");
       } else {
-        displayFlashMessage(data.message || "Failed to save changes.", "danger");
-        console.error("Error updating SIM:", data.message);
+        alert("Failed to update SIM data: " + (result.message || "Unknown error"));
       }
-    })
-    .catch((error) => {
-      displayFlashMessage("An error occurred. Please try again.", "danger");
-      console.error("Error updating SIM:", error);
-    });
-}
-
-function cancelEditSim(simId) {
-  location.reload();
+    } catch (err) {
+      alert("Error updating SIM data: " + err.message);
+    }
+  };
 }

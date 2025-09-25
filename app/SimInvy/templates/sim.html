@@ -40,11 +40,8 @@ Sim Inventory
 </div>
 
 <div class="search-container mb-4">
-  <div style="display: flex; gap: 10px; align-items: center;">
-    <label>Search:</label>
-    <input type="text" id="simSearch" placeholder="Search by Mobile, SIM, Vendor or IMEI..." style="flex: 1;" />
-    <button id="clearSearchBtn" class="btn" style="display: none;">Clear</button>
-  </div>
+  <label>Search:</label>
+  <input type="text" id="simSearch" placeholder="Search by Mobile, SIM or IMEI..." />
 
   <div class="filter-container mb-4">
     <select id="statusFilter" onchange="filterSimsByStatus()">
