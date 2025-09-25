@@ -107,6 +107,7 @@ def get_sims_by_status(status):
 @jwt_required()
 def search_sims():
     search_query = request.args.get('query', '').strip()
+    status_filter = request.args.get('status', '').strip()
     
     if not search_query:
         return jsonify([])
@@ -124,6 +125,12 @@ def search_sims():
         ]
     }
     
+    if status_filter and status_filter != 'All':
+        if status_filter == 'Allocated':
+            query["SimNumber"] = {"$in": list(allocated_sim_numbers)}
+        else:
+            query["status"] = status_filter
+    
     matching_sims = list(collection.find(query))
     
     results = []
@@ -131,6 +138,12 @@ def search_sims():
         sim_number = sim.get('SimNumber', '')
         
         actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+        
+        if status_filter and status_filter != 'All' and status_filter != 'Allocated':
+            if actual_status != status_filter:
+                continue
+        elif status_filter == 'Allocated' and sim_number not in allocated_sim_numbers:
+            continue
         
         sim_data = {
             '_id': str(sim.get('_id', '')),
