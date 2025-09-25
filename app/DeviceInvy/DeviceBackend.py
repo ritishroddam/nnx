@@ -406,7 +406,8 @@ def edit_device(device_id):
         # Fetch username from JWT
         username = get_jwt_identity() or "Unknown"
 
-        now_ist = datetime.now(timezone.utc)
+        last_edited_date = datetime.now(timezone.utc)
+        
 
         result = collection.update_one(
             {'_id': object_id},
