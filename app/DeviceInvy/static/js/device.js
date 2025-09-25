@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
   fetchAndRenderDevices(1);
-  updateCountersFromServer();
+  updateAllCountersFromServer();
   initializeStatusFilter();
 });
 
@@ -113,25 +113,90 @@ async function fetchAndRenderDevices(page = 1) {
   }
 }
 
-async function updateCountersFromServer() {
+// async function updateCountersFromServer() {
+//   try {
+//     const response = await fetch('/deviceInvy/device_status_counts', {
+//       headers: {
+//         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//       }
+//     });
+//     const counts = await response.json();
+    
+//     document.getElementById("newStockCount").textContent = counts["New Stock"] || 0;
+//     document.getElementById("inUseCount").textContent = counts["In use"] || 0;
+//     document.getElementById("availableCount").textContent = counts["Available"] || 0;
+//     document.getElementById("discardedCount").textContent = counts["Discarded"] || 0;
+    
+//     await updatePackageCountsFromServer();
+//   } catch (err) {
+//     console.error('Error fetching device counts:', err);
+//     updateStatusCounts();
+//   }
+// }
+
+async function updateAllCountersFromServer() {
   try {
-    const response = await fetch('/deviceInvy/device_status_counts', {
+    const response = await fetch('/deviceInvy/device_all_counts', {
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      }
+    });
+    const data = await response.json();
+    
+    // Update status counts
+    document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
+    document.getElementById("inUseCount").textContent = data.status["In use"] || 0;
+    document.getElementById("availableCount").textContent = data.status["Available"] || 0;
+    document.getElementById("discardedCount").textContent = data.status["Discarded"] || 0;
+    
+    // Update package counts
+    document.getElementById("rentalCount").textContent = data.package["Rental"] || 0;
+    document.getElementById("packageCount").textContent = data.package["Package"] || 0;
+    document.getElementById("outrateCount").textContent = data.package["Outrate"] || 0;
+    
+  } catch (err) {
+    console.error('Error fetching all counts:', err);
+    // Fallback to DOM counting
+    updateStatusCounts();
+  }
+}
+
+async function updatePackageCountsFromServer() {
+  try {
+    const response = await fetch('/deviceInvy/device_package_counts', {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
     });
     const counts = await response.json();
     
-    document.getElementById("newStockCount").textContent = counts["New Stock"] || 0;
-    document.getElementById("inUseCount").textContent = counts["In use"] || 0;
-    document.getElementById("availableCount").textContent = counts["Available"] || 0;
-    document.getElementById("discardedCount").textContent = counts["Discarded"] || 0;
+    document.getElementById("rentalCount").textContent = counts["Rental"] || 0;
+    document.getElementById("packageCount").textContent = counts["Package"] || 0;
+    document.getElementById("outrateCount").textContent = counts["Outrate"] || 0;
     
-    // For package counts, we need to fetch separately or calculate from all data
-    // For now, we'll keep the DOM-based counting for package types
   } catch (err) {
-    console.error('Error fetching device counts:', err);
+    console.error('Error fetching package counts:', err);
+    // Fallback to counting from current page data
+    updatePackageCountsFromCurrentData();
   }
+}
+
+function updatePackageCountsFromCurrentData() {
+  let rentalCount = 0;
+  let packageCount = 0;
+  let outrateCount = 0;
+
+  allDevices.forEach(device => {
+    const packageCell = device.cells[9];
+    const packageType = packageCell.textContent.trim();
+    if (packageType === "Rental") rentalCount++;
+    if (packageType === "Package") packageCount++;
+    if (packageType === "Outrate") outrateCount++;
+  });
+
+  document.getElementById("rentalCount").textContent = rentalCount;
+  document.getElementById("packageCount").textContent = packageCount;
+  document.getElementById("outrateCount").textContent = outrateCount;
 }
 
 function renderDeviceTable(devices) {
@@ -219,6 +284,7 @@ function filterDevicesByStatus() {
     allDevices.forEach(device => {
       device.style.display = "";
     });
+    updateAllCountersFromServer();
     return;
   }
   allDevices.forEach(device => {
@@ -234,6 +300,7 @@ function filterDevicesByStatus() {
       device.style.display = packageType === selectedStatus ? "" : "none";
     }
   });
+  updateStatusCounts();
 }
 
 function updateStatusCounts(devicesData = null) {
@@ -245,41 +312,25 @@ function updateStatusCounts(devicesData = null) {
   let packageCount = 0;
   let outrateCount = 0;
 
-  if (devicesData && Array.isArray(devicesData)) {
-    // Count from data objects (used for search results/paginated data)
-    devicesData.forEach(device => {
-      const packageType = device.Package || '';
-      const status = device.Status || '';
-      
+   allDevices.forEach(device => {
+    if (device.style.display !== 'none') {
+      // Count package types (from column 9)
+      const packageCell = device.cells[9];
+      const packageType = packageCell.textContent.trim();
       if (packageType === "Rental") rentalCount++;
       if (packageType === "Package") packageCount++;
       if (packageType === "Outrate") outrateCount++;
-      
+
+      // Count statuses (from column 11)
+      const statusCell = device.cells[11];
+      let status = statusCell.textContent.trim();
       if (status === "New Stock") newStockCount++;
       if (status === "In use") inUseCount++;
       if (status === "Available") availableCount++;
       if (status === "Discarded") discardedCount++;
-    });
-  } else {
-
-  allDevices.forEach(device => {
-    // Count package types (from column 9)
-    const packageCell = device.cells[9];
-    const packageType = packageCell.textContent.trim();
-    if (packageType === "Rental") rentalCount++;
-    if (packageType === "Package") packageCount++;
-    if (packageType === "Outrate") outrateCount++;
-
-    // Count statuses (from column 11)
-    const statusCell = device.cells[11];
-    let status = statusCell.textContent.trim();
-    if (status === "New Stock") newStockCount++;
-    if (status === "In use") inUseCount++;
-    if (status === "Available") availableCount++;
-    if (status === "Discarded") discardedCount++;
+    }
   });
-  }
-  
+
   document.getElementById("newStockCount").textContent = newStockCount;
   document.getElementById("inUseCount").textContent = inUseCount;
   document.getElementById("availableCount").textContent = availableCount;

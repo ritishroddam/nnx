@@ -460,3 +460,34 @@ def device_status_counts():
         return jsonify(counts)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@device_bp.route('/device_package_counts')
+@jwt_required()
+def device_package_counts():
+    try:
+        pipeline = [
+            {"$group": {"_id": "$Package", "count": {"$sum": 1}}}
+        ]
+        counts = {doc['_id']: doc['count'] for doc in collection.aggregate(pipeline)}
+        return jsonify(counts)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@device_bp.route('/device_all_counts')
+@jwt_required()
+def device_all_counts():
+    try:
+        # Status counts
+        status_pipeline = [{"$group": {"_id": "$Status", "count": {"$sum": 1}}}]
+        status_counts = {doc['_id']: doc['count'] for doc in collection.aggregate(status_pipeline)}
+        
+        # Package counts
+        package_pipeline = [{"$group": {"_id": "$Package", "count": {"$sum": 1}}}]
+        package_counts = {doc['_id']: doc['count'] for doc in collection.aggregate(package_pipeline)}
+        
+        return jsonify({
+            "status": status_counts,
+            "package": package_counts
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
