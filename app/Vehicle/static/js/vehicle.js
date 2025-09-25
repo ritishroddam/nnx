@@ -1794,8 +1794,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
-  markerImage.style.width = `${size.width}px`;
-  markerImage.style.height = `${size.height}px`;
+  markerContent.style.width = `${size.width}px`;
+  markerContent.style.height = `${size.height}px`;
   markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
@@ -1836,8 +1836,8 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
-  markerImage.style.width = `${size.width}px`;
-  markerImage.style.height = `${size.height}px`;
+  markerContent.style.width = `${size.width}px`;
+  markerContent.style.height = `${size.height}px`;
   markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
