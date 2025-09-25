@@ -451,6 +451,11 @@ function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
+    sosDiv.style.position = "absolute";
+    sosDiv.style.top = "50%";
+    sosDiv.style.left = "50%";
+    sosDiv.style.transform = "translate(-50%, -50%)";
+    sosDiv.style.pointerEvents = "none";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
@@ -585,7 +590,7 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
-  // popup.style.transform = "translate(-50%, -50%)";
+  popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = "10000";
   popup.style.backgroundColor = "white";
   popup.style.padding = "20px";
@@ -1007,7 +1012,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   infoWindow.setHeaderContent(headerContent);
   infoWindow.setContent(content);
-  infoWindow.setPosition(latLng);
+  // infoWindow.setPosition(latLng);
 }
 
 document.body.addEventListener("click", function (e) {
@@ -1060,7 +1065,7 @@ function showShareLocationPopup(plate) {
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
-  // popup.style.transform = "translate(-50%, -50%)";
+  popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
   const now = new Date();
@@ -1399,7 +1404,7 @@ function checkForDataTimeout(imei) {
         tooltip.style.borderRadius = "5px";
         tooltip.style.top = "-30px";
         tooltip.style.left = "50%";
-        // tooltip.style.transform = "translateX(-50%)";
+        tooltip.style.transform = "translateX(-50%)";
         tooltip.style.zIndex = "1000";
         marker.div.appendChild(tooltip);
 
@@ -1794,8 +1799,8 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
-  markerImage.style.width = `${size.width}px`;
-  markerImage.style.height = `${size.height}px`;
+  markerContent.style.width = `${size.width}px`;
+  markerContent.style.height = `${size.height}px`;
   markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
@@ -1836,8 +1841,8 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
-  markerImage.style.width = `${size.width}px`;
-  markerImage.style.height = `${size.height}px`;
+  markerContent.style.width = `${size.width}px`;
+  markerContent.style.height = `${size.height}px`;
   markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
