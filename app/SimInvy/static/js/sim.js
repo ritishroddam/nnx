@@ -352,7 +352,7 @@ function editSim(simId) {
     };
 
     try {
-      const response = await fetch('/simInvy/update_sim', {
+      const response = await fetch(`/simInvy/edit_sim/${simId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
