@@ -585,7 +585,7 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
-  popup.style.transform = "translate(-50%, -50%)";
+  // popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = "10000";
   popup.style.backgroundColor = "white";
   popup.style.padding = "20px";
@@ -1060,7 +1060,7 @@ function showShareLocationPopup(plate) {
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
-  popup.style.transform = "translate(-50%, -50%)";
+  // popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = 9999;
 
   const now = new Date();
@@ -1399,7 +1399,7 @@ function checkForDataTimeout(imei) {
         tooltip.style.borderRadius = "5px";
         tooltip.style.top = "-30px";
         tooltip.style.left = "50%";
-        tooltip.style.transform = "translateX(-50%)";
+        // tooltip.style.transform = "translateX(-50%)";
         tooltip.style.zIndex = "1000";
         marker.div.appendChild(tooltip);
 
