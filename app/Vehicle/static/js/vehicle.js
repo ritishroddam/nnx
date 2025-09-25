@@ -451,6 +451,11 @@ function triggerSOS(imei, marker) {
   if (!sosActiveMarkers[imei]) {
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
+    sosDiv.style.position = "absolute";
+    sosDiv.style.top = "50%";
+    sosDiv.style.left = "50%";
+    sosDiv.style.transform = "translate(-50%, -50%)";
+    sosDiv.style.pointerEvents = "none";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
@@ -1007,7 +1012,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   infoWindow.setHeaderContent(headerContent);
   infoWindow.setContent(content);
-  infoWindow.setPosition(latLng);
+  // infoWindow.setPosition(latLng);
 }
 
 document.body.addEventListener("click", function (e) {
