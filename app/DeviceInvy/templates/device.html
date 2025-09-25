@@ -118,30 +118,6 @@ Device Inventory
           </tr>
         </thead>
         <tbody id="deviceTable">
-          {% for device in devices %}
-          <tr data-id="{{ device._id }}">
-            <td>{{ device["IMEI"] }}</td>
-            <td>{{ device['GLNumber'] if device['GLNumber'] else '' }}</td>
-            <td>{{ device['LicensePlateNumber'] if device['LicensePlateNumber'] else '' }}</td>
-            <td>{{ device['CompanyName'] if device['CompanyName'] else '' }}</td>
-            <td>{{ device['DeviceModel'] if device['DeviceModel'] else '' }}</td>
-            <td>{{ device['DeviceMake'] if device['DeviceMake'] else '' }}</td>
-            <td>{{ device['DateIn'] if device['DateIn'] else '' }}</td>
-            <td>{{ device['Warranty'] if device['Warranty'] else '' }}</td>
-            <td>{{ device['OutwardTo'] if device['OutwardTo'] else '' }}</td>
-            <td>{{ device['Package'] if device['Package'] else '' }}</td>
-            <td>{{ device['Tenure'] if device['Package'] == 'Package' else '' }}</td>
-            <td>
-              <span class="status-label">{{ device['Status'] if device['Status'] else 'New Stock' }}</span>
-            </td>
-            <td>{{ device['LastEditedBy'] if device['LastEditedBy'] else '' }}</td>
-            <td>{{ device['LastEditedDate'] if device['LastEditedDate'] else '' }}</td>
-            <td>
-              <button class="icon-btn edit-icon" onclick="editDevice('{{ device._id }}')">✏️</button>
-            </td>
-            <td></td>
-          </tr>
-          {% endfor %}
         </tbody>
       </table>
     </div>
