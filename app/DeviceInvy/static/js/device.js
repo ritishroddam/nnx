@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
   fetchAndRenderDevices(1);
-  updateAllCountersFromServer();
+  // updateAllCountersFromServer();
   initializeStatusFilter();
 });
 
@@ -107,7 +107,7 @@ async function fetchAndRenderDevices(page = 1) {
     totalRows = data.total;
     renderDeviceTable(data.devices);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-    updateStatusCounts(data.devices);
+    await updateAllCountersFromServer();
   } catch (err) {
     document.getElementById('deviceTable').innerHTML = `<tr><td colspan="16">Failed to load data</td></tr>`;
   }
@@ -141,7 +141,16 @@ async function updateAllCountersFromServer() {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
     
     // Update status counts
     document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
@@ -157,6 +166,7 @@ async function updateAllCountersFromServer() {
   } catch (err) {
     console.error('Error fetching all counts:', err);
     // Fallback to DOM counting
+    console.log('Falling back to DOM counting');
     updateStatusCounts();
   }
 }
@@ -272,7 +282,7 @@ function initializeStatusFilter() {
     allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
     
     // Update counts
-    updateStatusCounts();
+    updateAllCountersFromServer();
     
     // Add event listener for filter
     document.getElementById("statusFilter").addEventListener("change", filterDevicesByStatus);
@@ -414,7 +424,7 @@ function searchDevices() {
       allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
 
       document.getElementById('devicePagination').innerHTML = '';
-      updateStatusCounts();
+      updateStatusCountsFromData(data);
     })
     .catch(error => {
       console.error('Error searching devices:', error);
@@ -437,6 +447,7 @@ function clearSearch() {
   document.getElementById("statusFilter").value = '';
   // location.reload(); 
   fetchAndRenderDevices(1);
+  updateAllCountersFromServer();
 }
 
 function updateStatusCountsFromData(devices) {
