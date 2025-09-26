@@ -1,11 +1,17 @@
 .status-container {
   display: flex;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   padding: 15px;
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+  width: fit-content;
+}
+
+.dark-mode .status-container {
+  background-color: #333;
+  border-color: #555;
 }
 
 .status-item {
