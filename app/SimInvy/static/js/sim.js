@@ -174,7 +174,6 @@ document.addEventListener("DOMContentLoaded", function() {
     updateCounters();
   }, 100);
 
-  // Build allSimsData from the table rows rendered by Jinja
   allSimsData = Array.from(document.querySelectorAll('#simTable tr[data-id]')).map(row => {
     return {
       _id: row.getAttribute('data-id'),
@@ -190,7 +189,6 @@ document.addEventListener("DOMContentLoaded", function() {
     };
   });
 
-  // Render the table with pagination on initial load
   renderSimTable(allSimsData, 1);
 });
 
@@ -269,10 +267,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   };
 }
 
-// Update counters using all data (optional: you may want a separate endpoint for total counts)
 function updateCounters(currentPageSims, total) {
-  // You may want to fetch all counts from a separate endpoint for accuracy
-  // For now, just count from current page
   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
   currentPageSims.forEach(sim => {
     const status = (sim.status || '').trim();
@@ -306,11 +301,9 @@ async function updateCountersFromServer() {
     document.getElementById('safeCustodyCount').textContent = counts["Safe Custody"] || 0;
     document.getElementById('suspendedCount').textContent = counts["Suspended"] || 0;
   } catch (err) {
-    // Optionally handle error
   }
 }
 
-// Call this after page load and after any action that changes SIM data
 document.addEventListener("DOMContentLoaded", function() {
   fetchAndRenderSims(1);
   updateCountersFromServer();
@@ -320,7 +313,6 @@ function editSim(simId) {
   const row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
   if (!row) return;
 
-  // Populate the modal fields with the current data
   document.getElementById("editMobileNumber").value = row.cells[0].innerText.trim();
   document.getElementById("editSimNumber").value = row.cells[1].innerText.trim();
   document.getElementById("editImei").value = row.cells[2].innerText.trim();
@@ -331,10 +323,8 @@ function editSim(simId) {
   document.getElementById("editLastEditedBy").value = row.cells[7].innerText.trim();
   document.getElementById("editLastEditedAt").value = row.cells[8].innerText.trim();
 
-  // Show the edit modal
   document.getElementById("editSimModal").classList.remove("hidden");
 
-  // Save changes event
   document.getElementById("saveEditBtn").onclick = async function() {
     const updatedData = {
       _id: simId,
@@ -360,7 +350,6 @@ function editSim(simId) {
       });
       const result = await response.json();
       if (result.success) {
-        // Update the row in the table
         const index = originalTableRows.findIndex(r => r.getAttribute('data-id') === simId);
         if (index !== -1) {
           originalTableRows[index].cells[0].innerText = updatedData.MobileNumber;
@@ -379,7 +368,6 @@ function editSim(simId) {
           originalTableRows[index].cells[8].innerText = updatedData.lastEditedAt;
         }
 
-        // Close the modal
         document.getElementById("editSimModal").classList.add("hidden");
       } else {
         alert("Failed to update SIM data: " + (result.message || "Unknown error"));
