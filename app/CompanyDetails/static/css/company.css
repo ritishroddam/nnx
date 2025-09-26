@@ -210,7 +210,7 @@ th {
     background-color: #f9f9f9;
 }
 
-.dark-mode .company-table td:hover{
+.dark-mode .company-table tr:hover{
     background-color: #444;
 }
 
