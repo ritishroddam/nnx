@@ -211,7 +211,7 @@ th {
 }
 
 .dark-mode .company-table td:hover{
-    color: #444;
+    background-color: #444;
 }
 
 .dark-mode .company-table {
@@ -227,10 +227,6 @@ th {
 .dark-mode .company-table th,
 .dark-mode .company-table td {
     color: #eee !important;
-}
-
-.dark-mode .company-table td:hover {
-    background-color: #444;
 }
 
 .company-modal {
