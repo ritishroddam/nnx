@@ -218,7 +218,7 @@ tr:hover {
     background-color: #f9f9f9;
 }
 
-.dark-mode .company-table tr:hover {
+.dark-mode .header-row:hover {
     background-color: #444;
 }
 
