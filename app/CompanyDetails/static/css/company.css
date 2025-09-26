@@ -135,6 +135,7 @@ th {
   overflow-x: auto;
   display: block;
   white-space: nowrap;
+  height: 70vh;
 }
 
 .dark-mode .company-table-container {
@@ -147,8 +148,6 @@ th {
   width: max-content;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-top: 20px;
-  margin-bottom: 20px;
   color: #333;
   table-layout: auto;
 }
