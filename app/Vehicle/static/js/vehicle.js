@@ -454,7 +454,6 @@ function triggerSOS(imei, marker) {
     sosDiv.style.position = "absolute";
     sosDiv.style.top = "50%";
     sosDiv.style.left = "50%";
-    sosDiv.style.transform = "translate(-50%, -50%)";
     sosDiv.style.pointerEvents = "none";
     marker.content.appendChild(sosDiv);
     sosActiveMarkers[imei] = sosDiv;
@@ -1441,7 +1440,7 @@ function updateVehicleData(vehicle) {
     const markerContent = markers[imei].content;
     markerContent.style.width = `${size.width}px`;
     markerContent.style.height = `${size.height}px`;
-    markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+    markerContent.style.transform = `rotate(${rotation}deg)`;
     }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
@@ -1801,7 +1800,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   markerContent.className = "custom-marker";
   markerContent.style.width = `${size.width}px`;
   markerContent.style.height = `${size.height}px`;
-  markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+  markerContent.style.transform = `rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
@@ -1843,7 +1842,7 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   markerContent.className = "custom-marker";
   markerContent.style.width = `${size.width}px`;
   markerContent.style.height = `${size.height}px`;
-  markerContent.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+  markerContent.style.transform = `rotate(${rotation}deg)`;
 
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
