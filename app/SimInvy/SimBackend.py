@@ -160,7 +160,7 @@ def manual_entry():
     data['status'] = data.get('Status', 'New Stock')
     data['isActive'] = True  
 
-    if len(data['MobileNumber']) not in [10, 13]:
+    if len(data['MobileNumber']) not in [10, 11, 12, 13, 14, 15]:
         flash("The lenght of Mobile Number must be 13 or 10", "danger")
 
         if len(data['SimNumber']) != 20:
@@ -252,7 +252,7 @@ def upload_file():
                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone'.", "danger")
                 return redirect(url_for('SimInvy.page'))
 
-            if len(mobile_number) not in [10,13]:
+            if len(mobile_number) not in [10, 11, 12, 13, 14, 15]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
             if len(sim_number) != 20:
