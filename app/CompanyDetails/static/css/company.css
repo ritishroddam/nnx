@@ -29,10 +29,6 @@ th {
   color: #333;
 }
 
-tr:hover {
-  background-color: #e2e8f0;
-}
-
 .btn {
   padding: 10px 15px;
   color: #fff;
