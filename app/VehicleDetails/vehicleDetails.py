@@ -315,8 +315,8 @@ def upload_vehicle_file():
                 flash(f"For vehcile {license_plate_number} Company Name invalid", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
-            if len(sim) != 20:
-                flash(f"For vehicle {license_plate_number}, SIM {sim} must be 20 characters long.", "danger")
+            if not (10 <= len(sim) <= 15):
+                flash(f"For vehicle {license_plate_number}, SIM {sim} must be between 10 and 15 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
