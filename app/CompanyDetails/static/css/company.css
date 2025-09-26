@@ -26,6 +26,10 @@
   margin-bottom: 5px;
 }
 
+.dark-mode .status-label {
+  color: #aaa;
+}
+
 .status-value {
   font-size: 24px;
   font-weight: bold;
