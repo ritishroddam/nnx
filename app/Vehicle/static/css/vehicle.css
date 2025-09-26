@@ -1207,6 +1207,11 @@ input:checked + .slider:before {
   background: #b71c1c;
 }
 
+#map .gm-style .gm-style-iw-t {
+  right: auto !important;
+  bottom: auto !important;
+}
+
 @keyframes sosBlink {
   0% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
   50% { border-color: transparent; box-shadow: none; }
