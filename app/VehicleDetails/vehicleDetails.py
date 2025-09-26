@@ -305,7 +305,7 @@ def upload_vehicle_file():
             
             
             pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
-            pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{2}$')
+            pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{1,2}$') 
             if not (pattern1.match(license_plate_number) or pattern2.match(license_plate_number)):
                 flash(f"License Plate Number {license_plate_number} is invalid.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
