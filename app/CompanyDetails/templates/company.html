@@ -34,7 +34,6 @@ Company Details
 <div class="company-modal hidden" id="manualEntryModal">
   <div class="company-modal-content">
     <span class="company-close-btn" id="closeCompanyModal">&times;</span>
-    <!-- Only the form part inside your modal -->
     <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-container">
@@ -136,7 +135,7 @@ Company Details
 <div class="company-table-container">
   <table class="company-table">
     <thead>
-      <tr>
+      <tr class="header-row">
         <th>Company Name</th>
         <th>Contact Person</th>
         <th>Email Address</th>

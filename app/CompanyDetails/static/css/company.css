@@ -218,6 +218,10 @@ tr:hover {
     background-color: #f9f9f9;
 }
 
+.dark-mode .company-table tr:hover {
+    background-color: #444;
+}
+
 .dark-mode .company-table {
     background-color: #000;
     color: #ccc;
