@@ -41,7 +41,7 @@ Company Details
 <div class="company-modal hidden" id="manualEntryModal">
   <div class="company-modal-content">
     <span class="company-close-btn" id="closeCompanyModal">&times;</span>
-    <h3 style="margin-bottom: 10px;">Add a New Company</h3>
+    <h2 style="margin-bottom: 10px;">Add a New Company</h2>
     <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-container">
