@@ -266,6 +266,9 @@ async function fetchAndRenderCustomers(page = 1) {
 
     totalRows = data.total;
     currentPage = data.page || page;
+
+    document.getElementById('totalCompaniesCount').textContent = totalRows;
+
     renderCustomerTable(data.customers);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
   } catch (err) {
