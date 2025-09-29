@@ -209,6 +209,9 @@ async function fetchAndRenderSims(page = 1) {
     totalRows = data.total;
     renderSimTable(data.sims);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
+    
+    // Update counters from server instead of client-side calculation
+    updateCountersFromServer();
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
@@ -263,6 +266,50 @@ async function fetchAndRenderSims(page = 1) {
 //   });
 // }
 
+// Utility function to get cookie value
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+}
+
+// Filter table function (you need to implement this)
+function filterTable(searchTerm) {
+  const rows = document.querySelectorAll('#simTable tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    if (text.includes(searchTerm)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+// Filter by status function (you need to implement this)
+function filterSimsByStatus() {
+  const statusFilter = document.getElementById('statusFilter').value;
+  if (statusFilter === 'All') {
+    fetchAndRenderSims(1);
+  } else {
+    // Implement status filtering logic here
+    fetch(`/simInvy/get_sims_by_status/${statusFilter}`, {
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      }
+    })
+    .then(response => response.json())
+    .then(sims => {
+      renderSimTable(sims);
+      updateCounters(sims);
+    })
+    .catch(err => {
+      console.error('Error filtering SIMs:', err);
+    });
+  }
+}
+
 function renderSimTable(sims) {
   const tableBody = document.getElementById('simTable');
   tableBody.innerHTML = '';
@@ -315,9 +362,32 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   };
 }
 
-function updateCounters(currentPageSims, total) {
+// function updateCounters(currentPageSims, total) {
+//   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
+//   currentPageSims.forEach(sim => {
+//     const status = (sim.status || '').trim();
+//     if (status === "New Stock") newStockCount++;
+//     if (status === "In Use") inUseCount++;
+//     if (status === "Available") availableCount++;
+//     if (status === "Scrap") scrapCount++;
+//     if (status === "Safe Custody") safeCustodyCount++;
+//     if (status === "Suspended") suspendedCount++;
+//   });
+//   document.getElementById('newStockCount').textContent = newStockCount;
+//   document.getElementById('inUseCount').textContent = inUseCount;
+//   document.getElementById('availableCount').textContent = availableCount;
+//   document.getElementById('scrapCount').textContent = scrapCount;
+//   document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
+//   document.getElementById('suspendedCount').textContent = suspendedCount;
+// }
+
+function updateCounters(sims = []) {
   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
-  currentPageSims.forEach(sim => {
+  
+  // Use the provided sims array or fallback to allSimsData
+  const simsToCount = sims.length > 0 ? sims : allSimsData;
+  
+  simsToCount.forEach(sim => {
     const status = (sim.status || '').trim();
     if (status === "New Stock") newStockCount++;
     if (status === "In Use") inUseCount++;
@@ -326,6 +396,7 @@ function updateCounters(currentPageSims, total) {
     if (status === "Safe Custody") safeCustodyCount++;
     if (status === "Suspended") suspendedCount++;
   });
+  
   document.getElementById('newStockCount').textContent = newStockCount;
   document.getElementById('inUseCount').textContent = inUseCount;
   document.getElementById('availableCount').textContent = availableCount;
