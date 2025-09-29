@@ -410,33 +410,12 @@ function setupDownloadButton() {
             `;
             document.body.appendChild(spinner);
 
-            // ✅ Fetch ALL sims from server (not just current page)
-            const responseAll = await fetch(`/simInvy/get_sims_paginated?page=1&per_page=${totalRows}`, {
-                headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
-            });
-            const dataAll = await responseAll.json();
-            if (!dataAll.sims || dataAll.sims.length === 0) throw new Error("No SIM data found.");
-
-            const simsToExport = dataAll.sims.map(sim => ({
-                MobileNumber: sim.MobileNumber || "",
-                SimNumber: sim.SimNumber || "",
-                IMEI: sim.IMEI || "N/A",
-                DateIn: sim.DateIn || "",
-                DateOut: sim.DateOut || "",
-                Vendor: sim.Vendor || "",
-                status: sim.status || "New Stock",
-                lastEditedBy: sim.lastEditedBy || "N/A",
-                lastEditedAt: sim.lastEditedAt || "N/A"
-            }));
-
-            // Send all sims to backend for Excel generation
-            const response = await fetch("/simInvy/download_excel_filtered", {
-                method: "POST",
+            // ✅ Directly hit backend to get full Excel (no huge JSON post)
+            const response = await fetch("/simInvy/download_excel", {
+                method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
                     "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-                },
-                body: JSON.stringify({ sims: simsToExport })
+                }
             });
 
             document.body.removeChild(spinner);
@@ -450,7 +429,7 @@ function setupDownloadButton() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'Full_SIM_Inventory_' + new Date().toISOString().split('T')[0] + '.xlsx';
+            a.download = 'SIM_Inventory_' + new Date().toISOString().split('T')[0] + '.xlsx';
             document.body.appendChild(a);
             a.click();
 
@@ -461,6 +440,7 @@ function setupDownloadButton() {
 
         } catch (error) {
             console.error('Download failed:', error);
+
             const errorDiv = document.createElement('div');
             errorDiv.innerHTML = `
                 <div style="
@@ -479,13 +459,18 @@ function setupDownloadButton() {
                 </div>
             `;
             document.body.appendChild(errorDiv);
-            setTimeout(() => document.body.removeChild(errorDiv), 5000);
+
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+
         } finally {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;
         }
     });
 }
+
 
 function filterTable(searchTerm) {
     const tableBody = document.getElementById('simTable');
