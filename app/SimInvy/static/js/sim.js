@@ -37,19 +37,19 @@ document.addEventListener("DOMContentLoaded", function() {
   const dateInInput = document.getElementById("DateIn");
   const dateOutInput = document.getElementById("DateOut");
 
-  const tableRows = document.querySelectorAll('#simTable tr');
-    originalTableData = Array.from(tableRows).map(row => {
-        return {
-            element: row,
-            mobile: row.cells[0].textContent.trim(),
-            sim: row.cells[1].textContent.trim(),
-            imei: row.cells[2].textContent.trim(),
-            status: row.cells[3].textContent.trim()
-        };
-    });
+  // const tableRows = document.querySelectorAll('#simTable tr');
+  //   originalTableData = Array.from(tableRows).map(row => {
+  //       return {
+  //           element: row,
+  //           mobile: row.cells[0].textContent.trim(),
+  //           sim: row.cells[1].textContent.trim(),
+  //           imei: row.cells[2].textContent.trim(),
+  //           status: row.cells[3].textContent.trim()
+  //       };
+  //   });
 
-  const tableBody = document.getElementById('simTable');
-    originalTableRows = Array.from(tableBody.querySelectorAll('tr'));
+  // const tableBody = document.getElementById('simTable');
+  //   originalTableRows = Array.from(tableBody.querySelectorAll('tr'));
     
     const searchInput = document.getElementById('simSearch');
     const clearBtn = document.getElementById('clearSearchBtn');
@@ -170,9 +170,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
-    setTimeout(() => {
-    updateCounters();
-  }, 100);
+  //   setTimeout(() => {
+  //   updateCounters();
+  // }, 100);
 
   allSimsData = Array.from(document.querySelectorAll('#simTable tr[data-id]')).map(row => {
     return {
@@ -210,7 +210,6 @@ async function fetchAndRenderSims(page = 1) {
     renderSimTable(data.sims);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
     
-    // Update counters from server instead of client-side calculation
     updateCountersFromServer();
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
@@ -266,7 +265,6 @@ async function fetchAndRenderSims(page = 1) {
 //   });
 // }
 
-// Utility function to get cookie value
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -274,7 +272,6 @@ function getCookie(name) {
   return '';
 }
 
-// Filter table function (you need to implement this)
 function filterTable(searchTerm) {
   const rows = document.querySelectorAll('#simTable tr');
   rows.forEach(row => {
@@ -287,13 +284,11 @@ function filterTable(searchTerm) {
   });
 }
 
-// Filter by status function (you need to implement this)
 function filterSimsByStatus() {
   const statusFilter = document.getElementById('statusFilter').value;
   if (statusFilter === 'All') {
     fetchAndRenderSims(1);
   } else {
-    // Implement status filtering logic here
     fetch(`/simInvy/get_sims_by_status/${statusFilter}`, {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
@@ -315,8 +310,12 @@ function renderSimTable(sims) {
   tableBody.innerHTML = '';
   if (!sims || sims.length === 0) {
     tableBody.innerHTML = '<tr><td colspan="10">No SIMs found</td></tr>';
+    originalTableRows = [];
     return;
   }
+  
+  originalTableRows = [];
+  
   sims.forEach(sim => {
     const row = document.createElement('tr');
     row.setAttribute('data-id', sim._id);
@@ -337,6 +336,7 @@ function renderSimTable(sims) {
       </td>
     `;
     tableBody.appendChild(row);
+    originalTableRows.push(row);
   });
 }
 
@@ -384,7 +384,6 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 function updateCounters(sims = []) {
   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
   
-  // Use the provided sims array or fallback to allSimsData
   const simsToCount = sims.length > 0 ? sims : allSimsData;
   
   simsToCount.forEach(sim => {
@@ -429,8 +428,25 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function editSim(simId) {
-  const row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
-  if (!row) return;
+  // const row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
+  // if (!row) return;
+
+   let row;
+  if (originalTableRows.length === 0) {
+    row = document.querySelector(`#simTable tr[data-id="${simId}"]`);
+  } else {
+    row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
+  }
+  
+  if (!row) {
+    console.error('Row not found for SIM ID:', simId);
+    alert('Could not find the SIM data to edit.');
+    return;
+  }
+
+  if (!document.getElementById("editSimModal")) {
+    createEditModal();
+  }
 
   document.getElementById("editMobileNumber").value = row.cells[0].innerText.trim();
   document.getElementById("editSimNumber").value = row.cells[1].innerText.trim();
@@ -444,59 +460,122 @@ function editSim(simId) {
 
   document.getElementById("editSimModal").classList.remove("hidden");
 
-  document.getElementById("saveEditBtn").onclick = async function() {
-    const updatedData = {
-      _id: simId,
-      MobileNumber: document.getElementById("editMobileNumber").value.trim(),
-      SimNumber: document.getElementById("editSimNumber").value.trim(),
-      IMEI: document.getElementById("editImei").value.trim(),
-      DateIn: document.getElementById("editDateIn").value.trim(),
-      DateOut: document.getElementById("editDateOut").value.trim(),
-      Vendor: document.getElementById("editVendor").value.trim(),
-      status: document.getElementById("editStatus").value.trim(),
-      lastEditedBy: document.getElementById("editLastEditedBy").value.trim(),
-      lastEditedAt: document.getElementById("editLastEditedAt").value.trim()
-    };
+//   document.getElementById("saveEditBtn").onclick = async function() {
+//     const updatedData = {
+//       _id: simId,
+//       MobileNumber: document.getElementById("editMobileNumber").value.trim(),
+//       SimNumber: document.getElementById("editSimNumber").value.trim(),
+//       IMEI: document.getElementById("editImei").value.trim(),
+//       DateIn: document.getElementById("editDateIn").value.trim(),
+//       DateOut: document.getElementById("editDateOut").value.trim(),
+//       Vendor: document.getElementById("editVendor").value.trim(),
+//       status: document.getElementById("editStatus").value.trim(),
+//       lastEditedBy: document.getElementById("editLastEditedBy").value.trim(),
+//       lastEditedAt: document.getElementById("editLastEditedAt").value.trim()
+//     };
 
-    try {
-      const response = await fetch('/simInvy/update_sim', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-        body: JSON.stringify(updatedData)
-      });
-      const result = await response.json();
-      if (result.success) {
-        const index = originalTableRows.findIndex(r => r.getAttribute('data-id') === simId);
-        if (index !== -1) {
-          originalTableRows[index].cells[0].innerText = updatedData.MobileNumber;
-          originalTableRows[index].cells[1].innerText = updatedData.SimNumber;
-          originalTableRows[index].cells[2].innerText = updatedData.IMEI;
-          originalTableRows[index].cells[3].innerText = updatedData.DateIn;
-          originalTableRows[index].cells[4].innerText = updatedData.DateOut;
-          originalTableRows[index].cells[5].innerHTML = `
-            <select id="editVendor">
-              <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
-              <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
-              <option value="BSNL" ${updatedData.Vendor === "BSNL" ? "selected" : ""}>BSNL</option>
-              <option value="Jio" ${updatedData.Vendor === "Jio" ? "selected" : ""}>Jio</option>
-            </select>
-          `;
-          originalTableRows[index].cells[6].innerText = updatedData.status;
-          originalTableRows[index].cells[7].innerText = updatedData.lastEditedBy;
-          originalTableRows[index].cells[8].innerText = updatedData.lastEditedAt;
-        }
+//     try {
+//       const response = await fetch('/simInvy/update_sim', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//         },
+//         body: JSON.stringify(updatedData)
+//       });
+//       const result = await response.json();
+//       if (result.success) {
+//         const index = originalTableRows.findIndex(r => r.getAttribute('data-id') === simId);
+//         if (index !== -1) {
+//           originalTableRows[index].cells[0].innerText = updatedData.MobileNumber;
+//           originalTableRows[index].cells[1].innerText = updatedData.SimNumber;
+//           originalTableRows[index].cells[2].innerText = updatedData.IMEI;
+//           originalTableRows[index].cells[3].innerText = updatedData.DateIn;
+//           originalTableRows[index].cells[4].innerText = updatedData.DateOut;
+//           originalTableRows[index].cells[5].innerHTML = `
+//             <select id="editVendor">
+//               <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
+//               <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
+//               <option value="BSNL" ${updatedData.Vendor === "BSNL" ? "selected" : ""}>BSNL</option>
+//               <option value="Jio" ${updatedData.Vendor === "Jio" ? "selected" : ""}>Jio</option>
+//             </select>
+//           `;
+//           originalTableRows[index].cells[6].innerText = updatedData.status;
+//           originalTableRows[index].cells[7].innerText = updatedData.lastEditedBy;
+//           originalTableRows[index].cells[8].innerText = updatedData.lastEditedAt;
+//         }
 
-        document.getElementById("editSimModal").classList.add("hidden");
-      } else {
-        alert("Failed to update SIM data: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      alert("Error updating SIM data: " + err.message);
-    }
+//         document.getElementById("editSimModal").classList.add("hidden");
+//       } else {
+//         alert("Failed to update SIM data: " + (result.message || "Unknown error"));
+//       }
+//     } catch (err) {
+//       alert("Error updating SIM data: " + err.message);
+//     }
+//   };
+// }
+
+ document.getElementById("saveEditBtn").onclick = async function() {
+    await saveSimEdit(simId, row);
   };
+}
+
+
+function formatDateForInput(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return dateStr;
+}
+
+async function saveSimEdit(simId, row) {
+  const updatedData = {
+    _id: simId,
+    MobileNumber: document.getElementById("editMobileNumber").value.trim(),
+    SimNumber: document.getElementById("editSimNumber").value.trim(),
+    IMEI: document.getElementById("editImei").value.trim(),
+    DateIn: document.getElementById("editDateIn").value.trim(),
+    DateOut: document.getElementById("editDateOut").value.trim(),
+    Vendor: document.getElementById("editVendor").value.trim(),
+    status: document.getElementById("editStatus").value.trim(),
+    lastEditedBy: document.getElementById("editLastEditedBy").value.trim(),
+    lastEditedAt: document.getElementById("editLastEditedAt").value.trim()
+  };
+
+  try {
+    const response = await fetch('/simInvy/update_sim', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+      body: JSON.stringify(updatedData)
+    });
+    const result = await response.json();
+    if (result.success) {
+      row.cells[0].textContent = updatedData.MobileNumber;
+      row.cells[1].textContent = updatedData.SimNumber;
+      row.cells[2].textContent = updatedData.IMEI;
+      row.cells[3].textContent = formatDateForDisplay(updatedData.DateIn);
+      row.cells[4].textContent = formatDateForDisplay(updatedData.DateOut);
+      row.cells[5].textContent = updatedData.Vendor;
+      row.cells[6].textContent = updatedData.status;
+      row.cells[7].textContent = updatedData.lastEditedBy;
+      row.cells[8].textContent = updatedData.lastEditedAt;
+
+      document.getElementById("editSimModal").classList.add("hidden");
+      
+      updateCountersFromServer();
+      
+      alert("SIM updated successfully!");
+    } else {
+      alert("Failed to update SIM data: " + (result.message || "Unknown error"));
+    }
+  } catch (err) {
+    alert("Error updating SIM data: " + err.message);
+  }
 }
 
 function setupDownloadButton() {
@@ -507,13 +586,11 @@ function setupDownloadButton() {
 
 async function downloadFilteredExcel() {
   try {
-    // Get current filtered data
     const statusFilter = document.getElementById('statusFilter').value;
     const searchQuery = document.getElementById('simSearch').value.trim();
     
     let sims = [];
     
-    // If there's a search query, use search results
     if (searchQuery) {
       const response = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(searchQuery)}`, {
         headers: {
@@ -522,7 +599,6 @@ async function downloadFilteredExcel() {
       });
       sims = await response.json();
     } 
-    // If a specific status filter is selected, use filtered results
     else if (statusFilter !== 'All') {
       const response = await fetch(`/simInvy/get_sims_by_status/${statusFilter}`, {
         headers: {
@@ -531,7 +607,6 @@ async function downloadFilteredExcel() {
       });
       sims = await response.json();
     }
-    // Otherwise, download all SIMs
     else {
       const response = await fetch('/simInvy/download_excel', {
         headers: {
@@ -540,7 +615,6 @@ async function downloadFilteredExcel() {
       });
       
       if (response.ok) {
-        // For the direct download endpoint, we don't need to process data
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -557,7 +631,6 @@ async function downloadFilteredExcel() {
       }
     }
     
-    // For filtered data, use the filtered download endpoint
     if (sims.length > 0) {
       const response = await fetch('/simInvy/download_excel_filtered', {
         method: 'POST',

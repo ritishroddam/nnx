@@ -156,7 +156,6 @@ def manual_entry():
     data = request.form.to_dict()
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    # Accept status from form, default to 'New Stock' if not provided
     data['status'] = data.get('Status', 'New Stock')
     data['isActive'] = True  
 
@@ -247,7 +246,6 @@ def upload_file():
             vendor = str(row['Vendor']).strip()
             status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
 
-            # Vendor validation
             if vendor not in ["Airtel", "Vodafone", "BSNL", "Jio"]:
                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone' 'BSNL' or 'Jio'.", "danger")
                 return redirect(url_for('SimInvy.page'))
@@ -476,7 +474,6 @@ def download_excel():
         vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
         sim_to_imei = {v['SIM']: v.get('imei', 'N/A') for v in vehicles if 'SIM' in v}
 
-        # Match the table columns exactly
         export_columns = [
             'MobileNumber', 'SimNumber', 'IMEI', 'DateIn', 'DateOut', 
             'Vendor', 'Status', 'lastEditedBy', 'lastEditedAt'
@@ -487,14 +484,12 @@ def download_excel():
             sim_number = sim.get('SimNumber', '')
             mobile_number = sim.get('MobileNumber', '')
             
-            # Format dates properly
             date_in = sim.get('DateIn', '')
             if date_in:
                 try:
                     if hasattr(date_in, 'strftime'):
                         date_in = date_in.strftime('%d-%m-%Y')
                     else:
-                        # Try to parse and format the date string
                         date_obj = datetime.strptime(str(date_in), '%Y-%m-%d')
                         date_in = date_obj.strftime('%d-%m-%Y')
                 except:
@@ -511,7 +506,6 @@ def download_excel():
                 except:
                     date_out = str(date_out)
             
-            # Format last edited date
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
                 if hasattr(last_edited_at, 'strftime'):
@@ -526,11 +520,11 @@ def download_excel():
             row = {
                 'MobileNumber': mobile_number,
                 'SimNumber': sim_number,
-                'IMEI': sim_to_imei.get(mobile_number, 'N/A'),  # Note: using MobileNumber as key
+                'IMEI': sim_to_imei.get(mobile_number, 'N/A'),  
                 'DateIn': date_in,
                 'DateOut': date_out,
                 'Vendor': sim.get('Vendor', ''),
-                'Status': sim.get('status', 'New Stock'),  # Using 'Status' to match table header
+                'Status': sim.get('status', 'New Stock'),  
                 'lastEditedBy': sim.get('lastEditedBy', 'N/A'),
                 'lastEditedAt': last_edited_at or 'N/A'
             }
@@ -542,7 +536,6 @@ def download_excel():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
             
-            # Auto-adjust column widths
             worksheet = writer.sheets["SIM Inventory"]
             for column in worksheet.columns:
                 max_length = 0
@@ -582,7 +575,6 @@ def download_excel_filtered():
         if not sims:
             return jsonify({"error": "No SIM data received"}), 400
 
-        # Match the table columns exactly
         columns = [
             'MobileNumber', 'SimNumber', 'IMEI', 'DateIn', 'DateOut', 
             'Vendor', 'Status', 'lastEditedBy', 'lastEditedAt'
@@ -590,7 +582,6 @@ def download_excel_filtered():
 
         cleaned = []
         for sim in sims:
-            # Format dates
             date_in = sim.get('DateIn', '')
             if date_in:
                 try:
@@ -637,7 +628,6 @@ def download_excel_filtered():
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Filtered SIMs")
             
-            # Auto-adjust column widths
             worksheet = writer.sheets["Filtered SIMs"]
             for column in worksheet.columns:
                 max_length = 0
