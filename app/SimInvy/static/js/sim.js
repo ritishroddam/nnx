@@ -365,7 +365,27 @@ function saveSim(simId) {
   const vendor = row.cells[5].querySelector("select").value;
   const status = row.cells[6].querySelector("select").value;
 
-  // Optionally, add validation here
+  const mobileRegex = /^\d{10,17}$/; 
+  if (!mobileRegex.test(mobile)) {
+    displayFlashMessage("Mobile Number must be 10 to 17 digits.", "danger");
+    return;
+  }
+
+  if (![19, 20, 21, 22].includes(simNumber.length) || isNaN(simNumber)) {
+    displayFlashMessage("SIM Number must be numeric and 19–22 digits long.", "danger");
+    return;
+  }
+
+  const validVendors = ["Airtel", "Vodafone", "BSNL", "Jio"];
+  if (!validVendors.includes(vendor)) {
+    displayFlashMessage("Vendor must be Airtel, Vodafone, BSNL, or Jio.", "danger");
+    return;
+  }
+
+  if (!dateIn) {
+    displayFlashMessage("Date In is required.", "danger");
+    return;
+  }
 
   const updatedData = {
     MobileNumber: mobile,
@@ -388,7 +408,6 @@ function saveSim(simId) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Optionally update the row inline, or just reload:
         location.reload();
       } else {
         displayFlashMessage(data.message || "Failed to save changes.", "danger");
