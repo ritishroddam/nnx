@@ -658,13 +658,13 @@ tr:hover {
 }
 
 .counter.new-stock {
-  color: #c2ddeb;
-  border: 1px solid #ccc;
+  color: #018da0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .dark-mode .counter.new-stock {
-  border: 1px solid #555;
-  color: #018da0;
+  box-shadow: 0 0 10px #cccccc90;
+  color: #c2ddeb;
 }
 
 .counter.in-use{
