@@ -370,6 +370,14 @@ def download_excel():
 
     df = pd.DataFrame(devices)
     
+    if 'GLNumber' not in df.columns:
+        df['GLNumber'] = ''
+    
+    df = df.rename(columns={
+        'DateIn': 'Purchase Date',
+        'OutwardTo': 'Outward/Inward Date'
+    })
+
     column_order = [
         'IMEI',
         'GLNumber',
@@ -377,14 +385,15 @@ def download_excel():
         'CompanyName',
         'DeviceModel',
         'DeviceMake',
-        'DateIn',
+        'Purchase Date',
         'Warranty',
         'SentBy',
-        'OutwardTo',
+        'Outward/Inward Date',
         'Package',
         'Tenure',
         'Status'
     ]
+
     df = df[column_order]
     
     output = BytesIO()
