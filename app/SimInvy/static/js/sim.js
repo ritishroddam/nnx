@@ -144,8 +144,8 @@ document.addEventListener("DOMContentLoaded", function() {
         mobileError.classList.add("hidden");
       }
 
-      if (simNumber.length !== 20 || isNaN(simNumber)) {
-        simError.textContent = "SIM Number must be exactly 20 digits.";
+      if (simNumber.length < 19  || simNumber.length > 22 || isNaN(simNumber)) {
+        simError.textContent = "SIM Number must be from 19 to 22 digits.";
         simError.classList.remove("hidden");
         isValid = false;
       } else {

@@ -160,13 +160,13 @@ def manual_entry():
     if len(data['MobileNumber']) not in [10, 11, 12, 13, 14, 15]:
         flash("The lenght of Mobile Number must be 13 or 10", "danger")
 
-        if len(data['SimNumber']) not in [19, 20]:
-            flash("The lenght of SIM Number must be 19 or 20", "danger")
+        if len(data['SimNumber']) not in [19, 20, 21, 22]:
+            flash("The lenght of SIM Number must be from 19 to 22 digits", "danger")
 
         return redirect(url_for('SimInvy.page'))
 
-    if  len(data['SimNumber']) not in [19, 20]:
-        flash("The lenght of SIM Number must be 20", "danger")
+    if  len(data['SimNumber']) not in [19, 20, 21, 22]:
+        flash("The lenght of SIM Number must be from 19 to 22 digits", "danger")
         return redirect(url_for('SimInvy.page'))
 
     if collection.find_one({"MobileNumber": data['MobileNumber']}):
@@ -251,7 +251,7 @@ def upload_file():
             if len(mobile_number) not in [10, 11, 12, 13, 14, 15]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
-            if len(sim_number) not in [19, 20]:
+            if len(sim_number) not in [19, 20, 21, 22]:
                 flash(f"Invalid SIM Number length at row {index + 2}, column 'SimNumber' (Length: {len(sim_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
             if collection.find_one({"MobileNumber": mobile_number}) or collection.find_one({"SimNumber": sim_number}):
