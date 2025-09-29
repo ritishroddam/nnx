@@ -422,12 +422,8 @@ def edit_device(device_id):
 
         last_edited_date = datetime.now(timezone.utc)
         
-
-        result = collection.update_one(
-            {'_id': object_id},
-            {'$set': {
+        newData = {
                 "IMEI": updated_data.get("IMEI"),
-                "GLNumber": updated_data.get("GLNumber"),
                 "DeviceModel": updated_data.get("DeviceModel"),
                 "DeviceMake": updated_data.get("DeviceMake"),
                 "DateIn": updated_data.get("DateIn"),
@@ -439,7 +435,14 @@ def edit_device(device_id):
                 "Status": updated_data.get("Status"),
                 "LastEditedBy": username,
                 "LastEditedDate": last_edited_date
-            }}
+            }
+        
+        if updated_data.get("GLNumber"):
+            newData["GLNumber"] = updated_data.get("GLNumber")
+
+        result = collection.update_one(
+            {'_id': object_id},
+            {'$set': newData}
         )
 
         print(f"Matched Count: {result.matched_count}, Modified Count: {result.modified_count}")  # Debug log
