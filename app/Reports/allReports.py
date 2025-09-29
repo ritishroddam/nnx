@@ -700,4 +700,5 @@ def download_report(report_id):
             download_name=xlsx_name
         )
     except Exception as e:
+        print(f"[DEBUG] Error sending file for download, {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
