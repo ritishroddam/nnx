@@ -344,6 +344,126 @@ def download_template():
     path = os.path.join(base_dir, 'templates', 'sim_inventory_template.xlsx')
     return send_file(path, as_attachment=True)
 
+# @sim_bp.route('/download_excel')
+# @jwt_required()
+# def download_excel():
+#     try:
+#         sims = list(collection.find({}))
+#         if not sims:
+#             return jsonify({"error": "No data available"}), 404
+
+#         vehicle_collection = db['vehicle_inventory']
+#         vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+#         sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
+
+
+#         export_columns = [
+#             'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
+#             'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
+#             'Vendor', 'lastEditedBy', 'lastEditedAt'
+#         ]
+
+#         processed_data = []
+#         for sim in sims:
+#             sim_number = sim.get('SimNumber', '')
+#             last_edited_at = sim.get('lastEditedAt', '')
+#             if last_edited_at:
+#                 if hasattr(last_edited_at, 'strftime'):
+#                     last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
+#                 else:
+#                     try:
+#                         dt = datetime.fromisoformat(str(last_edited_at))
+#                         last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
+#                     except:
+#                         pass
+#             row = {
+#                 'MobileNumber': sim.get('MobileNumber', ''),
+#                 'SimNumber': sim_number,
+#                 'IMEI': sim_to_imei.get(sim_number, 'N/A'),
+#                 'status': sim.get('status', 'Available'),
+#                 'isActive': 'Active' if sim.get('isActive', True) else 'Inactive',
+#                 'statusDate': str(sim.get('statusDate', '')).split('T')[0] if sim.get('statusDate') else '',
+#                 'reactivationDate': str(sim.get('reactivationDate', '')).split('T')[0] if sim.get('reactivationDate') else '',
+#                 'DateIn': str(sim.get('DateIn', '')).split('T')[0] if sim.get('DateIn') else '',
+#                 'DateOut': str(sim.get('DateOut', '')).split('T')[0] if sim.get('DateOut') else '',
+#                 'Vendor': sim.get('Vendor', ''),
+#                 'lastEditedBy': sim.get('lastEditedBy', 'N/A'),
+#                 'lastEditedAt': last_edited_at or ''
+#             }
+#             processed_data.append(row)
+
+#         df = pd.DataFrame(processed_data, columns=export_columns)
+
+#         output = BytesIO()
+#         with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+#             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+
+#         output.seek(0)
+#         return send_file(
+#             output,
+#             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+#             as_attachment=True,
+#             download_name='SIM_Inventory.xlsx'
+#         )
+        
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({
+#             "error": "Failed to generate Excel file",
+#             "details": str(e)
+#         }), 500
+
+# @sim_bp.route('/download_excel_filtered', methods=['POST'])
+# @jwt_required()
+# def download_excel_filtered():
+#     try:
+#         data = request.get_json()
+#         sims = data.get("sims", [])
+
+#         if not sims:
+#             return jsonify({"error": "No SIM data received"}), 400
+
+
+#         columns = [
+#             'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
+#             'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
+#             'Vendor', 'lastEditedBy', 'lastEditedAt'
+#         ]
+
+#         cleaned = []
+#         for sim in sims:
+#             last_edited_at = sim.get('lastEditedAt', '')
+#             if last_edited_at:
+#                 if hasattr(last_edited_at, 'strftime'):
+#                     last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
+#                 else:
+#                     try:
+#                         dt = datetime.fromisoformat(str(last_edited_at))
+#                         last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
+#                     except:
+#                         pass
+#             cleaned.append({col: str(sim.get(col, '')).strip() if col != 'lastEditedAt' else last_edited_at for col in columns})
+
+#         df = pd.DataFrame(cleaned, columns=columns)
+
+#         output = BytesIO()
+#         with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+#             df.to_excel(writer, index=False, sheet_name="Filtered SIMs")
+
+#         output.seek(0)
+#         return send_file(
+#             output,
+#             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+#             as_attachment=True,
+#             download_name='Filtered_SIMs.xlsx'
+#         )
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({"error": "Export failed", "details": str(e)}), 500
+
 @sim_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
@@ -353,50 +473,88 @@ def download_excel():
             return jsonify({"error": "No data available"}), 404
 
         vehicle_collection = db['vehicle_inventory']
-        vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
-        sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
+        vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
+        sim_to_imei = {v['SIM']: v.get('imei', 'N/A') for v in vehicles if 'SIM' in v}
 
-
+        # Match the table columns exactly
         export_columns = [
-            'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
-            'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
-            'Vendor', 'lastEditedBy', 'lastEditedAt'
+            'MobileNumber', 'SimNumber', 'IMEI', 'DateIn', 'DateOut', 
+            'Vendor', 'Status', 'lastEditedBy', 'lastEditedAt'
         ]
 
         processed_data = []
         for sim in sims:
             sim_number = sim.get('SimNumber', '')
+            mobile_number = sim.get('MobileNumber', '')
+            
+            # Format dates properly
+            date_in = sim.get('DateIn', '')
+            if date_in:
+                try:
+                    if hasattr(date_in, 'strftime'):
+                        date_in = date_in.strftime('%d-%m-%Y')
+                    else:
+                        # Try to parse and format the date string
+                        date_obj = datetime.strptime(str(date_in), '%Y-%m-%d')
+                        date_in = date_obj.strftime('%d-%m-%Y')
+                except:
+                    date_in = str(date_in)
+            
+            date_out = sim.get('DateOut', '')
+            if date_out:
+                try:
+                    if hasattr(date_out, 'strftime'):
+                        date_out = date_out.strftime('%d-%m-%Y')
+                    else:
+                        date_obj = datetime.strptime(str(date_out), '%Y-%m-%d')
+                        date_out = date_obj.strftime('%d-%m-%Y')
+                except:
+                    date_out = str(date_out)
+            
+            # Format last edited date
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
                 if hasattr(last_edited_at, 'strftime'):
-                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
+                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M:%S %p')
                 else:
                     try:
-                        dt = datetime.fromisoformat(str(last_edited_at))
-                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
+                        dt = datetime.fromisoformat(str(last_edited_at).replace('Z', '+00:00'))
+                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M:%S %p')
                     except:
                         pass
+
             row = {
-                'MobileNumber': sim.get('MobileNumber', ''),
+                'MobileNumber': mobile_number,
                 'SimNumber': sim_number,
-                'IMEI': sim_to_imei.get(sim_number, 'N/A'),
-                'status': sim.get('status', 'Available'),
-                'isActive': 'Active' if sim.get('isActive', True) else 'Inactive',
-                'statusDate': str(sim.get('statusDate', '')).split('T')[0] if sim.get('statusDate') else '',
-                'reactivationDate': str(sim.get('reactivationDate', '')).split('T')[0] if sim.get('reactivationDate') else '',
-                'DateIn': str(sim.get('DateIn', '')).split('T')[0] if sim.get('DateIn') else '',
-                'DateOut': str(sim.get('DateOut', '')).split('T')[0] if sim.get('DateOut') else '',
+                'IMEI': sim_to_imei.get(mobile_number, 'N/A'),  # Note: using MobileNumber as key
+                'DateIn': date_in,
+                'DateOut': date_out,
                 'Vendor': sim.get('Vendor', ''),
+                'Status': sim.get('status', 'New Stock'),  # Using 'Status' to match table header
                 'lastEditedBy': sim.get('lastEditedBy', 'N/A'),
-                'lastEditedAt': last_edited_at or ''
+                'lastEditedAt': last_edited_at or 'N/A'
             }
             processed_data.append(row)
 
         df = pd.DataFrame(processed_data, columns=export_columns)
 
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="SIM Inventory")
+            
+            # Auto-adjust column widths
+            worksheet = writer.sheets["SIM Inventory"]
+            for column in worksheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                worksheet.column_dimensions[column_letter].width = adjusted_width
 
         output.seek(0)
         return send_file(
@@ -424,32 +582,74 @@ def download_excel_filtered():
         if not sims:
             return jsonify({"error": "No SIM data received"}), 400
 
-
+        # Match the table columns exactly
         columns = [
-            'MobileNumber', 'SimNumber', 'IMEI', 'status', 'isActive',
-            'statusDate', 'reactivationDate', 'DateIn', 'DateOut',
-            'Vendor', 'lastEditedBy', 'lastEditedAt'
+            'MobileNumber', 'SimNumber', 'IMEI', 'DateIn', 'DateOut', 
+            'Vendor', 'Status', 'lastEditedBy', 'lastEditedAt'
         ]
 
         cleaned = []
         for sim in sims:
+            # Format dates
+            date_in = sim.get('DateIn', '')
+            if date_in:
+                try:
+                    date_obj = datetime.strptime(str(date_in), '%Y-%m-%d')
+                    date_in = date_obj.strftime('%d-%m-%Y')
+                except:
+                    date_in = str(date_in)
+            
+            date_out = sim.get('DateOut', '')
+            if date_out:
+                try:
+                    date_obj = datetime.strptime(str(date_out), '%Y-%m-%d')
+                    date_out = date_obj.strftime('%d-%m-%Y')
+                except:
+                    date_out = str(date_out)
+            
             last_edited_at = sim.get('lastEditedAt', '')
             if last_edited_at:
                 if hasattr(last_edited_at, 'strftime'):
-                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M %p')
+                    last_edited_at = last_edited_at.strftime('%d-%m-%Y %I:%M:%S %p')
                 else:
                     try:
-                        dt = datetime.fromisoformat(str(last_edited_at))
-                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M %p')
+                        dt = datetime.fromisoformat(str(last_edited_at).replace('Z', '+00:00'))
+                        last_edited_at = dt.strftime('%d-%m-%Y %I:%M:%S %p')
                     except:
                         pass
-            cleaned.append({col: str(sim.get(col, '')).strip() if col != 'lastEditedAt' else last_edited_at for col in columns})
+
+            row = {
+                'MobileNumber': sim.get('MobileNumber', ''),
+                'SimNumber': sim.get('SimNumber', ''),
+                'IMEI': sim.get('IMEI', 'N/A'),
+                'DateIn': date_in,
+                'DateOut': date_out,
+                'Vendor': sim.get('Vendor', ''),
+                'Status': sim.get('status', 'New Stock'),
+                'lastEditedBy': sim.get('lastEditedBy', 'N/A'),
+                'lastEditedAt': last_edited_at or 'N/A'
+            }
+            cleaned.append(row)
 
         df = pd.DataFrame(cleaned, columns=columns)
 
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl', datetime_format='YYYY-MM-DD') as writer:
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name="Filtered SIMs")
+            
+            # Auto-adjust column widths
+            worksheet = writer.sheets["Filtered SIMs"]
+            for column in worksheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                worksheet.column_dimensions[column_letter].width = adjusted_width
 
         output.seek(0)
         return send_file(

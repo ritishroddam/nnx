@@ -209,11 +209,59 @@ async function fetchAndRenderSims(page = 1) {
     totalRows = data.total;
     renderSimTable(data.sims);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-    // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
 }
+
+// async function fetchAndRenderSims(page = 1) {
+//   try {
+//     const response = await fetch(`/simInvy/get_sims_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+//       headers: {
+//         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//       }
+//     });
+//     const data = await response.json();
+//     if (data.error) throw new Error(data.error);
+
+//     totalRows = data.total;
+//     renderSimTable(data.sims);
+//     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
+//     // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
+//   } catch (err) {
+//     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
+//   }
+// }
+
+// function renderSimTable(sims) {
+//   const tableBody = document.getElementById('simTable');
+//   tableBody.innerHTML = '';
+//   if (!sims || sims.length === 0) {
+//     tableBody.innerHTML = '<tr><td colspan="10">No SIMs found</td></tr>';
+//     return;
+//   }
+//   sims.forEach(sim => {
+//     const row = document.createElement('tr');
+//     row.setAttribute('data-id', sim._id);
+//     const status = sim.status || 'New Stock';
+//     row.className = status.toLowerCase().replace(/\s/g, '-');
+//     row.innerHTML = `
+//       <td>${sim.MobileNumber}</td>
+//       <td>${sim.SimNumber}</td>
+//       <td>${sim.IMEI || 'N/A'}</td>
+//       <td>${sim.DateIn || ''}</td>
+//       <td>${sim.DateOut || ''}</td>
+//       <td>${sim.Vendor || ''}</td>
+//       <td>${status}</td>
+//       <td>${sim.lastEditedBy || 'N/A'}</td>
+//       <td>${sim.lastEditedAt || 'N/A'}</td>
+//       <td>
+//         <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
+//       </td>
+//     `;
+//     tableBody.appendChild(row);
+//   });
+// }
 
 function renderSimTable(sims) {
   const tableBody = document.getElementById('simTable');
