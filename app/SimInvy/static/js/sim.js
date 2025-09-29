@@ -144,8 +144,8 @@ document.addEventListener("DOMContentLoaded", function() {
         mobileError.classList.add("hidden");
       }
 
-      if (simNumber.length !== 19 || simNumber.length !==20 || isNaN(simNumber)) {
-        simError.textContent = "SIM Number must be 19 or 20 digits.";
+      if (simNumber.length !== 20 || isNaN(simNumber)) {
+        simError.textContent = "SIM Number must be exactly 20 digits.";
         simError.classList.remove("hidden");
         isValid = false;
       } else {
@@ -209,99 +209,9 @@ async function fetchAndRenderSims(page = 1) {
     totalRows = data.total;
     renderSimTable(data.sims);
     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-    
-    updateCountersFromServer();
+    // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
-  }
-}
-
-// async function fetchAndRenderSims(page = 1) {
-//   try {
-//     const response = await fetch(`/simInvy/get_sims_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
-//       headers: {
-//         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//       }
-//     });
-//     const data = await response.json();
-//     if (data.error) throw new Error(data.error);
-
-//     totalRows = data.total;
-//     renderSimTable(data.sims);
-//     renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-//     // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
-//   } catch (err) {
-//     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
-//   }
-// }
-
-// function renderSimTable(sims) {
-//   const tableBody = document.getElementById('simTable');
-//   tableBody.innerHTML = '';
-//   if (!sims || sims.length === 0) {
-//     tableBody.innerHTML = '<tr><td colspan="10">No SIMs found</td></tr>';
-//     return;
-//   }
-//   sims.forEach(sim => {
-//     const row = document.createElement('tr');
-//     row.setAttribute('data-id', sim._id);
-//     const status = sim.status || 'New Stock';
-//     row.className = status.toLowerCase().replace(/\s/g, '-');
-//     row.innerHTML = `
-//       <td>${sim.MobileNumber}</td>
-//       <td>${sim.SimNumber}</td>
-//       <td>${sim.IMEI || 'N/A'}</td>
-//       <td>${sim.DateIn || ''}</td>
-//       <td>${sim.DateOut || ''}</td>
-//       <td>${sim.Vendor || ''}</td>
-//       <td>${status}</td>
-//       <td>${sim.lastEditedBy || 'N/A'}</td>
-//       <td>${sim.lastEditedAt || 'N/A'}</td>
-//       <td>
-//         <button class="icon-btn edit-icon" onclick="editSim('${sim._id}')">✏️</button>
-//       </td>
-//     `;
-//     tableBody.appendChild(row);
-//   });
-// }
-
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return '';
-}
-
-function filterTable(searchTerm) {
-  const rows = document.querySelectorAll('#simTable tr');
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    if (text.includes(searchTerm)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-}
-
-function filterSimsByStatus() {
-  const statusFilter = document.getElementById('statusFilter').value;
-  if (statusFilter === 'All') {
-    fetchAndRenderSims(1);
-  } else {
-    fetch(`/simInvy/get_sims_by_status/${statusFilter}`, {
-      headers: {
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      }
-    })
-    .then(response => response.json())
-    .then(sims => {
-      renderSimTable(sims);
-      updateCounters(sims);
-    })
-    .catch(err => {
-      console.error('Error filtering SIMs:', err);
-    });
   }
 }
 
@@ -357,31 +267,9 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   };
 }
 
-// function updateCounters(currentPageSims, total) {
-//   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
-//   currentPageSims.forEach(sim => {
-//     const status = (sim.status || '').trim();
-//     if (status === "New Stock") newStockCount++;
-//     if (status === "In Use") inUseCount++;
-//     if (status === "Available") availableCount++;
-//     if (status === "Scrap") scrapCount++;
-//     if (status === "Safe Custody") safeCustodyCount++;
-//     if (status === "Suspended") suspendedCount++;
-//   });
-//   document.getElementById('newStockCount').textContent = newStockCount;
-//   document.getElementById('inUseCount').textContent = inUseCount;
-//   document.getElementById('availableCount').textContent = availableCount;
-//   document.getElementById('scrapCount').textContent = scrapCount;
-//   document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
-//   document.getElementById('suspendedCount').textContent = suspendedCount;
-// }
-
-function updateCounters(sims = []) {
+function updateCounters(currentPageSims, total) {
   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
-  
-  const simsToCount = sims.length > 0 ? sims : allSimsData;
-  
-  simsToCount.forEach(sim => {
+  currentPageSims.forEach(sim => {
     const status = (sim.status || '').trim();
     if (status === "New Stock") newStockCount++;
     if (status === "In Use") inUseCount++;
@@ -390,7 +278,6 @@ function updateCounters(sims = []) {
     if (status === "Safe Custody") safeCustodyCount++;
     if (status === "Suspended") suspendedCount++;
   });
-  
   document.getElementById('newStockCount').textContent = newStockCount;
   document.getElementById('inUseCount').textContent = inUseCount;
   document.getElementById('availableCount').textContent = availableCount;
@@ -474,8 +361,6 @@ function editSim(simId) {
             <select id="editVendor">
               <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
               <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
-              <option value="BSNL" ${updatedData.Vendor === "BSNL" ? "selected" : ""}>BSNL</option>
-              <option value="Jio" ${updatedData.Vendor === "Jio" ? "selected" : ""}>Jio</option>
             </select>
           `;
           originalTableRows[index].cells[6].innerText = updatedData.status;
@@ -492,91 +377,3 @@ function editSim(simId) {
     }
   };
 }
-
-function setupDownloadButton() {
-  document.getElementById("downloadExcelBtn").addEventListener("click", function() {
-    downloadFilteredExcel();
-  });
-}
-
-async function downloadFilteredExcel() {
-  try {
-    const statusFilter = document.getElementById('statusFilter').value;
-    const searchQuery = document.getElementById('simSearch').value.trim();
-    
-    let sims = [];
-    
-    if (searchQuery) {
-      const response = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(searchQuery)}`, {
-        headers: {
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        }
-      });
-      sims = await response.json();
-    } 
-    else if (statusFilter !== 'All') {
-      const response = await fetch(`/simInvy/get_sims_by_status/${statusFilter}`, {
-        headers: {
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        }
-      });
-      sims = await response.json();
-    }
-    else {
-      const response = await fetch('/simInvy/download_excel', {
-        headers: {
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        }
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'SIM_Inventory.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        return;
-      } else {
-        throw new Error('Failed to download Excel file');
-      }
-    }
-    
-    if (sims.length > 0) {
-      const response = await fetch('/simInvy/download_excel_filtered', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-        body: JSON.stringify({ sims: sims })
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'Filtered_SIMs.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        throw new Error('Failed to download filtered Excel file');
-      }
-    } else {
-      alert('No data to download');
-    }
-    
-  } catch (error) {
-    console.error('Download error:', error);
-    alert('Error downloading Excel file: ' + error.message);
-  }
-}
-
