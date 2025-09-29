@@ -253,7 +253,7 @@ def upload_file():
             if len(mobile_number) not in [10, 11, 12, 13, 14, 15]:
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
-            if len(sim_number) != 20:
+            if len(sim_number) not in [19, 20]:
                 flash(f"Invalid SIM Number length at row {index + 2}, column 'SimNumber' (Length: {len(sim_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
             if collection.find_one({"MobileNumber": mobile_number}) or collection.find_one({"SimNumber": sim_number}):

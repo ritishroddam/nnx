@@ -122,6 +122,13 @@ const companyFilter = document.getElementById('companyFilter');
         searchInput.addEventListener('input', handleSearch);
     }
 
+let allSimsData = [];
+let currentPage = 1;
+const ROWS_PER_PAGE = 100;
+let totalRows = 0;
+let currentFilter = 'All';
+let currentSearchQuery = '';
+
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.body.classList.add("modal-open");
   document.getElementById("manualEntryModal").classList.remove("hidden");
