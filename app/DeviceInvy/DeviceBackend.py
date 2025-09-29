@@ -164,7 +164,7 @@ def manual_entry():
         return redirect(url_for('DeviceInvy.page'))
 
     if not data['DateIn']:
-        flash("Date In is required", "danger")
+        flash("Purchase Date is required", "danger")
         return redirect(url_for('DeviceInvy.page'))
     
     if not data['DeviceModel']:
@@ -256,7 +256,7 @@ def upload_file():
                 return redirect(url_for('DeviceInvy.page'))
             
             if not row['DateIn']:
-                flash(f"Date In is required at row no.: {index + 2}", "danger")
+                flash(f"Purchase Date is required at row no.: {index + 2}", "danger")
                 return redirect(url_for('DeviceInvy.page'))
 
             if not row['Warranty']:

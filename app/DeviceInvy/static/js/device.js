@@ -594,7 +594,7 @@ function editDevice(deviceId) {
     editDateInInput.addEventListener("input", function () {
       if (this.value > today) {
         this.value = today;
-        displayFlashMessage("Future dates are not allowed for Date In.", "warning");
+        displayFlashMessage("Future dates are not allowed for Purchase Date.", "warning");
       }
     });
   }
@@ -637,7 +637,7 @@ function saveDevice(deviceId) {
     return;
   }
   if (dateIn > today) {
-    displayFlashMessage("Future dates are not allowed for Date In.", "warning");
+    displayFlashMessage("Future dates are not allowed for Purchase Date.", "warning");
     return;
   }
   if (packageValue === "Package" && tenureValue.trim() === "") {
