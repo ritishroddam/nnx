@@ -410,30 +410,12 @@ function setupDownloadButton() {
             `;
             document.body.appendChild(spinner);
 
-            // Collect only visible rows
-            const visibleRows = Array.from(document.querySelectorAll("#simTable tr"))
-                .filter(row => row.cells.length > 1 && row.style.display !== 'none');
-
-            // Map to correct fields based on your table structure
-            const simsToExport = visibleRows.map(row => ({
-                MobileNumber: row.cells[0].textContent.trim(),
-                SimNumber: row.cells[1].textContent.trim(),
-                IMEI: row.cells[2].textContent.trim(),
-                DateIn: row.cells[3].textContent.trim(),
-                DateOut: row.cells[4].textContent.trim(),
-                Vendor: row.cells[5].textContent.trim(),
-                status: row.cells[6].textContent.trim(),
-                lastEditedBy: row.cells[7].textContent.trim(),
-                lastEditedAt: row.cells[8].textContent.trim()
-            }));
-
-            const response = await fetch("/simInvy/download_excel_filtered", {
-                method: "POST",
+            // ✅ Directly hit backend to get full Excel (no huge JSON post)
+            const response = await fetch("/simInvy/download_excel", {
+                method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
                     "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-                },
-                body: JSON.stringify({ sims: simsToExport })
+                }
             });
 
             document.body.removeChild(spinner);
@@ -447,7 +429,7 @@ function setupDownloadButton() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'Filtered_SIM_Inventory_' + new Date().toISOString().split('T')[0] + '.xlsx';
+            a.download = 'SIM_Inventory_' + new Date().toISOString().split('T')[0] + '.xlsx';
             document.body.appendChild(a);
             a.click();
 
@@ -486,5 +468,35 @@ function setupDownloadButton() {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;
         }
+    });
+}
+
+
+function filterTable(searchTerm) {
+    const tableBody = document.getElementById('simTable');
+    
+    if (!searchTerm) {
+        originalTableRows.forEach(row => {
+            row.style.display = '';
+        });
+        return;
+    }
+
+    originalTableRows.forEach(row => {
+        if (row.cells.length < 3) {
+            return;
+        }
+        
+        const mobile = row.cells[0].textContent.trim().toLowerCase();
+        const sim = row.cells[1].textContent.trim().toLowerCase();
+        const imei = row.cells[2].textContent.trim().toLowerCase();
+        
+        const matches = (
+            mobile.includes(searchTerm) ||
+            sim.includes(searchTerm) ||
+            imei.includes(searchTerm)
+        );
+        
+        row.style.display = matches ? '' : 'none';
     });
 }
