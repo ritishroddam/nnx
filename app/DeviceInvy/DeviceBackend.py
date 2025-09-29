@@ -353,9 +353,14 @@ def download_excel():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
-        vehicle = VehicleData[device['IMEI']]
-        device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
-        device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+        vehicle = VehicleData[device['IMEI']] if VehicleData[device['IMEI']] else None
+        if vehicle:
+            device['LicensePlateNumber'] = vehicle['LicensePlateNumber']
+            device['CompanyName'] = vehicle['CompanyName']
+        else:
+            device['LicensePlateNumber'] = None
+            device['CompanyName'] = None
+            
 
     if not devices:
         return jsonify({"error": "No data available"}), 404
