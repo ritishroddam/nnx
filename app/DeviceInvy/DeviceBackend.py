@@ -353,7 +353,10 @@ def download_excel():
     VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
     
     for device in devices:
-        vehicle = VehicleData[device['IMEI']] if VehicleData[device['IMEI']] else None
+        try:
+            vehicle = VehicleData[device['IMEI']] 
+        except: 
+            vehicle = None
         if vehicle:
             device['LicensePlateNumber'] = vehicle['LicensePlateNumber']
             device['CompanyName'] = vehicle['CompanyName']
