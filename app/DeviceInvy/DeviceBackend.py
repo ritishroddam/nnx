@@ -118,10 +118,7 @@ def search_devices():
             ]
         }
         
-        devices = list(collection.find(query, {"_id": 1, "IMEI": 1, "GLNumber": 1, "DeviceModel": 1, 
-                                             "DeviceMake": 1, "DateIn": 1, "Warranty": 1, 
-                                             "SentBy": 1, "OutwardTo": 1, "Package": 1, 
-                                             "Tenure": 1, "Status": 1}))
+        devices = list(collection.find(query))
         
         if not devices:
             return jsonify([])
@@ -327,18 +324,7 @@ def upload_file():
 @jwt_required()
 def download_excel():
     projection = {
-        "_id": 0, 
-        "IMEI": 1,
-        "GLNumber": 1,
-        "DeviceModel": 1,
-        "DeviceMake": 1,
-        "DateIn": 1,
-        "Warranty": 1,
-        "SentBy": 1,
-        "OutwardTo": 1,
-        "Package": 1,
-        "Tenure": 1,
-        "Status": 1
+        "_id": 0,
     }
     
     devices = list(collection.find({}, projection))
@@ -387,7 +373,6 @@ def download_excel():
         'DeviceMake',
         'Purchase Date',
         'Warranty',
-        'SentBy',
         'Outward/Inward Date',
         'Package',
         'Tenure',
@@ -437,7 +422,6 @@ def edit_device(device_id):
                 "DeviceMake": updated_data.get("DeviceMake"),
                 "DateIn": updated_data.get("DateIn"),
                 "Warranty": updated_data.get("Warranty"),
-                "SentBy": updated_data.get("SentBy"),
                 "OutwardTo": updated_data.get("OutwardTo"),
                 "Package": package_type,
                 "Tenure": tenure,
