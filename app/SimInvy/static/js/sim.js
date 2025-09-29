@@ -313,11 +313,9 @@ function editSim(simId) {
   const row = document.querySelector(`tr[data-id='${simId}']`);
   if (!row) return;
 
-  // Prevent multiple edits at once
   if (row.classList.contains('editing')) return;
   row.classList.add('editing');
 
-  // Get current values
   const mobile = row.cells[0].innerText;
   const simNumber = row.cells[1].innerText;
   const imei = row.cells[2].innerText;
@@ -326,18 +324,22 @@ function editSim(simId) {
   const vendor = row.cells[5].innerText;
   const status = row.cells[6].innerText;
 
-  // Status options
   const statusOptions = [
     "New Stock", "In Use", "Available", "Scrap", "Safe Custody", "Suspended"
   ];
 
-  // Render editable fields
+  const vendorOptions = ["Airtel", "Vodafone", "BSNL", "Jio"];
+
   row.cells[0].innerHTML = `<input type="text" value="${mobile}" />`;
   row.cells[1].innerHTML = `<input type="text" value="${simNumber}" />`;
   row.cells[2].innerHTML = `<input type="text" value="${imei}" />`;
   row.cells[3].innerHTML = `<input type="date" value="${dateIn}" />`;
   row.cells[4].innerHTML = `<input type="date" value="${dateOut}" />`;
-  row.cells[5].innerHTML = `<input type="text" value="${vendor}" />`;
+  row.cells[5].innerHTML = `
+    <select>
+      ${vendorOptions.map(opt => `<option value="${opt}" ${opt === vendor ? "selected" : ""}>${opt}</option>`).join("")}
+    </select>
+  `;
   row.cells[6].innerHTML = `
     <select>
       ${statusOptions.map(opt => `<option value="${opt}" ${opt === status ? "selected" : ""}>${opt}</option>`).join("")}
@@ -360,7 +362,7 @@ function saveSim(simId) {
   const imei = row.cells[2].querySelector("input").value.trim();
   const dateIn = row.cells[3].querySelector("input").value;
   const dateOut = row.cells[4].querySelector("input").value;
-  const vendor = row.cells[5].querySelector("input").value.trim();
+  const vendor = row.cells[5].querySelector("select").value;
   const status = row.cells[6].querySelector("select").value;
 
   // Optionally, add validation here
