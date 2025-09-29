@@ -409,6 +409,8 @@ function editSim(simId) {
             <select id="editVendor">
               <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
               <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
+              <option value="BSNL" ${updatedData.Vendor === "BSNL" ? "selected" : ""}>BSNL</option>
+              <option value="Jio" ${updatedData.Vendor === "Jio" ? "selected" : ""}>Jio</option>
             </select>
           `;
           originalTableRows[index].cells[6].innerText = updatedData.status;
