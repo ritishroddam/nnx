@@ -37,8 +37,6 @@ def page():
     for sim in sims:
         if sim['MobileNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
-            # Remove this line to allow manual status changes:
-            # sim['status'] = 'Allocated'
             sim['isActive'] = True
         else:
             sim.setdefault('status', 'Available')
@@ -162,12 +160,12 @@ def manual_entry():
     if len(data['MobileNumber']) not in [10, 11, 12, 13, 14, 15]:
         flash("The lenght of Mobile Number must be 13 or 10", "danger")
 
-        if len(data['SimNumber']) != 20:
-            flash("The lenght of SIM Number must be 20", "danger")
+        if len(data['SimNumber']) not in [19, 20]:
+            flash("The lenght of SIM Number must be 19 or 20", "danger")
 
         return redirect(url_for('SimInvy.page'))
 
-    if  len(data['SimNumber']) != 20:
+    if  len(data['SimNumber']) not in [19, 20]:
         flash("The lenght of SIM Number must be 20", "danger")
         return redirect(url_for('SimInvy.page'))
 
