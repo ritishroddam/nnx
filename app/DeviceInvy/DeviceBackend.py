@@ -183,9 +183,15 @@ def manual_entry():
             flash("Tenure is required when Package is selected for Package Type")
             return redirect(url_for('DeviceInvy.page'))
         
+    status = data.get('Status', 'New Stock')
+    if status in ['New Stock', 'Available']:
+        data['Package'] = 'None'
+        data['Tenure'] = None 
     
     if not data['Status']:
         data['Status'] = 'New Stock'
+        data['Package'] = 'None'
+        data['Tenure'] = None
 
     # Only check for duplicate IMEI always, and duplicate GLNumber only if provided
     if collection.find_one({"IMEI": data['IMEI']}):

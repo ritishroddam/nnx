@@ -350,6 +350,20 @@ function updateStatusCounts(devicesData = null) {
   document.getElementById("outrateCount").textContent = outrateCount;
 }
 
+document.getElementById("Status").addEventListener("change", function() {
+  const status = this.value;
+  const packageSelect = document.getElementById("Package");
+  const tenureContainer = document.getElementById("TenureContainer");
+  const tenureInput = document.getElementById("Tenure");
+  
+  if (status === 'New Stock' || status === 'Available') {
+    packageSelect.value = 'None';
+    tenureContainer.classList.add("hidden");
+    tenureInput.removeAttribute("required");
+    tenureInput.value = '';
+  }
+});
+
 document.getElementById("Package").addEventListener("change", function () {
   var tenureContainer = document.getElementById("TenureContainer");
   var tenureInput = document.getElementById("Tenure");
@@ -359,6 +373,7 @@ document.getElementById("Package").addEventListener("change", function () {
   } else {
     tenureContainer.classList.add("hidden");
     tenureInput.removeAttribute("required");
+    tenureInput.value = '';
   }
 });
 
@@ -513,11 +528,9 @@ function editDevice(deviceId) {
   const packageValue = row.cells[9].innerText;
   const tenureValue = row.cells[10].innerText;
   const status = row.cells[11].innerText.trim();
-  // Hide Last Edited By and Last Edited Date columns (12, 13)
   row.cells[12].style.display = 'none';
   row.cells[13].style.display = 'none';
 
-  // Hide the corresponding table headers
   const table = row.closest('table');
   const thead = table.querySelector('thead tr');
   if (thead && thead.children[12] && thead.children[13]) {
@@ -534,6 +547,7 @@ function editDevice(deviceId) {
   row.cells[8].innerHTML = `<input type="date" value="${outwardTo}" />`;
   row.cells[9].innerHTML = `
     <select id="editPackage">
+      <option value="None" ${packageValue === "None" ? "selected" : ""}>None</option>
       <option value="Rental" ${packageValue === "Rental" ? "selected" : ""}>Rental</option>
       <option value="Package" ${packageValue === "Package" ? "selected" : ""}>Package</option>
       <option value="Outrate" ${packageValue === "Outrate" ? "selected" : ""}>Outrate</option>
@@ -554,6 +568,22 @@ function editDevice(deviceId) {
   `;
   document.getElementById("editPackage").addEventListener("change", function () {
     document.getElementById("editTenure").disabled = this.value !== "Package";
+    if (this.value !== "Package") {
+      document.getElementById("editTenure").value = '';
+    }
+  });
+
+    document.getElementById("editStatus").addEventListener("change", function() {
+    const status = this.value;
+    const packageSelect = document.getElementById("editPackage");
+    const tenureInput = document.getElementById("editTenure");
+    
+    if (status === 'New Stock' || status === 'Available') {
+      // Auto-set Package to "None"
+      packageSelect.value = 'None';
+      tenureInput.disabled = true;
+      tenureInput.value = '';
+    }
   });
 
   // Set max date for Date In input to today
