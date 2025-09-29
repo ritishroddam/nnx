@@ -310,73 +310,99 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function editSim(simId) {
-  const row = originalTableRows.find(r => r.getAttribute('data-id') === simId);
+  const row = document.querySelector(`tr[data-id='${simId}']`);
   if (!row) return;
 
-  document.getElementById("editMobileNumber").value = row.cells[0].innerText.trim();
-  document.getElementById("editSimNumber").value = row.cells[1].innerText.trim();
-  document.getElementById("editImei").value = row.cells[2].innerText.trim();
-  document.getElementById("editDateIn").value = row.cells[3].innerText.trim();
-  document.getElementById("editDateOut").value = row.cells[4].innerText.trim();
-  document.getElementById("editVendor").value = row.cells[5].innerText.trim();
-  document.getElementById("editStatus").value = row.cells[6].innerText.trim();
-  document.getElementById("editLastEditedBy").value = row.cells[7].innerText.trim();
-  document.getElementById("editLastEditedAt").value = row.cells[8].innerText.trim();
+  // Prevent multiple edits at once
+  if (row.classList.contains('editing')) return;
+  row.classList.add('editing');
 
-  document.getElementById("editSimModal").classList.remove("hidden");
+  // Get current values
+  const mobile = row.cells[0].innerText;
+  const simNumber = row.cells[1].innerText;
+  const imei = row.cells[2].innerText;
+  const dateIn = row.cells[3].innerText;
+  const dateOut = row.cells[4].innerText;
+  const vendor = row.cells[5].innerText;
+  const status = row.cells[6].innerText;
 
-  document.getElementById("saveEditBtn").onclick = async function() {
-    const updatedData = {
-      _id: simId,
-      MobileNumber: document.getElementById("editMobileNumber").value.trim(),
-      SimNumber: document.getElementById("editSimNumber").value.trim(),
-      IMEI: document.getElementById("editImei").value.trim(),
-      DateIn: document.getElementById("editDateIn").value.trim(),
-      DateOut: document.getElementById("editDateOut").value.trim(),
-      Vendor: document.getElementById("editVendor").value.trim(),
-      status: document.getElementById("editStatus").value.trim(),
-      lastEditedBy: document.getElementById("editLastEditedBy").value.trim(),
-      lastEditedAt: document.getElementById("editLastEditedAt").value.trim()
-    };
+  // Status options
+  const statusOptions = [
+    "New Stock", "In Use", "Available", "Scrap", "Safe Custody", "Suspended"
+  ];
 
-    try {
-      const response = await fetch('/simInvy/update_sim', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-        body: JSON.stringify(updatedData)
-      });
-      const result = await response.json();
-      if (result.success) {
-        const index = originalTableRows.findIndex(r => r.getAttribute('data-id') === simId);
-        if (index !== -1) {
-          originalTableRows[index].cells[0].innerText = updatedData.MobileNumber;
-          originalTableRows[index].cells[1].innerText = updatedData.SimNumber;
-          originalTableRows[index].cells[2].innerText = updatedData.IMEI;
-          originalTableRows[index].cells[3].innerText = updatedData.DateIn;
-          originalTableRows[index].cells[4].innerText = updatedData.DateOut;
-          originalTableRows[index].cells[5].innerHTML = `
-            <select id="editVendor">
-              <option value="Airtel" ${updatedData.Vendor === "Airtel" ? "selected" : ""}>Airtel</option>
-              <option value="Vodafone" ${updatedData.Vendor === "Vodafone" ? "selected" : ""}>Vodafone</option>
-            </select>
-          `;
-          originalTableRows[index].cells[6].innerText = updatedData.status;
-          originalTableRows[index].cells[7].innerText = updatedData.lastEditedBy;
-          originalTableRows[index].cells[8].innerText = updatedData.lastEditedAt;
-        }
+  // Render editable fields
+  row.cells[0].innerHTML = `<input type="text" value="${mobile}" />`;
+  row.cells[1].innerHTML = `<input type="text" value="${simNumber}" />`;
+  row.cells[2].innerHTML = `<input type="text" value="${imei}" />`;
+  row.cells[3].innerHTML = `<input type="date" value="${dateIn}" />`;
+  row.cells[4].innerHTML = `<input type="date" value="${dateOut}" />`;
+  row.cells[5].innerHTML = `<input type="text" value="${vendor}" />`;
+  row.cells[6].innerHTML = `
+    <select>
+      ${statusOptions.map(opt => `<option value="${opt}" ${opt === status ? "selected" : ""}>${opt}</option>`).join("")}
+    </select>
+  `;
 
-        document.getElementById("editSimModal").classList.add("hidden");
-      } else {
-        alert("Failed to update SIM data: " + (result.message || "Unknown error"));
-      }
-    } catch (err) {
-      alert("Error updating SIM data: " + err.message);
-    }
-  };
+  // Actions: Save and Cancel
+  row.cells[9].innerHTML = `
+    <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
+    <button class="icon-btn cancel-icon" onclick="cancelEditSim('${simId}')">❌</button>
+  `;
 }
+
+function saveSim(simId) {
+  const row = document.querySelector(`tr[data-id='${simId}']`);
+  if (!row) return;
+
+  const mobile = row.cells[0].querySelector("input").value.trim();
+  const simNumber = row.cells[1].querySelector("input").value.trim();
+  const imei = row.cells[2].querySelector("input").value.trim();
+  const dateIn = row.cells[3].querySelector("input").value;
+  const dateOut = row.cells[4].querySelector("input").value;
+  const vendor = row.cells[5].querySelector("input").value.trim();
+  const status = row.cells[6].querySelector("select").value;
+
+  // Optionally, add validation here
+
+  const updatedData = {
+    MobileNumber: mobile,
+    SimNumber: simNumber,
+    IMEI: imei,
+    DateIn: dateIn,
+    DateOut: dateOut,
+    Vendor: vendor,
+    status: status
+  };
+
+  fetch(`/simInvy/edit_sim/${simId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+    },
+    body: JSON.stringify(updatedData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Optionally update the row inline, or just reload:
+        location.reload();
+      } else {
+        displayFlashMessage(data.message || "Failed to save changes.", "danger");
+        console.error("Error updating SIM:", data.message);
+      }
+    })
+    .catch((error) => {
+      displayFlashMessage("An error occurred. Please try again.", "danger");
+      console.error("Error updating SIM:", error);
+    });
+}
+
+function cancelEditSim(simId) {
+  location.reload();
+}
+
 
 function setupDownloadButton() {
     const downloadBtn = document.getElementById("downloadExcelBtn");
