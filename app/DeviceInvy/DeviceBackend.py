@@ -354,8 +354,8 @@ def download_excel():
     
     for device in devices:
         try:
-            vehicle = VehicleData[device['IMEI']] 
-        except: 
+            vehicle = VehicleData[device['IMEI']]
+        except:
             vehicle = None
         if vehicle:
             device['LicensePlateNumber'] = vehicle['LicensePlateNumber']
