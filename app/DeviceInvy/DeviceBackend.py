@@ -357,16 +357,27 @@ def download_excel():
     df = pd.DataFrame(devices)
     
     if 'GLNumber' not in df.columns:
-        df['GLNumber'] = ''
+        df['SLNumber'] = ''
+    else:
+        df = df.rename(columns={
+            'GLNumber': 'SLNumber',
+        })
     
     df = df.rename(columns={
         'DateIn': 'Purchase Date',
-        'OutwardTo': 'Outward/Inward Date'
+        'OutwardTo': 'Outward/Inward Date',
+        'Package': 'Package Type'
     })
-
+    
+    if 'LastEditedDate' in df.columns:
+        df['LastEditedDate'] = df['LastEditedDate'].apply(
+            lambda d: d.astimezone(timezone(timedelta(hours=5, minutes=30))).strftime('%d-%m-%Y %I:%M %p')
+            if pd.notnull(d) and hasattr(d, 'astimezone') else ''
+        )
+        
     column_order = [
         'IMEI',
-        'GLNumber',
+        'SLNumber',
         'LicensePlateNumber',
         'CompanyName',
         'DeviceModel',
@@ -374,9 +385,11 @@ def download_excel():
         'Purchase Date',
         'Warranty',
         'Outward/Inward Date',
-        'Package',
+        'Package Type',
         'Tenure',
-        'Status'
+        'Status',
+        'LastEditedBy',
+        'LastEditedDate',
     ]
 
     df = df[column_order]
