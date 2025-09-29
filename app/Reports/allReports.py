@@ -600,7 +600,7 @@ def view_report_preview():
             "data": ordered_data
         }, ensure_ascii=False)
         
-        save_and_return_report(json_str, report_type, vehicle_number)
+        save_and_return_report(ordered_data, report_type, vehicle_number)
 
         return Response(json_str, mimetype='application/json')
 
