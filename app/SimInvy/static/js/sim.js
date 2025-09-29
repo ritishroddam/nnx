@@ -377,3 +377,97 @@ function editSim(simId) {
     }
   };
 }
+
+function setupDownloadButton() {
+  document.getElementById("downloadExcelBtn").addEventListener("click", function() {
+    downloadFilteredExcel();
+  });
+}
+
+async function downloadFilteredExcel() {
+  try {
+    // Get current filtered data
+    const statusFilter = document.getElementById('statusFilter').value;
+    const searchQuery = document.getElementById('simSearch').value.trim();
+    
+    let sims = [];
+    
+    // If there's a search query, use search results
+    if (searchQuery) {
+      const response = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(searchQuery)}`, {
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        }
+      });
+      sims = await response.json();
+    } 
+    // If a specific status filter is selected, use filtered results
+    else if (statusFilter !== 'All') {
+      const response = await fetch(`/simInvy/get_sims_by_status/${statusFilter}`, {
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        }
+      });
+      sims = await response.json();
+    }
+    // Otherwise, download all SIMs
+    else {
+      const response = await fetch('/simInvy/download_excel', {
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        }
+      });
+      
+      if (response.ok) {
+        // For the direct download endpoint, we don't need to process data
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'SIM_Inventory.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        return;
+      } else {
+        throw new Error('Failed to download Excel file');
+      }
+    }
+    
+    // For filtered data, use the filtered download endpoint
+    if (sims.length > 0) {
+      const response = await fetch('/simInvy/download_excel_filtered', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({ sims: sims })
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'Filtered_SIMs.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error('Failed to download filtered Excel file');
+      }
+    } else {
+      alert('No data to download');
+    }
+    
+  } catch (error) {
+    console.error('Download error:', error);
+    alert('Error downloading Excel file: ' + error.message);
+  }
+}
+
