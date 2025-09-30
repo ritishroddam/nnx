@@ -140,6 +140,16 @@ def upload_customers():
                 flash(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}", "danger")
                 continue
             
+            email = record.get('Email Address', "")
+            if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+                flash(f"Row {row_num}: Invalid Email Address format.", "danger")
+                continue
+            
+            phone = record.get('Phone Number', "")
+            if not phone.isdigit() or len(phone) != 10:
+                flash(f"Row {row_num}: Phone Number must be 10 digits.", "danger")
+                continue  
+            
             if all(record.get(field, "") != "" for field in required_fields):
                 customer = {
                     'Company Name': record.get('Company Name', ""),
