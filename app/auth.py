@@ -652,5 +652,8 @@ def logout():
 
 @auth_bp.route('/unauthorized')
 def unauthorized():
+    response = redirect(url_for('auth.login'))
+    unset_jwt_cookies(response)
+    unset_refresh_cookies(response)
     flash('To access this page please login or login with an account that has access to the page', 'danger')
-    return render_template('login.html'), 403
+    return response
