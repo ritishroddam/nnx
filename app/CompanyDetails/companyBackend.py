@@ -33,7 +33,7 @@ def manual_entry():
     
     if companyName:
         isCompany = customers_collection.find_one({
-            'Company Name':  {'$regex': f'^{re.escape(companyName)}$'}, '$options': 'i'
+            'Company Name':  {'$regex': f'^{re.escape(str(companyName))}$', '$options': 'i'}
         })
         if isCompany:
             flash(f"Company {companyName} already exists!")
@@ -126,7 +126,7 @@ def upload_customers():
             companyName = record['Company Name']
             if companyName:
                 isCompany = customers_collection.find_one({
-                    'Company Name':  {'$regex': f'^{re.escape(companyName)}$'}, '$options': 'i'
+                    'Company Name':  {'$regex': f'^{re.escape(str(companyName))}$', '$options': 'i'}
                 })
                 if isCompany:
                     flash(f"Row {row_num}: Company {companyName} already exists!")
