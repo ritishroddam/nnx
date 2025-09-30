@@ -110,3 +110,42 @@
 #map {
     height: 100%;
 }
+
+/* Saved Geofence List */
+#geofenceList {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+#geofenceList li {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.geofence-item-name {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.geofence-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.geofence-actions button {
+    border: none;
+    background: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.geofence-actions button:hover {
+    text-decoration: underline;
+}

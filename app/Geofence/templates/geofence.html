@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="{{ url_for('Geofence.static', filename='css/style.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <script defer src="{{ url_for('Geofence.static', filename='js/geofence.js') }}"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+<script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
 {% endblock %}
 
 {% block h1 %}
@@ -67,6 +69,10 @@ Create Geofence
             <!-- Confirm -->
             <button type="submit" class="confirm-btn">Confirm</button>
         </form>
+
+        <!-- Saved Geofences -->
+        <h3 class="section-title">Saved Geofences</h3>
+        <ul id="geofenceList"></ul>
     </div>
 
     <!-- Map -->
