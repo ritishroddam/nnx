@@ -79,11 +79,6 @@ const ROWS_PER_PAGE = 100;
 let totalRows = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
-  $("#imeiSearch").selectize({
-    placeholder: "Select devices",
-    searchField: "text",
-    create: false,
-  });
   const dateInInput = document.getElementById("DateIn");
   const today = new Date().toISOString().split("T")[0];
   dateInInput.setAttribute("max", today);
