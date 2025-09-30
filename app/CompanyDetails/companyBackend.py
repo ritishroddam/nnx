@@ -31,6 +31,14 @@ def manual_entry():
     companyLogo = request.files.get('CompanyLogo')
     companyName = request.form.get('CompanyName')
     
+    if companyName:
+        isCompany = customers_collection.find_one({
+            'Company Name':  {'$regex': f'^{re.escape(str(companyName))}$', '$options': 'i'}
+        })
+        if isCompany:
+            flash(f"Company {companyName} already exists!")
+            return redirect(url_for('CompanyDetails.page'))
+    
     if companyLogo:
         logo_id = fs.put(
             companyLogo.stream,
@@ -115,15 +123,23 @@ def upload_customers():
 
         valid_records = []
         for record in records:
+            companyName = record['Company Name']
+            if companyName:
+                isCompany = customers_collection.find_one({
+                    'Company Name':  {'$regex': f'^{re.escape(str(companyName))}$', '$options': 'i'}
+                })
+                if isCompany:
+                    flash(f"Row {row_num}: Company {companyName} already exists!")
+                    continue
+            
             record['companyLogo'] = logo_id
             # Ensure required fields are present and not empty
             row_num = records.index(record) + 2  # +2 for header and 0-indexing
             missing_fields = [field for field in required_fields if not record.get(field, "")]
             if missing_fields:
                 flash(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}", "danger")
-            missing_fields = [field for field in required_fields if not record.get(field, "")]
-            if missing_fields:
-                flash(f"Missing required fields in record: {', '.join(missing_fields)}", "danger")
+                continue
+            
             if all(record.get(field, "") != "" for field in required_fields):
                 customer = {
                     'Company Name': record.get('Company Name', ""),
@@ -151,6 +167,7 @@ def upload_customers():
             customers_collection.insert_many(valid_records)
             flash('Customers uploaded successfully!', 'success')
     except Exception as e:
+        print(e)
         flash(f'Error: {str(e)}', 'danger')
 
     return redirect(url_for('CompanyDetails.page'))
