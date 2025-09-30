@@ -1,0 +1,105 @@
+{%extends "base.html"%}
+
+{% block head %}
+<title>Geofence</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="{{ url_for('Geofence.static', filename='css/style.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+<script defer src="{{ url_for('Geofence.static', filename='js/geofence.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}
+Create Geofence
+{% endblock %}
+
+{% block block_container %}
+<div class="map-container">
+    <div id="map"></div>
+    <div class="controls">
+        <button id="drawPolygonBtn" class="btn primary">Draw Polygon</button>
+        <button id="drawCircleBtn" class="btn primary">Draw Circle</button>
+        <button id="clearShapesBtn" class="btn danger">Clear Shapes</button>
+        <button id="saveGeofenceBtn" class="btn success">Save Geofence</button>
+    </div>
+</div>
+<div id="geofenceList" class="geofence-list">
+    <h3>Saved Geofences</h3>
+    <ul id="geofencesUl">
+        <!-- Geofence items will be populated here -->
+    </ul>
+</div>
+<!-- Modal Popup for Geofence Details -->
+<div class="geofence-modal hidden" id="geofenceModal">
+    <div class="geofence-modal-content">
+        <span class="geofence-close-btn" id="closeGeofenceModal">&times;</span>
+        <h2 style="margin-bottom: 10px;">Add Geofence</h2>
+        <form id="geofenceForm" action="{{ url_for('Geofence.page') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="shapeData" id="shapeData" />
+            <div class="form-container">
+                <!-- Enter Geofence Name Section -->
+                <div class="section">
+                    <div class="section-title">Enter Geofence Name</div>
+                    <div class="form-group">
+                        <input type="text" name="GeofenceName" id="GeofenceName" placeholder="Enter geofence name" required />
+                        <div id="geofenceNameError" class="error hidden">Geofence Name is required.</div>
+                    </div>
+                </div>
+                
+                <!-- Enter Location Section -->
+                <div class="section">
+                    <div class="section-title">Enter Location</div>
+                    <div class="location-type">
+                        <div class="location-option">
+                            <input type="radio" id="circleType" name="locationType" value="circle" checked>
+                            <label for="circleType">Circle</label>
+                        </div>
+                        <div class="location-option">
+                            <input type="radio" id="polygonType" name="locationType" value="polygon">
+                            <label for="polygonType">Polygon</label>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <p>Draw the geofence area on the map</p>
+                    </div>
+                </div>
+                
+                <!-- Alert Settings Section -->
+                <div class="section">
+                    <div class="section-title">Alert Settings</div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enterAlert" name="alertType" value="enter">
+                        <label for="enterAlert">Alert when vehicle enters geofence</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="leaveAlert" name="alertType" value="leave">
+                        <label for="leaveAlert">Alert when vehicle leaves geofence</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="dwellAlert" name="alertType" value="dwell">
+                        <label for="dwellAlert">Alert when vehicle dwells within geofence</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="cameraOff" name="cameraOff">
+                        <label for="cameraOff">Turn off camera while inside geofence</label>
+                    </div>
+                </div>
+                
+                <!-- Confirm Section -->
+                <div class="confirm-section">
+                    <div class="section-title">Confirm</div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="free-tag">FREE</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn success">Save Geofence</button>
+                        <button type="button" id="cancelGeofenceBtn" class="btn danger">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="errorBox" class="error-box hidden"></div>
+{% endblock %}
