@@ -655,6 +655,11 @@ tr:hover {
 .counter .label {
   font-size: 14px;
   text-transform: uppercase;
+  color: #555;
+}
+
+.dark-mode .counter .label {
+  color: #ccc; 
 }
 
 .counter.new-stock {
