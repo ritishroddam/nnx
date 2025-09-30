@@ -145,7 +145,7 @@ def upload_customers():
                 flash(f"Row {row_num}: Invalid Email Address format.", "danger")
                 continue
             
-            phone = int(record.get('Phone Number', ""))
+            phone = str(record.get('Phone Number', ""))
             if not phone.isdigit() or len(phone) != 10:
                 flash(f"Row {row_num}: Phone Number must be 10 digits.", "danger")
                 continue  
