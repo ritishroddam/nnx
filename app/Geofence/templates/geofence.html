@@ -23,26 +23,21 @@ Create Geofence
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="shapeData" id="shapeData" />
 
-            <!-- Geofence Name -->
             <div class="form-group">
                 <input type="text" name="GeofenceName" id="GeofenceName" placeholder="Enter Geofence Name" required>
             </div>
 
-            <!-- Location -->
             <div class="form-group">
                 <input type="text" name="Location" id="Location" placeholder="Enter Location">
             </div>
 
-            <!-- Circle / Polygon Buttons -->
             <div class="btn-toggle">
                 <button type="button" id="circleBtn" class="toggle-btn active">Circle</button>
                 <button type="button" id="polygonBtn" class="toggle-btn">Polygon</button>
             </div>
 
-            <!-- Slider -->
             <input type="range" id="radiusSlider" min="100" max="5000" value="1000">
 
-            <!-- Alert Settings -->
             <h3 class="section-title">Alert Settings</h3>
             <label class="switch-label">
                 <input type="checkbox" id="enterAlert" name="alertType" value="enter">
@@ -55,16 +50,13 @@ Create Geofence
                 Alert when vehicle leaves geofence
             </label>
 
-            <!-- Confirm -->
             <button type="submit" class="confirm-btn">Confirm</button>
         </form>
 
-        <!-- Saved Geofences -->
         <h3 class="section-title">Saved Geofences</h3>
         <ul id="geofenceList"></ul>
     </div>
 
-    <!-- Map -->
     <div class="map-container">
         <div id="map"></div>
     </div>

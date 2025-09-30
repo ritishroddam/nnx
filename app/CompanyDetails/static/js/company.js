@@ -239,6 +239,11 @@ async function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  $("#companyFilter").selectize({
+    placeholder: "Select vehicles...",
+    searchField: "text",
+    create: false,
+  });
   await fetchAndRenderCustomers(1);
 });
 
