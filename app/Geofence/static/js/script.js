@@ -1,55 +1,47 @@
 let map;
-let drawnCircle = null;
-let drawnPolygon = null;
-let drawMode = "circle";
-let polygonDrawer = null;
-let geofences = []; // store saved geofences in memory
+let drawingManager;
+let drawnShape = null;
+let geofences = [];
 let editIndex = null;
 
-// Initialize Map
 function initMap() {
-    map = L.map('map').setView([20.5937, 78.9629], 5);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    setupControls();
-}
-
-// Setup Controls
-function setupControls() {
-    const circleBtn = document.getElementById("circleBtn");
-    const polygonBtn = document.getElementById("polygonBtn");
-    const slider = document.getElementById("radiusSlider");
-
-    circleBtn.addEventListener("click", () => {
-        drawMode = "circle";
-        circleBtn.classList.add("active");
-        polygonBtn.classList.remove("active");
-        clearShapes();
-        enableCircleDraw();
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 20.5937, lng: 78.9629 },
+        zoom: 5,
     });
 
-    polygonBtn.addEventListener("click", () => {
-        drawMode = "polygon";
-        polygonBtn.classList.add("active");
-        circleBtn.classList.remove("active");
-        clearShapes();
-        enablePolygonDraw();
+    drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: null,
+        drawingControl: false,
+        circleOptions: { fillColor: "#FF0000", fillOpacity: 0.35, strokeWeight: 2 },
+        polygonOptions: { fillColor: "#FF0000", fillOpacity: 0.35, strokeWeight: 2 },
     });
 
-    slider.addEventListener("input", () => {
-        if (drawMode === "circle" && drawnCircle) {
-            drawnCircle.setRadius(parseInt(slider.value));
-            updateShapeData();
-        }
+    drawingManager.setMap(map);
+
+    // Circle button
+    document.getElementById("circleBtn").addEventListener("click", () => {
+        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.CIRCLE);
     });
 
+    // Polygon button
+    document.getElementById("polygonBtn").addEventListener("click", () => {
+        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+    });
+
+    // Listen for completed drawings
+    google.maps.event.addListener(drawingManager, "overlaycomplete", (event) => {
+        if (drawnShape) drawnShape.setMap(null); // remove old shape
+        drawnShape = event.overlay;
+        drawingManager.setDrawingMode(null);
+        updateShapeData();
+    });
+
+    // Save form
     document.getElementById("geofenceForm").addEventListener("submit", (e) => {
         e.preventDefault();
         if (!document.getElementById("shapeData").value) {
-            alert("Please draw a geofence on the map first.");
+            alert("Please draw a geofence first");
             return;
         }
 
@@ -57,86 +49,54 @@ function setupControls() {
         const location = document.getElementById("Location").value;
         const data = JSON.parse(document.getElementById("shapeData").value);
 
-        const geofenceObj = { name, location, data };
+        const gf = { name, location, data };
 
         if (editIndex !== null) {
-            geofences[editIndex] = geofenceObj;
+            geofences[editIndex] = gf;
             editIndex = null;
         } else {
-            geofences.push(geofenceObj);
+            geofences.push(gf);
         }
 
         renderGeofenceList();
-        clearShapes();
+        clearShape();
         document.getElementById("geofenceForm").reset();
         document.getElementById("shapeData").value = "";
     });
 }
 
-// Enable Circle Drawing
-function enableCircleDraw() {
-    map.once("click", (e) => {
-        const radius = parseInt(document.getElementById("radiusSlider").value);
-        drawnCircle = L.circle(e.latlng, { radius, color: "red" }).addTo(map);
-        updateShapeData();
-    });
-}
-
-// Enable Polygon Drawing
-function enablePolygonDraw() {
-    if (polygonDrawer) map.removeControl(polygonDrawer);
-
-    polygonDrawer = new L.Draw.Polygon(map);
-    polygonDrawer.enable();
-
-    map.on(L.Draw.Event.CREATED, function (event) {
-        clearShapes();
-        drawnPolygon = event.layer;
-        map.addLayer(drawnPolygon);
-        updateShapeData();
-    });
-}
-
-// Clear Shapes
-function clearShapes() {
-    if (drawnCircle) {
-        map.removeLayer(drawnCircle);
-        drawnCircle = null;
-    }
-    if (drawnPolygon) {
-        map.removeLayer(drawnPolygon);
-        drawnPolygon = null;
-    }
-    if (polygonDrawer) polygonDrawer.disable();
-    document.getElementById("shapeData").value = "";
-}
-
-// Update Shape Data
+// Convert shape into JSON
 function updateShapeData() {
     let shapeData = {};
-    if (drawnCircle) {
+    if (drawnShape.type === google.maps.drawing.OverlayType.CIRCLE || drawnShape instanceof google.maps.Circle) {
         shapeData = {
             type: "circle",
-            center: drawnCircle.getLatLng(),
-            radius: drawnCircle.getRadius()
+            center: drawnShape.getCenter().toJSON(),
+            radius: drawnShape.getRadius(),
         };
-    } else if (drawnPolygon) {
-        shapeData = {
-            type: "polygon",
-            points: drawnPolygon.getLatLngs()[0]
-        };
+    } else if (drawnShape.type === google.maps.drawing.OverlayType.POLYGON || drawnShape instanceof google.maps.Polygon) {
+        const path = drawnShape.getPath().getArray().map((latLng) => latLng.toJSON());
+        shapeData = { type: "polygon", points: path };
     }
     document.getElementById("shapeData").value = JSON.stringify(shapeData);
 }
 
-// Render Geofence List
+// Clear current drawn shape
+function clearShape() {
+    if (drawnShape) {
+        drawnShape.setMap(null);
+        drawnShape = null;
+    }
+    document.getElementById("shapeData").value = "";
+}
+
+// Render saved geofences list
 function renderGeofenceList() {
     const list = document.getElementById("geofenceList");
     list.innerHTML = "";
 
-    geofences.forEach((gf, index) => {
+    geofences.forEach((gf, i) => {
         const li = document.createElement("li");
-
         const nameSpan = document.createElement("span");
         nameSpan.className = "geofence-item-name";
         nameSpan.textContent = gf.name;
@@ -146,44 +106,53 @@ function renderGeofenceList() {
 
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
-        editBtn.onclick = () => loadGeofence(index);
+        editBtn.onclick = () => loadGeofence(i);
 
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
         delBtn.onclick = () => {
-            geofences.splice(index, 1);
+            geofences.splice(i, 1);
             renderGeofenceList();
+            clearShape();
         };
 
         actions.appendChild(editBtn);
         actions.appendChild(delBtn);
-
         li.appendChild(nameSpan);
         li.appendChild(actions);
         list.appendChild(li);
     });
 }
 
-// Load geofence into form & map
-function loadGeofence(index) {
-    const gf = geofences[index];
-    clearShapes();
+// Load geofence back into map
+function loadGeofence(i) {
+    const gf = geofences[i];
+    clearShape();
 
     document.getElementById("GeofenceName").value = gf.name;
     document.getElementById("Location").value = gf.location;
 
     if (gf.data.type === "circle") {
-        drawnCircle = L.circle(gf.data.center, {
+        drawnShape = new google.maps.Circle({
+            center: gf.data.center,
             radius: gf.data.radius,
-            color: "red"
-        }).addTo(map);
-        document.getElementById("radiusSlider").value = gf.data.radius;
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeWeight: 2,
+            map,
+        });
     } else if (gf.data.type === "polygon") {
-        drawnPolygon = L.polygon(gf.data.points, { color: "red" }).addTo(map);
+        drawnShape = new google.maps.Polygon({
+            paths: gf.data.points,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeWeight: 2,
+            map,
+        });
     }
 
     updateShapeData();
-    editIndex = index;
+    editIndex = i;
 }
 
 document.addEventListener("DOMContentLoaded", initMap);
