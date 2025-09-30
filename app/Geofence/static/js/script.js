@@ -21,7 +21,6 @@ function initMap() {
 
         console.log("Map created successfully");
 
-        // Initialize drawing manager
         drawingManager = new google.maps.drawing.DrawingManager({
             drawingMode: null,
             drawingControl: false,
@@ -49,7 +48,6 @@ function initMap() {
 }
 
 function setupEventListeners() {
-    // Circle button
     const circleBtn = document.getElementById("circleBtn");
     const polygonBtn = document.getElementById("polygonBtn");
     
@@ -69,20 +67,17 @@ function setupEventListeners() {
         });
     }
 
-    // Form submission
     const form = document.getElementById("geofenceForm");
     if (form) {
         form.addEventListener("submit", handleFormSubmit);
     }
 
-    // Listen for completed drawings
     google.maps.event.addListener(drawingManager, "overlaycomplete", (event) => {
         if (drawnShape) drawnShape.setMap(null);
         drawnShape = event.overlay;
         drawingManager.setDrawingMode(null);
         updateShapeData();
         
-        // Make shape editable
         if (drawnShape instanceof google.maps.Circle || drawnShape instanceof google.maps.Polygon) {
             drawnShape.setEditable(true);
             google.maps.event.addListener(drawnShape, 'radius_changed', updateShapeData);
@@ -124,7 +119,6 @@ function handleFormSubmit(e) {
     document.getElementById("shapeData").value = "";
 }
 
-// Convert shape into JSON
 function updateShapeData() {
     if (!drawnShape) return;
     
@@ -146,7 +140,6 @@ function updateShapeData() {
     }
 }
 
-// Clear current drawn shape
 function clearShape() {
     if (drawnShape) {
         drawnShape.setMap(null);
@@ -158,7 +151,6 @@ function clearShape() {
     }
 }
 
-// Render saved geofences list
 function renderGeofenceList() {
     const list = document.getElementById("geofenceList");
     if (!list) return;
@@ -198,7 +190,6 @@ function renderGeofenceList() {
     });
 }
 
-// Load geofence back into map
 function loadGeofence(i) {
     const gf = geofences[i];
     clearShape();
@@ -228,7 +219,6 @@ function loadGeofence(i) {
             });
         }
 
-        // Center map on the shape
         if (gf.data.type === "circle") {
             map.setCenter(gf.data.center);
             map.setZoom(13);
@@ -246,9 +236,7 @@ function loadGeofence(i) {
     }
 }
 
-// Initialize when window loads
 window.onload = function() {
-    // Check if Google Maps API is loaded
     if (typeof google === 'undefined' || !google.maps) {
         console.error("Google Maps API not loaded");
         alert("Google Maps failed to load. Please check your API key and internet connection.");
