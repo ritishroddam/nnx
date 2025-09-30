@@ -355,7 +355,7 @@ th {
   margin-right: 10px;
   white-space: nowrap;
 }
-
+/* 
 .filter-dropdown {
   width: 250px;
   padding: 8px 12px;
@@ -381,7 +381,7 @@ th {
 
 .filter-dropdown:hover {
   border-color: #999;
-}
+} */
 
 .dark-mode .filter-container {
   background-color: #333;

@@ -240,7 +240,7 @@ async function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   $("#companyFilter").selectize({
-    placeholder: "Select vehicles...",
+    placeholder: "Search Companies...",
     searchField: "text",
     create: false,
   });
