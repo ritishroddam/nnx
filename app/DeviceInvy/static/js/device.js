@@ -79,7 +79,7 @@ const ROWS_PER_PAGE = 100;
 let totalRows = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
-  $("#statusFilter").selectize({
+  $("#imeiSearch").selectize({
     placeholder: "Select devices",
     searchField: "text",
     create: false,
