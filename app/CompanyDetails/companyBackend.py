@@ -121,6 +121,7 @@ def upload_customers():
             'Phone Number', 'Company Address'
         ]
 
+        errors = []
         valid_records = []
         for record in records:
             companyName = record['Company Name']
@@ -129,7 +130,7 @@ def upload_customers():
                     'Company Name':  {'$regex': f'^{re.escape(str(companyName))}$', '$options': 'i'}
                 })
                 if isCompany:
-                    flash(f"Row {row_num}: Company {companyName} already exists!")
+                    errors.append(f"Row {row_num}: Company {companyName} already exists!")
                     continue
             
             record['companyLogo'] = logo_id
@@ -137,17 +138,17 @@ def upload_customers():
             row_num = records.index(record) + 2  # +2 for header and 0-indexing
             missing_fields = [field for field in required_fields if not record.get(field, "")]
             if missing_fields:
-                flash(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}", "danger")
+                errors.append(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}")
                 continue
             
             email = record.get('Email Address', "")
             if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
-                flash(f"Row {row_num}: Invalid Email Address format.", "danger")
+                errors.append(f"Row {row_num}: Invalid Email Address format.")
                 continue
             
             phone = str(record.get('Phone Number', ""))
             if not phone.isdigit() or len(phone) != 10:
-                flash(f"Row {row_num}: Phone Number must be 10 digits.", "danger")
+                errors.append(f"Row {row_num}: Phone Number must be 10 digits.")
                 continue  
             
             if all(record.get(field, "") != "" for field in required_fields):
@@ -176,6 +177,12 @@ def upload_customers():
         else:
             customers_collection.insert_many(valid_records)
             flash('Customers uploaded successfully!', 'success')
+        
+        for msg in errors[:10]:
+            flash(msg, 'danger')
+        if len(errors) > 10:
+                flash(f"And {len(errors) - 10} more errors. Please fix and re-upload.", 'danger')
+        
     except Exception as e:
         print(e)
         flash(f'Error: {str(e)}', 'danger')
