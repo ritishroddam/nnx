@@ -83,7 +83,6 @@ function saveCustomer(customerId) {
   const lat = row.cells[5].querySelector("input").value.trim();
   const lng = row.cells[6].querySelector("input").value.trim();
 
-  // Phone number validation
   if (!/^\d{10}$/.test(phone)) {
     displayFlashMessage("Phone Number must be exactly 10 digits.", "danger");
     return;
@@ -227,7 +226,6 @@ async function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 
   container.appendChild(makeBtn("« Prev", Math.max(1, currentPage - 1), currentPage === 1));
 
-  // windowed page numbers
   const windowSize = 5;
   const start = Math.max(1, currentPage - Math.floor(windowSize / 2));
   const end = Math.min(totalPages, start + windowSize - 1);
