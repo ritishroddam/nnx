@@ -1,7 +1,7 @@
 /* Layout */
 .geofence-layout {
     display: flex;
-    height: calc(100vh - 80px); /* adjust if you have navbar */
+    height: 100vh; 
 }
 
 .geofence-panel {
@@ -106,9 +106,14 @@
 /* Map */
 .map-container {
     flex: 1;
+    position: relative;
 }
 #map {
     height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 /* Saved Geofence List */
