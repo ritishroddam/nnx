@@ -167,6 +167,7 @@ def upload_customers():
             customers_collection.insert_many(valid_records)
             flash('Customers uploaded successfully!', 'success')
     except Exception as e:
+        print(e)
         flash(f'Error: {str(e)}', 'danger')
 
     return redirect(url_for('CompanyDetails.page'))
