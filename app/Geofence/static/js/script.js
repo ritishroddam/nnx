@@ -40,8 +40,6 @@ function initMap() {
         });
 
         drawingManager.setMap(map);
-
-        // Set up event listeners
         setupEventListeners();
 
     } catch (error) {
@@ -52,18 +50,30 @@ function initMap() {
 
 function setupEventListeners() {
     // Circle button
-    document.getElementById("circleBtn").addEventListener("click", () => {
-        clearShape();
-        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.CIRCLE);
-        setActiveButton("circleBtn");
-    });
+    const circleBtn = document.getElementById("circleBtn");
+    const polygonBtn = document.getElementById("polygonBtn");
+    
+    if (circleBtn) {
+        circleBtn.addEventListener("click", () => {
+            clearShape();
+            drawingManager.setDrawingMode(google.maps.drawing.OverlayType.CIRCLE);
+            setActiveButton("circleBtn");
+        });
+    }
 
-    // Polygon button
-    document.getElementById("polygonBtn").addEventListener("click", () => {
-        clearShape();
-        drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
-        setActiveButton("polygonBtn");
-    });
+    if (polygonBtn) {
+        polygonBtn.addEventListener("click", () => {
+            clearShape();
+            drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+            setActiveButton("polygonBtn");
+        });
+    }
+
+    // Form submission
+    const form = document.getElementById("geofenceForm");
+    if (form) {
+        form.addEventListener("submit", handleFormSubmit);
+    }
 
     // Listen for completed drawings
     google.maps.event.addListener(drawingManager, "overlaycomplete", (event) => {
@@ -77,12 +87,8 @@ function setupEventListeners() {
             drawnShape.setEditable(true);
             google.maps.event.addListener(drawnShape, 'radius_changed', updateShapeData);
             google.maps.event.addListener(drawnShape, 'center_changed', updateShapeData);
-            google.maps.event.addListener(drawnShape, 'bounds_changed', updateShapeData);
         }
     });
-
-    // Form submission
-    document.getElementById("geofenceForm").addEventListener("submit", handleFormSubmit);
 }
 
 function setActiveButton(activeId) {
@@ -147,12 +153,16 @@ function clearShape() {
         drawnShape = null;
     }
     document.getElementById("shapeData").value = "";
-    drawingManager.setDrawingMode(null);
+    if (drawingManager) {
+        drawingManager.setDrawingMode(null);
+    }
 }
 
 // Render saved geofences list
 function renderGeofenceList() {
     const list = document.getElementById("geofenceList");
+    if (!list) return;
+    
     list.innerHTML = "";
 
     geofences.forEach((gf, i) => {
@@ -236,8 +246,8 @@ function loadGeofence(i) {
     }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener("DOMContentLoaded", function() {
+// Initialize when window loads
+window.onload = function() {
     // Check if Google Maps API is loaded
     if (typeof google === 'undefined' || !google.maps) {
         console.error("Google Maps API not loaded");
@@ -245,5 +255,5 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
     }
     
-    initMap();
-});
+    setTimeout(initMap, 100);
+};
