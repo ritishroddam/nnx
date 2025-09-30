@@ -33,23 +33,69 @@ Create Geofence
 <div class="geofence-modal hidden" id="geofenceModal">
     <div class="geofence-modal-content">
         <span class="geofence-close-btn" id="closeGeofenceModal">&times;</span>
-        <h2 style="margin-bottom: 10px;">Geofence Details</h2>
+        <h2 style="margin-bottom: 10px;">Add Geofence</h2>
         <form id="geofenceForm" action="{{ url_for('Geofence.page') }}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="shapeData" id="shapeData" />
             <div class="form-container">
-                <div class="form-group">
-                    <label for="GeofenceName">Geofence Name<span style="size: 12px; color: red;">*</span></label>
-                    <input type="text" name="GeofenceName" id="GeofenceName" required />
-                    <div id="geofenceNameError" class="error hidden">Geofence Name is required.</div>
+                <!-- Enter Geofence Name Section -->
+                <div class="section">
+                    <div class="section-title">Enter Geofence Name</div>
+                    <div class="form-group">
+                        <input type="text" name="GeofenceName" id="GeofenceName" placeholder="Enter geofence name" required />
+                        <div id="geofenceNameError" class="error hidden">Geofence Name is required.</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="Description">Description</label>
-                    <textarea name="Description" id="Description" rows="3"></textarea>
+                
+                <!-- Enter Location Section -->
+                <div class="section">
+                    <div class="section-title">Enter Location</div>
+                    <div class="location-type">
+                        <div class="location-option">
+                            <input type="radio" id="circleType" name="locationType" value="circle" checked>
+                            <label for="circleType">Circle</label>
+                        </div>
+                        <div class="location-option">
+                            <input type="radio" id="polygonType" name="locationType" value="polygon">
+                            <label for="polygonType">Polygon</label>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <p>Draw the geofence area on the map</p>
+                    </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn success">Save Geofence</button>
-                    <button type="button" id="cancelGeofenceBtn" class="btn danger">Cancel</button>
+                
+                <!-- Alert Settings Section -->
+                <div class="section">
+                    <div class="section-title">Alert Settings</div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enterAlert" name="alertType" value="enter">
+                        <label for="enterAlert">Alert when vehicle enters geofence</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="leaveAlert" name="alertType" value="leave">
+                        <label for="leaveAlert">Alert when vehicle leaves geofence</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="dwellAlert" name="alertType" value="dwell">
+                        <label for="dwellAlert">Alert when vehicle dwells within geofence</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="cameraOff" name="cameraOff">
+                        <label for="cameraOff">Turn off camera while inside geofence</label>
+                    </div>
+                </div>
+                
+                <!-- Confirm Section -->
+                <div class="confirm-section">
+                    <div class="section-title">Confirm</div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="free-tag">FREE</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn success">Save Geofence</button>
+                        <button type="button" id="cancelGeofenceBtn" class="btn danger">Cancel</button>
+                    </div>
                 </div>
             </div>
         </form>
