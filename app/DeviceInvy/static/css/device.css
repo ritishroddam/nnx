@@ -708,12 +708,12 @@ tr:hover {
 }
 
 .counter.package {
-  color: #ff9800;
+  color: #cccc00;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.package {
-  color: #ff9800;
+  color: #ffff00;
   box-shadow: 0 0 10px #cccccc90;
 }
 
