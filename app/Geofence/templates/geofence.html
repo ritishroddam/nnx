@@ -34,7 +34,7 @@ Create Geofence
     <div class="geofence-modal-content">
         <span class="geofence-close-btn" id="closeGeofenceModal">&times;</span>
         <h2 style="margin-bottom: 10px;">Geofence Details</h2>
-        <form id="geofenceForm" action="{{ url_for('Geofence.save_geofence') }}" method="post" enctype="multipart/form-data">
+        <form id="geofenceForm" action="{{ url_for('Geofence.page') }}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="shapeData" id="shapeData" />
             <div class="form-container">
