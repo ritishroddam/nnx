@@ -659,71 +659,71 @@ tr:hover {
 
 .counter.new-stock {
   color: #018da0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.new-stock {
   box-shadow: 0 0 10px #cccccc90;
-  color: #c2ddeb;
+  color: #02d8f5;
 }
 
 .counter.in-use{
   color: #be7201;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.in-use{
-  color: #e5d1a0;
+  color: #f19101;
   box-shadow: 0 0 10px #cccccc90;
 }
 
 .counter.available {
   color: #2e7d32;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.available {
-  color: #e6f7e6;
+  color: #5af462;
   box-shadow: 0 0 10px #cccccc90;
 }
 
 .counter.discarded {
   color: #c62828;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.discarded {
-  color: #fff3f3;
+  color: #f03131;
   box-shadow: 0 0 10px #cccccc90;
 }
 
 .counter.rental {
   color: #00bcd4;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.rental {
-  color: #e6f7ff;
+  color: #00e2fe;
   box-shadow: 0 0 10px #cccccc90;
 }
 
 .counter.package {
   color: #ff9800;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.package {
-  color: #fff0e6;
+  color: #ff9800;
   box-shadow: 0 0 10px #cccccc90;
 }
 
 .counter.outrate {
   color: #9c27b0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .dark-mode .counter.outrate {
-  color: #f5e6ff;
+  color: #d836f4;
   box-shadow: 0 0 10px #cccccc90;
 }
 
