@@ -43,28 +43,31 @@
     box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
 }
 
-/* Toggle Buttons */
+/* Toggle Buttons - Joined Style */
 .btn-toggle {
     display: flex;
     margin: 20px 0;
     border-radius: 6px;
     overflow: hidden;
     border: 1px solid #ddd;
+    background: #f8f9fa;
 }
 
 .toggle-btn {
     flex: 1;
     padding: 12px;
     border: none;
-    background: #f8f9fa;
+    background: transparent;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     transition: all 0.3s;
+    border-right: 1px solid #ddd;
+    position: relative;
 }
 
-.toggle-btn:first-child {
-    border-right: 1px solid #ddd;
+.toggle-btn:last-child {
+    border-right: none;
 }
 
 .toggle-btn.active {
@@ -74,6 +77,15 @@
 
 .toggle-btn:not(.active):hover {
     background: #e9ecef;
+}
+
+/* Remove the border between active button and its neighbors */
+.toggle-btn.active + .toggle-btn {
+    border-left-color: #28a745;
+}
+
+.toggle-btn:has(+ .toggle-btn.active) {
+    border-right-color: #28a745;
 }
 
 /* Slider */
