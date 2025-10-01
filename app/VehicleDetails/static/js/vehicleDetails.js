@@ -201,6 +201,8 @@ async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage
     totalRows = data.total;
     currentPage = data.page || page;
 
+    document.getElementById('totalVehiclesCount').textContent = totalRows;
+
     renderVehicleTable(data.vehicles);
     renderPaginationControls(totalRows, page, rowsPerPage);
   } catch (err) {
@@ -252,7 +254,6 @@ function renderVehicleTable(vehicles) {
       <td>${vehicle.normalSpeed || ''}</td>
       <td>
         <button class="icon-btn edit-icon" onclick="editVehicle('${vehicle._id}')">✏️</button>
-        <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicle._id}')">🗑️</button>
       </td>
     `;
     tableBody.appendChild(row);
@@ -261,6 +262,9 @@ function renderVehicleTable(vehicles) {
 
 document.addEventListener("DOMContentLoaded", function() {
   fetchIMEIData();
+  fetchSIMData();
+  fetchCompanies();
+  fetchCities();
   fetchAndRenderVehicles(1, 100);
 
   const manualEntryBtn = document.getElementById("manualEntryBtn");
@@ -366,6 +370,10 @@ window.addEventListener("click", function(event) {
       });
   });
 });
+
+function refreshVehicleCount() {
+  fetchAndRenderVehicles(currentPage, currentRowsPerPage);
+}
 
 function editVehicle(vehicleId) {
   const row = document.querySelector(`tr[data-id="${vehicleId}"]`);
@@ -527,7 +535,6 @@ function saveVehicle(vehicleID) {
 
         row.cells[19].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
         `;
 
         displayFlashMessage("Vehicle details updated successfully.", "success");
@@ -543,31 +550,6 @@ function saveVehicle(vehicleID) {
 
 function cancelEdit(vehicleID) {
   location.reload();
-}
-
-function deleteVehicle(vehicleID) {
-  if (confirm("Are you sure you want to delete this vehicle?")) {
-    fetch(`/vehicleDetails/delete_vehicle/${vehicleID}`, {
-      method: "DELETE", 
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-    })
-      .then((response) => {
-        if (response.ok) {
-          const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
-          row.remove();
-          alert("Vehicle deleted successfully.");
-        } else {
-          alert("Failed to delete vehicle.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert("An error occurred.");
-      });
-  }
 }
 
 let simData = []; 

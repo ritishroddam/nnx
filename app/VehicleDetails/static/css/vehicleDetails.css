@@ -574,7 +574,71 @@ body.modal-open {
   width: 60px;
 }
 
-/* Responsive design */
+/* Status Container Styles */
+.status-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    min-width: 200px;
+}
+
+.status-icon {
+    font-size: 2rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.status-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    line-height: 1;
+}
+
+.status-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .status-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .status-card {
+        min-width: auto;
+    }
+    
+    .status-number {
+        font-size: 1.75rem;
+    }
+}
+
 @media (max-width: 768px) {
   .pagination-container {
     flex-direction: column;
