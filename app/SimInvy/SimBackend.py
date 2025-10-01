@@ -469,7 +469,7 @@ def download_excel_filtered():
 def get_sims_paginated():
     try:
         page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 100))
+        per_page = int(request.args.get('per_page', 100))  # This already exists
         skip = (page - 1) * per_page
 
         total = collection.count_documents({})

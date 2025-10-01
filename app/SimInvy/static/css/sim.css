@@ -633,6 +633,23 @@ input[type="date"] {
   font-size: 14px;
 }
 
+/* Pagination styles */
+#simPagination select {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+}
+
+#simPagination .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#simPagination .btn:not(:disabled):hover {
+    background: #f0f0f0;
+}
+
 @media (max-width: 768px) {
   .table-container {
     border: 1px solid #ddd;

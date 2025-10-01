@@ -196,9 +196,9 @@ let currentPage = 1;
 const ROWS_PER_PAGE = 100;
 let totalRows = 0;
 
-async function fetchAndRenderSims(page = 1) {
+async function fetchAndRenderSims(page = 1, rowsPerPage = ROWS_PER_PAGE) {
   try {
-    const response = await fetch(`/simInvy/get_sims_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+    const response = await fetch(`/simInvy/get_sims_paginated?page=${page}&per_page=${rowsPerPage}`, {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
@@ -208,8 +208,7 @@ async function fetchAndRenderSims(page = 1) {
 
     totalRows = data.total;
     renderSimTable(data.sims);
-    renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-    // updateCounters(data.sims, data.total); // REMOVE or COMMENT OUT this line
+    renderPaginationControls(totalRows, page, rowsPerPage);
   } catch (err) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
@@ -249,22 +248,50 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   const totalPages = Math.ceil(totalRows / rowsPerPage);
   const paginationDiv = document.getElementById('simPagination');
   if (!paginationDiv) return;
+  
   if (totalPages <= 1) {
     paginationDiv.innerHTML = '';
     return;
   }
-  let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
-  html += `<button class="btn" id="simPrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-  html += `<span>Page ${currentPage} of ${totalPages}</span>`;
-  html += `<button class="btn" id="simNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
-  html += `</div>`;
+
+  // Calculate range for current page
+  const startItem = ((currentPage - 1) * rowsPerPage) + 1;
+  const endItem = Math.min(currentPage * rowsPerPage, totalRows);
+
+  let html = `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>Rows per page:</span>
+        <select id="rowsPerPageSelect" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+          <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
+          <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
+          <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
+          <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
+        </select>
+      </div>
+      
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>${startItem}–${endItem} of ${totalRows}</span>
+        <button class="btn" id="simPrevPage" ${currentPage === 1 ? 'disabled' : ''} style="padding: 4px 8px; border: 1px solid #ccc; background: white; cursor: ${currentPage === 1 ? 'not-allowed' : 'pointer'};">&lt;</button>
+        <button class="btn" id="simNextPage" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 4px 8px; border: 1px solid #ccc; background: white; cursor: ${currentPage === totalPages ? 'not-allowed' : 'pointer'};">&gt;</button>
+      </div>
+    </div>
+  `;
+  
   paginationDiv.innerHTML = html;
+
   document.getElementById('simPrevPage').onclick = function() {
     if (currentPage > 1) fetchAndRenderSims(currentPage - 1);
   };
+  
   document.getElementById('simNextPage').onclick = function() {
     if (currentPage < totalPages) fetchAndRenderSims(currentPage + 1);
   };
+
+  document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
+    const newRowsPerPage = parseInt(this.value);
+    fetchAndRenderSims(1, newRowsPerPage);
+  });
 }
 
 function updateCounters(currentPageSims, total) {
@@ -305,7 +332,7 @@ async function updateCountersFromServer() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  fetchAndRenderSims(1);
+  fetchAndRenderSims(1, ROWS_PER_PAGE);
   updateCountersFromServer();
 });
 
