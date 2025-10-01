@@ -261,6 +261,12 @@ function renderVehicleTable(vehicles) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    $("#companyFilter").selectize({
+    placeholder: "Search Companies",
+    searchField: "text",
+    create: false,
+  });
+
   fetchIMEIData();
   fetchSIMData();
   fetchCompanies();
