@@ -19,6 +19,13 @@ Vehicle Details
 
 {% block block_container %}
 
+<div class="status-container">
+    <div class="status-card">
+            <div class="status-number" id="totalVehiclesCount">0</div>
+            <div class="status-label">Total Vehicles</div>
+    </div>
+</div>
+
 <!-- Company Filter Dropdown -->
 <div class="filter-container">
 
@@ -259,4 +266,5 @@ Vehicle Details
     </tbody>
   </table>
 </div>
+<div id="vehiclePagination"></div>
 {% endblock %}

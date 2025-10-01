@@ -70,8 +70,208 @@ function handleSearch() {
     });
 }
 
+let currentPage = 1;
+const ROWS_PER_PAGE = 100;
+let totalRows = 0;
+let currentRowsPerPage = 100;
+
+// Add this function to handle pagination controls
+function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const paginationDiv = document.getElementById('vehiclePagination');
+  if (!paginationDiv) return;
+  
+  if (totalPages <= 1) {
+    paginationDiv.innerHTML = '';
+    return;
+  }
+
+  // Calculate range for current page
+  const startItem = ((currentPage - 1) * rowsPerPage) + 1;
+  const endItem = Math.min(currentPage * rowsPerPage, totalRows);
+
+  let html = `
+    <div class="pagination-container">
+      <div class="pagination-left">
+        <div class="rows-per-page">
+          <span class="pagination-label">Rows per page:</span>
+          <select id="rowsPerPageSelect" class="pagination-select">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
+            <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
+          </select>
+        </div>
+        <div class="page-info">
+          <span>${startItem}-${endItem} of ${totalRows}</span>
+        </div>
+      </div>
+      
+      <div class="pagination-right">
+        <div class="pagination-nav">
+          <button class="pagination-nav-btn" id="vehiclePrevPage" ${currentPage === 1 ? 'disabled' : ''}>
+            <span class="pagination-nav-icon">‹</span>
+            Previous
+          </button>
+          <button class="pagination-nav-btn" id="vehicleNextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+            Next
+            <span class="pagination-nav-icon">›</span>
+          </button>
+        </div>
+        <div class="go-to-page">
+          <span class="pagination-label">Go to Page:</span>
+          <input type="number" id="goToPageInput" class="page-input" 
+                 min="1" max="${totalPages}" value="${currentPage}">
+          <button class="pagination-go-btn" id="goToPageBtn">Go</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  paginationDiv.innerHTML = html;
+
+  // Add event listeners
+  document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
+    const newRowsPerPage = parseInt(this.value);
+    fetchAndRenderVehicles(1, newRowsPerPage);
+  });
+
+  // Previous button
+  document.getElementById('vehiclePrevPage').onclick = function() {
+    if (currentPage > 1) fetchAndRenderVehicles(currentPage - 1, rowsPerPage);
+  };
+
+  // Next button
+  document.getElementById('vehicleNextPage').onclick = function() {
+    if (currentPage < totalPages) fetchAndRenderVehicles(currentPage + 1, rowsPerPage);
+  };
+
+  // Add go to page functionality
+  document.getElementById('goToPageBtn').onclick = function() {
+    const pageInput = document.getElementById('goToPageInput');
+    const targetPage = parseInt(pageInput.value);
+    
+    if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
+      fetchAndRenderVehicles(targetPage, rowsPerPage);
+    } else {
+      alert(`Please enter a valid page number between 1 and ${totalPages}`);
+      pageInput.value = currentPage;
+    }
+  };
+
+  // Allow Enter key in go to page input
+  document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('goToPageBtn').click();
+    }
+  });
+
+  // Validate input on blur
+  document.getElementById('goToPageInput').addEventListener('blur', function() {
+    const value = parseInt(this.value);
+    if (!value || value < 1) {
+      this.value = 1;
+    } else if (value > totalPages) {
+      this.value = totalPages;
+    }
+  });
+}
+
+// Add this function to fetch paginated vehicles
+async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage) {
+  try {
+    currentRowsPerPage = rowsPerPage;
+    
+    const response = await fetch(`/vehicleDetails/get_vehicles_paginated?page=${page}&per_page=${rowsPerPage}`, {
+      method: "GET",
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        "Accept": "application/json"
+      },
+      credentials: "include"
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    totalRows = data.total;
+    currentPage = data.page || page;
+
+    document.getElementById('totalVehiclesCount').textContent = totalRows;
+
+    renderVehicleTable(data.vehicles);
+    renderPaginationControls(totalRows, page, rowsPerPage);
+  } catch (err) {
+    console.error("Error loading vehicles:", err);
+    const tableBody = document.querySelector('.vehicle-table tbody');
+    if (tableBody) {
+      tableBody.innerHTML = `<tr><td colspan="20">Failed to load data</td></tr>`;
+    }
+  }
+}
+
+// Add this function to render the vehicle table
+function renderVehicleTable(vehicles) {
+  const tableBody = document.querySelector('.vehicle-table tbody');
+  if (!tableBody) {
+    console.error('Vehicle table body not found');
+    return;
+  }
+  
+  tableBody.innerHTML = '';
+  
+  if (!vehicles || vehicles.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="20">No vehicles found</td></tr>';
+    return;
+  }
+  
+  vehicles.forEach(vehicle => {
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', vehicle._id);
+    row.innerHTML = `
+      <td>${vehicle.LicensePlateNumber || ''}</td>
+      <td>${vehicle.CompanyName || ''}</td>
+      <td>${vehicle.IMEI || ''}</td>
+      <td>${vehicle.SIM || ''}</td>
+      <td>${vehicle.VehicleType ? vehicle.VehicleType.charAt(0).toUpperCase() + vehicle.VehicleType.slice(1) : ''}</td>
+      <td>${vehicle.NumberOfSeatsContainer || ''}</td>
+      <td>${vehicle.VehicleModel || ''}</td>
+      <td>${vehicle.VehicleMake || ''}</td>
+      <td>${vehicle.YearOfManufacture || ''}</td>
+      <td>${vehicle.DateOfPurchase || ''}</td>
+      <td>${vehicle.InsuranceNumber || ''}</td>
+      <td>${vehicle.InsuranceExpiry || ''}</td>
+      <td>${vehicle.DriverName || ''}</td>
+      <td>${vehicle.CurrentStatus ? vehicle.CurrentStatus.charAt(0).toUpperCase() + vehicle.CurrentStatus.slice(1) : ''}</td>
+      <td>${vehicle.Location || ''}</td>
+      <td>${vehicle.OdometerReading || ''}</td>
+      <td>${vehicle.ServiceDueDate || ''}</td>
+      <td>${vehicle.slowSpeed || ''}</td>
+      <td>${vehicle.normalSpeed || ''}</td>
+      <td>
+        <button class="icon-btn edit-icon" onclick="editVehicle('${vehicle._id}')">✏️</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+    $("#companyFilter").selectize({
+    placeholder: "Search Companies",
+    searchField: "text",
+    create: false,
+  });
+
   fetchIMEIData();
+  fetchSIMData();
+  fetchCompanies();
+  fetchCities();
+  fetchAndRenderVehicles(1, 100);
 
   const manualEntryBtn = document.getElementById("manualEntryBtn");
   if (manualEntryBtn) {
@@ -176,6 +376,10 @@ window.addEventListener("click", function(event) {
       });
   });
 });
+
+function refreshVehicleCount() {
+  fetchAndRenderVehicles(currentPage, currentRowsPerPage);
+}
 
 function editVehicle(vehicleId) {
   const row = document.querySelector(`tr[data-id="${vehicleId}"]`);
@@ -337,7 +541,6 @@ function saveVehicle(vehicleID) {
 
         row.cells[19].innerHTML = `
           <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
-          <button class="icon-btn delete-icon" onclick="deleteVehicle('${vehicleID}')">🗑️</button>
         `;
 
         displayFlashMessage("Vehicle details updated successfully.", "success");
@@ -353,31 +556,6 @@ function saveVehicle(vehicleID) {
 
 function cancelEdit(vehicleID) {
   location.reload();
-}
-
-function deleteVehicle(vehicleID) {
-  if (confirm("Are you sure you want to delete this vehicle?")) {
-    fetch(`/vehicleDetails/delete_vehicle/${vehicleID}`, {
-      method: "DELETE", 
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-    })
-      .then((response) => {
-        if (response.ok) {
-          const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
-          row.remove();
-          alert("Vehicle deleted successfully.");
-        } else {
-          alert("Failed to delete vehicle.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert("An error occurred.");
-      });
-  }
 }
 
 let simData = []; 

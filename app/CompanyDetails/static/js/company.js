@@ -207,33 +207,98 @@ function renderCustomerTable(customers) {
   });
 }
 
-async function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
-  const container = document.getElementById("companyPagination");
-  if (!container) return;
-
-  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-  container.innerHTML = "";
-
-  const makeBtn = (label, page, disabled = false, active = false) => {
-    const btn = document.createElement("button");
-    btn.textContent = label;
-    btn.className = "btn";
-    if (active) btn.classList.add("active");
-    btn.disabled = disabled;
-    btn.addEventListener("click", async () => await fetchAndRenderCustomers(page));
-    return btn;
-  };
-
-  container.appendChild(makeBtn("« Prev", Math.max(1, currentPage - 1), currentPage === 1));
-
-  const windowSize = 5;
-  const start = Math.max(1, currentPage - Math.floor(windowSize / 2));
-  const end = Math.min(totalPages, start + windowSize - 1);
-  for (let p = start; p <= end; p++) {
-    container.appendChild(makeBtn(String(p), p, false, p === currentPage));
+function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const paginationDiv = document.getElementById('companyPagination');
+  if (!paginationDiv) return;
+  
+  if (totalPages <= 1) {
+    paginationDiv.innerHTML = '';
+    return;
   }
 
-  container.appendChild(makeBtn("Next »", Math.min(totalPages, currentPage + 1), currentPage === totalPages));
+  const startItem = ((currentPage - 1) * rowsPerPage) + 1;
+  const endItem = Math.min(currentPage * rowsPerPage, totalRows);
+
+  let html = `
+    <div class="pagination-container">
+      <div class="pagination-left">
+        <div class="rows-per-page">
+          <span class="pagination-label">Rows per page:</span>
+          <select id="rowsPerPageSelect" class="pagination-select">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
+            <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
+          </select>
+        </div>
+        <div class="page-info">
+          <span>${startItem}-${endItem} of ${totalRows}</span>
+        </div>
+      </div>
+      
+      <div class="pagination-right">
+        <div class="pagination-nav">
+          <button class="pagination-nav-btn" id="companyPrevPage" ${currentPage === 1 ? 'disabled' : ''}>
+            <span class="pagination-nav-icon">‹</span>
+            Previous
+          </button>
+          <button class="pagination-nav-btn" id="companyNextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+            Next
+            <span class="pagination-nav-icon">›</span>
+          </button>
+        </div>
+        <div class="go-to-page">
+          <span class="pagination-label">Go to Page:</span>
+          <input type="number" id="goToPageInput" class="page-input" 
+                 min="1" max="${totalPages}" value="${currentPage}">
+          <button class="pagination-go-btn" id="goToPageBtn">Go</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  paginationDiv.innerHTML = html;
+
+  document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
+    const newRowsPerPage = parseInt(this.value);
+    fetchAndRenderCustomers(1, newRowsPerPage);
+  });
+
+  document.getElementById('companyPrevPage').onclick = function() {
+    if (currentPage > 1) fetchAndRenderCustomers(currentPage - 1, rowsPerPage);
+  };
+
+  document.getElementById('companyNextPage').onclick = function() {
+    if (currentPage < totalPages) fetchAndRenderCustomers(currentPage + 1, rowsPerPage);
+  };
+
+  document.getElementById('goToPageBtn').onclick = function() {
+    const pageInput = document.getElementById('goToPageInput');
+    const targetPage = parseInt(pageInput.value);
+    
+    if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
+      fetchAndRenderCustomers(targetPage, rowsPerPage);
+    } else {
+      alert(`Please enter a valid page number between 1 and ${totalPages}`);
+      pageInput.value = currentPage;
+    }
+  };
+
+  document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('goToPageBtn').click();
+    }
+  });
+
+  document.getElementById('goToPageInput').addEventListener('blur', function() {
+    const value = parseInt(this.value);
+    if (!value || value < 1) {
+      this.value = 1;
+    } else if (value > totalPages) {
+      this.value = totalPages;
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
