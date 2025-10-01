@@ -4,6 +4,7 @@ from tracemalloc import start
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
+from numpy import long
 from pymongo import ASCENDING, DESCENDING
 import traceback
 import pandas as pd
@@ -229,6 +230,87 @@ def getDateRanges(date_range):
         return f"{(now - timedelta(days=30)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}"
     return f"Hi"
 
+def process_stoppage_report(imei, vehicle_number, date_filter):
+    try:
+        query = {
+            "imei": imei, "gps": "A"
+        }
+        query.update(date_filter)
+        data = list(db["atlanta"].find(
+            query, {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1},
+            sort=[("date_time", DESCENDING)]
+        ))
+        
+        firstDateTime = None
+        secondDateTime = None
+        latitude = None
+        longitude = None
+        location = None
+        dfs = []
+        for datum in data:
+            if not firstDateTime:
+                if datum['ignition'] == "1":
+                    continue
+                
+                firstDateTime = datum['date_time']
+                if datum.get("latitude", "") != "":
+                    latitude = datum.get("latitude")
+                    longitude = datum.get('longitude')
+                else:
+                    next_idx = data.index(datum) + 1
+                    while next_idx < len(data):
+                        next_datum = data[next_idx]
+                        if next_datum.get("latitude", "") != "" and next_datum.get("ignition", "") == "0":
+                            latitude = next_datum.get("latitude")
+                            longitude = next_datum.get("longitude")
+                            break
+                        next_idx += 1
+                    if not latitude and not longitude: 
+                        location = "Location Not Available"
+            else:
+                if datum['ignition'] == "0":
+                    secondDateTime = datum['date_time']
+                    continue
+                else:
+                    start_dt = secondDateTime
+                    end_dt = firstDateTime
+                    duration = round(((end_dt - start_dt).total_seconds() / 60.0), 2)
+                    resolvedLocation = location if location else geocodeInternal(latitude, longitude) if latitude and longitude else "Location Not Available"
+                    df = pd.DataFrame({ 
+                          "Vehicle Number": [vehicle_number],	
+                          "FROM DATE & TIME": [firstDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
+                          "TO DATE & TIME": [secondDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
+                          "DURATION (min)": [duration],
+                          "LOCATION": [resolvedLocation]
+                        })
+                    dfs.append(df)
+                    firstDateTime = None
+                    secondDateTime = None
+                    latitude = None
+                    longitude = None
+                    location = None
+
+        if firstDateTime and secondDateTime:
+            start_dt = secondDateTime
+            end_dt = firstDateTime
+            duration = round(((end_dt - start_dt).total_seconds() / 60.0), 2)
+            resolved_location = location if location else geocodeInternal(latitude, longitude) if latitude and longitude else "Location Not Available"
+            df = pd.DataFrame({
+                "Vehicle Number": [vehicle_number],
+                "FROM DATE & TIME": [start_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],
+                "TO DATE & TIME": [end_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],
+                "DURATION": [duration],
+                "LOCATION": [resolved_location]
+            })
+            dfs.append(df)
+        
+        if not dfs:
+            return None
+        return pd.concat(dfs, ignore_index=True)
+    except Exception as e:
+        print("[DEBUG] Error generating Stoppage Report: ", e)
+        return e
+
 def process_distance_report(imei, vehicle_number, date_filter):
     """Calculate total distance traveled"""
     try:
@@ -434,6 +516,32 @@ def view_report_preview():
                     if df is None or df.empty:
                         continue
                     all_dfs.append(df)
+            elif report_type == "stoppage":
+                config = report_configs[report_type]
+                fields = config['fields']
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                for imei in imeis:
+                    vehicle = imei_to_plate.get(imei, "")
+                    
+                    if vehicle:
+                        license_plate = vehicle["LicensePlateNumber"]
+                    else:
+                        license_plate = ""
+                        
+                    df = process_stoppage_report(imei, license_plate, date_filter)
+                    
+                    if df is None or df.empty:
+                        continue
+                    
+                    sep_dict= pd.DataFrame({ 
+                          "Vehicle Number": [f"--- {license_plate} ---"],	
+                          "FROM DATE & TIME": [],	
+                          "TO DATE & TIME": [],	
+                          "DURATION (min)": [],
+                          "LOCATION": []
+                        })
+                    all_dfs.append(sep_dict)
+                    all_dfs.append(df)
             else:
                 if report_type == "distance-speed-range":
                     config = report_configs[report_type]
@@ -488,7 +596,7 @@ def view_report_preview():
                 all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
             elif report_type_for_columns == 'stoppage':
-                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Stoppage Duration (min)'])
+                all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION', 'LOCATION'])
             elif report_type_for_columns == 'idle':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
             elif report_type_for_columns == 'ignition':
@@ -537,6 +645,11 @@ def view_report_preview():
         if report_type == "odometer-daily-distance":
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_distance_report(imei, license_plate, date_filter)
+            
+        elif report_type == "stoppage":
+             date_filter = get_date_range_filter(date_range, from_date, to_date)
+             df = process_stoppage_report(imei, license_plate, date_filter)
+
         else:
             if report_type == "distance-speed-range":
                 config = report_configs[report_type]
@@ -571,7 +684,7 @@ def view_report_preview():
             all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
         elif report_type == 'stoppage':
-            all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Stoppage Duration (min)'])
+            all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION', 'LOCATION'])
         elif report_type == 'idle':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
         elif report_type == 'ignition':
