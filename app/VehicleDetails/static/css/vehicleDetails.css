@@ -604,11 +604,19 @@ body.modal-open {
     line-height: 1;
 }
 
+.dark-mode .status-number {
+    color: #fff;
+}
+
 .status-label {
     font-size: 0.9rem;
     color: #6c757d;
     font-weight: 500;
     margin-top: 5px;
+}
+
+.dark-mode .status-label {
+    color: #aaa;
 }
 
 @media (max-width: 768px) {
