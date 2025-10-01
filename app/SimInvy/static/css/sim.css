@@ -642,6 +642,13 @@ input[type="date"] {
 .pagination-right {
   display: flex;
   align-items: center;
+  gap: 24px;
+}
+
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .rows-per-page {
@@ -708,6 +715,44 @@ input[type="date"] {
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+/* Navigation Buttons */
+.pagination-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  background: white;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pagination-nav-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #a0a0a0;
+}
+
+.pagination-nav-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.pagination-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.pagination-nav-icon {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
 .pagination-go-btn {
   padding: 6px 16px;
   border: 1px solid #007bff;
@@ -728,6 +773,42 @@ input[type="date"] {
 
 .pagination-go-btn:active {
   transform: translateY(1px);
+}
+
+/* Remove spinner arrows from number input */
+.page-input::-webkit-outer-spin-button,
+.page-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.page-input {
+  -moz-appearance: textfield;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .pagination-left {
+    justify-content: space-between;
+  }
+  
+  .pagination-right {
+    justify-content: space-between;
+  }
+  
+  .pagination-nav {
+    order: 2;
+  }
+  
+  .go-to-page {
+    order: 1;
+  }
 }
 
 .page-input::-webkit-outer-spin-button,

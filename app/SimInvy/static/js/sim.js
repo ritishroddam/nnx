@@ -263,7 +263,6 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     return;
   }
 
-  // Calculate range for current page
   const startItem = ((currentPage - 1) * rowsPerPage) + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalRows);
 
@@ -285,6 +284,16 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
       </div>
       
       <div class="pagination-right">
+        <div class="pagination-nav">
+          <button class="pagination-nav-btn" id="simPrevPage" ${currentPage === 1 ? 'disabled' : ''}>
+            <span class="pagination-nav-icon">‹</span>
+            Previous
+          </button>
+          <button class="pagination-nav-btn" id="simNextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+            Next
+            <span class="pagination-nav-icon">›</span>
+          </button>
+        </div>
         <div class="go-to-page">
           <span class="pagination-label">Go to Page:</span>
           <input type="number" id="goToPageInput" class="page-input" 
@@ -297,13 +306,19 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   
   paginationDiv.innerHTML = html;
 
-  // Add event listeners
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
     fetchAndRenderSims(1, newRowsPerPage);
   });
 
-  // Add go to page functionality
+  document.getElementById('simPrevPage').onclick = function() {
+    if (currentPage > 1) fetchAndRenderSims(currentPage - 1, rowsPerPage);
+  };
+
+  document.getElementById('simNextPage').onclick = function() {
+    if (currentPage < totalPages) fetchAndRenderSims(currentPage + 1, rowsPerPage);
+  };
+
   document.getElementById('goToPageBtn').onclick = function() {
     const pageInput = document.getElementById('goToPageInput');
     const targetPage = parseInt(pageInput.value);
@@ -316,14 +331,12 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     }
   };
 
-  // Allow Enter key in go to page input
   document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       document.getElementById('goToPageBtn').click();
     }
   });
 
-  // Validate input on blur
   document.getElementById('goToPageInput').addEventListener('blur', function() {
     const value = parseInt(this.value);
     if (!value || value < 1) {
