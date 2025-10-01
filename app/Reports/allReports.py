@@ -232,74 +232,73 @@ def getDateRanges(date_range):
 
 def process_stoppage_report(imei, vehicle_number, date_filter):
     try:
-        query = {
-            "imei": imei, "gps": "A"
-        }
-        query.update(date_filter)
-        data = list(db["atlanta"].find(
-            query, {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1},
-            sort=[("date_time", DESCENDING)]
-        ))
-        
-        firstDateTime = None
-        secondDateTime = None
-        latitude = None
-        longitude = None
-        location = None
-        dfs = []
-        for datum in data:
-            if not firstDateTime:
-                if datum['ignition'] == "1":
-                    continue
-                
-                firstDateTime = datum['date_time']
-                if datum.get("latitude", "") != "":
-                    latitude = datum.get("latitude")
-                    longitude = datum.get('longitude')
-                else:
-                    next_idx = data.index(datum) + 1
-                    while next_idx < len(data):
-                        next_datum = data[next_idx]
-                        if next_datum.get("latitude", "") != "" and next_datum.get("ignition", "") == "0":
-                            latitude = next_datum.get("latitude")
-                            longitude = next_datum.get("longitude")
-                            break
-                        next_idx += 1
-                    if not latitude and not longitude: 
-                        location = "Location Not Available"
-            else:
-                if datum['ignition'] == "0":
-                    secondDateTime = datum['date_time']
-                    continue
-                else:
-                    duration = round(((firstDateTime - secondDateTime).total_seconds() / 60.0), 2)
-                    resolvedLocation = location if location else geocodeInternal(latitude, longitude) if latitude and longitude else "Location Not Available"
-                    df = pd.DataFrame({ 
-                          "Vehicle Number": [vehicle_number],	
-                          "FROM DATE & TIME": [secondDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
-                          "TO DATE & TIME": [firstDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
-                          "DURATION (min)": [duration],
-                          "LOCATION": [resolvedLocation]
-                        })
-                    dfs.append(df)
-                    firstDateTime = None
-                    secondDateTime = None
-                    latitude = None
-                    longitude = None
-                    location = None
+        query = {"imei": imei, "gps": "A"}
+        query.update(date_filter or {})
+        cursor = db["atlanta"].find(
+            query,
+            {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1},
+        ).sort("date_time", DESCENDING)
+        data = list(cursor)
+        if not data:
+            return None
 
-        if firstDateTime and secondDateTime:
-            duration = round(((firstDateTime - secondDateTime).total_seconds() / 60.0), 2)
-            resolved_location = location if location else geocodeInternal(latitude, longitude) if latitude and longitude else "Location Not Available"
-            df = pd.DataFrame({
-                "Vehicle Number": [vehicle_number],	
-                "FROM DATE & TIME": [secondDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
-                "TO DATE & TIME": [firstDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
-                "DURATION (min)": [duration],
-                "LOCATION": [resolved_location]
-            })
+        data_asc = list(reversed(data))
+
+        current_start = None
+        last_zero_time = None
+        start_lat = None
+        start_lng = None
+        dfs = []
+
+        def push_block(start_dt, end_dt, lat, lng):
+            if not start_dt or not end_dt:
+                return
+            duration_min = round(((end_dt - start_dt).total_seconds() / 60.0), 2)
+            if duration_min < 0:
+                return
+            if lat is not None and lng is not None:
+                try:
+                    resolved = geocodeInternal(float(lat), float(lng))
+                except Exception:
+                    resolved = "Location Not Available"
+            else:
+                resolved = "Location Not Available"
+            df = pd.DataFrame([{
+                "Vehicle Number": vehicle_number,
+                "FROM DATE & TIME": start_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "TO DATE & TIME": end_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "DURATION (min)": duration_min,
+                "LOCATION": resolved
+            }])
             dfs.append(df)
-        
+
+        for rec in data_asc:
+            ign = str(rec.get('ignition', '')).strip()
+            ts = rec.get('date_time')
+            lat = rec.get('latitude') if rec.get('latitude') not in ("", None) else None
+            lng = rec.get('longitude') if rec.get('longitude') not in ("", None) else None
+
+            if ign == "0":
+                if current_start is None:
+                    current_start = ts
+                    last_zero_time = ts
+                    start_lat, start_lng = (lat, lng) if (lat is not None and lng is not None) else (None, None)
+                else:
+                    last_zero_time = ts
+                    if start_lat is None and lat is not None and lng is not None:
+                        start_lat, start_lng = lat, lng
+            else:
+                if current_start is not None and last_zero_time is not None:
+                    push_block(current_start, last_zero_time, start_lat, start_lng)
+                current_start = None
+                last_zero_time = None
+                start_lat = None
+                start_lng = None
+
+        # Close any trailing open block
+        if current_start is not None and last_zero_time is not None:
+            push_block(current_start, last_zero_time, start_lat, start_lng)
+
         if not dfs:
             return None
         return pd.concat(dfs, ignore_index=True)
@@ -526,7 +525,7 @@ def view_report_preview():
                         
                     df = process_stoppage_report(imei, license_plate, date_filter)
                     
-                    if df is None or df.empty:
+                    if not isinstance(df, pd.DataFrame) or df.empty:
                         continue
                     
                     sep_dict= pd.DataFrame([{ 
@@ -643,9 +642,10 @@ def view_report_preview():
             df = process_distance_report(imei, license_plate, date_filter)
             
         elif report_type == "stoppage":
-             date_filter = get_date_range_filter(date_range, from_date, to_date)
-             df = process_stoppage_report(imei, license_plate, date_filter)
-
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
+            df = process_stoppage_report(imei, license_plate, date_filter)
+            if not isinstance(df, pd.DataFrame) or df.empty:
+                return jsonify({"success": True, "data": []})
         else:
             if report_type == "distance-speed-range":
                 config = report_configs[report_type]
