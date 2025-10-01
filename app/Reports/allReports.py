@@ -299,7 +299,7 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
                 "Vehicle Number": [vehicle_number],
                 "FROM DATE & TIME": [start_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],
                 "TO DATE & TIME": [end_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],
-                "DURATION": [duration],
+                "DURATION (min)": [duration],
                 "LOCATION": [resolved_location]
             })
             dfs.append(df)
@@ -596,7 +596,7 @@ def view_report_preview():
                 all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
             elif report_type_for_columns == 'stoppage':
-                all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION', 'LOCATION'])
+                all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
             elif report_type_for_columns == 'idle':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
             elif report_type_for_columns == 'ignition':
@@ -684,7 +684,7 @@ def view_report_preview():
             all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
         elif report_type == 'stoppage':
-            all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION', 'LOCATION'])
+            all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
         elif report_type == 'idle':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
         elif report_type == 'ignition':
