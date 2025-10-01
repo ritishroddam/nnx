@@ -109,11 +109,9 @@ report_configs = {
     
 def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
-    
-    # Create a copy of the buffer content before uploading
+
     buffer_content = BytesIO(json.dumps({"data":output},ensure_ascii=False).encode('utf-8'))
     
-    # Generate unique filename
     timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
     report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.json"
     remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
@@ -123,7 +121,6 @@ def save_and_return_report(output, report_type, vehicle_number):
     s3.upload_fileobj(buffer_content, SPACE_NAME, remote_path)
     buffer_content.close()
 
-    # Save metadata to MongoDB
     report_metadata = {
         'user_id': get_jwt_identity(),
         'report_name': report_type.replace('-', ' ').title() + ' Report',
@@ -134,6 +131,7 @@ def save_and_return_report(output, report_type, vehicle_number):
         'vehicle_number': vehicle_number,
         'report_type': report_type
     }
+    
     db['generated_reports'].insert_one(report_metadata)
     print(f"[DEBUG] Report metadata saved to MongoDB: {report_metadata}")
 
