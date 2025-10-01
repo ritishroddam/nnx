@@ -529,13 +529,13 @@ def view_report_preview():
                     if df is None or df.empty:
                         continue
                     
-                    sep_dict= pd.DataFrame({ 
+                    sep_dict= pd.DataFrame([{ 
                             "Vehicle Number": f"--- {license_plate} ---",
                             "FROM DATE & TIME": "",	
                             "TO DATE & TIME": "",	
                             "DURATION (min)": "",
                             "LOCATION": ""
-                        })
+                        }])
                     all_dfs.append(sep_dict)
                     all_dfs.append(df)
             else:
