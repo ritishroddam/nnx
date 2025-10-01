@@ -650,6 +650,41 @@ input[type="date"] {
     background: #f0f0f0;
 }
 
+/* Pagination styles */
+.pagination-btn {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  margin: 0 2px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+#goToPageInput {
+  text-align: center;
+}
+
+#goToPageInput::-webkit-outer-spin-button,
+#goToPageInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .table-container {
     border: 1px solid #ddd;
