@@ -609,6 +609,10 @@ body.modal-open {
     color: #aaa;
 }
 
+.filter-select {
+  min-width: 250px;
+}
+
 @media (max-width: 768px) {
     .status-container {
         flex-direction: column;
