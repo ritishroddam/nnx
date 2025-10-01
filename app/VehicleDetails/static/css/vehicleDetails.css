@@ -469,7 +469,7 @@ body.modal-open {
   border-radius: 4px;
   background: white;
   font-size: 14px;
-  min-width: 80px;
+  width: 80px;
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
@@ -568,6 +568,10 @@ body.modal-open {
 .page-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.go-to-page .page-input {
+  width: 60px;
 }
 
 /* Responsive design */
