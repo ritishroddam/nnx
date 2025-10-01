@@ -152,20 +152,17 @@ async function updateAllCountersFromServer() {
       throw new Error(data.error);
     }
     
-    // Update status counts
     document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
     document.getElementById("inUseCount").textContent = data.status["In use"] || 0;
     document.getElementById("availableCount").textContent = data.status["Available"] || 0;
     document.getElementById("discardedCount").textContent = data.status["Discarded"] || 0;
     
-    // Update package counts
     document.getElementById("rentalCount").textContent = data.package["Rental"] || 0;
     document.getElementById("packageCount").textContent = data.package["Package"] || 0;
     document.getElementById("outrateCount").textContent = data.package["Outrate"] || 0;
     
   } catch (err) {
     console.error('Error fetching all counts:', err);
-    // Fallback to DOM counting
     console.log('Falling back to DOM counting');
     updateStatusCounts();
   }
@@ -186,7 +183,6 @@ async function updatePackageCountsFromServer() {
     
   } catch (err) {
     console.error('Error fetching package counts:', err);
-    // Fallback to counting from current page data
     updatePackageCountsFromCurrentData();
   }
 }
@@ -246,45 +242,153 @@ function renderDeviceTable(devices) {
     tableBody.appendChild(row);
   });
   
-  // Store all devices for filtering
   allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
 }
 
 function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   const totalPages = Math.ceil(totalRows / rowsPerPage);
-  const paginationDiv = document.getElementById('devicePagination');
+  const paginationDiv = document.getElementById('companyPagination');
   if (!paginationDiv) return;
   
   if (totalPages <= 1) {
     paginationDiv.innerHTML = '';
     return;
   }
-  
-  let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
-  html += `<button class="btn" id="devicePrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-  html += `<span>Page ${currentPage} of ${totalPages}</span>`;
-  html += `<button class="btn" device="btn" id="deviceNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
-  html += `</div>`;
+
+  const startItem = ((currentPage - 1) * rowsPerPage) + 1;
+  const endItem = Math.min(currentPage * rowsPerPage, totalRows);
+
+  let html = `
+    <div class="pagination-container">
+      <div class="pagination-left">
+        <div class="rows-per-page">
+          <span class="pagination-label">Rows per page:</span>
+          <select id="rowsPerPageSelect" class="pagination-select">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
+            <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
+          </select>
+        </div>
+        <div class="page-info">
+          <span>${startItem}-${endItem} of ${totalRows}</span>
+        </div>
+      </div>
+      
+      <div class="pagination-right">
+        <div class="pagination-nav">
+          <button class="pagination-nav-btn" id="companyPrevPage" ${currentPage === 1 ? 'disabled' : ''}>
+            <span class="pagination-nav-icon">‹</span>
+            Previous
+          </button>
+          <button class="pagination-nav-btn" id="companyNextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+            Next
+            <span class="pagination-nav-icon">›</span>
+          </button>
+        </div>
+        <div class="go-to-page">
+          <span class="pagination-label">Go to Page:</span>
+          <input type="number" id="goToPageInput" class="page-input" 
+                 min="1" max="${totalPages}" value="${currentPage}">
+          <button class="pagination-go-btn" id="goToPageBtn">Go</button>
+        </div>
+      </div>
+    </div>
+  `;
   
   paginationDiv.innerHTML = html;
-  
-  document.getElementById('devicePrevPage').onclick = function() {
-    if (currentPage > 1) fetchAndRenderDevices(currentPage - 1);
+
+  document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
+    const newRowsPerPage = parseInt(this.value);
+    fetchAndRenderCustomers(1, newRowsPerPage);
+  });
+
+  document.getElementById('companyPrevPage').onclick = function() {
+    if (currentPage > 1) fetchAndRenderCustomers(currentPage - 1, rowsPerPage);
   };
-  
-  document.getElementById('deviceNextPage').onclick = function() {
-    if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1);
+
+  // Next button
+  document.getElementById('companyNextPage').onclick = function() {
+    if (currentPage < totalPages) fetchAndRenderCustomers(currentPage + 1, rowsPerPage);
   };
+
+  document.getElementById('goToPageBtn').onclick = function() {
+    const pageInput = document.getElementById('goToPageInput');
+    const targetPage = parseInt(pageInput.value);
+    
+    if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
+      fetchAndRenderCustomers(targetPage, rowsPerPage);
+    } else {
+      alert(`Please enter a valid page number between 1 and ${totalPages}`);
+      pageInput.value = currentPage;
+    }
+  };
+
+  document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('goToPageBtn').click();
+    }
+  });
+
+  document.getElementById('goToPageInput').addEventListener('blur', function() {
+    const value = parseInt(this.value);
+    if (!value || value < 1) {
+      this.value = 1;
+    } else if (value > totalPages) {
+      this.value = totalPages;
+    }
+  });
 }
 
+let currentRowsPerPage = 100; 
+
+async function fetchAndRenderCustomers(page = 1, rowsPerPage = currentRowsPerPage) {
+  try {
+    currentRowsPerPage = rowsPerPage; 
+    
+    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${rowsPerPage}`, {
+      method: "GET",
+      headers: {
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        "Accept": "application/json"
+      },
+      credentials: "include"
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    totalRows = data.total;
+    currentPage = data.page || page;
+
+    document.getElementById('totalCompaniesCount').textContent = totalRows;
+
+    renderCustomerTable(data.customers);
+    renderPaginationControls(totalRows, page, rowsPerPage);
+  } catch (err) {
+    console.error("Error loading customers:", err);
+    document.getElementById('customerTable').innerHTML = `<tr><td colspan="14">Failed to load data</td></tr>`;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  $("#companyFilter").selectize({
+    placeholder: "Search Companies",
+    searchField: "text",
+    create: false,
+  });
+  await fetchAndRenderCustomers(1, 100); 
+});
+
 function initializeStatusFilter() {
-    // Store all devices when page loads
     allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
     
-    // Update counts
     updateAllCountersFromServer();
     
-    // Add event listener for filter
     document.getElementById("statusFilter").addEventListener("change", filterDevicesByStatus);
 }
 
@@ -298,13 +402,11 @@ function filterDevicesByStatus() {
     return;
   }
   allDevices.forEach(device => {
-    // Status is now in cell 11 (0-based)
     if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
       const statusCell = device.cells[11];
       let status = statusCell.textContent.trim();
       device.style.display = status === selectedStatus ? "" : "none";
     } else {
-      // For package type filter
       const packageCell = device.cells[9];
       const packageType = packageCell.textContent.trim();
       device.style.display = packageType === selectedStatus ? "" : "none";
