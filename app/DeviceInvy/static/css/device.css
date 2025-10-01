@@ -389,7 +389,25 @@ tr:hover {
 }
 
 .device-table {
+  width: 100%;
+  border-collapse: collapse;
   color: #333;
+  table-layout: auto;
+  min-width: 100%; 
+}
+
+.dark-mode .device-table {
+  color: #ccc;
+}
+
+.device-table th,
+.device-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
 }
 
 .device-table th {
@@ -402,23 +420,6 @@ tr:hover {
 
 .device-table tr:hover {
   background-color: #f9f9f9;
-}
-
-.device-table tr:hover {
-  background-color: #f9f9f9;
-}
-
-.dark-mode .device-table thead tr,
-.dark-mode .device-table tbody tr {
-    color: #ccc;
-}
-
-.dark-mode .table-scroll-container {
-  background-color: #23272b;
-}
-
-.dark-mode .device-table {
-  color: #ccc;
 }
 
 .dark-mode .device-table th {
