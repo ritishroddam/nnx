@@ -255,6 +255,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     return;
   }
 
+  // Calculate range for current page
   const startItem = ((currentPage - 1) * rowsPerPage) + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalRows);
 
@@ -298,11 +299,13 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   
   paginationDiv.innerHTML = html;
 
+  // Add event listeners
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
     fetchAndRenderCustomers(1, newRowsPerPage);
   });
 
+  // Previous button
   document.getElementById('companyPrevPage').onclick = function() {
     if (currentPage > 1) fetchAndRenderCustomers(currentPage - 1, rowsPerPage);
   };
@@ -312,6 +315,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     if (currentPage < totalPages) fetchAndRenderCustomers(currentPage + 1, rowsPerPage);
   };
 
+  // Add go to page functionality
   document.getElementById('goToPageBtn').onclick = function() {
     const pageInput = document.getElementById('goToPageInput');
     const targetPage = parseInt(pageInput.value);
@@ -324,6 +328,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     }
   };
 
+  // Allow Enter key in go to page input
   document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       document.getElementById('goToPageBtn').click();
@@ -374,6 +379,15 @@ async function fetchAndRenderCustomers(page = 1, rowsPerPage = currentRowsPerPag
     document.getElementById('customerTable').innerHTML = `<tr><td colspan="14">Failed to load data</td></tr>`;
   }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+  $("#companyFilter").selectize({
+    placeholder: "Search Companies",
+    searchField: "text",
+    create: false,
+  });
+  await fetchAndRenderCustomers(1, 100); 
+});
 
 document.addEventListener("DOMContentLoaded", async () => {
   $("#companyFilter").selectize({

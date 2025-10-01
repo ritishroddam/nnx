@@ -904,18 +904,12 @@ tr:hover {
   transform: translateY(1px);
 }
 
-/* Remove spinner arrows from number input */
 .page-input::-webkit-outer-spin-button,
 .page-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.page-input {
-  -moz-appearance: textfield;
-}
-
-/* Responsive design */
 @media (max-width: 768px) {
   .pagination-container {
     flex-direction: column;
