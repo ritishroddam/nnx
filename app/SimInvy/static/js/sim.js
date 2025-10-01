@@ -196,11 +196,11 @@ let currentPage = 1;
 const ROWS_PER_PAGE = 100;
 let totalRows = 0;
 
-let currentRowsPerPage = ROWS_PER_PAGE;
+let currentRowsPerPage = 100; 
 
 async function fetchAndRenderSims(page = 1, rowsPerPage = currentRowsPerPage) {
   try {
-    currentRowsPerPage = rowsPerPage; 
+    currentRowsPerPage = rowsPerPage;
     
     const response = await fetch(`/simInvy/get_sims_paginated?page=${page}&per_page=${rowsPerPage}`, {
       headers: {
@@ -217,6 +217,11 @@ async function fetchAndRenderSims(page = 1, rowsPerPage = currentRowsPerPage) {
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+  fetchAndRenderSims(1, 100);
+  updateCountersFromServer();
+});
 
 function renderSimTable(sims) {
   const tableBody = document.getElementById('simTable');
@@ -258,100 +263,47 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     return;
   }
 
+  // Calculate range for current page
   const startItem = ((currentPage - 1) * rowsPerPage) + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalRows);
 
-  let pageNumbers = [];
-  const maxVisiblePages = 5;
-  
-  if (totalPages <= maxVisiblePages) {
-    for (let i = 1; i <= totalPages; i++) {
-      pageNumbers.push(i);
-    }
-  } else {
-    pageNumbers.push(1);
-    
-    let start = Math.max(2, currentPage - 1);
-    let end = Math.min(totalPages - 1, currentPage + 1);
-    
-    if (start > 2) {
-      pageNumbers.push('...');
-    }
-    
-    for (let i = start; i <= end; i++) {
-      pageNumbers.push(i);
-    }
-    
-    if (end < totalPages - 1) {
-      pageNumbers.push('...');
-    }
-    
-    if (totalPages > 1) {
-      pageNumbers.push(totalPages);
-    }
-  }
-
   let html = `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span>Rows per page:</span>
-        <select id="rowsPerPageSelect" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
-          <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
-          <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
-          <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
-          <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
-        </select>
-        <span>${startItem}–${endItem} of ${totalRows}</span>
+    <div class="pagination-container">
+      <div class="pagination-left">
+        <div class="rows-per-page">
+          <span class="pagination-label">Rows per page:</span>
+          <select id="rowsPerPageSelect" class="pagination-select">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
+            <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
+          </select>
+        </div>
+        <div class="page-info">
+          <span>${startItem}-${endItem} of ${totalRows}</span>
+        </div>
       </div>
       
-      <div style="display: flex; align-items: center; gap: 5px;">
-        <button class="btn pagination-btn" id="simPrevPage" ${currentPage === 1 ? 'disabled' : ''}>
-          &lt; Previous
-        </button>
-        
-        ${pageNumbers.map(page => {
-          if (page === '...') {
-            return `<span style="padding: 4px 8px;">...</span>`;
-          } else {
-            return `
-              <button class="btn pagination-btn ${page === currentPage ? 'active' : ''}" 
-                      onclick="fetchAndRenderSims(${page}, ${rowsPerPage})"
-                      style="${page === currentPage ? 'background: #007bff; color: white; border-color: #007bff;' : ''}">
-                ${page}
-              </button>
-            `;
-          }
-        }).join('')}
-        
-        <button class="btn pagination-btn" id="simNextPage" ${currentPage === totalPages ? 'disabled' : ''}>
-          Next &gt;
-        </button>
-        
-        <span style="margin-left: 10px;">Go to Page:</span>
-        <input type="number" id="goToPageInput" 
-               min="1" max="${totalPages}" 
-               style="width: 60px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;"
-               placeholder="${currentPage}">
-        <button class="btn pagination-btn" id="goToPageBtn">Go</button>
+      <div class="pagination-right">
+        <div class="go-to-page">
+          <span class="pagination-label">Go to Page:</span>
+          <input type="number" id="goToPageInput" class="page-input" 
+                 min="1" max="${totalPages}" value="${currentPage}">
+          <button class="pagination-go-btn" id="goToPageBtn">Go</button>
+        </div>
       </div>
     </div>
   `;
   
   paginationDiv.innerHTML = html;
 
-  document.getElementById('simPrevPage').onclick = function() {
-    if (currentPage > 1) fetchAndRenderSims(currentPage - 1, rowsPerPage);
-  };
-  
-  document.getElementById('simNextPage').onclick = function() {
-    if (currentPage < totalPages) fetchAndRenderSims(currentPage + 1, rowsPerPage);
-  };
-
+  // Add event listeners
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
     fetchAndRenderSims(1, newRowsPerPage);
   });
 
+  // Add go to page functionality
   document.getElementById('goToPageBtn').onclick = function() {
     const pageInput = document.getElementById('goToPageInput');
     const targetPage = parseInt(pageInput.value);
@@ -360,12 +312,24 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
       fetchAndRenderSims(targetPage, rowsPerPage);
     } else {
       alert(`Please enter a valid page number between 1 and ${totalPages}`);
+      pageInput.value = currentPage;
     }
   };
 
+  // Allow Enter key in go to page input
   document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       document.getElementById('goToPageBtn').click();
+    }
+  });
+
+  // Validate input on blur
+  document.getElementById('goToPageInput').addEventListener('blur', function() {
+    const value = parseInt(this.value);
+    if (!value || value < 1) {
+      this.value = 1;
+    } else if (value > totalPages) {
+      this.value = totalPages;
     }
   });
 }
