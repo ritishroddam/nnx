@@ -390,6 +390,10 @@ th {
   color: #ccc;
 }
 
+.filter-dropdown {
+  min-width: 250px;
+}
+
 .dark-mode .filter-dropdown {
   background-color: #444;
   color: #eee;
