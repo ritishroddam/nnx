@@ -427,13 +427,6 @@ tr:hover {
   background-color: #f9f9f9;
 }
 
-.device-table thead tr, 
-.device-table tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
 .dark-mode .device-table thead tr,
 .dark-mode .device-table tbody tr {
     color: #ccc;
