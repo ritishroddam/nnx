@@ -416,5 +416,27 @@ def download_excel():
         headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
     )
 
+@vehicleDetails_bp.route('/get_vehicles_paginated')
+@jwt_required()
+def get_vehicles_paginated():
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 100))
+        skip = (page - 1) * per_page
+
+        total = vehicle_collection.count_documents({})
+        vehicles = list(vehicle_collection.find({}).skip(skip).limit(per_page))
+
+        for vehicle in vehicles:
+            vehicle['_id'] = str(vehicle['_id'])
+
+        return jsonify({
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "vehicles": vehicles
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
