@@ -374,15 +374,6 @@ body.modal-open {
   margin-bottom: 0;
 }
 
-.filter-select {
-  width: 100%;
-  max-width: 300px;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  background-color: white;
-}
-
 .filter-container label {
   margin-right: 10px;
   font-weight: 500;
