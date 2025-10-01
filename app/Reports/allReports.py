@@ -272,14 +272,12 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
                     secondDateTime = datum['date_time']
                     continue
                 else:
-                    start_dt = secondDateTime
-                    end_dt = firstDateTime
-                    duration = round(((end_dt - start_dt).total_seconds() / 60.0), 2)
+                    duration = round(((firstDateTime - secondDateTime).total_seconds() / 60.0), 2)
                     resolvedLocation = location if location else geocodeInternal(latitude, longitude) if latitude and longitude else "Location Not Available"
                     df = pd.DataFrame({ 
                           "Vehicle Number": [vehicle_number],	
-                          "FROM DATE & TIME": [firstDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
-                          "TO DATE & TIME": [secondDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
+                          "FROM DATE & TIME": [secondDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
+                          "TO DATE & TIME": [firstDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
                           "DURATION (min)": [duration],
                           "LOCATION": [resolvedLocation]
                         })
@@ -291,14 +289,12 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
                     location = None
 
         if firstDateTime and secondDateTime:
-            start_dt = secondDateTime
-            end_dt = firstDateTime
-            duration = round(((end_dt - start_dt).total_seconds() / 60.0), 2)
+            duration = round(((firstDateTime - secondDateTime).total_seconds() / 60.0), 2)
             resolved_location = location if location else geocodeInternal(latitude, longitude) if latitude and longitude else "Location Not Available"
             df = pd.DataFrame({
-                "Vehicle Number": [vehicle_number],
-                "FROM DATE & TIME": [start_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],
-                "TO DATE & TIME": [end_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],
+                "Vehicle Number": [vehicle_number],	
+                "FROM DATE & TIME": [secondDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
+                "TO DATE & TIME": [firstDateTime.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')],	
                 "DURATION (min)": [duration],
                 "LOCATION": [resolved_location]
             })
@@ -534,11 +530,11 @@ def view_report_preview():
                         continue
                     
                     sep_dict= pd.DataFrame({ 
-                          "Vehicle Number": [f"--- {license_plate} ---"],	
-                          "FROM DATE & TIME": [],	
-                          "TO DATE & TIME": [],	
-                          "DURATION (min)": [],
-                          "LOCATION": []
+                            "Vehicle Number": f"--- {license_plate} ---",
+                            "FROM DATE & TIME": "",	
+                            "TO DATE & TIME": "",	
+                            "DURATION (min)": "",
+                            "LOCATION": ""
                         })
                     all_dfs.append(sep_dict)
                     all_dfs.append(df)
