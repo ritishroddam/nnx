@@ -5,11 +5,6 @@
   padding: 0 10px;
 }
 
-.dark-mode .status-container {
-  background-color: #333;
-  border-color: #555;
-}
-
 .status-item {
   display: flex;
   align-items: center;
@@ -20,10 +15,16 @@
   min-width: 200px;
 }
 
+.dark-mode .status-item{
+  color: #ccc;
+  box-shadow: 0px 0px 10px #cccccc90;
+}
+
 .status-label {
-  font-size: 14px;
+  font-size: 0.9rem;
   color: #6c757d;
-  margin-bottom: 5px;
+  font-weight: 500;
+  margin-top: 5px;
 }
 
 .dark-mode .status-label {
@@ -31,9 +32,14 @@
 }
 
 .status-value {
-  font-size: 24px;
+  font-size: 2rem;
   font-weight: bold;
-  color: #007bff;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.dark-mode .status-value {
+  color: #fff;
 }
 
 input[type="date"],
