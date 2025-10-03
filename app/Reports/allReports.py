@@ -107,11 +107,6 @@ report_configs = {
         'sheet_name': "Daily Report"
     }
 }
-
-REPORT_PROCESSORS = {
-    "stoppage": process_stoppage_report,
-    "idle": process_idle_report,
-}
     
 def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
@@ -548,6 +543,11 @@ def index():
         vehicles = list(db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0}))
         reports = []
         return render_template('allReport.html', vehicles=vehicles, reports=reports)
+ 
+REPORT_PROCESSORS = {
+    "stoppage": process_stoppage_report,
+    "idle": process_idle_report,
+}   
     
 @reports_bp.route('/generate_report', methods=['POST'])
 @jwt_required()
