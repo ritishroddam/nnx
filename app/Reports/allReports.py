@@ -107,6 +107,11 @@ report_configs = {
         'sheet_name': "Daily Report"
     }
 }
+
+REPORT_PROCESSORS = {
+    "stoppage": process_stoppage_report,
+    "idle": process_idle_report,
+}
     
 def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
@@ -230,19 +235,91 @@ def getDateRanges(date_range):
         return f"{(now - timedelta(days=30)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}"
     return f"Hi"
 
+def process_idle_report(imei, vehicle_number, date_filter):
+    try:
+        query = {"imei": imei, "gps": "A"}
+        query.update(date_filter or {})
+        data_asc = list(db["atlanta"].find(
+            query,
+            {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1},
+        ).sort("date_time", ASCENDING))
+        if not data_asc:
+            return None
+
+        current_start = None
+        last_zero_time = None
+        start_lat = None
+        start_lng = None
+        dfs = []
+
+        def push_block(start_dt, end_dt, lat, lng):
+            if not start_dt or not end_dt:
+                return
+            duration_min = round(((end_dt - start_dt).total_seconds() / 60.0), 2)
+            if duration_min < 0:
+                return
+            if lat is not None and lng is not None:
+                try:
+                    resolved = geocodeInternal(float(lat), float(lng))
+                except Exception:
+                    resolved = "Location Not Available"
+            else:
+                resolved = "Location Not Available"
+            df = pd.DataFrame([{
+                "Vehicle Number": vehicle_number,
+                "FROM DATE & TIME": start_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "TO DATE & TIME": end_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "DURATION (min)": duration_min,
+                "LOCATION": resolved
+            }])
+            dfs.append(df)
+
+        for rec in data_asc:
+            ign = str(rec.get('ignition', '')).strip()
+            speed = float(rec.get('speed', 0))
+            ts = rec.get('date_time')
+            lat = rec.get('latitude') if rec.get('latitude') not in ("", None) else None
+            lng = rec.get('longitude') if rec.get('longitude') not in ("", None) else None
+
+            if ign == "1" and speed == 0.00:
+                if current_start is None:
+                    current_start = ts
+                    last_zero_time = ts
+                    start_lat, start_lng = (lat, lng) if (lat is not None and lng is not None) else (None, None)
+                else:
+                    last_zero_time = ts
+                    if start_lat is None and lat is not None and lng is not None:
+                        start_lat, start_lng = lat, lng
+            else:
+                if current_start is not None and last_zero_time is not None:
+                    push_block(current_start, last_zero_time, start_lat, start_lng)
+                current_start = None
+                last_zero_time = None
+                start_lat = None
+                start_lng = None
+
+        # Close any trailing open block
+        if current_start is not None and last_zero_time is not None:
+            push_block(current_start, last_zero_time, start_lat, start_lng)
+
+        if not dfs:
+            return None
+        return pd.concat(dfs, ignore_index=True)
+    except Exception as e:
+        print("[DEBUG] Error generating Idle Report: ", e)
+        return e
+
 def process_stoppage_report(imei, vehicle_number, date_filter):
     try:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        cursor = db["atlanta"].find(
+        data_asc = list(db["atlanta"].find(
             query,
             {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1},
-        ).sort("date_time", DESCENDING)
-        data = list(cursor)
-        if not data:
+        ).sort("date_time", ASCENDING))
+        
+        if not data_asc:
             return None
-
-        data_asc = list(reversed(data))
 
         current_start = None
         last_zero_time = None
@@ -511,7 +588,7 @@ def view_report_preview():
                     if df is None or df.empty:
                         continue
                     all_dfs.append(df)
-            elif report_type == "stoppage":
+            elif report_type == "stoppage" or report_type == "idle":
                 config = report_configs[report_type]
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
@@ -522,8 +599,10 @@ def view_report_preview():
                         license_plate = vehicle["LicensePlateNumber"]
                     else:
                         license_plate = ""
-                        
-                    df = process_stoppage_report(imei, license_plate, date_filter)
+                    
+                    func = REPORT_PROCESSORS.get(report_type)
+                    
+                    df = func(imei, license_plate, date_filter)
                     
                     if not isinstance(df, pd.DataFrame) or df.empty:
                         continue
@@ -583,18 +662,14 @@ def view_report_preview():
                 return jsonify({"success": True, "data": []})
 
             final_df = pd.concat(all_dfs, ignore_index=True)
-            # --- Keep this block as is for column order and JSON output ---
-            # (You can adjust all_possible_columns logic as needed)
-            report_type_for_columns = report_type
+
             all_possible_columns = ['Vehicle Number']
-            if report_type_for_columns == 'odometer-daily-distance':
+            if report_type == 'odometer-daily-distance':
                 all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
-            elif report_type_for_columns == 'stoppage':
+            elif report_type == 'stoppage' or report_type == 'idle':
                 all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
-            elif report_type_for_columns == 'idle':
-                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
-            elif report_type_for_columns == 'ignition':
+            elif report_type == 'ignition':
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
             else:
                 if report_type == 'daily-distance':
@@ -641,9 +716,10 @@ def view_report_preview():
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_distance_report(imei, license_plate, date_filter)
             
-        elif report_type == "stoppage":
+        elif report_type == 'stoppage' or report_type == 'idle':
             date_filter = get_date_range_filter(date_range, from_date, to_date)
-            df = process_stoppage_report(imei, license_plate, date_filter)
+            func = REPORT_PROCESSORS.get(report_type)
+            df = func(imei, license_plate, date_filter)
             if not isinstance(df, pd.DataFrame) or df.empty:
                 return jsonify({"success": True, "data": []})
         else:
@@ -679,10 +755,8 @@ def view_report_preview():
         if report_type == 'odometer-daily-distance':
             all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
-        elif report_type == 'stoppage':
+        elif report_type == 'stoppage' or report_type == 'idle':
             all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
-        elif report_type == 'idle':
-            all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'ignition', 'Idle Duration (min)'])
         elif report_type == 'ignition':
             all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
         else:
