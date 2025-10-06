@@ -1,13 +1,9 @@
-import re
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
-from numpy import long
-from pymongo import ASCENDING, DESCENDING
-import traceback
-import pandas as pd
-from datetime import datetime
 from datetime import timezone as timeZ
+from pymongo import ASCENDING, DESCENDING
+import pandas as pd
 import pytz
 from pytz import timezone
 from io import BytesIO
@@ -21,7 +17,6 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
 from app.geocoding import geocodeInternal
-import tempfile
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -135,7 +130,7 @@ def save_and_return_report(output, report_type, vehicle_number, date_filter=None
             end_dt_utc = dt_part.get('$lte') or dt_part.get('$lt')
     
     if start_dt_utc and not end_dt_utc:
-        end_dt_utc =  datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
+        end_dt_utc =  datetime.now(timeZ.utc)
     
     def _fmt(dt):
         if isinstance(dt, datetime):
