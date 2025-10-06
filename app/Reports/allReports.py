@@ -255,10 +255,6 @@ def process_idle_report(imei, vehicle_number, date_filter):
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
         projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1}
-        # data_asc = list(db["atlanta"].find(
-        #     query,
-        #     projection,
-        # ).sort("date_time", ASCENDING))
         
         data_asc = getData(query, projection)
         
@@ -339,10 +335,8 @@ def process_daily_report(imei, vehicle_doc, date_filter):
         query = {"imei": imei, "gps": "A"}
         if date_filter:
             query.update(date_filter)
-        # Need ignition, speed, odometer, coords
-        cursor = db["atlanta"].find(
-            query,
-            {
+        
+        projection = {
                 "_id": 0,
                 "date_time": 1,
                 "ignition": 1,
@@ -351,8 +345,8 @@ def process_daily_report(imei, vehicle_doc, date_filter):
                 "latitude": 1,
                 "longitude": 1
             }
-        ).sort("date_time", ASCENDING)
-        records = list(cursor)
+
+        records = getData(query, projection)
         if not records:
             return None
 
@@ -492,10 +486,9 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
     try:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        data_asc = list(db["atlanta"].find(
-            query,
-            {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1},
-        ).sort("date_time", ASCENDING))
+        projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1}
+        
+        data_asc = getData(query, projection) 
         
         if not data_asc:
             return None
@@ -565,10 +558,9 @@ def process_ignition_report(imei, vehicle_number, date_filter):
     try:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        data_asc = list(db["atlanta"].find(
-            query,
-            {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "odometer": 1},
-        ).sort("date_time", ASCENDING))
+        projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "odometer": 1}
+        
+        data_asc = getData(query, projection) 
 
         if not data_asc:
             return None
