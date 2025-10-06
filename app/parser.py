@@ -71,6 +71,7 @@ def getData(imei, date_filter, projection):
     print("[DEBUG] Data Processing")
     for doc in ais140_data:
         flat_doc = atlantaAis140ToFront(doc)  # produces atlanta-style keys
+        print("[DEBUG] Data parsed")
         # Filter to requested projection keys + _id if requested
         out_doc = {}
         for field in wanted_fields:
