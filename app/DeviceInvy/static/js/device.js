@@ -90,6 +90,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   fetchAndRenderDevices(1, 100);
   initializeStatusFilter();
+
+  document.getElementById("downloadExcel").onclick = function() {
+    window.location.href = '/deviceInvy/download_excel';
+  };
 });
 
 async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage) {
