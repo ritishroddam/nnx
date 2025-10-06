@@ -766,8 +766,8 @@ def view_report_preview():
                 all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
             elif report_type == 'ignition':
                 all_possible_columns.extend([
-                    'START DATE & TIME','STOP DATE & TIME','START LOCATION','STOP LOCATION',
-                    'DURATION (min)','DISTANCE (km)'
+                    'START DATE & TIME', 'START LOCATION', 'STOP DATE & TIME', 'STOP LOCATION',
+                    'DURATION (min)', 'DISTANCE (km)'
                 ])
             else:
                 if report_type == 'daily-distance':
@@ -857,8 +857,8 @@ def view_report_preview():
             all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
         elif report_type == 'ignition':
             all_possible_columns.extend([
-                'START DATE & TIME','STOP DATE & TIME','START LOCATION','STOP LOCATION',
-                'DURATION (min)','DISTANCE (km)'
+                'START DATE & TIME', 'START LOCATION', 'STOP DATE & TIME', 'STOP LOCATION',
+                'DURATION (min)', 'DISTANCE (km)'
             ])
         else:
             if report_type == 'daily-distance':
