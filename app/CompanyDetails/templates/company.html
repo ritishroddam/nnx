@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<title>Company Details</title>
+<title>Vendor Details</title>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="{{ url_for('CompanyDetails.static', filename='css/company.css') }}" />
@@ -18,7 +18,7 @@ Company Details
 <div class="status-container">
   <div class="status-item">
     <div class="status-value" id="totalCompaniesCount">0</div>
-    <div class="status-label">Total Companies</div>
+    <div class="status-label">Total Vendor's</div>
   </div>
 </div>
 
@@ -40,14 +40,14 @@ Company Details
 <div class="company-modal hidden" id="manualEntryModal">
   <div class="company-modal-content">
     <span class="company-close-btn" id="closeCompanyModal">&times;</span>
-    <h2 style="margin-bottom: 10px;">Add a New Company</h2>
+    <h2 style="margin-bottom: 10px;">Add a New Vendor</h2>
     <form id="manualForm" action="{{ url_for('CompanyDetails.manual_entry') }}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-container">
         <div class="form-group">
-          <label for="CompanyName">Company Name<span style="size: 12px; color: red;">*</span></label>
+          <label for="CompanyName">Vendor Name<span style="size: 12px; color: red;">*</span></label>
           <input type="text" name="CompanyName" id="CompanyName" required />
-          <div id="companyNameError" class="error hidden">Company Name is required.</div>
+          <div id="companyNameError" class="error hidden">Vendor Name is required.</div>
         </div>
         <div class="form-group">
           <label for="ContactPerson">Contact Person<span style="size: 12px; color: red;">*</span></label>
@@ -65,9 +65,9 @@ Company Details
           <div id="phoneNumberError" class="error hidden">Phone Number is required.</div>
         </div>
         <div class="form-group">
-          <label for="CompanyAddress">Company Address<span style="size: 12px; color: red;">*</span></label>
+          <label for="CompanyAddress">Vendor Address<span style="size: 12px; color: red;">*</span></label>
           <input type="text" name="CompanyAddress" id="CompanyAddress" required />
-          <div id="companyAddressError" class="error hidden">Company Address is required.</div>
+          <div id="companyAddressError" class="error hidden">Vendor Address is required.</div>
         </div>
         <div class="form-group">
           <label for="lat">Latitude Of Company</label>

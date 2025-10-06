@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<title>GPS Sim Inventory</title>
+<title>Sim Inventory</title>
 <link rel="stylesheet" href="{{ url_for('SimInvy.static', filename='css/sim.css') }}" />
 <script defer src="{{ url_for('SimInvy.static', filename='js/sim.js') }}"></script>
 {% endblock %}
@@ -60,7 +60,7 @@ Sim Inventory
 <div class="action-buttons">
   <button id="manualEntryBtn" class="btn success">Add New SIM</button>
   <button id="uploadBtn" class="btn">Upload</button>
-  <button id="downloadExcelBtn" class="btn">Download Excel</button>
+  <button id="downloadExcelBtn" class="btn">Download Table</button>
 </div>
 
 <!-- Manual Entry Modal -->
