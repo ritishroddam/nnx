@@ -3,6 +3,29 @@ from app.geocoding import geocodeInternal
 from pymongo import ASCENDING, DESCENDING
 from app.database import db
 
+FLAT_TO_AIS140 = {
+    "latitude": "gps.lat",
+    "longitude": "gps.lon",
+    "dir1": "gps.latDir",
+    "dir2": "gps.lonDir",
+    "course": "gps.heading",
+    "date_time": "gps.timestamp",
+    "speed": "telemetry.speed",
+    "ignition": "telemetry.ignition",
+    "odometer": "telemetry.odometer",
+    "main_power": "telemetry.mainPower",
+    "internal_bat": "telemetry.internalBatteryVoltage",
+    "sos": "telemetry.emergencyStatus",
+    "gsm_sig": "network.gsmSignal",
+    "mobCountryCode": "network.mcc",
+    "mobNetworkCode": "network.mnc",
+    "localAreaCode": "network.lac",
+    "cellid": "network.cellId",
+    "harsh_speed": "packet.id",
+    "harsh_break": "packet.id",
+    "timestamp": "timestamp",
+}
+
 def _convert_date_time_emit(date):
     if not date:
         now = datetime.now(timezone(timedelta(hours=5, minutes=30)))
@@ -56,36 +79,39 @@ def getData(imei, date_filter, projection):
         return data
 
     wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
+    
+    ais140_projection = {"_id": 0, "imei": 1}
 
-    print("[DEBUG] Called Db for data")
+    for flat in wanted_fields:
+        path = FLAT_TO_AIS140.get(flat)
+        if path:
+            ais140_projection[path] = 1
+
+    ais140_query = {"imei": imei, "gps.timestamp": date_filter.get("date_time")}
+
     ais140_data = list(db["atlantaAis140"].find(
-        {"imei": imei, "gps.timestamp": date_filter.get("date_time")},
-        {"_id": 0}
+        ais140_query,
+        ais140_projection
     ).sort("gps.timestamp", ASCENDING))
-    print("[DEBUG] Data recevied from db")
 
     if not ais140_data:
         return []
 
     converted = []
-    print("[DEBUG] Data Processing")
     for doc in ais140_data:
-        flat_doc = atlantaAis140ToFront(doc)  # produces atlanta-style keys
-        print("[DEBUG] Data parsed")
-        # Filter to requested projection keys + _id if requested
-        print("data processing")
+        try:
+            flat_doc = atlantaAis140ToFront(doc)
+        except Exception:
+            continue
         out_doc = {}
         for field in wanted_fields:
             if field in flat_doc:
                 out_doc[field] = flat_doc[field]
-        # Ensure date_time present for sorting
-        if "date_time" not in out_doc and "date_time" in flat_doc:
-            out_doc["date_time"] = flat_doc["date_time"]
-        converted.append(out_doc)
-        print("data processed")
 
-    print("[DEBUG] Data Sorting")
-    # Final sort (safety) by date_time ascending
-    converted.sort(key=lambda r: r.get("date_time") or datetime.min.replace(tzinfo=timezone.utc))
-    print("[DEBUG] Data Sorted")
+        if "date_time" in flat_doc and ("date_time" in projection or "date_time" not in out_doc):
+            out_doc.setdefault("date_time", flat_doc["date_time"])
+        if projection.get("_id"):
+            out_doc["_id"] = flat_doc.get("_id")
+        converted.append(out_doc)
+
     return converted
