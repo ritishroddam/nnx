@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
-from app.utils import roles_required
+from app.utils import roles_required, get_vehicle_data
 from app.parser import atlantaAis140ToFront
 from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime, getTimeAnalysisBasedOnTime
 
