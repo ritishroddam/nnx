@@ -47,33 +47,23 @@ def atlantaAis140ToFront(parsedData):
     return json_data
 
 def getData(imei, date_filter, projection):
-    """
-    Unified data fetch:
-      1. Try 'atlanta' (flat schema) with given projection.
-      2. If no records, try 'atlantaAis140' (nested schema), convert each
-         using atlantaAis140ToFront to flat keys, then filter to requested
-         projection keys.
-    projection: dict of flat atlanta-style field names (e.g. latitude, longitude, speed, date_time)
-    """
     query = {"imei": imei, "gps": "A"}
     query.update(date_filter or {})
 
-    # 1. Primary: atlanta
     data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
+    
     if data:
         return data
 
-    # 2. Fallback: atlantaAis140
-    # Determine which flat fields were requested (exclude _id control flags)
     wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
 
     ais140_data = list(db["atlantaAis140"].find(
-        {"imei": imei},
+        {"imei": imei, "gps.timestamp": date_filter.get("date_time")},
         {"_id": 0}
     ).sort("gps.timestamp", ASCENDING))
 
     if not ais140_data:
-        return None
+        return []
 
     converted = []
     for doc in ais140_data:
