@@ -124,17 +124,41 @@ def format_duration_hms(total_seconds):
     except Exception:
         return "0 s"
     
-def save_and_return_report(output, report_type, vehicle_number):
+def save_and_return_report(output, report_type, vehicle_number, date_filter=None):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
-
-    buffer_content = BytesIO(json.dumps({"data":output},ensure_ascii=False).encode('utf-8'))
     
-    timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
-    report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.json"
+    start_dt_utc = end_dt_utc = None
+    if date_filter and isinstance(date_filter, dict):
+        dt_part = date_filter.get('date_time') or {}
+        if isinstance(dt_part, dict):
+            start_dt_utc = dt_part.get('$gte')
+            end_dt_utc = dt_part.get('$lte') or dt_part.get('$lt')
+    
+    if start_dt_utc and not end_dt_utc:
+        end_dt_utc =  datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
+    
+    def _fmt(dt):
+        if isinstance(dt, datetime):
+            try:
+                return dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
+            except Exception:
+                return "NA"
+        return "NA"
+    
+    start_str = _fmt(start_dt_utc) if start_dt_utc else "NA"
+    end_str = _fmt(end_dt_utc) if end_dt_utc else "NA"
+        
+    base_vehicle = vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'
+    if start_str != "NA" or end_str != "NA":
+        report_filename = f"{report_type}_report_{base_vehicle}_{start_str}_to_{end_str}.json"
+    else:
+        report_filename = f"{report_type}_report_{base_vehicle}.json"
+        
     remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
-
+    
+    buffer_content = BytesIO(json.dumps({"data":output},ensure_ascii=False).encode('utf-8'))
     s3.upload_fileobj(buffer_content, SPACE_NAME, remote_path)
     buffer_content.close()
 
@@ -146,7 +170,9 @@ def save_and_return_report(output, report_type, vehicle_number):
         'size': len(output),
         'generated_at': datetime.now(pytz.UTC),
         'vehicle_number': vehicle_number,
-        'report_type': report_type
+        'report_type': report_type,
+        'range_start_utc': start_dt_utc,
+        'range_end_utc': end_dt_utc
     }
     
     db['generated_reports'].insert_one(report_metadata)
@@ -822,6 +848,7 @@ def view_report_preview():
         date_range = data.get("dateRange", "all")
         from_date = data.get("fromDate")
         to_date = data.get("toDate")
+        date_filter = get_date_range_filter(date_range, from_date, to_date)
 
         if vehicle_number == "all":
             vehicles = list(get_vehicle_data())
@@ -836,7 +863,6 @@ def view_report_preview():
             post_process = None
             
             if report_type == "daily":
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
                 for idx, imei in enumerate(imeis):
                     vdoc = imei_to_plate.get(imei, {})
                     df = process_daily_report(imei, vdoc, date_filter)
@@ -867,13 +893,12 @@ def view_report_preview():
                 final_df = final_df[existing]
                 data_records = final_df.fillna("").to_dict(orient="records")
                 json_str = json.dumps({"success": True,"data": data_records}, ensure_ascii=False)
-                save_and_return_report(data_records, report_type, vehicle_number)
+                save_and_return_report(data_records, report_type, vehicle_number, date_filter)
                 return Response(json_str, mimetype='application/json')
             
             elif report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
                 fields = config['fields']
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
                 for imei in imeis:
                     vehicle = imei_to_plate.get(imei, "")
                     
@@ -889,7 +914,6 @@ def view_report_preview():
             elif report_type in ("stoppage", "idle", "ignition"):
                 config = report_configs[report_type]
                 fields = config['fields']
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
                 for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
                     
@@ -930,7 +954,6 @@ def view_report_preview():
                 if report_type == "distance-speed-range":
                     config = report_configs[report_type]
                     fields = config['fields']
-                    date_filter = get_date_range_filter(date_range, from_date, to_date)
                     df = process_speed_report(imeis, imei_to_plate, date_filter)
                 else:
                     config = report_configs[report_type]
@@ -938,7 +961,6 @@ def view_report_preview():
                     collection = config['collection']
                     base_query = config['query']
                     post_process = config.get('post_process')
-                    date_filter = get_date_range_filter(date_range, from_date, to_date)
                     query = {"imei": {"$in": imeis}}
                     if date_filter:
                         query.update(date_filter)
@@ -1006,7 +1028,7 @@ def view_report_preview():
                 "data": ordered_data
             }, ensure_ascii=False)
             
-            save_and_return_report(ordered_data, report_type, vehicle_number)
+            save_and_return_report(ordered_data, report_type, vehicle_number, date_filter)
 
             return Response(json_str, mimetype='application/json')
 
@@ -1026,7 +1048,6 @@ def view_report_preview():
         post_process = None
         
         if report_type == "daily":
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_daily_report(imei, vehicle, date_filter)
             if df is None or df.empty:
                 return jsonify({"success": True, "data": []})
@@ -1040,15 +1061,13 @@ def view_report_preview():
             df = df[existing]
             data_records = df.fillna("").to_dict(orient="records")
             json_str = json.dumps({"success": True,"data": data_records}, ensure_ascii=False)
-            save_and_return_report(data_records, report_type, vehicle_number)
+            save_and_return_report(data_records, report_type, vehicle_number, date_filter)
             return Response(json_str, mimetype='application/json')
         
         elif report_type == "odometer-daily-distance":
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_distance_report(imei, license_plate, date_filter)
             
         elif report_type in ("stoppage", "idle", "ignition"):
-            date_filter = get_date_range_filter(date_range, from_date, to_date)
             func = REPORT_PROCESSORS.get(report_type)
             df = func(imei, license_plate, date_filter)
             if not isinstance(df, pd.DataFrame) or df.empty:
@@ -1057,7 +1076,6 @@ def view_report_preview():
             if report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
                 df = process_speed_report(imei, vehicle, date_filter)
             else:
                 config = report_configs[report_type]
@@ -1065,7 +1083,6 @@ def view_report_preview():
                 collection = config['collection']
                 base_query = config['query']
                 post_process = config.get('post_process')
-                date_filter = get_date_range_filter(date_range, from_date, to_date)
                 query = {"imei": imei}
                 if date_filter:
                     query.update(date_filter)
@@ -1115,7 +1132,7 @@ def view_report_preview():
             "data": ordered_data
         }, ensure_ascii=False)
         
-        save_and_return_report(ordered_data, report_type, vehicle_number)
+        save_and_return_report(ordered_data, report_type, vehicle_number, date_filter)
 
         return Response(json_str, mimetype='application/json')
 
