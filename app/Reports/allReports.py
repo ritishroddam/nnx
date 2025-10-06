@@ -105,6 +105,24 @@ report_configs = {
         'sheet_name': "Daily Report"
     }
 }
+
+def format_duration_hms(total_seconds):
+    try:
+        secs = int(total_seconds)
+        if secs < 0:
+            secs = 0
+        h = secs // 3600
+        m = (secs % 3600) // 60
+        s = secs % 60
+        parts = []
+        if h > 0:
+            parts.append(f"{h} h")
+        if m > 0 or h > 0:
+            parts.append(f"{m} m")
+        parts.append(f"{s} s")
+        return " ".join(parts)
+    except Exception:
+        return "0 s"
     
 def save_and_return_report(output, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
@@ -300,6 +318,167 @@ def process_idle_report(imei, vehicle_number, date_filter):
     except Exception as e:
         print("[DEBUG] Error generating Idle Report: ", e)
         return e
+
+def process_daily_report(imei, vehicle_doc, date_filter):
+    """
+    Build per-day summary with columns:
+    Vehicle Number, Date, First Ignition On, Odometer Start, Start Location,
+    Last Ignition Off, Odometer End, Stop Location, Avg Speed, Max Speed,
+    Over Speed Count, Running Time, Overspeed Duration, Idle Time,
+    Stoppage Time, Distance, Total Way Points
+    """
+    try:
+        query = {"imei": imei, "gps": "A"}
+        if date_filter:
+            query.update(date_filter)
+        # Need ignition, speed, odometer, coords
+        cursor = db["atlanta"].find(
+            query,
+            {
+                "_id": 0,
+                "date_time": 1,
+                "ignition": 1,
+                "speed": 1,
+                "odometer": 1,
+                "latitude": 1,
+                "longitude": 1
+            }
+        ).sort("date_time", ASCENDING)
+        records = list(cursor)
+        if not records:
+            return None
+
+        # Thresholds (fallbacks if missing in inventory record)
+        normal_speed = float(vehicle_doc.get("normalSpeed") or vehicle_doc.get("normal_speed") or 60)
+        license_plate = vehicle_doc.get("LicensePlateNumber", "")
+
+        tz_ist = IST
+
+        def safe_geocode(lat, lng):
+            try:
+                if lat in (None, "",) or lng in (None, "",):
+                    return "Location Not Available"
+                return geocodeInternal(float(lat), float(lng))
+            except Exception:
+                return "Location Not Available"
+
+        # Bucket records by IST date
+        from collections import defaultdict
+        day_buckets = defaultdict(list)
+        for r in records:
+            dt = r.get("date_time")
+            if not dt:
+                continue
+            dt_ist = dt.astimezone(tz_ist)
+            r["_dt_ist"] = dt_ist
+            r["_date_key"] = dt_ist.date()
+            # Normalize numeric
+            try:
+                r["_speed_f"] = float(r.get("speed", 0) or 0)
+            except:
+                r["_speed_f"] = 0.0
+            try:
+                r["_odo_f"] = float(r.get("odometer", 0) or 0)
+            except:
+                r["_odo_f"] = None
+            day_buckets[r["_date_key"]].append(r)
+
+        rows = []
+        for day, recs in sorted(day_buckets.items()):
+            if not recs:
+                continue
+            # First ignition ON record
+            first_on = next((r for r in recs if str(r.get("ignition", "")).strip() == "1"), None)
+            # Last ignition OFF record (search from end)
+            last_off = None
+            for r in reversed(recs):
+                if str(r.get("ignition", "")).strip() == "0":
+                    last_off = r
+                    break
+            # Fallbacks
+            first_on = first_on or recs[0]
+            last_off = last_off or recs[-1]
+
+            # Odometer start/end
+            odo_start = first_on.get("_odo_f")
+            odo_end = last_off.get("_odo_f")
+            distance = None
+            if odo_start is not None and odo_end is not None:
+                diff = odo_end - odo_start
+                if diff >= 0:
+                    distance = round(diff, 2)
+
+            # Locations
+            start_loc = safe_geocode(first_on.get("latitude"), first_on.get("longitude"))
+            stop_loc = safe_geocode(last_off.get("latitude"), last_off.get("longitude"))
+
+            # Speed stats
+            speeds = [r["_speed_f"] for r in recs if r["_speed_f"] is not None]
+            avg_speed = round(sum(speeds) / len(speeds), 2) if speeds else 0.0
+            max_speed = round(max(speeds), 2) if speeds else 0.0
+
+            # Way points
+            total_way_points = len(recs)
+
+            # Durations
+            running_seconds = 0
+            idle_seconds = 0
+            stoppage_seconds = 0
+            overspeed_seconds = 0
+            overspeed_count = 0
+
+            prev = None
+            for r in recs:
+                if prev:
+                    delta = (r["_dt_ist"] - prev["_dt_ist"]).total_seconds()
+                    if delta < 0:
+                        delta = 0
+                    prev_ign = str(prev.get("ignition", "")).strip()
+                    prev_speed = prev["_speed_f"]
+                    # Running
+                    if prev_ign == "1" and prev_speed > 0:
+                        running_seconds += delta
+                    # Idle
+                    if prev_ign == "1" and prev_speed == 0:
+                        idle_seconds += delta
+                    # Stoppage
+                    if prev_ign == "0":
+                        stoppage_seconds += delta
+                    # Overspeed
+                    if prev_speed >= normal_speed:
+                        overspeed_seconds += delta
+                prev = r
+
+            # Overspeed count (number of records with speed >= threshold)
+            overspeed_count = sum(1 for r in recs if r["_speed_f"] >= normal_speed)
+
+            row = {
+                "Vehicle Number": license_plate,
+                "Date": day.strftime("%Y-%m-%d"),
+                "First Ignition On": first_on["_dt_ist"].strftime('%Y-%m-%d %H:%M:%S'),
+                "Odometer Start": odo_start if odo_start is not None else "",
+                "Start Location": start_loc,
+                "Last Ignition Off": last_off["_dt_ist"].strftime('%Y-%m-%d %H:%M:%S'),
+                "Odometer End": odo_end if odo_end is not None else "",
+                "Stop Location": stop_loc,
+                "Avg Speed": avg_speed,
+                "Max Speed": max_speed,
+                "Over Speed Count": overspeed_count,
+                "Running Time": format_duration_hms(running_seconds),
+                "Overspeed Duration": format_duration_hms(overspeed_seconds),
+                "Idle Time": format_duration_hms(idle_seconds),
+                "Stoppage Time": format_duration_hms(stoppage_seconds),
+                "Distance": distance if distance is not None else "",
+                "Total Way Points": total_way_points
+            }
+            rows.append(row)
+
+        if not rows:
+            return None
+        return pd.DataFrame(rows)
+    except Exception as e:
+        print("[DEBUG] Error generating Daily Report: ", e)
+        return None
 
 def process_stoppage_report(imei, vehicle_number, date_filter):
     try:
@@ -656,7 +835,42 @@ def view_report_preview():
             
             post_process = None
             
-            if report_type == "odometer-daily-distance":
+            if report_type == "daily":
+                date_filter = get_date_range_filter(date_range, from_date, to_date)
+                for idx, imei in enumerate(imeis):
+                    vdoc = imei_to_plate.get(imei, {})
+                    df = process_daily_report(imei, vdoc, date_filter)
+                    if df is None or df.empty:
+                        continue
+                    # separator after first
+                    if idx > 0:
+                        sep_df = pd.DataFrame([{
+                            "Vehicle Number": f"--- {vdoc.get('LicensePlateNumber','')} ---",
+                            "Date": "", "First Ignition On": "", "Odometer Start": "",
+                            "Start Location": "", "Last Ignition Off": "", "Odometer End": "",
+                            "Stop Location": "", "Avg Speed": "", "Max Speed": "",
+                            "Over Speed Count": "", "Running Time": "", "Overspeed Duration": "",
+                            "Idle Time": "", "Stoppage Time": "", "Distance": "", "Total Way Points": ""
+                        }])
+                        all_dfs.append(sep_df)
+                    all_dfs.append(df)
+                if not all_dfs:
+                    return jsonify({"success": True, "data": []})
+                final_df = pd.concat(all_dfs, ignore_index=True)
+                desired_cols = [
+                    "Vehicle Number","Date","First Ignition On","Odometer Start","Start Location",
+                    "Last Ignition Off","Odometer End","Stop Location","Avg Speed","Max Speed",
+                    "Over Speed Count","Running Time","Overspeed Duration","Idle Time",
+                    "Stoppage Time","Distance","Total Way Points"
+                ]
+                existing = [c for c in desired_cols if c in final_df.columns]
+                final_df = final_df[existing]
+                data_records = final_df.fillna("").to_dict(orient="records")
+                json_str = json.dumps({"success": True,"data": data_records}, ensure_ascii=False)
+                save_and_return_report(data_records, report_type, vehicle_number)
+                return Response(json_str, mimetype='application/json')
+            
+            elif report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
@@ -676,7 +890,7 @@ def view_report_preview():
                 config = report_configs[report_type]
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
-                for imei in imeis:
+                for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
                     
                     if vehicle:
@@ -691,25 +905,26 @@ def view_report_preview():
                     if not isinstance(df, pd.DataFrame) or df.empty:
                         continue
                     
-                    if report_type != "ignition":
-                        sep_dict= pd.DataFrame([{ 
-                                "Vehicle Number": f"--- {license_plate} ---",
-                                "FROM DATE & TIME": "",	
-                                "TO DATE & TIME": "",	
-                                "DURATION (min)": "",
-                                "LOCATION": ""
-                            }])
-                    else:
-                        sep_dict = pd.DataFrame([{
-                                "Vehicle Number": f"--- {license_plate} ---",
-                                "START DATE & TIME": "",
-                                "START LOCATION": "",
-                                "STOP DATE & TIME": "",
-                                "STOP LOCATION": "",
-                                "DURATION (min)": "",
-                                "DISTANCE (km)": ""
-                            }])
-                    all_dfs.append(sep_dict)
+                    if idx > 0:
+                        if report_type != "ignition":
+                            sep_dict= pd.DataFrame([{ 
+                                    "Vehicle Number": f"--- {license_plate} ---",
+                                    "FROM DATE & TIME": "",	
+                                    "TO DATE & TIME": "",	
+                                    "DURATION (min)": "",
+                                    "LOCATION": ""
+                                }])
+                        else:
+                            sep_dict = pd.DataFrame([{
+                                    "Vehicle Number": f"--- {license_plate} ---",
+                                    "START DATE & TIME": "",
+                                    "START LOCATION": "",
+                                    "STOP DATE & TIME": "",
+                                    "STOP LOCATION": "",
+                                    "DURATION (min)": "",
+                                    "DISTANCE (km)": ""
+                                }])
+                        all_dfs.append(sep_dict)
                     all_dfs.append(df)
             else:
                 if report_type == "distance-speed-range":
@@ -810,7 +1025,25 @@ def view_report_preview():
         
         post_process = None
         
-        if report_type == "odometer-daily-distance":
+        if report_type == "daily":
+            date_filter = get_date_range_filter(date_range, from_date, to_date)
+            df = process_daily_report(imei, vehicle, date_filter)
+            if df is None or df.empty:
+                return jsonify({"success": True, "data": []})
+            desired_cols = [
+                "Vehicle Number","Date","First Ignition On","Odometer Start","Start Location",
+                "Last Ignition Off","Odometer End","Stop Location","Avg Speed","Max Speed",
+                "Over Speed Count","Running Time","Overspeed Duration","Idle Time",
+                "Stoppage Time","Distance","Total Way Points"
+            ]
+            existing = [c for c in desired_cols if c in df.columns]
+            df = df[existing]
+            data_records = df.fillna("").to_dict(orient="records")
+            json_str = json.dumps({"success": True,"data": data_records}, ensure_ascii=False)
+            save_and_return_report(data_records, report_type, vehicle_number)
+            return Response(json_str, mimetype='application/json')
+        
+        elif report_type == "odometer-daily-distance":
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_distance_report(imei, license_plate, date_filter)
             
