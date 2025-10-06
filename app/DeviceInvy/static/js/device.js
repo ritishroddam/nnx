@@ -99,15 +99,6 @@ console.log("Initializing download button...");
   if (downloadBtn) {
     downloadBtn.addEventListener("click", async function() {
       console.log("Download button clicked!");
-      
-      try {
-        const accessToken = localStorage.getItem('access_token') || getCookie('access_token_cookie');
-        console.log("Access token exists:", !!accessToken);
-        
-        if (!accessToken) {
-          alert('Please log in again to download the file.');
-          return;
-        }
         
         console.log("Making fetch request to /deviceInvy/download_excel");
         const response = await fetch('/deviceInvy/download_excel', {
@@ -137,11 +128,6 @@ console.log("Initializing download button...");
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         console.log("Download completed successfully");
-        
-      } catch (error) {
-        console.error('Download error:', error);
-        alert('Failed to download the file. Please try again.');
-      }
     });
     
     console.log("Download button event listener attached successfully");
