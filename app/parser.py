@@ -47,11 +47,75 @@ def atlantaAis140ToFront(parsedData):
     return json_data
 
 def getData(imei, date_filter, projection):
+    """
+    Unified data fetch:
+      1. Try 'atlanta' (flat schema) with given projection.
+      2. If no records, try 'atlantaAis140' (nested schema), convert each
+         using atlantaAis140ToFront to flat keys, then filter to requested
+         projection keys.
+    projection: dict of flat atlanta-style field names (e.g. latitude, longitude, speed, date_time)
+    """
     query = {"imei": imei, "gps": "A"}
     query.update(date_filter or {})
-    data_asc = list(db["atlanta"].find(
-            query,
-            projection,
-        ).sort("date_time", ASCENDING))
-    
-    return data_asc
+
+    # 1. Primary: atlanta
+    data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
+    if data:
+        return data
+
+    # 2. Fallback: atlantaAis140
+    # Determine which flat fields were requested (exclude _id control flags)
+    wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
+
+    # Minimal projection for nested ais140 schema (grab blocks needed to derive flat fields)
+    ais140_projection = {
+        "_id": 0,
+        "imei": 1,
+        "gps.lat": 1,
+        "gps.lon": 1,
+        "gps.timestamp": 1,
+        "gps.heading": 1,
+        "gps.latDir": 1,
+        "gps.lonDir": 1,
+        "telemetry.speed": 1,
+        "telemetry.ignition": 1,
+        "telemetry.odometer": 1,
+        "telemetry.mainPower": 1,
+        "telemetry.internalBatteryVoltage": 1,
+        "telemetry.emergencyStatus": 1,
+        "telemetry.mainBatteryVoltage": 1,
+        "network.gsmSignal": 1,
+        "network.mcc": 1,
+        "network.mnc": 1,
+        "network.lac": 1,
+        "network.cellId": 1,
+        "packet.id": 1,
+        "timestamp": 1    # raw packet timestamp if present
+    }
+
+    ais140_data = list(db["atlantaAis140"].find(
+        {"imei": imei, "gps.timestamp": {"$exists": True}, **{k: v for k, v in query.items() if k not in ["date_time"]}},
+        ais140_projection
+    ).sort("gps.timestamp", ASCENDING))
+
+    if not ais140_data:
+        return None
+
+    converted = []
+    for doc in ais140_data:
+        flat_doc = atlantaAis140ToFront(doc)  # produces atlanta-style keys
+        # Filter to requested projection keys + _id if requested
+        out_doc = {}
+        for field in wanted_fields:
+            if field in flat_doc:
+                out_doc[field] = flat_doc[field]
+        # Ensure date_time present for sorting
+        if "date_time" not in out_doc and "date_time" in flat_doc:
+            out_doc["date_time"] = flat_doc["date_time"]
+        if "_id" in projection:
+            out_doc["_id"] = flat_doc.get("_id")
+        converted.append(out_doc)
+
+    # Final sort (safety) by date_time ascending
+    converted.sort(key=lambda r: r.get("date_time") or datetime.min.replace(tzinfo=timezone.utc))
+    return converted
