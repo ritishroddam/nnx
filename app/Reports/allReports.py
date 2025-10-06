@@ -1,6 +1,8 @@
 from ast import Lambda
+from codecs import oem_decode
 import re
-from tracemalloc import start
+from tracemalloc import start, stop
+from turtle import distance
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
@@ -293,7 +295,6 @@ def process_idle_report(imei, vehicle_number, date_filter):
                 start_lat = None
                 start_lng = None
 
-        # Close any trailing open block
         if current_start is not None and last_zero_time is not None:
             push_block(current_start, last_zero_time, start_lat, start_lng)
 
@@ -367,7 +368,6 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
                 start_lat = None
                 start_lng = None
 
-        # Close any trailing open block
         if current_start is not None and last_zero_time is not None:
             push_block(current_start, last_zero_time, start_lat, start_lng)
 
@@ -376,6 +376,93 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
         return pd.concat(dfs, ignore_index=True)
     except Exception as e:
         print("[DEBUG] Error generating Stoppage Report: ", e)
+        return e
+    
+def process_ignition_report(imei, vehicle_number, date_filter):
+    try:
+        query = {"imei": imei, "gps": "A"}
+        query.update(date_filter or {})
+        data_asc = list(db["atlanta"].find(
+            query,
+            {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "odometer": 1},
+        ).sort("date_time", ASCENDING))
+
+        if not data_asc:
+            return None
+
+        dfs = []
+        current_start = None
+        start_lat = start_lng = None
+        last_valid_lat = last_valid_lng = None
+
+        def safe_geocode(lat, lng):
+            try:
+                if lat is None or lng is None:
+                    return "Location Not Available"
+                return geocodeInternal(float(lat), float(lng))
+            except Exception:
+                return "Location Not Available"
+
+        def push_block(start_dt, stop_dt_calc, s_lat, s_lng, e_lat, e_lng, start_odo, end_odo, ongoing=False):
+            if not start_dt or not stop_dt_calc:
+                return
+            duration_min = round((stop_dt_calc - start_dt).total_seconds() / 60.0, 2)
+            if duration_min < 0:
+                return
+            start_resolved = safe_geocode(s_lat, s_lng)
+            end_resolved = safe_geocode(e_lat, e_lng)
+            distance = float(end_odo) - float(start_odo)
+            stop_display = "ONGOING" if ongoing else stop_dt_calc.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
+            df = pd.DataFrame([{
+                "Vehicle Number": vehicle_number,
+                "START DATE & TIME": start_dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "START LOCATION": start_resolved,
+                "STOP DATE & TIME": stop_display,
+                "STOP LOCATION": end_resolved,
+                "DURATION (min)": duration_min,
+                "DISTANCE": distance
+            }])
+            dfs.append(df)
+
+        for rec in data_asc:
+            ign = str(rec.get("ignition", "")).strip()
+            ts = rec.get("date_time")
+            lat = rec.get("latitude") if rec.get("latitude") not in ("", None) else None
+            lng = rec.get("longitude") if rec.get("longitude") not in ("", None) else None
+            odo = rec.get("odometer")
+
+            if ign == "1":
+                if current_start is None:
+                    current_start = ts
+                    start_lat, start_lng = lat, lng
+                    last_valid_lat, last_valid_lng = lat, lng
+                    start_odo = odo
+                else:
+                    if lat is not None and lng is not None:
+                        last_valid_lat, last_valid_lng = lat, lng
+                    end_odo = odo
+            else:
+                if current_start is not None:
+                    end_lat = last_valid_lat if last_valid_lat is not None else start_lat
+                    end_lng = last_valid_lng if last_valid_lng is not None else start_lng
+                    end_odo = odo
+                    push_block(current_start, ts, start_lat, start_lng, end_lat, end_lng, start_odo, end_odo, ongoing=False)
+                    current_start = None
+                    start_lat = start_lng = None
+                    last_valid_lat = last_valid_lng = None
+                    start_odo = end_odo = None
+
+        if current_start is not None:
+            calc_stop = datetime.now(pytz.UTC)
+            end_lat = last_valid_lat if last_valid_lat is not None else start_lat
+            end_lng = last_valid_lng if last_valid_lng is not None else start_lng
+            push_block(current_start, calc_stop, start_lat, start_lng, end_lat, end_lng, start_odo, end_odo, ongoing=True)
+
+        if not dfs:
+            return None
+        return pd.concat(dfs, ignore_index=True)
+    except Exception as e:
+        print("[DEBUG] Error generating Ignition Report: ", e)
         return e
 
 def process_distance_report(imei, vehicle_number, date_filter):
@@ -547,6 +634,7 @@ def index():
 REPORT_PROCESSORS = {
     "stoppage": process_stoppage_report,
     "idle": process_idle_report,
+    "ignition": process_ignition_report,
 }   
     
 @reports_bp.route('/generate_report', methods=['POST'])
@@ -588,7 +676,7 @@ def view_report_preview():
                     if df is None or df.empty:
                         continue
                     all_dfs.append(df)
-            elif report_type == "stoppage" or report_type == "idle":
+            elif report_type in ("stoppage", "idle", "ignition"):
                 config = report_configs[report_type]
                 fields = config['fields']
                 date_filter = get_date_range_filter(date_range, from_date, to_date)
@@ -607,13 +695,24 @@ def view_report_preview():
                     if not isinstance(df, pd.DataFrame) or df.empty:
                         continue
                     
-                    sep_dict= pd.DataFrame([{ 
-                            "Vehicle Number": f"--- {license_plate} ---",
-                            "FROM DATE & TIME": "",	
-                            "TO DATE & TIME": "",	
-                            "DURATION (min)": "",
-                            "LOCATION": ""
-                        }])
+                    if report_type != "ignition":
+                        sep_dict= pd.DataFrame([{ 
+                                "Vehicle Number": f"--- {license_plate} ---",
+                                "FROM DATE & TIME": "",	
+                                "TO DATE & TIME": "",	
+                                "DURATION (min)": "",
+                                "LOCATION": ""
+                            }])
+                    else:
+                        sep_dict = df = pd.DataFrame([{
+                                "Vehicle Number": f"--- {license_plate} ---",
+                                "START DATE & TIME": "",
+                                "START LOCATION": "",
+                                "STOP DATE & TIME": "",
+                                "STOP LOCATION": "",
+                                "DURATION (min)": "",
+                                "DISTANCE": ""
+                            }])
                     all_dfs.append(sep_dict)
                     all_dfs.append(df)
             else:
@@ -670,7 +769,10 @@ def view_report_preview():
             elif report_type == 'stoppage' or report_type == 'idle':
                 all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
             elif report_type == 'ignition':
-                all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
+                all_possible_columns.extend([
+                    'START DATE & TIME','STOP DATE & TIME','START LOCATION','STOP LOCATION',
+                    'DURATION (min)','DISTANCE (km)'
+                ])
             else:
                 if report_type == 'daily-distance':
                     all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
@@ -716,7 +818,7 @@ def view_report_preview():
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             df = process_distance_report(imei, license_plate, date_filter)
             
-        elif report_type == 'stoppage' or report_type == 'idle':
+        elif report_type in ("stoppage", "idle", "ignition"):
             date_filter = get_date_range_filter(date_range, from_date, to_date)
             func = REPORT_PROCESSORS.get(report_type)
             df = func(imei, license_plate, date_filter)
@@ -758,7 +860,10 @@ def view_report_preview():
         elif report_type == 'stoppage' or report_type == 'idle':
             all_possible_columns.extend(['FROM DATE & TIME', 'TO DATE & TIME', 'DURATION (min)', 'LOCATION'])
         elif report_type == 'ignition':
-            all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'ignition', 'Ignition Duration (min)'])
+            all_possible_columns.extend([
+                'START DATE & TIME','STOP DATE & TIME','START LOCATION','STOP LOCATION',
+                'DURATION (min)','DISTANCE (km)'
+            ])
         else:
             if report_type == 'daily-distance':
                 all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
