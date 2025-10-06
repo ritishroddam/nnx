@@ -339,7 +339,7 @@ body.modal-open {
 }
 
 .modal-content {
-  background: #ffffff;
+  background-color: white;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 24px 32px 32px 32px;
@@ -352,6 +352,7 @@ body.modal-open {
 }
 
 .dark-mode .modal-content {
+  background-color: black;
   color: #ccc;
   border: 1px solid #374151;
   box-shadow: 0 0 10px #cccccc90;
