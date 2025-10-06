@@ -700,7 +700,7 @@ def view_report_preview():
                                 "LOCATION": ""
                             }])
                     else:
-                        sep_dict = df = pd.DataFrame([{
+                        sep_dict = pd.DataFrame([{
                                 "Vehicle Number": f"--- {license_plate} ---",
                                 "START DATE & TIME": "",
                                 "START LOCATION": "",
