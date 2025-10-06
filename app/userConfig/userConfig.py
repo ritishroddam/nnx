@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.geocoding import geocodeInternal
 from bson import ObjectId
 from functools import wraps
-from app.utils import roles_required, get_filtered_results 
+from app.utils import roles_required
 import gridfs
 import io
 

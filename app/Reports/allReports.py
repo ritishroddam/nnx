@@ -17,6 +17,7 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
 from app.geocoding import geocodeInternal
+from app.parser import atlantaAis140ToFront, getData
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -249,32 +250,18 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
             raise ValueError(f"Invalid custom date range: {str(e)}")
     return {}
 
-def getDateRanges(date_range):
-    tz = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(tz)
-
-    if date_range == "last24hours":
-        return f"Last 24 hours from {now.strftime('%Y-%m-%d %H:%M:%S')}"
-    elif date_range == "today":
-        today_start = datetime(now.year, now.month, now.day, tzinfo=tz)
-        return f"{today_start.strftime('%Y-%m-%d')}"
-    elif date_range == "yesterday":
-        yesterday_start_ist = now - timedelta(days=1)
-        return f"{yesterday_start_ist.strftime('%Y-%m-%d')}"
-    elif date_range == "last7days":
-        return f"{(now - timedelta(days=7)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}" 
-    elif date_range == "last30days":
-        return f"{(now - timedelta(days=30)).strftime('%Y-%m-%d')} to {now.strftime('%Y-%m-%d')}"
-    return f"Hi"
-
 def process_idle_report(imei, vehicle_number, date_filter):
     try:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        data_asc = list(db["atlanta"].find(
-            query,
-            {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1},
-        ).sort("date_time", ASCENDING))
+        projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1},
+        # data_asc = list(db["atlanta"].find(
+        #     query,
+        #     projection,
+        # ).sort("date_time", ASCENDING))
+        
+        data_asc = getData(query, projection)
+        
         if not data_asc:
             return None
 
@@ -777,7 +764,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             cursor = db["atlanta"].find(
                 query,
                 {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-            ).sort("date_time", -1)
+            ).sort("date_time", DESCENDING)
             df = pd.DataFrame(list(cursor))
             return df
 
@@ -790,7 +777,7 @@ def process_speed_report(imeis, vehicles, date_filter):
             cursor = db["atlanta"].find(
                 query,
                 {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-            ).sort("date_time", -1)
+            ).sort("date_time", DESCENDING)
             cursor = list(cursor)
             if cursor:
                 i += 1

@@ -1,6 +1,7 @@
-
 from datetime import datetime, timezone, timedelta
 from app.geocoding import geocodeInternal
+from pymongo import ASCENDING, DESCENDING
+from app.database import db
 
 def _convert_date_time_emit(date):
     if not date:
@@ -44,3 +45,11 @@ def atlantaAis140ToFront(parsedData):
         "date_time": parsedData.get("gps", {}).get("timestamp"),
     }
     return json_data
+
+def getData(query, projection):
+    data_asc = list(db["atlanta"].find(
+            query,
+            projection,
+        ).sort("date_time", ASCENDING))
+    
+    return data_asc
