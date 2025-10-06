@@ -416,7 +416,7 @@ def process_ignition_report(imei, vehicle_number, date_filter):
                 "STOP DATE & TIME": stop_display,
                 "STOP LOCATION": end_resolved,
                 "DURATION (min)": duration_min,
-                "DISTANCE": distance
+                "DISTANCE (km)": distance
             }])
             dfs.append(df)
 
@@ -707,7 +707,7 @@ def view_report_preview():
                                 "STOP DATE & TIME": "",
                                 "STOP LOCATION": "",
                                 "DURATION (min)": "",
-                                "DISTANCE": ""
+                                "DISTANCE (km)": ""
                             }])
                     all_dfs.append(sep_dict)
                     all_dfs.append(df)
