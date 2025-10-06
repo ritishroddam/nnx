@@ -1,5 +1,3 @@
-from ast import Lambda
-from codecs import oem_decode
 import re
 from tracemalloc import start, stop
 from turtle import distance
