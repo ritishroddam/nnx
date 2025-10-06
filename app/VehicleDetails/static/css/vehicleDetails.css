@@ -262,6 +262,7 @@ body.modal-open {
 }
 
 .dark-mode .modal-content {
+  background-color: black;
   color: #ccc;
   border: 1px solid #374151;
   box-shadow: 0 0 10px #cccccc90;
