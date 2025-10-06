@@ -90,6 +90,10 @@ document.addEventListener("DOMContentLoaded", function () {
   
   fetchAndRenderDevices(1, 100);
   initializeStatusFilter();
+
+  document.getElementById("downloadExcel").onclick = function() {
+    window.location.href = '/deviceInvy/download_excel';
+  };
 });
 
 async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage) {
@@ -612,44 +616,6 @@ function updateStatusCountsFromData(devices) {
 //     form.submit();
 //     document.body.removeChild(form);
 // });
-
-document.getElementById("downloadExcel").addEventListener("click", async function() {
-    try {
-        const accessToken = localStorage.getItem('access_token') || getCookie('access_token_cookie');
-        
-        if (!accessToken) {
-            alert('Please log in again to download the file.');
-            return;
-        }
-        
-        const response = await fetch('/deviceInvy/download_excel', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'X-CSRF-TOKEN': getCookie("csrf_access_token"),
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Download failed');
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'Device_Inventory.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-    } catch (error) {
-        console.error('Download error:', error);
-        alert('Failed to download the file. Please try again.');
-    }
-});
 
 function editDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);

@@ -374,7 +374,12 @@ def download_excel():
             lambda d: d.astimezone(timezone(timedelta(hours=5, minutes=30))).strftime('%d-%m-%Y %I:%M %p')
             if pd.notnull(d) and hasattr(d, 'astimezone') else ''
         )
-        
+    
+    datetime_columns = ['Purchase Date', 'Warranty', 'Outward/Inward Date']
+    for col in datetime_columns:
+        if col in df.columns:
+            df[col] = df[col].astype(str)
+    
     column_order = [
         'IMEI',
         'SLNumber',
