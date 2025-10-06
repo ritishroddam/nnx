@@ -34,38 +34,50 @@ def _convert_date_time_emit(date):
     ist = date.astimezone(timezone(timedelta(hours=5, minutes=30)))
     return ist.strftime("%d%m%y"), ist.strftime("%H%M%S")
 
-def atlantaAis140ToFront(parsedData):
+def atlantaAis140ToFront(parsedData, include_address=True):
     date, time = _convert_date_time_emit(parsedData.get("timestamp"))
 
-    address = geocodeInternal(parsedData.get("gps", {}).get("lat"), parsedData.get("gps", {}).get("lon"))
+    gps = parsedData.get("gps", {}) or {}
+    telemetry = parsedData.get("telemetry", {}) or {}
+    network = parsedData.get("network", {}) or {}
+    packet = parsedData.get("packet", {}) or {}
+    packet_id = str(packet.get("id", ""))
+
+    if include_address:
+        try:
+            address = geocodeInternal(gps.get("lat"), gps.get("lon"))
+        except Exception:
+            address = None
+    else:
+        address = None
+
     json_data = {
         "_id": parsedData.get("_id"),
         "imei": parsedData.get("imei"),
-        "speed": parsedData.get("telemetry", {}).get("speed"),
-        "latitude": parsedData.get("gps", {}).get("lat"),
-        "dir1": parsedData.get("gps", {}).get("latDir"),
-        "longitude": parsedData.get("gps", {}).get("lon"),
-        "dir2": parsedData.get("gps", {}).get("lonDir"),
+        "speed": telemetry.get("speed"),
+        "latitude": gps.get("lat"),
+        "dir1": gps.get("latDir"),
+        "longitude": gps.get("lon"),
+        "dir2": gps.get("lonDir"),
         "date": date,
         "time": time,
-        "course": parsedData.get("gps", {}).get("heading"),
+        "course": gps.get("heading"),
         "address": address,
-        "ignition": parsedData.get("telemetry", {}).get("ignition"),
-        "gsm_sig": parsedData.get("network", {}).get("gsmSignal"),
-        "sos": parsedData.get("telemetry", {}).get("emergencyStatus"),
-        "odometer": parsedData.get("telemetry", {}).get("odometer"),
-        "main_power": parsedData.get("telemetry", {}).get("mainPower"),
-        "harsh_speed": "0" if parsedData.get("packet").get("id") != "14" else "1",
-        "harsh_break": "0" if parsedData.get("packet").get("id") != "13" else "1",
-        "adc_voltage": parsedData.get("telemetry", {}).get("mainBatteryVoltage"),
-        "odometer": parsedData.get("telemetry", {}).get("odometer"),
-        "internal_bat": parsedData.get("telemetry", {}).get("internalBatteryVoltage"),
-        "gsm_sig": parsedData.get("network", {}).get("gsmSignal"),
-        "mobCountryCode": parsedData.get("network", {}).get("mcc"),
-        "mobNetworkCode": parsedData.get("network", {}).get("mnc"),
-        "localAreaCode": parsedData.get("network", {}).get("lac"),
-        "cellid": parsedData.get("network", {}).get("cellId"),
-        "date_time": parsedData.get("gps", {}).get("timestamp"),
+        "ignition": telemetry.get("ignition"),
+        "gsm_sig": network.get("gsmSignal"),
+        "sos": telemetry.get("emergencyStatus"),
+        "odometer": telemetry.get("odometer"),
+        "main_power": telemetry.get("mainPower"),
+        "harsh_speed": "1" if packet_id == "14" else "0",
+        "harsh_break": "1" if packet_id == "13" else "0",
+        "adc_voltage": telemetry.get("mainBatteryVoltage"),
+        "internal_bat": telemetry.get("internalBatteryVoltage"),
+        "mobCountryCode": network.get("mcc"),
+        "mobNetworkCode": network.get("mnc"),
+        "localAreaCode": network.get("lac"),
+        "cellid": network.get("cellId"),
+        "date_time": gps.get("timestamp"),
+        "timestamp": parsedData.get("timestamp"),
     }
     return json_data
 
@@ -74,40 +86,42 @@ def getData(imei, date_filter, projection):
     query.update(date_filter or {})
 
     data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
-    
     if data:
         return data
 
     wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
-    
-    ais140_projection = {"_id": 0, "imei": 1}
 
+    ais140_projection = {"_id": 0, "imei": 1}
     for flat in wanted_fields:
         path = FLAT_TO_AIS140.get(flat)
         if path:
             ais140_projection[path] = 1
 
-    ais140_query = {"imei": imei, "gps.timestamp": date_filter.get("date_time")}
+    dt_filter = None
+    if isinstance(date_filter, dict):
+        dt_filter = date_filter.get("date_time")
 
-    ais140_data = list(db["atlantaAis140"].find(
-        ais140_query,
-        ais140_projection
-    ).sort("gps.timestamp", ASCENDING))
+    ais140_query = {"imei": imei}
+    if dt_filter is not None:
+        ais140_query["gps.timestamp"] = dt_filter
+
+    ais140_data = list(
+        db["atlantaAis140"].find(
+            ais140_query,
+            ais140_projection
+        ).sort("gps.timestamp", ASCENDING)
+    )
 
     if not ais140_data:
         return []
 
     converted = []
     for doc in ais140_data:
-        try:
-            flat_doc = atlantaAis140ToFront(doc)
-        except Exception:
-            continue
+        flat_doc = atlantaAis140ToFront(doc, include_address=False)
         out_doc = {}
         for field in wanted_fields:
             if field in flat_doc:
                 out_doc[field] = flat_doc[field]
-
         if "date_time" in flat_doc and ("date_time" in projection or "date_time" not in out_doc):
             out_doc.setdefault("date_time", flat_doc["date_time"])
         if projection.get("_id"):
