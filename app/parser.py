@@ -57,15 +57,18 @@ def getData(imei, date_filter, projection):
 
     wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
 
+    print("[DEBUG] Called Db for data")
     ais140_data = list(db["atlantaAis140"].find(
         {"imei": imei, "gps.timestamp": date_filter.get("date_time")},
         {"_id": 0}
     ).sort("gps.timestamp", ASCENDING))
+    print("[DEBUG] Data recevied from db")
 
     if not ais140_data:
         return []
 
     converted = []
+    print("[DEBUG] Data Processing")
     for doc in ais140_data:
         flat_doc = atlantaAis140ToFront(doc)  # produces atlanta-style keys
         # Filter to requested projection keys + _id if requested
@@ -78,6 +81,8 @@ def getData(imei, date_filter, projection):
             out_doc["date_time"] = flat_doc["date_time"]
         converted.append(out_doc)
 
+    print("[DEBUG] Data Sorting")
     # Final sort (safety) by date_time ascending
     converted.sort(key=lambda r: r.get("date_time") or datetime.min.replace(tzinfo=timezone.utc))
+    print("[DEBUG] Data Sorted")
     return converted
