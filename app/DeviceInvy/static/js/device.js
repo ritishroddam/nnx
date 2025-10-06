@@ -617,53 +617,6 @@ function updateStatusCountsFromData(devices) {
 //     document.body.removeChild(form);
 // });
 
-document.getElementById("downloadExcel").addEventListener("click", async function() {
-    console.log("Download button clicked!"); // Add this to check if event fires
-    
-    try {
-        const accessToken = localStorage.getItem('access_token') || getCookie('access_token_cookie');
-        console.log("Access token:", accessToken); // Check if token exists
-        
-        if (!accessToken) {
-            alert('Please log in again to download the file.');
-            return;
-        }
-        
-        console.log("Making fetch request...");
-        const response = await fetch('/deviceInvy/download_excel', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'X-CSRF-TOKEN': getCookie("csrf_access_token"),
-            }
-        });
-        
-        console.log("Response status:", response.status);
-        
-        if (!response.ok) {
-            throw new Error(`Download failed with status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        console.log("Blob received, size:", blob.size);
-        
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'Device_Inventory.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        console.log("Download completed successfully");
-        
-    } catch (error) {
-        console.error('Download error:', error);
-        alert('Failed to download the file. Please try again.');
-    }
-});
-
 function editDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
   const imei = row.cells[0].innerText;
