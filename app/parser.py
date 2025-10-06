@@ -73,6 +73,7 @@ def getData(imei, date_filter, projection):
         flat_doc = atlantaAis140ToFront(doc)  # produces atlanta-style keys
         print("[DEBUG] Data parsed")
         # Filter to requested projection keys + _id if requested
+        print("data processing")
         out_doc = {}
         for field in wanted_fields:
             if field in flat_doc:
@@ -81,6 +82,7 @@ def getData(imei, date_filter, projection):
         if "date_time" not in out_doc and "date_time" in flat_doc:
             out_doc["date_time"] = flat_doc["date_time"]
         converted.append(out_doc)
+        print("data processed")
 
     print("[DEBUG] Data Sorting")
     # Final sort (safety) by date_time ascending
