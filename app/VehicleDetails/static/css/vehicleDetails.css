@@ -261,6 +261,12 @@ body.modal-open {
   margin: auto; 
 }
 
+.dark-mode .modal-content {
+  color: #ccc;
+  border: 1px solid #374151;
+  box-shadow: 0 0 10px #cccccc90;
+}
+
 .modal:not(.hidden) {
   display: flex !important;
   align-items: center;
@@ -300,6 +306,11 @@ body.modal-open {
   padding-bottom: 16px;
   border-bottom: 1px solid #e5e7eb;
   position: relative;
+}
+
+.dark-mode .modal-content h2 {
+  color: #fff;
+  border-color: #444;
 }
 
 .modal-form-grid {
