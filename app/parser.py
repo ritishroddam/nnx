@@ -46,7 +46,9 @@ def atlantaAis140ToFront(parsedData):
     }
     return json_data
 
-def getData(query, projection):
+def getData(imei, date_filter, projection):
+    query = {"imei": imei, "gps": "A"}
+    query.update(date_filter or {})
     data_asc = list(db["atlanta"].find(
             query,
             projection,

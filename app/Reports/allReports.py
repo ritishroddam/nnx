@@ -252,11 +252,9 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
 
 def process_idle_report(imei, vehicle_number, date_filter):
     try:
-        query = {"imei": imei, "gps": "A"}
-        query.update(date_filter or {})
         projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1}
         
-        data_asc = getData(query, projection)
+        data_asc = getData(imei, date_filter, projection)
         
         if not data_asc:
             return None
@@ -324,18 +322,8 @@ def process_idle_report(imei, vehicle_number, date_filter):
         return e
 
 def process_daily_report(imei, vehicle_doc, date_filter):
-    """
-    Build per-day summary with columns:
-    Vehicle Number, Date, First Ignition On, Odometer Start, Start Location,
-    Last Ignition Off, Odometer End, Stop Location, Avg Speed, Max Speed,
-    Over Speed Count, Running Time, Overspeed Duration, Idle Time,
-    Stoppage Time, Distance, Total Way Points
-    """
+
     try:
-        query = {"imei": imei, "gps": "A"}
-        if date_filter:
-            query.update(date_filter)
-        
         projection = {
                 "_id": 0,
                 "date_time": 1,
@@ -346,7 +334,7 @@ def process_daily_report(imei, vehicle_doc, date_filter):
                 "longitude": 1
             }
 
-        records = getData(query, projection)
+        records = getData(imei, date_filter, projection)
         if not records:
             return None
 
@@ -484,11 +472,9 @@ def process_daily_report(imei, vehicle_doc, date_filter):
 
 def process_stoppage_report(imei, vehicle_number, date_filter):
     try:
-        query = {"imei": imei, "gps": "A"}
-        query.update(date_filter or {})
         projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1}
         
-        data_asc = getData(query, projection) 
+        data_asc = getData(imei, date_filter, projection)
         
         if not data_asc:
             return None
@@ -556,11 +542,9 @@ def process_stoppage_report(imei, vehicle_number, date_filter):
     
 def process_ignition_report(imei, vehicle_number, date_filter):
     try:
-        query = {"imei": imei, "gps": "A"}
-        query.update(date_filter or {})
         projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "odometer": 1}
         
-        data_asc = getData(query, projection) 
+        data_asc = getData(imei, date_filter, projection)
 
         if not data_asc:
             return None
