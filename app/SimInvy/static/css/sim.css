@@ -352,7 +352,6 @@ body.modal-open {
 }
 
 .dark-mode .modal-content {
-  background: #1f2937;
   color: #ccc;
   border: 1px solid #374151;
   box-shadow: 0 0 10px #cccccc90;
@@ -392,6 +391,11 @@ body.modal-open {
   border-bottom: 1px solid #e5e7eb;
 }
 
+.dark-mode .modal-content h2 {
+  color: #ccc;
+  border-color: #444;
+}
+
 #manualForm {
   margin-top: 0;
   display: grid;
@@ -403,6 +407,10 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
+}
+
+.dark-mode .form-group label {
+  color: #ccc;
 }
 
 .form-group:has(#MobileNumber),
