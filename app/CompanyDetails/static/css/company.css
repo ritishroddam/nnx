@@ -336,6 +336,7 @@ th {
 .upload-btn-row {
   display: flex;
   gap: 12px;
+  margin-top: 10px;
 }
 
 .upload-btn-row .btn,
@@ -433,6 +434,7 @@ th {
   flex-direction: column;
   width: 48%; 
   min-width: 200px;
+  padding: 0 0 10px 0;
 }
 
 .company-modal-content label {
