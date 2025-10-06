@@ -221,8 +221,8 @@ body.modal-open {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 24px 32px 32px 32px;
   width: 95%;
-  max-width: 1400px;
-  max-height: 90vh;
+  max-width: 1300px;
+  max-height: 80vh;
   overflow-y: auto;
   position: relative;
   border: 1px solid #e1e5e9;
