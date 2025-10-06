@@ -90,50 +90,6 @@ document.addEventListener("DOMContentLoaded", function () {
   
   fetchAndRenderDevices(1, 100);
   initializeStatusFilter();
-
-console.log("Initializing download button...");
-  
-  const downloadBtn = document.getElementById("downloadExcel");
-  console.log("Download button element:", downloadBtn);
-  
-  if (downloadBtn) {
-    downloadBtn.addEventListener("click", async function() {
-      console.log("Download button clicked!");
-        
-        console.log("Making fetch request to /deviceInvy/download_excel");
-        const response = await fetch('/deviceInvy/download_excel', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'X-CSRF-TOKEN': getCookie("csrf_access_token"),
-          }
-        });
-        
-        console.log("Response status:", response.status);
-        
-        if (!response.ok) {
-          throw new Error(`Download failed with status: ${response.status}`);
-        }
-        
-        const blob = await response.blob();
-        console.log("Blob received, size:", blob.size);
-        
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'Device_Inventory.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        console.log("Download completed successfully");
-    });
-    
-    console.log("Download button event listener attached successfully");
-  } else {
-    console.error("Download button not found!");
-  }
 });
 
 async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage) {
