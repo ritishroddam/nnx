@@ -74,9 +74,7 @@ document
   });
 
 let allDevices = [];
-let currentPage = 1;
-const ROWS_PER_PAGE = 100;
-let totalRows = 0;
+let currentRowsPerPage = 100;
 
 document.addEventListener("DOMContentLoaded", function () {
   const dateInInput = document.getElementById("DateIn");
@@ -89,14 +87,16 @@ document.addEventListener("DOMContentLoaded", function () {
       this.value = today; 
     }
   });
-  fetchAndRenderDevices(1);
-  // updateAllCountersFromServer();
+  
+  fetchAndRenderDevices(1, 100);
   initializeStatusFilter();
 });
 
-async function fetchAndRenderDevices(page = 1) {
+async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage) {
   try {
-    const response = await fetch(`/deviceInvy/get_devices_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
+    currentRowsPerPage = rowsPerPage; 
+    
+    const response = await fetch(`/deviceInvy/get_devices_paginated?page=${page}&per_page=${rowsPerPage}`, {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
@@ -106,7 +106,7 @@ async function fetchAndRenderDevices(page = 1) {
 
     totalRows = data.total;
     renderDeviceTable(data.devices);
-    renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
+    renderPaginationControls(totalRows, page, rowsPerPage);
     await updateAllCountersFromServer();
   } catch (err) {
     document.getElementById('deviceTable').innerHTML = `<tr><td colspan="16">Failed to load data</td></tr>`;
@@ -250,6 +250,33 @@ function renderDeviceTable(devices) {
   allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
 }
 
+// function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
+//   const totalPages = Math.ceil(totalRows / rowsPerPage);
+//   const paginationDiv = document.getElementById('devicePagination');
+//   if (!paginationDiv) return;
+  
+//   if (totalPages <= 1) {
+//     paginationDiv.innerHTML = '';
+//     return;
+//   }
+  
+//   let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
+//   html += `<button class="btn" id="devicePrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+//   html += `<span>Page ${currentPage} of ${totalPages}</span>`;
+//   html += `<button class="btn" device="btn" id="deviceNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+//   html += `</div>`;
+  
+//   paginationDiv.innerHTML = html;
+  
+//   document.getElementById('devicePrevPage').onclick = function() {
+//     if (currentPage > 1) fetchAndRenderDevices(currentPage - 1);
+//   };
+  
+//   document.getElementById('deviceNextPage').onclick = function() {
+//     if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1);
+//   };
+// }
+
 function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   const totalPages = Math.ceil(totalRows / rowsPerPage);
   const paginationDiv = document.getElementById('devicePagination');
@@ -259,32 +286,103 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     paginationDiv.innerHTML = '';
     return;
   }
-  
-  let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
-  html += `<button class="btn" id="devicePrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-  html += `<span>Page ${currentPage} of ${totalPages}</span>`;
-  html += `<button class="btn" device="btn" id="deviceNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
-  html += `</div>`;
+
+  // Calculate range for current page
+  const startItem = ((currentPage - 1) * rowsPerPage) + 1;
+  const endItem = Math.min(currentPage * rowsPerPage, totalRows);
+
+  let html = `
+    <div class="pagination-container">
+      <div class="pagination-left">
+        <div class="rows-per-page">
+          <span class="pagination-label">Rows per page:</span>
+          <select id="rowsPerPageSelect" class="pagination-select">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>10</option>
+            <option value="25" ${rowsPerPage === 25 ? 'selected' : ''}>25</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>50</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>100</option>
+          </select>
+        </div>
+        <div class="page-info">
+          <span>${startItem}-${endItem} of ${totalRows}</span>
+        </div>
+      </div>
+      
+      <div class="pagination-right">
+        <div class="pagination-nav">
+          <button class="pagination-nav-btn" id="devicePrevPage" ${currentPage === 1 ? 'disabled' : ''}>
+            <span class="pagination-nav-icon">‹</span>
+            Previous
+          </button>
+          <button class="pagination-nav-btn" id="deviceNextPage" ${currentPage === totalPages ? 'disabled' : ''}>
+            Next
+            <span class="pagination-nav-icon">›</span>
+          </button>
+        </div>
+        <div class="go-to-page">
+          <span class="pagination-label">Go to Page:</span>
+          <input type="number" id="goToPageInput" class="page-input" 
+                 min="1" max="${totalPages}" value="${currentPage}">
+          <button class="pagination-go-btn" id="goToPageBtn">Go</button>
+        </div>
+      </div>
+    </div>
+  `;
   
   paginationDiv.innerHTML = html;
-  
+
+  // Add event listeners
+  document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
+    const newRowsPerPage = parseInt(this.value);
+    fetchAndRenderDevices(1, newRowsPerPage);
+  });
+
+  // Previous button
   document.getElementById('devicePrevPage').onclick = function() {
-    if (currentPage > 1) fetchAndRenderDevices(currentPage - 1);
+    if (currentPage > 1) fetchAndRenderDevices(currentPage - 1, rowsPerPage);
   };
-  
+
+  // Next button
   document.getElementById('deviceNextPage').onclick = function() {
-    if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1);
+    if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1, rowsPerPage);
   };
+
+  // Add go to page functionality
+  document.getElementById('goToPageBtn').onclick = function() {
+    const pageInput = document.getElementById('goToPageInput');
+    const targetPage = parseInt(pageInput.value);
+    
+    if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
+      fetchAndRenderDevices(targetPage, rowsPerPage);
+    } else {
+      alert(`Please enter a valid page number between 1 and ${totalPages}`);
+      pageInput.value = currentPage;
+    }
+  };
+
+  // Allow Enter key in go to page input
+  document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('goToPageBtn').click();
+    }
+  });
+
+  // Validate input on blur
+  document.getElementById('goToPageInput').addEventListener('blur', function() {
+    const value = parseInt(this.value);
+    if (!value || value < 1) {
+      this.value = 1;
+    } else if (value > totalPages) {
+      this.value = totalPages;
+    }
+  });
 }
 
 function initializeStatusFilter() {
-    // Store all devices when page loads
     allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
     
-    // Update counts
     updateAllCountersFromServer();
     
-    // Add event listener for filter
     document.getElementById("statusFilter").addEventListener("change", filterDevicesByStatus);
 }
 
@@ -298,13 +396,11 @@ function filterDevicesByStatus() {
     return;
   }
   allDevices.forEach(device => {
-    // Status is now in cell 11 (0-based)
     if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
       const statusCell = device.cells[11];
       let status = statusCell.textContent.trim();
       device.style.display = status === selectedStatus ? "" : "none";
     } else {
-      // For package type filter
       const packageCell = device.cells[9];
       const packageType = packageCell.textContent.trim();
       device.style.display = packageType === selectedStatus ? "" : "none";
@@ -324,14 +420,12 @@ function updateStatusCounts(devicesData = null) {
 
    allDevices.forEach(device => {
     if (device.style.display !== 'none') {
-      // Count package types (from column 9)
       const packageCell = device.cells[9];
       const packageType = packageCell.textContent.trim();
       if (packageType === "Rental") rentalCount++;
       if (packageType === "Package") packageCount++;
       if (packageType === "Outrate") outrateCount++;
 
-      // Count statuses (from column 11)
       const statusCell = device.cells[11];
       let status = statusCell.textContent.trim();
       if (status === "New Stock") newStockCount++;
@@ -408,6 +502,9 @@ function searchDevices() {
         row.innerHTML = `<td colspan="16" class="no-results">No devices found</td>`;
         tableBody.appendChild(row);
         resetCounts();
+        
+        // Clear pagination during search
+        document.getElementById('devicePagination').innerHTML = '';
         return;
       }
 
@@ -460,8 +557,8 @@ function resetCounts() {
 function clearSearch() {
   document.getElementById("imeiSearch").value = '';
   document.getElementById("statusFilter").value = '';
-  // location.reload(); 
-  fetchAndRenderDevices(1);
+  // Restore paginated view
+  fetchAndRenderDevices(1, currentRowsPerPage);
   updateAllCountersFromServer();
 }
 
