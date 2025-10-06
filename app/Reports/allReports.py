@@ -254,7 +254,7 @@ def process_idle_report(imei, vehicle_number, date_filter):
     try:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1},
+        projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "speed": 1}
         # data_asc = list(db["atlanta"].find(
         #     query,
         #     projection,
