@@ -67,35 +67,9 @@ def getData(imei, date_filter, projection):
     # Determine which flat fields were requested (exclude _id control flags)
     wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
 
-    # Minimal projection for nested ais140 schema (grab blocks needed to derive flat fields)
-    ais140_projection = {
-        "_id": 0,
-        "imei": 1,
-        "gps.lat": 1,
-        "gps.lon": 1,
-        "gps.timestamp": 1,
-        "gps.heading": 1,
-        "gps.latDir": 1,
-        "gps.lonDir": 1,
-        "telemetry.speed": 1,
-        "telemetry.ignition": 1,
-        "telemetry.odometer": 1,
-        "telemetry.mainPower": 1,
-        "telemetry.internalBatteryVoltage": 1,
-        "telemetry.emergencyStatus": 1,
-        "telemetry.mainBatteryVoltage": 1,
-        "network.gsmSignal": 1,
-        "network.mcc": 1,
-        "network.mnc": 1,
-        "network.lac": 1,
-        "network.cellId": 1,
-        "packet.id": 1,
-        "timestamp": 1    # raw packet timestamp if present
-    }
-
     ais140_data = list(db["atlantaAis140"].find(
-        {"imei": imei, "gps.timestamp": {"$exists": True}, **{k: v for k, v in query.items() if k not in ["date_time"]}},
-        ais140_projection
+        {"imei": imei},
+        {"_id": 0}
     ).sort("gps.timestamp", ASCENDING))
 
     if not ais140_data:
@@ -112,8 +86,6 @@ def getData(imei, date_filter, projection):
         # Ensure date_time present for sorting
         if "date_time" not in out_doc and "date_time" in flat_doc:
             out_doc["date_time"] = flat_doc["date_time"]
-        if "_id" in projection:
-            out_doc["_id"] = flat_doc.get("_id")
         converted.append(out_doc)
 
     # Final sort (safety) by date_time ascending
