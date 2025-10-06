@@ -339,6 +339,13 @@ th {
   border: 1px solid #e1e5e9;
 }
 
+.dark-mode .company-modal-content {
+  background-color: black;
+  color: #ccc;
+  border: 1px solid #374151;
+  box-shadow: 0 0 10px #cccccc90;
+}
+
 .company-close-btn {
   position: absolute;
   top: 16px;
@@ -370,6 +377,11 @@ th {
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.dark-mode .company-modal-content h2 {
+  color: #fff;
+  border-color: #444;
 }
 
 .upload-form-group {
@@ -411,33 +423,6 @@ th {
   margin-right: 10px;
   white-space: nowrap;
 }
-/* 
-.filter-dropdown {
-  width: 250px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: white;
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
-}
-
-.filter-dropdown:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-}
-
-.filter-dropdown:hover {
-  border-color: #999;
-} */
 
 .dark-mode .filter-container {
   background-color: #333;
@@ -484,6 +469,10 @@ th {
   display: flex;
   flex-direction: column;
   margin-bottom: 0;
+}
+
+.dark-mode .form-group label {
+  color: #ccc;
 }
 
 .company-modal-content label {
