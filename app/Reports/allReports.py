@@ -414,7 +414,7 @@ def process_daily_report(imei, vehicle_doc, date_filter):
 
             # Speed stats
             speeds = [r["_speed_f"] for r in recs if r["_speed_f"] is not None]
-            avg_speed = round(sum(speeds) / len(speeds), 2) if speeds else 0.0
+            avg_speed = round(sum(s for s in speeds if s > 0) / len([s for s in speeds if s > 0]), 2) if any(s > 0 for s in speeds) else 0.0
             max_speed = round(max(speeds), 2) if speeds else 0.0
 
             # Way points
