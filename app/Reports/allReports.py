@@ -1080,26 +1080,25 @@ def view_report_preview():
             df = func(imei, license_plate, date_filter)
             if not isinstance(df, pd.DataFrame) or df.empty:
                 return jsonify({"success": True, "data": []})
-        else:
-            if report_type == "distance-speed-range":
+        elif report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
                 df = process_speed_report(imei, vehicle, date_filter)
-            else:
-                config = report_configs[report_type]
-                fields = config['fields']
-                collection = config['collection']
-                base_query = config['query']
-                post_process = config.get('post_process')
-                query = {"imei": imei}
-                if date_filter:
-                    query.update(date_filter)
-                query.update(base_query)
-                cursor = db[collection].find(
-                    query,
-                    {field: 1 for field in fields}
-                ).sort("date_time", -1)
-                df = pd.DataFrame(list(cursor))
+        else:
+            config = report_configs[report_type]
+            fields = config['fields']
+            collection = config['collection']
+            base_query = config['query']
+            post_process = config.get('post_process')
+            query = {"imei": imei}
+            if date_filter:
+                query.update(date_filter)
+            query.update(base_query)
+            cursor = db[collection].find(
+                query,
+                {field: 1 for field in fields}
+            ).sort("date_time", -1)
+            df = pd.DataFrame(list(cursor))
             df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
 
         
