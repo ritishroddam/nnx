@@ -177,9 +177,13 @@ def save_and_return_report(output, report_type, vehicle_number, date_filter=None
     return report_filename
 
 def process_df(df, license_plate, fields, post_process=None):
-    print(f"[DEBUG] Processing DataFrame for license_plate={license_plate} with fields={fields}")
+    print(f"[DEBUG] [process_df] Starting for license_plate={license_plate} with fields={fields}")
+
     if df.empty:
+        print(f"[DEBUG] [process_df] DataFrame is empty. Returning None.")
         return None
+
+    print(f"[DEBUG] [process_df] Starting Location column block")
     if 'latitude' in df.columns and 'longitude' in df.columns:
         df['Location'] = df.apply(
             lambda row: geocodeInternal(row['latitude'], row['longitude'])
@@ -188,29 +192,48 @@ def process_df(df, license_plate, fields, post_process=None):
             else 'Missing coordinates',
             axis=1
         )
+        print(f"[DEBUG] [process_df] Location column block has finished executing")
+
+        print(f"[DEBUG] [process_df] Starting Latitude/Longitude rounding block")
         df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce').round(3)
         df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce').round(3)
+        print(f"[DEBUG] [process_df] Latitude/Longitude rounding block has finished executing")
+
+        print(f"[DEBUG] [process_df] Starting columns reorder block")
         cols = df.columns.tolist()
         if 'Location' in cols:
             cols.remove('Location')
         lng_idx = cols.index('longitude')
         cols.insert(lng_idx + 1, 'Location')
         df = df[cols]
+        print(f"[DEBUG] [process_df] columns reorder block has finished executing")
+
+    print(f"[DEBUG] [process_df] Starting Vehicle Number column block")
     if 'Vehicle Number' not in df.columns:
         df.insert(0, 'Vehicle Number', license_plate)
+        print(f"[DEBUG] [process_df] Vehicle Number column block has finished executing")
+
+    print(f"[DEBUG] [process_df] Starting _id column drop block")
     if '_id' in df.columns:
         df.drop('_id', axis=1, inplace=True)
+        print(f"[DEBUG] [process_df] _id column drop block has finished executing")
+
+    print(f"[DEBUG] [process_df] Starting ignition column block")
     if "ignition" in fields:
         df['ignition'] = df['ignition'].replace({"0": "OFF", "1": "ON"})
-        
+        print(f"[DEBUG] [process_df] ignition column block has finished executing")
+
+    print(f"[DEBUG] [process_df] Starting post_process block")
     if post_process:
-        print("[DEBUG] Applying post_process function")
         df = post_process(df)
-    
+        print(f"[DEBUG] [process_df] post_process block has finished executing")
+
+    print(f"[DEBUG] [process_df] Starting date_time formatting block")
     if 'date_time' in df.columns:
-        df['date_time'] = df['date_time'].dt.tz_convert(IST).dt.strftime('%d-%b-%Y %I:%M:%S %p')    
-    
-    print("[DEBUG] DataFrame processing complete")
+        df['date_time'] = df['date_time'].dt.tz_convert(IST).dt.strftime('%d-%b-%Y %I:%M:%S %p')
+        print(f"[DEBUG] [process_df] date_time formatting block has finished executing")
+
+    print(f"[DEBUG] [process_df] DataFrame processing complete")
     return df
 
 def get_date_range_filter(date_range, from_date=None, to_date=None):
@@ -881,6 +904,7 @@ def view_report_preview():
                     if df is None or df.empty:
                         continue
                     all_dfs.append(df)
+                    
             elif report_type in ("stoppage", "idle", "ignition"):
                 config = report_configs[report_type]
                 fields = config['fields']
@@ -920,6 +944,7 @@ def view_report_preview():
                                 }])
                         all_dfs.append(sep_dict)
                     all_dfs.append(df)
+                    
             elif report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
