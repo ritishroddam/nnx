@@ -907,8 +907,8 @@ def view_report_preview():
                     func = REPORT_PROCESSORS.get(report_type)
                     
                     df = func(imei, license_plate, date_filter)
-                    
-                    if not isinstance(df, pd.DataFrame) or df.empty:
+
+                    if df is None or not isinstance(df, pd.DataFrame) or df.empty:
                         continue
                     
                     if idx > 0:
