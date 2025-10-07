@@ -734,7 +734,7 @@ def add_speed_metrics(rows):
 
 def process_speed_report(imei, vehicle, date_filter):
     try:
-        query = {"imei": imei, "speed": {"$gt": float(vehicle['normalSpeed'])}}
+        query = {"imei": imei, "speed": {"$gt": float(vehicle.get('normalSpeed', 60))}}
         query.update(date_filter)
         data = list(db["atlanta"].find(
             query,
@@ -744,6 +744,8 @@ def process_speed_report(imei, vehicle, date_filter):
         if not data: 
             return None
         
+        rows =[]
+        
         def safe_geocode(lat, lng):
             try:
                 if lat is None or lng is None:
@@ -752,10 +754,8 @@ def process_speed_report(imei, vehicle, date_filter):
             except Exception:
                 return "Location Not Available"
         
-        dfs =[]
-        
+        vehicle_number = vehicle["LicensePlateNumber"]
         for doc in data:
-            vehicle_number = vehicle["LicensePlateNumber"]
             
             lat = doc.get("latitude") if doc.get("latitude") not in ("", None) else None
             lng = doc.get("longitude") if doc.get("longitude") not in ("", None) else None
@@ -765,19 +765,18 @@ def process_speed_report(imei, vehicle, date_filter):
             
             location = safe_geocode(lat, lng)
             
-            df = pd.DataFrame([{
+            rows.append({
                 "Vehicle Number": vehicle_number,
                 "DATE & TIME": doc.get('date_time').astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
                 "Latitude & Longitude": f'{round(float(lat), 4)}, {round(float(lng), 4)}',
                 "LOCATION": location,
                 "SPEED": doc.get('speed', '')
-            }])
-            dfs.append(df)
+            })
 
-        if not dfs:
+        if not rows:
             return None
         
-        return dfs
+        return pd.DataFrame(rows)
     except Exception as e:
         print(e)
         return e
