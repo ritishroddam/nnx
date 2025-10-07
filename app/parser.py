@@ -1,4 +1,6 @@
 from datetime import datetime, timezone, timedelta
+
+from urllib3 import Retry
 from app.geocoding import geocodeInternal
 from pymongo import ASCENDING, DESCENDING
 from app.database import db
@@ -141,3 +143,58 @@ def getData(imei, date_filter, projection, speedThreshold = None):
         converted.append(out_doc)
 
     return converted
+
+def getDataForDistanceReport(imei, date_filter):
+    projection = {"_id": 0, "odometer": 1, "latitude": 1, "longitude": 1}
+    
+    query = {
+        "imei": imei, "gps": "A"
+    }
+    query.update(date_filter)
+    
+    start_doc = db["atlanta"].find_one(
+        query, projection,
+        sort=[("date_time", ASCENDING)]
+    )
+    
+    end_doc = db["atlanta"].find_one(
+        query, projection,
+        sort=[("date_time", DESCENDING)]
+    )
+    
+    if start_doc:
+        return start_doc, end_doc
+    
+    query = {
+       "imei": imei,
+       "gps.timestamp": date_filter.get("date_time"),
+    }
+    
+    ais140_projection = {"_id": 0, "telemetry.odometer": 1, "gps.lat": 1, "gps.lon": 1}
+    
+    start_data = db["atlantaAis140"].find_one(
+        query, ais140_projection,
+        sort = [("gps.timestamp", ASCENDING)]
+    )
+    
+    if not start_data:
+        return start_doc, end_doc
+    
+    end_data = db["atlantaAis140"].find_one(
+        query, ais140_projection,
+        sort = [("gps.timestamp", DESCENDING)]
+    )
+    
+    start_doc = {
+        "odometer": start_data.get("telemetry", {}).get("odometer", ""),
+        "latitude": start_data.get("gps", {}).get("lat", ""),
+        "longitude": start_data.get("gps", {}).get("lon", ""),
+    }
+    
+    end_doc = {
+        "odometer": end_data.get("telemetry", {}).get("odometer", ""),
+        "latitude": end_data.get("gps", {}).get("lat", ""),
+        "longitude": end_data.get("gps", {}).get("lon", ""),
+    }
+    
+    return start_doc, end_doc

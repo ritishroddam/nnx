@@ -17,7 +17,7 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
 from app.geocoding import geocodeInternal
-from app.parser import atlantaAis140ToFront, getData
+from app.parser import atlantaAis140ToFront, getData, getDataForDistanceReport
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -627,25 +627,21 @@ def process_ignition_report(imei, vehicle_number, date_filter):
 def process_distance_report(imei, vehicle_number, date_filter):
     """Calculate total distance traveled"""
     try:
-        query = {
-            "imei": imei, "gps": "A"
-        }
-        query.update(date_filter)
-        start_doc = db["atlanta"].find_one(
-            query, {"_id": 0, "odometer": 1, "latitude": 1, "longitude": 1},
-            sort=[("date_time", ASCENDING)]
-        )
-        if not start_doc:
-            return None
-        end_doc = db["atlanta"].find_one(
-            query, {"_id": 0, "odometer": 1, "latitude": 1, "longitude": 1},
-            sort=[("date_time", DESCENDING)]
-        )
-        if not end_doc:
+        start_doc, end_doc = getDataForDistanceReport(imei, date_filter)
+        
+        if not start_doc and end_doc:
             return None
         
-        start_location = geocodeInternal(float(start_doc['latitude']), float(start_doc['longitude']))
-        end_location = geocodeInternal(float(end_doc['latitude']), float(end_doc['longitude']))
+        def safe_geocode(lat, lng):
+            try:
+                if lat is None or lng is None:
+                    return "Location Not Available"
+                return geocodeInternal(float(lat), float(lng))
+            except Exception:
+                return "Location Not Available"
+        
+        start_location = safe_geocode(start_doc['latitude'], start_doc['longitude'])
+        end_location = safe_geocode(end_doc['latitude'], end_doc['longitude'])
         
         start_odometer = start_doc["odometer"]
         end_odometer = end_doc["odometer"]
@@ -734,16 +730,8 @@ def add_speed_metrics(rows):
 
 def process_speed_report(imei, vehicle, date_filter):
     try:
-        # query = {"imei": imei, "speed": {"$gt": float(vehicle.get('normalSpeed', 60))}}
-        # query.update(date_filter)
-        
         projection = {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-        
-        # data = list(db["atlanta"].find(
-        #     query,
-        #     {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-        # ).sort("date_time", DESCENDING))
-        
+     
         speedThreshold = float(vehicle.get('normalSpeed', 60))
         
         data = getData(imei, date_filter, projection, speedThreshold)
