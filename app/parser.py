@@ -106,7 +106,7 @@ def getData(imei, date_filter, projection, speedThreshold = None):
     if isinstance(date_filter, dict):
         dt_filter = date_filter.get("date_time")
 
-    if speedThreshold:
+    if not speedThreshold:
         ais140_query = {"imei": imei}
     else:
         ais140_query = {"imei": imei, "telemetry.speed": {"$gt": float(speedThreshold)}}
