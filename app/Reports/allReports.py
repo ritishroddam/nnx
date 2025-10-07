@@ -732,34 +732,15 @@ def add_speed_metrics(rows):
         print(f"[DEBUG] Skipping speed summary (single): {e}")
         return e
 
-def process_speed_report(imeis, vehicles, date_filter):
+def process_speed_report(imeis, vehicle, date_filter):
     try:
-        if not isinstance(imeis, list):
-            query = {"imei": imeis, "speed": {"$gt": float(vehicles['normalSpeed'])}}
-            query.update(date_filter)
-            cursor = db["atlanta"].find(
-                query,
-                {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-            ).sort("date_time", DESCENDING)
-            df = pd.DataFrame(list(cursor))
-            return df
-
-        data = []
-        i = 0 
-        for imei in imeis:
-            vehicle = vehicles.get(imei)
-            query = {"imei": imei, "speed": {"$gt": float(vehicle['normalSpeed'])}}
-            query.update(date_filter)
-            cursor = db["atlanta"].find(
-                query,
-                {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-            ).sort("date_time", DESCENDING)
-            cursor = list(cursor)
-            if cursor:
-                i += 1
-                print(i)
-                data.extend(cursor)
-        df = pd.DataFrame(data)
+        query = {"imei": imeis, "speed": {"$gt": float(vehicle['normalSpeed'])}}
+        query.update(date_filter)
+        cursor = db["atlanta"].find(
+            query,
+            {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+        ).sort("date_time", DESCENDING)
+        df = pd.DataFrame(list(cursor))
         return df
     except Exception as e:
         print(e)
@@ -912,7 +893,20 @@ def view_report_preview():
                 if report_type == "distance-speed-range":
                     config = report_configs[report_type]
                     fields = config['fields']
-                    df = process_speed_report(imeis, imei_to_plate, date_filter)
+                    df_list = []
+                    for imei in imeis:
+                        vehicle = imei_to_plate.get(imei, "")
+                        if not vehicle:
+                            continue
+                        speed_df = process_speed_report(imei, vehicle, date_filter)
+                        if not isinstance(speed_df, pd.DataFrame) or speed_df.empty:
+                            continue
+
+                        if 'imei' not in speed_df.columns:
+                            speed_df['imei'] = imei
+                        df_list.append(speed_df)
+
+                    df = pd.concat(df_list, ignore_index=True) if df_list else pd.DataFrame()
                 else:
                     config = report_configs[report_type]
                     fields = config['fields']

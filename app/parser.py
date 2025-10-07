@@ -81,8 +81,12 @@ def atlantaAis140ToFront(parsedData, include_address=True):
     }
     return json_data
 
-def getData(imei, date_filter, projection):
-    query = {"imei": imei, "gps": "A"}
+def getData(imei, date_filter, projection, speedThreshold = None):
+    if speedThreshold:
+        query = {"imei": imei, "gps": "A"}
+    else:
+        query = {"imei": imei, "speed": {"$gt": float(speedThreshold)}}
+        
     query.update(date_filter or {})
 
     data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
@@ -101,7 +105,11 @@ def getData(imei, date_filter, projection):
     if isinstance(date_filter, dict):
         dt_filter = date_filter.get("date_time")
 
-    ais140_query = {"imei": imei}
+    if speedThreshold:
+        ais140_query = {"imei": imei}
+    else:
+        ais140_query = {"imei": imei, "telemetry.speed": {"$gt": float(speedThreshold)}}
+    
     if dt_filter is not None:
         ais140_query["gps.timestamp"] = dt_filter
 
