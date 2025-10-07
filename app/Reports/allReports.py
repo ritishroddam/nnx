@@ -732,16 +732,52 @@ def add_speed_metrics(rows):
         print(f"[DEBUG] Skipping speed summary (single): {e}")
         return e
 
-def process_speed_report(imeis, vehicle, date_filter):
+def process_speed_report(imei, vehicle, date_filter):
     try:
-        query = {"imei": imeis, "speed": {"$gt": float(vehicle['normalSpeed'])}}
+        query = {"imei": imei, "speed": {"$gt": float(vehicle['normalSpeed'])}}
         query.update(date_filter)
-        cursor = db["atlanta"].find(
+        data = list(db["atlanta"].find(
             query,
             {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-        ).sort("date_time", DESCENDING)
-        df = pd.DataFrame(list(cursor))
-        return df
+        ).sort("date_time", DESCENDING))
+        
+        if not data: 
+            return None
+        
+        def safe_geocode(lat, lng):
+            try:
+                if lat is None or lng is None:
+                    return "Location Not Available"
+                return geocodeInternal(float(lat), float(lng))
+            except Exception:
+                return "Location Not Available"
+        
+        dfs =[]
+        
+        for doc in data:
+            vehicle_number = vehicle["LicensePlateNumber"]
+            
+            lat = doc.get("latitude") if doc.get("latitude") not in ("", None) else None
+            lng = doc.get("longitude") if doc.get("longitude") not in ("", None) else None
+            
+            if not lat or not lng:
+                continue
+            
+            location = safe_geocode(lat, lng)
+            
+            df = pd.DataFrame([{
+                "Vehicle Number": vehicle_number,
+                "DATE & TIME": doc.get('date_time').astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "Latitude & Longitude": f'{round(float(lat), 4)}, {round(float(lng), 4)}',
+                "LOCATION": location,
+                "SPEED": doc.get('speed', '')
+            }])
+            dfs.append(df)
+
+        if not dfs:
+            return None
+        
+        return dfs
     except Exception as e:
         print(e)
         return e
@@ -775,6 +811,7 @@ REPORT_PROCESSORS = {
     "stoppage": process_stoppage_report,
     "idle": process_idle_report,
     "ignition": process_ignition_report,
+    "distance-speed-range": process_speed_report,
 }   
     
 @reports_bp.route('/generate_report', methods=['POST'])
@@ -889,39 +926,50 @@ def view_report_preview():
                                 }])
                         all_dfs.append(sep_dict)
                     all_dfs.append(df)
+            elif report_type == "distance-speed-range":
+                config = report_configs[report_type]
+                fields = config['fields']
+                
+                for idx, imei in enumerate(imeis):
+                    vehicle = imei_to_plate.get(imei, "")
+                    
+                    if vehicle:
+                        license_plate = vehicle["LicensePlateNumber"]
+                    else:
+                        license_plate = ""
+                    
+                    func = REPORT_PROCESSORS.get(report_type)
+                    
+                    df = func(imei, vehicle, date_filter)
+                    
+                    if not isinstance(df, pd.DataFrame) or df.empty:
+                        continue
+                    
+                    if idx > 0:
+                        sep_dict = pd.DataFrame([{
+                                "Vehicle Number": f"--- {license_plate} ---",
+                                "DATE & TIME": "",
+                                "Latitude & Longitude": "",
+                                "LOCATION": "",
+                                "SPEED": "",
+                            }])
+                        all_dfs.append(sep_dict)
+                    all_dfs.append(df)
             else:
-                if report_type == "distance-speed-range":
-                    config = report_configs[report_type]
-                    fields = config['fields']
-                    df_list = []
-                    for imei in imeis:
-                        vehicle = imei_to_plate.get(imei, "")
-                        if not vehicle:
-                            continue
-                        speed_df = process_speed_report(imei, vehicle, date_filter)
-                        if not isinstance(speed_df, pd.DataFrame) or speed_df.empty:
-                            continue
-
-                        if 'imei' not in speed_df.columns:
-                            speed_df['imei'] = imei
-                        df_list.append(speed_df)
-
-                    df = pd.concat(df_list, ignore_index=True) if df_list else pd.DataFrame()
-                else:
-                    config = report_configs[report_type]
-                    fields = config['fields']
-                    collection = config['collection']
-                    base_query = config['query']
-                    post_process = config.get('post_process')
-                    query = {"imei": {"$in": imeis}}
-                    if date_filter:
-                        query.update(date_filter)
-                    query.update(base_query)
-                    cursor = db[collection].find(
-                        query,
-                        {field: 1 for field in fields + ["imei"]}
-                    ).sort("date_time", -1)
-                    df = pd.DataFrame(list(cursor))
+                config = report_configs[report_type]
+                fields = config['fields']
+                collection = config['collection']
+                base_query = config['query']
+                post_process = config.get('post_process')
+                query = {"imei": {"$in": imeis}}
+                if date_filter:
+                    query.update(date_filter)
+                query.update(base_query)
+                cursor = db[collection].find(
+                    query,
+                    {field: 1 for field in fields + ["imei"]}
+                ).sort("date_time", -1)
+                df = pd.DataFrame(list(cursor))
 
                 if not df.empty:
                     for idx, (imei, group) in enumerate(df.groupby("imei")):
@@ -958,6 +1006,8 @@ def view_report_preview():
                     'START DATE & TIME', 'START LOCATION', 'STOP DATE & TIME', 'STOP LOCATION',
                     'DURATION (min)', 'DISTANCE (km)'
                 ])
+            elif report_type == 'distance-speed-range':
+                all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
             else:
                 if report_type == 'daily-distance':
                     all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
@@ -1062,6 +1112,8 @@ def view_report_preview():
                 'START DATE & TIME', 'START LOCATION', 'STOP DATE & TIME', 'STOP LOCATION',
                 'DURATION (min)', 'DISTANCE (km)'
             ])
+        elif report_type == 'distance-speed-range':
+            all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
         else:
             if report_type == 'daily-distance':
                 all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
