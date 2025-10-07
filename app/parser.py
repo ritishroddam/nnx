@@ -82,14 +82,15 @@ def atlantaAis140ToFront(parsedData, include_address=True):
     return json_data
 
 def getData(imei, date_filter, projection, speedThreshold = None):
-    if speedThreshold:
+    if not speedThreshold:
         query = {"imei": imei, "gps": "A"}
+        query.update(date_filter or {})
+        data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
     else:
-        query = {"imei": imei, "speed": {"$gt": float(speedThreshold)}}
+        query = {"imei": imei, "gps": "A", "speed": {"$gt": float(speedThreshold)}}
+        query.update(date_filter or {})
+        data = list(db["atlanta"].find(query, projection).sort("date_time", DESCENDING))
         
-    query.update(date_filter or {})
-
-    data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
     if data:
         return data
 
@@ -113,12 +114,15 @@ def getData(imei, date_filter, projection, speedThreshold = None):
     if dt_filter is not None:
         ais140_query["gps.timestamp"] = dt_filter
 
-    ais140_data = list(
-        db["atlantaAis140"].find(
+    ais140_cursor = db["atlantaAis140"].find(
             ais140_query,
             ais140_projection
-        ).sort("gps.timestamp", ASCENDING)
-    )
+        )
+    
+    if not speedThreshold:
+        ais140_data = list(ais140_cursor.sort("gps.timestamp", ASCENDING))
+    else:
+        ais140_data = list(ais140_cursor.sort("gps.timestamp", DESCENDING))
 
     if not ais140_data:
         return []

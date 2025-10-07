@@ -734,12 +734,19 @@ def add_speed_metrics(rows):
 
 def process_speed_report(imei, vehicle, date_filter):
     try:
-        query = {"imei": imei, "speed": {"$gt": float(vehicle.get('normalSpeed', 60))}}
-        query.update(date_filter)
-        data = list(db["atlanta"].find(
-            query,
-            {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
-        ).sort("date_time", DESCENDING))
+        # query = {"imei": imei, "speed": {"$gt": float(vehicle.get('normalSpeed', 60))}}
+        # query.update(date_filter)
+        
+        projection = {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+        
+        # data = list(db["atlanta"].find(
+        #     query,
+        #     {"imei": 1, "speed": 1, "date_time": 1, "latitude": 1, "longitude": 1}
+        # ).sort("date_time", DESCENDING))
+        
+        speedThreshold = float(vehicle.get('normalSpeed', 60))
+        
+        data = getData(imei, date_filter, projection, speedThreshold)
         
         if not data: 
             return None
