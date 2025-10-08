@@ -983,15 +983,18 @@ def view_report_preview():
                 collection = config['collection']
                 base_query = config['query']
                 post_process = config.get('post_process')
-                query = {"imei": {"$in": imeis}}
-                if date_filter:
-                    query.update(date_filter)
-                query.update(base_query)
-                cursor = db[collection].find(
-                    query,
-                    {field: 1 for field in fields + ["imei"]}
-                ).sort("date_time", -1)
-                df = pd.DataFrame(list(cursor))
+
+                projection = {field: 1 for field in fields + ["imei"]}
+                
+                docs = []
+                
+                for imei in imeis:
+                    records = getData(imei, date_filter, projection)
+                    
+                    for record in records:
+                        docs.append(record)
+                
+                df = pd.DataFrame(docs)
 
                 if not df.empty:
                     for idx, (imei, group) in enumerate(df.groupby("imei")):
