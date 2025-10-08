@@ -626,7 +626,7 @@ def process_distance_report(imei, vehicle_number, date_filter):
     try:
         start_doc, end_doc = getDataForDistanceReport(imei, date_filter)
         
-        if not start_doc and end_doc:
+        if not start_doc or not end_doc:
             return None
         
         start_location = safe_geocode(start_doc['latitude'], start_doc['longitude'])
