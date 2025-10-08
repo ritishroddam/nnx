@@ -15,9 +15,11 @@ from bson import ObjectId
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
-from app.utils import roles_required, get_vehicle_data
+from app.utils import roles_required, get_vehicle_data, get_vehicle_data_for_claims
 from app.geocoding import geocodeInternal
 from app.parser import atlantaAis140ToFront, getData, getDataForDistanceReport
+from celery import states
+from app.celery_app import celery as celery_app
 
 reports_bp = Blueprint('Reports', __name__, static_folder='static', template_folder='templates')
 
@@ -128,60 +130,60 @@ def format_duration_hms(total_seconds):
     except Exception:
         return "0 s"
     
-def save_and_return_report(output, report_type, vehicle_number, date_filter=None):
+def save_and_return_report(output, report_type, vehicle_number, override_user_id, date_filter=None):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
-    
+    user_id = override_user_id
+
     start_dt_utc = end_dt_utc = None
-    if date_filter and isinstance(date_filter, dict):
+    if isinstance(date_filter, dict):
         dt_part = date_filter.get('date_time') or {}
         if isinstance(dt_part, dict):
             start_dt_utc = dt_part.get('$gte')
             end_dt_utc = dt_part.get('$lte') or dt_part.get('$lt')
-    
+
     if start_dt_utc and not end_dt_utc:
-        end_dt_utc =  datetime.now(timeZ.utc)
-    
+        end_dt_utc = datetime.now(timeZ.utc)
+
     def _fmt(dt):
         if isinstance(dt, datetime):
             try:
-                return dt.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
+                return dt.astimezone(IST).strftime('%d-%b-%Y_%H-%M-%S')
             except Exception:
                 return "NA"
         return "NA"
-    
+
     start_str = _fmt(start_dt_utc) if start_dt_utc else "NA"
     end_str = _fmt(end_dt_utc) if end_dt_utc else "NA"
-        
+
     base_vehicle = vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'
     if start_str != "NA" or end_str != "NA":
         report_filename = f"{report_type}_report_{base_vehicle}_{start_str}_to_{end_str}.json"
     else:
         report_filename = f"{report_type}_report_{base_vehicle}.json"
-        
-    remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
+
+    remote_path = f"reports/{user_id}/{report_filename}"
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
-    
-    buffer_content = BytesIO(json.dumps({"data":output},ensure_ascii=False).encode('utf-8'))
+
+    buffer_content = BytesIO(json.dumps({"data": output}, ensure_ascii=False, default=str).encode('utf-8'))
     s3.upload_fileobj(buffer_content, SPACE_NAME, remote_path)
+    size_bytes = buffer_content.getbuffer().nbytes
     buffer_content.close()
 
     report_metadata = {
-        'user_id': get_jwt_identity(),
+        'user_id': user_id,
         'report_name': report_type.replace('-', ' ').title() + ' Report',
         'filename': report_filename,
         'path': remote_path,
-        'size': len(output),
+        'size': size_bytes,
         'generated_at': datetime.now(pytz.UTC),
         'vehicle_number': vehicle_number,
         'report_type': report_type,
         'range_start_utc': start_dt_utc,
         'range_end_utc': end_dt_utc
     }
-    
     db['generated_reports'].insert_one(report_metadata)
     print(f"[DEBUG] Report metadata saved to MongoDB: {report_metadata}")
-
     return report_filename
 
 def process_df(df, license_plate, fields, post_process=None):
@@ -788,21 +790,13 @@ REPORT_PROCESSORS = {
     "ignition": process_ignition_report,
     "distance-speed-range": process_speed_report,
 }   
-    
-@reports_bp.route('/generate_report', methods=['POST'])
-@jwt_required()
-def view_report_preview():
-    try:
-        data = request.get_json()
-        report_type = data.get("reportType")
-        vehicle_number = data.get("vehicleNumber")
-        date_range = data.get("dateRange", "all")
-        from_date = data.get("fromDate")
-        to_date = data.get("toDate")
-        date_filter = get_date_range_filter(date_range, from_date, to_date)
 
+def _build_report_sync(report_type, vehicle_number, date_filter, claims):
+    try:
+        rows = []
+        
         if vehicle_number == "all":
-            vehicles = list(get_vehicle_data())
+            vehicles = list(get_vehicle_data_for_claims(claims))
 
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
@@ -832,7 +826,7 @@ def view_report_preview():
                         all_dfs.append(sep_df)
                     all_dfs.append(df)
                 if not all_dfs:
-                    return jsonify({"success": True, "data": []})
+                    return rows
                 final_df = pd.concat(all_dfs, ignore_index=True)
                 desired_cols = [
                     "Vehicle Number","Date","First Ignition On","Odometer Start","Start Location",
@@ -843,9 +837,7 @@ def view_report_preview():
                 existing = [c for c in desired_cols if c in final_df.columns]
                 final_df = final_df[existing]
                 data_records = final_df.fillna("").to_dict(orient="records")
-                json_str = json.dumps({"success": True,"data": data_records}, ensure_ascii=False)
-                save_and_return_report(data_records, report_type, vehicle_number, date_filter)
-                return Response(json_str, mimetype='application/json')
+                return data_records
             
             elif report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
@@ -935,7 +927,6 @@ def view_report_preview():
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
-                collection = config['collection']
                 post_process = config.get('post_process')
 
                 projection = {field: 1 for field in fields + ["imei"]}
@@ -978,7 +969,7 @@ def view_report_preview():
                             all_dfs.append(processed)
 
             if not all_dfs:
-                return jsonify({"success": True, "data": []})
+                return rows
 
             final_df = pd.concat(all_dfs, ignore_index=True)
 
@@ -1012,34 +1003,27 @@ def view_report_preview():
             if 'speed' in existing_columns:
                 ordered_data = add_speed_metrics(ordered_data)
 
-            json_str = json.dumps({
-                "success": True,
-                "data": ordered_data
-            }, ensure_ascii=False)
-            
-            save_and_return_report(ordered_data, report_type, vehicle_number, date_filter)
-
-            return Response(json_str, mimetype='application/json')
+            return ordered_data
 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number}
         )
         if not vehicle:
-            return jsonify({"success": False, "message": "Vehicle not found"}), 404
+            return []
 
         imei = vehicle["IMEI"]
         license_plate = vehicle["LicensePlateNumber"]
 
         if report_type not in report_configs:
-            return jsonify({"success": False, "message": "Invalid report type"}), 400
+            return []
         
         post_process = None
         
         if report_type == "daily":
             df = process_daily_report(imei, vehicle, date_filter)
             if df is None or df.empty:
-                return jsonify({"success": True, "data": []})
+                return []
             desired_cols = [
                 "Vehicle Number","Date","First Ignition On","Odometer Start","Start Location",
                 "Last Ignition Off","Odometer End","Stop Location","Avg Speed","Max Speed",
@@ -1049,9 +1033,7 @@ def view_report_preview():
             existing = [c for c in desired_cols if c in df.columns]
             df = df[existing]
             data_records = df.fillna("").to_dict(orient="records")
-            json_str = json.dumps({"success": True,"data": data_records}, ensure_ascii=False)
-            save_and_return_report(data_records, report_type, vehicle_number, date_filter)
-            return Response(json_str, mimetype='application/json')
+            return data_records
         
         elif report_type == "odometer-daily-distance":
             df = process_distance_report(imei, license_plate, date_filter)
@@ -1060,7 +1042,7 @@ def view_report_preview():
             func = REPORT_PROCESSORS.get(report_type)
             df = func(imei, license_plate, date_filter)
             if not isinstance(df, pd.DataFrame) or df.empty:
-                return jsonify({"success": True, "data": []})
+                return []
         elif report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
@@ -1068,7 +1050,6 @@ def view_report_preview():
         else:
             config = report_configs[report_type]
             fields = config['fields']
-            collection = config['collection']
             post_process = config.get('post_process')
             
             projection = {field: 1 for field in fields}
@@ -1091,7 +1072,7 @@ def view_report_preview():
 
         
         if df is None or df.empty:
-            return jsonify({"success": True, "data": []})
+            return []
 
         # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
@@ -1123,19 +1104,68 @@ def view_report_preview():
 
         if 'speed' in existing_columns:
             ordered_data = add_speed_metrics(ordered_data)
-        
-        json_str = json.dumps({
-            "success": True,
-            "data": ordered_data
-        }, ensure_ascii=False)
-        
-        save_and_return_report(ordered_data, report_type, vehicle_number, date_filter)
 
-        return Response(json_str, mimetype='application/json')
+        return ordered_data
 
     except Exception as e:
-        print(e)
-        return jsonify({"success": False, "message": str(e)}), 500
+        print(f"[DEBUG] _build_report_sync error: {e}")
+        return []
+
+@celery_app.task(bind=True)
+def generate_report_task(self, params):
+    self.update_state(state="STARTED", meta={"progress": 5})
+    report_type = params["report_type"]
+    vehicle_number = params["vehicle_number"]
+    claims = params["claims"]
+    date_filter = params.get("date_filter") or {}
+    user_id = params["user_id"]
+
+    rows = _build_report_sync(report_type, vehicle_number, date_filter, claims)
+    save_and_return_report(rows, report_type, vehicle_number, user_id, date_filter)
+    self.update_state(state="SUCCESS", meta={"rows": len(rows)})
+    return {"rows": len(rows)}
+
+@reports_bp.route('/generate_report', methods=['POST'])
+@jwt_required()
+def generate_report_async():
+    body = request.get_json() or {}
+    report_type = body.get("reportType")
+    vehicle_number = body.get("vehicleNumber")
+    date_range = body.get("dateRange", "last24hours")
+    from_date = body.get("fromDate")
+    to_date = body.get("toDate")
+
+    if not report_type or not vehicle_number:
+        return jsonify({"success": False, "message": "Missing reportType or vehicleNumber"}), 400
+
+    date_filter = get_date_range_filter(date_range, from_date, to_date)
+    claims = get_jwt()
+    user_id = get_jwt_identity()
+
+    task = generate_report_task.delay({
+        "report_type": report_type,
+        "vehicle_number": vehicle_number,
+        "date_filter": date_filter,
+        "user_claims": claims,
+        "user_id": user_id
+    })
+    return jsonify({"success": True, "task_id": task.id}), 202   
+
+@reports_bp.route('/report_status/<task_id>', methods=['GET'])
+@jwt_required()
+def report_status(task_id):
+    async_res = generate_report_task.AsyncResult(task_id)
+    state = async_res.state
+    info = async_res.info or {}
+    if state == "PENDING":
+        return jsonify({"state": state, "progress": 0})
+    if state == "STARTED":
+        return jsonify({"state": state, "progress": info.get("progress", 10)})
+    if state == "SUCCESS":
+        return jsonify({"state": state, "progress": 100, "rows": info.get("rows", 0)})
+    if state == "FAILURE":
+        return jsonify({"state": state, "progress": 100, "error": str(info)})
+    return jsonify({"state": state})
     
 @reports_bp.route('/get_recent_reports', methods=['GET'])
 @jwt_required()
@@ -1231,3 +1261,37 @@ def download_report(report_id):
     except Exception as e:
         print(f"[DEBUG] Error sending file for download, {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+    
+@reports_bp.route('/view_report/<report_id>', methods=['GET'])
+@jwt_required()
+def view_report(report_id):
+    try:
+        meta = db['generated_reports'].find_one({
+            '_id': ObjectId(report_id),
+            'user_id': get_jwt_identity()
+        })
+        if not meta:
+            return jsonify({"success": False, "message": "Report not found"}), 404
+
+        buf = BytesIO()
+        s3.download_fileobj(SPACE_NAME, meta['path'], buf)
+        buf.seek(0)
+        try:
+            payload = json.load(buf)
+        except Exception:
+            return jsonify({"success": False, "message": "Corrupt report file"}), 500
+        rows = payload.get("data", [])
+        return jsonify({
+            "success": True,
+            "metadata": {
+                "report_name": meta['report_name'],
+                "generated_at": meta['generated_at'].isoformat(),
+                "vehicle_number": meta.get('vehicle_number', ''),
+                "size": meta.get('size', 0),
+                "report_type": meta.get('report_type')
+            },
+            "data": rows
+        })
+    except Exception as e:
+        print("[DEBUG] view_report error:", e)
+        return jsonify({"success": False, "message": str(e)}), 500

@@ -78,6 +78,46 @@
     max-width: 80%;
 }
 
+.datetime-composite {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  background:#f5f5f5;
+  padding:8px 10px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+.dark-mode .datetime-composite {
+  background:#444;
+  border-color:#555;
+}
+.datetime-composite input.date-part {
+  padding:6px 10px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  font-size:14px;
+  background:#fff;
+}
+.dark-mode .datetime-composite input.date-part {
+  background:#333;
+  color:#ccc;
+  border-color:#555;
+}
+.datetime-composite select.time-part {
+  min-width:70px;
+  padding:6px 8px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  background:#fff;
+  font-size:14px;
+}
+.dark-mode .datetime-composite select.time-part {
+  background:#333;
+  color:#ccc;
+  border-color:#555;
+}
+
 .report-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

@@ -84,5 +84,27 @@ def get_vehicle_data():
 
     return results
 
+def get_vehicle_data_for_claims(claims):
+    """
+    Pure helper usable inside Celery tasks (no request context).
+    claims: dict containing roles, company, user_id
+    """
+    user_roles = claims.get('roles', [])
+    user_id = claims.get('user_id')
+    user_company = claims.get('company')
+
+    vehicle_inventory = db["vehicle_inventory"]
+
+    if 'admin' in user_roles:
+        cursor = vehicle_inventory.find()
+    elif 'user' in user_roles:
+        cursor = vehicle_inventory.find({
+            'CompanyName': user_company,
+            'AssignedUsers': ObjectId(user_id)
+        })
+    else:
+        cursor = vehicle_inventory.find({'CompanyName': user_company})
+    return list(cursor)
+
 def admin_required(fn):
     return roles_required('admin')(fn)

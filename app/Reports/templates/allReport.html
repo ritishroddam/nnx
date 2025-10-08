@@ -4,9 +4,6 @@
 <title>Reports</title>
 <link rel="stylesheet" href="{{ url_for('Reports.static', filename='css/allReport.css') }}">
 
-<!-- <script>
-    const reports = {{ reports | tojson }};
-</script> -->
 <script defer src="{{ url_for('Reports.static', filename='js/allReport.js') }}" defer></script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -26,77 +23,47 @@ All Reports
 
 {% block block_container %}
 <div class="reports-layout-container">
-    <!-- Left Column - Report Cards -->
     <div class="report-cards-container">
         <div class="report-header">
             <h2>Generate a New Report</h2>
         </div>
         <div class="report-cards">
-        
-            <a href="#" class="report-card" data-report="custom">
-                <h3>Custom Report</h3>
-                <i class="fa-solid fa-cogs"></i>
-            </a>
-        
             <a href="#" class="report-card" data-report="daily-distance">
                 <h3>Travel Path Report</h3>
                 <i class="fa-solid fa-route"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="odometer-daily-distance">
                 <h3>Distance Report</h3>
                 <i class="fa-solid fa-road"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="distance-speed-range">
                 <h3>Speed Report</h3>
                 <i class="fa-solid fa-gauge-high"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="stoppage">
                 <h3>Stoppage Report</h3>
                 <i class="fa-solid fa-traffic-light"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="idle">
                 <h3>Idle Report</h3>
                 <i class="fa-solid fa-hourglass-half"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="ignition">
                 <h3>Ignition Report</h3>
                 <i class="fa-solid fa-key"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="daily">
                 <h3>Daily Report</h3>
                 <i class="fa-solid fa-calendar-day"></i>
             </a>
-        
             <a href="#" class="report-card" data-report="panic">
                 <h3>Panic Report</h3>
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </a>
-        
-            {% for report in reports %}
-            <a href="#" class="report-card" data-report="custom" data-report-name="{{ report.report_name }}">
-                <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
-                    <div>
-                        <h3>{{ report.report_name }}</h3>
-                    </div>
-                    <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-top: 20px;">
-                        <i class="fa-solid fa-trash delete-report" title="Delete Report"
-                           style="color: #d9534f; cursor: pointer; font-size: 1.4em; margin-left: 0;"></i>
-                        <i class="fa-solid fa-file-alt" style="font-size: 2.5em;"></i>
-                    </div>
-                </div>
-            </a>
-            {% endfor %}
-        
         </div>
     </div>
 
-<div class="recent-reports-container">
+    <div class="recent-reports-container">
         <div class="recent-reports-header">
             <h2>Recently Generated Reports</h2>
             <div class="date-range-selector">
@@ -115,36 +82,6 @@ All Reports
     </div>
 </div>
 
-<div id="customReportModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Create Custom Report</h2>
-        <form id="customReportForm">
-            <div class="form-group">
-                <label for="reportName">Report Name*</label>
-                <input type="text" id="reportName" name="reportName" required />
-            </div>
-            <div class="form-group">
-                <label for="fieldSelection">Select Fields*</label>
-                <div id="fieldSelection" class="field-selection">
-                    <!-- Dynamically populated fields -->
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="selectedFields">Selected Fields (Drag to Reorder)</label>
-                <ul id="selectedFields" class="selected-fields">
-                    <!-- Dynamically updated selected fields -->
-                </ul>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="cancel-btn">Cancel</button>
-                <button type="submit" id="saveCustomReport">Save Report</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- The Modal -->
 <div id="reportModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -161,26 +98,52 @@ All Reports
                     <option value="custom">Custom</option>
                 </select>
             </div>
-            
-            <!-- Custom Date Range Fields -->
-            <div id="customDateRange" style="display: none; margin-top: 15px;">
-    <div class="form-group">
-        <label for="fromDate">From Date & Time</label>
-        <input type="datetime-local" id="fromDate" name="fromDate" class="form-control">
-    </div>
-    <div class="form-group">
-        <label for="toDate">To Date & Time</label>
-        <input type="datetime-local" id="toDate" name="toDate" class="form-control">
-    </div>
-</div>
-            
+
+            <div id="customDateRange" style="display:none; margin-top:15px;">
+              <input type="hidden" id="fromDate" name="fromDate">
+              <input type="hidden" id="toDate" name="toDate">
+              <div class="form-group">
+                <label>From Date & Time</label>
+                <div class="datetime-composite" id="fromComposite">
+                  <input type="date" id="fromDateDate" class="date-part">
+                  <select id="fromDateHour" class="time-part">
+                    {% for h in range(1,13) %}<option value="{{'%02d' % h}}">{{'%02d' % h}}</option>{% endfor %}
+                  </select>
+                  <span>:</span>
+                  <select id="fromDateMinute" class="time-part">
+                    {% for m in range(0,60) %}<option value="{{'%02d' % m}}">{{'%02d' % m}}</option>{% endfor %}
+                  </select>
+                  <select id="fromDateAmPm" class="time-part">
+                    <option value="AM">AM</option><option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>To Date & Time</label>
+                <div class="datetime-composite" id="toComposite">
+                  <input type="date" id="toDateDate" class="date-part">
+                  <select id="toDateHour" class="time-part">
+                    {% for h in range(1,13) %}<option value="{{'%02d' % h}}">{{'%02d' % h}}</option>{% endfor %}
+                  </select>
+                  <span>:</span>
+                  <select id="toDateMinute" class="time-part">
+                    {% for m in range(0,60) %}<option value="{{'%02d' % m}}">{{'%02d' % m}}</option>{% endfor %}
+                  </select>
+                  <select id="toDateAmPm" class="time-part">
+                    <option value="AM">AM</option><option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+              <small class="range-note">Maximum custom range: 30 days.</small>
+            </div>
+
             <div class="form-group">
                 <label for="subUserName">Sub User Name*</label>
                 <select id="subUserName" name="subUserName">
                     <option value="all">All sub users</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="vehicleNumber">Vehicle Number</label>
                 <select id="vehicleNumber" name="vehicleNumber">
@@ -191,39 +154,27 @@ All Reports
                     {% endfor %}
                 </select>
             </div>
-            
+
             <div class="form-actions">
-                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="button" class="cancel-btn" id="cancelReportModal">Cancel</button>
                 <button type="submit" id="generateReport">Generate Report</button>
                 <button type="button" id="viewReport" title="Preview Report" style="margin-left: 10px;">
                    <i class="fa-solid fa-eye"></i>
                 </button>
             </div>
+
+            <div id="asyncProgress" style="display:none;margin-top:10px;font-size:0.9em;">
+                Queued... <span id="asyncProgressText">0%</span>
+            </div>
         </form>
     </div>
 </div>
 
-<div id="deleteConfirmModal" class="modal" style="display:none;">
-  <div class="modal-content1" style="max-width: 350px;">
-    <span class="close" id="deleteConfirmClose">&times;</span>
-    <h3>Delete Report</h3>
-    <p id="deleteConfirmText"></p>
-    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-      <button id="deleteCancelBtn" class="btn btn-secondary">Cancel</button>
-      <button id="deleteOkBtn" class="btn btn-danger">Delete</button>
-    </div>
-  </div>
-</div>
-
 <div id="reportPreviewModal" class="modal" style="display:none;">
-  <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+  <div class="modal-content" style="max-height:80vh;overflow-y:auto;">
     <span class="close" id="closePreviewModal">&times;</span>
-    <h2>Report Preview</h2>
-    <div id="reportPreviewTableContainer">
-      <!-- Table gets injected here -->
-    </div>
+    <h2 id="reportPreviewModalTitle">Report Preview</h2>
+    <div id="reportPreviewTableContainer"></div>
   </div>
 </div>
-
-
 {% endblock %}

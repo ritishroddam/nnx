@@ -11,6 +11,7 @@ import os
 import signal
 from datetime import datetime, timezone, timedelta
 from functools import wraps
+from app.celery_app import init_celery, celery as celery_instance
 
 jwt = JWTManager()
 mongo_client = None
@@ -388,5 +389,7 @@ def create_app(config_name='default'):
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(gecoding_bp)
+    
+    init_celery(app)
     
     return app

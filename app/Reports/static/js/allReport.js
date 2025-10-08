@@ -1,61 +1,137 @@
-const allowedFields = [
-  "main_power",
-  "ignition",
-  "Tenure",
-  "gsm_sig",
-  "arm",
-  "sos",
-  "harsh_speed",
-  "odometer",
-  "internal_bat",
-  "Package",
-  "longitude",
-  "latitude",
-  "speed",
-  "door",
-  "temp",
-  "MobileNumber",
-  "VechicleType",
-  "Average Speed",
-  "Maximum Speed"
-];
+const REPORT_TITLE_MAP = {
+  'daily-distance':'Travel Path Report',
+  'odometer-daily-distance':'Distance Report',
+  'distance-speed-range':'Speed Report',
+  'stoppage':'Stoppage Report',
+  'idle':'Idle Report',
+  'ignition':'Ignition Report',
+  'daily':'Daily Report',
+  'panic':'Panic Report'
+};
 
-function downloadReport(reportId) {
-    fetch(`/reports/download_report/${reportId}`, {
-        method: "GET",
-        headers: {
-            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-    })
-        .then((response) => {
-            if (!response.ok) {
-                // If the response is not OK, parse the error message
-                return response.json().then((errorData) => {
-                    throw new Error(errorData.message || "Failed to download the report.");
-                });
-            }
-            const contentDisposition = response.headers.get("Content-Disposition");
-            const fileNameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
-            const fileName = fileNameMatch ? fileNameMatch[1] : `report_${reportId}.xlsx`; // Fallback filename
-            return response.blob().then(blob => ({ blob, fileName }));
-        })
-        .then(({ blob, fileName }) => {
-            // Create a download link for the file
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName; // Use the dynamic file name
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch((error) => {
-            // Display the error message using displayFlashMessage
-            console.error("Error downloading report:", error);
-            displayFlashMessage(error.message || "An unexpected error occurred while downloading the report.", "danger");
-        });
+const MAX_CUSTOM_RANGE_MS = 30 * 24 * 60 * 60 * 1000;
+
+function toAmPm(dtStr){
+  if(!dtStr) return '';
+  const d = new Date(dtStr);
+  if(isNaN(d)) return '';
+  let h = d.getHours();
+  const m = d.getMinutes().toString().padStart(2,'0');
+  const ampm = h >= 12 ? 'PM':'AM';
+  h = h % 12;
+  if(h === 0) h = 12;
+  return `${h}:${m} ${ampm}`;
 }
+
+function updateAmPmDisplays(){
+  document.getElementById('fromDateAmPm').textContent = toAmPm(document.getElementById('fromDate').value);
+  document.getElementById('toDateAmPm').textContent   = toAmPm(document.getElementById('toDate').value);
+}
+
+function setCompositeFromDate(prefix, dateObj){
+  // prefix: 'fromDate' | 'toDate'
+  const pad=n=>n.toString().padStart(2,'0');
+  const dateStr = `${dateObj.getFullYear()}-${pad(dateObj.getMonth()+1)}-${pad(dateObj.getDate())}`;
+  let h24 = dateObj.getHours();
+  let ampm = h24>=12?'PM':'AM';
+  let h12 = h24%12; if(h12===0) h12=12;
+  const min = pad(dateObj.getMinutes());
+  document.getElementById(prefix+'Date').value = dateStr;
+  document.getElementById(prefix+'Hour').value = pad(h12);
+  document.getElementById(prefix+'Minute').value = min;
+  document.getElementById(prefix+'AmPm').value = ampm;
+  syncHiddenInputs();
+}
+
+function clampCustomRange(){
+  syncHiddenInputs();
+  const fromHidden = document.getElementById('fromDate').value;
+  const toHidden = document.getElementById('toDate').value;
+  if(!fromHidden || !toHidden) return true;
+  let from = new Date(fromHidden);
+  let to = new Date(toHidden);
+  if(isNaN(from)||isNaN(to)){
+    displayFlashMessage('Invalid custom date/time','danger');
+    return false;
+  }
+  if(from > to){
+    from = new Date(to);
+    setCompositeFromDate('fromDate', from);
+    displayFlashMessage('From date adjusted (cannot exceed To)','warning');
+  }
+  if((to - from) > MAX_CUSTOM_RANGE_MS){
+    from = new Date(to.getTime() - MAX_CUSTOM_RANGE_MS);
+    setCompositeFromDate('fromDate', from);
+    displayFlashMessage('Custom range capped at 30 days','warning');
+  }
+  const earliest = new Date(Date.now() - MAX_CUSTOM_RANGE_MS);
+  if(from < earliest){
+    from = earliest;
+    setCompositeFromDate('fromDate', from);
+    displayFlashMessage('From date cannot be older than 30 days','warning');
+  }
+  // Re-sync hidden after adjustments
+  syncHiddenInputs();
+  return true;
+}
+
+function buildISOFromParts(prefix){
+  const date = document.getElementById(prefix+'Date').value; // yyyy-mm-dd
+  const hour12 = document.getElementById(prefix+'Hour').value;
+  const minute = document.getElementById(prefix+'Minute').value;
+  const ampm = document.getElementById(prefix+'AmPm').value;
+  if(!date) return '';
+  let h = parseInt(hour12,10);
+  if(ampm === 'PM' && h !== 12) h += 12;
+  if(ampm === 'AM' && h === 12) h = 0;
+  const hh = h.toString().padStart(2,'0');
+  return `${date}T${hh}:${minute}`;
+}
+
+function syncHiddenInputs(){
+  const fromISO = buildISOFromParts('fromDate');
+  const toISO = buildISOFromParts('toDate');
+  if(fromISO) document.getElementById('fromDate').value = fromISO;
+  if(toISO) document.getElementById('toDate').value = toISO;
+}
+
+function parseLocal(dtStr){
+  if(!dtStr) return null;
+  const d = new Date(dtStr.replace('T',' ') + ':00');
+  return isNaN(d)?null:d;
+}
+
+function downloadReport(reportId){
+  fetch(`/reports/download_report/${reportId}`,{
+    headers:{'X-CSRF-TOKEN':getCookie('csrf_access_token')}
+  }).then(resp=>{
+    if(!resp.ok)return resp.json().then(j=>{throw new Error(j.message||'Download failed')});
+    return resp.blob();
+  }).then(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='report.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+  }).catch(e=>displayFlashMessage(e.message,'danger'));
+}
+
+function openStoredReport(id){
+  fetch(`/reports/view_report/${id}`,{
+    headers:{'X-CSRF-TOKEN':getCookie('csrf_access_token')}
+  }).then(r=>r.json())
+    .then(js=>{
+      if(!js.success){
+        displayFlashMessage(js.message||'Unable to load report','danger');
+        return;
+      }
+      openPreview(js.metadata.report_name, js.data||[]);
+    }).catch(e=>console.error(e));
+}
+
 
 function formatTimeAgo(date) {
     const seconds = Math.floor((new Date() - date) / 1000);
@@ -68,691 +144,240 @@ function formatTimeAgo(date) {
     return `${days} days ago`;
 }
 
-function loadRecentReports(range) {
+function loadRecentReports(range){
   fetch(`/reports/get_recent_reports?range=${range}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.reports.length > 0) {
-            renderRecentReports(data.reports);
-        } else {
-            document.getElementById('recentReportsList').innerHTML = 
-                '<p>Your generated reports will be visible here.</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Error loading recent reports:', error);
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.success&&d.reports.length)renderRecentReports(d.reports);
+      else document.getElementById('recentReportsList').innerHTML='<p>Your generated reports will be visible here.</p>';
     });
 }
 
-function renderRecentReports(reports) {
-    const container = document.getElementById('recentReportsList');
-    container.innerHTML = '';
-
-    reports.forEach(report => {
-      const reportItem = document.createElement('div');
-      reportItem.className = 'report-item';
-      
-      // Format file size
-      const fileSize = report.size > 1024 ? 
-          `${(report.size/1024).toFixed(1)} KB` : 
-          `${report.size} bytes`;
-          
-      // Format timestamp
-      const timeAgo = formatTimeAgo(new Date(report.generated_at));
-      
-      reportItem.innerHTML = `
-          <div class="report-info">
-              <div class="report-name">${report.report_name}</div>
-              <div class="report-meta">
-                  <span class="file-size">${fileSize}</span>
-                  <span class="time-ago">${timeAgo}</span>
-              </div>
-          </div>
-          <div class="report-actions">
-              <button class="download-report" data-id="${report._id}" onclick="downloadReport('${report._id}')" title="Download Report">
-                  <i class="fas fa-download"></i>
-              </button>
-          </div>
-      `;
-      
-      container.appendChild(reportItem);
-    });
+function renderRecentReports(reports){
+  const c=document.getElementById('recentReportsList');
+  c.innerHTML='';
+  reports.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='report-item';
+    div.innerHTML=`
+      <div class="report-info report-open" data-id="${r._id}">
+        <div class="report-name">${r.report_name}</div>
+        <div class="report-meta">
+          <span>${(r.size/1024).toFixed(1)} KB</span>
+          <span>${formatTimeAgo(new Date(r.generated_at))}</span>
+        </div>
+      </div>
+      <div class="report-actions">
+        <button title="Download" onclick="downloadReport('${r._id}')"><i class="fas fa-download"></i></button>
+      </div>`;
+    c.appendChild(div);
+  });
+  c.querySelectorAll('.report-open').forEach(el=>{
+    el.addEventListener('click',()=>openStoredReport(el.dataset.id));
+  });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  const reportModal = document.getElementById("reportModal");
-  const customReportModal = document.getElementById("customReportModal");
-  const fieldSelection = document.getElementById("fieldSelection");
-  const selectedFields = document.getElementById("selectedFields");
-  const customReportForm = document.getElementById("customReportForm");
-  const dateRangeSelect = document.getElementById("dateRange");
-  const customDateRange = document.getElementById("customDateRange");
-
-  let generatedReports = [];
-
-  loadRecentReports('today');
-
-  const reportDateRangeSelect = document.getElementById('reportDateRange');
-  if (reportDateRangeSelect) {
-      reportDateRangeSelect.addEventListener('change', function() {
-          loadRecentReports(this.value);
-      });
-  }
-
-   function handleDateRangeChange() {
-        if (dateRangeSelect.value === "custom") {
-            customDateRange.style.display = "block";
-            
-            const now = new Date();
-            const threeMonthsAgo = new Date();
-            threeMonthsAgo.setMonth(now.getMonth() - 3);
-            
-            function formatDate(date) {
-                const pad = num => num.toString().padStart(2, '0');
-                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-            }
-            
-            document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
-            document.getElementById("toDate").value = formatDate(now);
-        } else {
-            customDateRange.style.display = "none";
-        }
-    }
-    
-    dateRangeSelect.addEventListener("change", handleDateRangeChange);
-    
-    handleDateRangeChange();
-
-  $("select").selectize({
-    create: false,
-    sortField: "text",
-  });
-function viewReport(reportId) {
-    const report = generatedReports.find(r => r._id === reportId);
-    if (!report) return;
-    
-    // You can reuse your existing preview modal here
-    // Populate it with the report data
-    displayFlashMessage(`Viewing report: ${report.report_name}`,"success");
+function buildTable(rows){
+  if(!rows.length)return '<p>No data.</p>';
+  const headers=Object.keys(rows[0]);
+  const thead=`<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
+  const tbody=`<tbody>${rows.map(r=>`<tr>${headers.map(h=>`<td>${r[h]??''}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  return `<table class="table table-bordered table-striped">${thead}${tbody}</table>`;
 }
-  const vehicleSelect = document.getElementById("vehicleNumber");
-  const vehicleSelectize = vehicleSelect.selectize;
 
-  document.querySelectorAll(".report-card").forEach((card) => {
-    card.addEventListener("click", function () {
-      const reportType = card.dataset.report;
-      if (reportType === "daily-distance") {
-        vehicleSelectize.removeOption("all");
-        if (vehicleSelectize.getValue() === "all") {
-          vehicleSelectize.clear();
-        }
-      } else {
-        if (!vehicleSelectize.options["all"]) {
-          vehicleSelectize.addOption({ value: "all", text: "All Vehicle" });
-        }
-      }
-    });
-  });
+function openPreview(title, rows){
+  document.getElementById('reportPreviewModalTitle').textContent=title+' Preview';
+  document.getElementById('reportPreviewTableContainer').innerHTML=buildTable(rows);
+  document.getElementById('reportPreviewModal').style.display='block';
+}
 
-  document
-    .querySelector('[data-report="custom"]')
-    .addEventListener("click", function () {
-      customReportModal.style.display = "block";
-      loadFields();
-    });
-
-  document.querySelectorAll(".close").forEach((closeBtn) => {
-    closeBtn.addEventListener("click", function () {
-      customReportModal.style.display = "none";
-      reportModal.style.display = "none";
-    });
-  });
-
-  document.querySelectorAll(".cancel-btn").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      customReportModal.style.display = "none";
-      reportModal.style.display = "none";
-    });
-  });
-
-  window.addEventListener("click", function (event) {
-    if (event.target == reportModal) {
-      reportModal.style.display = "none";
-    }
-    if (event.target == customReportModal) {
-      customReportModal.style.display = "none";
-    }
-  });
-
-  document.querySelectorAll(".report-card").forEach((card) => {
-    card.addEventListener("click", function (e) {
-      e.preventDefault();
-      const reportType = this.dataset.report;
-      const reportName = this.querySelector("h3").textContent;
-
-      if (reportName === "Custom Report") {
-        document.getElementById("generateReport").dataset.reportType =
-          reportType;
-        document.getElementById("generateReport").dataset.reportName =
-          reportName;
-        return;
-      }
-
-      if (reportType === "custom") {
-        fetch(
-          `/reports/get_custom_report?name=${encodeURIComponent(reportName)}`
-        )
-          .then((response) => {
-            if (!response.ok) {
-              displayFlashMessage("Network response was not ok", "danger");
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              openReportModal(reportName);
-              document.getElementById("generateReport").dataset.reportType =
-                reportType;
-              document.getElementById("generateReport").dataset.reportName =
-                reportName;
-            } else {
-              throw new Error(data.message || "Failed to load custom report");
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            alert("Failed to load custom report configuration");
-          });
-      } else if (reportType === "panic") {
-        console.log("reportType", reportType);
-        openReportModal(reportName);
-        document.getElementById("generateReport").dataset.reportType =
-          reportType;
-      } else {
-        openReportModal(reportName);
-        document.getElementById("generateReport").dataset.reportType =
-          reportType;
-      }
-    });
-  });
-
-  document.getElementById("dateRange").addEventListener("change", function() {
-    const customDateRange = document.getElementById("customDateRange");
-    if (this.value === "custom") {
-        customDateRange.style.display = "block";
-        
-        const now = new Date();
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        
-        const formatDate = (date) => {
-            return date.toISOString().slice(0, 16);
-        };
-        
-        document.getElementById("fromDate").max = formatDate(now);
-        document.getElementById("fromDate").min = formatDate(threeMonthsAgo);
-        document.getElementById("toDate").max = formatDate(now);
-        document.getElementById("toDate").min = formatDate(threeMonthsAgo);
-        
-        document.getElementById("fromDate").value = formatDate(threeMonthsAgo);
-        document.getElementById("toDate").value = formatDate(now);
-    } else {
-        customDateRange.style.display = "none";
-    }
-});
-
-document.getElementById("viewReport").addEventListener("click", async function (e) {
-  e.preventDefault();
-
-  const reportType = document.getElementById("generateReport").dataset.reportType;
-  const reportName = document.getElementById("generateReport").dataset.reportName;
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  const dateRange = document.getElementById("dateRange").value;
-
-  if (!vehicleNumber) {
-    alert("Please select a vehicle number");
+async function previewReport(){
+  const reportType=document.getElementById('generateReport').dataset.reportType;
+  const vehicleNumber=document.getElementById('vehicleNumber').value;
+  const dateRange=document.getElementById('dateRange').value;
+  if(!vehicleNumber){
+    displayFlashMessage('Select a vehicle first','warning');
     return;
   }
-
-  const body = {
-    reportType,
-    reportName,
-    vehicleNumber,
-    dateRange,
-  };
-
-  if (dateRange === "custom") {
-    body.fromDate = document.getElementById("fromDate").value;
-    body.toDate = document.getElementById("toDate").value;
+  if(dateRange==='custom'){
+    if(!clampCustomRange()) return;
   }
+  const body={reportType,vehicleNumber,dateRange};
+  if(dateRange==='custom'){
+    body.fromDate=document.getElementById('fromDate').value;
+    body.toDate=document.getElementById('toDate').value;
+  }
+  const resp=await fetch('/reports/preview_report',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':getCookie('csrf_access_token')},
+    body:JSON.stringify(body)
+  });
+  const js=await resp.json();
+  if(!js.success){
+    displayFlashMessage(js.message||'Preview failed','danger');
+    return;
+  }
+  openPreview(REPORT_TITLE_MAP[reportType]||'Report', js.data||[]);
+}
 
-  try {
-    const response = await fetch("/reports/generate_report", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify(body),
-    });
-
-    const result = await response.json();
-    if (!result.success) {
-      alert(result.message || "Failed to load preview");
+function queueReport(){
+  const reportType=document.getElementById('generateReport').dataset.reportType;
+  const vehicleNumber=document.getElementById('vehicleNumber').value;
+  const dateRange=document.getElementById('dateRange').value;
+  if(dateRange === 'custom'){
+    if(!clampCustomRange()) return;
+  }
+  if(!vehicleNumber){
+    displayFlashMessage('Select a vehicle first','warning');
+    return;
+  }
+  const btn=document.getElementById('generateReport');
+  const prog=document.getElementById('asyncProgress');
+  const progText=document.getElementById('asyncProgressText');
+  btn.disabled=true; btn.textContent='Queuing...';
+  prog.style.display='block'; progText.textContent='0%';
+  const body={reportType,vehicleNumber,dateRange};
+  if(dateRange==='custom'){
+    body.fromDate=document.getElementById('fromDate').value;
+    body.toDate=document.getElementById('toDate').value;
+  }
+  fetch('/reports/generate_report',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':getCookie('csrf_access_token')},
+    body:JSON.stringify(body)
+  }).then(r=>r.json()).then(js=>{
+    if(!js.success){
+      displayFlashMessage(js.message||'Failed to queue report','danger');
+      reset();
       return;
     }
+    pollStatus(js.task_id,btn,prog,progText,reportType);
+  }).catch(e=>{
+    console.error(e);
+    displayFlashMessage('Queue failed','danger');
+    reset();
+  });
+  function reset(){
+    btn.disabled=false; btn.textContent='Generate Report'; prog.style.display='none';
+  }
+}
 
-    const container = document.getElementById("reportPreviewTableContainer");
-    container.innerHTML = "";
+function pollStatus(taskId,btn,prog,progText,reportType){
+  const iv=setInterval(()=>{
+    fetch(`/reports/report_status/${taskId}`,{headers:{'X-CSRF-TOKEN':getCookie('csrf_access_token')}})
+      .then(r=>r.json())
+      .then(js=>{
+        if(js.state==='PENDING'||js.state==='STARTED'){
+          progText.textContent = js.progress ? `${js.progress}%` : '...';
+        }else if(js.state==='SUCCESS'){
+          clearInterval(iv);
+          progText.textContent='Done';
+          setTimeout(()=>{prog.style.display='none';},800);
+          btn.disabled=false; btn.textContent='Generate Report';
+          loadRecentReports(document.getElementById('reportDateRange').value||'today');
+        }else if(js.state==='FAILURE'){
+          clearInterval(iv);
+          displayFlashMessage(js.error||'Failed','danger');
+          btn.disabled=false; btn.textContent='Generate Report';
+          prog.style.display='none';
+        }
+      }).catch(e=>{console.error(e);});
+  },1500);
+}
 
-    if (result.data.length === 0) {
-      container.innerHTML = "<p>No data found.</p>";
+function setDefaultCustom(){
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime()-3600*1000);
+  setCompositeFromDate('toDate', now);
+  setCompositeFromDate('fromDate', oneHourAgo);
+}
+
+function applySelectize(){
+  const selIds = [
+    '#dateRange','#subUserName','#vehicleNumber',
+    '#fromDateHour','#fromDateMinute','#fromDateAmPm',
+    '#toDateHour','#toDateMinute','#toDateAmPm'
+  ];
+  selIds.forEach(id=>{
+    const el = document.querySelector(id);
+    if(el && !el.classList.contains('selectized')){
+      $(el).selectize({
+        create:false,
+        sortField:'text',
+        searchField:['text']
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  applySelectize();
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    // ...existing initialization code...
+    document.getElementById('cancelReportModal').addEventListener('click',()=>{
+      document.getElementById('reportModal').style.display='none';
+    });
+  });
+
+  const drSel = document.getElementById('dateRange');
+  drSel.addEventListener('change', ()=>{
+    const custom = document.getElementById('customDateRange');
+    if(drSel.value === 'custom'){
+      custom.style.display='block';
+      if(!document.getElementById('fromDate').value || !document.getElementById('toDate').value){
+        setDefaultCustom();
+      }
+      clampCustomRange();
     } else {
-      const table = document.createElement("table");
-      table.className = "table table-bordered table-striped";
-      
-      const thead = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-      
-      const headers = Object.keys(result.data[0]);
-      
-      const formattedHeaders = headers.map(header => {
-        return header
-          .replace(/_/g, ' ')
-          .replace(/([a-z])([A-Z])/g, '$1 $2')
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' ');
-      });
-      
-      formattedHeaders.forEach(header => {
-        const th = document.createElement("th");
-        th.textContent = header;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-      result.data.forEach(row => {
-        const tr = document.createElement("tr");
-        headers.forEach(h => {
-          const td = document.createElement("td");
-          if (h === 'date_time') {
-            td.textContent = row[h] || "";
-          } else if (h === 'ignition') {
-            td.textContent = row[h] === 'ON' ? 'ON' : 'OFF';
-          } else if (h.endsWith('(km)') || h.endsWith('(min)')) {
-            const numValue = parseFloat(row[h]);
-            td.textContent = !isNaN(numValue) ? numValue.toFixed(2) : (row[h] === 0 ? '0.00' : row[h] || '');
-          } else {
-            td.textContent = (row[h] !== undefined && row[h] !== null) ? row[h] : '';
-          }
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-      container.appendChild(table);
+      custom.style.display='none';
     }
+  });
+  const fromEl = document.getElementById('fromDate');
+  const toEl = document.getElementById('toDate');
 
-    const modalTitle = document.getElementById("reportPreviewModalTitle");
-    if (modalTitle) {
-      const reportTitles = {
-        'daily-distance': 'Travel Path Report Preview',
-        'odometer-daily-distance': 'Distance Report Preview',
-        'distance-speed-range': 'Speed Report Preview',
-        'stoppage': 'Stoppage Report Preview',
-        'idle': 'Idle Report Preview',
-        'ignition': 'Ignition Report Preview',
-        'daily': 'Daily Report Preview',
-        'panic': 'Panic Report Preview',
-        'custom': `${reportName} Preview`
-      };
-      modalTitle.textContent = reportTitles[reportType] || 'Report Preview';
-    }
-
-    document.getElementById("reportPreviewModal").style.display = "block";
-
-  } catch (error) {
-    console.error("Error fetching report preview:", error);
-    alert("An error occurred while loading the preview.");
-  }
-});
-
-  document.getElementById("generateReport").addEventListener("click", async function (e) {
-  e.preventDefault();
-
-  const reportType = this.dataset.reportType || (typeof currentReportType !== "undefined" ? currentReportType : null);
-  const reportName = this.dataset.reportName;
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  const dateRange = document.getElementById("dateRange").value;
-
-  if (!vehicleNumber) {
-    alert("Please select a vehicle number");
-    return;
-  }
-
-  const generateBtn = this;
-  const originalText = generateBtn.textContent;
-  generateBtn.disabled = true;
-  generateBtn.textContent = "Generating...";
-
-  if (reportType === "panic") {
-    await generatePanicReport();
-    generateBtn.disabled = false;
-    generateBtn.textContent = originalText;
-  } else {
-    try {
-      let endpoint = "/reports/download_custom_report";
-      let body = {
-        reportType: reportType,
-        vehicleNumber: vehicleNumber,
-        reportName: reportName,
-        dateRange: dateRange,
-      };
-      if (dateRange === "custom") {
-        body.fromDate = document.getElementById("fromDate").value;
-        body.toDate = document.getElementById("toDate").value;
-      }
-      if (reportType === "distance-speed-range" && typeof speedValue !== "undefined") {
-        body.speedValue = speedValue;
-      }
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-        body: JSON.stringify(body),
+  ['fromDateDate','fromDateHour','fromDateMinute','fromDateAmPm',
+   'toDateDate','toDateHour','toDateMinute','toDateAmPm'
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      el.addEventListener('change',()=>{
+        syncHiddenInputs();
+        clampCustomRange();
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        displayFlashMessage(
-          errorData.message || "Failed to generate report",
-          errorData.category || "danger"
-        );
-        return;
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = vehicleNumber === "all"
-        ? `${reportType === "custom" ? reportName : reportType}_report_ALL_VEHICLES.xlsx`
-        : `${reportType === "custom" ? reportName : reportType}_report_${vehicleNumber}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "Failed to generate report");
-    } finally {
-      generateBtn.disabled = false;
-      generateBtn.textContent = originalText;
-    }
-  }
-});
-
-document.getElementById("reportForm").addEventListener("submit", function(e) {
-    const dateRange = document.getElementById("dateRange").value;
-    if (dateRange === "custom") {
-        const fromDate = new Date(document.getElementById("fromDate").value);
-        const toDate = new Date(document.getElementById("toDate").value);
-        
-        if (!fromDate || !toDate) {
-            e.preventDefault();
-            alert("Please select both from and to dates");
-            return;
-        }
-        
-        if (fromDate > toDate) {
-            e.preventDefault();
-            alert("From date cannot be after To date");
-            return;
-        }
-        
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        
-        if (fromDate < threeMonthsAgo || toDate < threeMonthsAgo) {
-            e.preventDefault();
-            alert("Date range cannot be older than 3 months");
-            return;
-        }
-    }
-});
-
-  customReportForm.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const reportName = document.getElementById("reportName").value.trim();
-  if (!reportName) {
-    alert("Please provide a report name");
-    return;
-  }
-
-  const fields = Array.from(selectedFields.children).map(
-    (li) => li.dataset.field
-  );
-  if (fields.length === 0) {
-    alert("Please select at least one field");
-    return;
-  }
-
-  const saveBtn = document.getElementById("saveCustomReport");
-  const originalText = saveBtn.textContent;
-  saveBtn.disabled = true;
-  saveBtn.textContent = "Saving...";
-
-  fetch("/reports/save_custom_report", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-    },
-    body: JSON.stringify({
-      reportName: reportName,
-      fields: fields,
-    }),
-  })
-    .then((response) => response.json().then(data => ({ ok: response.ok, data })))
-    .then(({ ok, data }) => {
-      if (!ok) {
-        displayFlashMessage(data.message || "Failed to save report", "danger");
-        throw new Error(data.message || "Failed to save report");
-      }
-      alert(data.message || "Report saved successfully!");
-      customReportModal.style.display = "none";
-      customReportForm.reset();
-      selectedFields.innerHTML = "";
-      window.location.reload();
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert(error.message);
-    })
-    .finally(() => {
-      saveBtn.disabled = false;
-      saveBtn.textContent = originalText;
-    });
-});
-
-  fieldSelection.addEventListener("change", function (e) {
-    const field = e.target.value;
-
-    if (e.target.checked) {
-      const existingField = selectedFields.querySelector(
-        `[data-field="${field}"]`
-      );
-      if (existingField) {
-        alert("This field is already selected.");
-        e.target.checked = false;
-        return;
-      }
-
-      const listItem = document.createElement("li");
-      listItem.textContent = field;
-      listItem.dataset.field = field;
-      listItem.draggable = true;
-
-      const removeButton = document.createElement("button");
-      removeButton.textContent = "Remove";
-      removeButton.className = "btn btn-sm btn-danger";
-      removeButton.style.marginLeft = "10px";
-
-      removeButton.addEventListener("click", function () {
-        selectedFields.removeChild(listItem);
-        const checkbox = fieldSelection.querySelector(
-          `input[value="${field}"]`
-        );
-        if (checkbox) {
-          checkbox.checked = false;
-          checkbox.parentElement.style.display = "block";
-        }
-      });
-
-      listItem.appendChild(removeButton);
-
-      listItem.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", e.target.dataset.field);
-      });
-
-      listItem.addEventListener("dragover", (e) => e.preventDefault());
-      listItem.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const draggedField = e.dataTransfer.getData("text/plain");
-        const draggedItem = selectedFields.querySelector(
-          `[data-field="${draggedField}"]`
-        );
-        if (draggedItem) {
-          selectedFields.insertBefore(draggedItem, e.target);
-        }
-      });
-
-      selectedFields.appendChild(listItem);
-      e.target.parentElement.style.display = "none";
-    } else {
-      const listItem = selectedFields.querySelector(`[data-field="${field}"]`);
-      if (listItem) selectedFields.removeChild(listItem);
-      e.target.parentElement.style.display = "block";
     }
   });
 
-  document.querySelectorAll(".report-card").forEach((card) => {
-    card.addEventListener("click", function (e) {
-      const reportType = card.dataset.report;
-      const allVehicleOption = document.getElementById("allVehicleOption");
-      if (allVehicleOption) {
-        allVehicleOption.style.display = "none";
-      }
 
-      if (reportType === "daily-distance" && allVehicleOption) {
-        allVehicleOption.style.display = "none";
-
-        const vehicleSelect = document.getElementById("vehicleNumber");
-        if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
-
-        if (vehicleSelect.selectize) {
-          vehicleSelect.selectize.removeOption("all");
-        }
-      } else if (allVehicleOption) {
-        allVehicleOption.style.display = "";
-        const vehicleSelect = document.getElementById("vehicleNumber");
-        if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
-          vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
-        }
-      }
+  loadRecentReports('today');
+  // Card click selects type
+  document.querySelectorAll('.report-card').forEach(card=>{
+    card.addEventListener('click',e=>{
+      e.preventDefault();
+      const type=card.dataset.report;
+      document.getElementById('generateReport').dataset.reportType=type;
+      document.getElementById('reportModalTitle').textContent=REPORT_TITLE_MAP[type]||'Report';
+      document.getElementById('reportModal').style.display='block';
     });
   });
-
-  const speedSelectGroup = document.getElementById("speedSelectGroup");
-  const speedSelect = document.getElementById("speedSelect");
-  let currentReportType = null;
-
-  document.querySelectorAll(".report-card").forEach((card) => {
-    card.addEventListener("click", function () {
-      currentReportType = card.dataset.report;
-
-      const reportType = card.dataset.report;
-      const allVehicleOption = document.getElementById("allVehicleOption");
-      if (allVehicleOption) {
-        allVehicleOption.style.display = "none";
-      }
-
-      if (reportType === "daily-distance" && allVehicleOption) {
-        allVehicleOption.style.display = "none";
-        const vehicleSelect = document.getElementById("vehicleNumber");
-        if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
-        if (vehicleSelect.selectize) {
-          vehicleSelect.selectize.removeOption("all");
-        }
-      } else if (allVehicleOption) {
-        allVehicleOption.style.display = "";
-        const vehicleSelect = document.getElementById("vehicleNumber");
-        if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
-          vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
-        }
-      }
-    });
+  document.getElementById('viewReport').addEventListener('click',e=>{
+    e.preventDefault(); previewReport();
   });
-
-  document.getElementById("reportForm").addEventListener("submit", function(e) {
-    const dateRange = document.getElementById("dateRange").value;
-    if (dateRange === "custom") {
-        const fromDate = new Date(document.getElementById("fromDate").value);
-        const toDate = new Date(document.getElementById("toDate").value);
-        
-        if (!fromDate || !toDate) {
-            e.preventDefault();
-            alert("Please select both from and to dates");
-            return;
-        }
-        
-        if (fromDate > toDate) {
-            e.preventDefault();
-            alert("From date cannot be after To date");
-            return;
-        }
-        
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        
-        if (fromDate < threeMonthsAgo || toDate < threeMonthsAgo) {
-            e.preventDefault();
-            alert("Date range cannot be older than 3 months");
-            return;
-        }
-    }
+  document.getElementById('generateReport').addEventListener('click',e=>{
+    e.preventDefault(); queueReport();
   });
-
-  document.querySelectorAll(".report-card").forEach((card) => {
-    card.addEventListener("click", function (e) {
-      const reportType = card.dataset.report;
-      const allVehicleOption = document.getElementById("allVehicleOption");
-      if (allVehicleOption) {
-        allVehicleOption.style.display = "none";
-      }
-      if (reportType === "daily-distance" && allVehicleOption) {
-        allVehicleOption.style.display = "none";
-        const vehicleSelect = document.getElementById("vehicleNumber");
-        if (vehicleSelect.value === "all") vehicleSelect.selectedIndex = 1;
-        if (vehicleSelect.selectize) {
-          vehicleSelect.selectize.removeOption("all");
-        }
-      } else if (allVehicleOption) {
-        allVehicleOption.style.display = "";
-        const vehicleSelect = document.getElementById("vehicleNumber");
-        if (vehicleSelect.selectize && !vehicleSelect.selectize.options["all"]) {
-          vehicleSelect.selectize.addOption({value: "all", text: "All Vehicle"});
-        }
-      }
-    });
+  document.getElementById('closePreviewModal').addEventListener('click',()=>{
+    document.getElementById('reportPreviewModal').style.display='none';
+  });
+  document.querySelectorAll('#reportModal .close').forEach(c=>c.addEventListener('click',()=>{
+    document.getElementById('reportModal').style.display='none';
+  }));
+  document.getElementById('reportDateRange').addEventListener('change',function(){
+    loadRecentReports(this.value);
+  });
+  document.getElementById('dateRange').addEventListener('change',function(){
+    const custom=document.getElementById('customDateRange');
+    if(this.value==='custom') custom.style.display='block'; else custom.style.display='none';
   });
 });
 
@@ -815,7 +440,7 @@ async function generatePanicReport() {
   const dateRange = document.getElementById("dateRange").value;
 
   if (!vehicleNumber) {
-    alert("Please select a vehicle first");
+    displayFlashMessage('Select a vehicle first','warning');
     return;
   }
 
@@ -834,10 +459,7 @@ async function generatePanicReport() {
 
     if (!response.ok) {
       const errorData = await response.json();
-      displayFlashMessage(
-        errorData.message || "Failed to generate panic report",
-        errorData.category || "danger"
-      );
+      displayFlashMessage(errorData.message || "Failed to generate panic report", errorData.category || "danger");
       return;
     }
 
@@ -852,9 +474,10 @@ async function generatePanicReport() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+    displayFlashMessage('Panic report download started','success');
   } catch (error) {
     console.error("Error:", error);
-    alert(error.message || "Failed to generate panic report");
+    displayFlashMessage(error.message || "Failed to generate panic report",'danger');
   }
 }
 
@@ -862,12 +485,16 @@ function loadFields() {
   fetch("/reports/get_fields")
     .then((response) => {
       if (!response.ok) {
-        displayFlashMessage("Network response was not ok", "danger");
+        displayFlashMessage("Failed to load fields","danger");
         throw new Error("Network response was not ok");
       }
       return response.json();
     })
     .then((fields) => {
+      if (typeof fieldSelection === 'undefined' || typeof allowedFields === 'undefined') {
+        console.warn('Custom report field UI removed; loadFields skipped.');
+        return;
+      }
       fieldSelection.innerHTML = "";
       const filteredFields = fields.filter((field) =>
         allowedFields.includes(field)
@@ -892,63 +519,8 @@ function loadFields() {
     })
     .catch((error) => {
       console.error("Error loading fields:", error);
-      alert("Failed to load available fields. Please try again.");
+      displayFlashMessage("Failed to load available fields","danger");
     });
-}
-
-document.querySelectorAll('.report-card[data-report="custom"] .delete-report').forEach(function(icon) {
-  icon.addEventListener('click', function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    const reportCard = this.closest('.report-card');
-    const reportName = reportCard.dataset.reportName || reportCard.querySelector('h3').textContent;
-    showDeleteConfirm(reportName, function() {
-      fetch(`/reports/delete_custom_report?name=${encodeURIComponent(reportName)}`, {
-        method: "DELETE",
-        headers: {
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          reportCard.remove();
-        } else {
-          alert(data.message || "Failed to delete report.");
-        }
-      })
-      .catch(() => alert("Failed to delete report."));
-    });
-  });
-});
-
-function showDeleteConfirm(reportName, onConfirm) {
-  const modal = document.getElementById("deleteConfirmModal");
-  const text = document.getElementById("deleteConfirmText");
-  const okBtn = document.getElementById("deleteOkBtn");
-  const cancelBtn = document.getElementById("deleteCancelBtn");
-  const closeBtn = document.getElementById("deleteConfirmClose");
-
-  text.textContent = `Are you sure you want to delete the report "${reportName}"?`;
-  modal.style.display = "block";
-
-  function cleanup() {
-    modal.style.display = "none";
-    okBtn.removeEventListener("click", onOk);
-    cancelBtn.removeEventListener("click", onCancel);
-    closeBtn.removeEventListener("click", onCancel);
-  }
-  function onOk() {
-    cleanup();
-    onConfirm();
-  }
-  function onCancel() {
-    cleanup();
-  }
-
-  okBtn.addEventListener("click", onOk);
-  cancelBtn.addEventListener("click", onCancel);
-  closeBtn.addEventListener("click", onCancel);
 }
 
 document.getElementById("closePreviewModal").addEventListener("click", function () {
