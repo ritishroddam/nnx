@@ -185,28 +185,31 @@ def process_df(df, license_plate, fields, post_process=None):
 
     print(f"[DEBUG] [process_df] Starting Location column block")
     if 'latitude' in df.columns and 'longitude' in df.columns:
-        df['Location'] = df.apply(
-            lambda row: geocodeInternal(row['latitude'], row['longitude'])
-            if pd.notnull(row['latitude']) and row['latitude'] != "" and
-               pd.notnull(row['longitude']) and row['longitude'] != ""
-            else 'Missing coordinates',
-            axis=1
-        )
+        # Convert once (cheap); keeps original strings safe if needed later
+        lat_series = pd.to_numeric(df['latitude'], errors='coerce')
+        lon_series = pd.to_numeric(df['longitude'], errors='coerce')
+
+        cache = {}
+        locations = []
+        for lat, lon in zip(lat_series.values, lon_series.values):
+            if pd.isna(lat) or pd.isna(lon):
+                locations.append('Missing coordinates')
+                continue
+            key = (round(lat, 5), round(lon, 5))  # quantize to reduce duplicates
+            if key in cache:
+                locations.append(cache[key])
+                continue
+            try:
+                addr = geocodeInternal(float(lat), float(lon))
+            except Exception:
+                addr = "Location Not Available"
+            cache[key] = addr
+            locations.append(addr)
+
+        df['Location'] = locations
+        df['latitude'] = lat_series.round(3)
+        df['longitude'] = lon_series.round(3)
         print(f"[DEBUG] [process_df] Location column block has finished executing")
-
-        print(f"[DEBUG] [process_df] Starting Latitude/Longitude rounding block")
-        df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce').round(3)
-        df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce').round(3)
-        print(f"[DEBUG] [process_df] Latitude/Longitude rounding block has finished executing")
-
-        print(f"[DEBUG] [process_df] Starting columns reorder block")
-        cols = df.columns.tolist()
-        if 'Location' in cols:
-            cols.remove('Location')
-        lng_idx = cols.index('longitude')
-        cols.insert(lng_idx + 1, 'Location')
-        df = df[cols]
-        print(f"[DEBUG] [process_df] columns reorder block has finished executing")
 
     print(f"[DEBUG] [process_df] Starting Vehicle Number column block")
     if 'Vehicle Number' not in df.columns:
