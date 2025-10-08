@@ -102,6 +102,14 @@ report_configs = {
     }
 }
 
+def safe_geocode(lat, lng):
+    try:
+        if lat in (None, "",) or lng in (None, "",):
+            return "Location Not Available"
+        return geocodeInternal(float(lat), float(lng))
+    except Exception:
+        return "Location Not Available"
+
 def format_duration_hms(total_seconds):
     try:
         secs = int(total_seconds)
@@ -183,33 +191,12 @@ def process_df(df, license_plate, fields, post_process=None):
         print(f"[DEBUG] [process_df] DataFrame is empty. Returning None.")
         return None
 
-    print(f"[DEBUG] [process_df] Starting Location column block")
+    print(f"[DEBUG] [process_df] Starting Location column block A")
     if 'latitude' in df.columns and 'longitude' in df.columns:
         # Convert once (cheap); keeps original strings safe if needed later
-        lat_series = pd.to_numeric(df['latitude'], errors='coerce')
-        lon_series = pd.to_numeric(df['longitude'], errors='coerce')
-
-        cache = {}
-        locations = []
-        for lat, lon in zip(lat_series.values, lon_series.values):
-            if pd.isna(lat) or pd.isna(lon):
-                locations.append('Missing coordinates')
-                continue
-            key = (round(lat, 5), round(lon, 5))  # quantize to reduce duplicates
-            if key in cache:
-                locations.append(cache[key])
-                continue
-            try:
-                addr = geocodeInternal(float(lat), float(lon))
-            except Exception:
-                addr = "Location Not Available"
-            cache[key] = addr
-            locations.append(addr)
-
-        df['Location'] = locations
-        df['latitude'] = lat_series.round(3)
-        df['longitude'] = lon_series.round(3)
-        print(f"[DEBUG] [process_df] Location column block has finished executing")
+        df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce').round(3)
+        df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce').round(3)
+    print(f"[DEBUG] [process_df] Location column block A has finished executing")
 
     print(f"[DEBUG] [process_df] Starting Vehicle Number column block")
     if 'Vehicle Number' not in df.columns:
@@ -369,14 +356,6 @@ def process_daily_report(imei, vehicle_doc, date_filter):
         license_plate = vehicle_doc.get("LicensePlateNumber", "")
 
         tz_ist = IST
-
-        def safe_geocode(lat, lng):
-            try:
-                if lat in (None, "",) or lng in (None, "",):
-                    return "Location Not Available"
-                return geocodeInternal(float(lat), float(lng))
-            except Exception:
-                return "Location Not Available"
 
         # Bucket records by IST date
         from collections import defaultdict
@@ -580,14 +559,6 @@ def process_ignition_report(imei, vehicle_number, date_filter):
         start_lat = start_lng = None
         last_valid_lat = last_valid_lng = None
 
-        def safe_geocode(lat, lng):
-            try:
-                if lat is None or lng is None:
-                    return "Location Not Available"
-                return geocodeInternal(float(lat), float(lng))
-            except Exception:
-                return "Location Not Available"
-
         def push_block(start_dt, stop_dt_calc, s_lat, s_lng, e_lat, e_lng, start_odo, end_odo, ongoing=False):
             if not start_dt or not stop_dt_calc:
                 return
@@ -657,14 +628,6 @@ def process_distance_report(imei, vehicle_number, date_filter):
         
         if not start_doc and end_doc:
             return None
-        
-        def safe_geocode(lat, lng):
-            try:
-                if lat is None or lng is None:
-                    return "Location Not Available"
-                return geocodeInternal(float(lat), float(lng))
-            except Exception:
-                return "Location Not Available"
         
         start_location = safe_geocode(start_doc['latitude'], start_doc['longitude'])
         end_location = safe_geocode(end_doc['latitude'], end_doc['longitude'])
@@ -766,14 +729,6 @@ def process_speed_report(imei, vehicle, date_filter):
             return None
         
         rows =[]
-        
-        def safe_geocode(lat, lng):
-            try:
-                if lat is None or lng is None:
-                    return "Location Not Available"
-                return geocodeInternal(float(lat), float(lng))
-            except Exception:
-                return "Location Not Available"
         
         vehicle_number = vehicle["LicensePlateNumber"]
         for doc in data:
@@ -981,7 +936,6 @@ def view_report_preview():
                 config = report_configs[report_type]
                 fields = config['fields']
                 collection = config['collection']
-                base_query = config['query']
                 post_process = config.get('post_process')
 
                 projection = {field: 1 for field in fields + ["imei"]}
@@ -990,10 +944,18 @@ def view_report_preview():
                 
                 for imei in imeis:
                     records = getData(imei, date_filter, projection)
-                    
+                    print(f"[DEBUG] [process_df] Starting Location column block")
                     for record in records:
+                        
+                        lat = record.get("latitude") if record.get("latitude") not in ("", None) else None
+                        lng = record.get("longitude") if record.get("longitude") not in ("", None) else None
+                        
+                        location = safe_geocode(lat, lng)
+                        
+                        record['location'] = location
+                        
                         docs.append(record)
-                
+                    print(f"[DEBUG] [process_df] Location column block has finished executing")
                 df = pd.DataFrame(docs)
 
                 if not df.empty:
@@ -1107,17 +1069,24 @@ def view_report_preview():
             config = report_configs[report_type]
             fields = config['fields']
             collection = config['collection']
-            base_query = config['query']
             post_process = config.get('post_process')
-            query = {"imei": imei}
-            if date_filter:
-                query.update(date_filter)
-            query.update(base_query)
-            cursor = db[collection].find(
-                query,
-                {field: 1 for field in fields}
-            ).sort("date_time", -1)
-            df = pd.DataFrame(list(cursor))
+            
+            projection = {field: 1 for field in fields}
+            
+            records = getData(imei, date_filter, projection)
+            print(f"[DEBUG] [process_df] Starting Location column block")
+            for record in records:
+                
+                lat = record.get("latitude") if record.get("latitude") not in ("", None) else None
+                lng = record.get("longitude") if record.get("longitude") not in ("", None) else None
+                
+                location = safe_geocode(lat, lng)
+                
+                record['location'] = location
+
+            print(f"[DEBUG] [process_df] Location column block has finished executing")
+
+            df = pd.DataFrame(records)
             df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
 
         
