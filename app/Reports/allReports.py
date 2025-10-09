@@ -1146,7 +1146,7 @@ def generate_report_async():
         "report_type": report_type,
         "vehicle_number": vehicle_number,
         "date_filter": date_filter,
-        "user_claims": claims,
+        "claims": claims,
         "user_id": user_id
     })
     return jsonify({"success": True, "task_id": task.id}), 202   
