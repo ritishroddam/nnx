@@ -313,13 +313,6 @@ function applySelectize(){
 document.addEventListener('DOMContentLoaded',()=>{
   applySelectize();
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    // ...existing initialization code...
-    document.getElementById('cancelReportModal').addEventListener('click',()=>{
-      document.getElementById('reportModal').style.display='none';
-    });
-  });
-
   const drSel = document.getElementById('dateRange');
   drSel.addEventListener('change', ()=>{
     const custom = document.getElementById('customDateRange');
@@ -355,8 +348,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     card.addEventListener('click',e=>{
       e.preventDefault();
       const type=card.dataset.report;
-      document.getElementById('generateReport').dataset.reportType=type;
-      document.getElementById('reportModalTitle').textContent=REPORT_TITLE_MAP[type]||'Report';
+      const genBtn = document.getElementById('generateReport');
+      if (genBtn) genBtn.dataset.reportType=type;
+      const titleEl = document.getElementById('reportModalTitle') || document.querySelector('#reportModal h2');
+      if (titleEl) titleEl.textContent = REPORT_TITLE_MAP[type]||'Report';
       document.getElementById('reportModal').style.display='block';
     });
   });
