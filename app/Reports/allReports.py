@@ -165,9 +165,11 @@ def save_and_return_report(output, report_type, vehicle_number, override_user_id
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
 
-    buffer_content = BytesIO(json.dumps({"data": output}, ensure_ascii=False, default=str).encode('utf-8'))
+    payload_bytes = json.dumps({"data": output}, ensure_ascii=False, default=str).encode('utf-8')
+    size_bytes = len(payload_bytes)
+    buffer_content = BytesIO(payload_bytes)
+    buffer_content.seek(0)
     s3.upload_fileobj(buffer_content, SPACE_NAME, remote_path)
-    size_bytes = buffer_content.getbuffer().nbytes
     buffer_content.close()
 
     report_metadata = {
