@@ -194,11 +194,6 @@ def process_df(df, license_plate, fields, post_process=None):
     if df.empty:
         print(f"[DEBUG] [process_df] DataFrame is empty. Returning None.")
         return None
-
-    if 'Location' not in df.columns:
-        print("I am wrong")
-    else:
-        print("copilot is wrong")
     
     print(f"[DEBUG] [process_df] Starting Location column block A")
     if 'latitude' in df.columns and 'longitude' in df.columns:
