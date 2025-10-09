@@ -197,7 +197,6 @@ def process_df(df, license_plate, fields, post_process=None):
 
     print(f"[DEBUG] [process_df] Starting Location column block A")
     if 'latitude' in df.columns and 'longitude' in df.columns:
-        # Convert once (cheap); keeps original strings safe if needed later
         df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce').round(3)
         df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce').round(3)
     print(f"[DEBUG] [process_df] Location column block A has finished executing")
@@ -945,7 +944,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                         
                         location = safe_geocode(lat, lng)
                         
-                        record['location'] = location
+                        record['Location'] = location
                         
                         docs.append(record)
                     print(f"[DEBUG] [process_df] Location column block has finished executing")
@@ -1065,7 +1064,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                 
                 location = safe_geocode(lat, lng)
                 
-                record['location'] = location
+                record['Location'] = location
 
             print(f"[DEBUG] [process_df] Location column block has finished executing")
 
