@@ -26,6 +26,11 @@ def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
+    
+    try:
+        app.json.sort_keys = False
+    except Exception:
+        pass
 
     jwt.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*", transports=["websocket"])

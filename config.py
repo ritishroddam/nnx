@@ -15,7 +15,8 @@ class Config:
     JWT_ACCESS_CSRF_HEADER_NAME = "X-CSRF-TOKEN"
     JWT_REFRESH_CSRF_HEADER_NAME = "X-CSRF-REFRESH-TOKEN"
     JWT_CSRF_IN_COOKIES = True
-    JWT_REFRESH_CSRF_PROTECT = True    
+    JWT_REFRESH_CSRF_PROTECT = True
+    JSON_SORT_KEYS = False
     
     GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY') or 'AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84'
     MONGO_URI = "mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin"
