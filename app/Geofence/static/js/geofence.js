@@ -79,7 +79,6 @@ function setupEventListeners() {
     const form = document.getElementById("geofenceForm");
     form.addEventListener("submit", handleFormSubmit);
 
-    // Drawing manager events
     google.maps.event.addListener(drawingManager, "overlaycomplete", (event) => {
         if (drawnShape) drawnShape.setMap(null);
         drawnShape = event.overlay;
@@ -92,7 +91,6 @@ function setupEventListeners() {
             drawnShape.setEditable(true);
             drawnShape.setDraggable(true);
             
-            // Add event listeners for changes
             if (drawnShape instanceof google.maps.Circle) {
                 google.maps.event.addListener(drawnShape, 'radius_changed', updateShapeData);
                 google.maps.event.addListener(drawnShape, 'center_changed', updateShapeData);
@@ -106,7 +104,6 @@ function setupEventListeners() {
         }
     });
 
-    // Rectangle drawing using mouse events
     let rectangleStart = null;
     let rectangleDrawing = false;
 
@@ -154,18 +151,15 @@ function setShapeType(type) {
     currentShapeType = type;
     clearShape();
     
-    // Update UI
     document.getElementById("circleBtn").classList.remove("active");
     document.getElementById("polygonBtn").classList.remove("active");
     document.getElementById("rectangleBtn").classList.remove("active");
     document.getElementById(`${type}Btn`).classList.add("active");
     
-    // Show/hide controls
     document.getElementById("circleControls").style.display = type === 'circle' ? 'block' : 'none';
     document.getElementById("polygonControls").style.display = type === 'polygon' ? 'block' : 'none';
     document.getElementById("rectangleControls").style.display = type === 'rectangle' ? 'block' : 'none';
     
-    // Set drawing mode
     if (type === 'rectangle') {
         drawingManager.setDrawingMode(null);
     } else {
@@ -336,14 +330,12 @@ function renderGeofenceList() {
 }
 
 function renderGeofencesOnMap() {
-    // Clear existing geofences from map
     geofences.forEach(gf => {
         if (gf.mapOverlay) {
             gf.mapOverlay.setMap(null);
         }
     });
 
-    // Render all geofences on map
     geofences.forEach(gf => {
         const coords = gf.coordinates;
         let overlay = null;
@@ -387,7 +379,6 @@ function renderGeofencesOnMap() {
             });
         }
 
-        // Store reference and add click event
         if (overlay) {
             gf.mapOverlay = overlay;
             

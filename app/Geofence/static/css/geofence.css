@@ -28,7 +28,6 @@
     color: #f0f0f0;
 }
 
-/* Form Elements */
 .form-group {
     margin-bottom: 15px;
 }
@@ -76,7 +75,6 @@
     background: #e9ecef;
 }
 
-/* Remove the border between active button and its neighbors */
 .toggle-btn.active + .toggle-btn {
     border-left-color: #28a745;
 }
@@ -375,7 +373,6 @@ input:checked + .switch::after {
     background: #c82333;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .geofence-layout {
         flex-direction: column;
