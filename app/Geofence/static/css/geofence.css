@@ -288,10 +288,6 @@ input:checked + .switch::after {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-#geofenceForm {
-    margin-right: 5px;
-}
-
 #geofenceList {
     list-style: none;
     padding: 0;
