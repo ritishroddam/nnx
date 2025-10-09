@@ -1,18 +1,17 @@
-/* Layout */
 .geofence-layout {
     display: flex;
-    height: 100vh; 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
+    height: calc(100vh - 120px);
+    gap: 20px;
 }
 
 .geofence-panel {
-    width: 350px;
-    background: #fff;
-    padding: 25px;
-    border-right: 1px solid #e0e0e0;
+    width: 400px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     overflow-y: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    height: 100%;
 }
 
 .geofence-panel h2 {
@@ -24,17 +23,15 @@
 
 /* Form Elements */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .form-group input {
     width: 100%;
-    padding: 12px 15px;
+    padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: 14px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    box-sizing: border-box;
 }
 
 .form-group input:focus {
@@ -43,27 +40,20 @@
     box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
 }
 
-/* Toggle Buttons - Joined Style */
 .btn-toggle {
     display: flex;
-    margin: 20px 0;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid #ddd;
-    background: #f8f9fa;
+    gap: 5px;
+    margin-bottom: 15px;
 }
 
 .toggle-btn {
     flex: 1;
-    padding: 12px;
-    border: none;
-    background: transparent;
+    padding: 8px 12px;
+    border: 1px solid #007bff;
+    background: white;
+    color: #007bff;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s;
-    border-right: 1px solid #ddd;
-    position: relative;
+    border-radius: 4px;
 }
 
 .toggle-btn:last-child {
@@ -71,7 +61,7 @@
 }
 
 .toggle-btn.active {
-    background: #28a745;
+    background: #007bff;
     color: white;
 }
 
@@ -88,15 +78,22 @@
     border-right-color: #28a745;
 }
 
-/* Slider */
+.shape-controls {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+.shape-controls label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #495057;
+}
+
 #radiusSlider {
     width: 100%;
-    margin: 20px 0;
-    -webkit-appearance: none;
-    height: 6px;
-    border-radius: 3px;
-    background: #ddd;
-    outline: none;
 }
 
 #radiusSlider::-webkit-slider-thumb {
@@ -118,26 +115,18 @@
     border: none;
 }
 
-/* Section Titles */
 .section-title {
+    margin: 20px 0 10px 0;
+    color: #495057;
     font-size: 16px;
-    font-weight: 600;
-    margin: 25px 0 15px;
-    color: #333;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #eee;
 }
 
-/* Switch Styles */
 .switch-label {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 15px 0;
-    font-size: 14px;
+    margin-bottom: 10px;
     cursor: pointer;
-    color: #555;
-    transition: color 0.2s;
+    font-size: 14px;
 }
 
 .switch-label:hover {
@@ -150,53 +139,65 @@
 
 .switch {
     position: relative;
-    width: 44px;
-    height: 22px;
-    background: #ccc;
-    border-radius: 22px;
-    transition: background 0.3s;
-    flex-shrink: 0;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch::before {
+    content: "";
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: .4s;
 }
 
 .switch::after {
     content: "";
     position: absolute;
-    top: 2px;
+    height: 16px;
+    width: 16px;
     left: 2px;
-    width: 18px;
-    height: 18px;
-    background: white;
+    bottom: 2px;
+    background-color: white;
     border-radius: 50%;
-    transition: transform 0.3s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: .4s;
 }
 
-.switch-label input:checked + .switch {
-    background: #28a745;
+input:checked + .switch::before {
+    background-color: #007bff;
 }
 
-.switch-label input:checked + .switch::after {
-    transform: translateX(22px);
+input:checked + .switch::after {
+    transform: translateX(20px);
 }
 
-/* Confirm Button */
 .confirm-btn {
     width: 100%;
-    padding: 14px;
-    background: #ff5c5c;
+    padding: 12px;
+    background: #28a745;
     color: white;
     border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 15px;
+    border-radius: 4px;
     cursor: pointer;
-    margin-top: 25px;
-    transition: background 0.3s, transform 0.1s;
-    box-shadow: 0 2px 4px rgba(255, 92, 92, 0.3);
+    font-size: 16px;
+    margin-top: 10px;
 }
 
 .confirm-btn:hover {
-    background: #e64545;
+    background: #218838;
 }
 
 .confirm-btn:active {
@@ -204,15 +205,87 @@
     box-shadow: 0 1px 2px rgba(255, 92, 92, 0.3);
 }
 
-/* Map */
+.saved-geofences-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.geofence-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.geofence-list-item {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.geofence-item-content {
+    flex: 1;
+}
+
+.geofence-item-name {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.geofence-item-meta {
+    font-size: 12px;
+    color: #666;
+}
+
+.geofence-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.geofence-actions button {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.view-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: black;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.geofence-actions button:hover {
+    opacity: 0.8;
+}
+
 .map-container {
     flex: 1;
-    position: relative;
+    height: 100%;
+    position: sticky;
+    top: 0;
 }
 
 #map {
-    height: 100%;
     width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 /* Saved Geofence List */
