@@ -4,11 +4,6 @@ let drawnShape = null;
 let geofences = [];
 let currentShapeType = 'circle';
 let rectangle = null;
-let rectangleDrawing = false;
-let rectangleStart = null;
-
-// API Base URL
-const API_BASE = '/Geofence';
 
 function initMap() {
     console.log("Initializing map...");
@@ -55,33 +50,11 @@ function initMap() {
 
         drawingManager.setMap(map);
         setupEventListeners();
-        
-        // Test API connection first
-        testAPI().then(() => {
-            loadSavedGeofences();
-        }).catch(error => {
-            console.error('API test failed:', error);
-            alert('Cannot connect to server. Please refresh the page.');
-        });
+        loadSavedGeofences();
 
     } catch (error) {
         console.error("Error creating map:", error);
         alert("Error loading Google Maps. Please check your API key and console for details.");
-    }
-}
-
-// Test API connection
-async function testAPI() {
-    try {
-        const response = await fetch(`${API_BASE}/api/health`);
-        if (!response.ok) {
-            throw new Error(`API health check failed: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('API health check:', data);
-    } catch (error) {
-        console.error('API test failed:', error);
-        throw error;
     }
 }
 
@@ -113,10 +86,30 @@ function setupEventListeners() {
         drawingManager.setDrawingMode(null);
         updateShapeData();
         
-        setupShapeListeners();
+        if (drawnShape instanceof google.maps.Circle || 
+            drawnShape instanceof google.maps.Polygon || 
+            drawnShape instanceof google.maps.Rectangle) {
+            drawnShape.setEditable(true);
+            drawnShape.setDraggable(true);
+            
+            // Add event listeners for changes
+            if (drawnShape instanceof google.maps.Circle) {
+                google.maps.event.addListener(drawnShape, 'radius_changed', updateShapeData);
+                google.maps.event.addListener(drawnShape, 'center_changed', updateShapeData);
+            } else if (drawnShape instanceof google.maps.Polygon) {
+                google.maps.event.addListener(drawnShape.getPath(), 'set_at', updateShapeData);
+                google.maps.event.addListener(drawnShape.getPath(), 'insert_at', updateShapeData);
+                google.maps.event.addListener(drawnShape.getPath(), 'remove_at', updateShapeData);
+            } else if (drawnShape instanceof google.maps.Rectangle) {
+                google.maps.event.addListener(drawnShape, 'bounds_changed', updateShapeData);
+            }
+        }
     });
 
     // Rectangle drawing using mouse events
+    let rectangleStart = null;
+    let rectangleDrawing = false;
+
     google.maps.event.addListener(map, 'mousedown', (event) => {
         if (currentShapeType === 'rectangle' && !rectangleDrawing) {
             rectangleStart = event.latLng;
@@ -151,25 +144,10 @@ function setupEventListeners() {
             rectangle.setEditable(true);
             rectangle.setDraggable(true);
             
-            setupShapeListeners();
+            google.maps.event.addListener(rectangle, 'bounds_changed', updateShapeData);
             updateShapeData();
         }
     });
-}
-
-function setupShapeListeners() {
-    if (!drawnShape) return;
-    
-    if (drawnShape instanceof google.maps.Circle) {
-        google.maps.event.addListener(drawnShape, 'radius_changed', updateShapeData);
-        google.maps.event.addListener(drawnShape, 'center_changed', updateShapeData);
-    } else if (drawnShape instanceof google.maps.Polygon) {
-        google.maps.event.addListener(drawnShape.getPath(), 'set_at', updateShapeData);
-        google.maps.event.addListener(drawnShape.getPath(), 'insert_at', updateShapeData);
-        google.maps.event.addListener(drawnShape.getPath(), 'remove_at', updateShapeData);
-    } else if (drawnShape instanceof google.maps.Rectangle) {
-        google.maps.event.addListener(drawnShape, 'bounds_changed', updateShapeData);
-    }
 }
 
 function setShapeType(type) {
@@ -245,21 +223,16 @@ async function handleFormSubmit(e) {
     const enterAlert = document.getElementById("enterAlert").checked;
     const leaveAlert = document.getElementById("leaveAlert").checked;
 
-    if (!name.trim()) {
-        alert("Please enter a geofence name");
-        return;
-    }
-
     try {
-        const response = await fetch(`${API_BASE}/api/geofences`, {
+        const response = await fetch('/Geofence/api/geofences', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
             },
             body: JSON.stringify({
-                name: name.trim(),
-                location: location.trim(),
+                name: name,
+                location: location,
                 shape_type: currentShapeType,
                 coordinates: JSON.parse(shapeData),
                 alert_enter: enterAlert,
@@ -267,33 +240,21 @@ async function handleFormSubmit(e) {
             })
         });
 
-        const responseText = await response.text();
-        let result;
-        try {
-            result = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('Failed to parse response:', responseText);
-            throw new Error('Invalid response from server');
-        }
-
         if (response.ok) {
+            const result = await response.json();
             alert('Geofence saved successfully!');
             clearShape();
             document.getElementById("geofenceForm").reset();
             document.getElementById("shapeData").value = "";
             loadSavedGeofences();
         } else {
-            alert('Error saving geofence: ' + (result.error || 'Unknown error'));
+            const error = await response.json();
+            alert('Error saving geofence: ' + error.error);
         }
     } catch (error) {
         console.error('Error saving geofence:', error);
-        alert('Error saving geofence: ' + error.message);
+        alert('Error saving geofence');
     }
-}
-
-function getCSRFToken() {
-    const csrfInput = document.querySelector('input[name="csrf_token"]');
-    return csrfInput ? csrfInput.value : '';
 }
 
 function clearShape() {
@@ -305,61 +266,32 @@ function clearShape() {
         rectangle.setMap(null);
         rectangle = null;
     }
-    rectangleDrawing = false;
-    rectangleStart = null;
     document.getElementById("shapeData").value = "";
     drawingManager.setDrawingMode(null);
 }
 
 async function loadSavedGeofences() {
     try {
-        console.log('Loading saved geofences...');
-        const response = await fetch(`${API_BASE}/api/geofences`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch('/Geofence/api/geofences');
+        if (response.ok) {
+            geofences = await response.json();
+            renderGeofenceList();
+            renderGeofencesOnMap();
+        } else {
+            console.error('Failed to load geofences');
         }
-        
-        const responseText = await response.text();
-        let geofencesData;
-        
-        try {
-            geofencesData = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('Failed to parse geofences response:', responseText);
-            throw new Error('Invalid JSON response from server');
-        }
-        
-        geofences = Array.isArray(geofencesData) ? geofencesData : [];
-        console.log(`Loaded ${geofences.length} geofences`);
-        
-        renderGeofenceList();
-        renderGeofencesOnMap();
-        
     } catch (error) {
         console.error('Error loading geofences:', error);
-        // Don't show alert for initial load, just log the error
     }
 }
 
 function renderGeofenceList() {
     const list = document.getElementById("geofenceList");
-    if (!list) {
-        console.error('Geofence list element not found');
-        return;
-    }
+    if (!list) return;
     
     list.innerHTML = "";
 
-    if (geofences.length === 0) {
-        const emptyMsg = document.createElement('li');
-        emptyMsg.className = 'geofence-list-item';
-        emptyMsg.textContent = 'No geofences saved yet';
-        list.appendChild(emptyMsg);
-        return;
-    }
-
-    geofences.forEach((gf) => {
+    geofences.forEach((gf, i) => {
         const li = document.createElement("li");
         li.className = "geofence-list-item";
         
@@ -372,13 +304,11 @@ function renderGeofenceList() {
         
         const metaDiv = document.createElement("div");
         metaDiv.className = "geofence-item-meta";
-        
-        const createdDate = gf.created_at ? new Date(gf.created_at) : new Date();
         metaDiv.innerHTML = `
             <div>Location: ${gf.location || 'N/A'}</div>
             <div>Type: ${gf.shape_type}</div>
-            <div>Created by: ${gf.created_by || 'Unknown'}</div>
-            <div>Created: ${createdDate.toLocaleString()}</div>
+            <div>Created by: ${gf.created_by}</div>
+            <div>Created: ${new Date(gf.created_at).toLocaleString()}</div>
         `;
 
         const actions = document.createElement("div");
@@ -473,23 +403,19 @@ function zoomToGeofence(geofence) {
     
     if (geofence.shape_type === 'circle') {
         map.setCenter(new google.maps.LatLng(coords.center.lat, coords.center.lng));
-        // Adjust zoom based on radius
-        const zoomLevel = Math.max(10, 15 - Math.log(coords.radius / 1000));
-        map.setZoom(zoomLevel);
+        map.setZoom(15);
     } else if (geofence.shape_type === 'polygon') {
         const bounds = new google.maps.LatLngBounds();
         coords.points.forEach(point => {
             bounds.extend(new google.maps.LatLng(point.lat, point.lng));
         });
         map.fitBounds(bounds);
-        map.setZoom(map.getZoom() - 1); // Slight zoom out to see borders
     } else if (geofence.shape_type === 'rectangle') {
         const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
             new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
         );
         map.fitBounds(bounds);
-        map.setZoom(map.getZoom() - 1); // Slight zoom out to see borders
     }
 }
 
@@ -499,10 +425,10 @@ async function deleteGeofence(geofenceId) {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/api/geofences/${geofenceId}`, {
+        const response = await fetch(`/Geofence/api/geofences/${geofenceId}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRFToken': getCSRFToken()
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
             }
         });
 
@@ -511,11 +437,11 @@ async function deleteGeofence(geofenceId) {
             loadSavedGeofences();
         } else {
             const error = await response.json();
-            alert('Error deleting geofence: ' + (error.error || 'Unknown error'));
+            alert('Error deleting geofence: ' + error.error);
         }
     } catch (error) {
         console.error('Error deleting geofence:', error);
-        alert('Error deleting geofence: ' + error.message);
+        alert('Error deleting geofence');
     }
 }
 
