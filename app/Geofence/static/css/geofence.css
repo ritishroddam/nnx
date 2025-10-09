@@ -6,12 +6,15 @@
 
 .geofence-panel {
     width: 400px;
-    background: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     overflow-y: auto;
     height: 100%;
+}
+
+.dark-mode .geofence-panel {
+    color: #ddd;
 }
 
 .geofence-panel h2 {
@@ -21,7 +24,10 @@
     color: #333;
 }
 
-/* Form Elements */
+.dark-mode .geofence-panel h2 {
+    color: #f0f0f0;
+}
+
 .form-group {
     margin-bottom: 15px;
 }
@@ -69,7 +75,6 @@
     background: #e9ecef;
 }
 
-/* Remove the border between active button and its neighbors */
 .toggle-btn.active + .toggle-btn {
     border-left-color: #28a745;
 }
@@ -368,7 +373,6 @@ input:checked + .switch::after {
     background: #c82333;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .geofence-layout {
         flex-direction: column;

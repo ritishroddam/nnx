@@ -6,7 +6,6 @@ from app.database import db
 
 geofence_bp = Blueprint('Geofence', __name__, static_folder='static', template_folder='templates')
 
-# MongoDB collection for geofences
 geofence_collection = db['geofences']
 
 @geofence_bp.route('/page')
@@ -28,7 +27,6 @@ def get_geofences():
         else:
             geofences = list(geofence_collection.find({'company': user_company}))
         
-        # Convert ObjectId to string for JSON serialization
         for geofence in geofences:
             geofence['_id'] = str(geofence['_id'])
             geofence['created_by_id'] = str(geofence.get('created_by_id', ''))
