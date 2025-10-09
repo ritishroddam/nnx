@@ -4,14 +4,14 @@
 <title>Geofence</title>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="{{ url_for('Geofence.static', filename='css/style.css') }}" />
+<link rel="stylesheet" href="{{ url_for('Geofence.static', filename='css/geofence.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84&libraries=drawing,geometry"></script>
 <script defer src="{{ url_for('Geofence.static', filename='js/geofence.js') }}"></script>
 {% endblock %}
 
 {% block h1 %}
-Create Geofence
+Creation of Geofence
 {% endblock %}
 
 {% block block_container %}
@@ -19,7 +19,7 @@ Create Geofence
     <!-- Left Panel -->
     <div class="geofence-panel">
         <h2>Add Geofence</h2>
-        <form id="geofenceForm" action="{{ url_for('Geofence.page') }}" method="post">
+        <form id="geofenceForm">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="shapeData" id="shapeData" />
 
@@ -34,10 +34,21 @@ Create Geofence
             <div class="btn-toggle">
                 <button type="button" id="circleBtn" class="toggle-btn active">Circle</button>
                 <button type="button" id="polygonBtn" class="toggle-btn">Polygon</button>
-                <button type="button" id="squareBtn" class="toggle-btn">Square</button>
+                <button type="button" id="rectangleBtn" class="toggle-btn">Rectangle</button>
             </div>
 
-            <input type="range" id="radiusSlider" min="100" max="5000" value="1000">
+            <div id="circleControls" class="shape-controls">
+                <label for="radiusSlider">Radius (meters): <span id="radiusValue">1000</span></label>
+                <input type="range" id="radiusSlider" min="100" max="5000" value="1000" step="100">
+            </div>
+
+            <div id="rectangleControls" class="shape-controls" style="display: none;">
+                <label>Draw rectangle on map by clicking and dragging</label>
+            </div>
+
+            <div id="polygonControls" class="shape-controls" style="display: none;">
+                <label>Click on map to place polygon points. Double-click to complete.</label>
+            </div>
 
             <h3 class="section-title">Alert Settings</h3>
             <label class="switch-label">
@@ -51,11 +62,13 @@ Create Geofence
                 Alert when vehicle leaves geofence
             </label>
 
-            <button type="submit" class="confirm-btn">Confirm</button>
+            <button type="submit" class="confirm-btn">Save Geofence</button>
         </form>
 
         <h3 class="section-title">Saved Geofences</h3>
-        <ul id="geofenceList"></ul>
+        <div class="saved-geofences-container">
+            <ul id="geofenceList" class="geofence-list"></ul>
+        </div>
     </div>
 
     <div class="map-container">
