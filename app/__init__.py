@@ -390,6 +390,4 @@ def create_app(config_name='default'):
     app.register_blueprint(main_bp)
     app.register_blueprint(gecoding_bp)
     
-    init_celery(app)
-    
     return app
