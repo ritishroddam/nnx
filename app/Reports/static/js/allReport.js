@@ -23,6 +23,34 @@ function toAmPm(dtStr){
   return `${h}:${m} ${ampm}`;
 }
 
+function getSelectizeInst(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  if (el.selectize) return el.selectize; 
+  const jq = window.jQuery && window.jQuery('#' + id)[0];
+  return jq && jq.selectize ? jq.selectize : null;
+}
+
+function getSelectValue(id) {
+  const inst = getSelectizeInst(id);
+  if (inst) return inst.getValue();
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+function setSelectValue(id, val) {
+  const inst = getSelectizeInst(id);
+  if (inst) {
+    inst.setValue(val, true);
+  } else {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = val;
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+}
+
 function setCompositeFromDate(prefix, dateObj){
   // prefix: 'fromDate' | 'toDate'
   const pad=n=>n.toString().padStart(2,'0');
@@ -31,18 +59,35 @@ function setCompositeFromDate(prefix, dateObj){
   let ampm = h24>=12?'PM':'AM';
   let h12 = h24%12; if(h12===0) h12=12;
   const min = pad(dateObj.getMinutes());
-  document.getElementById(prefix+'Date').value = dateStr;
-  document.getElementById(prefix+'Hour').value = pad(h12);
-  document.getElementById(prefix+'Minute').value = min;
-  document.getElementById(prefix+'AmPm').value = ampm;
+  const dateEl = document.getElementById(prefix+'Date');
+  if (dateEl) dateEl.value = dateStr;
+  setSelectValue(prefix+'Hour', pad(h12));
+  setSelectValue(prefix+'Minute', min);
+  setSelectValue(prefix+'AmPm', ampm);
   syncHiddenInputs();
 }
 
 function clampCustomRange(){
+  // If any part is missing, set defaults first
+  const needDefaults =
+    !document.getElementById('fromDateDate').value ||
+    !getSelectValue('fromDateHour') ||
+    !getSelectValue('fromDateMinute') ||
+    !getSelectValue('fromDateAmPm') ||
+    !document.getElementById('toDateDate').value ||
+    !getSelectValue('toDateHour') ||
+    !getSelectValue('toDateMinute') ||
+    !getSelectValue('toDateAmPm');
+
+  if (needDefaults) setDefaultCustom();
+
   syncHiddenInputs();
   const fromHidden = document.getElementById('fromDate').value;
   const toHidden = document.getElementById('toDate').value;
-  if(!fromHidden || !toHidden) return true;
+  if(!fromHidden || !toHidden) {
+    displayFlashMessage('Invalid custom date/time','danger');
+    return false;
+  }
   let from = new Date(fromHidden);
   let to = new Date(toHidden);
   if(isNaN(from)||isNaN(to)){
@@ -71,12 +116,13 @@ function clampCustomRange(){
 }
 
 function buildISOFromParts(prefix){
-  const date = document.getElementById(prefix+'Date').value; // yyyy-mm-dd
-  const hour12 = document.getElementById(prefix+'Hour').value;
-  const minute = document.getElementById(prefix+'Minute').value;
-  const ampm = document.getElementById(prefix+'AmPm').value;
+  const date = document.getElementById(prefix+'Date').value;
+  const hour12 = getSelectValue(prefix+'Hour') || '12';
+  const minute = getSelectValue(prefix+'Minute') || '00';
+  const ampm = getSelectValue(prefix+'AmPm') || 'AM';
   if(!date) return '';
   let h = parseInt(hour12,10);
+  if (isNaN(h)) h = 12;
   if(ampm === 'PM' && h !== 12) h += 12;
   if(ampm === 'AM' && h === 12) h = 0;
   const hh = h.toString().padStart(2,'0');
@@ -300,15 +346,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   if (drInst) {
     drInst.on('change', (val)=>toggleCustomDateRange(val));
-    // Initialize visibility based on current value
     toggleCustomDateRange(drInst.getValue());
   } else if (drSel) {
     drSel.addEventListener('change', (e)=>toggleCustomDateRange(e.target.value));
     toggleCustomDateRange(drSel.value);
   }
-
-  const fromEl = document.getElementById('fromDate');
-  const toEl = document.getElementById('toDate');
 
   ['fromDateDate','fromDateHour','fromDateMinute','fromDateAmPm',
    'toDateDate','toDateHour','toDateMinute','toDateAmPm'
@@ -363,10 +405,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('#reportModal .close').forEach(c=>c.addEventListener('click',()=>{
     document.getElementById('reportModal').style.display='none';
   }));
-
-  document.getElementById('reportDateRange').addEventListener('change',function(){
-    loadRecentReports(this.value);
-  });
 
   document.getElementById('reportDateRange').addEventListener('change',function(){
     loadRecentReports(this.value);

@@ -81,37 +81,56 @@
 .datetime-composite {
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:12px;
   flex-wrap:wrap;
   background:#f5f5f5;
-  padding:8px 10px;
+  padding:12px 14px;
   border:1px solid #ddd;
-  border-radius:6px;
+  border-radius:8px;
 }
+
 .dark-mode .datetime-composite {
   background:#444;
   border-color:#555;
 }
+
 .datetime-composite input.date-part {
-  padding:6px 10px;
+  padding:10px 12px;
   border:1px solid #ccc;
-  border-radius:4px;
-  font-size:14px;
+  border-radius:6px;
+  font-size:16px;
   background:#fff;
+  min-width: 180px;
+  height: 40px;
 }
+
 .dark-mode .datetime-composite input.date-part {
   background:#333;
   color:#ccc;
   border-color:#555;
 }
+
 .datetime-composite select.time-part {
-  min-width:70px;
-  padding:6px 8px;
+  min-width: 96px;
+  padding:10px 12px;
   border:1px solid #ccc;
-  border-radius:4px;
+  border-radius:6px;
   background:#fff;
-  font-size:14px;
+  font-size:16px;
+  height: 40px;
 }
+
+.datetime-composite .selectize-control {
+  min-width: 96px;
+}
+.datetime-composite .selectize-input {
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
 .dark-mode .datetime-composite select.time-part {
   background:#333;
   color:#ccc;
