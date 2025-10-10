@@ -9,8 +9,6 @@ const REPORT_TITLE_MAP = {
   'panic':'Panic Report'
 };
 
-let lastCustomValidity = true;
-
 const MAX_CUSTOM_RANGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 function toAmPm(dtStr){
@@ -45,7 +43,6 @@ function getSelectOrNativeValue(id){
 function validateCustomRange(showFlash = true){
   if (!isCustomSelected()) {
     updateGenerateButtonState(true);
-    lastCustomValidity = true;
     return true;
   }
 
@@ -80,10 +77,9 @@ function validateCustomRange(showFlash = true){
   const valid = msg === '';
   updateGenerateButtonState(valid);
 
-  if (!valid && (showFlash || lastCustomValidity !== valid)) {
+  if (!valid && showFlash) {
     displayFlashMessage(msg, 'warning');
   }
-  lastCustomValidity = valid;
   return valid;
 }
 
@@ -419,12 +415,9 @@ function toggleCustomDateRange(val){
     if(!document.getElementById('fromDate').value || !document.getElementById('toDate').value){
       setDefaultCustom();
     }
-    // Initial validity check without flashing
-    validateCustomRange(false);
   }else{
     custom.style.display='none';
     updateGenerateButtonState(true);
-    lastCustomValidity = true;
   }
 }
 
