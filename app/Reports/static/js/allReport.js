@@ -58,15 +58,19 @@ function validateCustomRange(showFlash = true){
   } else {
     const from = new Date(fromISO);
     const to   = new Date(toISO);
+    const now  = new Date();
     if (isNaN(from) || isNaN(to)) {
       msg = 'Invalid custom date/time';
+    } else if (to > now) {
+      msg = 'To date cannot be in the future';
+    } else if (from > now) {
+      msg = 'From date cannot be in the future';
     } else if (from > to) {
       msg = 'From date cannot be after To date';
     } else if ((to - from) > MAX_CUSTOM_RANGE_MS) {
       msg = 'Maximum custom range is 30 days';
     } else {
-      // Optional floor: from cannot be older than 30 days from now
-      const earliest = new Date(Date.now() - MAX_CUSTOM_RANGE_MS);
+      const earliest = new Date(now.getTime() - MAX_CUSTOM_RANGE_MS);
       if (from < earliest) {
         msg = 'From date cannot be older than 30 days';
       }
@@ -76,7 +80,6 @@ function validateCustomRange(showFlash = true){
   const valid = msg === '';
   updateGenerateButtonState(valid);
 
-  // Flash only on transitions or when requested
   if (!valid && (showFlash || lastCustomValidity !== valid)) {
     displayFlashMessage(msg, 'warning');
   }
@@ -150,11 +153,26 @@ function clampCustomRange(){
     return false;
   }
   let from = new Date(fromHidden);
-  let to = new Date(toHidden);
+  let to   = new Date(toHidden);
   if(isNaN(from)||isNaN(to)){
     displayFlashMessage('Invalid custom date/time','danger');
     return false;
   }
+
+  const now = new Date();
+  // Force "to" not in future
+  if (to > now) {
+    to = now;
+    setCompositeFromDate('toDate', to);
+    displayFlashMessage('To date cannot be in the future','warning');
+  }
+  // Also prevent "from" in future
+  if (from > now) {
+    from = now;
+    setCompositeFromDate('fromDate', from);
+    displayFlashMessage('From date cannot be in the future','warning');
+  }
+
   if(from > to){
     from = new Date(to);
     setCompositeFromDate('fromDate', from);
@@ -165,17 +183,16 @@ function clampCustomRange(){
     setCompositeFromDate('fromDate', from);
     displayFlashMessage('Custom range capped at 30 days','warning');
   }
-  const earliest = new Date(Date.now() - MAX_CUSTOM_RANGE_MS);
+  const earliest = new Date(now.getTime() - MAX_CUSTOM_RANGE_MS);
   if(from < earliest){
     from = earliest;
     setCompositeFromDate('fromDate', from);
     displayFlashMessage('From date cannot be older than 30 days','warning');
   }
-  // Re-sync hidden after adjustments
+
   syncHiddenInputs();
   return true;
 }
-
 function buildISOFromParts(prefix){
   const date = document.getElementById(prefix+'Date').value;
   const hour12 = getSelectValue(prefix+'Hour') || '12';
