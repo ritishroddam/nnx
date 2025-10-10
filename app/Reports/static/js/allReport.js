@@ -274,8 +274,8 @@ function renderRecentReports(reports){
           <span><b>Vehicle:</b> ${r.vehicle_number}</span>
           <span><b>Size:</b> ${(r.size/1024).toFixed(1)} KB</span>
           <span><b>Date Range:</b>
-            <span><b>From: ${new Date(range_start_utc).toLocaleString()}</b></span>
-            <span><b>To: ${new Date(range_end_utc).toLocaleString()}</b></span>
+            <span><b>From: ${new Date(r.range_start_utc).toLocaleString()}</b></span>
+            <span><b>To: ${new Date(r.range_end_utc).toLocaleString()}</b></span>
           </span>
           <span><b>Generated Time:</b> ${new Date(r.generated_at).toLocaleString()}</span>
         </div>
