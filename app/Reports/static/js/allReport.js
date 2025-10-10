@@ -191,35 +191,6 @@ function openPreview(title, rows){
   document.getElementById('reportPreviewModal').style.display='block';
 }
 
-// async function previewReport(){
-//   const reportType=document.getElementById('generateReport').dataset.reportType;
-//   const vehicleNumber=document.getElementById('vehicleNumber').value;
-//   const dateRange=document.getElementById('dateRange').value;
-//   if(!vehicleNumber){
-//     displayFlashMessage('Select a vehicle first','warning');
-//     return;
-//   }
-//   if(dateRange==='custom'){
-//     if(!clampCustomRange()) return;
-//   }
-//   const body={reportType,vehicleNumber,dateRange};
-//   if(dateRange==='custom'){
-//     body.fromDate=document.getElementById('fromDate').value;
-//     body.toDate=document.getElementById('toDate').value;
-//   }
-//   const resp=await fetch('/reports/preview_report',{
-//     method:'POST',
-//     headers:{'Content-Type':'application/json','X-CSRF-TOKEN':getCookie('csrf_access_token')},
-//     body:JSON.stringify(body)
-//   });
-//   const js=await resp.json();
-//   if(!js.success){
-//     displayFlashMessage(js.message||'Preview failed','danger');
-//     return;
-//   }
-//   openPreview(REPORT_TITLE_MAP[reportType]||'Report', js.data||[]);
-// }
-
 function queueReport(){
   const reportType=document.getElementById('generateReport').dataset.reportType;
   const vehicleNumber=document.getElementById('vehicleNumber').value;
@@ -310,22 +281,35 @@ function applySelectize(){
   });
 }
 
+function toggleCustomDateRange(val){
+  const custom = document.getElementById('customDateRange');
+  if(!custom) return;
+  if(val === 'custom'){
+    custom.style.display='block';
+    if(!document.getElementById('fromDate').value || !document.getElementById('toDate').value){
+      setDefaultCustom();
+    }
+    clampCustomRange();
+  }else{
+    custom.style.display='none';
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   applySelectize();
 
   const drSel = document.getElementById('dateRange');
-  drSel.addEventListener('change', ()=>{
-    const custom = document.getElementById('customDateRange');
-    if(drSel.value === 'custom'){
-      custom.style.display='block';
-      if(!document.getElementById('fromDate').value || !document.getElementById('toDate').value){
-        setDefaultCustom();
-      }
-      clampCustomRange();
-    } else {
-      custom.style.display='none';
-    }
-  });
+  const drInst = window.jQuery && $('#dateRange')[0] ? $('#dateRange')[0].selectize : null;
+
+  if (drInst) {
+    drInst.on('change', (val)=>toggleCustomDateRange(val));
+    // Initialize visibility based on current value
+    toggleCustomDateRange(drInst.getValue());
+  } else if (drSel) {
+    drSel.addEventListener('change', (e)=>toggleCustomDateRange(e.target.value));
+    toggleCustomDateRange(drSel.value);
+  }
+
   const fromEl = document.getElementById('fromDate');
   const toEl = document.getElementById('toDate');
 
@@ -352,6 +336,9 @@ document.addEventListener('DOMContentLoaded',()=>{
       const titleEl = document.getElementById('reportModalTitle') || document.querySelector('#reportModal h2');
       if (titleEl) titleEl.textContent = REPORT_TITLE_MAP[type]||'Report';
       document.getElementById('reportModal').style.display='block';
+
+      const current = drInst ? drInst.getValue() : (drSel ? drSel.value : '');
+      toggleCustomDateRange(current);
     });
   });
 
@@ -367,21 +354,25 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('generateReport').addEventListener('click',e=>{
     e.preventDefault(); queueReport();
   });
+
   document.getElementById('closePreviewModal').addEventListener('click',()=>{
     document.getElementById('reportPreviewModal').style.display='none';
   });
+
   document.querySelectorAll('#cancelReportModal').forEach(c=>c.addEventListener('click',()=>{
     document.getElementById('reportModal').style.display='none';
   }));
+
   document.querySelectorAll('#reportModal .close').forEach(c=>c.addEventListener('click',()=>{
     document.getElementById('reportModal').style.display='none';
   }));
+
   document.getElementById('reportDateRange').addEventListener('change',function(){
     loadRecentReports(this.value);
   });
-  document.getElementById('dateRange').addEventListener('change',function(){
-    const custom=document.getElementById('customDateRange');
-    if(this.value==='custom') custom.style.display='block'; else custom.style.display='none';
+
+  document.getElementById('reportDateRange').addEventListener('change',function(){
+    loadRecentReports(this.value);
   });
 });
 
