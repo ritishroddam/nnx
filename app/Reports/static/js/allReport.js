@@ -364,6 +364,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('closePreviewModal').addEventListener('click',()=>{
     document.getElementById('reportPreviewModal').style.display='none';
   });
+  document.querySelectorAll('#cancelReportModal').forEach(c=>c.addEventListener('click',()=>{
+    document.getElementById('reportModal').style.display='none';
+  }));
   document.querySelectorAll('#reportModal .close').forEach(c=>c.addEventListener('click',()=>{
     document.getElementById('reportModal').style.display='none';
   }));
