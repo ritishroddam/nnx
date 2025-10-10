@@ -191,34 +191,34 @@ function openPreview(title, rows){
   document.getElementById('reportPreviewModal').style.display='block';
 }
 
-async function previewReport(){
-  const reportType=document.getElementById('generateReport').dataset.reportType;
-  const vehicleNumber=document.getElementById('vehicleNumber').value;
-  const dateRange=document.getElementById('dateRange').value;
-  if(!vehicleNumber){
-    displayFlashMessage('Select a vehicle first','warning');
-    return;
-  }
-  if(dateRange==='custom'){
-    if(!clampCustomRange()) return;
-  }
-  const body={reportType,vehicleNumber,dateRange};
-  if(dateRange==='custom'){
-    body.fromDate=document.getElementById('fromDate').value;
-    body.toDate=document.getElementById('toDate').value;
-  }
-  const resp=await fetch('/reports/preview_report',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':getCookie('csrf_access_token')},
-    body:JSON.stringify(body)
-  });
-  const js=await resp.json();
-  if(!js.success){
-    displayFlashMessage(js.message||'Preview failed','danger');
-    return;
-  }
-  openPreview(REPORT_TITLE_MAP[reportType]||'Report', js.data||[]);
-}
+// async function previewReport(){
+//   const reportType=document.getElementById('generateReport').dataset.reportType;
+//   const vehicleNumber=document.getElementById('vehicleNumber').value;
+//   const dateRange=document.getElementById('dateRange').value;
+//   if(!vehicleNumber){
+//     displayFlashMessage('Select a vehicle first','warning');
+//     return;
+//   }
+//   if(dateRange==='custom'){
+//     if(!clampCustomRange()) return;
+//   }
+//   const body={reportType,vehicleNumber,dateRange};
+//   if(dateRange==='custom'){
+//     body.fromDate=document.getElementById('fromDate').value;
+//     body.toDate=document.getElementById('toDate').value;
+//   }
+//   const resp=await fetch('/reports/preview_report',{
+//     method:'POST',
+//     headers:{'Content-Type':'application/json','X-CSRF-TOKEN':getCookie('csrf_access_token')},
+//     body:JSON.stringify(body)
+//   });
+//   const js=await resp.json();
+//   if(!js.success){
+//     displayFlashMessage(js.message||'Preview failed','danger');
+//     return;
+//   }
+//   openPreview(REPORT_TITLE_MAP[reportType]||'Report', js.data||[]);
+// }
 
 function queueReport(){
   const reportType=document.getElementById('generateReport').dataset.reportType;
@@ -355,9 +355,9 @@ document.addEventListener('DOMContentLoaded',()=>{
       document.getElementById('reportModal').style.display='block';
     });
   });
-  document.getElementById('viewReport').addEventListener('click',e=>{
-    e.preventDefault(); previewReport();
-  });
+  // document.getElementById('viewReport').addEventListener('click',e=>{
+  //   e.preventDefault(); previewReport();
+  // });
   document.getElementById('generateReport').addEventListener('click',e=>{
     e.preventDefault(); queueReport();
   });
