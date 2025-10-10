@@ -23,11 +23,6 @@ function toAmPm(dtStr){
   return `${h}:${m} ${ampm}`;
 }
 
-function updateAmPmDisplays(){
-  document.getElementById('fromDateAmPm').textContent = toAmPm(document.getElementById('fromDate').value);
-  document.getElementById('toDateAmPm').textContent   = toAmPm(document.getElementById('toDate').value);
-}
-
 function setCompositeFromDate(prefix, dateObj){
   // prefix: 'fromDate' | 'toDate'
   const pad=n=>n.toString().padStart(2,'0');
@@ -271,13 +266,15 @@ function applySelectize(){
   ];
   selIds.forEach(id=>{
     const el = document.querySelector(id);
-    if(el && !el.classList.contains('selectized')){
-      $(el).selectize({
-        create:false,
-        sortField:'text',
-        searchField:['text']
-      });
-    }
+    if(!el) return;
+    // Skip if already initialized by Selectize
+    const inst = window.jQuery && $(el)[0] && $(el)[0].selectize;
+    if (inst) return;
+    $(el).selectize({
+      create:false,
+      sortField:'text',
+      searchField:['text']
+    });
   });
 }
 
