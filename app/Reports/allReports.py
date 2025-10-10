@@ -1202,7 +1202,15 @@ def get_recent_reports():
         
         reports = list(db['generated_reports'].find(
             query,
-            {'_id': 1, 'report_name': 1, 'generated_at': 1, 'vehicle_number': 1, 'size': 1}
+            {
+                '_id': 1, 
+                'report_name': 1, 
+                'generated_at': 1, 
+                'vehicle_number': 1, 
+                'size': 1,
+                'range_start_utc': 1,
+                'range_end_utc': 1
+            }
         ).sort('generated_at', -1).limit(50))
         
         return jsonify({
@@ -1212,7 +1220,9 @@ def get_recent_reports():
                 'report_name': report['report_name'],
                 'generated_at': report['generated_at'].isoformat(),
                 'size': report.get('size', 0),
-                'vehicle_number': report.get('vehicle_number', '')
+                'vehicle_number': report.get('vehicle_number', ''),
+                'range_start_utc': report.get('range_start_utc', ''),
+                'range_end_utc': report.get('range_end_utc', ''),
             } for report in reports]
         })
     except Exception as e:
