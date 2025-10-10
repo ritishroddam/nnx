@@ -9,6 +9,8 @@ const REPORT_TITLE_MAP = {
   'panic':'Panic Report'
 };
 
+let lastCustomValidity = true;
+
 const MAX_CUSTOM_RANGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 function toAmPm(dtStr){
@@ -21,6 +23,60 @@ function toAmPm(dtStr){
   h = h % 12;
   if(h === 0) h = 12;
   return `${h}:${m} ${ampm}`;
+}
+
+function updateGenerateButtonState(valid){
+  const btn = document.getElementById('generateReport');
+  if (btn) btn.disabled = !valid;
+}
+
+function isCustomSelected(){
+  const drSel = document.getElementById('dateRange');
+  const drInst = window.jQuery && $('#dateRange')[0] ? $('#dateRange')[0].selectize : null;
+  const val = drInst ? drInst.getValue() : (drSel ? drSel.value : '');
+  return val === 'custom';
+}
+
+function validateCustomRange(showFlash = true){
+  if (!isCustomSelected()) {
+    updateGenerateButtonState(true);
+    lastCustomValidity = true;
+    return true;
+  }
+
+  const fromISO = buildISOFromParts('fromDate');
+  const toISO   = buildISOFromParts('toDate');
+
+  let msg = '';
+  if (!fromISO || !toISO) {
+    msg = 'Please select both From and To date & time';
+  } else {
+    const from = new Date(fromISO);
+    const to   = new Date(toISO);
+    if (isNaN(from) || isNaN(to)) {
+      msg = 'Invalid custom date/time';
+    } else if (from > to) {
+      msg = 'From date cannot be after To date';
+    } else if ((to - from) > MAX_CUSTOM_RANGE_MS) {
+      msg = 'Maximum custom range is 30 days';
+    } else {
+      // Optional floor: from cannot be older than 30 days from now
+      const earliest = new Date(Date.now() - MAX_CUSTOM_RANGE_MS);
+      if (from < earliest) {
+        msg = 'From date cannot be older than 30 days';
+      }
+    }
+  }
+
+  const valid = msg === '';
+  updateGenerateButtonState(valid);
+
+  // Flash only on transitions or when requested
+  if (!valid && (showFlash || lastCustomValidity !== valid)) {
+    displayFlashMessage(msg, 'warning');
+  }
+  lastCustomValidity = valid;
+  return valid;
 }
 
 function getSelectizeInst(id) {
@@ -236,13 +292,17 @@ function queueReport(){
   const reportType=document.getElementById('generateReport').dataset.reportType;
   const vehicleNumber=document.getElementById('vehicleNumber').value;
   const dateRange=document.getElementById('dateRange').value;
+
   if(dateRange === 'custom'){
-    if(!clampCustomRange()) return;
+    syncHiddenInputs();
+    if(!validateCustomRange(true)) return;
   }
+  
   if(!vehicleNumber){
     displayFlashMessage('Select a vehicle first','warning');
     return;
   }
+
   const btn=document.getElementById('generateReport');
   const prog=document.getElementById('asyncProgress');
   const progText=document.getElementById('asyncProgressText');
@@ -332,9 +392,12 @@ function toggleCustomDateRange(val){
     if(!document.getElementById('fromDate').value || !document.getElementById('toDate').value){
       setDefaultCustom();
     }
-    clampCustomRange();
+    // Initial validity check without flashing
+    validateCustomRange(false);
   }else{
     custom.style.display='none';
+    updateGenerateButtonState(true);
+    lastCustomValidity = true;
   }
 }
 
@@ -345,10 +408,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   const drInst = window.jQuery && $('#dateRange')[0] ? $('#dateRange')[0].selectize : null;
 
   if (drInst) {
-    drInst.on('change', (val)=>toggleCustomDateRange(val));
+    drInst.on('change', (val)=>{
+      toggleCustomDateRange(val);
+      validateCustomRange(false);
+    });
     toggleCustomDateRange(drInst.getValue());
   } else if (drSel) {
-    drSel.addEventListener('change', (e)=>toggleCustomDateRange(e.target.value));
+    drSel.addEventListener('change', (e)=>{
+      toggleCustomDateRange(e.target.value);
+      validateCustomRange(false);
+    });
     toggleCustomDateRange(drSel.value);
   }
 
@@ -359,11 +428,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(el){
       el.addEventListener('change',()=>{
         syncHiddenInputs();
-        clampCustomRange();
+        validateCustomRange(true);
       });
     }
   });
-
 
   loadRecentReports('today');
   document.querySelectorAll('.report-card').forEach(card=>{
