@@ -23,11 +23,6 @@ function toAmPm(dtStr){
   return `${h}:${m} ${ampm}`;
 }
 
-function updateGenerateButtonState(valid){
-  const btn = document.getElementById('generateReport');
-  if (btn) btn.disabled = !valid;
-}
-
 function isCustomSelected(){
   return getSelectOrNativeValue('dateRange') === 'custom';
 }
@@ -42,7 +37,6 @@ function getSelectOrNativeValue(id){
 
 function validateCustomRange(showFlash = true){
   if (!isCustomSelected()) {
-    updateGenerateButtonState(true);
     return true;
   }
 
@@ -75,7 +69,6 @@ function validateCustomRange(showFlash = true){
   }
 
   const valid = msg === '';
-  updateGenerateButtonState(valid);
 
   if (!valid && showFlash) {
     displayFlashMessage(msg, 'warning');
@@ -417,7 +410,6 @@ function toggleCustomDateRange(val){
     }
   }else{
     custom.style.display='none';
-    updateGenerateButtonState(true);
   }
 }
 

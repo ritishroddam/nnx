@@ -188,42 +188,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     profileHover.style.display = "none";
   });
 
-  // async function loadNotifications() {
-  //   try {
-  //     const res = await fetch("/alerts/notification_alerts", {
-  //       headers: {
-  //         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-  //       },
-  //     });
-  //     const data = await res.json();
-  //   if (data.success) {
-  //     countSpan.textContent = data.alerts.length;
-  //     list.innerHTML = "";
-  //     if (data.alerts.length === 0) {
-  //       list.innerHTML = "<li>No new alerts</li>";
-  //     } else {
-  //       data.alerts.forEach((alert) => {
-  //         const li = document.createElement("li");
-  //         li.innerHTML = `<strong>${alert.type}</strong> - ${alert.vehicle} <br><small>${new Date(
-  //           alert.date_time
-  //         ).toLocaleString()}</small>`;
-  //         li.dataset.alertId = alert.id;
-  //         li.dataset.alertType = alert.type;
-  //         li.addEventListener("click", function () {
-  //           window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
-  //             alert.type
-  //           )}`;
-  //         });
-  //         list.appendChild(li);
-  //       });
-  //     }
-  //   }
-  //   } catch (e) {
-  //     countSpan.textContent = "!";
-  //     list.innerHTML = "<li>Error loading alerts</li>";
-  //   }
-  // }
-
 async function loadNotifications() {
   try {
     const res = await fetch("/alerts/notification_alerts", {
