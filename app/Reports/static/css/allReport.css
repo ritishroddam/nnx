@@ -5,6 +5,75 @@
   margin-bottom: 20px;
 }
 
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 24px 0;
+}
+
+.toggle-slider {
+  display: flex;
+  position: relative;
+  width: 300px;
+  height: 50px;
+  background: #e0e0e0;
+  border: 1.5px solid #bbb;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.dark-mode .toggle-slider {
+  background: #333;
+  border: 1.5px solid #444;
+  box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);
+}
+
+.toggle-option {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 50px;
+  color: #555;
+  z-index: 2;
+  user-select: none;
+  cursor: pointer;
+}
+
+.toggle-option.active {
+  color: #111;
+}
+
+.slider-button {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 8px);
+  height: calc(100% - 8px);
+  background: #fff;
+  border-radius: 21px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.25s ease;
+}
+
+.dark-mode .slider-button {
+  background: #555;
+}
+
+.reports-view { display: none; }
+.reports-view.active { display: block; }
+
+.recent-full {
+  flex: none;
+  width: 100%;
+  max-width: 100%;
+  position: static;
+  box-shadow: 0 0px 12px rgba(0,0,0,0.2);
+}
+
+.recent-full { top: auto; }
+
 .report-filters {
   display: flex;
   gap: 10px;

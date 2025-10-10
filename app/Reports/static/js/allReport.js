@@ -417,6 +417,31 @@ function toggleCustomDateRange(val){
 document.addEventListener('DOMContentLoaded',()=>{
   applySelectize();
 
+  const toggleEl = document.getElementById('reportsToggle');
+  if (toggleEl) {
+    const genOpt = toggleEl.querySelector('.generate-option');
+    const recOpt = toggleEl.querySelector('.recent-option');
+    const slider = toggleEl.querySelector('.slider-button');
+    const genView = document.getElementById('generateReportsView');
+    const recView = document.getElementById('recentReportsView');
+
+    function setMode(mode){
+      const isRecent = mode === 'recent';
+      genOpt.classList.toggle('active', !isRecent);
+      recOpt.classList.toggle('active', isRecent);
+      slider.style.transform = isRecent ? 'translateX(100%)' : 'translateX(0%)';
+      genView.classList.toggle('active', !isRecent);
+      recView.classList.toggle('active', isRecent);
+      if (isRecent) {
+        const range = (document.getElementById('reportDateRange')?.value) || 'today';
+        loadRecentReports(range);
+      }
+    }
+
+    genOpt?.addEventListener('click', ()=>setMode('generate'));
+    recOpt?.addEventListener('click', ()=>setMode('recent'));
+  }
+
   const drSel = document.getElementById('dateRange');
   const drInst = window.jQuery && $('#dateRange')[0] ? $('#dateRange')[0].selectize : null;
 

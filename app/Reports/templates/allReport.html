@@ -3,18 +3,15 @@
 {% block head %}
 <title>Reports</title>
 <link rel="stylesheet" href="{{ url_for('Reports.static', filename='css/allReport.css') }}">
-
 <script defer src="{{ url_for('Reports.static', filename='js/allReport.js') }}" defer></script>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css"
     integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"
-    integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+    integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script> -->
 {% endblock %}
 
 {% block h1 %}
@@ -22,152 +19,159 @@ All Reports
 {% endblock %}
 
 {% block block_container %}
-<div class="reports-layout-container">
-    <div class="report-cards-container">
-        <div class="report-header">
-            <h2>Generate a New Report</h2>
-        </div>
-        <div class="report-cards">
-            <a href="#" class="report-card" data-report="daily-distance">
-                <h3>Travel Path Report</h3>
-                <i class="fa-solid fa-route"></i>
-            </a>
-            <a href="#" class="report-card" data-report="odometer-daily-distance">
-                <h3>Distance Report</h3>
-                <i class="fa-solid fa-road"></i>
-            </a>
-            <a href="#" class="report-card" data-report="distance-speed-range">
-                <h3>Speed Report</h3>
-                <i class="fa-solid fa-gauge-high"></i>
-            </a>
-            <a href="#" class="report-card" data-report="stoppage">
-                <h3>Stoppage Report</h3>
-                <i class="fa-solid fa-traffic-light"></i>
-            </a>
-            <a href="#" class="report-card" data-report="idle">
-                <h3>Idle Report</h3>
-                <i class="fa-solid fa-hourglass-half"></i>
-            </a>
-            <a href="#" class="report-card" data-report="ignition">
-                <h3>Ignition Report</h3>
-                <i class="fa-solid fa-key"></i>
-            </a>
-            <a href="#" class="report-card" data-report="daily">
-                <h3>Daily Report</h3>
-                <i class="fa-solid fa-calendar-day"></i>
-            </a>
-            <a href="#" class="report-card" data-report="panic">
-                <h3>Panic Report</h3>
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </a>
-        </div>
-    </div>
+<div class="toggle-container reports-toggle">
+  <div class="toggle-slider" id="reportsToggle">
+    <div class="toggle-option generate-option active">Generate</div>
+    <div class="toggle-option recent-option">Recent</div>
+    <div class="slider-button"></div>
+  </div>
+</div>
 
-    <div class="recent-reports-container">
-        <div class="recent-reports-header">
-            <h2>Recently Generated Reports</h2>
-            <div class="date-range-selector">
-                <select id="reportDateRange" onchange="loadRecentReports(this.value)">
-                    <option value="today">Today</option>
-                    <option value="last24hours">Last 24 Hours</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="last7days">Last 7 Days</option>
-                    <option value="last30days">Last 30 Days</option>
-                </select>
-            </div>
-        </div>
-        <div id="recentReportsList">
-            <p>Your generated reports will be visible here.</p>
-        </div>
+<div id="generateReportsView" class="reports-view active">
+  <div class="report-cards-container">
+    <div class="report-header">
+      <h2>Generate a New Report</h2>
     </div>
+    <div class="report-cards">
+      <a href="#" class="report-card" data-report="daily-distance">
+        <h3>Travel Path Report</h3>
+        <i class="fa-solid fa-route"></i>
+      </a>
+      <a href="#" class="report-card" data-report="odometer-daily-distance">
+        <h3>Distance Report</h3>
+        <i class="fa-solid fa-road"></i>
+      </a>
+      <a href="#" class="report-card" data-report="distance-speed-range">
+        <h3>Speed Report</h3>
+        <i class="fa-solid fa-gauge-high"></i>
+      </a>
+      <a href="#" class="report-card" data-report="stoppage">
+        <h3>Stoppage Report</h3>
+        <i class="fa-solid fa-traffic-light"></i>
+      </a>
+      <a href="#" class="report-card" data-report="idle">
+        <h3>Idle Report</h3>
+        <i class="fa-solid fa-hourglass-half"></i>
+      </a>
+      <a href="#" class="report-card" data-report="ignition">
+        <h3>Ignition Report</h3>
+        <i class="fa-solid fa-key"></i>
+      </a>
+      <a href="#" class="report-card" data-report="daily">
+        <h3>Daily Report</h3>
+        <i class="fa-solid fa-calendar-day"></i>
+      </a>
+      <a href="#" class="report-card" data-report="panic">
+        <h3>Panic Report</h3>
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="recentReportsView" class="reports-view">
+  <div class="recent-reports-container recent-full">
+    <div class="recent-reports-header">
+      <h2>Recently Generated Reports</h2>
+      <div class="date-range-selector">
+        <select id="reportDateRange" onchange="loadRecentReports(this.value)">
+          <option value="today">Today</option>
+          <option value="last24hours">Last 24 Hours</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="last7days">Last 7 Days</option>
+          <option value="last30days">Last 30 Days</option>
+        </select>
+      </div>
+    </div>
+    <div id="recentReportsList">
+      <p>Your generated reports will be visible here.</p>
+    </div>
+  </div>
 </div>
 
 <div id="reportModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="reportModalTitle">Travel Path Report</h2>
-        <form id="reportForm">
-            <div class="form-group">
-                <label for="dateRange">Date Range*</label>
-                <select id="dateRange" name="dateRange">
-                    <option value="last24hours">Last 24 Hours</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="last7days">Last 7 Days</option>
-                    <option value="last30days">Last 30 Days</option>
-                    <option value="custom">Custom</option>
-                </select>
-            </div>
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="reportModalTitle">Travel Path Report</h2>
+    <form id="reportForm">
+      <div class="form-group">
+        <label for="dateRange">Date Range*</label>
+        <select id="dateRange" name="dateRange">
+          <option value="last24hours">Last 24 Hours</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="last7days">Last 7 Days</option>
+          <option value="last30days">Last 30 Days</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
 
-            <div id="customDateRange" style="display:none; margin-top:15px;">
-              <input type="hidden" id="fromDate" name="fromDate">
-              <input type="hidden" id="toDate" name="toDate">
-              <div class="form-group">
-                <label>From Date & Time</label>
-                <div class="datetime-composite" id="fromComposite">
-                  <input type="date" id="fromDateDate" class="date-part">
-                  <select id="fromDateHour" class="time-part">
-                    {% for h in range(1,13) %}<option value="{{'%02d' % h}}">{{'%02d' % h}}</option>{% endfor %}
-                  </select>
-                  <span>:</span>
-                  <select id="fromDateMinute" class="time-part">
-                    {% for m in range(0,60) %}<option value="{{'%02d' % m}}">{{'%02d' % m}}</option>{% endfor %}
-                  </select>
-                  <select id="fromDateAmPm" class="time-part">
-                    <option value="AM">AM</option><option value="PM">PM</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>To Date & Time</label>
-                <div class="datetime-composite" id="toComposite">
-                  <input type="date" id="toDateDate" class="date-part">
-                  <select id="toDateHour" class="time-part">
-                    {% for h in range(1,13) %}<option value="{{'%02d' % h}}">{{'%02d' % h}}</option>{% endfor %}
-                  </select>
-                  <span>:</span>
-                  <select id="toDateMinute" class="time-part">
-                    {% for m in range(0,60) %}<option value="{{'%02d' % m}}">{{'%02d' % m}}</option>{% endfor %}
-                  </select>
-                  <select id="toDateAmPm" class="time-part">
-                    <option value="AM">AM</option><option value="PM">PM</option>
-                  </select>
-                </div>
-              </div>
-              <small class="range-note">Maximum custom range: 30 days.</small>
-            </div>
+      <div id="customDateRange" style="display:none; margin-top:15px;">
+        <input type="hidden" id="fromDate" name="fromDate">
+        <input type="hidden" id="toDate" name="toDate">
+        <div class="form-group">
+          <label>From Date & Time</label>
+          <div class="datetime-composite" id="fromComposite">
+            <input type="date" id="fromDateDate" class="date-part">
+            <select id="fromDateHour" class="time-part">
+              {% for h in range(1,13) %}<option value="{{'%02d' % h}}">{{'%02d' % h}}</option>{% endfor %}
+            </select>
+            <span>:</span>
+            <select id="fromDateMinute" class="time-part">
+              {% for m in range(0,60) %}<option value="{{'%02d' % m}}">{{'%02d' % m}}</option>{% endfor %}
+            </select>
+            <select id="fromDateAmPm" class="time-part">
+              <option value="AM">AM</option><option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>To Date & Time</label>
+          <div class="datetime-composite" id="toComposite">
+            <input type="date" id="toDateDate" class="date-part">
+            <select id="toDateHour" class="time-part">
+              {% for h in range(1,13) %}<option value="{{'%02d' % h}}">{{'%02d' % h}}</option>{% endfor %}
+            </select>
+            <span>:</span>
+            <select id="toDateMinute" class="time-part">
+              {% for m in range(0,60) %}<option value="{{'%02d' % m}}">{{'%02d' % m}}</option>{% endfor %}
+            </select>
+            <select id="toDateAmPm" class="time-part">
+              <option value="AM">AM</option><option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+        <small class="range-note">Maximum custom range: 30 days.</small>
+      </div>
 
-            <div class="form-group">
-                <label for="subUserName">Sub User Name*</label>
-                <select id="subUserName" name="subUserName">
-                    <option value="all">All sub users</option>
-                </select>
-            </div>
+      <div class="form-group">
+        <label for="subUserName">Sub User Name*</label>
+        <select id="subUserName" name="subUserName">
+          <option value="all">All sub users</option>
+        </select>
+      </div>
 
-            <div class="form-group">
-                <label for="vehicleNumber">Vehicle Number</label>
-                <select id="vehicleNumber" name="vehicleNumber">
-                    <option value="">Select Vehicle Number</option>
-                    <option value="all" id="allVehicleOption">All Vehicle</option>
-                    {% for vehicle in vehicles %}
-                    <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+      <div class="form-group">
+        <label for="vehicleNumber">Vehicle Number</label>
+        <select id="vehicleNumber" name="vehicleNumber">
+          <option value="">Select Vehicle Number</option>
+          <option value="all" id="allVehicleOption">All Vehicle</option>
+          {% for vehicle in vehicles %}
+          <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-            <div class="form-actions">
-                <button type="button" class="cancel-btn" id="cancelReportModal">Cancel</button>
-                <button type="submit" id="generateReport">Generate Report</button>
-                <!-- <button type="button" id="viewReport" title="Preview Report" style="margin-left: 10px;">
-                   <i class="fa-solid fa-eye"></i>
-                </button> -->
-            </div>
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" id="cancelReportModal">Cancel</button>
+        <button type="submit" id="generateReport">Generate Report</button>
+      </div>
 
-            <div id="asyncProgress" style="display:none;margin-top:10px;font-size:0.9em;">
-                Queued... <span id="asyncProgressText">0%</span>
-            </div>
-        </form>
-    </div>
+      <div id="asyncProgress" style="display:none;margin-top:10px;font-size:0.9em;">
+        Queued... <span id="asyncProgressText">0%</span>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div id="reportPreviewModal" class="modal" style="display:none;">
