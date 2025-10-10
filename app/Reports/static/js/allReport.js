@@ -31,10 +31,15 @@ function updateGenerateButtonState(valid){
 }
 
 function isCustomSelected(){
-  const drSel = document.getElementById('dateRange');
-  const drInst = window.jQuery && $('#dateRange')[0] ? $('#dateRange')[0].selectize : null;
-  const val = drInst ? drInst.getValue() : (drSel ? drSel.value : '');
-  return val === 'custom';
+  return getSelectOrNativeValue('dateRange') === 'custom';
+}
+
+function getSelectOrNativeValue(id){
+  const el = document.getElementById(id);
+  if (!el) return '';
+  const inst = (window.jQuery && $('#' + id)[0]) ? $('#' + id)[0].selectize : null;
+  if (inst) return inst.getValue();
+  return el.value || '';
 }
 
 function validateCustomRange(showFlash = true){
@@ -291,13 +296,16 @@ function openPreview(title, rows){
 function queueReport(){
   const reportType=document.getElementById('generateReport').dataset.reportType;
   const vehicleNumber=document.getElementById('vehicleNumber').value;
-  const dateRange=document.getElementById('dateRange').value;
+  const dateRange=getSelectOrNativeValue('dateRange');
 
   if(dateRange === 'custom'){
     syncHiddenInputs();
-    if(!validateCustomRange(true)) return;
+    if(!validateCustomRange(true)) {
+      displayFlashMessage('Invalid custom date range. Please fix and try again.','warning');
+      return;
+    }
   }
-  
+
   if(!vehicleNumber){
     displayFlashMessage('Select a vehicle first','warning');
     return;
@@ -308,11 +316,13 @@ function queueReport(){
   const progText=document.getElementById('asyncProgressText');
   btn.disabled=true; btn.textContent='Queuing...';
   prog.style.display='block'; progText.textContent='0%';
+
   const body={reportType,vehicleNumber,dateRange};
   if(dateRange==='custom'){
     body.fromDate=document.getElementById('fromDate').value;
     body.toDate=document.getElementById('toDate').value;
   }
+
   fetch('/reports/generate_report',{
     method:'POST',
     headers:{'Content-Type':'application/json','X-CSRF-TOKEN':getCookie('csrf_access_token')},
