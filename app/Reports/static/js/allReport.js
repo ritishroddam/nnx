@@ -262,7 +262,7 @@ function applySelectize(){
   const selIds = [
     '#dateRange','#subUserName','#vehicleNumber',
     '#fromDateHour','#fromDateMinute','#fromDateAmPm',
-    '#toDateHour','#toDateMinute','#toDateAmPm'
+    '#toDateHour','#toDateMinute','#toDateAmPm', '#reportDateRange'
   ];
   selIds.forEach(id=>{
     const el = document.querySelector(id);
