@@ -343,7 +343,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
   loadRecentReports('today');
-  // Card click selects type
   document.querySelectorAll('.report-card').forEach(card=>{
     card.addEventListener('click',e=>{
       e.preventDefault();
@@ -355,9 +354,16 @@ document.addEventListener('DOMContentLoaded',()=>{
       document.getElementById('reportModal').style.display='block';
     });
   });
-  // document.getElementById('viewReport').addEventListener('click',e=>{
-  //   e.preventDefault(); previewReport();
-  // });
+
+  const reportModalEl = document.getElementById('reportModal');
+  if (reportModalEl) {
+    reportModalEl.addEventListener('click', (e) => {
+      if (e.target === reportModalEl) {
+        reportModalEl.style.display = 'none';
+      }
+    });
+  }
+
   document.getElementById('generateReport').addEventListener('click',e=>{
     e.preventDefault(); queueReport();
   });
