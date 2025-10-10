@@ -24,7 +24,7 @@ function toAmPm(dtStr){
 }
 
 function isCustomSelected(){
-  return getSelectOrNativeValue('dateRange') === 'custom';
+  return (getSelectOrNativeValue('dateRange') || '').toLowerCase() === 'custom';
 }
 
 function getSelectOrNativeValue(id){
@@ -401,9 +401,10 @@ function applySelectize(){
 }
 
 function toggleCustomDateRange(val){
+  const v = (val || '').toLowerCase();
   const custom = document.getElementById('customDateRange');
   if(!custom) return;
-  if(val === 'custom'){
+  if(v === 'custom'){
     custom.style.display='block';
     if(!document.getElementById('fromDate').value || !document.getElementById('toDate').value){
       setDefaultCustom();
