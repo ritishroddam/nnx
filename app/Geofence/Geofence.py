@@ -45,10 +45,9 @@ def create_geofence():
         user_company = claims.get('company')
         
         data = request.get_json()
-        # Add logging for debugging
         print("[DEBUG] Received geofence data:", data)
+        print("[DEBUG] Coordinates type:", type(data.get('coordinates')), data.get('coordinates'))
 
-        # Validate required fields
         name = data.get('name')
         shape_type = data.get('shape_type')
         coordinates = data.get('coordinates')

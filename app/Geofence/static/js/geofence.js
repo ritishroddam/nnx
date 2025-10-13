@@ -6,8 +6,6 @@ let currentShapeType = 'circle';
 let rectangle = null;
 
 function initMap() {
-    console.log("Initializing map...");
-    
     const mapElement = document.getElementById("map");
     if (!mapElement) {
         console.error("Map element not found!");
@@ -243,11 +241,11 @@ async function handleFormSubmit(e) {
             loadSavedGeofences();
         } else {
             const error = await response.json();
-            alert('Error saving geofence: ' + error.error);
+            alert('Error saving geofence: ' + (error.error || JSON.stringify(error)));
         }
     } catch (error) {
         console.error('Error saving geofence:', error);
-        alert('Error saving geofence');
+        alert('Error saving geofence: ' + error.message);
     }
 }
 
