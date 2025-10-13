@@ -838,32 +838,150 @@ input[type="datetime-local"] {
 }
 
 .report-item {
-  background: #f7f7f7;
-  border-radius: 8px;
-  box-shadow: 0 1px 8px #0001;
-  padding: 18px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0001;
+  padding: 28px 28px 18px 28px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   min-width: 0;
-}
-
-.dark-mode .report-item {
-  background: #333;
-  color: #eee;
-}
-
-.report-item:last-child {
-    border-bottom: none;
+  border: 1.5px solid #e5e7eb;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+  margin-bottom: 10px;
 }
 
 .report-item:hover {
-    background-color: #ccc;
+  box-shadow: 0 4px 24px #0002;
+  border-color: #bfc9d1;
+  background: #f8fafc;
+}
+
+.dark-mode .report-item {
+  background: #23272f;
+  color: #fff;
+  border: 1.5px solid #444;
+  box-shadow: 0 2px 12px #0004;
 }
 
 .dark-mode .report-item:hover {
-    background-color: #555;
-    color: #fff;
+  background: #2c323c;
+  border-color: #666;
+}
+
+.report-name {
+  font-size: 1.25em;
+  font-weight: 700;
+  color: #22304a;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+.dark-mode .report-name {
+  color: #fff;
+  border-color: #444;
+}
+
+.report-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 18px 0 0 0;
+  gap: 0;
+  font-size: 1em;
+  color: #22304a;
+  flex-wrap: wrap;
+}
+
+.dark-mode .report-meta {
+  color: #ccc;
+}
+
+.report-meta > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  margin-right: 24px;
+  margin-bottom: 0;
+  font-size: 0.98em;
+}
+
+.report-meta > span b {
+  font-weight: 600;
+  color: #22304a;
+  margin-bottom: 2px;
+}
+
+.dark-mode .report-meta > span b {
+  color: #fff;
+}
+
+.report-meta .report-date-range {
+  min-width: 180px;
+}
+
+.report-meta .report-date-range span {
+  font-size: 0.97em;
+  color: #374151;
+}
+
+.dark-mode .report-meta .report-date-range span {
+  color: #ccc;
+}
+
+.report-meta .report-generated {
+  min-width: 120px;
+}
+
+.report-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 18px;
+  gap: 0;
+  justify-content: flex-start;
+}
+
+.report-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #22304a;
+  font-size: 2.1em;
+  padding: 0;
+  margin-right: 0;
+  margin-top: 8px;
+  transition: color 0.2s;
+  outline: none;
+}
+
+.report-actions button:hover {
+  color: #1d3557;
+  background: none;
+}
+
+.dark-mode .report-actions button {
+  color: #fff;
+}
+
+.dark-mode .report-actions button:hover {
+  color: #60a5fa;
+}
+
+@media (max-width: 700px) {
+  .report-item {
+    padding: 18px 10px 12px 10px;
+  }
+  .report-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .report-meta > span {
+    margin-right: 0;
+    min-width: unset;
+  }
 }
 
 @media (max-width: 500px) {
