@@ -52,7 +52,7 @@ def create_geofence():
             'shape_type': data.get('shape_type'),
             'coordinates': data.get('coordinates'),
             'created_by': username,
-            'created_by_id': ObjectId(user_id),
+            'created_by_id': str(user_id), 
             'company': user_company,
             'created_at': datetime.utcnow(),
             'is_active': True
