@@ -126,6 +126,10 @@
     font-size: 16px;
 }
 
+.dark-mode .section-title {
+    color: #fff;
+}
+
 .switch-label {
     display: flex;
     align-items: center;
@@ -213,6 +217,12 @@ input:checked + .switch::after {
 .saved-geofences-container {
     max-height: 400px;
     overflow-y: auto;
+}
+
+.dark-mode .saved-geofences-container {
+    background: #2c2c2c;
+    color: #ddd; 
+    box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .geofence-list {
