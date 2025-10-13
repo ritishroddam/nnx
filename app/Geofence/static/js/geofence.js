@@ -437,7 +437,7 @@ async function deleteGeofence(geofenceId) {
         const response = await fetch(`/geofence/api/geofences/${geofenceId}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                'X-CSRF-TOKEN': document.querySelector('input[name="csrf_token"]').value // <-- fix here
             }
         });
 
