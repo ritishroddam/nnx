@@ -45,26 +45,38 @@ def create_geofence():
         user_company = claims.get('company')
         
         data = request.get_json()
-        
+        # Add logging for debugging
+        print("[DEBUG] Received geofence data:", data)
+
+        # Validate required fields
+        name = data.get('name')
+        shape_type = data.get('shape_type')
+        coordinates = data.get('coordinates')
+
+        if not name or not shape_type or not coordinates:
+            return jsonify({'error': 'Missing required fields'}), 400
+
         geofence_data = {
-            'name': data.get('name'),
+            'name': name,
             'location': data.get('location'),
-            'shape_type': data.get('shape_type'),
-            'coordinates': data.get('coordinates'),
+            'shape_type': shape_type,
+            'coordinates': coordinates,
             'created_by': username,
-            'created_by_id': ObjectId(user_id),
+            'created_by_id': str(user_id),
             'company': user_company,
             'created_at': datetime.utcnow(),
             'is_active': True
         }
         
         result = geofence_collection.insert_one(geofence_data)
+        print("[DEBUG] Geofence inserted with ID:", result.inserted_id)
         
         return jsonify({
             'message': 'Geofence created successfully',
             'geofence_id': str(result.inserted_id)
         }), 201
     except Exception as e:
+        print("[ERROR] Exception in create_geofence:", str(e))
         return jsonify({'error': str(e)}), 500
 
 @geofence_bp.route('/api/geofences/<geofence_id>', methods=['DELETE'])
