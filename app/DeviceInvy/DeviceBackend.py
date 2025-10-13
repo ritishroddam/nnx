@@ -233,6 +233,17 @@ def upload_file():
     file = request.files['file']
     if file and file.filename.endswith(('.xls', '.xlsx')):
         df = pd.read_excel(file)
+
+        df.columns = [str(c).strip() for c in df.columns]
+        required_headers = [
+            'IMEI', 'GLNumber', 'DeviceModel', 'DeviceMake',
+            'DateIn', 'Warranty', 'OutwardTo', 'Package', 'Tenure', 'Status'
+        ]
+        missing_headers = [h for h in required_headers if h not in df.columns]
+        if missing_headers:
+            flash(f"Missing required columns: {', '.join(missing_headers)}", "danger")
+            return redirect(url_for('DeviceInvy.page'))
+
         records = []
         imeis = []
         gl_numbers = []
