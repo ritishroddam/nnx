@@ -237,6 +237,13 @@ def upload_file():
 
     if file and (file.filename.endswith('.xls') or file.filename.endswith('.xlsx')):
         df = pd.read_excel(file)
+        
+        df.columns = [str(c).strip() for c in df.columns]
+        required_headers = ['MobileNumber', 'SimNumber', 'DateIn', 'DateOut', 'Vendor', 'Status']
+        missing_headers = [h for h in required_headers if h not in df.columns]
+        if missing_headers:
+            flash(f"Missing required columns: {', '.join(missing_headers)}", "danger")
+            return redirect(url_for('SimInvy.page'))
 
         records = []
         for index, row in df.iterrows():

@@ -103,6 +103,17 @@ def upload_customers():
 
     try:
         df = pd.read_excel(file)
+        
+        df.columns = [str(c).strip() for c in df.columns]
+        required_headers = [
+            'Company Name', 'Contact Person', 'Email Address', 'Phone Number', 'Company Address',
+            'Number of GPS Devices', 'Number of Vehicles', 'Number of Drivers',
+            'Payment Status', 'Support Contact', 'Remarks', 'lat', 'lng'
+        ]
+        missing_headers = [h for h in required_headers if h not in df.columns]
+        if missing_headers:
+            flash(f"Missing required columns: {', '.join(missing_headers)}", 'danger')
+            return redirect(url_for('CompanyDetails.page'))
 
         # Replace NaN/None with empty string
         df = df.fillna("")
