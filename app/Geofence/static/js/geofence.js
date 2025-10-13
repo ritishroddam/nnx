@@ -218,7 +218,7 @@ async function handleFormSubmit(e) {
     const leaveAlert = document.getElementById("leaveAlert").checked;
 
     try {
-        const response = await fetch('/Geofence/api/geofences', {
+        const response = await fetch('/geofence/api/geofences', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -266,7 +266,7 @@ function clearShape() {
 
 async function loadSavedGeofences() {
     try {
-        const response = await fetch('/Geofence/api/geofences');
+        const response = await fetch('/geofence/api/geofences');
         if (response.ok) {
             geofences = await response.json();
             renderGeofenceList();
@@ -416,7 +416,7 @@ async function deleteGeofence(geofenceId) {
     }
 
     try {
-        const response = await fetch(`/Geofence/api/geofences/${geofenceId}`, {
+        const response = await fetch(`/geofence/api/geofences/${geofenceId}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
