@@ -389,7 +389,7 @@ def create_app(config_name='default'):
     app.register_blueprint(companyConfig_bp, url_prefix='/companyConfig')
     app.register_blueprint(mapZoomIn_bp, url_prefix='/mapZoomIn')
     app.register_blueprint(rawLogs_bp, url_prefix='/rawLogs')
-    app.register_blueprint(geofence_bp, url_prefix='/geofence')
+    app.register_blueprint(geofence_bp, url_prefix='/Geofence')
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
