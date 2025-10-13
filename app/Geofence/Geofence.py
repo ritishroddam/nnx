@@ -56,7 +56,6 @@ def create_geofence():
         if not name or not shape_type or not coordinates:
             return jsonify({'error': 'Missing required fields'}), 400
 
-        # Validate coordinates structure
         if shape_type == "circle":
             if not (isinstance(coordinates, dict) and "center" in coordinates and "radius" in coordinates):
                 return jsonify({'error': 'Invalid circle coordinates'}), 400
