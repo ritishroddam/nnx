@@ -352,6 +352,10 @@ input:checked + .switch::after {
     color: #333;
 }
 
+.dark-mode .geofence-item-name {
+    color: #f0f0f0;
+}
+
 .geofence-actions {
     display: flex;
     gap: 8px;
