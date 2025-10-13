@@ -220,7 +220,7 @@ async function handleFormSubmit(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                'X-CSRF-TOKEN': document.querySelector('input[name="csrf_token"]').value
             },
             body: JSON.stringify({
                 name: name,
