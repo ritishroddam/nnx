@@ -705,11 +705,10 @@ async function deleteGeofence(geofenceId) {
 }
 
 window.onload = async function() {
-    await geofenceMap();
-
-    if (typeof google === 'undefined' || !google.maps) {
-        console.error("Google Maps API not loaded");
-        displayFlashMessage("Google Maps failed to load");
-        return;
+    try{
+        await geofenceMap();
+    } catch (e){
+        console.error("Failed to load map", e);
+        displayFlashMessage("Failed to load map for Geofence")
     }
 };
