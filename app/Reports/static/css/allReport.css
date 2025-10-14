@@ -866,6 +866,84 @@ input[type="datetime-local"] {
     color: #fff;
 }
 
+/* Style for report-info/report-open for better readability */
+.report-info.report-open {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+.report-info .report-name {
+  font-size: 1.15em;
+  font-weight: 700;
+  margin-bottom: 2px;
+  color: #222;
+}
+
+.report-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 18px;
+  font-size: 0.98em;
+  color: #444;
+  margin-bottom: 2px;
+}
+
+.report-meta span {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  white-space: normal;
+}
+
+.report-meta b {
+  font-weight: 600;
+  color: #222;
+  min-width: 80px;
+  display: inline-block;
+}
+
+.report-meta .date-range-label {
+  grid-column: 1 / -1;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.report-meta .date-range-values {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 18px;
+  margin-left: 12px;
+  font-size: 0.97em;
+}
+
+.report-meta .date-range-values span {
+  gap: 2px;
+}
+
+.report-meta .generated-time {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  color: #666;
+  font-size: 0.96em;
+}
+
+/* Dark mode adjustments */
+.dark-mode .report-info .report-name,
+.dark-mode .report-meta b {
+  color: #fff;
+}
+
+.dark-mode .report-meta {
+  color: #ccc;
+}
+
+.dark-mode .report-meta .generated-time {
+  color: #aaa;
+}
+
 @media (max-width: 500px) {
   #deleteConfirmModal .modal-content {
     width: 95%;
