@@ -481,6 +481,22 @@ function toggleCustomDateRange(val){
 document.addEventListener('DOMContentLoaded',()=>{
   applySelectize();
 
+  function bindReportRangeChange(){
+    const sel = document.getElementById('reportDateRange');
+    const inst = window.jQuery && $('#reportDateRange')[0] ? $('#reportDateRange')[0].selectize : null;
+
+    if (inst && !bindReportRangeChange._boundToSelectize) {
+      inst.on('change', (val)=> loadRecentReports(val || 'today'));
+      bindReportRangeChange._boundToSelectize = true;
+    }
+
+    if (sel && !bindReportRangeChange._boundToNative) {
+      sel.addEventListener('change', function(){ loadRecentReports(this.value || 'today'); });
+      bindReportRangeChange._boundToNative = true;
+    }
+  }
+  bindReportRangeChange();
+
   const toggleEl = document.getElementById('reportsToggle');
   if (toggleEl) {
     const genOpt = toggleEl.querySelector('.generate-option');
@@ -497,6 +513,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       genView.classList.toggle('active', !isRecent);
       recView.classList.toggle('active', isRecent);
       if (isRecent) {
+        // Rebind in case Selectize got initialized after DOMContentLoaded
+        bindReportRangeChange();
         const range = (document.getElementById('reportDateRange')?.value) || 'today';
         loadRecentReports(range);
       }
@@ -576,9 +594,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('reportModal').style.display='none';
   }));
 
-  document.getElementById('reportDateRange').addEventListener('change',function(){
-    loadRecentReports(this.value);
-  });
+  loadRecentReports('today');
 });
 
 function createReportCard(report) {
