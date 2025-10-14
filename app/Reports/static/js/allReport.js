@@ -273,8 +273,8 @@ function renderRecentReports(reports){
         <div class="report-meta">
           <span><b>Vehicle:</b> ${r.vehicle_number}</span>
           <span><b>Size:</b> ${(r.size/1024).toFixed(1)} KB</span>
-          <span><b>Date Range:</b>
-            <span><b>From:</b> ${new Date(r.range_start_utc).toLocaleString()}</span>
+          <span><b>Date Range:</b><br>
+            <span><b>From:</b> ${new Date(r.range_start_utc).toLocaleString()}</span><br>
             <span><b>To:</b> ${new Date(r.range_end_utc).toLocaleString()}</span>
           </span>
           <span><b>Generated Time:</b> ${formatTimeAgo(new Date(r.generated_at))}</span>
