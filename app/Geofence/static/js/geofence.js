@@ -6,8 +6,6 @@ let currentShapeType = 'circle';
 let rectangle = null;
 
 function initMap() {
-    console.log("Initializing map...");
-    
     const mapElement = document.getElementById("map");
     if (!mapElement) {
         console.error("Map element not found!");
@@ -222,7 +220,7 @@ async function handleFormSubmit(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                'X-CSRF-TOKEN': document.querySelector('input[name="csrf_token"]').value
             },
             body: JSON.stringify({
                 name: name,
@@ -243,11 +241,11 @@ async function handleFormSubmit(e) {
             loadSavedGeofences();
         } else {
             const error = await response.json();
-            alert('Error saving geofence: ' + error.error);
+            alert('Error saving geofence: ' + (error.error || JSON.stringify(error)));
         }
     } catch (error) {
         console.error('Error saving geofence:', error);
-        alert('Error saving geofence');
+        alert('Error saving geofence: ' + error.message);
     }
 }
 
@@ -330,19 +328,25 @@ function renderGeofenceList() {
 }
 
 function renderGeofencesOnMap() {
+    // Clear previous overlays
     geofences.forEach(gf => {
         if (gf.mapOverlay) {
             gf.mapOverlay.setMap(null);
         }
     });
 
+    // Create a LatLngBounds object to include all geofences
+    const bounds = new google.maps.LatLngBounds();
+    let hasGeofence = false;
+
     geofences.forEach(gf => {
         const coords = gf.coordinates;
         let overlay = null;
 
         if (gf.shape_type === 'circle') {
+            const center = new google.maps.LatLng(coords.center.lat, coords.center.lng);
             overlay = new google.maps.Circle({
-                center: new google.maps.LatLng(coords.center.lat, coords.center.lng),
+                center: center,
                 radius: coords.radius,
                 fillColor: "#FF0000",
                 fillOpacity: 0.2,
@@ -352,9 +356,14 @@ function renderGeofencesOnMap() {
                 editable: false,
                 draggable: false
             });
+            // Extend bounds by circle's bounding box
+            const circleBounds = overlay.getBounds();
+            if (circleBounds) bounds.union(circleBounds);
+            hasGeofence = true;
         } else if (gf.shape_type === 'polygon') {
+            const path = coords.points.map(p => new google.maps.LatLng(p.lat, p.lng));
             overlay = new google.maps.Polygon({
-                paths: coords.points.map(p => new google.maps.LatLng(p.lat, p.lng)),
+                paths: path,
                 fillColor: "#FF0000",
                 fillOpacity: 0.2,
                 strokeColor: "#FF0000",
@@ -363,12 +372,15 @@ function renderGeofencesOnMap() {
                 editable: false,
                 draggable: false
             });
+            path.forEach(latlng => bounds.extend(latlng));
+            hasGeofence = true;
         } else if (gf.shape_type === 'rectangle') {
+            const rectBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
+                new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
+            );
             overlay = new google.maps.Rectangle({
-                bounds: new google.maps.LatLngBounds(
-                    new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
-                    new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
-                ),
+                bounds: rectBounds,
                 fillColor: "#FF0000",
                 fillOpacity: 0.2,
                 strokeColor: "#FF0000",
@@ -377,16 +389,22 @@ function renderGeofencesOnMap() {
                 editable: false,
                 draggable: false
             });
+            bounds.union(rectBounds);
+            hasGeofence = true;
         }
 
         if (overlay) {
             gf.mapOverlay = overlay;
-            
             google.maps.event.addListener(overlay, 'click', () => {
                 zoomToGeofence(gf);
             });
         }
     });
+
+    // Fit map to all geofences if any exist
+    if (hasGeofence && !bounds.isEmpty()) {
+        map.fitBounds(bounds);
+    }
 }
 
 function zoomToGeofence(geofence) {
@@ -419,7 +437,7 @@ async function deleteGeofence(geofenceId) {
         const response = await fetch(`/geofence/api/geofences/${geofenceId}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                'X-CSRF-TOKEN': document.querySelector('input[name="csrf_token"]').value // <-- fix here
             }
         });
 

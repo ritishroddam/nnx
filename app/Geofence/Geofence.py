@@ -45,16 +45,25 @@ def create_geofence():
         user_company = claims.get('company')
         
         data = request.get_json()
-        # Add logging for debugging
         print("[DEBUG] Received geofence data:", data)
+        print("[DEBUG] Coordinates type:", type(data.get('coordinates')), data.get('coordinates'))
 
-        # Validate required fields
         name = data.get('name')
         shape_type = data.get('shape_type')
         coordinates = data.get('coordinates')
 
         if not name or not shape_type or not coordinates:
             return jsonify({'error': 'Missing required fields'}), 400
+
+        if shape_type == "circle":
+            if not (isinstance(coordinates, dict) and "center" in coordinates and "radius" in coordinates):
+                return jsonify({'error': 'Invalid circle coordinates'}), 400
+        elif shape_type == "polygon":
+            if not (isinstance(coordinates, dict) and "points" in coordinates and isinstance(coordinates["points"], list)):
+                return jsonify({'error': 'Invalid polygon coordinates'}), 400
+        elif shape_type == "rectangle":
+            if not (isinstance(coordinates, dict) and "bounds" in coordinates):
+                return jsonify({'error': 'Invalid rectangle coordinates'}), 400
 
         geofence_data = {
             'name': name,
