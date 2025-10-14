@@ -45,6 +45,10 @@
   color: #111;
 }
 
+.dark-mode .toggle-option {
+  color: #ccc;
+}
+
 .slider-button {
   position: absolute;
   top: 4px;
