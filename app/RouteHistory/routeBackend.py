@@ -9,12 +9,14 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
+from app.parser import atlantaAis140ToFront, getData, FLAT_TO_AIS140
 from config import config
 
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
 
 data_collection = db["vehicle_inventory"]
 atlanta_collection = db["atlanta"]
+atlantaAIS140_collection = db['atlantaAis140']
 company_collection = db["customers_list"]
 
 def convertDate(ddmmyy, hhmmss):
@@ -64,6 +66,25 @@ def show_vehicle_data(LicensePlateNumber):
         ]
 
         vehicle_data = list(atlanta_collection.aggregate(pipeline))
+        
+        if not vehicle_data:
+            pipeline = [
+                {'$match': {'imei': vehicleData['IMEI'], 'gps.gpsStatus': 1}},
+                {'$sort': {"gps.timestamp": -1}},
+                {'$limit': 50},
+            ]
+            
+            vehicleAisData = list(atlantaAIS140_collection.aggregate(pipeline))
+            
+            if not vehicleAisData:
+                flash(f"Data for vehicle with License Plate Number '{LicensePlateNumber}' does not exist.", "warning")
+                return render_template('vehicleMap.html')
+            
+            vehicle_data = []
+            for datum in vehicleAisData:
+                vehicle_datum = atlantaAis140ToFront(datum, include_address=False)
+                
+                vehicle_data.append(vehicle_datum)
 
         is_active = False
         most_recent_entry = None
@@ -160,82 +181,101 @@ def fetch_live_data(imei):
         now = datetime.now().astimezone(pytz.UTC)
         thirty_minutes_ago = now - timedelta(minutes=30)
 
-        pipeline = [
-            {"$match": {"imei": imei, "gps": "A", "date_time": {"$gte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}}},
-            {"$sort": {"date_time": 1}},
-            {"$project": {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1, "course": 1}}
-        ]
-
-        liveData = list(atlanta_collection.aggregate(pipeline))
+        projection = {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1, "course": 1}
+        date_filter = {"date_time": {"$gte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}}
+        
+        liveData = getData(imei, date_filter, projection)
 
         if not liveData:
+            projection = {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1, "course": 1}
             pipeline = [
                 {"$match": {"imei": imei, "gps": "A"}},
                 {"$sort": {"date_time": -1}},
-                {"$project": {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1, "course": 1}},
+                {"$project": projection},
                 {"$limit": 1}
             ]
             data = list(atlanta_collection.aggregate(pipeline))
-            if data:
-                status_time_delta = now - data[0]["date_time"]
-                status_time = deltaTimeString(status_time_delta)
+            
+            if not data:
+                wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
 
-                data[0]["status"] = "Inactive"
-                data[0]["status_time"] = status_time
-                data[0]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
-                return jsonify(data), 200
-            else:
-                return jsonify({"error": "No data found for the specified vehicle"}), 404
+                ais140_projection = {"_id": 0, "imei": 1}
+                for flat in wanted_fields:
+                    path = FLAT_TO_AIS140.get(flat)
+                    if path:
+                        ais140_projection[path] = 1
+                        
+                pipeline = [
+                    {"$match": {"imei": imei}},
+                    {"$sort": {"gps.timestamp": -1}},
+                    {"$project": projection},
+                    {"$limit": 1}
+                ]
+                
+                data = list(atlantaAIS140_collection.aggregate(pipeline))
+                
+                if not data:
+                    return jsonify({"error": "No data found for the specified vehicle"}), 404
+                
+                data = [atlantaAis140ToFront(datum, include_address=False) for datum in data]
+
+            status_time_delta = now - data[0]["date_time"]
+            status_time = deltaTimeString(status_time_delta)
+
+            data[0]["status"] = "Inactive"
+            data[0]["status_time"] = status_time
+            data[0]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
+            return jsonify(data), 200
+
+        address = geocodeInternal(liveData[0]["latitude"], liveData[0]["longitude"])
+
+        if address:
+            liveData[0]["address"] = address
+
+        if liveData[0]["ignition"] == "0" and liveData[0]["speed"] == "0.0":
+            index = len(liveData) - 1
+            for entry in liveData:
+                if entry["ignition"] != "1" or entry["speed"] != "0.0":
+                    index = liveData.index(entry)
+                    break
+            status_time_delta = liveData[0]["date_time"] - liveData[index]["date_time"]
+            status_time = deltaTimeString(status_time_delta)
+
+            liveData[0]["status"] = "Stopped"
+            liveData[0]["status_time"] = status_time
+            liveData[0]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
+            return jsonify(liveData), 200
+        elif liveData[0]["ignition"] == "1" and liveData[0]["speed"] != "0.0":
+            index = len(liveData) - 1
+            for entry in liveData:
+                if entry["ignition"] != "1" or entry["speed"] == "0.0":
+                    index = liveData.index(entry)
+                    break
+            status_time_delta = liveData[0]["date_time"] - liveData[index]["date_time"]
+            status_time = deltaTimeString(status_time_delta)
+
+            liveData[0]["status"] = "Moving"
+            liveData[0]["status_time"] = status_time
+            liveData[0]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
+            return jsonify(liveData), 200
+        elif liveData[0]["ignition"] == "1" and liveData[0]["speed"] == "0.0":
+            index = len(liveData) - 1
+            for entry in liveData:
+                if entry["ignition"] != "1" or entry["speed"] != "0.0":
+                    index = liveData.index(entry)
+                    break
+            status_time_delta = liveData[0]["date_time"] - liveData[index]["date_time"]
+            status_time = deltaTimeString(status_time_delta)
+
+            liveData[0]["status"] = "Idle"
+            liveData[0]["status_time"] = status_time
+            liveData[0]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
+            return jsonify(liveData), 200
         else:
-            address = geocodeInternal(liveData[-1]["latitude"], liveData[-1]["longitude"])
-
-            if address:
-                liveData[-1]["address"] = address
-
-            if liveData[-1]["ignition"] == "0" and liveData[-1]["speed"] == "0.0":
-                index = len(liveData) - 1
-                for entry in reversed(liveData):
-                    if entry["ignition"] != "1" or entry["speed"] != "0.0":
-                        index = liveData.index(entry)
-                        break
-                status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
-                status_time = deltaTimeString(status_time_delta)
-
-                liveData[-1]["status"] = "Stopped"
-                liveData[-1]["status_time"] = status_time
-                liveData[-1]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
-                return jsonify(liveData), 200
-            elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] != "0.0":
-                index = len(liveData) - 1
-                for entry in reversed(liveData):
-                    if entry["ignition"] != "1" or entry["speed"] == "0.0":
-                        index = liveData.index(entry)
-                        break
-                status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
-                status_time = deltaTimeString(status_time_delta)
-
-                liveData[-1]["status"] = "Moving"
-                liveData[-1]["status_time"] = status_time
-                liveData[-1]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
-                return jsonify(liveData), 200
-            elif liveData[-1]["ignition"] == "1" and liveData[-1]["speed"] == "0.0":
-                index = len(liveData) - 1
-                for entry in reversed(liveData):
-                    if entry["ignition"] != "1" or entry["speed"] != "0.0":
-                        index = liveData.index(entry)
-                        break
-                status_time_delta = liveData[-1]["date_time"] - liveData[index]["date_time"]
-                status_time = deltaTimeString(status_time_delta)
-
-                liveData[-1]["status"] = "Idle"
-                liveData[-1]["status_time"] = status_time
-                liveData[-1]["status_time_delta"] = int(status_time_delta.total_seconds()  * 1000)
-                return jsonify(liveData), 200
-            else:
-                liveData[-1]["status"] = "unknown"
-                liveData[-1]["status_time"] = "unknown"
-                liveData[-1]["status_time_delta"] = "unknown"
-                return jsonify(liveData), 200
+            liveData[0]["status"] = "unknown"
+            liveData[0]["status_time"] = "unknown"
+            liveData[0]["status_time_delta"] = "unknown"
+            return jsonify(liveData), 200
             
     except Exception as e:
         print(f"Error fetching live data for IMEI {imei}: {e}")
@@ -309,19 +349,7 @@ def get_vehicle_path():
         if not data_record:
             return jsonify({"error": f"IMEI number {imei_numeric} not found in data collection"}), 404
 
-        pipeline = [
-            {
-                "$match": {
-                    "imei": str(imei_numeric),
-                    "gps": "A",
-                    "date_time": {"$gte": iso_start_date, "$lte": iso_end_date}
-                }
-            },
-            {
-                "$sort": {"date_time": 1}  
-            },
-            {
-                "$project": {
+        projection = {
                     "_id": 0,
                     "latitude": 1,
                     "longitude": 1,
@@ -330,9 +358,11 @@ def get_vehicle_path():
                     "date_time": 1,
                     "course": 1,
                 }
-            }
-        ]
-        records_list = list(atlanta_collection.aggregate(pipeline))
+        
+        date_filter = {"date_time": {"$gte": iso_start_date, "$lte": iso_end_date}}
+        
+
+        records_list = getData(str(imei_numeric), date_filter, projection)
 
         if not records_list:
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
@@ -340,7 +370,7 @@ def get_vehicle_path():
         ist = pytz.timezone("Asia/Kolkata")
 
         path_data = []
-        for record in records_list:
+        for record in reversed(records_list):
             
             if not record['latitude'] or not record['longitude']:
                 continue
