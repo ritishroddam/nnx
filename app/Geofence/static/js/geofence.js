@@ -333,13 +333,20 @@ function renderGeofenceList() {
         li.appendChild(content);
         li.appendChild(actions);
 
-        // Add edit action bar if this is the editing geofence
+        // Add Save/Cancel below actions if editing
         if (editingGeofence && editingGeofence._id === gf._id) {
+            const editBarWrapper = document.createElement("div");
+            editBarWrapper.style.width = "100%";
+            editBarWrapper.style.display = "flex";
+            editBarWrapper.style.justifyContent = "flex-end";
+
             const editBar = document.createElement("div");
-            editBar.className = "edit-action-bar-inline";
+            editBar.className = "edit-action-bar-inline vertical";
             editBar.style.display = "flex";
+            editBar.style.flexDirection = "row";
             editBar.style.gap = "10px";
-            editBar.style.marginTop = "10px";
+            editBar.style.marginTop = "12px";
+            editBar.style.marginBottom = "2px";
 
             const saveBtn = document.createElement("button");
             saveBtn.textContent = "Save";
@@ -353,7 +360,10 @@ function renderGeofenceList() {
 
             editBar.appendChild(saveBtn);
             editBar.appendChild(cancelBtn);
-            li.appendChild(editBar);
+            editBarWrapper.appendChild(editBar);
+
+            // Insert below actions
+            li.appendChild(editBarWrapper);
         }
 
         list.appendChild(li);

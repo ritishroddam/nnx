@@ -432,6 +432,14 @@ input:checked + .switch::after {
     border-color: #dc3545;
 }
 
+.edit-action-bar-inline.vertical {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 12px;
+    margin-bottom: 2px;
+    gap: 10px;
+}
+
 @media (max-width: 768px) {
     .geofence-layout {
         flex-direction: column;
