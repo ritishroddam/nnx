@@ -838,9 +838,9 @@ input[type="datetime-local"] {
 }
 
 .report-item {
-  background: #f7f7f7;
+  background: #fafafa;
   border-radius: 8px;
-  box-shadow: 0 1px 8px #0001;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
@@ -851,6 +851,7 @@ input[type="datetime-local"] {
 .dark-mode .report-item {
   background: #333;
   color: #eee;
+  box-shadow: 0px 0px 10px #cccccc90;
 }
 
 .report-item:last-child {
