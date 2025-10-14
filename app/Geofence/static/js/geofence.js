@@ -4,6 +4,9 @@ let drawnShape = null;
 let geofences = [];
 let currentShapeType = 'circle';
 let rectangle = null;
+let editingGeofence = null;
+let editingOverlay = null;
+let originalOverlayData = null;
 
 function initMap() {
     const mapElement = document.getElementById("map");
@@ -311,12 +314,18 @@ function renderGeofenceList() {
         viewBtn.className = "view-btn";
         viewBtn.onclick = () => zoomToGeofence(gf);
 
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.className = "edit-btn";
+        editBtn.onclick = () => startEditGeofence(gf);
+
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
         delBtn.className = "delete-btn";
         delBtn.onclick = () => deleteGeofence(gf._id);
 
         actions.appendChild(viewBtn);
+        actions.appendChild(editBtn);
         actions.appendChild(delBtn);
         
         content.appendChild(nameSpan);
@@ -325,6 +334,181 @@ function renderGeofenceList() {
         li.appendChild(actions);
         list.appendChild(li);
     });
+}
+
+// --- Edit Geofence Logic ---
+
+function startEditGeofence(gf) {
+    if (editingGeofence) {
+        alert("Finish editing the current geofence first.");
+        return;
+    }
+    editingGeofence = gf;
+
+    // Remove previous overlays
+    if (editingOverlay) {
+        editingOverlay.setMap(null);
+        editingOverlay = null;
+    }
+
+    // Zoom to geofence and draw editable overlay
+    zoomToGeofence(gf);
+
+    // Draw editable overlay
+    const coords = gf.coordinates;
+    let overlay = null;
+    if (gf.shape_type === 'circle') {
+        overlay = new google.maps.Circle({
+            center: coords.center,
+            radius: coords.radius,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeColor: "#FF0000",
+            strokeWeight: 2,
+            map: map,
+            editable: true,
+            draggable: true
+        });
+        originalOverlayData = {
+            center: { ...coords.center },
+            radius: coords.radius
+        };
+    } else if (gf.shape_type === 'polygon') {
+        const path = coords.points.map(p => new google.maps.LatLng(p.lat, p.lng));
+        overlay = new google.maps.Polygon({
+            paths: path,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeColor: "#FF0000",
+            strokeWeight: 2,
+            map: map,
+            editable: true,
+            draggable: true
+        });
+        originalOverlayData = coords.points.map(p => ({ ...p }));
+    } else if (gf.shape_type === 'rectangle') {
+        const rectBounds = new google.maps.LatLngBounds(
+            new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
+            new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
+        );
+        overlay = new google.maps.Rectangle({
+            bounds: rectBounds,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+            strokeColor: "#FF0000",
+            strokeWeight: 2,
+            map: map,
+            editable: true,
+            draggable: true
+        });
+        originalOverlayData = { ...coords.bounds };
+    }
+    editingOverlay = overlay;
+
+    // Show Save/Cancel buttons
+    showEditActionButtons();
+}
+
+function showEditActionButtons() {
+    let panel = document.querySelector(".geofence-panel");
+    if (!panel) return;
+
+    // Remove existing edit-action-bar if any
+    let oldBar = document.getElementById("edit-action-bar");
+    if (oldBar) oldBar.remove();
+
+    let bar = document.createElement("div");
+    bar.id = "edit-action-bar";
+    bar.style.display = "flex";
+    bar.style.gap = "10px";
+    bar.style.margin = "15px 0";
+
+    let saveBtn = document.createElement("button");
+    saveBtn.textContent = "Save";
+    saveBtn.className = "confirm-btn";
+    saveBtn.onclick = saveEditGeofence;
+
+    let cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.className = "btn danger";
+    cancelBtn.onclick = cancelEditGeofence;
+
+    bar.appendChild(saveBtn);
+    bar.appendChild(cancelBtn);
+
+    panel.insertBefore(bar, panel.querySelector(".section-title"));
+}
+
+async function saveEditGeofence() {
+    if (!editingGeofence || !editingOverlay) return;
+
+    let newCoordinates = null;
+    if (editingGeofence.shape_type === 'circle') {
+        newCoordinates = {
+            center: editingOverlay.getCenter().toJSON(),
+            radius: editingOverlay.getRadius()
+        };
+    } else if (editingGeofence.shape_type === 'polygon') {
+        newCoordinates = {
+            points: editingOverlay.getPath().getArray().map(ll => ll.toJSON())
+        };
+    } else if (editingGeofence.shape_type === 'rectangle') {
+        const bounds = editingOverlay.getBounds();
+        newCoordinates = {
+            bounds: {
+                north: bounds.getNorthEast().lat(),
+                south: bounds.getSouthWest().lat(),
+                east: bounds.getNorthEast().lng(),
+                west: bounds.getSouthWest().lng()
+            }
+        };
+    }
+
+    try {
+        const response = await fetch(`/geofence/api/geofences/${editingGeofence._id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify({
+                coordinates: newCoordinates
+            })
+        });
+        if (response.ok) {
+            alert("Geofence updated successfully!");
+            endEditGeofence();
+            loadSavedGeofences();
+        } else {
+            const error = await response.json();
+            alert("Error updating geofence: " + (error.error || JSON.stringify(error)));
+        }
+    } catch (error) {
+        alert("Error updating geofence: " + error.message);
+    }
+}
+
+function cancelEditGeofence() {
+    if (editingOverlay) {
+        editingOverlay.setMap(null);
+        editingOverlay = null;
+    }
+    editingGeofence = null;
+    originalOverlayData = null;
+    let bar = document.getElementById("edit-action-bar");
+    if (bar) bar.remove();
+    loadSavedGeofences();
+}
+
+function endEditGeofence() {
+    if (editingOverlay) {
+        editingOverlay.setMap(null);
+        editingOverlay = null;
+    }
+    editingGeofence = null;
+    originalOverlayData = null;
+    let bar = document.getElementById("edit-action-bar");
+    if (bar) bar.remove();
 }
 
 function renderGeofencesOnMap() {

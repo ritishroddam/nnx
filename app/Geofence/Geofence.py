@@ -108,3 +108,27 @@ def delete_geofence(geofence_id):
             return jsonify({'error': 'Geofence not found or access denied'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@geofence_bp.route('/api/geofences/<geofence_id>', methods=['PATCH'])
+@jwt_required()
+def update_geofence(geofence_id):
+    try:
+        claims = get_jwt()
+        user_roles = claims.get('roles', [])
+        user_company = claims.get('company')
+        data = request.get_json()
+        coordinates = data.get('coordinates')
+        if not coordinates:
+            return jsonify({'error': 'Missing coordinates'}), 400
+
+        query = {'_id': ObjectId(geofence_id)}
+        if 'admin' not in user_roles:
+            query['company'] = user_company
+
+        update = {'$set': {'coordinates': coordinates}}
+        result = geofence_collection.update_one(query, update)
+        if result.matched_count == 0:
+            return jsonify({'error': 'Geofence not found or access denied'}), 404
+        return jsonify({'message': 'Geofence updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
