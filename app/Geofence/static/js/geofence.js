@@ -706,6 +706,7 @@ async function deleteGeofence(geofenceId) {
 
 window.onload = async function() {
     try{
+        await backgroundMap();
         await geofenceMap();
     } catch (e){
         console.error("Failed to load map", e);
