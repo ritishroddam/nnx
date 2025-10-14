@@ -143,8 +143,9 @@
 }
 
 .report-actions {
+  margin-top: auto;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .report-actions input {
@@ -811,20 +812,37 @@ input[type="datetime-local"] {
 }
 
 .report-actions button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: black;
-    font-size: 1em;
-    padding: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #34495e;
+  font-size: 1em;
+  padding: 6px;
+  border-radius: 6px;
+  transition: transform .2s, background-color .2s, color .2s;
 }
 
 .dark-mode  .report-actions button {
     color: #ccc;
 }
 
+.report-actions button i { 
+  font-size: 26px; 
+}
+
 .report-actions button:hover {
-    color: #007bff;
+  transform: scale(1.05);
+  color: #007bff;
+  background-color: #f0f7ff;
+}
+
+.dark-mode .report-actions button { 
+  color: #ccc; 
+}
+
+.dark-mode .report-actions button:hover {
+  background: #1f2a35;
+  color: #8bbcff;
 }
 
 .no-reports {
@@ -871,13 +889,21 @@ input[type="datetime-local"] {
 }
 
 .report-item {
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-  padding: 18px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.dark-mode .report-item {
+  background-color: #000;
+  color: #ccc;
+  box-shadow: 0 0 10px #cccccc90;
 }
 
 .badge {
@@ -909,12 +935,8 @@ input[type="datetime-local"] {
 }
 
 .report-item.in-progress {
-  position: relative;
+  position: relative; 
   overflow: hidden;
-}
-
-.dark-mode .report-item.in-progress { 
-  background: #2a2a2a; 
 }
 
 .report-item.in-progress::after {
@@ -963,22 +985,18 @@ input[type="datetime-local"] {
   text-overflow: ellipsis; 
 }
 
-.dark-mode .report-item {
-  color: #ccc;
-  box-shadow: 0px 0px 10px #cccccc90;
-}
-
 .report-item:last-child {
     border-bottom: none;
 }
 
 .report-item:hover {
-    background-color: #ccc;
+  transform: scale(1.02);
+  background-color: #f7f7f7;
 }
 
 .dark-mode .report-item:hover {
-    background-color: #555;
-    color: #fff;
+  background-color: #111;
+  color: #fff;
 }
 
 @media (max-width: 500px) {
