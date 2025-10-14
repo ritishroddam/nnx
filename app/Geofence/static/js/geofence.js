@@ -32,7 +32,7 @@ async function geofenceMap() {
     loadSavedGeofences();
   } catch (error) {
     console.error("Error creating map:", error);
-    alert("Error loading Google Maps. Please check your API key and console for details.");
+    displayFlashMessage("Error loading Google Maps");
   }
 }
 
@@ -272,6 +272,55 @@ function updateShapeData() {
   }
 }
 
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const shapeData = document.getElementById("shapeData").value;
+    if (!shapeData) {
+        displayFlashMessage("Please draw a geofence first", 'warning');
+        return;
+    }
+
+    const name = document.getElementById("GeofenceName").value;
+    const location = document.getElementById("Location").value;
+    const enterAlert = document.getElementById("enterAlert").checked;
+    const leaveAlert = document.getElementById("leaveAlert").checked;
+
+    try {
+        const response = await fetch('/geofence/api/geofences', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCookie("csrf_access_token"),
+            },
+            body: JSON.stringify({
+                name: name,
+                location: location,
+                shape_type: currentShapeType,
+                coordinates: JSON.parse(shapeData),
+                alert_enter: enterAlert,
+                alert_leave: leaveAlert
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            displayFlashMessage('Geofence saved successfully!', 'success');
+            clearShape();
+            document.getElementById("geofenceForm").reset();
+            document.getElementById("shapeData").value = "";
+            loadSavedGeofences();
+        } else {
+            const error = await response.json();
+            console.error((error.error || JSON.stringify(error)));
+            displayFlashMessage('Error saving geofence: ', 'danger');
+        }
+    } catch (error) {
+        console.error('Error saving geofence:', error);
+        displayFlashMessage('Error saving geofence: ', 'danger');
+    }
+}
+
 function clearShape() {
   if (drawnShape) {
     drawnShape.setMap(null);
@@ -471,7 +520,7 @@ function renderGeofencesOnMap() {
 
 function startEditGeofence(gf, li) {
     if (editingGeofence) {
-        alert("Finish editing the current geofence first.");
+        displayFlashMessage("Finish editing the current geofence first");
         return;
     }
     editingGeofence = gf;
@@ -566,22 +615,24 @@ async function saveEditGeofence() {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document.querySelector('input[name="csrf_token"]').value
+                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
             },
             body: JSON.stringify({
                 coordinates: newCoordinates
             })
         });
         if (response.ok) {
-            alert("Geofence updated successfully!");
+            displayFlashMessage("Geofence updated successfully!", "success");
             endEditGeofence();
             loadSavedGeofences();
         } else {
             const error = await response.json();
-            alert("Error updating geofence: " + (error.error || JSON.stringify(error)));
+            displayFlashMessage("Error updating geofence: ", 'danger');
+            console.error((error.error || JSON.stringify(error)));
         }
     } catch (error) {
-        alert("Error updating geofence: " + error.message);
+        displayFlashMessage("Error updating geofence: ", 'danger');
+        console.error(error.message);
     }
 }
 
@@ -635,20 +686,21 @@ async function deleteGeofence(geofenceId) {
         const response = await fetch(`/geofence/api/geofences/${geofenceId}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('input[name="csrf_token"]').value // <-- fix here
+                'X-CSRF-TOKEN': getCookie("csrf_access_token"),
             }
         });
 
         if (response.ok) {
-            alert('Geofence deleted successfully!');
+            displayFlashMessage('Geofence deleted successfully!', 'success');
             loadSavedGeofences();
         } else {
             const error = await response.json();
-            alert('Error deleting geofence: ' + error.error);
+            console.error(error.error);
+            displayFlashMessage('Error deleting geofence: ', 'danger');
         }
     } catch (error) {
         console.error('Error deleting geofence:', error);
-        alert('Error deleting geofence');
+        displayFlashMessage('Error deleting geofence');
     }
 }
 
@@ -657,7 +709,7 @@ window.onload = async function() {
 
     if (typeof google === 'undefined' || !google.maps) {
         console.error("Google Maps API not loaded");
-        alert("Google Maps failed to load. Please check your API key and internet connection.");
+        displayFlashMessage("Google Maps failed to load");
         return;
     }
 };
