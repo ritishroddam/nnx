@@ -362,7 +362,7 @@ def get_vehicle_path():
         date_filter = {"date_time": {"$gte": iso_start_date, "$lte": iso_end_date}}
         
 
-        records_list = getData(str(imei_numeric), projection)
+        records_list = getData(str(imei_numeric), date_filter, projection)
 
         if not records_list:
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
