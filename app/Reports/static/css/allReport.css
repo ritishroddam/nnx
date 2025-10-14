@@ -769,6 +769,8 @@ input[type="datetime-local"] {
 
 .report-meta {
     display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
     font-size: 0.85em;
     color: black;
     gap: 10px;
@@ -855,6 +857,46 @@ input[type="datetime-local"] {
   gap: 8px;
   min-width: 0;
 }
+
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; }
+.badge-success { background:#e6ffed; color:#1b7f2a; border:1px solid #bff0c9; }
+.badge-fail { background:#ffecec; color:#a52828; border:1px solid #f3b5b5; }
+.badge-progress { background:#eef5ff; color:#1a5fb4; border:1px solid #c9ddff; }
+
+.report-item.in-progress { position: relative; overflow: hidden; }
+.report-item.in-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+.progress-wrap {
+  position: relative;
+  height: 10px;
+  background: #e9f0ff;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #5aa3ff, #2e7cff);
+  border-radius: 6px;
+  transition: width .3s ease;
+}
+.progress-text {
+  font-size: 12px;
+  color: #1a5fb4;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.report-item.failed { border-left: 4px solid #e55353; }
+.error-text { color:#a52828; font-size:12px; margin-top:6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .dark-mode .report-item {
   background: #333;
