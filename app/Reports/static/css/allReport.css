@@ -65,6 +65,30 @@
   background: #555;
 }
 
+:root {
+  --badge-progress-bg: #eaf3ff;
+  --badge-progress-text: #0b5ed7;
+  --badge-progress-border: #8cb8ff;
+  --badge-fail-bg: #ffe5e5;
+  --badge-fail-text: #b42318;
+  --badge-fail-border: #ffc1c1;
+
+  /* Light-mode shimmer (slightly darker stripe) */
+  --shimmer-stripe: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.08), rgba(0,0,0,0));
+}
+
+.dark-mode {
+  --badge-progress-bg: #1b2a41;
+  --badge-progress-text: #8bbcff;
+  --badge-progress-border: #295b99;
+  --badge-fail-bg: #3a1f1f;
+  --badge-fail-text: #ff8a8a;
+  --badge-fail-border: #7a3b3b;
+
+  /* Dark-mode shimmer (lighter stripe) */
+  --shimmer-stripe: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.18), rgba(255,255,255,0));
+}
+
 .reports-view { display: none; }
 .reports-view.active { display: block; }
 
@@ -858,22 +882,56 @@ input[type="datetime-local"] {
   min-width: 0;
 }
 
-.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; }
-.badge-success { background:#e6ffed; color:#1b7f2a; border:1px solid #bff0c9; }
-.badge-fail { background:#ffecec; color:#a52828; border:1px solid #f3b5b5; }
-.badge-progress { background:#eef5ff; color:#1a5fb4; border:1px solid #c9ddff; }
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  border: 1px solid currentColor;
+}
 
-.report-item.in-progress { position: relative; overflow: hidden; }
+.badge-success { 
+  background:#e6ffed; 
+  color:#1b7f2a; 
+  border:1px solid #bff0c9; 
+}
+
+.badge-fail {
+  background: var(--badge-fail-bg);
+  color: var(--badge-fail-text);
+  border-color: var(--badge-fail-border);
+}
+
+.badge-progress {
+  background: var(--badge-progress-bg);
+  color: var(--badge-progress-text);
+  border-color: var(--badge-progress-border);
+}
+
+.report-item.in-progress {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+
+.dark-mode .report-item.in-progress { 
+  background: #2a2a2a; 
+}
+
 .report-item.in-progress::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  background: var(--shimmer-stripe);
   transform: translateX(-100%);
-  animation: shimmer 1.2s infinite;
+  animation: shimmer 1.1s linear infinite;
   pointer-events: none;
+  mix-blend-mode: multiply; /* keeps text readable */
 }
-@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+@keyframes shimmer { to { transform: translateX(100%); } }
 
 .progress-wrap {
   position: relative;
