@@ -436,7 +436,14 @@ function showEditActionButtons() {
     bar.appendChild(saveBtn);
     bar.appendChild(cancelBtn);
 
-    panel.insertBefore(bar, panel.querySelector(".section-title"));
+    // Insert above the geofence list
+    const geofenceList = document.getElementById("geofenceList");
+    if (geofenceList && geofenceList.parentElement) {
+        geofenceList.parentElement.insertBefore(bar, geofenceList);
+    } else {
+        // fallback: insert at top of panel
+        panel.insertBefore(bar, panel.firstChild);
+    }
 }
 
 async function saveEditGeofence() {
