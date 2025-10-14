@@ -283,20 +283,20 @@ async function loadSavedGeofences() {
 function renderGeofenceList() {
     const list = document.getElementById("geofenceList");
     if (!list) return;
-    
     list.innerHTML = "";
 
     geofences.forEach((gf, i) => {
         const li = document.createElement("li");
         li.className = "geofence-list-item";
-        
+        li.dataset.geofenceId = gf._id;
+
         const content = document.createElement("div");
         content.className = "geofence-item-content";
-        
+
         const nameSpan = document.createElement("span");
         nameSpan.className = "geofence-item-name";
         nameSpan.textContent = gf.name;
-        
+
         const metaDiv = document.createElement("div");
         metaDiv.className = "geofence-item-meta";
         metaDiv.innerHTML = `
@@ -317,7 +317,7 @@ function renderGeofenceList() {
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
         editBtn.className = "edit-btn";
-        editBtn.onclick = () => startEditGeofence(gf);
+        editBtn.onclick = () => startEditGeofence(gf, li);
 
         const delBtn = document.createElement("button");
         delBtn.textContent = "Delete";
@@ -327,18 +327,41 @@ function renderGeofenceList() {
         actions.appendChild(viewBtn);
         actions.appendChild(editBtn);
         actions.appendChild(delBtn);
-        
+
         content.appendChild(nameSpan);
         content.appendChild(metaDiv);
         li.appendChild(content);
         li.appendChild(actions);
+
+        // Add edit action bar if this is the editing geofence
+        if (editingGeofence && editingGeofence._id === gf._id) {
+            const editBar = document.createElement("div");
+            editBar.className = "edit-action-bar-inline";
+            editBar.style.display = "flex";
+            editBar.style.gap = "10px";
+            editBar.style.marginTop = "10px";
+
+            const saveBtn = document.createElement("button");
+            saveBtn.textContent = "Save";
+            saveBtn.className = "confirm-btn small";
+            saveBtn.onclick = saveEditGeofence;
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.textContent = "Cancel";
+            cancelBtn.className = "cancel-btn small";
+            cancelBtn.onclick = cancelEditGeofence;
+
+            editBar.appendChild(saveBtn);
+            editBar.appendChild(cancelBtn);
+            li.appendChild(editBar);
+        }
+
         list.appendChild(li);
     });
 }
 
 // --- Edit Geofence Logic ---
-
-function startEditGeofence(gf) {
+function startEditGeofence(gf, li) {
     if (editingGeofence) {
         alert("Finish editing the current geofence first.");
         return;
@@ -405,48 +428,11 @@ function startEditGeofence(gf) {
     }
     editingOverlay = overlay;
 
-    // Show Save/Cancel buttons
-    showEditActionButtons();
+    // Re-render list to show Save/Cancel for this item
+    renderGeofenceList();
 }
 
-function showEditActionButtons() {
-    let panel = document.querySelector(".geofence-panel");
-    if (!panel) return;
-
-    // Remove existing edit-action-bar if any
-    let oldBar = document.getElementById("edit-action-bar");
-    if (oldBar) oldBar.remove();
-
-    let bar = document.createElement("div");
-    bar.id = "edit-action-bar";
-    bar.style.display = "flex";
-    bar.style.gap = "10px";
-    bar.style.margin = "15px 0";
-
-    let saveBtn = document.createElement("button");
-    saveBtn.textContent = "Save";
-    saveBtn.className = "confirm-btn";
-    saveBtn.onclick = saveEditGeofence;
-
-    let cancelBtn = document.createElement("button");
-    cancelBtn.textContent = "Cancel";
-    cancelBtn.className = "btn danger";
-    cancelBtn.onclick = cancelEditGeofence;
-
-    bar.appendChild(saveBtn);
-    bar.appendChild(cancelBtn);
-
-    // Insert above the geofence list
-    const geofenceList = document.getElementById("geofenceList");
-    if (geofenceList && geofenceList.parentElement) {
-        geofenceList.parentElement.insertBefore(bar, geofenceList);
-    } else {
-        // fallback: insert at top of panel
-        panel.insertBefore(bar, panel.firstChild);
-    }
-}
-
-async function saveEditGeofence() {
+function saveEditGeofence() {
     if (!editingGeofence || !editingOverlay) return;
 
     let newCoordinates = null;
@@ -502,8 +488,7 @@ function cancelEditGeofence() {
     }
     editingGeofence = null;
     originalOverlayData = null;
-    let bar = document.getElementById("edit-action-bar");
-    if (bar) bar.remove();
+    renderGeofenceList();
     loadSavedGeofences();
 }
 

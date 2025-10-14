@@ -394,6 +394,44 @@ input:checked + .switch::after {
     background: #c82333;
 }
 
+.edit-action-bar-inline {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.confirm-btn.small, .cancel-btn.small {
+    width: auto;
+    min-width: 80px;
+    padding: 8px 18px;
+    font-size: 14px;
+    margin-top: 0;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.confirm-btn.small {
+    background: #28a745;
+    color: #fff;
+    border: none;
+}
+
+.confirm-btn.small:hover {
+    background: #218838;
+}
+
+.cancel-btn.small {
+    background: #f5f5f5;
+    color: #222;
+    border: 1px solid #bbb;
+}
+
+.cancel-btn.small:hover {
+    background: #eee;
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
 @media (max-width: 768px) {
     .geofence-layout {
         flex-direction: column;
