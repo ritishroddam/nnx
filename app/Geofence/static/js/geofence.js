@@ -333,40 +333,37 @@ function renderGeofenceList() {
         li.appendChild(content);
         li.appendChild(actions);
 
-        // Add Save/Cancel below actions if editing
-        if (editingGeofence && editingGeofence._id === gf._id) {
-            const editBarWrapper = document.createElement("div");
-            editBarWrapper.style.width = "100%";
-            editBarWrapper.style.display = "flex";
-            editBarWrapper.style.justifyContent = "flex-end";
+        list.appendChild(li);
 
-            const editBar = document.createElement("div");
-            editBar.className = "edit-action-bar-inline vertical";
-            editBar.style.display = "flex";
-            editBar.style.flexDirection = "row";
-            editBar.style.gap = "10px";
-            editBar.style.marginTop = "12px";
-            editBar.style.marginBottom = "2px";
+        // Add Save/Cancel as a new row below the edited item
+        if (editingGeofence && editingGeofence._id === gf._id) {
+            const actionLi = document.createElement("li");
+            actionLi.className = "edit-action-bar-below";
+            actionLi.style.listStyle = "none";
+            actionLi.style.background = "transparent";
+            actionLi.style.display = "flex";
+            actionLi.style.justifyContent = "center";
+            actionLi.style.alignItems = "center";
+            actionLi.style.border = "none";
+            actionLi.style.boxShadow = "none";
+            actionLi.style.marginTop = "-10px";
+            actionLi.style.marginBottom = "10px";
 
             const saveBtn = document.createElement("button");
             saveBtn.textContent = "Save";
-            saveBtn.className = "confirm-btn small";
+            saveBtn.className = "confirm-btn below";
             saveBtn.onclick = saveEditGeofence;
 
             const cancelBtn = document.createElement("button");
             cancelBtn.textContent = "Cancel";
-            cancelBtn.className = "cancel-btn small";
+            cancelBtn.className = "cancel-btn below";
             cancelBtn.onclick = cancelEditGeofence;
 
-            editBar.appendChild(saveBtn);
-            editBar.appendChild(cancelBtn);
-            editBarWrapper.appendChild(editBar);
+            actionLi.appendChild(saveBtn);
+            actionLi.appendChild(cancelBtn);
 
-            // Insert below actions
-            li.appendChild(editBarWrapper);
+            list.appendChild(actionLi);
         }
-
-        list.appendChild(li);
     });
 }
 
