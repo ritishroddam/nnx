@@ -432,7 +432,7 @@ function startEditGeofence(gf, li) {
     renderGeofenceList();
 }
 
-function saveEditGeofence() {
+async function saveEditGeofence() {
     if (!editingGeofence || !editingOverlay) return;
 
     let newCoordinates = null;
@@ -499,19 +499,15 @@ function endEditGeofence() {
     }
     editingGeofence = null;
     originalOverlayData = null;
-    let bar = document.getElementById("edit-action-bar");
-    if (bar) bar.remove();
 }
 
 function renderGeofencesOnMap() {
-    // Clear previous overlays
     geofences.forEach(gf => {
         if (gf.mapOverlay) {
             gf.mapOverlay.setMap(null);
         }
     });
 
-    // Create a LatLngBounds object to include all geofences
     const bounds = new google.maps.LatLngBounds();
     let hasGeofence = false;
 
@@ -532,7 +528,6 @@ function renderGeofencesOnMap() {
                 editable: false,
                 draggable: false
             });
-            // Extend bounds by circle's bounding box
             const circleBounds = overlay.getBounds();
             if (circleBounds) bounds.union(circleBounds);
             hasGeofence = true;
@@ -577,7 +572,6 @@ function renderGeofencesOnMap() {
         }
     });
 
-    // Fit map to all geofences if any exist
     if (hasGeofence && !bounds.isEmpty()) {
         map.fitBounds(bounds);
     }
