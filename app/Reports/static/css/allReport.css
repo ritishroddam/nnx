@@ -866,7 +866,6 @@ input[type="datetime-local"] {
     color: #fff;
 }
 
-/* Style for report-info/report-open for better readability */
 .report-info.report-open {
   display: flex;
   flex-direction: column;

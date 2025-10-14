@@ -271,13 +271,14 @@ function renderRecentReports(reports){
       <div class="report-info report-open" data-id="${r._id}">
         <div class="report-name">${r.report_name}</div>
         <div class="report-meta">
-          <span><b>Vehicle:</b> ${r.vehicle_number}</span>
-          <span><b>Size:</b> ${(r.size/1024).toFixed(1)} KB</span>
-          <span><b>Date Range:</b>
+          <span><b>Vehicle:</b> <span>${r.vehicle_number}</span></span>
+          <span><b>Size:</b> <span>${(r.size/1024).toFixed(1)} KB</span></span>
+          <span class="date-range-label"><b>Date Range:</b></span>
+          <span class="date-range-values">
             <span><b>From:</b> ${new Date(r.range_start_utc).toLocaleString()}</span>
             <span><b>To:</b> ${new Date(r.range_end_utc).toLocaleString()}</span>
           </span>
-          <span><b>Generated Time:</b> ${formatTimeAgo(new Date(r.generated_at))}</span>
+          <span class="generated-time"><b>Generated Time:</b> ${formatTimeAgo(new Date(r.generated_at))}</span>
         </div>
       </div>
       <div class="report-actions">
@@ -554,116 +555,4 @@ function createReportCard(report) {
       })
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          reportCard.remove();
-        } else {
-          alert(data.message || "Failed to delete report.");
-        }
-      })
-      .catch(() => alert("Failed to delete report."));
-    });
-  });
-
-  const container = document.querySelector(".report-cards");
-  container.insertBefore(reportCard, container.lastElementChild);
-}
-
-function openReportModal(reportName) {
-  const modal = document.getElementById("reportModal");
-  if (modal) {
-    modal.querySelector("h2").textContent = reportName;
-    modal.style.display = "block";
-  }
-}
-
-async function generatePanicReport() {
-  const vehicleNumber = document.getElementById("vehicleNumber").value;
-  const dateRange = document.getElementById("dateRange").value;
-
-  if (!vehicleNumber) {
-    displayFlashMessage('Select a vehicle first','warning');
-    return;
-  }
-
-  try {
-    const response = await fetch("/reports/download_panic_report", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify({
-        vehicleNumber: vehicleNumber,
-        dateRange: dateRange || "all",
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      displayFlashMessage(errorData.message || "Failed to generate panic report", errorData.category || "danger");
-      return;
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = vehicleNumber === "all"
-      ? `panic_report_ALL_VEHICLES.xlsx`
-      : `panic_report_${vehicleNumber}.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    displayFlashMessage('Panic report download started','success');
-  } catch (error) {
-    console.error("Error:", error);
-    displayFlashMessage(error.message || "Failed to generate panic report",'danger');
-  }
-}
-
-function loadFields() {
-  fetch("/reports/get_fields")
-    .then((response) => {
-      if (!response.ok) {
-        displayFlashMessage("Failed to load fields","danger");
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((fields) => {
-      if (typeof fieldSelection === 'undefined' || typeof allowedFields === 'undefined') {
-        console.warn('Custom report field UI removed; loadFields skipped.');
-        return;
-      }
-      fieldSelection.innerHTML = "";
-      const filteredFields = fields.filter((field) =>
-        allowedFields.includes(field)
-      );
-      filteredFields.forEach((field) => {
-        const fieldItem = document.createElement("div");
-        fieldItem.className = "field-item";
-        fieldItem.style.cssText = `
-          padding: 10px;
-          margin: 5px;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-          background-color: #f9f9f9;
-          cursor: pointer;
-        `;
-        fieldItem.innerHTML = `
-          <input type="checkbox" id="${field}" value="${field}" />
-          <label for="${field}" style="margin-left: 5px;">${field}</label>
-        `;
-        fieldSelection.appendChild(fieldItem);
-      });
-    })
-    .catch((error) => {
-      console.error("Error loading fields:", error);
-      displayFlashMessage("Failed to load available fields","danger");
-    });
-}
-
-document.getElementById("closePreviewModal").addEventListener("click", function () {
-  document.getElementById("reportPreviewModal").style.display = "none";
-});
+        if
