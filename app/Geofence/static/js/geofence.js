@@ -287,6 +287,93 @@ async function loadSavedGeofences() {
     }
 }
 
+function renderGeofenceList() {
+    const list = document.getElementById("geofenceList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    geofences.forEach((gf, i) => {
+        const li = document.createElement("li");
+        li.className = "geofence-list-item";
+        li.dataset.geofenceId = gf._id;
+
+        const content = document.createElement("div");
+        content.className = "geofence-item-content";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "geofence-item-name";
+        nameSpan.textContent = gf.name;
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "geofence-item-meta";
+        metaDiv.innerHTML = `
+            <div>Location: ${gf.location || 'N/A'}</div>
+            <div>Type: ${gf.shape_type}</div>
+            <div>Created by: ${gf.created_by}</div>
+            <div>Created: ${new Date(gf.created_at).toLocaleString()}</div>
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "geofence-actions";
+
+        const viewBtn = document.createElement("button");
+        viewBtn.textContent = "View";
+        viewBtn.className = "view-btn";
+        viewBtn.onclick = () => zoomToGeofence(gf);
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.className = "edit-btn";
+        editBtn.onclick = () => startEditGeofence(gf, li);
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => deleteGeofence(gf._id);
+
+        actions.appendChild(viewBtn);
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        content.appendChild(nameSpan);
+        content.appendChild(metaDiv);
+        li.appendChild(content);
+        li.appendChild(actions);
+
+        list.appendChild(li);
+
+        // Add Save/Cancel as a new row below the edited item
+        if (editingGeofence && editingGeofence._id === gf._id) {
+            const actionLi = document.createElement("li");
+            actionLi.className = "edit-action-bar-below";
+            actionLi.style.listStyle = "none";
+            actionLi.style.background = "transparent";
+            actionLi.style.display = "flex";
+            actionLi.style.justifyContent = "center";
+            actionLi.style.alignItems = "center";
+            actionLi.style.border = "none";
+            actionLi.style.boxShadow = "none";
+            actionLi.style.marginTop = "-10px";
+            actionLi.style.marginBottom = "10px";
+
+            const saveBtn = document.createElement("button");
+            saveBtn.textContent = "Save";
+            saveBtn.className = "confirm-btn below";
+            saveBtn.onclick = saveEditGeofence;
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.textContent = "Cancel";
+            cancelBtn.className = "cancel-btn below";
+            cancelBtn.onclick = cancelEditGeofence;
+
+            actionLi.appendChild(saveBtn);
+            actionLi.appendChild(cancelBtn);
+
+            list.appendChild(actionLi);
+        }
+    });
+}
+
 function renderGeofencesOnMap() {
   geofences.forEach((gf) => {
     if (gf.mapOverlay) {
@@ -497,82 +584,6 @@ function endEditGeofence() {
     }
     editingGeofence = null;
     originalOverlayData = null;
-}
-
-function renderGeofencesOnMap() {
-    geofences.forEach(gf => {
-        if (gf.mapOverlay) {
-            gf.mapOverlay.setMap(null);
-        }
-    });
-
-    const bounds = new google.maps.LatLngBounds();
-    let hasGeofence = false;
-
-    geofences.forEach(gf => {
-        const coords = gf.coordinates;
-        let overlay = null;
-
-        if (gf.shape_type === 'circle') {
-            const center = new google.maps.LatLng(coords.center.lat, coords.center.lng);
-            overlay = new google.maps.Circle({
-                center: center,
-                radius: coords.radius,
-                fillColor: "#FF0000",
-                fillOpacity: 0.2,
-                strokeColor: "#FF0000",
-                strokeWeight: 2,
-                map: map,
-                editable: false,
-                draggable: false
-            });
-            const circleBounds = overlay.getBounds();
-            if (circleBounds) bounds.union(circleBounds);
-            hasGeofence = true;
-        } else if (gf.shape_type === 'polygon') {
-            const path = coords.points.map(p => new google.maps.LatLng(p.lat, p.lng));
-            overlay = new google.maps.Polygon({
-                paths: path,
-                fillColor: "#FF0000",
-                fillOpacity: 0.2,
-                strokeColor: "#FF0000",
-                strokeWeight: 2,
-                map: map,
-                editable: false,
-                draggable: false
-            });
-            path.forEach(latlng => bounds.extend(latlng));
-            hasGeofence = true;
-        } else if (gf.shape_type === 'rectangle') {
-            const rectBounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
-                new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
-            );
-            overlay = new google.maps.Rectangle({
-                bounds: rectBounds,
-                fillColor: "#FF0000",
-                fillOpacity: 0.2,
-                strokeColor: "#FF0000",
-                strokeWeight: 2,
-                map: map,
-                editable: false,
-                draggable: false
-            });
-            bounds.union(rectBounds);
-            hasGeofence = true;
-        }
-
-        if (overlay) {
-            gf.mapOverlay = overlay;
-            google.maps.event.addListener(overlay, 'click', () => {
-                zoomToGeofence(gf);
-            });
-        }
-    });
-
-    if (hasGeofence && !bounds.isEmpty()) {
-        map.fitBounds(bounds);
-    }
 }
 
 function zoomToGeofence(geofence) {
