@@ -102,7 +102,13 @@ report_configs = {
         'fields': ["date_time", "odometer", "speed", "latitude", "longitude"],
         'query': {"gps": "A"},
         'sheet_name': "Daily Report"
-    }
+    },
+    'panic': {
+        'collection': 'sos_logs',
+        'fileds': ['all', 'all'],
+        'query': ['this is a placeholder, and am to lazy to remove this'],
+        'sheet_name': 'Panic Report'
+    },
 }
 
 def safe_geocode(lat, lng):
