@@ -130,6 +130,14 @@
     color: #fff;
 }
 
+.saved-geofence{
+    border-top: 1px dashed #999;
+}
+
+.dark-mode .saved-geofence{
+    border-top: 1px dashed #666;
+}
+
 .switch-label {
     display: flex;
     align-items: center;
