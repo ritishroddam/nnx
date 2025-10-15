@@ -2,6 +2,7 @@ from flask import render_template, Blueprint, request, jsonify, send_file, Respo
 import json
 from datetime import datetime, timedelta
 from datetime import timezone as timeZ
+from numpy import record
 from pymongo import ASCENDING, DESCENDING
 import pandas as pd
 import pytz
@@ -279,6 +280,39 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
         except ValueError as e:
             raise ValueError(f"Invalid custom date range: {str(e)}")
     return {}
+
+
+def process_panic_report(imei, vehicle_number, date_filter):
+    try:
+        projection = {'_id': 0}
+
+        query = {'imei': imei}
+        query.update(date_filter or {})
+
+        data = list(db['sos_logs'].find(
+            query, projection,
+        ).sort('date_time', -1))
+
+        if not data:
+            return None
+
+        records = []
+        for datum in data:
+            if datum['latitude'] or datum not in ['', "", None]:
+                location = geocodeInternal(float(datum['latitude']), float(datum['longitude']))
+                records = {
+                    "Vehicle Number": vehicle_number,
+                    "Latitude & Longitude": f'{datum['latitude']}, {datum['longitude']}',
+                    "DATE & TIME": datum['date_time'].astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                    "LOCATION": location
+                }
+                records.append(record)
+        if not records:
+            return None
+        return pd.DataFrame(records)
+    except Exception as e:
+        print("[DEBUG] Error generating Idle Report: ", e)
+        return e
 
 def process_idle_report(imei, vehicle_number, date_filter):
     try:
@@ -830,7 +864,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 raise ValueError(f"Invalid report type: {report_type}")
             
             post_process = None
-            
+                    
             if report_type == "daily":
                 for idx, imei in enumerate(imeis):
                     vdoc = imei_to_plate.get(imei, {})
@@ -868,6 +902,27 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 final_df = final_df[existing]
                 data_records = final_df.fillna("").to_dict(orient="records")
                 return data_records
+            
+            elif report_type == 'panic':
+                for idx, imei in enumerate(imeis):
+                    vehicle = imei_to_plate.get(imei, "")
+                    
+                    if vehicle:
+                        license_plate = vehicle["LicensePlateNumber"]
+                    else:
+                        license_plate = ""
+                        
+                    dfs = process_panic_report(imei, license_plate, date_filter)
+                    
+                    if isinstance(dfs, Exception):
+                        raise dfs
+                    
+                    if dfs is None or dfs.empty:
+                        report_progress(((idx + 1) / total) * 100)
+                        continue
+                    
+                    all_dfs.append(dfs)
+                    report_progress(((idx + 1) / total) * 100)
             
             elif report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
@@ -1038,6 +1093,8 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 ])
             elif report_type == 'distance-speed-range':
                 all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
+            elif report_type == 'panic':
+                all_possible_columns.extend(["Latitude & Longitude", "DATE & TIME", "LOCATION"])
             else:
                 if report_type == 'daily-distance':
                     all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
@@ -1090,7 +1147,11 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             df = df[existing]
             data_records = df.fillna("").to_dict(orient="records")
             return data_records
-        
+        elif report_type == 'panic':
+            df = process_panic_report(imei, license_plate, date_filter)
+            
+            if isinstance(df, Exception):
+                raise df
         elif report_type == "odometer-daily-distance":
             df = process_distance_report(imei, license_plate, date_filter)
             
@@ -1152,6 +1213,8 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             ])
         elif report_type == 'distance-speed-range':
             all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
+        elif report_type == 'panic':
+            all_possible_columns.extend(["Latitude & Longitude", "DATE & TIME", "LOCATION"])
         else:
             if report_type == 'daily-distance':
                 all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
