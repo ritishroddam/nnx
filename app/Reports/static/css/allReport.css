@@ -907,7 +907,7 @@ input[type="datetime-local"] {
   box-shadow: 0 0 10px #cccccc90;
 }
 
-.badge {
+.statusBadge {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 12px;

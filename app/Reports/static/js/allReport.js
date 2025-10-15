@@ -313,8 +313,8 @@ function renderRecentReports(reports){
         </div>`;
     } else {
       const statusBadge = isFail
-        ? '<span class="badge badge-fail">Failed</span>'
-        : '<span class="badge badge-progress">In&nbsp;progress</span>';
+        ? '<span class="statusBadge badge-fail">Failed</span>'
+        : '<span class="statusBadge badge-progress">In&nbsp;progress</span>';
 
       const progressBar = isProgress ? `
         <div class="progress-wrap">
