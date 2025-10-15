@@ -129,7 +129,21 @@ def format_duration_hms(total_seconds):
         return " ".join(parts)
     except Exception:
         return "0 s"
-    
+
+def _update_report(report_id, fields):
+    db['generated_reports'].update_one({'_id': ObjectId(report_id)}, {'$set': {**fields, 'updated_at': datetime.now(timeZ.utc)}})
+
+def _extract_range(date_filter):
+    start_dt_utc = end_dt_utc = None
+    if isinstance(date_filter, dict):
+        dt_part = date_filter.get('date_time') or {}
+        if isinstance(dt_part, dict):
+            start_dt_utc = dt_part.get('$gte')
+            end_dt_utc = dt_part.get('$lte') or dt_part.get('$lt')
+    if start_dt_utc and not end_dt_utc:
+        end_dt_utc = datetime.now(timeZ.utc)
+    return start_dt_utc, end_dt_utc
+
 def save_and_return_report(output, report_type, vehicle_number, override_user_id, date_filter=None):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     user_id = override_user_id
@@ -1114,17 +1128,67 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
 
 @celery_app.task(bind=True)
 def generate_report_task(self, params):
-    self.update_state(state="STARTED", meta={"progress": 5})
-    report_type = params["report_type"]
-    vehicle_number = params["vehicle_number"]
-    claims = params["claims"]
-    date_filter = params.get("date_filter") or {}
-    user_id = params["user_id"]
+    def bump(progress):
+        try:
+            _update_report(params["report_id"], {'progress': progress, 'status': 'IN_PROGRESS'})
+        except Exception:
+            pass
+        self.update_state(state="STARTED", meta={"progress": progress})
 
-    rows = _build_report_sync(report_type, vehicle_number, date_filter, claims)
-    save_and_return_report(rows, report_type, vehicle_number, user_id, date_filter)
-    self.update_state(state="SUCCESS", meta={"rows": len(rows)})
-    return {"rows": len(rows)}
+    try:
+        bump(5)
+        report_type = params["report_type"]
+        vehicle_number = params["vehicle_number"]
+        claims = params["claims"]
+        date_filter = params.get("date_filter") or {}
+        user_id = params["user_id"]
+        report_id = params["report_id"]
+
+        rows = _build_report_sync(report_type, vehicle_number, date_filter, claims)
+        bump(60)
+
+        start_dt_utc, end_dt_utc = _extract_range(date_filter)
+        base_vehicle = vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'
+        start_str = start_dt_utc.astimezone(IST).strftime('%d-%b-%Y_%H-%M-%S') if isinstance(start_dt_utc, datetime) else "NA"
+        end_str = end_dt_utc.astimezone(IST).strftime('%d-%b-%Y_%H-%M-%S') if isinstance(end_dt_utc, datetime) else "NA"
+        if start_str != "NA" or end_str != "NA":
+            report_filename = f"{report_type}_report_{base_vehicle}_{start_str}_to_{end_str}.json"
+        else:
+            report_filename = f"{report_type}_report_{base_vehicle}.json"
+        remote_path = f"reports/{user_id}/{report_filename}"
+
+        payload_bytes = json.dumps({"data": rows}, ensure_ascii=False, default=str).encode('utf-8')
+        size_bytes = len(payload_bytes)
+        buf = BytesIO(payload_bytes); buf.seek(0)
+        s3.upload_fileobj(buf, SPACE_NAME, remote_path)
+        buf.close()
+        bump(90)
+
+        # 3) Mark success and store metadata
+        _update_report(report_id, {
+            'status': 'SUCCESS',
+            'progress': 100,
+            'generated_at': datetime.now(pytz.UTC),
+            'filename': report_filename,
+            'path': remote_path,
+            'size': size_bytes,
+            'range_start_utc': start_dt_utc,
+            'range_end_utc': end_dt_utc
+        })
+        self.update_state(state="SUCCESS", meta={"rows": len(rows)})
+        return {"rows": len(rows)}
+
+    except Exception as e:
+        try:
+            _update_report(params.get("report_id"), {
+                'status': 'FAILURE',
+                'progress': 100,
+                'generated_at': datetime.now(pytz.UTC),
+                'error_message': str(e)[:500]
+            })
+        except Exception:
+            pass
+        raise
 
 @reports_bp.route('/generate_report', methods=['POST'])
 @jwt_required()
@@ -1140,17 +1204,44 @@ def generate_report_async():
         return jsonify({"success": False, "message": "Missing reportType or vehicleNumber"}), 400
 
     date_filter = get_date_range_filter(date_range, from_date, to_date)
+    start_dt_utc, end_dt_utc = _extract_range(date_filter)
+
     claims = get_jwt()
     user_id = get_jwt_identity()
+
+    doc = {
+        'user_id': user_id,
+        'report_name': report_type.replace('-', ' ').title() + ' Report',
+        'report_type': report_type,
+        'vehicle_number': vehicle_number,
+        'status': 'IN_PROGRESS',
+        'progress': 0,
+        'created_at': datetime.now(pytz.UTC),
+        'updated_at': datetime.now(pytz.UTC),
+        'generated_at': None,
+        'size': 0,
+        'path': None,
+        'filename': None,
+        'range_start_utc': start_dt_utc,
+        'range_end_utc': end_dt_utc,
+        'task_id': None,
+        'error_message': None
+    }
+    result = db['generated_reports'].insert_one(doc)
+    report_id = str(result.inserted_id)
 
     task = generate_report_task.delay({
         "report_type": report_type,
         "vehicle_number": vehicle_number,
         "date_filter": date_filter,
         "claims": claims,
-        "user_id": user_id
+        "user_id": user_id,
+        "report_id": report_id
     })
-    return jsonify({"success": True, "task_id": task.id}), 202   
+    
+    _update_report(report_id, {'task_id': task.id})
+
+    return jsonify({"success": True, "task_id": task.id, "report_id": report_id}), 202
 
 @reports_bp.route('/report_status/<task_id>', methods=['GET'])
 @jwt_required()
@@ -1158,72 +1249,77 @@ def report_status(task_id):
     async_res = generate_report_task.AsyncResult(task_id)
     state = async_res.state
     info = async_res.info or {}
-    if state == "PENDING":
-        return jsonify({"state": state, "progress": 0})
-    if state == "STARTED":
-        return jsonify({"state": state, "progress": info.get("progress", 10)})
-    if state == "SUCCESS":
-        return jsonify({"state": state, "progress": 100, "rows": info.get("rows", 0)})
+    progress = 0
+    rec = db['generated_reports'].find_one({'task_id': task_id, 'user_id': get_jwt_identity()}, {'progress': 1, 'status': 1, '_id': 0})
+    if rec:
+        progress = rec.get('progress', 0)
+        if rec.get('status') == 'SUCCESS':
+            state = "SUCCESS"
+            progress = 100
+        elif rec.get('status') == 'FAILURE':
+            state = "FAILURE"
+            progress = 100
+    elif state in ("STARTED",):
+        progress = info.get("progress", 10)
+    elif state == "SUCCESS":
+        progress = 100
+
+    resp = {"state": state, "progress": progress}
     if state == "FAILURE":
-        return jsonify({"state": state, "progress": 100, "error": str(info)})
-    return jsonify({"state": state})
+        resp["error"] = str(info)
+    return jsonify(resp)
     
 @reports_bp.route('/get_recent_reports', methods=['GET'])
 @jwt_required()
 def get_recent_reports():
     try:
         date_range = request.args.get('range', 'today')
-        
         now = datetime.now(timeZ.utc)
-        
         if date_range == 'today':
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = None
         elif date_range == 'last24hours':
-            start_date = now - timedelta(hours=24)
+            start_date = now - timedelta(hours=24); end_date = None
         elif date_range == 'yesterday':
             start_date = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
             end_date = start_date + timedelta(hours=24)
         elif date_range == 'last7days':
-            start_date = now - timedelta(days=7)
+            start_date = now - timedelta(days=7); end_date = None
         elif date_range == 'last30days':
-            start_date = now - timedelta(days=30)
+            start_date = now - timedelta(days=30); end_date = None
         else:
-            start_date = now - timedelta(days=1)
-        
-        query = {
-            'user_id': get_jwt_identity(),
-            'generated_at': {'$gte': start_date}
-        }
-        
-        if date_range == 'yesterday':
-            query['generated_at']['$lt'] = end_date
-        
-        print(f"[DEBUG] Query: {query}")
-        
+            start_date = now - timedelta(days=1); end_date = None
+
+        q = {'user_id': get_jwt_identity(), 'created_at': {'$gte': start_date}}
+        if end_date:
+            q['created_at']['$lt'] = end_date
+
         reports = list(db['generated_reports'].find(
-            query,
+            q,
             {
-                '_id': 1, 
-                'report_name': 1, 
-                'generated_at': 1, 
-                'vehicle_number': 1, 
-                'size': 1,
-                'range_start_utc': 1,
-                'range_end_utc': 1
+                '_id': 1, 'report_name': 1, 'report_type': 1, 'vehicle_number': 1,
+                'size': 1, 'generated_at': 1, 'created_at': 1, 'status': 1, 'progress': 1,
+                'range_start_utc': 1, 'range_end_utc': 1, 'task_id': 1, 'error_message': 1
             }
-        ).sort('generated_at', -1).limit(50))
-        
+        ).sort([('updated_at', -1), ('created_at', -1)]).limit(50))
+
         return jsonify({
             'success': True,
             'reports': [{
-                '_id': str(report['_id']),
-                'report_name': report['report_name'],
-                'generated_at': report['generated_at'].isoformat(),
-                'size': report.get('size', 0),
-                'vehicle_number': report.get('vehicle_number', ''),
-                'range_start_utc': report.get('range_start_utc', ''),
-                'range_end_utc': report.get('range_end_utc', ''),
-            } for report in reports]
+                '_id': str(r['_id']),
+                'report_name': r.get('report_name', ''),
+                'report_type': r.get('report_type', ''),
+                'vehicle_number': r.get('vehicle_number', ''),
+                'size': r.get('size', 0),
+                'generated_at': r.get('generated_at').isoformat() if r.get('generated_at') else None,
+                'created_at': r.get('created_at').isoformat() if r.get('created_at') else None,
+                'status': r.get('status', 'IN_PROGRESS'),
+                'progress': r.get('progress', 0),
+                'range_start_utc': r.get('range_start_utc'),
+                'range_end_utc': r.get('range_end_utc'),
+                'task_id': r.get('task_id'),
+                'error_message': r.get('error_message')
+            } for r in reports]
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -1232,7 +1328,6 @@ def get_recent_reports():
 @jwt_required()
 def download_report(report_id):
     try:
-        # Fetch report metadata from the database
         report = db['generated_reports'].find_one({
             '_id': ObjectId(report_id),
             'user_id': get_jwt_identity()
@@ -1241,26 +1336,22 @@ def download_report(report_id):
         if not report:
             return jsonify({'success': False, 'message': 'Report not found'}), 404
 
-        # Construct the full path for the file in DigitalOcean Spaces
         file_path = report['path'] 
 
         output = BytesIO()
         s3.download_fileobj(SPACE_NAME, file_path, output)
         output.seek(0)
-        # Read the JSON data from the output buffer
 
         output.seek(0)
         json_data = json.load(output)
         data = json_data.get("data", [])
 
-        # Create a DataFrame and write to Excel in memory
         df = pd.DataFrame(data)
         excel_buffer = BytesIO()
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Report')
         excel_buffer.seek(0)
 
-        # Replace output with the Excel buffer for sending
         xlsx_name = os.path.splitext(report['filename'])[0] + '.xlsx'
 
         return send_file(

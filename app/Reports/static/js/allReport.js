@@ -11,6 +11,8 @@ const REPORT_TITLE_MAP = {
 
 const MAX_CUSTOM_RANGE_MS = 30 * 24 * 60 * 60 * 1000;
 
+let recentPollTimer = null;
+
 function toAmPm(dtStr){
   if(!dtStr) return '';
   const d = new Date(dtStr);
@@ -256,35 +258,92 @@ function loadRecentReports(range){
   fetch(`/reports/get_recent_reports?range=${range}`)
     .then(r=>r.json())
     .then(d=>{
-      if(d.success&&d.reports.length)renderRecentReports(d.reports);
-      else document.getElementById('recentReportsList').innerHTML='<p>Your generated reports will be visible here.</p>';
+      if(d.success){
+        renderRecentReports(d.reports || []);
+        const hasInProgress = (d.reports || []).some(r => r.status === 'IN_PROGRESS');
+        if (hasInProgress && !recentPollTimer) {
+          recentPollTimer = setInterval(()=>{
+            const current = document.getElementById('reportDateRange')?.value || 'today';
+            loadRecentReports(current);
+          }, 2000);
+        } else if (!hasInProgress && recentPollTimer){
+          clearInterval(recentPollTimer); recentPollTimer = null;
+        }
+      } else {
+        document.getElementById('recentReportsList').innerHTML='<p>Your generated reports will be visible here.</p>';
+      }
     });
 }
 
 function renderRecentReports(reports){
   const c=document.getElementById('recentReportsList');
   c.innerHTML='';
+  if(!reports.length){
+    c.innerHTML = '<p class="no-reports">No reports found for selected range.</p>';
+    return;
+  }
+
+  function fmt(dt){ return dt ? new Date(dt).toLocaleString() : '—'; }
+  function kb(size){ return typeof size==='number' && size>0 ? (size/1024).toFixed(1)+' KB' : '—'; }
+
   reports.forEach(r=>{
-    const div=document.createElement('div');
-    div.className='report-item';
-    div.innerHTML=`
-      <div class="report-info report-open" data-id="${r._id}">
-        <div class="report-name">${r.report_name}</div><br>
-        <div class="report-meta">
-          <span><b>Vehicle:</b><br> ${r.vehicle_number}</span>
-          <span><b>Size:</b><br> ${(r.size/1024).toFixed(1)} KB</span>
-          <span><b>Date Range:</b><br>
-            <span><b>From:</b><br> ${new Date(r.range_start_utc).toLocaleString()}</span><br>
-            <span><b>To:</b><br> ${new Date(r.range_end_utc).toLocaleString()}</span>
-          </span>
-          <span><b>Generated Time:</b><br> ${formatTimeAgo(new Date(r.generated_at))}</span>
+    const isSuccess = r.status === 'SUCCESS';
+    const isFail = r.status === 'FAILURE';
+    const isProgress = r.status === 'IN_PROGRESS';
+
+    const div = document.createElement('div');
+    div.className = 'report-item' + (isProgress?' in-progress':'') + (isFail?' failed':'');
+
+    if (isSuccess) {
+      div.innerHTML = `
+        <div class="report-info report-open" data-id="${r._id}">
+          <div class="report-name">${r.report_name}</div><br>
+          <div class="report-meta">
+            <span><b>Vehicle:</b><br> ${r.vehicle_number || '—'}</span>
+            <span><b>Size:</b><br> ${kb(r.size)}</span>
+            <span><b>Date Range:</b><br>
+              <span><b>From:</b><br> ${fmt(r.range_start_utc)}</span><br>
+              <span><b>To:</b><br> ${fmt(r.range_end_utc)}</span>
+            </span>
+            <span><b>Generated Time:</b><br> ${r.generated_at ? formatTimeAgo(new Date(r.generated_at)) : '—'}</span>
+          </div>
         </div>
-      </div>
-      <div class="report-actions">
-        <button title="Download" onclick="downloadReport('${r._id}')"><i class="fas fa-download"></i></button>
-      </div>`;
+        <div class="report-actions">
+          <button title="Download" onclick="downloadReport('${r._id}')"><i class="fas fa-download"></i></button>
+        </div>`;
+    } else {
+      const statusBadge = isFail
+        ? '<span class="badge badge-fail">Failed</span>'
+        : '<span class="badge badge-progress">In&nbsp;progress</span>';
+
+      const progressBar = isProgress ? `
+        <div class="progress-wrap">
+          <div class="progress-bar" style="width:${Math.max(5, r.progress||0)}%"></div>
+          <span class="progress-text">${r.progress||0}%</span>
+        </div>` : '';
+
+      const err = isFail && r.error_message
+        ? `<div class="error-text" title="${r.error_message}">${r.error_message}</div>` : '';
+
+      div.innerHTML = `
+        <div class="report-info">
+          <div class="report-name">${r.report_name}</div>
+          <div class="report-meta">
+            <span><b>Status:</b> ${statusBadge}</span>
+            <span><b>Vehicle:</b> ${r.vehicle_number || '—'}</span>
+            <span><b>Size:</b> ${kb(r.size)}</span>
+            <span><b>From:</b> ${fmt(r.range_start_utc)}</span>
+            <span><b>To:</b> ${fmt(r.range_end_utc)}</span>
+            ${r.created_at ? `<span><b>Created:</b> ${formatTimeAgo(new Date(r.created_at))}</span>` : ''}
+          </div>
+          ${progressBar}
+          ${err}
+        </div>`;
+    }
+
     c.appendChild(div);
   });
+
   c.querySelectorAll('.report-open').forEach(el=>{
     el.addEventListener('click',()=>openStoredReport(el.dataset.id));
   });
@@ -422,6 +481,22 @@ function toggleCustomDateRange(val){
 document.addEventListener('DOMContentLoaded',()=>{
   applySelectize();
 
+  function bindReportRangeChange(){
+    const sel = document.getElementById('reportDateRange');
+    const inst = window.jQuery && $('#reportDateRange')[0] ? $('#reportDateRange')[0].selectize : null;
+
+    if (inst && !bindReportRangeChange._boundToSelectize) {
+      inst.on('change', (val)=> loadRecentReports(val || 'today'));
+      bindReportRangeChange._boundToSelectize = true;
+    }
+
+    if (sel && !bindReportRangeChange._boundToNative) {
+      sel.addEventListener('change', function(){ loadRecentReports(this.value || 'today'); });
+      bindReportRangeChange._boundToNative = true;
+    }
+  }
+  bindReportRangeChange();
+
   const toggleEl = document.getElementById('reportsToggle');
   if (toggleEl) {
     const genOpt = toggleEl.querySelector('.generate-option');
@@ -438,6 +513,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       genView.classList.toggle('active', !isRecent);
       recView.classList.toggle('active', isRecent);
       if (isRecent) {
+        // Rebind in case Selectize got initialized after DOMContentLoaded
+        bindReportRangeChange();
         const range = (document.getElementById('reportDateRange')?.value) || 'today';
         loadRecentReports(range);
       }
@@ -517,9 +594,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('reportModal').style.display='none';
   }));
 
-  document.getElementById('reportDateRange').addEventListener('change',function(){
-    loadRecentReports(this.value);
-  });
+  loadRecentReports('today');
 });
 
 function createReportCard(report) {
