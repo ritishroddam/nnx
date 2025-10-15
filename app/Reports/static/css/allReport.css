@@ -77,7 +77,10 @@
   --badge-success-border: #62936d; 
 
   /* Light-mode shimmer (slightly darker stripe) */
-  --shimmer-stripe: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.08), rgba(0,0,0,0));
+  --shimmer-stripe: linear-gradient(90deg,
+    rgba(0,0,0,0),
+    rgba(0,0,0,0.08),
+    rgba(0,0,0,0));
 }
 
 .dark-mode {
@@ -92,14 +95,10 @@
   --badge-success-border: #0b6f24; 
 
   /* Dark-mode shimmer (lighter stripe) */
-  --shimmer-stripe: linear-gradient(
-    90deg,
-  #ccc 0%,
-  #e0e0e0 25%,
-  #ffffff 50%,
-  #e0e0e0 75%,
-  #ccc 100%
-  );
+  --shimmer-stripe: linear-gradient(90deg,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0.22),
+    rgba(255,255,255,0));
 }
 
 .reports-view { display: none; }
@@ -951,7 +950,6 @@ input[type="datetime-local"] {
 .report-item.in-progress {
   position: relative; 
   overflow: hidden;
-  background: #8883
 }
 
 .report-item.in-progress::after {
@@ -962,7 +960,6 @@ input[type="datetime-local"] {
   transform: translateX(-100%);
   animation: shimmer 1.1s linear infinite;
   pointer-events: none;
-  mix-blend-mode: multiply; /* keeps text readable */
 }
 
 @keyframes shimmer { to { transform: translateX(100%); } }
