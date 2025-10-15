@@ -282,68 +282,47 @@ function renderRecentReports(reports){
     c.innerHTML = '<p class="no-reports">No reports found for selected range.</p>';
     return;
   }
-
-  function fmt(dt){ return dt ? new Date(dt).toLocaleString() : '—'; }
-  function kb(size){ return typeof size==='number' && size>0 ? (size/1024).toFixed(1)+' KB' : '—'; }
-
   reports.forEach(r=>{
     const isSuccess = r.status === 'SUCCESS';
     const isFail = r.status === 'FAILURE';
     const isProgress = r.status === 'IN_PROGRESS';
+    const sizeKB = r.size ? (r.size/1024).toFixed(1)+' KB' : '—';
+    const genTime = r.generated_at ? new Date(r.generated_at) : (r.created_at ? new Date(r.created_at) : null);
+    const fromStr = r.range_start_utc ? new Date(r.range_start_utc).toLocaleString() : '—';
+    const toStr = r.range_end_utc ? new Date(r.range_end_utc).toLocaleString() : '—';
+    const statusBadge = isSuccess ? '<span class="statusBadge badge-success">Ready</span>' :
+                         isFail ? '<span class="statusBadge badge-fail">Failed</span>' :
+                         `<span class="statusBadge badge-progress">In&nbsp;progress</span>`;
 
-    const div = document.createElement('div');
-    div.className = 'report-item' + (isProgress?' in-progress':'') + (isFail?' failed':'');
+    const progressBar = isProgress ? `
+      <div class="progress-wrap">
+        <div class="progress-bar" style="width:${Math.max(5, r.progress||0)}%"></div>
+        <span class="progress-text">${r.progress||0}%</span>
+      </div>` : '';
 
-    if (isSuccess) {
-      div.innerHTML = `
-        <div class="report-info report-open" data-id="${r._id}">
-          <div class="report-name">${r.report_name}</div><br>
-          <div class="report-meta">
-            <span><b>Vehicle:</b><br> ${r.vehicle_number || '—'}</span>
-            <span><b>Size:</b><br> ${kb(r.size)}</span>
-            <span><b>Date Range:</b><br>
-              <span><b>From:</b><br> ${fmt(r.range_start_utc)}</span><br>
-              <span><b>To:</b><br> ${fmt(r.range_end_utc)}</span>
-            </span>
-            <span><b>Generated Time:</b><br> ${r.generated_at ? formatTimeAgo(new Date(r.generated_at)) : '—'}</span>
-          </div>
+    const err = isFail && r.error_message ? `<div class="error-text" title="${r.error_message}">${r.error_message}</div>` : '';
+
+    const div=document.createElement('div');
+    div.className='report-item'+(isProgress?' in-progress':'')+(isFail?' failed':'');
+    div.innerHTML=`
+      <div class="report-info ${isSuccess ? 'report-open' : ''}" ${isSuccess ? `data-id="${r._id}"` : ''}>
+        <div class="report-name">${r.report_name}</div>
+        <div class="report-meta">
+          <span><b>Status:</b> ${statusBadge}</span>
+          <span><b>Vehicle:</b> ${r.vehicle_number || '—'}</span>
+          <span><b>Size:</b> ${sizeKB}</span>
+          <span><b>From:</b> ${fromStr}</span>
+          <span><b>To:</b> ${toStr}</span>
+          ${genTime ? `<span><b>${isSuccess?'Generated':'Created'}:</b> ${formatTimeAgo(genTime)}</span>` : ''}
         </div>
-        <div class="report-actions">
-          <button title="Download" onclick="downloadReport('${r._id}')"><i class="fas fa-download"></i></button>
-        </div>`;
-    } else {
-      const statusBadge = isFail
-        ? '<span class="statusBadge badge-fail">Failed</span>'
-        : '<span class="statusBadge badge-progress">In&nbsp;progress</span>';
-
-      const progressBar = isProgress ? `
-        <div class="progress-wrap">
-          <div class="progress-bar" style="width:${Math.max(5, r.progress||0)}%"></div>
-          <span class="progress-text">${r.progress||0}%</span>
-        </div>` : '';
-
-      const err = isFail && r.error_message
-        ? `<div class="error-text" title="${r.error_message}">${r.error_message}</div>` : '';
-
-      div.innerHTML = `
-        <div class="report-info">
-          <div class="report-name">${r.report_name}</div>
-          <div class="report-meta">
-            <span><b>Status:</b> ${statusBadge}</span>
-            <span><b>Vehicle:</b> ${r.vehicle_number || '—'}</span>
-            <span><b>Size:</b> ${kb(r.size)}</span>
-            <span><b>From:</b> ${fmt(r.range_start_utc)}</span>
-            <span><b>To:</b> ${fmt(r.range_end_utc)}</span>
-            ${r.created_at ? `<span><b>Created:</b> ${formatTimeAgo(new Date(r.created_at))}</span>` : ''}
-          </div>
-          ${progressBar}
-          ${err}
-        </div>`;
-    }
-
+        ${progressBar}
+        ${err}
+      </div>
+      <div class="report-actions">
+        <button title="Download" ${isSuccess?'':'disabled'} onclick="downloadReport('${r._id}')"><i class="fas fa-download"></i></button>
+      </div>`;
     c.appendChild(div);
   });
-
   c.querySelectorAll('.report-open').forEach(el=>{
     el.addEventListener('click',()=>openStoredReport(el.dataset.id));
   });
