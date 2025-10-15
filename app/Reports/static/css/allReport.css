@@ -1014,12 +1014,6 @@ input[type="datetime-local"] {
 
 .report-item:hover {
   transform: scale(1.02);
-  background-color: #f7f7f7;
-}
-
-.dark-mode .report-item:hover {
-  background-color: #111;
-  color: #fff;
 }
 
 @media (max-width: 500px) {
