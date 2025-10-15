@@ -807,7 +807,15 @@ REPORT_PROCESSORS = {
 }   
 
 def _build_report_sync(report_type, vehicle_number, date_filter, claims):
+    def report_progress(pct):
+        try:
+            if on_progress:
+                on_progress(max(0, min(100, int(pct))))
+        except Exception:
+            pass
+        
     try:
+        report_progress(0)
         rows = []
         
         if vehicle_number == "all":
@@ -815,6 +823,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
 
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
+            total = max(1, len(imeis))
             all_dfs = []
 
             if report_type not in report_configs:
@@ -840,6 +849,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                         }])
                         all_dfs.append(sep_df)
                     all_dfs.append(df)
+                    report_progress(((idx + 1) / total) * 100)
                 if not all_dfs:
                     return rows
                 final_df = pd.concat(all_dfs, ignore_index=True)
@@ -869,6 +879,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                     if df is None or df.empty:
                         continue
                     all_dfs.append(df)
+                    report_progress(((idx + 1) / total) * 100)
                     
             elif report_type in ("stoppage", "idle", "ignition"):
                 config = report_configs[report_type]
@@ -909,6 +920,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                                 }])
                         all_dfs.append(sep_dict)
                     all_dfs.append(df)
+                    report_progress(((idx + 1) / total) * 100)
                     
             elif report_type == "distance-speed-range":
                 config = report_configs[report_type]
@@ -939,6 +951,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                             }])
                         all_dfs.append(sep_dict)
                     all_dfs.append(df)
+                    report_progress(((idx + 1) / total) * 100)
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
@@ -982,6 +995,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
                             sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
                             all_dfs.append(processed)
+                        report_progress(((idx + 1) / total) * 100)
 
             if not all_dfs:
                 return rows
@@ -1018,6 +1032,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
             if 'speed' in existing_columns:
                 ordered_data = add_speed_metrics(ordered_data)
 
+            report_progress(100)
             return ordered_data
 
         # Single vehicle
@@ -1120,6 +1135,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims):
         if 'speed' in existing_columns:
             ordered_data = add_speed_metrics(ordered_data)
 
+        report_progress(100)
         return ordered_data
 
     except Exception as e:
@@ -1143,9 +1159,12 @@ def generate_report_task(self, params):
         date_filter = params.get("date_filter") or {}
         user_id = params["user_id"]
         report_id = params["report_id"]
+        
+        def within(start, end):
+            span = max(1, end - start)
+            return lambda pct: bump(int(start + (span * (max(0, min(100, int(pct)))) / 100)))
 
-        rows = _build_report_sync(report_type, vehicle_number, date_filter, claims)
-        bump(60)
+        rows = _build_report_sync(report_type, vehicle_number, date_filter, claims, on_progress=within(5, 60))
 
         start_dt_utc, end_dt_utc = _extract_range(date_filter)
         base_vehicle = vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'
