@@ -836,6 +836,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     vdoc = imei_to_plate.get(imei, {})
                     df = process_daily_report(imei, vdoc, date_filter)
                     if df is None or df.empty:
+                        report_progress(((idx + 1) / total) * 100)
                         continue
                     # separator after first
                     if idx > 0:
@@ -867,7 +868,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             elif report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
                 fields = config['fields']
-                for imei in imeis:
+                for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
                     
                     if vehicle:
@@ -877,6 +878,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     
                     df = process_distance_report(imei, license_plate, date_filter)
                     if df is None or df.empty:
+                        report_progress(((idx + 1) / total) * 100)
                         continue
                     all_dfs.append(df)
                     report_progress(((idx + 1) / total) * 100)
@@ -897,6 +899,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     df = func(imei, license_plate, date_filter)
 
                     if df is None or not isinstance(df, pd.DataFrame) or df.empty:
+                        report_progress(((idx + 1) / total) * 100)
                         continue
                     
                     if idx > 0:
@@ -939,6 +942,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     df = func(imei, vehicle, date_filter)
                     
                     if not isinstance(df, pd.DataFrame) or df.empty:
+                        report_progress(((idx + 1) / total) * 100)
                         continue
                     
                     if idx > 0:
@@ -961,7 +965,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 
                 docs = []
                 
-                for imei in imeis:
+                for idx, imei in enumerate(imeis):
                     records = getData(imei, date_filter, projection)
                     print(f"[DEBUG] [process_df] Starting Location column block")
                     for record in records:
@@ -974,6 +978,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                         record['Location'] = location
                         
                         docs.append(record)
+                    report_progress((((idx + 1)/2) / total) * 100)
                     print(f"[DEBUG] [process_df] Location column block has finished executing")
                 df = pd.DataFrame(docs)
 
