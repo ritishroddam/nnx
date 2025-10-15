@@ -806,7 +806,7 @@ REPORT_PROCESSORS = {
     "distance-speed-range": process_speed_report,
 }   
 
-def _build_report_sync(report_type, vehicle_number, date_filter, claims):
+def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_progress=None):
     def report_progress(pct):
         try:
             if on_progress:
