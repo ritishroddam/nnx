@@ -827,7 +827,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             all_dfs = []
 
             if report_type not in report_configs:
-                return jsonify({"success": False, "message": "Invalid report type"}), 400
+                raise ValueError(f"Invalid report type: {report_type}")
             
             post_process = None
             
@@ -835,6 +835,10 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 for idx, imei in enumerate(imeis):
                     vdoc = imei_to_plate.get(imei, {})
                     df = process_daily_report(imei, vdoc, date_filter)
+                    
+                    if isinstance(df, Exception):
+                        raise df
+                    
                     if df is None or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
@@ -852,7 +856,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     all_dfs.append(df)
                     report_progress(((idx + 1) / total) * 100)
                 if not all_dfs:
-                    return rows
+                    raise ValueError(f"No Data Found")
                 final_df = pd.concat(all_dfs, ignore_index=True)
                 desired_cols = [
                     "Vehicle Number","Date","First Ignition On","Odometer Start","Start Location",
@@ -877,6 +881,10 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                         license_plate = ""
                     
                     df = process_distance_report(imei, license_plate, date_filter)
+                    
+                    if isinstance(df, Exception):
+                        raise df
+                    
                     if df is None or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
@@ -897,6 +905,9 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     func = REPORT_PROCESSORS.get(report_type)
                     
                     df = func(imei, license_plate, date_filter)
+                    
+                    if isinstance(df, Exception):
+                        raise df
 
                     if df is None or not isinstance(df, pd.DataFrame) or df.empty:
                         report_progress(((idx + 1) / total) * 100)
@@ -940,6 +951,9 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     func = REPORT_PROCESSORS.get(report_type)
                     
                     df = func(imei, vehicle, date_filter)
+                    
+                    if isinstance(df, Exception):
+                        raise df
                     
                     if not isinstance(df, pd.DataFrame) or df.empty:
                         report_progress(((idx + 1) / total) * 100)
@@ -994,6 +1008,10 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                         group = group.drop(columns=["imei"])
 
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+                        
+                        if isinstance(processed, Exception):
+                            raise df
+                        
                         print(report_type)
                         if processed is not None:
                             sep_dict = OrderedDict((col, "" ) for col in processed.columns)
@@ -1003,7 +1021,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                         report_progress(((idx + 1) / total) * 100)
 
             if not all_dfs:
-                return rows
+                raise ValueError(f"No Data Found")
 
             final_df = pd.concat(all_dfs, ignore_index=True)
 
@@ -1045,20 +1063,23 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             {"LicensePlateNumber": vehicle_number}
         )
         if not vehicle:
-            return []
+            raise ValueError(f"Invalid Vehicle: {vehicle_number}")
 
         imei = vehicle["IMEI"]
         license_plate = vehicle["LicensePlateNumber"]
 
         if report_type not in report_configs:
-            return []
+            raise ValueError(f"Invalid report type: {report_type}")
         
         post_process = None
         
         if report_type == "daily":
             df = process_daily_report(imei, vehicle, date_filter)
+            if isinstance(df, Exception):
+                raise df
+            
             if df is None or df.empty:
-                return []
+                raise ValueError(f"No Data Found")
             desired_cols = [
                 "Vehicle Number","Date","First Ignition On","Odometer Start","Start Location",
                 "Last Ignition Off","Odometer End","Stop Location","Avg Speed","Max Speed",
@@ -1073,15 +1094,23 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
         elif report_type == "odometer-daily-distance":
             df = process_distance_report(imei, license_plate, date_filter)
             
+            if isinstance(df, Exception):
+                raise df
         elif report_type in ("stoppage", "idle", "ignition"):
             func = REPORT_PROCESSORS.get(report_type)
             df = func(imei, license_plate, date_filter)
+            
+            if isinstance(df, Exception):
+                raise df
+            
             if not isinstance(df, pd.DataFrame) or df.empty:
-                return []
+                raise ValueError(f"No Data Found")
         elif report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
                 df = process_speed_report(imei, vehicle, date_filter)
+                if isinstance(df, Exception):
+                    raise df
         else:
             config = report_configs[report_type]
             fields = config['fields']
@@ -1107,7 +1136,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
         
         if df is None or df.empty:
-            return []
+            raise ValueError(f"No Data Found")
 
         # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
@@ -1145,7 +1174,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
     except Exception as e:
         print(f"[DEBUG] _build_report_sync error: {e}")
-        return []
+        raise e
 
 @celery_app.task(bind=True)
 def generate_report_task(self, params):
