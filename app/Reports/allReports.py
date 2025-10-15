@@ -306,7 +306,7 @@ def process_panic_report(imei, vehicle_number, date_filter):
         for datum in data:
             if datum['latitude'] or datum['latitude'] not in ['', "", None]:
                 location = geocodeInternal(float(datum['latitude']), float(datum['longitude']))
-                records = {
+                record = {
                     "Vehicle Number": vehicle_number,
                     "Latitude & Longitude": f'{datum['latitude']}, {datum['longitude']}',
                     "DATE & TIME": datum['date_time'].astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
