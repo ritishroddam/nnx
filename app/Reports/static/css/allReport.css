@@ -86,7 +86,14 @@
   --badge-fail-border: #7a3b3b;
 
   /* Dark-mode shimmer (lighter stripe) */
-  --shimmer-stripe: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.18), rgba(255,255,255,0));
+  --shimmer-stripe: linear-gradient(
+    90deg,
+  #ccc 0%,
+  #e0e0e0 25%,
+  #ffffff 50%,
+  #e0e0e0 75%,
+  #ccc 100%
+  );
 }
 
 .reports-view { display: none; }
@@ -938,6 +945,7 @@ input[type="datetime-local"] {
 .report-item.in-progress {
   position: relative; 
   overflow: hidden;
+  background: #8883
 }
 
 .report-item.in-progress::after {
@@ -956,21 +964,35 @@ input[type="datetime-local"] {
 .progress-wrap {
   position: relative;
   height: 10px;
-  background: #e9f0ff;
+  background: #ccc;
   border-radius: 6px;
   margin-top: 8px;
 }
+
+.dark-mode .progress-wrap{
+  background: #333; 
+}
+
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #5aa3ff, #2e7cff);
+  background: linear-gradient(90deg, black, #201f1f);
   border-radius: 6px;
   transition: width .3s ease;
 }
+
+.dark-mode .progress-bar{
+  background: linear-gradient(90deg, #ccc, #cacaca);
+}
+
 .progress-text {
   font-size: 12px;
-  color: #1a5fb4;
+  color: black;
   margin-top: 6px;
   display: inline-block;
+}
+
+.dark-mode .progress-text{
+  color: #ccc;
 }
 
 .report-item.failed { 
