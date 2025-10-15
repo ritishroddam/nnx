@@ -1149,8 +1149,8 @@ def generate_report_task(self, params):
 
         start_dt_utc, end_dt_utc = _extract_range(date_filter)
         base_vehicle = vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'
-        start_str = start_dt_utc.astimezone(IST).strftime('%d-%b-%Y_%H-%M-%S') if isinstance(start_dt_utc, datetime) else "NA"
-        end_str = end_dt_utc.astimezone(IST).strftime('%d-%b-%Y_%H-%M-%S') if isinstance(end_dt_utc, datetime) else "NA"
+        start_str = start_dt_utc.astimezone(IST).strftime('%d-%b-%Y_%I:%M:%S %p') if isinstance(start_dt_utc, datetime) else "NA"
+        end_str = end_dt_utc.astimezone(IST).strftime('%d-%b-%Y_%I:%M:%S %p') if isinstance(end_dt_utc, datetime) else "NA"
         if start_str != "NA" or end_str != "NA":
             report_filename = f"{report_type}_report_{base_vehicle}_{start_str}_to_{end_str}.json"
         else:
