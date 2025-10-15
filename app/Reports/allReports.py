@@ -304,7 +304,7 @@ def process_panic_report(imei, vehicle_number, date_filter):
 
         records = []
         for datum in data:
-            if datum['latitude'] or datum not in ['', "", None]:
+            if datum['latitude'] or datum['latitude'] not in ['', "", None]:
                 location = geocodeInternal(float(datum['latitude']), float(datum['longitude']))
                 records = {
                     "Vehicle Number": vehicle_number,
