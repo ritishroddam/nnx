@@ -97,11 +97,14 @@
   text-align: center;
   font-size: 16px;
   font-weight: bold;
-  line-height: 50px;
   color: #555;
   z-index: 2;
   user-select: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .dark-mode .toggle-option {
@@ -121,7 +124,7 @@
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc(50% - 4px);
+  width: calc(50% - 8px);
   height: auto;
   background: black;
   border-radius: 21px;
