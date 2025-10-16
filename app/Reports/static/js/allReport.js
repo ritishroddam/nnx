@@ -337,59 +337,9 @@ function buildTable(rows){
 }
 
 function openPreview(title, rows){
-  // Set title
-  document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
-  // Remove any old pagination bar in header
-  document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
-  // Render pagination bar in header (next to title)
-  const header = document.querySelector('#reportPreviewModal .modal-header');
-  if (header && previewTotalRows > previewRowsPerPage) {
-    const bar = document.createElement('div');
-    bar.className = 'report-pagination-bar header';
-    bar.style.marginLeft = '24px';
-    bar.innerHTML = renderPreviewPaginationBar();
-    header.appendChild(bar);
-    attachPreviewPaginationEvents(bar);
-  }
-  // Render table
-  document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
-  document.getElementById('reportPreviewModal').style.display = 'block';
-}
-
-function renderPreviewPaginationBar() {
-  if (previewTotalRows <= previewRowsPerPage) return '';
-  const totalPages = Math.ceil(previewTotalRows / previewRowsPerPage);
-  return `
-    <button id="previewPrevPage" class="pagination-btn" ${previewCurrentPage === 1 ? 'disabled' : ''}>Previous</button>
-    <span style="margin:0 12px;">Page ${previewCurrentPage} of ${totalPages}</span>
-    <button id="previewNextPage" class="pagination-btn" ${previewCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
-    <span style="margin-left:16px;">Rows per page:</span>
-    <select id="previewRowsPerPage" class="pagination-select">
-      <option value="10" ${previewRowsPerPage==10?'selected':''}>10</option>
-      <option value="25" ${previewRowsPerPage==25?'selected':''}>25</option>
-      <option value="50" ${previewRowsPerPage==50?'selected':''}>50</option>
-      <option value="100" ${previewRowsPerPage==100?'selected':''}>100</option>
-    </select>
-    <span style="margin-left:16px;">Total: ${previewTotalRows}</span>
-  `;
-}
-
-function attachPreviewPaginationEvents(scope) {
-  if (!scope) scope = document;
-  const totalPages = Math.ceil(previewTotalRows / previewRowsPerPage);
-  const prevBtn = scope.querySelector('#previewPrevPage');
-  const nextBtn = scope.querySelector('#previewNextPage');
-  const rowsSel = scope.querySelector('#previewRowsPerPage');
-  if (prevBtn) prevBtn.onclick = function() {
-    if (previewCurrentPage > 1) loadReportPreviewPage(previewReportId, previewCurrentPage - 1, previewRowsPerPage);
-  };
-  if (nextBtn) nextBtn.onclick = function() {
-    if (previewCurrentPage < totalPages) loadReportPreviewPage(previewReportId, previewCurrentPage + 1, previewRowsPerPage);
-  };
-  if (rowsSel) rowsSel.onchange = function() {
-    previewRowsPerPage = parseInt(this.value);
-    loadReportPreviewPage(previewReportId, 1, previewRowsPerPage);
-  };
+  document.getElementById('reportPreviewModalTitle').textContent=title+' Preview';
+  document.getElementById('reportPreviewTableContainer').innerHTML=buildTable(rows);
+  document.getElementById('reportPreviewModal').style.display='block';
 }
 
 function queueReport(){
@@ -771,49 +721,3 @@ function loadFields() {
 document.getElementById("closePreviewModal").addEventListener("click", function () {
   document.getElementById("reportPreviewModal").style.display = "none";
 });
-
-let previewCurrentPage = 1;
-let previewRowsPerPage = 50;
-let previewTotalRows = 0;
-let previewReportId = null;
-
-// Update loadReportPreviewPage to NOT call renderPreviewPagination
-function loadReportPreviewPage(reportId, page, perPage) {
-  previewReportId = reportId;
-  previewCurrentPage = page;
-  previewRowsPerPage = perPage;
-  fetch(`/reports/view_report/${reportId}?page=${page}&per_page=${perPage}`, {
-    headers: {'X-CSRF-TOKEN': getCookie('csrf_access_token')}
-  })
-    .then(r => r.json())
-    .then(js => {
-      if (!js.success) {
-        displayFlashMessage(js.message || 'Unable to load report', 'danger');
-        return;
-      }
-      previewTotalRows = js.total || 0;
-      openPreview(js.metadata.report_name, js.data || []);
-      // renderPreviewPagination(); // REMOVE THIS LINE
-    }).catch(e => console.error(e));
-}
-
-// Update openPreview to render pagination bar next to the title
-function openPreview(title, rows) {
-  // Set title
-  document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
-  // Remove any old pagination bar in header
-  document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
-  // Render pagination bar in header (next to title)
-  const header = document.querySelector('#reportPreviewModal .modal-header');
-  if (header && previewTotalRows > previewRowsPerPage) {
-    const bar = document.createElement('div');
-    bar.className = 'report-pagination-bar header';
-    bar.style.marginLeft = '24px';
-    bar.innerHTML = renderPreviewPaginationBar();
-    header.appendChild(bar);
-    attachPreviewPaginationEvents(bar);
-  }
-  // Render table
-  document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
-  document.getElementById('reportPreviewModal').style.display = 'block';
-}
