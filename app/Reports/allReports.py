@@ -758,16 +758,16 @@ def add_speed_metrics(rows):
         avg_speed = round(sum(speeds) / len(speeds), 2)
         max_speed = round(max(speeds), 2)
         
-        columns = list(rows[0].keys())
+        columns = list(rows[0].keys());
         
-        summary = OrderedDict()
+        summary = OrderedDict();
         
-        summary[columns[0]] = "Average Speed"
-        summary[columns[1]] = avg_speed
-        summary[columns[2]] = "Maximum Speed"
-        summary[columns[3]] = max_speed
+        summary[columns[0]] = "Average Speed";
+        summary[columns[1]] = avg_speed;
+        summary[columns[2]] = "Maximum Speed";
+        summary[columns[3]] = max_speed;
         for i in range(4, len(columns)):
-            summary[columns[i]] = ""
+            summary[columns[i]] = "";
             
         return rows + [summary]
     except Exception as e:
@@ -857,28 +857,26 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
     try:
         report_progress(0)
         rows = []
-        
-        if vehicle_number == "all":
-            vehicles = list(get_vehicle_data_for_claims(claims))
 
+        if vehicle_number == "all":
+            vehicles = list(get_vehicle_data_for_claims(claims))    
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             imeis = list(imei_to_plate.keys())
             total = max(1, len(imeis))
-            all_dfs = []
-
+            all_dfs = []    
             if report_type not in report_configs:
                 raise ValueError(f"Invalid report type: {report_type}")
-            
+
             post_process = None
-                    
+
             if report_type == "daily":
                 for idx, imei in enumerate(imeis):
                     vdoc = imei_to_plate.get(imei, {})
                     df = process_daily_report(imei, vdoc, date_filter)
-                    
+
                     if isinstance(df, Exception):
                         raise df
-                    
+
                     if df is None or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
@@ -908,68 +906,67 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 final_df = final_df[existing]
                 data_records = final_df.fillna("").to_dict(orient="records")
                 return data_records
-            
+
             elif report_type == 'panic':
                 for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
-                    
+
                     if vehicle:
                         license_plate = vehicle["LicensePlateNumber"]
                     else:
                         license_plate = ""
-                        
+
                     dfs = process_panic_report(imei, license_plate, date_filter)
-                    
+
                     if isinstance(dfs, Exception):
                         raise dfs
-                    
+
                     if dfs is None or dfs.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
                     
                     all_dfs.append(dfs)
                     report_progress(((idx + 1) / total) * 100)
-            
+
             elif report_type == "odometer-daily-distance":
                 config = report_configs[report_type]
                 fields = config['fields']
                 for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
-                    
+
                     if vehicle:
                         license_plate = vehicle["LicensePlateNumber"]
                     else:
                         license_plate = ""
-                    
+
                     df = process_distance_report(imei, license_plate, date_filter)
-                    
+
                     if isinstance(df, Exception):
                         raise df
-                    
+
                     if df is None or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
                     all_dfs.append(df)
                     report_progress(((idx + 1) / total) * 100)
-                    
+
             elif report_type in ("stoppage", "idle", "ignition"):
                 config = report_configs[report_type]
                 fields = config['fields']
                 for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
-                    
+
                     if vehicle:
                         license_plate = vehicle["LicensePlateNumber"]
                     else:
                         license_plate = ""
-                    
-                    func = REPORT_PROCESSORS.get(report_type)
-                    
-                    df = func(imei, license_plate, date_filter)
-                    
-                    if isinstance(df, Exception):
-                        raise df
 
+                    func = REPORT_PROCESSORS.get(report_type)
+
+                    df = func(imei, license_plate, date_filter)
+
+                    if isinstance(df, Exception):
+                        raise df    
                     if df is None or not isinstance(df, pd.DataFrame) or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
@@ -996,26 +993,26 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                         all_dfs.append(sep_dict)
                     all_dfs.append(df)
                     report_progress(((idx + 1) / total) * 100)
-                    
+
             elif report_type == "distance-speed-range":
                 config = report_configs[report_type]
                 fields = config['fields']
-                
+
                 for idx, imei in enumerate(imeis):
                     vehicle = imei_to_plate.get(imei, "")
-                    
+
                     if vehicle:
                         license_plate = vehicle["LicensePlateNumber"]
                     else:
                         license_plate = ""
-                    
+
                     func = REPORT_PROCESSORS.get(report_type)
-                    
+
                     df = func(imei, vehicle, date_filter)
-                    
+
                     if isinstance(df, Exception):
                         raise df
-                    
+
                     if not isinstance(df, pd.DataFrame) or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
@@ -1034,58 +1031,50 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
-                post_process = config.get('post_process')
-
+                post_process = config.get('post_process')   
                 projection = {field: 1 for field in fields + ["imei"]}
-                
+
                 docs = []
-                
+
                 for idx, imei in enumerate(imeis):
                     records = getData(imei, date_filter, projection)
                     print(f"[DEBUG] [process_df] Starting Location column block")
                     for record in records:
-                        
+
                         lat = record.get("latitude") if record.get("latitude") not in ("", None) else None
                         lng = record.get("longitude") if record.get("longitude") not in ("", None) else None
-                        
+
                         location = safe_geocode(lat, lng)
-                        
+
                         record['Location'] = location
-                        
+
                         docs.append(record)
                     report_progress((((idx + 1)/2) / total) * 100)
                     print(f"[DEBUG] [process_df] Location column block has finished executing")
-                df = pd.DataFrame(docs)
-
+                df = pd.DataFrame(docs) 
                 if not df.empty:
                     for idx, (imei, group) in enumerate(df.groupby("imei")):
-                        vehicle = imei_to_plate.get(imei, "")
-
+                        vehicle = imei_to_plate.get(imei, "")   
                         if vehicle:
                             license_plate = vehicle["LicensePlateNumber"]
                         else:
-                            license_plate = ""
-
-                        group = group.drop(columns=["imei"])
-
+                            license_plate = ""  
+                        group = group.drop(columns=["imei"])    
                         processed = process_df(group, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
-                        
+
                         if isinstance(processed, Exception):
                             raise df
-                        
+
                         print(report_type)
                         if processed is not None:
                             sep_dict = OrderedDict((col, "" ) for col in processed.columns)
                             sep_dict[processed.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
                             all_dfs.append(processed)
-                        report_progress(((idx + 1) / total) * 100)
-
+                        report_progress(((idx + 1) / total) * 100)  
             if not all_dfs:
-                raise ValueError(f"No Data Found")
-
-            final_df = pd.concat(all_dfs, ignore_index=True)
-
+                raise ValueError(f"No Data Found")  
+            final_df = pd.concat(all_dfs, ignore_index=True)    
             all_possible_columns = ['Vehicle Number']
             if report_type == 'odometer-daily-distance':
                 all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
@@ -1107,40 +1096,34 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 else:
                     all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
                     if report_type == 'daily':
-                        all_possible_columns.append('odometer')
-
+                        all_possible_columns.append('odometer') 
             existing_columns = [col for col in all_possible_columns if col in final_df.columns]
-            final_df = final_df[existing_columns]
-
+            final_df = final_df[existing_columns]   
             data_records = final_df.fillna("").to_dict(orient="records")
             ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
-            
+
             if 'speed' in existing_columns:
-                ordered_data = add_speed_metrics(ordered_data)
-
+                ordered_data = add_speed_metrics(ordered_data)  
             report_progress(100)
-            return ordered_data
-
+            return ordered_data 
         # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number}
         )
         if not vehicle:
-            raise ValueError(f"Invalid Vehicle: {vehicle_number}")
-
+            raise ValueError(f"Invalid Vehicle: {vehicle_number}")  
         imei = vehicle["IMEI"]
-        license_plate = vehicle["LicensePlateNumber"]
-
+        license_plate = vehicle["LicensePlateNumber"]   
         if report_type not in report_configs:
             raise ValueError(f"Invalid report type: {report_type}")
-        
+
         post_process = None
-        
+
         if report_type == "daily":
             df = process_daily_report(imei, vehicle, date_filter)
             if isinstance(df, Exception):
                 raise df
-            
+
             if df is None or df.empty:
                 raise ValueError(f"No Data Found")
             desired_cols = [
@@ -1155,21 +1138,21 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             return data_records
         elif report_type == 'panic':
             df = process_panic_report(imei, license_plate, date_filter)
-            
+
             if isinstance(df, Exception):
                 raise df
         elif report_type == "odometer-daily-distance":
             df = process_distance_report(imei, license_plate, date_filter)
-            
+
             if isinstance(df, Exception):
                 raise df
         elif report_type in ("stoppage", "idle", "ignition"):
             func = REPORT_PROCESSORS.get(report_type)
             df = func(imei, license_plate, date_filter)
-            
+
             if isinstance(df, Exception):
                 raise df
-            
+
             if not isinstance(df, pd.DataFrame) or df.empty:
                 raise ValueError(f"No Data Found")
         elif report_type == "distance-speed-range":
@@ -1182,29 +1165,25 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             config = report_configs[report_type]
             fields = config['fields']
             post_process = config.get('post_process')
-            
+
             projection = {field: 1 for field in fields}
-            
+
             records = getData(imei, date_filter, projection)
             print(f"[DEBUG] [process_df] Starting Location column block")
             for record in records:
-                
+
                 lat = record.get("latitude") if record.get("latitude") not in ("", None) else None
                 lng = record.get("longitude") if record.get("longitude") not in ("", None) else None
-                
+
                 location = safe_geocode(lat, lng)
-                
-                record['Location'] = location
 
-            print(f"[DEBUG] [process_df] Location column block has finished executing")
-
+                record['Location'] = location   
+            print(f"[DEBUG] [process_df] Location column block has finished executing") 
             df = pd.DataFrame(records)
-            df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)
+            df = process_df(df, license_plate, fields, (lambda d: post_process(d, license_plate)) if post_process else None)    
 
-        
         if df is None or df.empty:
-            raise ValueError(f"No Data Found")
-
+            raise ValueError(f"No Data Found")  
         # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
         if report_type == 'odometer-daily-distance':
@@ -1227,20 +1206,15 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             else:
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed'])
                 if report_type == 'daily':
-                    all_possible_columns.append('odometer')
-
+                    all_possible_columns.append('odometer') 
         existing_columns = [col for col in all_possible_columns if col in df.columns]
-        df = df[existing_columns]
-
+        df = df[existing_columns]   
         data_records = df.fillna("").to_dict(orient="records")
-        ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]
-
+        ordered_data = [OrderedDict((col, row.get(col, "")) for col in existing_columns) for row in data_records]   
         if 'speed' in existing_columns:
-            ordered_data = add_speed_metrics(ordered_data)
-
+            ordered_data = add_speed_metrics(ordered_data)  
         report_progress(100)
-        return ordered_data
-
+        return ordered_data 
     except Exception as e:
         print(f"[DEBUG] _build_report_sync error: {e}")
         raise e
@@ -1490,6 +1464,11 @@ def download_report(report_id):
 @jwt_required()
 def view_report(report_id):
     try:
+        # Get pagination params
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 50))
+        skip = (page - 1) * per_page
+
         meta = db['generated_reports'].find_one({
             '_id': ObjectId(report_id),
             'user_id': get_jwt_identity()
@@ -1505,16 +1484,22 @@ def view_report(report_id):
         except Exception:
             return jsonify({"success": False, "message": "Corrupt report file"}), 500
         rows = payload.get("data", [])
+        total = len(rows)
+        paginated_rows = rows[skip:skip+per_page]
+
         return jsonify({
             "success": True,
             "metadata": {
-                "report_name": meta['report_name'],
-                "generated_at": meta['generated_at'].isoformat(),
+                "report_name": meta.get('report_name', ''),
+                "generated_at": meta.get('generated_at').isoformat() if meta.get('generated_at') else '',
                 "vehicle_number": meta.get('vehicle_number', ''),
                 "size": meta.get('size', 0),
-                "report_type": meta.get('report_type')
+                "report_type": meta.get('report_type', '')
             },
-            "data": rows
+            "data": paginated_rows,
+            "total": total,
+            "page": page,
+            "per_page": per_page
         })
     except Exception as e:
         print("[DEBUG] view_report error:", e)

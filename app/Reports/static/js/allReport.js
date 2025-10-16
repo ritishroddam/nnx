@@ -721,3 +721,75 @@ function loadFields() {
 document.getElementById("closePreviewModal").addEventListener("click", function () {
   document.getElementById("reportPreviewModal").style.display = "none";
 });
+
+let previewCurrentPage = 1;
+let previewRowsPerPage = 50;
+let previewTotalRows = 0;
+let previewReportId = null;
+
+function renderPreviewPagination() {
+  const container = document.getElementById('reportPreviewTableContainer');
+  if (!container || previewTotalRows <= previewRowsPerPage) return;
+
+  const totalPages = Math.ceil(previewTotalRows / previewRowsPerPage);
+  let html = `
+    <div class="pagination-container" style="margin-top:16px;">
+      <button id="previewPrevPage" ${previewCurrentPage === 1 ? 'disabled' : ''}>Previous</button>
+      <span>Page ${previewCurrentPage} of ${totalPages}</span>
+      <button id="previewNextPage" ${previewCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
+      <span style="margin-left:16px;">Rows per page:</span>
+      <select id="previewRowsPerPage">
+        <option value="10" ${previewRowsPerPage==10?'selected':''}>10</option>
+        <option value="25" ${previewRowsPerPage==25?'selected':''}>25</option>
+        <option value="50" ${previewRowsPerPage==50?'selected':''}>50</option>
+        <option value="100" ${previewRowsPerPage==100?'selected':''}>100</option>
+      </select>
+      <span style="margin-left:16px;">Total: ${previewTotalRows}</span>
+    </div>
+  `;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  container.appendChild(div);
+
+  document.getElementById('previewPrevPage').onclick = function() {
+    if (previewCurrentPage > 1) loadReportPreviewPage(previewReportId, previewCurrentPage - 1, previewRowsPerPage);
+  };
+  document.getElementById('previewNextPage').onclick = function() {
+    if (previewCurrentPage < totalPages) loadReportPreviewPage(previewReportId, previewCurrentPage + 1, previewRowsPerPage);
+  };
+  document.getElementById('previewRowsPerPage').onchange = function() {
+    previewRowsPerPage = parseInt(this.value);
+    loadReportPreviewPage(previewReportId, 1, previewRowsPerPage);
+  };
+}
+
+function loadReportPreviewPage(reportId, page, perPage) {
+  previewReportId = reportId;
+  previewCurrentPage = page;
+  previewRowsPerPage = perPage;
+  fetch(`/reports/view_report/${reportId}?page=${page}&per_page=${perPage}`, {
+    headers: {'X-CSRF-TOKEN': getCookie('csrf_access_token')}
+  })
+    .then(r => r.json())
+    .then(js => {
+      if (!js.success) {
+        displayFlashMessage(js.message || 'Unable to load report', 'danger');
+        return;
+      }
+      previewTotalRows = js.total || 0;
+      openPreview(js.metadata.report_name, js.data || []);
+      renderPreviewPagination();
+    }).catch(e => console.error(e));
+}
+
+// Update openStoredReport to use paginated preview
+function openStoredReport(id) {
+  loadReportPreviewPage(id, previewCurrentPage, previewRowsPerPage);
+}
+
+// Update openPreview to not reset pagination controls
+function openPreview(title, rows) {
+  document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
+  document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
+  document.getElementById('reportPreviewModal').style.display = 'block';
+}
