@@ -883,17 +883,36 @@ input[type="datetime-local"] {
 }
 
 .report-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    font-size: 0.85em;
-    color: black;
-    gap: 10px;
-    margin-top: 4px;
+  display: grid;
+  gap: 6px;
 }
 
 .dark-mode .report-meta {
     color: #ccc;
+}
+
+.report-meta .meta-row.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+}
+
+.report-meta .meta-row.one {
+  display: block;
+}
+
+.report-meta .meta-item {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .report-meta .meta-row.two {
+    grid-template-columns: 1fr; /* stack on small screens */
+    row-gap: 4px;
+  }
 }
 
 .report-actions button i { 

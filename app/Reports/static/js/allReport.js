@@ -309,11 +309,18 @@ function renderRecentReports(reports){
       <div class="report-info ${isSuccess ? 'report-open' : ''}" ${isSuccess ? `data-id="${r._id}"` : ''}>
         <div class="report-name">${r.report_name}</div>
         <div class="report-meta">
-          <span><b>Vehicle:</b> ${r.vehicle_number || '—'}</span>
-          <span><b>Size:</b> ${sizeKB}</span>
-          <span><b>From:</b> ${fromStr}</span>
-          <span><b>To:</b> ${toStr}</span>
-          ${genTime ? `<span><b>${isSuccess?'Generated':'Created'}:</b> ${formatTimeAgo(genTime)}</span>` : ''}
+          <div class="meta-row two">
+            <span class="meta-item"><b>Vehicle:</b> ${r.vehicle_number || '—'}</span>
+            <span class="meta-item"><b>Size:</b> ${sizeKB}</span>
+          </div>
+          <div class="meta-row two">
+            <span class="meta-item"><b>From:</b> ${fromStr}</span>
+            <span class="meta-item"><b>To:</b> ${toStr}</span>
+          </div>
+          ${genTime ? `
+          <div class="meta-row one">
+            <span class="meta-item"><b>${isSuccess?'Generated':'Created'}:</b> ${formatTimeAgo(genTime)}</span>
+          </div>` : ''}
         </div>
         ${progressBar}
         ${err}
