@@ -337,9 +337,69 @@ function buildTable(rows){
 }
 
 function openPreview(title, rows){
-  document.getElementById('reportPreviewModalTitle').textContent=title+' Preview';
-  document.getElementById('reportPreviewTableContainer').innerHTML=buildTable(rows);
-  document.getElementById('reportPreviewModal').style.display='block';
+  // Set title
+  document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
+  // Remove any old pagination bar in header
+  document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
+  // Render pagination bar in header (top right, outside scroll)
+  const header = document.getElementById('reportPreviewModalHeader') || document.getElementById('reportPreviewModalTitle').parentElement;
+  if (header) {
+    const bar = document.createElement('div');
+    bar.className = 'report-pagination-bar header';
+    bar.innerHTML = renderPreviewPaginationBar();
+    header.appendChild(bar);
+    attachPreviewPaginationEvents(bar);
+  }
+  // Render table
+  document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
+  // Remove any old bottom pagination
+  document.querySelectorAll('.report-pagination-bar.bottom').forEach(el => el.remove());
+  // Render pagination bar at bottom of table
+  const container = document.getElementById('reportPreviewTableContainer');
+  if (container && previewTotalRows > previewRowsPerPage) {
+    const bar = document.createElement('div');
+    bar.className = 'report-pagination-bar bottom';
+    bar.innerHTML = renderPreviewPaginationBar();
+    container.appendChild(bar);
+    attachPreviewPaginationEvents(bar);
+  }
+  document.getElementById('reportPreviewModal').style.display = 'block';
+}
+
+function renderPreviewPaginationBar() {
+  if (previewTotalRows <= previewRowsPerPage) return '';
+  const totalPages = Math.ceil(previewTotalRows / previewRowsPerPage);
+  return `
+    <button id="previewPrevPage" class="pagination-btn" ${previewCurrentPage === 1 ? 'disabled' : ''}>Previous</button>
+    <span style="margin:0 12px;">Page ${previewCurrentPage} of ${totalPages}</span>
+    <button id="previewNextPage" class="pagination-btn" ${previewCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
+    <span style="margin-left:16px;">Rows per page:</span>
+    <select id="previewRowsPerPage" class="pagination-select">
+      <option value="10" ${previewRowsPerPage==10?'selected':''}>10</option>
+      <option value="25" ${previewRowsPerPage==25?'selected':''}>25</option>
+      <option value="50" ${previewRowsPerPage==50?'selected':''}>50</option>
+      <option value="100" ${previewRowsPerPage==100?'selected':''}>100</option>
+    </select>
+    <span style="margin-left:16px;">Total: ${previewTotalRows}</span>
+  `;
+}
+
+function attachPreviewPaginationEvents(scope) {
+  if (!scope) scope = document;
+  const totalPages = Math.ceil(previewTotalRows / previewRowsPerPage);
+  const prevBtn = scope.querySelector('#previewPrevPage');
+  const nextBtn = scope.querySelector('#previewNextPage');
+  const rowsSel = scope.querySelector('#previewRowsPerPage');
+  if (prevBtn) prevBtn.onclick = function() {
+    if (previewCurrentPage > 1) loadReportPreviewPage(previewReportId, previewCurrentPage - 1, previewRowsPerPage);
+  };
+  if (nextBtn) nextBtn.onclick = function() {
+    if (previewCurrentPage < totalPages) loadReportPreviewPage(previewReportId, previewCurrentPage + 1, previewRowsPerPage);
+  };
+  if (rowsSel) rowsSel.onchange = function() {
+    previewRowsPerPage = parseInt(this.value);
+    loadReportPreviewPage(previewReportId, 1, previewRowsPerPage);
+  };
 }
 
 function queueReport(){
