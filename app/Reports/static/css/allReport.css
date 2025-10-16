@@ -287,6 +287,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 130px;
 }
 
 .dark-mode .report-card {
