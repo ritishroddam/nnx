@@ -978,6 +978,13 @@ input[type="datetime-local"] {
   box-shadow: 0 0 10px #cccccc90;
 }
 
+.report-status {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: 2;
+}
+
 .statusBadge {
   display: inline-block;
   padding: 4px 10px;

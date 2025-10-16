@@ -305,10 +305,10 @@ function renderRecentReports(reports){
     const div=document.createElement('div');
     div.className='report-item'+(isProgress?' in-progress':'')+(isFail?' failed':'');
     div.innerHTML=`
+      <div class="report-status">${statusBadge}</div>
       <div class="report-info ${isSuccess ? 'report-open' : ''}" ${isSuccess ? `data-id="${r._id}"` : ''}>
         <div class="report-name">${r.report_name}</div>
         <div class="report-meta">
-          <span><b>Status:</b> ${statusBadge}</span>
           <span><b>Vehicle:</b> ${r.vehicle_number || '—'}</span>
           <span><b>Size:</b> ${sizeKB}</span>
           <span><b>From:</b> ${fromStr}</span>
