@@ -254,9 +254,6 @@ def process_df(df, license_plate, fields, post_process=None):
 
 def processTravelPathDistanceRecord(records):
     try:
-        if records and isinstance(records, list) and 'date_time' in records[0]:
-            records.sort(key=lambda r: r.get('date_time') or 0)
-
         def haversine_m(lat1, lon1, lat2, lon2):
             R = 6371000.0  # meters
             dlat = radians(lat2 - lat1)
