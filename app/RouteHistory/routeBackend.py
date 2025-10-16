@@ -10,6 +10,7 @@ from app.models import User
 from app.utils import roles_required
 from app.geocoding import geocodeInternal
 from app.parser import atlantaAis140ToFront, getData, FLAT_TO_AIS140
+from app.Reports.allReports import processTravelPathDistanceRecord
 from config import config
 
 route_bp = Blueprint('RouteHistory', __name__, static_folder='static', template_folder='templates')
@@ -363,7 +364,7 @@ def get_vehicle_path():
         
 
         records_list = getData(str(imei_numeric), date_filter, projection)
-
+        records_list = processTravelPathDistanceRecord(records_list)
         if not records_list:
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
 
