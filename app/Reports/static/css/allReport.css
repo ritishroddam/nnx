@@ -202,8 +202,8 @@
 
 .report-cards-container {
     flex: 4;
-    width: 80%;
-    max-width: 80%;
+    width: 100%;
+    max-width: 100%;
 }
 
 .datetime-composite {
@@ -268,10 +268,10 @@
 
 .report-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); /* match recent grid */
+  gap: 18px;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
   padding-bottom: 32px;
 }
 
@@ -281,9 +281,12 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   text-decoration: none;
   color: inherit;
-  text-align: center;
   transition: transform 0.2s;
-  width: 350px;
+  width: auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .dark-mode .report-card {
@@ -297,7 +300,6 @@
 
 .report-card h3 {
   margin-top: 0;
-  margin-right: 140px;
 }
 
 .report-card p {
@@ -306,8 +308,8 @@
 
 .report-card i {
   font-size: 40px;
-  margin-top: 20px;
-  margin-left: 230px;
+  /* margin-top: 20px;
+  margin-left: 230px; */
   color: #34495e;
 }
 
