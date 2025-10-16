@@ -17,13 +17,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (rawLogsView.classList.contains("active")) {
       rawLogsView.classList.remove("active");
       subscribeView.classList.add("active");
-      liderButton.style.transform = 'translateX(100%)';
+      liderButton.style.transform = 'translateX(0%)';
       logsOption.classList.remove("active");
       subscribeOption.classList.add("active");
     } else {
       subscribeView.classList.remove("active");
       rawLogsView.classList.add("active");
-      sliderButton.style.transform = 'translateX(0%)';
+      sliderButton.style.transform = 'translateX(100%)';
       subscribeOption.classList.remove("active");
       logsOption.classList.add("active");
     }
