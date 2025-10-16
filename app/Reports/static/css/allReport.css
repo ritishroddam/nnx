@@ -914,6 +914,7 @@ input[type="datetime-local"] {
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+  cursor: pointer;
   transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 
