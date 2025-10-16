@@ -885,6 +885,7 @@ input[type="datetime-local"] {
 .report-meta {
   display: grid;
   gap: 6px;
+  font-size: 0.85em;
 }
 
 .dark-mode .report-meta {
