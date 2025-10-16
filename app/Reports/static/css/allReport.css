@@ -118,8 +118,11 @@
 
 .slider-button {
   position: absolute;
-  width: 50%;
-  height: 100%;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: auto;
   background: black;
   border-radius: 21px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
