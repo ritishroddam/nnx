@@ -784,12 +784,12 @@ function loadReportPreviewPage(reportId, page, perPage) {
 
 // Update openStoredReport to use paginated preview
 function openStoredReport(id) {
-  loadReportPreviewPage(id, 1, previewRowsPerPage);
+  loadReportPreviewPage(id, previewCurrentPage, previewRowsPerPage);
 }
 
 // Update openPreview to not reset pagination controls
 function openPreview(title, rows) {
-  document.getElementById('reportPreviewModalTitle').textContent = title + ' Preview';
+  document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
   document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
   document.getElementById('reportPreviewModal').style.display = 'block';
 }
