@@ -355,8 +355,6 @@ function openPreview(title, rows){
   }
   // Render table
   document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
-  // Remove any old bottom pagination
-  document.querySelectorAll('.report-pagination-bar.bottom').forEach(el => el.remove());
   document.getElementById('reportPreviewModal').style.display = 'block';
 }
 
@@ -781,42 +779,7 @@ let previewRowsPerPage = 50;
 let previewTotalRows = 0;
 let previewReportId = null;
 
-function renderPreviewPagination() {
-  const container = document.getElementById('reportPreviewTableContainer');
-  if (!container || previewTotalRows <= previewRowsPerPage) return;
-
-  const totalPages = Math.ceil(previewTotalRows / previewRowsPerPage);
-  let html = `
-    <div class="pagination-container" style="margin-top:16px;">
-      <button id="previewPrevPage" ${previewCurrentPage === 1 ? 'disabled' : ''}>Previous</button>
-      <span>Page ${previewCurrentPage} of ${totalPages}</span>
-      <button id="previewNextPage" ${previewCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
-      <span style="margin-left:16px;">Rows per page:</span>
-      <select id="previewRowsPerPage">
-        <option value="10" ${previewRowsPerPage==10?'selected':''}>10</option>
-        <option value="25" ${previewRowsPerPage==25?'selected':''}>25</option>
-        <option value="50" ${previewRowsPerPage==50?'selected':''}>50</option>
-        <option value="100" ${previewRowsPerPage==100?'selected':''}>100</option>
-      </select>
-      <span style="margin-left:16px;">Total: ${previewTotalRows}</span>
-    </div>
-  `;
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  container.appendChild(div);
-
-  document.getElementById('previewPrevPage').onclick = function() {
-    if (previewCurrentPage > 1) loadReportPreviewPage(previewReportId, previewCurrentPage - 1, previewRowsPerPage);
-  };
-  document.getElementById('previewNextPage').onclick = function() {
-    if (previewCurrentPage < totalPages) loadReportPreviewPage(previewReportId, previewCurrentPage + 1, previewRowsPerPage);
-  };
-  document.getElementById('previewRowsPerPage').onchange = function() {
-    previewRowsPerPage = parseInt(this.value);
-    loadReportPreviewPage(previewReportId, 1, previewRowsPerPage);
-  };
-}
-
+// Update loadReportPreviewPage to NOT call renderPreviewPagination
 function loadReportPreviewPage(reportId, page, perPage) {
   previewReportId = reportId;
   previewCurrentPage = page;
@@ -832,18 +795,29 @@ function loadReportPreviewPage(reportId, page, perPage) {
       }
       previewTotalRows = js.total || 0;
       openPreview(js.metadata.report_name, js.data || []);
-      renderPreviewPagination();
+      // renderPreviewPagination(); // REMOVE THIS LINE
     }).catch(e => console.error(e));
 }
 
-// Update openStoredReport to use paginated preview
-function openStoredReport(id) {
-  loadReportPreviewPage(id, previewCurrentPage, previewRowsPerPage);
-}
-
-// Update openPreview to not reset pagination controls
+// Update openPreview to render pagination bar next to the title
 function openPreview(title, rows) {
+  // Set title
   document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
+  // Remove any old pagination bar in header
+  document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
+  // Render pagination bar in header (next to title)
+  const header = document.getElementById('reportPreviewModalTitle').parentElement;
+  if (header && previewTotalRows > previewRowsPerPage) {
+    const bar = document.createElement('div');
+    bar.className = 'report-pagination-bar header';
+    bar.style.display = 'inline-block';
+    bar.style.verticalAlign = 'middle';
+    bar.style.marginLeft = '24px';
+    bar.innerHTML = renderPreviewPaginationBar();
+    header.appendChild(bar);
+    attachPreviewPaginationEvents(bar);
+  }
+  // Render table
   document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
   document.getElementById('reportPreviewModal').style.display = 'block';
 }
