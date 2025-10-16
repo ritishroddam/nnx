@@ -13,6 +13,8 @@ from collections import OrderedDict
 import boto3
 from botocore.client import Config
 from bson import ObjectId
+from collections import defaultdict
+from math import radians, cos, sin, asin, sqrt
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
@@ -250,6 +252,50 @@ def process_df(df, license_plate, fields, post_process=None):
     print(f"[DEBUG] [process_df] DataFrame processing complete")
     return df
 
+def processTravelPathDistanceRecord(records):
+    try:
+        if records and isinstance(records, list) and 'date_time' in records[0]:
+            records.sort(key=lambda r: r.get('date_time') or 0)
+
+        def haversine_m(lat1, lon1, lat2, lon2):
+            R = 6371000.0  # meters
+            dlat = radians(lat2 - lat1)
+            dlon = radians(lon2 - lon1)
+            a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+            c = 2 * asin(sqrt(a))
+            return R * c
+
+        filtered = []
+        prev_lat = prev_lng = None
+
+        for rec in records:
+            lat = rec.get('latitude')
+            lng = rec.get('longitude')
+
+            if lat in (None, "", " ") or lng in (None, "", " "):
+                continue
+
+            try:
+                latf = float(lat)
+                lngf = float(lng)
+            except Exception:
+                continue
+
+            if prev_lat is None:
+                filtered.append(rec)
+                prev_lat, prev_lng = latf, lngf
+            else:
+                dist = haversine_m(prev_lat, prev_lng, latf, lngf)
+                if dist >= 50.0:
+                    filtered.append(rec)
+                    prev_lat, prev_lng = latf, lngf
+                else:
+                    pass
+
+        return filtered
+    except Exception as _e:
+        return None
+
 def get_date_range_filter(date_range, from_date=None, to_date=None):
     print(f"[DEBUG] Generating date range filter for date_range={date_range}, from_date={from_date}, to_date={to_date}")
     tz = pytz.UTC
@@ -415,7 +461,6 @@ def process_daily_report(imei, vehicle_doc, date_filter):
         tz_ist = IST
 
         # Bucket records by IST date
-        from collections import defaultdict
         day_buckets = defaultdict(list)
         for r in records:
             dt = r.get("date_time")
@@ -1039,6 +1084,9 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 for idx, imei in enumerate(imeis):
                     records = getData(imei, date_filter, projection)
                     print(f"[DEBUG] [process_df] Starting Location column block")
+                    if report_type == 'daily-distance':
+                        records = processTravelPathDistanceRecord(records)
+
                     for record in records:
 
                         lat = record.get("latitude") if record.get("latitude") not in ("", None) else None
@@ -1170,6 +1218,8 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
             records = getData(imei, date_filter, projection)
             print(f"[DEBUG] [process_df] Starting Location column block")
+            if report_type == 'daily-distance':
+                records = processTravelPathDistanceRecord(records)
             for record in records:
 
                 lat = record.get("latitude") if record.get("latitude") not in ("", None) else None
