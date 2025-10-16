@@ -343,7 +343,7 @@ function openPreview(title, rows){
   document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
   // Render pagination bar in header (top right, outside scroll)
   const header = document.getElementById('reportPreviewModalHeader') || document.getElementById('reportPreviewModalTitle').parentElement;
-  if (header) {
+  if (header && previewTotalRows > previewRowsPerPage) {
     const bar = document.createElement('div');
     bar.className = 'report-pagination-bar header';
     bar.innerHTML = renderPreviewPaginationBar();
@@ -354,15 +354,6 @@ function openPreview(title, rows){
   document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);
   // Remove any old bottom pagination
   document.querySelectorAll('.report-pagination-bar.bottom').forEach(el => el.remove());
-  // Render pagination bar at bottom of table
-  const container = document.getElementById('reportPreviewTableContainer');
-  if (container && previewTotalRows > previewRowsPerPage) {
-    const bar = document.createElement('div');
-    bar.className = 'report-pagination-bar bottom';
-    bar.innerHTML = renderPreviewPaginationBar();
-    container.appendChild(bar);
-    attachPreviewPaginationEvents(bar);
-  }
   document.getElementById('reportPreviewModal').style.display = 'block';
 }
 
