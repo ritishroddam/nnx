@@ -342,12 +342,10 @@ function openPreview(title, rows){
   // Remove any old pagination bar in header
   document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
   // Render pagination bar in header (next to title)
-  const header = document.getElementById('reportPreviewModalTitle').parentElement;
+  const header = document.querySelector('#reportPreviewModal .modal-header');
   if (header && previewTotalRows > previewRowsPerPage) {
     const bar = document.createElement('div');
     bar.className = 'report-pagination-bar header';
-    bar.style.display = 'inline-block';
-    bar.style.verticalAlign = 'middle';
     bar.style.marginLeft = '24px';
     bar.innerHTML = renderPreviewPaginationBar();
     header.appendChild(bar);
@@ -806,12 +804,10 @@ function openPreview(title, rows) {
   // Remove any old pagination bar in header
   document.querySelectorAll('.report-pagination-bar.header').forEach(el => el.remove());
   // Render pagination bar in header (next to title)
-  const header = document.getElementById('reportPreviewModalTitle').parentElement;
+  const header = document.querySelector('#reportPreviewModal .modal-header');
   if (header && previewTotalRows > previewRowsPerPage) {
     const bar = document.createElement('div');
     bar.className = 'report-pagination-bar header';
-    bar.style.display = 'inline-block';
-    bar.style.verticalAlign = 'middle';
     bar.style.marginLeft = '24px';
     bar.innerHTML = renderPreviewPaginationBar();
     header.appendChild(bar);
