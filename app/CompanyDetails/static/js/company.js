@@ -290,32 +290,57 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
-// function filterByCompanyValue(filterValue) {
-//   if (filterValue == null) filterValue = '';
-//   const fv = filterValue.toString().trim().toLowerCase();
-//   const rows = document.querySelectorAll('#customerTable tr');
-
-//   rows.forEach(row => {
-//     const companyNameCell = row.cells[0];
-//     if (!companyNameCell) return;
-//     const companyName = companyNameCell.textContent.trim().toLowerCase();
-//     row.style.display = (fv === '' || companyName.includes(fv)) ? '' : 'none';
-//   });
-// }
-
 function filterByCompanyValue(filterValue) {
   return (async function() {
     try {
       if (filterValue == null) filterValue = '';
       const fv = filterValue.toString().trim().toLowerCase();
 
-      // empty selection -> restore paginated view
+      // If user selected the explicit All Companies token -> fetch full dataset and render it
+      if (fv === '__all__') {
+        // first request to get total count (fast)
+        const metaResp = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=1`, {
+          method: "GET",
+          headers: {
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            "Accept": "application/json"
+          },
+          credentials: "include"
+        });
+
+        if (!metaResp.ok) throw new Error(`HTTP ${metaResp.status}`);
+        const meta = await metaResp.json();
+        const total = meta.total || 0;
+        const perPage = total > 0 ? total : 10000;
+
+        // fetch all customers in one go
+        const resp = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
+          method: "GET",
+          headers: {
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            "Accept": "application/json"
+          },
+          credentials: "include"
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const customers = data.customers || [];
+
+        document.getElementById('totalCompaniesCount').textContent = customers.length;
+        renderCustomerTable(customers);
+        const paginationDiv = document.getElementById('companyPagination');
+        if (paginationDiv) paginationDiv.innerHTML = ''; // hide pagination while showing all
+        return;
+      }
+
+      // empty selection -> restore paginated view (first page)
       if (fv === '') {
         await fetchAndRenderCustomers(1);
         return;
       }
 
-      // Request all customers from backend (use known totalRows if available)
+      // default: fetch all customers (use known totalRows if available) and filter client-side
       const perPage = (typeof totalRows === 'number' && totalRows > 0) ? totalRows : 10000;
       const response = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
         method: "GET",

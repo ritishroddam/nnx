@@ -25,7 +25,7 @@ Vendor Details
 <div class="filter-container">
   <label for="companyFilter">Filter by Company:</label>
   <select id="companyFilter" class="filter-dropdown">
-    <option value="">All Companies</option>
+    <option value="__all__">All Companies</option>
     {% for company in unique_companies %}
     <option value="{{ company }}">{{ company }}</option>
     {% endfor %}
