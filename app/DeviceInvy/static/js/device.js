@@ -96,11 +96,17 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 });
 
-async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage) {
+async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage, status = '') {
   try {
     currentRowsPerPage = rowsPerPage; 
-    
-    const response = await fetch(`/deviceInvy/get_devices_paginated?page=${page}&per_page=${rowsPerPage}`, {
+
+    // Attach optional status filter to server-side paginated endpoint
+    let url = `/deviceInvy/get_devices_paginated?page=${page}&per_page=${rowsPerPage}`;
+    if (status && status.trim() !== '') {
+      url += `&status=${encodeURIComponent(status)}`;
+    }
+
+    const response = await fetch(url, {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
@@ -109,8 +115,10 @@ async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage)
     if (data.error) throw new Error(data.error);
 
     totalRows = data.total;
+    currentPage = data.page || page;
+
     renderDeviceTable(data.devices);
-    renderPaginationControls(totalRows, page, rowsPerPage);
+    renderPaginationControls(totalRows, currentPage, rowsPerPage);
     await updateAllCountersFromServer();
   } catch (err) {
     document.getElementById('deviceTable').innerHTML = `<tr><td colspan="16">Failed to load data</td></tr>`;
@@ -401,6 +409,7 @@ async function filterDevicesByStatus() {
   }
 
   try {
+    await fetchAndRenderDevices(1, currentRowsPerPage, selectedStatus);
     const metaResp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=1`, {
       headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
     });

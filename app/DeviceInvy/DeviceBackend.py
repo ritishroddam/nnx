@@ -67,29 +67,50 @@ def get_devices_paginated():
         per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        # Get total count and paginated devices
-        total = collection.count_documents({})
-        devices = list(collection.find({}).skip(skip).limit(per_page))
-        
+        # optional status/package filter from querystring
+        status_q = request.args.get('status', '').strip()
+
+        # Determine whether the incoming token should be treated as Status or Package
+        status_values = {"New Stock", "In use", "Available", "Discarded"}
+        query = {}
+        if status_q:
+            if status_q in status_values:
+                # handle 'Discarded' alias if needed
+                if status_q == 'Discarded':
+                    query['$or'] = [{'Status': 'Discarded'}, {'Status': 'Scrap'}]
+                else:
+                    query['Status'] = status_q
+            else:
+                # treat as Package filter (Rental, Package, Outrate, None, etc.)
+                query['Package'] = status_q
+
+        # Get total count and paginated devices with filter applied
+        total = collection.count_documents(query)
+        devices = list(collection.find(query).skip(skip).limit(per_page))
+
         imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
-        
+
         vehiclesData = vehicle_collection.find(
-            {"IMEI": {"$in": imeiList}}, 
-            {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
+            {"IMEI": {"$in": imeiList}},
+            {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI": 1}
         )
-        
+
         VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
-        
+
         for device in devices:
-            date = device['LastEditedDate'].astimezone(timezone(timedelta(hours=5, minutes=30)))
-            device['LastEditedDate'] = date.strftime('%d-%m-%Y %I:%M %p')
-            vehicle = VehicleData.get(device['IMEI']) 
+            try:
+                date = device['LastEditedDate'].astimezone(timezone(timedelta(hours=5, minutes=30)))
+                device['LastEditedDate'] = date.strftime('%d-%m-%Y %I:%M %p')
+            except Exception:
+                # keep raw if conversion fails
+                pass
+            vehicle = VehicleData.get(device.get('IMEI'))
             if not vehicle:
                 device['LicensePlateNumber'] = None
                 device['CompanyName'] = None
             else:
-                device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
-                device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+                device['LicensePlateNumber'] = vehicle.get('LicensePlateNumber')
+                device['CompanyName'] = vehicle.get('CompanyName')
             device['_id'] = str(device['_id'])
 
         return jsonify({
