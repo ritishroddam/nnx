@@ -1,15 +1,6 @@
 document.getElementById('companyFilter').addEventListener('change', function() {
-  const filterValue = this.value.toLowerCase();
-  const rows = document.querySelectorAll('#customerTable tr');
-  
-  rows.forEach(row => {
-    const companyName = row.cells[0].textContent.toLowerCase();
-    if (filterValue === '' || companyName.includes(filterValue)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
+  // trigger server-side fetch when company changes
+  fetchAndRenderCustomers(1);
 });
 
 document.getElementById("uploadBtn").addEventListener("click", function() {
@@ -307,7 +298,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     searchField: "text",
     create: false,
   });
+  // fetch initial page (reads current filter from the select)
   await fetchAndRenderCustomers(1);
+  // ensure change also triggers server-side fetch (for Selectize)
+  const companySelect = document.getElementById('companyFilter');
+  companySelect.addEventListener('change', () => fetchAndRenderCustomers(1));
 });
 
 let currentPage = 1;
@@ -316,14 +311,16 @@ let totalRows = 0;
 
 async function fetchAndRenderCustomers(page = 1) {
   try {
-    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}`, {
-      method: "GET",
-      headers: {
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        "Accept": "application/json"
-      },
-      credentials: "include"
-    });
+    // include selected company filter in request (server-side filtering)
+    const company = encodeURIComponent((document.getElementById('companyFilter')?.value || '').trim());
+    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}${company ? `&company=${company}` : ''}`, {
+       method: "GET",
+       headers: {
+         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+         "Accept": "application/json"
+       },
+       credentials: "include"
+     });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);

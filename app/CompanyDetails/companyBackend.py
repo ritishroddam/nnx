@@ -268,8 +268,15 @@ def get_customers_paginated():
         per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        total = customers_collection.count_documents({})
-        customers = list(customers_collection.find({}).skip(skip).limit(per_page))
+        # Server-side filter: optional `company` query param (case-insensitive, partial match)
+        company = (request.args.get('company') or '').strip()
+        query = {}
+        if company:
+            # partial, case-insensitive match on "Company Name"
+            query = {'Company Name': {'$regex': re.escape(company), '$options': 'i'}}
+
+        total = customers_collection.count_documents(query)
+        customers = list(customers_collection.find(query).skip(skip).limit(per_page))
 
         for customer in customers:
             customer['_id'] = str(customer['_id'])
