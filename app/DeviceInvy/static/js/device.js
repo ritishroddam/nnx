@@ -383,34 +383,60 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 }
 
 function initializeStatusFilter() {
-    allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
-    
     updateAllCountersFromServer();
-    
-    document.getElementById("statusFilter").addEventListener("change", filterDevicesByStatus);
+
+    const statusEl = document.getElementById("statusFilter");
+    if (statusEl) {
+      statusEl.addEventListener("change", filterDevicesByStatus);
+    }
 }
 
-function filterDevicesByStatus() {
+async function filterDevicesByStatus() {
   const selectedStatus = document.getElementById("statusFilter").value;
+
   if (!selectedStatus) {
-    allDevices.forEach(device => {
-      device.style.display = "";
-    });
+    fetchAndRenderDevices(1, currentRowsPerPage);
     updateAllCountersFromServer();
     return;
   }
-  allDevices.forEach(device => {
-    if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
-      const statusCell = device.cells[11];
-      let status = statusCell.textContent.trim();
-      device.style.display = status === selectedStatus ? "" : "none";
-    } else {
-      const packageCell = device.cells[9];
-      const packageType = packageCell.textContent.trim();
-      device.style.display = packageType === selectedStatus ? "" : "none";
-    }
-  });
-  updateStatusCounts();
+
+  try {
+    const metaResp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=1`, {
+      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
+    });
+    if (!metaResp.ok) throw new Error(`HTTP ${metaResp.status}`);
+    const meta = await metaResp.json();
+    const total = meta.total || 0;
+    const perPage = total > 0 ? total : 10000;
+
+    const resp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=${perPage}`, {
+      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const devices = data.devices || [];
+
+    const filtered = devices.filter(device => {
+      if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
+        const status = (device.Status || '').toString().trim();
+        if (selectedStatus === 'Discarded') {
+          return status === 'Discarded' || status === 'Scrap';
+        }
+        return status === selectedStatus;
+      } else {
+        const pkg = (device.Package || '').toString().trim();
+        return pkg === selectedStatus;
+      }
+    });
+
+    renderDeviceTable(filtered);
+    allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+    document.getElementById('devicePagination').innerHTML = '';
+    updateStatusCountsFromData(filtered);
+  } catch (err) {
+    console.error("Error filtering devices:", err);
+    displayFlashMessage("Failed to filter devices. See console for details.", "danger");
+  }
 }
 
 function updateStatusCounts(devicesData = null) {
