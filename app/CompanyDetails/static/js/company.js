@@ -1,16 +1,5 @@
-document.getElementById('companyFilter').addEventListener('change', function() {
-  const filterValue = this.value.toLowerCase();
-  const rows = document.querySelectorAll('#customerTable tr');
-  
-  rows.forEach(row => {
-    const companyName = row.cells[0].textContent.toLowerCase();
-    if (filterValue === '' || companyName.includes(filterValue)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-});
+// NOTE: Filtering is handled by the Selectize/native binding inside DOMContentLoaded
+// to ensure the Selectize instance triggers the same handler. See filterByCompanyValue().
 
 document.getElementById("uploadBtn").addEventListener("click", function() {
   const modal = document.getElementById("uploadModal");
@@ -301,12 +290,41 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
+function filterByCompanyValue(filterValue) {
+  if (filterValue == null) filterValue = '';
+  const fv = filterValue.toString().trim().toLowerCase();
+  const rows = document.querySelectorAll('#customerTable tr');
+
+  rows.forEach(row => {
+    const companyNameCell = row.cells[0];
+    if (!companyNameCell) return;
+    const companyName = companyNameCell.textContent.trim().toLowerCase();
+    row.style.display = (fv === '' || companyName.includes(fv)) ? '' : 'none';
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   $("#companyFilter").selectize({
     placeholder: "Search Companies",
     searchField: "text",
     create: false,
   });
+
+  const jqEl = window.jQuery && $('#companyFilter')[0];
+  const selectizeInst = jqEl ? jqEl.selectize : null;
+  if (selectizeInst && typeof selectizeInst.on === 'function') {
+    selectizeInst.on('change', function(val) {
+      filterByCompanyValue(val);
+    });
+  } else {
+    const nativeSelect = document.getElementById('companyFilter');
+    if (nativeSelect) {
+      nativeSelect.addEventListener('change', function(e) {
+        filterByCompanyValue(e.target.value);
+      });
+    }
+  }
+
   await fetchAndRenderCustomers(1);
 });
 
