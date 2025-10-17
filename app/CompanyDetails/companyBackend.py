@@ -270,11 +270,15 @@ def get_customers_paginated():
 
         # Server-side filter: optional `company` query param (case-insensitive, partial match)
         company = (request.args.get('company') or '').strip()
+        # normalize whitespace (collapse multiple spaces) so matching is robust
+        company = ' '.join(company.split())
         query = {}
         if company:
-            # partial, case-insensitive match on "Company Name"
-            query = {'Company Name': {'$regex': re.escape(company), '$options': 'i'}}
-
+            # Build a substring regex, escape special chars, case-insensitive
+            regex = f".*{re.escape(company)}.*"
+            query = {'Company Name': {'$regex': regex, '$options': 'i'}}
+            print(f"[DEBUG] get_customers_paginated - company filter: {company} regex: {regex}")
+ 
         total = customers_collection.count_documents(query)
         customers = list(customers_collection.find(query).skip(skip).limit(per_page))
 

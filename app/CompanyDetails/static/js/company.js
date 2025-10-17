@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     create: false,
   });
   // fetch initial page (reads current filter from the select)
-  await fetchAndRenderCustomers(1);
+  await fetchAndRenderCustomers(1, ROWS_PER_PAGE);
   // ensure change also triggers server-side fetch (for Selectize)
   const companySelect = document.getElementById('companyFilter');
   companySelect.addEventListener('change', () => fetchAndRenderCustomers(1));
@@ -309,18 +309,18 @@ let currentPage = 1;
 const ROWS_PER_PAGE = 100;
 let totalRows = 0;
 
-async function fetchAndRenderCustomers(page = 1) {
-  try {
-    // include selected company filter in request (server-side filtering)
-    const company = encodeURIComponent((document.getElementById('companyFilter')?.value || '').trim());
-    const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${ROWS_PER_PAGE}${company ? `&company=${company}` : ''}`, {
-       method: "GET",
-       headers: {
-         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-         "Accept": "application/json"
-       },
-       credentials: "include"
-     });
+async function fetchAndRenderCustomers(page = 1, rowsPerPage = ROWS_PER_PAGE) {
+   try {
+     // include selected company filter in request (server-side filtering)
+     const company = encodeURIComponent((document.getElementById('companyFilter')?.value || '').trim());
+     const response = await fetch(`/companyDetails/get_customers_paginated?page=${page}&per_page=${rowsPerPage}${company ? `&company=${company}` : ''}`, {
+        method: "GET",
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+          "Accept": "application/json"
+        },
+        credentials: "include"
+      });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -335,9 +335,9 @@ async function fetchAndRenderCustomers(page = 1) {
     document.getElementById('totalCompaniesCount').textContent = totalRows;
 
     renderCustomerTable(data.customers);
-    renderPaginationControls(totalRows, page, ROWS_PER_PAGE);
-  } catch (err) {
+    renderPaginationControls(totalRows, page, rowsPerPage);
+   } catch (err) {
     console.error("Error loading customers:", err);
     document.getElementById('customerTable').innerHTML = `<tr><td colspan="14">Failed to load data</td></tr>`;
   }
-}
+ }
