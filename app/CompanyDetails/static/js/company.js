@@ -290,17 +290,64 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
-function filterByCompanyValue(filterValue) {
-  if (filterValue == null) filterValue = '';
-  const fv = filterValue.toString().trim().toLowerCase();
-  const rows = document.querySelectorAll('#customerTable tr');
+// function filterByCompanyValue(filterValue) {
+//   if (filterValue == null) filterValue = '';
+//   const fv = filterValue.toString().trim().toLowerCase();
+//   const rows = document.querySelectorAll('#customerTable tr');
 
-  rows.forEach(row => {
-    const companyNameCell = row.cells[0];
-    if (!companyNameCell) return;
-    const companyName = companyNameCell.textContent.trim().toLowerCase();
-    row.style.display = (fv === '' || companyName.includes(fv)) ? '' : 'none';
-  });
+//   rows.forEach(row => {
+//     const companyNameCell = row.cells[0];
+//     if (!companyNameCell) return;
+//     const companyName = companyNameCell.textContent.trim().toLowerCase();
+//     row.style.display = (fv === '' || companyName.includes(fv)) ? '' : 'none';
+//   });
+// }
+
+function filterByCompanyValue(filterValue) {
+  return (async function() {
+    try {
+      if (filterValue == null) filterValue = '';
+      const fv = filterValue.toString().trim().toLowerCase();
+
+      // empty selection -> restore paginated view
+      if (fv === '') {
+        await fetchAndRenderCustomers(1);
+        return;
+      }
+
+      // Request all customers from backend (use known totalRows if available)
+      const perPage = (typeof totalRows === 'number' && totalRows > 0) ? totalRows : 10000;
+      const response = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
+        method: "GET",
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+          "Accept": "application/json"
+        },
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const customers = data.customers || [];
+
+      // filter across complete dataset
+      const filtered = customers.filter(c => {
+        const name = (c['Company Name'] || '').toString().toLowerCase();
+        return name.includes(fv);
+      });
+
+      // render filtered results and hide pagination while filtered
+      document.getElementById('totalCompaniesCount').textContent = filtered.length;
+      renderCustomerTable(filtered);
+      const paginationDiv = document.getElementById('companyPagination');
+      if (paginationDiv) paginationDiv.innerHTML = '';
+    } catch (err) {
+      console.error("Error filtering customers:", err);
+    }
+  })();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
