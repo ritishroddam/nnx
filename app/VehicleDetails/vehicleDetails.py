@@ -23,7 +23,7 @@ company_config_collection = db['company_config']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    vehicles = list(vehicle_collection.find({}))
+    vehicles = list(vehicle_collection.find({}, {'AssignedUsers': 0}))
     
     company_names = set()
     for vehicle in vehicles:
