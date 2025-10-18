@@ -96,11 +96,16 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 });
 
-async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage) {
+async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage, status = '') {
   try {
     currentRowsPerPage = rowsPerPage; 
-    
-    const response = await fetch(`/deviceInvy/get_devices_paginated?page=${page}&per_page=${rowsPerPage}`, {
+
+    let url = `/deviceInvy/get_devices_paginated?page=${page}&per_page=${rowsPerPage}`;
+    if (status && status.trim() !== '') {
+      url += `&status=${encodeURIComponent(status)}`;
+    }
+
+    const response = await fetch(url, {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
@@ -109,34 +114,15 @@ async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage)
     if (data.error) throw new Error(data.error);
 
     totalRows = data.total;
+    currentPage = data.page || page;
+
     renderDeviceTable(data.devices);
-    renderPaginationControls(totalRows, page, rowsPerPage);
+    renderPaginationControls(totalRows, currentPage, rowsPerPage);
     await updateAllCountersFromServer();
   } catch (err) {
     document.getElementById('deviceTable').innerHTML = `<tr><td colspan="16">Failed to load data</td></tr>`;
   }
 }
-
-// async function updateCountersFromServer() {
-//   try {
-//     const response = await fetch('/deviceInvy/device_status_counts', {
-//       headers: {
-//         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//       }
-//     });
-//     const counts = await response.json();
-    
-//     document.getElementById("newStockCount").textContent = counts["New Stock"] || 0;
-//     document.getElementById("inUseCount").textContent = counts["In use"] || 0;
-//     document.getElementById("availableCount").textContent = counts["Available"] || 0;
-//     document.getElementById("discardedCount").textContent = counts["Discarded"] || 0;
-    
-//     await updatePackageCountsFromServer();
-//   } catch (err) {
-//     console.error('Error fetching device counts:', err);
-//     updateStatusCounts();
-//   }
-// }
 
 async function updateAllCountersFromServer() {
   try {
@@ -156,20 +142,17 @@ async function updateAllCountersFromServer() {
       throw new Error(data.error);
     }
     
-    // Update status counts
     document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
     document.getElementById("inUseCount").textContent = data.status["In use"] || 0;
     document.getElementById("availableCount").textContent = data.status["Available"] || 0;
     document.getElementById("discardedCount").textContent = data.status["Discarded"] || 0;
     
-    // Update package counts
     document.getElementById("rentalCount").textContent = data.package["Rental"] || 0;
     document.getElementById("packageCount").textContent = data.package["Package"] || 0;
     document.getElementById("outrateCount").textContent = data.package["Outrate"] || 0;
     
   } catch (err) {
     console.error('Error fetching all counts:', err);
-    // Fallback to DOM counting
     console.log('Falling back to DOM counting');
     updateStatusCounts();
   }
@@ -190,7 +173,6 @@ async function updatePackageCountsFromServer() {
     
   } catch (err) {
     console.error('Error fetching package counts:', err);
-    // Fallback to counting from current page data
     updatePackageCountsFromCurrentData();
   }
 }
@@ -250,36 +232,8 @@ function renderDeviceTable(devices) {
     tableBody.appendChild(row);
   });
   
-  // Store all devices for filtering
   allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
 }
-
-// function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
-//   const totalPages = Math.ceil(totalRows / rowsPerPage);
-//   const paginationDiv = document.getElementById('devicePagination');
-//   if (!paginationDiv) return;
-  
-//   if (totalPages <= 1) {
-//     paginationDiv.innerHTML = '';
-//     return;
-//   }
-  
-//   let html = `<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:10px 0;">`;
-//   html += `<button class="btn" id="devicePrevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
-//   html += `<span>Page ${currentPage} of ${totalPages}</span>`;
-//   html += `<button class="btn" device="btn" id="deviceNextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
-//   html += `</div>`;
-  
-//   paginationDiv.innerHTML = html;
-  
-//   document.getElementById('devicePrevPage').onclick = function() {
-//     if (currentPage > 1) fetchAndRenderDevices(currentPage - 1);
-//   };
-  
-//   document.getElementById('deviceNextPage').onclick = function() {
-//     if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1);
-//   };
-// }
 
 function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   const totalPages = Math.ceil(totalRows / rowsPerPage);
@@ -291,7 +245,6 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     return;
   }
 
-  // Calculate range for current page
   const startItem = ((currentPage - 1) * rowsPerPage) + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalRows);
 
@@ -335,23 +288,19 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   
   paginationDiv.innerHTML = html;
 
-  // Add event listeners
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
     fetchAndRenderDevices(1, newRowsPerPage);
   });
 
-  // Previous button
   document.getElementById('devicePrevPage').onclick = function() {
     if (currentPage > 1) fetchAndRenderDevices(currentPage - 1, rowsPerPage);
   };
 
-  // Next button
   document.getElementById('deviceNextPage').onclick = function() {
     if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1, rowsPerPage);
   };
 
-  // Add go to page functionality
   document.getElementById('goToPageBtn').onclick = function() {
     const pageInput = document.getElementById('goToPageInput');
     const targetPage = parseInt(pageInput.value);
@@ -364,14 +313,12 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     }
   };
 
-  // Allow Enter key in go to page input
   document.getElementById('goToPageInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       document.getElementById('goToPageBtn').click();
     }
   });
 
-  // Validate input on blur
   document.getElementById('goToPageInput').addEventListener('blur', function() {
     const value = parseInt(this.value);
     if (!value || value < 1) {
@@ -383,34 +330,61 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 }
 
 function initializeStatusFilter() {
-    allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
-    
     updateAllCountersFromServer();
-    
-    document.getElementById("statusFilter").addEventListener("change", filterDevicesByStatus);
+
+    const statusEl = document.getElementById("statusFilter");
+    if (statusEl) {
+      statusEl.addEventListener("change", filterDevicesByStatus);
+    }
 }
 
-function filterDevicesByStatus() {
+async function filterDevicesByStatus() {
   const selectedStatus = document.getElementById("statusFilter").value;
+
   if (!selectedStatus) {
-    allDevices.forEach(device => {
-      device.style.display = "";
-    });
+    fetchAndRenderDevices(1, currentRowsPerPage);
     updateAllCountersFromServer();
     return;
   }
-  allDevices.forEach(device => {
-    if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
-      const statusCell = device.cells[11];
-      let status = statusCell.textContent.trim();
-      device.style.display = status === selectedStatus ? "" : "none";
-    } else {
-      const packageCell = device.cells[9];
-      const packageType = packageCell.textContent.trim();
-      device.style.display = packageType === selectedStatus ? "" : "none";
-    }
-  });
-  updateStatusCounts();
+
+  try {
+    await fetchAndRenderDevices(1, currentRowsPerPage, selectedStatus);
+    const metaResp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=1`, {
+      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
+    });
+    if (!metaResp.ok) throw new Error(`HTTP ${metaResp.status}`);
+    const meta = await metaResp.json();
+    const total = meta.total || 0;
+    const perPage = total > 0 ? total : 10000;
+
+    const resp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=${perPage}`, {
+      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const devices = data.devices || [];
+
+    const filtered = devices.filter(device => {
+      if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
+        const status = (device.Status || '').toString().trim();
+        if (selectedStatus === 'Discarded') {
+          return status === 'Discarded' || status === 'Scrap';
+        }
+        return status === selectedStatus;
+      } else {
+        const pkg = (device.Package || '').toString().trim();
+        return pkg === selectedStatus;
+      }
+    });
+
+    renderDeviceTable(filtered);
+    allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
+    document.getElementById('devicePagination').innerHTML = '';
+    updateStatusCountsFromData(filtered);
+  } catch (err) {
+    console.error("Error filtering devices:", err);
+    displayFlashMessage("Failed to filter devices. See console for details.", "danger");
+  }
 }
 
 function updateStatusCounts(devicesData = null) {
@@ -507,7 +481,6 @@ function searchDevices() {
         tableBody.appendChild(row);
         resetCounts();
         
-        // Clear pagination during search
         document.getElementById('devicePagination').innerHTML = '';
         return;
       }
@@ -561,7 +534,6 @@ function resetCounts() {
 function clearSearch() {
   document.getElementById("imeiSearch").value = '';
   document.getElementById("statusFilter").value = '';
-  // Restore paginated view
   fetchAndRenderDevices(1, currentRowsPerPage);
   updateAllCountersFromServer();
 }
@@ -576,13 +548,11 @@ function updateStatusCountsFromData(devices) {
   let outrateCount = 0;
 
   devices.forEach(device => {
-    // Count package types
     const packageType = device.Package || '';
     if (packageType === "Rental") rentalCount++;
     if (packageType === "Package") packageCount++;
     if (packageType === "Outrate") outrateCount++;
 
-    // Count statuses
     const status = device.Status || '';
     if (status === "New Stock") newStockCount++;
     if (status === "In use") inUseCount++;
@@ -598,24 +568,6 @@ function updateStatusCountsFromData(devices) {
   document.getElementById("packageCount").textContent = packageCount;
   document.getElementById("outrateCount").textContent = outrateCount;
 }
-
-////////////////// Download ////////////////////////
-
-// document.getElementById("downloadExcel").addEventListener("click", function() {
-//     const form = document.createElement('form');
-//     form.method = 'GET';
-//     form.action = '/deviceInvy/download_excel';
-    
-//     const tokenInput = document.createElement('input');
-//     tokenInput.type = 'hidden';
-//     tokenInput.name = 'access_token';
-//     tokenInput.value = localStorage.getItem('access_token') || getCookie('access_token');
-//     form.appendChild(tokenInput);
-    
-//     document.body.appendChild(form);
-//     form.submit();
-//     document.body.removeChild(form);
-// });
 
 function editDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
@@ -680,14 +632,12 @@ function editDevice(deviceId) {
     const tenureInput = document.getElementById("editTenure");
     
     if (status === 'New Stock' || status === 'Available') {
-      // Auto-set Package to "None"
       packageSelect.value = 'None';
       tenureInput.disabled = true;
       tenureInput.value = '';
     }
   });
 
-  // Set max date for Date In input to today
   const today = new Date().toISOString().split("T")[0];
   const editDateInInput = row.cells[6].querySelector("#editDateIn");
   if (editDateInInput) {
@@ -746,7 +696,6 @@ function saveDevice(deviceId) {
     return;
   }
 
-  // Get username from localStorage or cookie (assume JWT username is stored)
   let username = localStorage.getItem('username') || getCookie('username') || 'Unknown';
   let now = new Date();
   let lastEditedDate = now.toLocaleString();

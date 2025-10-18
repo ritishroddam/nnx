@@ -1,16 +1,5 @@
-document.getElementById('companyFilter').addEventListener('change', function() {
-  const filterValue = this.value.toLowerCase();
-  const rows = document.querySelectorAll('#customerTable tr');
-  
-  rows.forEach(row => {
-    const companyName = row.cells[0].textContent.toLowerCase();
-    if (filterValue === '' || companyName.includes(filterValue)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-});
+// NOTE: Filtering is handled by the Selectize/native binding inside DOMContentLoaded
+// to ensure the Selectize instance triggers the same handler. See filterByCompanyValue().
 
 document.getElementById("uploadBtn").addEventListener("click", function() {
   const modal = document.getElementById("uploadModal");
@@ -301,12 +290,113 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
+function filterByCompanyValue(filterValue) {
+  return (async function() {
+    try {
+      if (filterValue == null) filterValue = '';
+      const fv = filterValue.toString().trim().toLowerCase();
+
+      // If user selected the explicit All Companies token -> fetch full dataset and render it
+      if (fv === '__all__') {
+        // first request to get total count (fast)
+        const metaResp = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=1`, {
+          method: "GET",
+          headers: {
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            "Accept": "application/json"
+          },
+          credentials: "include"
+        });
+
+        if (!metaResp.ok) throw new Error(`HTTP ${metaResp.status}`);
+        const meta = await metaResp.json();
+        const total = meta.total || 0;
+        const perPage = total > 0 ? total : 10000;
+
+        // fetch all customers in one go
+        const resp = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
+          method: "GET",
+          headers: {
+            "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+            "Accept": "application/json"
+          },
+          credentials: "include"
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const customers = data.customers || [];
+
+        document.getElementById('totalCompaniesCount').textContent = customers.length;
+        renderCustomerTable(customers);
+        const paginationDiv = document.getElementById('companyPagination');
+        if (paginationDiv) paginationDiv.innerHTML = ''; // hide pagination while showing all
+        return;
+      }
+
+      // empty selection -> restore paginated view (first page)
+      if (fv === '') {
+        await fetchAndRenderCustomers(1);
+        return;
+      }
+
+      // default: fetch all customers (use known totalRows if available) and filter client-side
+      const perPage = (typeof totalRows === 'number' && totalRows > 0) ? totalRows : 10000;
+      const response = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
+        method: "GET",
+        headers: {
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+          "Accept": "application/json"
+        },
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const customers = data.customers || [];
+
+      // filter across complete dataset
+      const filtered = customers.filter(c => {
+        const name = (c['Company Name'] || '').toString().toLowerCase();
+        return name.includes(fv);
+      });
+
+      // render filtered results and hide pagination while filtered
+      document.getElementById('totalCompaniesCount').textContent = filtered.length;
+      renderCustomerTable(filtered);
+      const paginationDiv = document.getElementById('companyPagination');
+      if (paginationDiv) paginationDiv.innerHTML = '';
+    } catch (err) {
+      console.error("Error filtering customers:", err);
+    }
+  })();
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   $("#companyFilter").selectize({
     placeholder: "Search Companies",
     searchField: "text",
     create: false,
   });
+
+  const jqEl = window.jQuery && $('#companyFilter')[0];
+  const selectizeInst = jqEl ? jqEl.selectize : null;
+  if (selectizeInst && typeof selectizeInst.on === 'function') {
+    selectizeInst.on('change', function(val) {
+      filterByCompanyValue(val);
+    });
+  } else {
+    const nativeSelect = document.getElementById('companyFilter');
+    if (nativeSelect) {
+      nativeSelect.addEventListener('change', function(e) {
+        filterByCompanyValue(e.target.value);
+      });
+    }
+  }
+
   await fetchAndRenderCustomers(1);
 });
 

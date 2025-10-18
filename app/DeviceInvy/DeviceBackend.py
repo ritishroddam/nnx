@@ -29,7 +29,6 @@ vehicle_collection = db['vehicle_inventory']
 @device_bp.route('/page')
 @jwt_required()
 def page():
-    # Get pagination parameters
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 100))
     skip = (page - 1) * per_page
@@ -67,29 +66,44 @@ def get_devices_paginated():
         per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        # Get total count and paginated devices
-        total = collection.count_documents({})
-        devices = list(collection.find({}).skip(skip).limit(per_page))
-        
+        status_q = request.args.get('status', '').strip()
+
+        status_values = {"New Stock", "In use", "Available", "Discarded"}
+        query = {}
+        if status_q:
+            if status_q in status_values:
+                if status_q == 'Discarded':
+                    query['$or'] = [{'Status': 'Discarded'}, {'Status': 'Scrap'}]
+                else:
+                    query['Status'] = status_q
+            else:
+                query['Package'] = status_q
+
+        total = collection.count_documents(query)
+        devices = list(collection.find(query).skip(skip).limit(per_page))
+
         imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
-        
+
         vehiclesData = vehicle_collection.find(
-            {"IMEI": {"$in": imeiList}}, 
-            {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
+            {"IMEI": {"$in": imeiList}},
+            {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI": 1}
         )
-        
+
         VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
-        
+
         for device in devices:
-            date = device['LastEditedDate'].astimezone(timezone(timedelta(hours=5, minutes=30)))
-            device['LastEditedDate'] = date.strftime('%d-%m-%Y %I:%M %p')
-            vehicle = VehicleData.get(device['IMEI']) 
+            try:
+                date = device['LastEditedDate'].astimezone(timezone(timedelta(hours=5, minutes=30)))
+                device['LastEditedDate'] = date.strftime('%d-%m-%Y %I:%M %p')
+            except Exception:
+                pass
+            vehicle = VehicleData.get(device.get('IMEI'))
             if not vehicle:
                 device['LicensePlateNumber'] = None
                 device['CompanyName'] = None
             else:
-                device['LicensePlateNumber'] = vehicle['LicensePlateNumber'] if vehicle else None
-                device['CompanyName'] = vehicle['CompanyName'] if vehicle else None
+                device['LicensePlateNumber'] = vehicle.get('LicensePlateNumber')
+                device['CompanyName'] = vehicle.get('CompanyName')
             device['_id'] = str(device['_id'])
 
         return jsonify({
@@ -190,7 +204,6 @@ def manual_entry():
         data['Package'] = 'None'
         data['Tenure'] = None
 
-    # Only check for duplicate IMEI always, and duplicate GLNumber only if provided
     if collection.find_one({"IMEI": data['IMEI']}):
         flash("IMEI already exists", "danger")
         return redirect(url_for('DeviceInvy.page'))
@@ -440,7 +453,6 @@ def edit_device(device_id):
         package_type = updated_data.get("Package", "")
         tenure = updated_data.get("Tenure", "").strip() if package_type == "Package" else None
 
-        # Fetch username from JWT
         username = get_jwt_identity() or "Unknown"
 
         last_edited_date = datetime.now(timezone.utc)
@@ -517,11 +529,9 @@ def device_package_counts():
 @jwt_required()
 def device_all_counts():
     try:
-        # Status counts
         status_pipeline = [{"$group": {"_id": "$Status", "count": {"$sum": 1}}}]
         status_counts = {doc['_id']: doc['count'] for doc in collection.aggregate(status_pipeline)}
         
-        # Package counts
         package_pipeline = [{"$group": {"_id": "$Package", "count": {"$sum": 1}}}]
         package_counts = {doc['_id']: doc['count'] for doc in collection.aggregate(package_pipeline)}
         
