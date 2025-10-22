@@ -10,6 +10,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
+import traceback
 
 vehicleDetails_bp = Blueprint('VehicleDetails', __name__, static_folder='static', template_folder='templates')
 
@@ -427,6 +428,9 @@ def get_vehicles_paginated():
         company_q = request.args.get('company', '').strip()
         query_q = request.args.get('query', '').strip()
 
+        # Log incoming params for debugging
+        print(f"[DEBUG] get_vehicles_paginated called with page={page}, per_page={per_page}, company='{company_q}', query='{query_q}'")
+
         mongo_query = {}
 
         if company_q:
@@ -459,6 +463,7 @@ def get_vehicles_paginated():
         })
     except Exception as e:
         print(f"Error in get_vehicles_paginated: {e}")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 

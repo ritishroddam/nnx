@@ -204,7 +204,13 @@ async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      // improved error parsing: try JSON then text
+      const text = await response.text();
+      let parsed;
+      try { parsed = JSON.parse(text); } catch(e) { parsed = null; }
+      const serverMessage = (parsed && parsed.error) ? parsed.error : text || `HTTP ${response.status}`;
+      console.error("Server error from get_vehicles_paginated:", serverMessage);
+      throw new Error(serverMessage);
     }
 
     const data = await response.json();
