@@ -74,6 +74,8 @@ let currentPage = 1;
 const ROWS_PER_PAGE = 100;
 let totalRows = 0;
 let currentRowsPerPage = 100;
+let currentCompanyFilter = '';       // NEW: current company filter
+let currentSearchQuery = '';         // NEW: current search query
 
 // Add this function to handle pagination controls
 function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
@@ -133,17 +135,17 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   // Add event listeners
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
-    fetchAndRenderVehicles(1, newRowsPerPage);
+    fetchAndRenderVehicles(1, newRowsPerPage, currentCompanyFilter, currentSearchQuery);
   });
 
   // Previous button
   document.getElementById('vehiclePrevPage').onclick = function() {
-    if (currentPage > 1) fetchAndRenderVehicles(currentPage - 1, rowsPerPage);
+    if (currentPage > 1) fetchAndRenderVehicles(currentPage - 1, rowsPerPage, currentCompanyFilter, currentSearchQuery);
   };
 
   // Next button
   document.getElementById('vehicleNextPage').onclick = function() {
-    if (currentPage < totalPages) fetchAndRenderVehicles(currentPage + 1, rowsPerPage);
+    if (currentPage < totalPages) fetchAndRenderVehicles(currentPage + 1, rowsPerPage, currentCompanyFilter, currentSearchQuery);
   };
 
   // Add go to page functionality
@@ -152,7 +154,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     const targetPage = parseInt(pageInput.value);
     
     if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
-      fetchAndRenderVehicles(targetPage, rowsPerPage);
+      fetchAndRenderVehicles(targetPage, rowsPerPage, currentCompanyFilter, currentSearchQuery);
     } else {
       alert(`Please enter a valid page number between 1 and ${totalPages}`);
       pageInput.value = currentPage;
@@ -177,15 +179,25 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
-// Add this function to fetch paginated vehicles
-async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage) {
+// Replace fetchAndRenderVehicles with this updated version
+async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage, company = currentCompanyFilter, query = currentSearchQuery) {
   try {
     currentRowsPerPage = rowsPerPage;
-    
-    const response = await fetch(`/vehicleDetails/get_vehicles_paginated?page=${page}&per_page=${rowsPerPage}`, {
+    currentCompanyFilter = company || '';
+    currentSearchQuery = query || '';
+
+    let url = `/vehicleDetails/get_vehicles_paginated?page=${page}&per_page=${rowsPerPage}`;
+    if (currentCompanyFilter && currentCompanyFilter.trim() !== '') {
+      url += `&company=${encodeURIComponent(currentCompanyFilter)}`;
+    }
+    if (currentSearchQuery && currentSearchQuery.trim() !== '') {
+      url += `&query=${encodeURIComponent(currentSearchQuery)}`;
+    }
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        "X-CSRF-TOKEN": getCookie ? getCookie("csrf_access_token") : "",
         "Accept": "application/json"
       },
       credentials: "include"
@@ -198,13 +210,13 @@ async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage
     const data = await response.json();
     if (data.error) throw new Error(data.error);
 
-    totalRows = data.total;
+    totalRows = data.total || 0;
     currentPage = data.page || page;
 
     document.getElementById('totalVehiclesCount').textContent = totalRows;
 
-    renderVehicleTable(data.vehicles);
-    renderPaginationControls(totalRows, page, rowsPerPage);
+    renderVehicleTable(data.vehicles || []);
+    renderPaginationControls(totalRows, currentPage, rowsPerPage);
   } catch (err) {
     console.error("Error loading vehicles:", err);
     const tableBody = document.querySelector('.vehicle-table tbody');
@@ -706,4 +718,33 @@ document.getElementById("manualForm").addEventListener("submit", async function 
 
 document.getElementById("uploadForm").addEventListener("submit", function () {
   document.querySelector(".preloader").style.display = "block";
+});
+
+// Wire company filter and search to server-side pagination
+document.addEventListener("DOMContentLoaded", function() {
+  const companyFilter = document.getElementById('companyFilter');
+  if (companyFilter) {
+    companyFilter.addEventListener('change', function() {
+      const selected = this.value || '';
+      currentCompanyFilter = selected;
+      // reset search when company filter changes (optional)
+      // document.getElementById('searchInput').value = '';
+      currentSearchQuery = document.getElementById('searchInput')?.value.trim() || '';
+      fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
+    });
+  }
+
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    // debounce to avoid many requests
+    let debounceTimer = null;
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentSearchQuery = this.value.trim();
+        // preserve company filter while searching
+        fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
+      }, 350);
+    });
+  }
 });

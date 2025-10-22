@@ -424,19 +424,41 @@ def get_vehicles_paginated():
         per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        total = vehicle_collection.count_documents({})
-        vehicles = list(vehicle_collection.find({}).skip(skip).limit(per_page))
+        company_q = request.args.get('company', '').strip()
+        query_q = request.args.get('query', '').strip()
 
+        mongo_query = {}
+
+        if company_q:
+            mongo_query['CompanyName'] = company_q
+
+        if query_q:
+            # match LicensePlateNumber, IMEI or SIM (contains / ends-with / exact)
+            mongo_query['$or'] = [
+                {'LicensePlateNumber': {'$regex': query_q, '$options': 'i'}},
+                {'IMEI': {'$regex': query_q, '$options': 'i'}},
+                {'SIM': {'$regex': query_q, '$options': 'i'}},
+                {'LicensePlateNumber': query_q},
+                {'IMEI': query_q},
+                {'SIM': query_q}
+            ]
+
+        total = vehicle_collection.count_documents(mongo_query)
+        vehicles = list(vehicle_collection.find(mongo_query).skip(skip).limit(per_page))
+
+        processed = []
         for vehicle in vehicles:
             vehicle['_id'] = str(vehicle['_id'])
+            processed.append(vehicle)
 
         return jsonify({
             "total": total,
             "page": page,
             "per_page": per_page,
-            "vehicles": vehicles
+            "vehicles": processed
         })
     except Exception as e:
+        print(f"Error in get_vehicles_paginated: {e}")
         return jsonify({"error": str(e)}), 500
 
 
