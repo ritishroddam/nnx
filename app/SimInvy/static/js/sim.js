@@ -1,5 +1,7 @@
 let allSimsData = [];
 let originalTableRows = [];
+let currentStatus = 'All';        // new: track selected status
+let currentSearch = '';          // new: track current search
 
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.remove("hidden");
@@ -52,12 +54,18 @@ document.addEventListener("DOMContentLoaded", function() {
     originalTableRows = Array.from(tableBody.querySelectorAll('tr'));
     
     const searchInput = document.getElementById('simSearch');
-    const clearBtn = document.getElementById('clearSearchBtn');
-    
     searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.trim().toLowerCase();
-        filterTable(searchTerm);
-    });
+      const searchTerm = this.value.trim();
+      if (!searchTerm) {
+        clearSearch();
+      } else {
+        searchSims(searchTerm);
+      }
+  });
+
+  // wire up status select (template already has onchange="filterSimsByStatus()")
+  // ensure function exists globally (declared below)
+  document.getElementById('statusFilter').addEventListener('change', filterSimsByStatus);
 
   document.getElementById("manualEntryModal").classList.add("hidden");
   document.getElementById("uploadModal").classList.add("hidden");
@@ -599,31 +607,88 @@ function setupDownloadButton() {
 }
 
 
-function filterTable(searchTerm) {
-    const tableBody = document.getElementById('simTable');
-    
-    if (!searchTerm) {
-        originalTableRows.forEach(row => {
-            row.style.display = '';
-        });
-        return;
-    }
+async function filterSimsByStatus() {
+  const status = document.getElementById('statusFilter').value || 'All';
+  currentStatus = status;
+  currentSearch = '';
 
-    originalTableRows.forEach(row => {
-        if (row.cells.length < 3) {
-            return;
-        }
-        
-        const mobile = row.cells[0].textContent.trim().toLowerCase();
-        const sim = row.cells[1].textContent.trim().toLowerCase();
-        const imei = row.cells[2].textContent.trim().toLowerCase();
-        
-        const matches = (
-            mobile.includes(searchTerm) ||
-            sim.includes(searchTerm) ||
-            imei.includes(searchTerm)
-        );
-        
-        row.style.display = matches ? '' : 'none';
+  // When user selects All, restore paginated view
+  if (!status || status === 'All') {
+    document.getElementById('simSearch').value = '';
+    fetchAndRenderSims(1, ROWS_PER_PAGE);
+    return;
+  }
+
+  try {
+    const res = await fetch(`/simInvy/get_sims_by_status/${encodeURIComponent(status)}`, {
+      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
     });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error || 'Failed to load status results');
+
+    // Render full result set and hide pagination
+    renderSimTable(data);
+    document.getElementById('simPagination').innerHTML = '';
+    updateCounters(data, data.length);
+  } catch (err) {
+    console.error('Error filtering by status:', err);
+    document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
+  }
+}
+
+async function searchSims(query) {
+  currentSearch = query;
+  currentStatus = 'All';
+
+  if (!query || query.trim() === '') {
+    clearSearch();
+    return;
+  }
+
+  try {
+    const res = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(query)}`, {
+      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error || 'Search failed');
+
+    // Render results from server (search across all sims)
+    renderSimTable(data);
+    document.getElementById('simPagination').innerHTML = '';
+    updateCounters(data, data.length);
+  } catch (err) {
+    console.error('Error searching SIMs:', err);
+    document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load search results</td></tr>`;
+  }
+}
+
+function clearSearch() {
+  // Reset filters and restore paginated listing
+  currentSearch = '';
+  currentStatus = 'All';
+  const searchEl = document.getElementById('simSearch');
+  const statusEl = document.getElementById('statusFilter');
+  if (searchEl) searchEl.value = '';
+  if (statusEl) statusEl.value = 'All';
+  fetchAndRenderSims(1, ROWS_PER_PAGE);
+  updateCountersFromServer();
+}
+
+// Replace the old client-side filterTable - keep it as a fallback if needed
+function filterTable(searchTerm) {
+  // Deprecated: server-side search now used. Keep fallback for small datasets.
+  if (!searchTerm) {
+    originalTableRows.forEach(row => row.style.display = '');
+    return;
+  }
+  originalTableRows.forEach(row => {
+    if (row.cells.length < 3) return;
+    const mobile = row.cells[0].textContent.trim().toLowerCase();
+    const sim = row.cells[1].textContent.trim().toLowerCase();
+    const imei = row.cells[2].textContent.trim().toLowerCase();
+    const matches = mobile.includes(searchTerm.toLowerCase()) ||
+                    sim.includes(searchTerm.toLowerCase()) ||
+                    imei.includes(searchTerm.toLowerCase());
+    row.style.display = matches ? '' : 'none';
+  });
 }
