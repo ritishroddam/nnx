@@ -75,6 +75,7 @@ document
 
 let allDevices = [];
 let currentRowsPerPage = 100;
+let currentStatus = ''; // new: track currently selected status
 
 document.addEventListener("DOMContentLoaded", function () {
   const dateInInput = document.getElementById("DateIn");
@@ -98,11 +99,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage, status = '') {
   try {
-    currentRowsPerPage = rowsPerPage; 
-
+    currentRowsPerPage = rowsPerPage;
+    currentStatus = status || ''; // new: remember status for pagination callbacks
+    
     let url = `/deviceInvy/get_devices_paginated?page=${page}&per_page=${rowsPerPage}`;
-    if (status && status.trim() !== '') {
-      url += `&status=${encodeURIComponent(status)}`;
+    if (currentStatus && currentStatus.trim() !== '') {
+      url += `&status=${encodeURIComponent(currentStatus)}`;
     }
 
     const response = await fetch(url, {
@@ -290,15 +292,15 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
-    fetchAndRenderDevices(1, newRowsPerPage);
+    fetchAndRenderDevices(1, newRowsPerPage, currentStatus); // pass status
   });
 
   document.getElementById('devicePrevPage').onclick = function() {
-    if (currentPage > 1) fetchAndRenderDevices(currentPage - 1, rowsPerPage);
+    if (currentPage > 1) fetchAndRenderDevices(currentPage - 1, rowsPerPage, currentStatus); // pass status
   };
 
   document.getElementById('deviceNextPage').onclick = function() {
-    if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1, rowsPerPage);
+    if (currentPage < totalPages) fetchAndRenderDevices(currentPage + 1, rowsPerPage, currentStatus); // pass status
   };
 
   document.getElementById('goToPageBtn').onclick = function() {
@@ -306,7 +308,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     const targetPage = parseInt(pageInput.value);
     
     if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
-      fetchAndRenderDevices(targetPage, rowsPerPage);
+      fetchAndRenderDevices(targetPage, rowsPerPage, currentStatus); // pass status
     } else {
       alert(`Please enter a valid page number between 1 and ${totalPages}`);
       pageInput.value = currentPage;
@@ -342,52 +344,18 @@ async function filterDevicesByStatus() {
   const selectedStatus = document.getElementById("statusFilter").value;
 
   if (!selectedStatus) {
+    currentStatus = '';
     fetchAndRenderDevices(1, currentRowsPerPage);
     updateAllCountersFromServer();
     return;
   }
 
-  try {
-    await fetchAndRenderDevices(1, currentRowsPerPage, selectedStatus);
-    const metaResp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=1`, {
-      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
-    });
-    if (!metaResp.ok) throw new Error(`HTTP ${metaResp.status}`);
-    const meta = await metaResp.json();
-    const total = meta.total || 0;
-    const perPage = total > 0 ? total : 10000;
-
-    const resp = await fetch(`/deviceInvy/get_devices_paginated?page=1&per_page=${perPage}`, {
-      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    const devices = data.devices || [];
-
-    const filtered = devices.filter(device => {
-      if (["New Stock", "In use", "Available", "Discarded"].includes(selectedStatus)) {
-        const status = (device.Status || '').toString().trim();
-        if (selectedStatus === 'Discarded') {
-          return status === 'Discarded' || status === 'Scrap';
-        }
-        return status === selectedStatus;
-      } else {
-        const pkg = (device.Package || '').toString().trim();
-        return pkg === selectedStatus;
-      }
-    });
-
-    renderDeviceTable(filtered);
-    allDevices = Array.from(document.querySelectorAll("#deviceTable tr[data-id]"));
-    document.getElementById('devicePagination').innerHTML = '';
-    updateStatusCountsFromData(filtered);
-  } catch (err) {
-    console.error("Error filtering devices:", err);
-    displayFlashMessage("Failed to filter devices. See console for details.", "danger");
-  }
+  // simply load server-side paginated data for the selected status
+  currentStatus = selectedStatus;
+  fetchAndRenderDevices(1, currentRowsPerPage, currentStatus);
 }
 
-function updateStatusCounts(devicesData = null) {
+async function updateStatusCounts(devicesData = null) {
   let newStockCount = 0;
   let inUseCount = 0;
   let availableCount = 0;
