@@ -172,7 +172,7 @@ select {
   justify-content: flex-start;
   border-top: none;
   margin-top: 0;
-  padding-top: 0;
+  padding-top: 10px;
 }
 
 #NumberOfSeatsContainer.hidden {
@@ -217,7 +217,7 @@ body.modal-open {
   left: 0;
   width: 100vw;
   height: 100vh;
-  margin-top: 20px;
+  padding-top: 20px;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
   z-index: 9999;
@@ -303,7 +303,6 @@ body.modal-open {
   font-size: 1.5rem;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid #e5e7eb;
   position: relative;
