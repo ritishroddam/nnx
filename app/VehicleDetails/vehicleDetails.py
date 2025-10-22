@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required
 import traceback
+from datetime import datetime
 
 vehicleDetails_bp = Blueprint('VehicleDetails', __name__, static_folder='static', template_folder='templates')
 
@@ -417,6 +418,23 @@ def download_excel():
         headers={"Content-Disposition": "attachment;filename=SIM_Inventory.xlsx"}
     )
 
+def _sanitize_value(val):
+    """Recursively convert ObjectId/datetime to JSON-serializable types."""
+    try:
+        from bson.objectid import ObjectId as _ObjectId
+    except Exception:
+        _ObjectId = None
+
+    if _ObjectId is not None and isinstance(val, _ObjectId):
+        return str(val)
+    if isinstance(val, datetime):
+        return val.isoformat()
+    if isinstance(val, dict):
+        return {k: _sanitize_value(v) for k, v in val.items()}
+    if isinstance(val, list):
+        return [_sanitize_value(v) for v in val]
+    return val
+
 @vehicleDetails_bp.route('/get_vehicles_paginated')
 @jwt_required()
 def get_vehicles_paginated():
@@ -452,8 +470,10 @@ def get_vehicles_paginated():
 
         processed = []
         for vehicle in vehicles:
+            # ensure top-level _id string
             vehicle['_id'] = str(vehicle['_id'])
-            processed.append(vehicle)
+            # sanitize whole document recursively (handles nested ObjectId/datetime)
+            processed.append(_sanitize_value(vehicle))
 
         return jsonify({
             "total": total,

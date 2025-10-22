@@ -183,7 +183,8 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
 async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage, company = currentCompanyFilter, query = currentSearchQuery) {
   try {
     currentRowsPerPage = rowsPerPage;
-    currentCompanyFilter = company || '';
+    // treat explicit 'All' as no filter
+    currentCompanyFilter = (company === 'All' ? '' : (company || ''));
     currentSearchQuery = query || '';
 
     let url = `/vehicleDetails/get_vehicles_paginated?page=${page}&per_page=${rowsPerPage}`;
@@ -730,13 +731,13 @@ document.getElementById("uploadForm").addEventListener("submit", function () {
 document.addEventListener("DOMContentLoaded", function() {
   const companyFilter = document.getElementById('companyFilter');
   if (companyFilter) {
+    // set explicit All default
+    companyFilter.value = 'All';
     companyFilter.addEventListener('change', function() {
-      const selected = this.value || '';
-      currentCompanyFilter = selected;
-      // reset search when company filter changes (optional)
-      // document.getElementById('searchInput').value = '';
+      const selected = this.value || 'All';
+      currentCompanyFilter = (selected === 'All') ? '' : selected;
       currentSearchQuery = document.getElementById('searchInput')?.value.trim() || '';
-      fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
+      fetchAndRenderVehicles(1, currentRowsPerPage, selected, currentSearchQuery);
     });
   }
 

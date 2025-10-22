@@ -36,7 +36,7 @@ Vehicle Details
 
     <label for="companyFilter">Filter By Company:</label>
     <select id="companyFilter" class="filter-select">
-      <option value="">All Companies</option>
+      <option value="All" selected>All Companies</option>
       {% for company in companies %}
       <option value="{{ company.name }}">{{ company.name }}</option>
       {% endfor %}
