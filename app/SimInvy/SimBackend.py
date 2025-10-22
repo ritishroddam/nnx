@@ -476,29 +476,65 @@ def download_excel_filtered():
 def get_sims_paginated():
     try:
         page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 100))  # This already exists
+        per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        total = collection.count_documents({})
-        sims = list(collection.find({}).skip(skip).limit(per_page))
+        status_q = request.args.get('status', '').strip()
+        query_q = request.args.get('query', '').strip()
+
+        mongo_query = {}
+
+        # handle status filter
+        if status_q and status_q != 'All':
+            if status_q in ['Active', 'Inactive']:
+                mongo_query['isActive'] = True if status_q == 'Active' else False
+            elif status_q == 'Allocated':
+                # allocate set from vehicle_inventory and filter SimNumber in that set
+                vehicle_collection = db['vehicle_inventory']
+                vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
+                allocated_set = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+                if allocated_set:
+                    mongo_query['SimNumber'] = {'$in': list(allocated_set)}
+                else:
+                    # no allocations -> force empty result
+                    mongo_query['SimNumber'] = {'$in': []}
+            else:
+                # default: filter by stored status value
+                mongo_query['status'] = status_q
+
+        # handle search query (mobile or sim, exact or ends-with)
+        if query_q:
+            mongo_query['$or'] = [
+                {'MobileNumber': query_q},
+                {'SimNumber': query_q},
+                {'MobileNumber': {'$regex': f'{query_q}$'}},
+                {'SimNumber': {'$regex': f'{query_q}$'}}
+            ]
+
+        total = collection.count_documents(mongo_query)
+        sims = list(collection.find(mongo_query).skip(skip).limit(per_page))
 
         vehicle_collection = db['vehicle_inventory']
-        vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
-        sim_to_imei = {v['SIM']: v.get('imei', 'N/A') for v in vehicles if 'SIM' in v}
+        vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+        sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
 
+        processed = []
         for sim in sims:
-            sim['IMEI'] = sim_to_imei.get(sim.get('MobileNumber', ''), 'N/A')
-            sim['_id'] = str(sim['_id'])
+            sim_number = sim.get('SimNumber', '')
+            sim['_id'] = str(sim.get('_id'))
+            sim['IMEI'] = sim_to_imei.get(sim_number, 'N/A')
             sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
             sim['lastEditedAt'] = sim.get('lastEditedAt', '')
+            processed.append(sim)
 
         return jsonify({
             "total": total,
             "page": page,
             "per_page": per_page,
-            "sims": sims
+            "sims": processed
         })
     except Exception as e:
+        print(f"Error in get_sims_paginated: {e}")
         return jsonify({"error": str(e)}), 500
 
 @sim_bp.route('/sim_status_counts')

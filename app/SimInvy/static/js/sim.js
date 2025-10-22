@@ -206,22 +206,40 @@ let totalRows = 0;
 
 let currentRowsPerPage = 100; 
 
-async function fetchAndRenderSims(page = 1, rowsPerPage = currentRowsPerPage) {
+function fetchAndRenderSims(page = 1, rowsPerPage = currentRowsPerPage, status = currentStatus, query = currentSearch) {
   try {
     currentRowsPerPage = rowsPerPage;
-    
-    const response = await fetch(`/simInvy/get_sims_paginated?page=${page}&per_page=${rowsPerPage}`, {
+    currentStatus = status || 'All';
+    currentSearch = query || '';
+
+    let url = `/simInvy/get_sims_paginated?page=${page}&per_page=${rowsPerPage}`;
+    if (currentStatus && currentStatus !== 'All') {
+      url += `&status=${encodeURIComponent(currentStatus)}`;
+    }
+    if (currentSearch && currentSearch.trim() !== '') {
+      url += `&query=${encodeURIComponent(currentSearch)}`;
+    }
+
+    fetch(url, {
       headers: {
         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
       }
-    });
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
-
-    totalRows = data.total;
-    renderSimTable(data.sims);
-    renderPaginationControls(totalRows, page, rowsPerPage);
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        totalRows = data.total || 0;
+        currentPage = data.page || page;
+        renderSimTable(data.sims || []);
+        renderPaginationControls(totalRows, currentPage, rowsPerPage);
+        // IMPORTANT: do not update status counters here when filtered/searching.
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
+      });
   } catch (err) {
+    console.error(err);
     document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
   }
 }
@@ -314,17 +332,18 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   
   paginationDiv.innerHTML = html;
 
+  // Preserve currentStatus/currentSearch when changing rows or pages
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
-    fetchAndRenderSims(1, newRowsPerPage);
+    fetchAndRenderSims(1, newRowsPerPage, currentStatus, currentSearch);
   });
 
   document.getElementById('simPrevPage').onclick = function() {
-    if (currentPage > 1) fetchAndRenderSims(currentPage - 1, rowsPerPage);
+    if (currentPage > 1) fetchAndRenderSims(currentPage - 1, rowsPerPage, currentStatus, currentSearch);
   };
 
   document.getElementById('simNextPage').onclick = function() {
-    if (currentPage < totalPages) fetchAndRenderSims(currentPage + 1, rowsPerPage);
+    if (currentPage < totalPages) fetchAndRenderSims(currentPage + 1, rowsPerPage, currentStatus, currentSearch);
   };
 
   document.getElementById('goToPageBtn').onclick = function() {
@@ -332,7 +351,7 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
     const targetPage = parseInt(pageInput.value);
     
     if (targetPage && targetPage >= 1 && targetPage <= totalPages) {
-      fetchAndRenderSims(targetPage, rowsPerPage);
+      fetchAndRenderSims(targetPage, rowsPerPage, currentStatus, currentSearch);
     } else {
       alert(`Please enter a valid page number between 1 and ${totalPages}`);
       pageInput.value = currentPage;
@@ -612,28 +631,17 @@ async function filterSimsByStatus() {
   currentStatus = status;
   currentSearch = '';
 
-  // When user selects All, restore paginated view
   if (!status || status === 'All') {
     document.getElementById('simSearch').value = '';
-    fetchAndRenderSims(1, ROWS_PER_PAGE);
+    // restore normal paginated view and refresh counters (only when clearing)
+    fetchAndRenderSims(1, ROWS_PER_PAGE, 'All', '');
+    updateCountersFromServer(); // restore counters
     return;
   }
 
-  try {
-    const res = await fetch(`/simInvy/get_sims_by_status/${encodeURIComponent(status)}`, {
-      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error || 'Failed to load status results');
-
-    // Render full result set and hide pagination
-    renderSimTable(data);
-    document.getElementById('simPagination').innerHTML = '';
-    updateCounters(data, data.length);
-  } catch (err) {
-    console.error('Error filtering by status:', err);
-    document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load data</td></tr>`;
-  }
+  // show paginated results for the selected status
+  fetchAndRenderSims(1, ROWS_PER_PAGE, currentStatus, '');
+  // DO NOT change status counters here (user requested)
 }
 
 async function searchSims(query) {
@@ -645,21 +653,9 @@ async function searchSims(query) {
     return;
   }
 
-  try {
-    const res = await fetch(`/simInvy/search_sims?query=${encodeURIComponent(query)}`, {
-      headers: { "X-CSRF-TOKEN": getCookie("csrf_access_token") }
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error || 'Search failed');
-
-    // Render results from server (search across all sims)
-    renderSimTable(data);
-    document.getElementById('simPagination').innerHTML = '';
-    updateCounters(data, data.length);
-  } catch (err) {
-    console.error('Error searching SIMs:', err);
-    document.getElementById('simTable').innerHTML = `<tr><td colspan="10">Failed to load search results</td></tr>`;
-  }
+  // use server-side paginated search and preserve pagination UI
+  fetchAndRenderSims(1, ROWS_PER_PAGE, 'All', currentSearch);
+  // DO NOT change status counters here
 }
 
 function clearSearch() {
