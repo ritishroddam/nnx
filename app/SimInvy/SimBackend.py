@@ -757,6 +757,7 @@ def sim_status_counts():
         
         all_sims = list(collection.find({}))
         
+        # Initialize counters
         counts = {
             "New Stock": 0,
             "In Use": 0, 
@@ -767,20 +768,16 @@ def sim_status_counts():
         }
         
         for sim in all_sims:
-            stored_status = sim.get('status', '')
-            if stored_status in counts:
-                counts[stored_status] += 1
-        
-        allocated_count = 0
-        for sim in all_sims:
             sim_number = sim.get('SimNumber', '')
+            
             if sim_number in allocated_sim_numbers:
-                allocated_count += 1
-                stored_status = sim.get('status', '')
-                if stored_status in counts and counts[stored_status] > 0:
-                    counts[stored_status] -= 1
-        
-        counts['In Use'] = allocated_count
+                counts["In Use"] += 1
+            else:
+                stored_status = sim.get('status', 'New Stock')
+                if stored_status in counts:
+                    counts[stored_status] += 1
+                else:
+                    counts["Available"] += 1
         
         return jsonify(counts)
         

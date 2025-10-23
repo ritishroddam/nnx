@@ -406,6 +406,7 @@ async function updateCountersFromServer() {
       }
     });
     const counts = await response.json();
+    
     document.getElementById('newStockCount').textContent = counts["New Stock"] || 0;
     document.getElementById('inUseCount').textContent = counts["In Use"] || 0;
     document.getElementById('availableCount').textContent = counts["Available"] || 0;
@@ -413,12 +414,12 @@ async function updateCountersFromServer() {
     document.getElementById('safeCustodyCount').textContent = counts["Safe Custody"] || 0;
     document.getElementById('suspendedCount').textContent = counts["Suspended"] || 0;
 
-    // Set total as sum of status counts (fallback if paginated total not available)
-      // const total = Object.values(counts).reduce((sum, v) => sum + (parseInt(v) || 0), 0);
-      // const totalEl = document.getElementById('totalSimsCount');
-      // if (totalEl) totalEl.textContent = total;
+    const total = Object.values(counts).reduce((sum, v) => sum + (parseInt(v) || 0), 0);
+    const totalEl = document.getElementById('totalSimsCount');
+    if (totalEl) totalEl.textContent = total;
+    
   } catch (err) {
-    // keep silent on failure, leave counters unchanged
+    console.error('Failed to update counters:', err);
   }
 }
 
