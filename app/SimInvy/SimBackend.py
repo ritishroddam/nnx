@@ -552,3 +552,19 @@ def sim_status_counts():
 ist = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(ist)
 last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
+
+@sim_bp.route('/sim_all_counts')
+@jwt_required()
+def sim_all_counts():
+    try:
+        status_pipeline = [{"$group": {"_id": "$status", "count": {"$sum": 1}}}]
+        status_counts = {doc['_id']: doc['count'] for doc in collection.aggregate(status_pipeline)}
+        
+        total_sims = sum(status_counts.values())
+        
+        return jsonify({
+            "total": total_sims,
+            "status": status_counts
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

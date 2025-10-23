@@ -977,6 +977,15 @@ input[type="date"] {
   -moz-appearance: textfield;
 }
 
+.counter.total {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .counter.total {
+  color: #fcfcfc;
+  box-shadow: 0 0 10px #cccccc90;
+}
+
 @media (max-width: 1024px) {
   #manualForm {
     grid-template-columns: repeat(2, 1fr);
