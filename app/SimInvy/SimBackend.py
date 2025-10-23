@@ -24,26 +24,48 @@ def format_date(date_str):
     except:
         return date_str
 
+# @sim_bp.route('/page')
+# @jwt_required()
+# def page():
+#     vehicle_collection = db['vehicle_inventory']
+#     vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
+    
+#     sim_to_imei = {v['SIM']: v.get('imei', 'N/A') 
+#                   for v in vehicles if 'SIM' in v}
+    
+#     sims = list(collection.find({}))
+#     for sim in sims:
+#         if sim['MobileNumber'] in sim_to_imei:
+#             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
+#             # Remove this line to allow manual status changes:
+#             # sim['status'] = 'Allocated'
+#             sim['isActive'] = True
+#         else:
+#             sim.setdefault('status', 'Available')
+#             sim.setdefault('isActive', True)
+#             sim.setdefault('lastEditedBy', 'N/A')
+    
+#     return render_template('sim.html', sims=sims)
+
 @sim_bp.route('/page')
 @jwt_required()
 def page():
     vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
+    vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
     
-    sim_to_imei = {v['SIM']: v.get('imei', 'N/A') 
-                  for v in vehicles if 'SIM' in v}
+    allocated_sim_numbers = {v['sim_number'] for v in vehicles if 'sim_number' in v}
+    sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
     
     sims = list(collection.find({}))
     for sim in sims:
-        if sim['MobileNumber'] in sim_to_imei:
-            sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
-            # Remove this line to allow manual status changes:
-            # sim['status'] = 'Allocated'
-            sim['isActive'] = True
-        else:
-            sim.setdefault('status', 'Available')
-            sim.setdefault('isActive', True)
-            sim.setdefault('lastEditedBy', 'N/A')
+        sim_number = sim.get('SimNumber', '')
+        
+        if sim_number in allocated_sim_numbers:
+            sim['status'] = 'In Use'
+            sim['IMEI'] = sim_to_imei.get(sim_number, 'N/A')
+        
+        sim.setdefault('isActive', True)
+        sim.setdefault('lastEditedBy', 'N/A')
     
     return render_template('sim.html', sims=sims)
 
@@ -189,7 +211,7 @@ def search_sims():
     for sim in matching_sims:
         sim_number = sim.get('SimNumber', '')
         
-        actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
+        actual_status = 'In Use' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
         
         sim_data = {
             '_id': str(sim.get('_id', '')),
