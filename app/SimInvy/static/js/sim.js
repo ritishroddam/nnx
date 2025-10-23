@@ -230,6 +230,11 @@ function fetchAndRenderSims(page = 1, rowsPerPage = currentRowsPerPage, status =
         if (data.error) throw new Error(data.error);
         totalRows = data.total || 0;
         currentPage = data.page || page;
+
+        // update total counter from paginated response (authoritative)
+        const totalEl = document.getElementById('totalSimsCount');
+        if (totalEl) totalEl.textContent = totalRows;
+
         renderSimTable(data.sims || []);
         renderPaginationControls(totalRows, currentPage, rowsPerPage);
         // IMPORTANT: do not update status counters here when filtered/searching.
@@ -407,7 +412,13 @@ async function updateCountersFromServer() {
     document.getElementById('scrapCount').textContent = counts["Scrap"] || 0;
     document.getElementById('safeCustodyCount').textContent = counts["Safe Custody"] || 0;
     document.getElementById('suspendedCount').textContent = counts["Suspended"] || 0;
+
+    // Set total as sum of status counts (fallback if paginated total not available)
+    const total = Object.values(counts).reduce((sum, v) => sum + (parseInt(v) || 0), 0);
+    const totalEl = document.getElementById('totalSimsCount');
+    if (totalEl) totalEl.textContent = total;
   } catch (err) {
+    // keep silent on failure, leave counters unchanged
   }
 }
 
