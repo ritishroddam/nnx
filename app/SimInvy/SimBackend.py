@@ -646,42 +646,59 @@ def get_sims_paginated():
 
         vehicle_collection = db['vehicle_inventory']
         vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
-        allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+        allocated_sim_numbers = {str(v['sim_number']).strip() for v in vehicle_sims if 'sim_number' in v and v['sim_number']}
 
         if status_q and status_q != 'All':
             if status_q == 'In Use':
                 if allocated_sim_numbers:
                     mongo_query['SimNumber'] = {'$in': list(allocated_sim_numbers)}
                 else:
-                    mongo_query['SimNumber'] = {'$in': []}  
+                    # If no allocated SIMs, return empty result
+                    return jsonify({
+                        "total": 0,
+                        "page": page,
+                        "per_page": per_page,
+                        "sims": []
+                    })
             else:
+                # For other statuses, exclude allocated SIMs and match the status
                 mongo_query['$and'] = [
                     {'status': status_q},
                     {'SimNumber': {'$nin': list(allocated_sim_numbers)}}
                 ]
 
         if query_q:
-            mongo_query['$or'] = [
+            query_conditions = [
                 {'MobileNumber': query_q},
                 {'SimNumber': query_q},
                 {'MobileNumber': {'$regex': f'{query_q}$'}},
                 {'SimNumber': {'$regex': f'{query_q}$'}}
             ]
+            
+            if mongo_query:
+                # If we already have status conditions, combine with $and
+                if '$and' in mongo_query:
+                    mongo_query['$and'].append({'$or': query_conditions})
+                else:
+                    mongo_query = {'$and': [mongo_query, {'$or': query_conditions}]}
+            else:
+                mongo_query['$or'] = query_conditions
 
         total = collection.count_documents(mongo_query)
         sims = list(collection.find(mongo_query).skip(skip).limit(per_page))
 
         vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
-        sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
+        sim_to_imei = {str(v.get('sim_number')).strip(): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v and v['sim_number']}
 
         processed = []
         for sim in sims:
-            sim_number = sim.get('SimNumber', '')
+            sim_number = str(sim.get('SimNumber', '')).strip()
             sim['_id'] = str(sim.get('_id'))
             sim['IMEI'] = sim_to_imei.get(sim_number, 'N/A')
             sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
             sim['lastEditedAt'] = sim.get('lastEditedAt', '')
             
+            # Override status to 'In Use' if SIM is allocated to a vehicle
             if sim_number in allocated_sim_numbers:
                 sim['status'] = 'In Use'
             
