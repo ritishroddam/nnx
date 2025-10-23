@@ -1,7 +1,7 @@
 let allSimsData = [];
 let originalTableRows = [];
-let currentStatus = 'All';        // new: track selected status
-let currentSearch = '';          // new: track current search
+let currentStatus = 'All';      
+let currentSearch = '';          
 
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.getElementById("manualEntryModal").classList.remove("hidden");
@@ -63,8 +63,6 @@ document.addEventListener("DOMContentLoaded", function() {
       }
   });
 
-  // wire up status select (template already has onchange="filterSimsByStatus()")
-  // ensure function exists globally (declared below)
   document.getElementById('statusFilter').addEventListener('change', filterSimsByStatus);
 
   document.getElementById("manualEntryModal").classList.add("hidden");
@@ -116,7 +114,6 @@ document.addEventListener("DOMContentLoaded", function() {
       var simError = document.getElementById("simError");
 
       var dateInValue = dateInInput.value.trim();
-      // var dateOutValue = dateOutInput.value.trim();
 
       var indianMobileRegex = /^\d{10}$|^\d{13}$/;
 
@@ -232,7 +229,6 @@ function fetchAndRenderSims(page = 1, rowsPerPage = currentRowsPerPage, status =
         currentPage = data.page || page;
         renderSimTable(data.sims || []);
         renderPaginationControls(totalRows, currentPage, rowsPerPage);
-        // IMPORTANT: do not update status counters here when filtered/searching.
       })
       .catch(err => {
         console.error(err);
@@ -332,7 +328,6 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   
   paginationDiv.innerHTML = html;
 
-  // Preserve currentStatus/currentSearch when changing rows or pages
   document.getElementById('rowsPerPageSelect').addEventListener('change', function() {
     const newRowsPerPage = parseInt(this.value);
     fetchAndRenderSims(1, newRowsPerPage, currentStatus, currentSearch);
@@ -374,25 +369,6 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
-// function updateCounters(currentPageSims, total) {
-//   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
-//   currentPageSims.forEach(sim => {
-//     const status = (sim.status || '').trim();
-//     if (status === "New Stock") newStockCount++;
-//     if (status === "In Use") inUseCount++;
-//     if (status === "Available") availableCount++;
-//     if (status === "Scrap") scrapCount++;
-//     if (status === "Safe Custody") safeCustodyCount++;
-//     if (status === "Suspended") suspendedCount++;
-//   });
-//   document.getElementById('newStockCount').textContent = newStockCount;
-//   document.getElementById('inUseCount').textContent = inUseCount;
-//   document.getElementById('availableCount').textContent = availableCount;
-//   document.getElementById('scrapCount').textContent = scrapCount;
-//   document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
-//   document.getElementById('suspendedCount').textContent = suspendedCount;
-// }
-
 function updateCounters(currentPageSims, total) {
   let newStockCount = 0, inUseCount = 0, availableCount = 0, 
       scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
@@ -428,24 +404,6 @@ function resetCounters() {
   document.getElementById('safeCustodyCount').textContent = "0";
   document.getElementById('suspendedCount').textContent = "0";
 }
-
-// async function updateCountersFromServer() {
-//   try {
-//     const response = await fetch('/simInvy/sim_status_counts', {
-//       headers: {
-//         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//       }
-//     });
-//     const counts = await response.json();
-//     document.getElementById('newStockCount').textContent = counts["New Stock"] || 0;
-//     document.getElementById('inUseCount').textContent = counts["In Use"] || 0;
-//     document.getElementById('availableCount').textContent = counts["Available"] || 0;
-//     document.getElementById('scrapCount').textContent = counts["Scrap"] || 0;
-//     document.getElementById('safeCustodyCount').textContent = counts["Safe Custody"] || 0;
-//     document.getElementById('suspendedCount').textContent = counts["Suspended"] || 0;
-//   } catch (err) {
-//   }
-// }
 
 async function updateCountersFromServer() {
   try {
@@ -543,7 +501,6 @@ function editSim(simId) {
     </select>
   `;
 
-  // Actions: Save and Cancel
   row.cells[9].innerHTML = `
     <button class="icon-btn save-icon" onclick="saveSim('${simId}')">💾</button>
     <button class="icon-btn cancel-icon" onclick="cancelEditSim('${simId}')">❌</button>
@@ -654,7 +611,6 @@ function setupDownloadButton() {
             `;
             document.body.appendChild(spinner);
 
-            // ✅ Directly hit backend to get full Excel (no huge JSON post)
             const response = await fetch("/simInvy/download_excel", {
                 method: "GET",
                 headers: {
@@ -723,15 +679,12 @@ async function filterSimsByStatus() {
 
   if (!status || status === 'All') {
     document.getElementById('simSearch').value = '';
-    // restore normal paginated view and refresh counters (only when clearing)
     fetchAndRenderSims(1, ROWS_PER_PAGE, 'All', '');
-    updateCountersFromServer(); // restore counters
+    updateCountersFromServer(); 
     return;
   }
 
-  // show paginated results for the selected status
   fetchAndRenderSims(1, ROWS_PER_PAGE, currentStatus, '');
-  // DO NOT change status counters here (user requested)
 }
 
 async function searchSims(query) {
@@ -743,13 +696,10 @@ async function searchSims(query) {
     return;
   }
 
-  // use server-side paginated search and preserve pagination UI
   fetchAndRenderSims(1, ROWS_PER_PAGE, 'All', currentSearch);
-  // DO NOT change status counters here
 }
 
 function clearSearch() {
-  // Reset filters and restore paginated listing
   currentSearch = '';
   currentStatus = 'All';
   const searchEl = document.getElementById('simSearch');
@@ -760,9 +710,7 @@ function clearSearch() {
   updateCountersFromServer();
 }
 
-// Replace the old client-side filterTable - keep it as a fallback if needed
 function filterTable(searchTerm) {
-  // Deprecated: server-side search now used. Keep fallback for small datasets.
   if (!searchTerm) {
     originalTableRows.forEach(row => row.style.display = '');
     return;

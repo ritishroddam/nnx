@@ -37,8 +37,6 @@ def page():
     for sim in sims:
         if sim['MobileNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
-            # Remove this line to allow manual status changes:
-            # sim['status'] = 'Allocated'
             sim['isActive'] = True
         else:
             sim.setdefault('status', 'Available')
@@ -156,7 +154,6 @@ def manual_entry():
     data = request.form.to_dict()
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    # Accept status from form, default to 'New Stock' if not provided
     data['status'] = data.get('Status', 'New Stock')
     data['isActive'] = True  
 
@@ -254,7 +251,6 @@ def upload_file():
             vendor = str(row['Vendor']).strip()
             status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
 
-            # Vendor validation
             if vendor not in ["Airtel", "Vodafone", "BSNL", "Jio"]:
                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone' or 'BSNL' or 'Jio'.", "danger")
                 return redirect(url_for('SimInvy.page'))
@@ -484,25 +480,20 @@ def get_sims_paginated():
 
         mongo_query = {}
 
-        # handle status filter
         if status_q and status_q != 'All':
             if status_q in ['Active', 'Inactive']:
                 mongo_query['isActive'] = True if status_q == 'Active' else False
             elif status_q == 'Allocated':
-                # allocate set from vehicle_inventory and filter SimNumber in that set
                 vehicle_collection = db['vehicle_inventory']
                 vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
                 allocated_set = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
                 if allocated_set:
                     mongo_query['SimNumber'] = {'$in': list(allocated_set)}
                 else:
-                    # no allocations -> force empty result
                     mongo_query['SimNumber'] = {'$in': []}
             else:
-                # default: filter by stored status value
                 mongo_query['status'] = status_q
 
-        # handle search query (mobile or sim, exact or ends-with)
         if query_q:
             mongo_query['$or'] = [
                 {'MobileNumber': query_q},

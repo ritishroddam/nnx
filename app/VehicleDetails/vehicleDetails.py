@@ -446,7 +446,6 @@ def get_vehicles_paginated():
         company_q = request.args.get('company', '').strip()
         query_q = request.args.get('query', '').strip()
 
-        # Log incoming params for debugging
         print(f"[DEBUG] get_vehicles_paginated called with page={page}, per_page={per_page}, company='{company_q}', query='{query_q}'")
 
         mongo_query = {}
@@ -455,7 +454,6 @@ def get_vehicles_paginated():
             mongo_query['CompanyName'] = company_q
 
         if query_q:
-            # match LicensePlateNumber, IMEI or SIM (contains / ends-with / exact)
             mongo_query['$or'] = [
                 {'LicensePlateNumber': {'$regex': query_q, '$options': 'i'}},
                 {'IMEI': {'$regex': query_q, '$options': 'i'}},
@@ -470,9 +468,7 @@ def get_vehicles_paginated():
 
         processed = []
         for vehicle in vehicles:
-            # ensure top-level _id string
             vehicle['_id'] = str(vehicle['_id'])
-            # sanitize whole document recursively (handles nested ObjectId/datetime)
             processed.append(_sanitize_value(vehicle))
 
         return jsonify({
