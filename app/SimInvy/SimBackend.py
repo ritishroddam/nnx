@@ -564,11 +564,9 @@ def sim_status_counts():
             if sim_number in allocated_sim_numbers:
                 counts['In Use'] += 1
             else:
-                status = sim.get('status', 'Available')
+                status = sim.get('status', '')
                 if status in counts:
                     counts[status] += 1
-                else:
-                    counts['Available'] += 1  
         
         return jsonify(counts)
     except Exception as e:
