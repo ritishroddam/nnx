@@ -242,23 +242,6 @@ tr:hover {
   display: none;
 }
 
-/* .status-btn {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.status-active {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.status-inactive {
-  background-color: #ffebee;
-  color: #c62828;
-} */
-
 .error-box {
   padding: 10px;
   background-color: #dc3545;
@@ -276,6 +259,18 @@ tr:hover {
   height: 30px;
   animation: spin 2s linear infinite;
   margin: 10px auto;
+}
+
+.counter.total {
+  background-color: #6c757d;
+}
+
+.counter.total:hover {
+  background-color: #5a6268;
+}
+
+.count-badge.total {
+  background-color: #495057;
 }
 
 @keyframes spin {

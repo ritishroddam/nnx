@@ -126,6 +126,40 @@ async function fetchAndRenderDevices(page = 1, rowsPerPage = currentRowsPerPage,
   }
 }
 
+// async function updateAllCountersFromServer() {
+//   try {
+//     const response = await fetch('/deviceInvy/device_all_counts', {
+//       headers: {
+//         "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//       }
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+
+//     const data = await response.json();
+
+//     if (data.error) {
+//       throw new Error(data.error);
+//     }
+    
+//     document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
+//     document.getElementById("inUseCount").textContent = data.status["In use"] || 0;
+//     document.getElementById("availableCount").textContent = data.status["Available"] || 0;
+//     document.getElementById("discardedCount").textContent = data.status["Discarded"] || 0;
+    
+//     document.getElementById("rentalCount").textContent = data.package["Rental"] || 0;
+//     document.getElementById("packageCount").textContent = data.package["Package"] || 0;
+//     document.getElementById("outrateCount").textContent = data.package["Outrate"] || 0;
+    
+//   } catch (err) {
+//     console.error('Error fetching all counts:', err);
+//     console.log('Falling back to DOM counting');
+//     updateStatusCounts();
+//   }
+// }
+
 async function updateAllCountersFromServer() {
   try {
     const response = await fetch('/deviceInvy/device_all_counts', {
@@ -143,6 +177,13 @@ async function updateAllCountersFromServer() {
     if (data.error) {
       throw new Error(data.error);
     }
+    
+    const totalDevices = (data.status["New Stock"] || 0) + 
+                        (data.status["In use"] || 0) + 
+                        (data.status["Available"] || 0) + 
+                        (data.status["Discarded"] || 0);
+    
+    document.getElementById("totalCount").textContent = totalDevices;
     
     document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
     document.getElementById("inUseCount").textContent = data.status["In use"] || 0;
@@ -355,7 +396,42 @@ async function filterDevicesByStatus() {
   fetchAndRenderDevices(1, currentRowsPerPage, currentStatus);
 }
 
-async function updateStatusCounts(devicesData = null) {
+// async function updateStatusCounts(devicesData = null) {
+//   let newStockCount = 0;
+//   let inUseCount = 0;
+//   let availableCount = 0;
+//   let discardedCount = 0;
+//   let rentalCount = 0;
+//   let packageCount = 0;
+//   let outrateCount = 0;
+
+//    allDevices.forEach(device => {
+//     if (device.style.display !== 'none') {
+//       const packageCell = device.cells[9];
+//       const packageType = packageCell.textContent.trim();
+//       if (packageType === "Rental") rentalCount++;
+//       if (packageType === "Package") packageCount++;
+//       if (packageType === "Outrate") outrateCount++;
+
+//       const statusCell = device.cells[11];
+//       let status = statusCell.textContent.trim();
+//       if (status === "New Stock") newStockCount++;
+//       if (status === "In use") inUseCount++;
+//       if (status === "Available") availableCount++;
+//       if (status === "Discarded") discardedCount++;
+//     }
+//   });
+
+//   document.getElementById("newStockCount").textContent = newStockCount;
+//   document.getElementById("inUseCount").textContent = inUseCount;
+//   document.getElementById("availableCount").textContent = availableCount;
+//   document.getElementById("discardedCount").textContent = discardedCount;
+//   document.getElementById("rentalCount").textContent = rentalCount;
+//   document.getElementById("packageCount").textContent = packageCount;
+//   document.getElementById("outrateCount").textContent = outrateCount;
+// }
+
+function updateStatusCounts(devicesData = null) {
   let newStockCount = 0;
   let inUseCount = 0;
   let availableCount = 0;
@@ -364,7 +440,7 @@ async function updateStatusCounts(devicesData = null) {
   let packageCount = 0;
   let outrateCount = 0;
 
-   allDevices.forEach(device => {
+  allDevices.forEach(device => {
     if (device.style.display !== 'none') {
       const packageCell = device.cells[9];
       const packageType = packageCell.textContent.trim();
@@ -380,6 +456,9 @@ async function updateStatusCounts(devicesData = null) {
       if (status === "Discarded") discardedCount++;
     }
   });
+
+  const totalDevices = newStockCount + inUseCount + availableCount + discardedCount;
+  document.getElementById("totalCount").textContent = totalDevices;
 
   document.getElementById("newStockCount").textContent = newStockCount;
   document.getElementById("inUseCount").textContent = inUseCount;
@@ -489,7 +568,18 @@ function searchDevices() {
     });
 }
 
+// function resetCounts() {
+//   document.getElementById("newStockCount").textContent = "0";
+//   document.getElementById("inUseCount").textContent = "0";
+//   document.getElementById("availableCount").textContent = "0";
+//   document.getElementById("discardedCount").textContent = "0";
+//   document.getElementById("rentalCount").textContent = "0";
+//   document.getElementById("packageCount").textContent = "0";
+//   document.getElementById("outrateCount").textContent = "0";
+// }
+
 function resetCounts() {
+  document.getElementById("totalCount").textContent = "0";
   document.getElementById("newStockCount").textContent = "0";
   document.getElementById("inUseCount").textContent = "0";
   document.getElementById("availableCount").textContent = "0";
@@ -505,6 +595,37 @@ function clearSearch() {
   fetchAndRenderDevices(1, currentRowsPerPage);
   updateAllCountersFromServer();
 }
+
+// function updateStatusCountsFromData(devices) {
+//   let newStockCount = 0;
+//   let inUseCount = 0;
+//   let availableCount = 0;
+//   let discardedCount = 0;
+//   let rentalCount = 0;
+//   let packageCount = 0;
+//   let outrateCount = 0;
+
+//   devices.forEach(device => {
+//     const packageType = device.Package || '';
+//     if (packageType === "Rental") rentalCount++;
+//     if (packageType === "Package") packageCount++;
+//     if (packageType === "Outrate") outrateCount++;
+
+//     const status = device.Status || '';
+//     if (status === "New Stock") newStockCount++;
+//     if (status === "In use") inUseCount++;
+//     if (status === "Available") availableCount++;
+//     if (status === "Discarded") discardedCount++;
+//   });
+
+//   document.getElementById("newStockCount").textContent = newStockCount;
+//   document.getElementById("inUseCount").textContent = inUseCount;
+//   document.getElementById("availableCount").textContent = availableCount;
+//   document.getElementById("discardedCount").textContent = discardedCount;
+//   document.getElementById("rentalCount").textContent = rentalCount;
+//   document.getElementById("packageCount").textContent = packageCount;
+//   document.getElementById("outrateCount").textContent = outrateCount;
+// }
 
 function updateStatusCountsFromData(devices) {
   let newStockCount = 0;
@@ -527,6 +648,9 @@ function updateStatusCountsFromData(devices) {
     if (status === "Available") availableCount++;
     if (status === "Discarded") discardedCount++;
   });
+
+  const totalDevices = newStockCount + inUseCount + availableCount + discardedCount;
+  document.getElementById("totalCount").textContent = totalDevices;
 
   document.getElementById("newStockCount").textContent = newStockCount;
   document.getElementById("inUseCount").textContent = inUseCount;
