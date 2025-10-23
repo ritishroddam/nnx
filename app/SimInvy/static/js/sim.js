@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function() {
   dateInInput.addEventListener("change", preventManualFutureDates);
   dateOutInput.addEventListener("change", preventManualFutureDates);
     setTimeout(() => {
-    updateCounters();
+    updateCounters([], 0);
   }, 100);
 
   allSimsData = Array.from(document.querySelectorAll('#simTable tr[data-id]')).map(row => {
@@ -379,8 +379,32 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
-function updateCounters(currentPageSims, total) {
+// function updateCounters(currentPageSims, total) {
+//   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
+//   currentPageSims.forEach(sim => {
+//     const status = (sim.status || '').trim();
+//     if (status === "New Stock") newStockCount++;
+//     if (status === "In Use") inUseCount++;
+//     if (status === "Available") availableCount++;
+//     if (status === "Scrap") scrapCount++;
+//     if (status === "Safe Custody") safeCustodyCount++;
+//     if (status === "Suspended") suspendedCount++;
+//   });
+//   document.getElementById('newStockCount').textContent = newStockCount;
+//   document.getElementById('inUseCount').textContent = inUseCount;
+//   document.getElementById('availableCount').textContent = availableCount;
+//   document.getElementById('scrapCount').textContent = scrapCount;
+//   document.getElementById('safeCustodyCount').textContent = safeCustodyCount;
+//   document.getElementById('suspendedCount').textContent = suspendedCount;
+// }
+
+function updateCounters(currentPageSims = [], total) {
   let newStockCount = 0, inUseCount = 0, availableCount = 0, scrapCount = 0, safeCustodyCount = 0, suspendedCount = 0;
+  
+  if (!currentPageSims || !Array.isArray(currentPageSims)) {
+    currentPageSims = [];
+  }
+  
   currentPageSims.forEach(sim => {
     const status = (sim.status || '').trim();
     if (status === "New Stock") newStockCount++;
@@ -390,6 +414,7 @@ function updateCounters(currentPageSims, total) {
     if (status === "Safe Custody") safeCustodyCount++;
     if (status === "Suspended") suspendedCount++;
   });
+  
   document.getElementById('newStockCount').textContent = newStockCount;
   document.getElementById('inUseCount').textContent = inUseCount;
   document.getElementById('availableCount').textContent = availableCount;
