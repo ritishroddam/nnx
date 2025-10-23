@@ -776,8 +776,8 @@ def sim_status_counts():
                 stored_status = sim.get('status', 'New Stock')
                 if stored_status in counts:
                     counts[stored_status] += 1
-                # else:
-                #     counts["Available"] += 1
+                else:
+                    counts["In Use"] += 1
         
         return jsonify(counts)
         
