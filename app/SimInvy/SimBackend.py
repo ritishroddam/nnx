@@ -539,6 +539,39 @@ def get_sims_paginated():
         print(f"Error in get_sims_paginated: {e}")
         return jsonify({"error": str(e)}), 500
 
+# @sim_bp.route('/sim_status_counts')
+# @jwt_required()
+# def sim_status_counts():
+#     try:
+#         vehicle_collection = db['vehicle_inventory']
+#         vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
+#         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+        
+#         all_sims = list(collection.find({}))
+        
+#         counts = {
+#             "New Stock": 0,
+#             "In Use": 0, 
+#             "Available": 0,
+#             "Scrap": 0,
+#             "Safe Custody": 0,
+#             "Suspended": 0
+#         }
+        
+#         for sim in all_sims:
+#             sim_number = sim.get('SimNumber', '')
+            
+#             if sim_number in allocated_sim_numbers:
+#                 counts['In Use'] += 1
+#             else:
+#                 status = sim.get('status', '')
+#                 if status in counts:
+#                     counts[status] += 1
+        
+#         return jsonify(counts)
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
 @sim_bp.route('/sim_status_counts')
 @jwt_required()
 def sim_status_counts():
@@ -548,6 +581,7 @@ def sim_status_counts():
         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
         
         all_sims = list(collection.find({}))
+        total_sims_count = len(all_sims)
         
         counts = {
             "New Stock": 0,
@@ -559,15 +593,67 @@ def sim_status_counts():
         }
         
         for sim in all_sims:
+            stored_status = sim.get('status', '')
+            if stored_status in counts:
+                counts[stored_status] += 1
+        
+        allocated_count = 0
+        for sim in all_sims:
             sim_number = sim.get('SimNumber', '')
-            
             if sim_number in allocated_sim_numbers:
-                counts['In Use'] += 1
-            else:
-                status = sim.get('status', '')
-                if status in counts:
-                    counts[status] += 1
+                allocated_count += 1
+                stored_status = sim.get('status', '')
+                if stored_status in counts and counts[stored_status] > 0:
+                    counts[stored_status] -= 1
+        
+        counts['In Use'] += allocated_count
+        
+        calculated_total = sum(counts.values())
+        if calculated_total != total_sims_count:
+            print(f"WARNING: Counter total ({calculated_total}) doesn't match database total ({total_sims_count})")
+            difference = total_sims_count - calculated_total
+            if difference > 0:
+                largest_category = max(counts, key=counts.get)
+                counts[largest_category] += difference
         
         return jsonify(counts)
+        
+    except Exception as e:
+        print(f"Error in sim_status_counts: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+@sim_bp.route('/debug_sim_statuses')
+@jwt_required()
+def debug_sim_statuses():
+    try:
+        vehicle_collection = db['vehicle_inventory']
+        vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
+        allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
+        
+        all_sims = list(collection.find({}))
+        
+        status_analysis = {
+            'total_sims': len(all_sims),
+            'allocated_sims': 0,
+            'status_breakdown': {},
+            'allocated_by_status': {}
+        }
+        
+        for sim in all_sims:
+            sim_number = sim.get('SimNumber', '')
+            stored_status = sim.get('status', 'NO_STATUS')
+            
+            if stored_status not in status_analysis['status_breakdown']:
+                status_analysis['status_breakdown'][stored_status] = 0
+            status_analysis['status_breakdown'][stored_status] += 1
+            
+            if sim_number in allocated_sim_numbers:
+                status_analysis['allocated_sims'] += 1
+                if stored_status not in status_analysis['allocated_by_status']:
+                    status_analysis['allocated_by_status'][stored_status] = 0
+                status_analysis['allocated_by_status'][stored_status] += 1
+        
+        return jsonify(status_analysis)
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
