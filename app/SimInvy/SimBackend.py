@@ -24,29 +24,6 @@ def format_date(date_str):
     except:
         return date_str
 
-# @sim_bp.route('/page')
-# @jwt_required()
-# def page():
-#     vehicle_collection = db['vehicle_inventory']
-#     vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
-    
-#     sim_to_imei = {v['SIM']: v.get('imei', 'N/A') 
-#                   for v in vehicles if 'SIM' in v}
-    
-#     sims = list(collection.find({}))
-#     for sim in sims:
-#         if sim['MobileNumber'] in sim_to_imei:
-#             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
-#             # Remove this line to allow manual status changes:
-#             # sim['status'] = 'Allocated'
-#             sim['isActive'] = True
-#         else:
-#             sim.setdefault('status', 'Available')
-#             sim.setdefault('isActive', True)
-#             sim.setdefault('lastEditedBy', 'N/A')
-    
-#     return render_template('sim.html', sims=sims)
-
 @sim_bp.route('/page')
 @jwt_required()
 def page():
@@ -68,62 +45,6 @@ def page():
         sim.setdefault('lastEditedBy', 'N/A')
     
     return render_template('sim.html', sims=sims)
-
-# @sim_bp.route('/get_sims_by_status/<status>')
-# @jwt_required()
-# def get_sims_by_status(status):
-#     try:
-#         vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
-#         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
-#         sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
-
-#         all_sims = list(collection.find({}))
-        
-#         results = []
-#         for sim in all_sims:
-#             sim_number = sim.get('SimNumber', '')
-            
-#             actual_status = 'Allocated' if sim_number in allocated_sim_numbers else sim.get('status', 'Available')
-            
-#             is_active = sim.get('isActive', True)
-            
-#             if status != 'All':
-#                 if status in ['Active', 'Inactive']:
-#                     if (status == 'Active' and not is_active) or (status == 'Inactive' and is_active):
-#                         continue
-#                 else:
-#                     if actual_status != status:
-#                         continue
-                
-#             sim_data = {
-#                 '_id': str(sim.get('_id', '')),
-#                 'MobileNumber': sim.get('MobileNumber', ''),
-#                 'SimNumber': sim_number,
-#                 'IMEI': sim_to_imei.get(sim_number, 'N/A'),
-#                 'status': actual_status,
-#                 'isActive': is_active,
-#                 'statusDate': sim.get('statusDate', ''),
-#                 'reactivationDate': sim.get('reactivationDate', ''),
-#                 'DateIn': sim.get('DateIn', ''),
-#                 'DateOut': sim.get('DateOut', ''),
-#                 'Vendor': sim.get('Vendor', ''),
-#                 'lastEditedBy': sim.get('lastEditedBy', 'N/A')
-#             }
-            
-#             if actual_status in ['SafeCustody', 'Suspended']:
-#                 if 'statusDate' not in sim_data or not sim_data['statusDate']:
-#                     sim_data['statusDate'] = datetime.utcnow().strftime('%Y-%m-%d')
-#                 if actual_status == 'SafeCustody' and ('reactivationDate' not in sim_data or not sim_data['reactivationDate']):
-#                     reactivation_date = datetime.utcnow() + timedelta(days=90)
-#                     sim_data['reactivationDate'] = reactivation_date.strftime('%Y-%m-%d')
-            
-#             results.append(sim_data)
-        
-#         return jsonify(results)
-        
-#     except Exception as e:
-#         print(f"Error in get_sims_by_status: {str(e)}")
-#         return jsonify({'error': str(e)}), 
 
 @sim_bp.route('/get_sims_by_status/<status>')
 @jwt_required()
@@ -237,7 +158,6 @@ def manual_entry():
     data = request.form.to_dict()
     data['MobileNumber'] = data['MobileNumber'].strip()
     data['SimNumber'] = data['SimNumber'].strip()
-    # Accept status from form, default to 'New Stock' if not provided
     data['status'] = data.get('Status', 'New Stock')
     data['isActive'] = True  
 
@@ -335,7 +255,6 @@ def upload_file():
             vendor = str(row['Vendor']).strip()
             status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
 
-            # Vendor validation
             if vendor not in ["Airtel", "Vodafone", "BSNL", "Jio"]:
                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone' or 'BSNL' or 'Jio'.", "danger")
                 return redirect(url_for('SimInvy.page'))
@@ -552,67 +471,6 @@ def download_excel_filtered():
         traceback.print_exc()
         return jsonify({"error": "Export failed", "details": str(e)}), 500
 
-# @sim_bp.route('/get_sims_paginated')
-# @jwt_required()
-# def get_sims_paginated():
-#     try:
-#         page = int(request.args.get('page', 1))
-#         per_page = int(request.args.get('per_page', 100))
-#         skip = (page - 1) * per_page
-
-#         status_q = request.args.get('status', '').strip()
-#         query_q = request.args.get('query', '').strip()
-
-#         mongo_query = {}
-
-#         if status_q and status_q != 'All':
-#             if status_q in ['Active', 'Inactive']:
-#                 mongo_query['isActive'] = True if status_q == 'Active' else False
-#             elif status_q == 'Allocated':
-#                 vehicle_collection = db['vehicle_inventory']
-#                 vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
-#                 allocated_set = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
-#                 if allocated_set:
-#                     mongo_query['SimNumber'] = {'$in': list(allocated_set)}
-#                 else:
-#                     mongo_query['SimNumber'] = {'$in': []}
-#             else:
-#                 mongo_query['status'] = status_q
-
-#         if query_q:
-#             mongo_query['$or'] = [
-#                 {'MobileNumber': query_q},
-#                 {'SimNumber': query_q},
-#                 {'MobileNumber': {'$regex': f'{query_q}$'}},
-#                 {'SimNumber': {'$regex': f'{query_q}$'}}
-#             ]
-
-#         total = collection.count_documents(mongo_query)
-#         sims = list(collection.find(mongo_query).skip(skip).limit(per_page))
-
-#         vehicle_collection = db['vehicle_inventory']
-#         vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
-#         sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
-
-#         processed = []
-#         for sim in sims:
-#             sim_number = sim.get('SimNumber', '')
-#             sim['_id'] = str(sim.get('_id'))
-#             sim['IMEI'] = sim_to_imei.get(sim_number, 'N/A')
-#             sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
-#             sim['lastEditedAt'] = sim.get('lastEditedAt', '')
-#             processed.append(sim)
-
-#         return jsonify({
-#             "total": total,
-#             "page": page,
-#             "per_page": per_page,
-#             "sims": processed
-#         })
-#     except Exception as e:
-#         print(f"Error in get_sims_paginated: {e}")
-#         return jsonify({"error": str(e)}), 500
-
 @sim_bp.route('/get_sims_paginated')
 @jwt_required()
 def get_sims_paginated():
@@ -681,32 +539,14 @@ def get_sims_paginated():
         print(f"Error in get_sims_paginated: {e}")
         return jsonify({"error": str(e)}), 500
 
-# @sim_bp.route('/sim_status_counts')
-# @jwt_required()
-# def sim_status_counts():
-#     try:
-#         pipeline = [
-#             {"$group": {"_id": "$status", "count": {"$sum": 1}}}
-#         ]
-#         counts = {doc['_id']: doc['count'] for doc in collection.aggregate(pipeline)}
-#         return jsonify(counts)
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-# ist = pytz.timezone("Asia/Kolkata")
-# now_ist = datetime.now(ist)
-# last_edited_date = now_ist.strftime("%d-%m-%Y %I:%M:%S %p")
-
 @sim_bp.route('/sim_status_counts')
 @jwt_required()
 def sim_status_counts():
     try:
-        # Get allocated SIM numbers from vehicles
         vehicle_collection = db['vehicle_inventory']
         vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
         
-        # Get all SIMs and count properly
         all_sims = list(collection.find({}))
         
         counts = {
@@ -722,14 +562,13 @@ def sim_status_counts():
             sim_number = sim.get('SimNumber', '')
             
             if sim_number in allocated_sim_numbers:
-                # Count allocated SIMs as 'In Use'
                 counts['In Use'] += 1
             else:
                 status = sim.get('status', 'Available')
                 if status in counts:
                     counts[status] += 1
                 else:
-                    counts['Available'] += 1  # Default for unknown status
+                    counts['Available'] += 1  
         
         return jsonify(counts)
     except Exception as e:
