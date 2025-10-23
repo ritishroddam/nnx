@@ -262,11 +262,12 @@ tr:hover {
 }
 
 .counter.total {
-  background-color: #6c757d;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.counter.total:hover {
-  background-color: #5a6268;
+.dark-mode .counter.total {
+  color: #666;
+  box-shadow: 0 0 10px #cccccc90;
 }
 
 @keyframes spin {
