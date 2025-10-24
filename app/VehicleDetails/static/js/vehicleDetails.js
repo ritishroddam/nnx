@@ -274,6 +274,32 @@ document.addEventListener("DOMContentLoaded", function() {
     create: false,
   });
 
+  const companyFilter = document.getElementById('companyFilter');
+  if (companyFilter) {
+    companyFilter.value = 'All';
+    
+    companyFilter.addEventListener('change', function() {
+      const selectedCompany = this.value;
+      console.log("Company filter changed to:", selectedCompany);
+      
+      currentCompanyFilter = (selectedCompany === 'All') ? '' : selectedCompany;
+      fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
+    });
+  }
+
+const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    let debounceTimer = null;
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentSearchQuery = this.value.trim();
+        console.log("Search query:", currentSearchQuery);
+        fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
+      }, 350);
+    });
+  }
+
   fetchIMEIData();
   fetchSIMData();
   fetchCompanies();
@@ -296,38 +322,6 @@ document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("uploadModal").classList.remove("hidden");
     });
   }
-  
-const companyFilter = document.getElementById('companyFilter');
-    
-    if (companyFilter) {
-        companyFilter.addEventListener('change', function() {
-            const selectedCompany = this.value.toLowerCase();
-            console.log("Filtering by company:", selectedCompany || "All Companies");
-            
-            const tableRows = document.querySelectorAll('.vehicle-table tbody tr');
-            tableRows.forEach(row => {
-                const companyNameCell = row.cells[1];
-                const rowCompanyName = companyNameCell.textContent.trim().toLowerCase();
-                
-                console.log("Checking row with company:", rowCompanyName);
-                
-                if (!selectedCompany || rowCompanyName === selectedCompany) {
-                    row.style.display = '';
-                    console.log("Showing row");
-                } else {
-                    row.style.display = 'none';
-                    console.log("Hiding row");
-                }
-            });
-        });
-        
-        companyFilter.dispatchEvent(new Event('change'));
-    }
-
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', handleSearch);
-    }
 
 document.getElementById("manualEntryBtn").addEventListener("click", function() {
   document.body.classList.add("modal-open");
@@ -706,29 +700,4 @@ document.getElementById("manualForm").addEventListener("submit", async function 
 
 document.getElementById("uploadForm").addEventListener("submit", function () {
   document.querySelector(".preloader").style.display = "block";
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-  const companyFilter = document.getElementById('companyFilter');
-  if (companyFilter) {
-    companyFilter.value = 'All';
-    companyFilter.addEventListener('change', function() {
-      const selected = this.value || 'All';
-      currentCompanyFilter = (selected === 'All') ? '' : selected;
-      currentSearchQuery = document.getElementById('searchInput')?.value.trim() || '';
-      fetchAndRenderVehicles(1, currentRowsPerPage, selected, currentSearchQuery);
-    });
-  }
-
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) {
-    let debounceTimer = null;
-    searchInput.addEventListener('input', function() {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        currentSearchQuery = this.value.trim();
-        fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
-      }, 350);
-    });
-  }
 });
