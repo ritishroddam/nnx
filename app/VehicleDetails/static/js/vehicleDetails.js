@@ -171,19 +171,82 @@ function renderPaginationControls(totalRows, currentPage, rowsPerPage) {
   });
 }
 
+// async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage, company = currentCompanyFilter, query = currentSearchQuery) {
+//   try {
+//     currentRowsPerPage = rowsPerPage;
+//     currentCompanyFilter = (company === 'All' ? '' : (company || ''));
+//     currentSearchQuery = query || '';
+
+//     let url = `/vehicleDetails/get_vehicles_paginated?page=${page}&per_page=${rowsPerPage}`;
+//     if (currentCompanyFilter && currentCompanyFilter.trim() !== '') {
+//       url += `&company=${encodeURIComponent(currentCompanyFilter)}`;
+//     }
+//     if (currentSearchQuery && currentSearchQuery.trim() !== '') {
+//       url += `&query=${encodeURIComponent(currentSearchQuery)}`;
+//     }
+
+//     const response = await fetch(url, {
+//       method: "GET",
+//       headers: {
+//         "X-CSRF-TOKEN": getCookie ? getCookie("csrf_access_token") : "",
+//         "Accept": "application/json"
+//       },
+//       credentials: "include"
+//     });
+
+//     if (!response.ok) {
+//       const text = await response.text();
+//       let parsed;
+//       try { parsed = JSON.parse(text); } catch(e) { parsed = null; }
+//       const serverMessage = (parsed && parsed.error) ? parsed.error : text || `HTTP ${response.status}`;
+//       console.error("Server error from get_vehicles_paginated:", serverMessage);
+//       throw new Error(serverMessage);
+//     }
+
+//     const data = await response.json();
+//     if (data.error) throw new Error(data.error);
+
+//     totalRows = data.total || 0;
+//     currentPage = data.page || page;
+
+//     document.getElementById('totalVehiclesCount').textContent = totalRows;
+
+//     renderVehicleTable(data.vehicles || []);
+//     renderPaginationControls(totalRows, currentPage, rowsPerPage);
+//   } catch (err) {
+//     console.error("Error loading vehicles:", err);
+//     const tableBody = document.querySelector('.vehicle-table tbody');
+//     if (tableBody) {
+//       tableBody.innerHTML = `<tr><td colspan="20">Failed to load data</td></tr>`;
+//     }
+//   }
+// }
+
 async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage, company = currentCompanyFilter, query = currentSearchQuery) {
   try {
     currentRowsPerPage = rowsPerPage;
-    currentCompanyFilter = (company === 'All' ? '' : (company || ''));
+    currentCompanyFilter = company || '';
     currentSearchQuery = query || '';
 
+    console.log("Fetching vehicles with params:", {
+      page,
+      rowsPerPage,
+      company: currentCompanyFilter,
+      query: currentSearchQuery
+    });
+
     let url = `/vehicleDetails/get_vehicles_paginated?page=${page}&per_page=${rowsPerPage}`;
-    if (currentCompanyFilter && currentCompanyFilter.trim() !== '') {
+    
+    // Only add company parameter if it's not empty and not 'All'
+    if (currentCompanyFilter && currentCompanyFilter.trim() !== '' && currentCompanyFilter !== 'All') {
       url += `&company=${encodeURIComponent(currentCompanyFilter)}`;
     }
+    
     if (currentSearchQuery && currentSearchQuery.trim() !== '') {
       url += `&query=${encodeURIComponent(currentSearchQuery)}`;
     }
+
+    console.log("Request URL:", url);
 
     const response = await fetch(url, {
       method: "GET",
@@ -217,7 +280,7 @@ async function fetchAndRenderVehicles(page = 1, rowsPerPage = currentRowsPerPage
     console.error("Error loading vehicles:", err);
     const tableBody = document.querySelector('.vehicle-table tbody');
     if (tableBody) {
-      tableBody.innerHTML = `<tr><td colspan="20">Failed to load data</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="20">Failed to load data: ${err.message}</td></tr>`;
     }
   }
 }
@@ -268,26 +331,23 @@ function renderVehicleTable(vehicles) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    $("#companyFilter").selectize({
+  // Initialize company filter with Selectize
+  const companyFilterSelectize = $("#companyFilter").selectize({
     placeholder: "Search Companies",
     searchField: "text",
     create: false,
-  });
-
-  const companyFilter = document.getElementById('companyFilter');
-  if (companyFilter) {
-    companyFilter.value = 'All';
-    
-    companyFilter.addEventListener('change', function() {
-      const selectedCompany = this.value;
-      console.log("Company filter changed to:", selectedCompany);
-      
-      currentCompanyFilter = (selectedCompany === 'All') ? '' : selectedCompany;
+    onChange: function(value) {
+      console.log("Company filter changed to:", value);
+      currentCompanyFilter = (value === 'All' || !value) ? '' : value;
       fetchAndRenderVehicles(1, currentRowsPerPage, currentCompanyFilter, currentSearchQuery);
-    });
-  }
+    }
+  })[0].selectize;
 
-const searchInput = document.getElementById('searchInput');
+  // Set default value
+  companyFilterSelectize.setValue('All');
+
+  // Search input with debouncing
+  const searchInput = document.getElementById('searchInput');
   if (searchInput) {
     let debounceTimer = null;
     searchInput.addEventListener('input', function() {
