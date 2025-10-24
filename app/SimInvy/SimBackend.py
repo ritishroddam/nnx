@@ -220,6 +220,70 @@ def update_sim_status(sim_id):
         print(f"Error updating SIM status: {e}")
         return jsonify({'success': False, 'message': 'Error updating SIM status.'}), 500
 
+# @sim_bp.route('/upload_file', methods=['POST'])
+# @jwt_required()
+# def upload_file():
+#     if 'file' not in request.files:
+#         flash("No file part", "danger")
+#         return redirect(url_for('SimInvy.page'))
+
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash("No selected file", "danger")
+#         return redirect(url_for('SimInvy.page'))
+
+#     if file and (file.filename.endswith('.xls') or file.filename.endswith('.xlsx')):
+#         df = pd.read_excel(file)
+        
+#         df.columns = [str(c).strip() for c in df.columns]
+#         required_headers = ['MobileNumber', 'SimNumber', 'DateIn', 'DateOut', 'Vendor', 'Status']
+#         missing_headers = [h for h in required_headers if h not in df.columns]
+#         if missing_headers:
+#             flash(f"Missing required columns: {', '.join(missing_headers)}", "danger")
+#             return redirect(url_for('SimInvy.page'))
+
+#         records = []
+#         for index, row in df.iterrows():
+#             mobile_number = str(row['MobileNumber']).strip()
+#             sim_number = str(row['SimNumber']).strip()
+#             date_in = str(row['DateIn']).split(' ')[0].strip()
+#             date_out = str(row['DateOut']).split(' ')[0].strip() if not pd.isnull(row['DateOut']) else ""
+#             vendor = str(row['Vendor']).strip()
+#             status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
+
+#             if vendor not in ["Airtel", "Vodafone", "BSNL", "Jio"]:
+#                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone' or 'BSNL' or 'Jio'.", "danger")
+#                 return redirect(url_for('SimInvy.page'))
+
+#             if len(mobile_number) < 10 or len(mobile_number) > 17:
+#                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
+#                 return redirect(url_for('SimInvy.page'))
+#             if len(sim_number) < 19 or len(sim_number) > 22:
+#                 flash(f"Invalid SIM Number length at row {index + 2}, column 'SimNumber' (Length: {len(sim_number)})", "danger")
+#                 return redirect(url_for('SimInvy.page'))
+#             if collection.find_one({"MobileNumber": mobile_number}) or collection.find_one({"SimNumber": sim_number}):
+#                 flash(f"Duplicate Mobile Number or SIM Number at row {index + 2}", "danger")
+#                 return redirect(url_for('SimInvy.page'))
+
+#             record = {
+#                 "MobileNumber": mobile_number,
+#                 "SimNumber": sim_number,
+#                 "DateIn": date_in,
+#                 "DateOut": date_out,
+#                 "Vendor": vendor,
+#                 "status": status
+#             }
+#             records.append(record)
+
+#         if records:
+#             collection.insert_many(records)
+#             flash("File uploaded and SIMs added successfully!", "success")
+
+#         return redirect(url_for('SimInvy.page'))
+#     else:
+#         flash("Unsupported file format", "danger")
+#         return redirect(url_for('SimInvy.page'))
+
 @sim_bp.route('/upload_file', methods=['POST'])
 @jwt_required()
 def upload_file():
@@ -248,10 +312,14 @@ def upload_file():
             sim_number = str(row['SimNumber']).strip()
             date_in = str(row['DateIn']).split(' ')[0].strip()
             date_out = str(row['DateOut']).split(' ')[0].strip() if not pd.isnull(row['DateOut']) else ""
-            vendor = str(row['Vendor']).strip()
-            status = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
+            
+            vendor_raw = str(row['Vendor']).strip()
+            vendor = ' '.join(word.capitalize() for word in vendor_raw.split())
+            
+            status_raw = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
+            status = ' '.join(word.capitalize() for word in status_raw.split())
 
-            if vendor not in ["Airtel", "Vodafone", "BSNL", "Jio"]:
+            if vendor not in ["Airtel", "Vodafone", "Bspl", "Jio"]:
                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone' or 'BSNL' or 'Jio'.", "danger")
                 return redirect(url_for('SimInvy.page'))
 
@@ -270,8 +338,8 @@ def upload_file():
                 "SimNumber": sim_number,
                 "DateIn": date_in,
                 "DateOut": date_out,
-                "Vendor": vendor,
-                "status": status
+                "Vendor": vendor, 
+                "status": status   
             }
             records.append(record)
 
