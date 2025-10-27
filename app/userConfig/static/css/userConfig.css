@@ -145,6 +145,7 @@
 }
 
 .dark-mode .modal-body textarea {
+  background: #333;
   color: #eee;
   border: 1px solid #555;
 }
