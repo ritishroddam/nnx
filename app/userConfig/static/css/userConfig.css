@@ -86,7 +86,6 @@
 }
 
 .modal-content {
-  background-color: #fefefe;
   margin: 10% auto;
   padding: 0;
   border-radius: 8px;
@@ -95,12 +94,21 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+.dark-mode .modal-content {
+  color: #eee;
+}
+
 .modal-header {
   padding: 15px 20px;
   border-bottom: 1px solid #dee2e6;
   display: flex;
   justify-content: between;
   align-items: center;
+}
+
+.dark-mode .modal-header {
+  border-bottom: 1px solid #444;
+  color: white;
 }
 
 .modal-header h3 {
@@ -131,6 +139,11 @@
   border-radius: 4px;
   resize: vertical;
   margin-bottom: 15px;
+}
+
+.dark-mode .modal-body textarea {
+  color: #eee;
+  border: 1px solid #555;
 }
 
 .modal-actions {
