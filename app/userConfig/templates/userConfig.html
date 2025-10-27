@@ -8,7 +8,9 @@
 
 {% block h1 %}
 User Configuration
+{% endblock %}
 
+{% block block_container %}
  <!-- Email Configuration Section -->
     <div class="form-group">
       <label>Email Alerts</label>
@@ -24,9 +26,7 @@ User Configuration
         {% endif %}
       </div>
     </div>
-{% endblock %}
-
-{% block block_container %}
+    
 <div class="user-config-form">
   <form id="userConfigForm">
     <div class="form-group">
