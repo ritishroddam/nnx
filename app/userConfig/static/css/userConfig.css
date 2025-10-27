@@ -164,3 +164,13 @@
 .btn-secondary:hover {
   background-color: #5a6268;
 }
+
+.dark-mode #saveEmailsBtn{
+  background-color: darkblue;
+  color: white;
+}
+
+.dark-mode #cancelEmailsBtn{
+  background-color: #555;
+  color: white;
+}
