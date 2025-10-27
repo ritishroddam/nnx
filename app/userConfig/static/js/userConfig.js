@@ -141,34 +141,42 @@ document.addEventListener("DOMContentLoaded", function() {
     emailConfigModal.style.display = 'block';
   });
 
-  // Populate alert type checkboxes
-  function populateAlertTypeCheckboxes() {
+  // Populate alert type checkboxes - Fixed version
+function populateAlertTypeCheckboxes() {
     emailAlertTypesContainer.innerHTML = '';
     
     if (currentAlertTypes.length === 0) {
-      emailAlertTypesContainer.innerHTML = '<p class="no-alerts-warning">No alert types configured. Please configure alerts first.</p>';
-      return;
+        emailAlertTypesContainer.innerHTML = '<p class="no-alerts-warning">No alert types configured. Please configure alerts first.</p>';
+        return;
     }
     
     currentAlertTypes.forEach(alertType => {
-      const checkboxDiv = document.createElement('div');
-      checkboxDiv.className = 'alert-type-checkbox';
-      
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = `email_${alertType}`;
-      checkbox.value = alertType;
-      checkbox.checked = currentEmailAlertTypes.includes(alertType);
-      
-      const label = document.createElement('label');
-      label.htmlFor = `email_${alertType}`;
-      label.textContent = alertType.replace('_', ' ').title();
-      
-      checkboxDiv.appendChild(checkbox);
-      checkboxDiv.appendChild(label);
-      emailAlertTypesContainer.appendChild(checkboxDiv);
+        const checkboxDiv = document.createElement('div');
+        checkboxDiv.className = 'alert-type-checkbox';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `email_${alertType}`;
+        checkbox.value = alertType;
+        checkbox.checked = currentEmailAlertTypes.includes(alertType);
+        
+        const label = document.createElement('label');
+        label.htmlFor = `email_${alertType}`;
+        
+        // Fixed: Proper string formatting
+        const formattedName = alertType
+            .replace(/_/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        
+        label.textContent = formattedName;
+        
+        checkboxDiv.appendChild(checkbox);
+        checkboxDiv.appendChild(label);
+        emailAlertTypesContainer.appendChild(checkboxDiv);
     });
-  }
+}
 
   // Get selected alert types for emails
   function getSelectedEmailAlertTypes() {
