@@ -127,8 +127,16 @@
   padding: 0 10px;
 }
 
+.dark-mode .close {
+  color: #ccc;
+}
+
 .close:hover {
   color: #000;
+}
+
+.dark-mode .close:hover {
+  color: #fff;
 }
 
 .modal-body {
@@ -165,12 +173,32 @@
   background-color: #5a6268;
 }
 
+#saveEmailsBtn {
+  background-color: blue;
+  color: white;
+}
+
 .dark-mode #saveEmailsBtn{
   background-color: darkblue;
   color: white;
 }
 
+.dark-mode #saveEmailsBtn:hover{
+  background-color: #00008b;
+  color: white;
+}
+
+#cancelEmailsBtn {
+  background-color: #555;
+  color: white;
+}
+
 .dark-mode #cancelEmailsBtn{
   background-color: #555;
+  color: white;
+}
+
+.dark-mode #cancelEmailsBtn:hover{
+  background-color: #777;
   color: white;
 }
