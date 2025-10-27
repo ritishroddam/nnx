@@ -11,22 +11,31 @@ User Configuration
 {% endblock %}
 
 {% block block_container %}
- <!-- Email Configuration Section -->
-    <div class="form-group">
-      <label>Email Alerts</label>
-      <button type="button" id="emailConfigBtn" class="btn btn-secondary">Email Config</button>
-      <div id="emailTagsContainer" class="email-tags-container">
-        {% if userConfigs.emailAlerts %}
-          {% for email in userConfigs.emailAlerts %}
-            <span class="email-tag">
-              {{ email }}
-              <span class="email-tag-remove" data-email="{{ email }}">×</span>
-            </span>
-          {% endfor %}
-        {% endif %}
-      </div>
-    </div>
-    
+<!-- Email Configuration Section -->
+<div class="form-group">
+  <label>Email Alerts</label>
+  <button type="button" id="emailConfigBtn" class="btn btn-secondary">Email Config</button>
+  <div id="emailTagsContainer" class="email-tags-container">
+    {% if userConfigs.emailAlerts %}
+      {% for email in userConfigs.emailAlerts %}
+        <span class="email-tag">
+          {{ email }}
+          <span class="email-tag-remove" data-email="{{ email }}">×</span>
+        </span>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% if userConfigs.emailAlertTypes %}
+  <div class="email-alert-types">
+    <small>Email alerts enabled for: 
+      {% for alert_type in userConfigs.emailAlertTypes %}
+        <span class="alert-type-badge">{{ alert_type.replace('_', ' ').title() }}</span>
+      {% endfor %}
+    </small>
+  </div>
+  {% endif %}
+</div>
+
 <div class="user-config-form">
   <form id="userConfigForm">
     <div class="form-group">
@@ -73,8 +82,17 @@ User Configuration
     <div class="modal-body">
       <p>Enter email addresses (comma separated):</p>
       <textarea id="emailInput" placeholder="e.g., user1@example.com, user2@example.com" rows="4"></textarea>
+      
+      <div class="form-group">
+        <label>Select alert types for email notifications:</label>
+        <div id="emailAlertTypes" class="alert-types-checkboxes">
+          <!-- Checkboxes will be populated by JavaScript -->
+        </div>
+        <small class="form-text text-muted">Only selected alert types will trigger email notifications</small>
+      </div>
+      
       <div class="modal-actions">
-        <button type="button" id="saveEmailsBtn" class="btn">Save Emails</button>
+        <button type="button" id="saveEmailsBtn" class="btn">Save Email Configuration</button>
         <button type="button" id="cancelEmailsBtn" class="btn btn-secondary">Cancel</button>
       </div>
     </div>
