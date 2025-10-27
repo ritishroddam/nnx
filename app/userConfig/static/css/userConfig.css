@@ -207,61 +207,8 @@
   color: white;
 }
 
-.alert-types-checkboxes {
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 10px 0;
-}
-
-.alert-type-checkbox {
-  margin: 5px 0;
-  display: flex;
-  align-items: center;
-}
-
-.alert-type-checkbox input[type="checkbox"] {
-  margin-right: 8px;
-}
-
-.alert-type-checkbox label {
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.no-alerts-warning {
-  color: #dc3545;
-  font-style: italic;
-  text-align: center;
-  padding: 10px;
-}
-
-.alert-type-badge {
-  background-color: #007bff;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
+.form-text.text-muted {
+  color: #6c757d !important;
   font-size: 12px;
-  margin: 2px;
-  display: inline-block;
-}
-
-.email-alert-types {
-  margin-top: 8px;
-}
-
-.email-alert-types small {
-  color: #6c757d;
-}
-
-.modal-body .form-group {
-  margin: 15px 0;
-}
-
-.modal-body label {
-  font-weight: 500;
-  margin-bottom: 8px;
-  display: block;
+  margin-top: 5px;
 }

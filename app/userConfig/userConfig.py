@@ -21,8 +21,7 @@ def createUserConfig(userID):
         "userID": ObjectId(userID),
         "darkMode": "false",
         "alerts": [],
-        "emailAlerts": [],
-        "emailAlertTypes": []  
+        "emailAlerts": [] 
     }
     result = userConfiCollection.insert_one(userConfig)
 
@@ -106,12 +105,11 @@ def editDarkMode():
 @jwt_required()
 def editEmailConfig():
     emails = request.json.get('emails', [])
-    alert_types = request.json.get('alert_types', []) 
     
     valid_emails = []
     for email in emails:
         email = email.strip()
-        if email and '@' in email and '.' in email:
+        if email and '@' in email and '.' in email: 
             valid_emails.append(email)
     
     claims = get_jwt()
@@ -125,8 +123,7 @@ def editEmailConfig():
     result = userConfiCollection.update_one(
         {"userID": ObjectId(userID)},
         {"$set": {
-            "emailAlerts": valid_emails,
-            "emailAlertTypes": alert_types  
+            "emailAlerts": valid_emails
         }},
         upsert=True
     )
@@ -134,8 +131,7 @@ def editEmailConfig():
     if result.modified_count > 0 or result.upserted_id:
         return jsonify({
             "message": "Email configuration updated successfully", 
-            "emails": valid_emails,
-            "alert_types": alert_types
+            "emails": valid_emails
         }), 200
     else:
         return jsonify({"error": "Failed to update email configuration"}), 500
@@ -189,16 +185,12 @@ def editConfig():
     
     existing_config = userConfiCollection.find_one({"userID": ObjectId(userID)})
     existing_emails = existing_config.get('emailAlerts', []) if existing_config else []
-    existing_email_alert_types = existing_config.get('emailAlertTypes', []) if existing_config else []
-    
-    valid_email_alert_types = [alert for alert in existing_email_alert_types if alert in listOfAlerts]
     
     userConfig = {
         "darkMode": "true" if darkMode == "true" else "false",
         "alerts": listOfAlerts,
         "alertsSound": "true" if alertsSound == "true" else "false",
-        "emailAlerts": existing_emails,
-        "emailAlertTypes": valid_email_alert_types  
+        "emailAlerts": existing_emails
     }
     
     result = userConfiCollection.update_one(
@@ -211,22 +203,6 @@ def editConfig():
         return jsonify({"message": "User configuration updated successfully"}), 200
     else:
         return jsonify({"error": "Failed to update user configuration"}), 500
-    
-@userConfigBlueprint.route('/getAlertConfig', methods=['GET'])
-@jwt_required()
-def getAlertConfig():
-    claims = get_jwt()
-    userID = claims.get('user_id')
-    
-    userConfig = userConfiCollection.find_one({"userID": ObjectId(userID)})
-    
-    if userConfig:
-        return jsonify({
-            "alerts": userConfig.get('alerts', []),
-            "emailAlertTypes": userConfig.get('emailAlertTypes', [])
-        }), 200
-    else:
-        return jsonify({"alerts": [], "emailAlertTypes": []}), 200
     
 @userConfigBlueprint.route('/getCompanyLogo', methods=['GET'])
 @jwt_required()

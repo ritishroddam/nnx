@@ -25,15 +25,6 @@ User Configuration
       {% endfor %}
     {% endif %}
   </div>
-  {% if userConfigs.emailAlertTypes %}
-  <div class="email-alert-types">
-    <small>Email alerts enabled for: 
-      {% for alert_type in userConfigs.emailAlertTypes %}
-        <span class="alert-type-badge">{{ alert_type.replace('_', ' ').title() }}</span>
-      {% endfor %}
-    </small>
-  </div>
-  {% endif %}
 </div>
 
 <div class="user-config-form">
@@ -53,7 +44,7 @@ User Configuration
       </select>
     </div>
     <div class="form-group">
-      <label for="alerts">Alerts</label>
+      <label for="alerts">Alerts (Email notifications will be sent for selected alerts)</label>
       <select id="alerts" name="alerts" multiple>
         <option value = "" {% if not userConfigs.alerts %}selected{% endif %}>None</option>
         {% set all_alert_types = [
@@ -72,7 +63,7 @@ User Configuration
   </form>
 </div>
 
-<!-- Email Configuration Modal -->
+<!-- Email Configuration Modal - Simplified -->
 <div id="emailConfigModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -82,17 +73,10 @@ User Configuration
     <div class="modal-body">
       <p>Enter email addresses (comma separated):</p>
       <textarea id="emailInput" placeholder="e.g., user1@example.com, user2@example.com" rows="4"></textarea>
-      
-      <div class="form-group">
-        <label>Select alert types for email notifications:</label>
-        <div id="emailAlertTypes" class="alert-types-checkboxes">
-          <!-- Checkboxes will be populated by JavaScript -->
-        </div>
-        <small class="form-text text-muted">Only selected alert types will trigger email notifications</small>
-      </div>
+      <small class="form-text text-muted">Email notifications will be sent for alerts selected in the main configuration</small>
       
       <div class="modal-actions">
-        <button type="button" id="saveEmailsBtn" class="btn">Save Email Configuration</button>
+        <button type="button" id="saveEmailsBtn" class="btn">Save Emails</button>
         <button type="button" id="cancelEmailsBtn" class="btn btn-secondary">Cancel</button>
       </div>
     </div>
