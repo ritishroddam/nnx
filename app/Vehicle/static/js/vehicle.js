@@ -1969,7 +1969,7 @@ function addHoverListenersToCardsAndMarkers() {
           marker.position.lng
         );
 
-        map.setZoom(22);
+        map.setZoom(23);
         panToWithOffset(latLng, -200, 0);
 
         const coords = {
