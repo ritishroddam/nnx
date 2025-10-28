@@ -67,10 +67,19 @@
   font-size: 0.875rem;
 }
 
+.dark-mode .email-tag {
+  background: #444;
+  color: #f1f1f1;
+}
+
 .email-remove {
   cursor: pointer;
   font-weight: bold;
   color: #dc3545;
+}
+
+.dark-mode .email-remove {
+  color: #ff6b6b;
 }
 
 .email-remove:hover {
@@ -100,6 +109,11 @@
   overflow-y: auto;
 }
 
+.dark-mode .modal-content {
+  background: #222;
+  color: #f1f1f1;
+}
+
 .modal-header {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #dee2e6;
@@ -108,9 +122,17 @@
   align-items: center;
 }
 
+.dark-mode .modal-header {
+  border-bottom: 1px solid #444;
+}
+
 .modal-header h3 {
   margin: 0;
   flex: 1;
+}
+
+.dark-mode .modal-header h3 {
+  color: #f1f1f1;
 }
 
 .close-btn {
@@ -119,6 +141,10 @@
   font-size: 1.5rem;
   cursor: pointer;
   color: #6c757d;
+}
+
+.dark-mode .close-btn {
+  color: #ccc;
 }
 
 .close-btn:hover {
@@ -136,6 +162,12 @@
   border: 1px solid #ced4da;
   border-radius: 0.25rem;
   resize: vertical;
+}
+
+.dark-mode .modal-body textarea {
+  background: #333;
+  color: #f1f1f1;
+  border: 1px solid #555;
 }
 
 .form-actions {
