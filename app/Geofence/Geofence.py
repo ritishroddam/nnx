@@ -41,7 +41,7 @@ def create_geofence():
     try:
         claims = get_jwt()
         user_id = claims.get('user_id')
-        username = claims.get('username', 'Unknown')
+        username = claims.get('sub', 'Unknown')
         user_company = claims.get('company')
         
         data = request.get_json()
@@ -78,7 +78,6 @@ def create_geofence():
         }
         
         result = geofence_collection.insert_one(geofence_data)
-        print("[DEBUG] Geofence inserted with ID:", result.inserted_id)
         
         return jsonify({
             'message': 'Geofence created successfully',
@@ -130,5 +129,32 @@ def update_geofence(geofence_id):
         if result.matched_count == 0:
             return jsonify({'error': 'Geofence not found or access denied'}), 404
         return jsonify({'message': 'Geofence updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@geofence_bp.route('/api/geofences/<geofence_id>/status', methods=['PATCH'])
+@jwt_required()
+def update_geofence_status(geofence_id):
+    try:
+        claims = get_jwt()
+        user_roles = claims.get('roles', [])
+        user_company = claims.get('company')
+        data = request.get_json()
+        
+        is_active = data.get('is_active')
+        if is_active is None:
+            return jsonify({'error': 'Missing is_active field'}), 400
+
+        query = {'_id': ObjectId(geofence_id)}
+        if 'admin' not in user_roles:
+            query['company'] = user_company
+
+        update = {'$set': {'is_active': is_active}}
+        result = geofence_collection.update_one(query, update)
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Geofence not found or access denied'}), 404
+            
+        return jsonify({'message': 'Geofence status updated successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

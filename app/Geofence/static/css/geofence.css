@@ -490,6 +490,24 @@ input:checked + .switch::after {
     border-color: #b91c1c;
 }
 
+.activate-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.deactivate-btn {
+    background-color: #ffc107;
+    color: black;
+}
+
+.activate-btn:hover {
+    background-color: #218838;
+}
+
+.deactivate-btn:hover {
+    background-color: #e0a800;
+}
+
 @media (max-width: 768px) {
     .geofence-layout {
         flex-direction: column;
