@@ -585,7 +585,7 @@ function renderGeofenceList() {
             <div>Location: ${gf.location || 'N/A'}</div>
             <div>Type: ${gf.shape_type}</div>
             <div>Created by: ${gf.created_by}</div>
-            <div>Created: ${new Date(gf.created_at).toLocaleString()}</div>
+            <div>Created:<br> ${new Date(gf.created_at).toLocaleString()}</div>
             <div class="geofence-status-container">
                 <span class="geofence-status-label">Status:</span>
                 <label class="geofence-status-switch">
