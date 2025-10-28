@@ -586,14 +586,14 @@ function renderGeofenceList() {
             <div>Type: ${gf.shape_type}</div>
             <div>Created by: ${gf.created_by}</div>
             <div>Created: ${new Date(gf.created_at).toLocaleString()}</div>
-            <div class="status-container">
-                <span class="status-label">Status:</span>
-                <label class="switch">
+            <div class="geofence-status-container">
+                <span class="geofence-status-label">Status:</span>
+                <label class="geofence-status-switch">
                     <input type="checkbox" ${gf.is_active ? 'checked' : ''} 
                            onchange="toggleGeofenceStatus('${gf._id}', this.checked)">
-                    <span class="slider round"></span>
+                    <span class="geofence-status-slider"></span>
                 </label>
-                <span class="status-text">${gf.is_active ? 'Active' : 'Inactive'}</span>
+                <span class="geofence-status-text">${gf.is_active ? 'Active' : 'Inactive'}</span>
             </div>
         `;
 
