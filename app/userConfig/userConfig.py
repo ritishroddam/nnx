@@ -23,6 +23,7 @@ def createUserConfig(userID):
         "darkMode": "false",
         "alerts": [],
         "alert_emails": [],
+        "alertsSound": "true",
     }
     result = userConfiCollection.insert_one(userConfig)
 
