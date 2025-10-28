@@ -84,6 +84,11 @@ def editConfig():
     claims = get_jwt()
     userID = claims.get('user_id')
     
+    checkUserConfig = userConfiCollection.find_one({"userID": ObjectId(userID)})
+    
+    if not checkUserConfig:
+        createUserConfig(userID)
+    
     listOfAlerts = list(alerts)
     
     userConfig = {
@@ -119,6 +124,11 @@ def updateAlertEmails():
     for email in email_list:
         if re.match(email_regex, email):
             valid_emails.append(email)
+    
+    checkUserConfig = userConfiCollection.find_one({"userID": ObjectId(userID)})
+    
+    if not checkUserConfig:
+        createUserConfig(userID)
     
     result = userConfiCollection.update_one(
         {"userID": ObjectId(userID)},
