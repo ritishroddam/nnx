@@ -500,8 +500,6 @@ async function handleFormSubmit(e) {
 
     const name = document.getElementById("GeofenceName").value;
     const location = document.getElementById("Location").value;
-    const enterAlert = document.getElementById("enterAlert").checked;
-    const leaveAlert = document.getElementById("leaveAlert").checked;
 
     try {
         const response = await fetch('/geofence/api/geofences', {
@@ -515,8 +513,6 @@ async function handleFormSubmit(e) {
                 location: location,
                 shape_type: currentShapeType,
                 coordinates: JSON.parse(shapeData),
-                alert_enter: enterAlert,
-                alert_leave: leaveAlert
             })
         });
 

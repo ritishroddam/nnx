@@ -8,6 +8,13 @@ geofence_bp = Blueprint('Geofence', __name__, static_folder='static', template_f
 
 geofence_collection = db['geofences']
 
+def chenageRectangleToPolygon(coordinates):
+    return[
+            {'lat': coordinates.get('bounds').get('north'), 'lon': coordinates.get('bounds').get('east')}, 
+            {'lat': coordinates.get('bounds').get('north'), 'lon': coordinates.get('bounds').get('west')}, 
+            {'lat': coordinates.get('bounds').get('south'), 'lon': coordinates.get('bounds').get('west')}, 
+            {'lat': coordinates.get('bounds').get('south'), 'lon': coordinates.get('bounds').get('east')}]
+
 @geofence_bp.route('/page')
 @jwt_required()
 def page():
@@ -64,6 +71,8 @@ def create_geofence():
         elif shape_type == "rectangle":
             if not (isinstance(coordinates, dict) and "bounds" in coordinates):
                 return jsonify({'error': 'Invalid rectangle coordinates'}), 400
+            coordinates = chenageRectangleToPolygon(coordinates)
+            shape_type = "polygon"
 
         geofence_data = {
             'name': name,
