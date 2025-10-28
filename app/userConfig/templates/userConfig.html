@@ -45,4 +45,44 @@ User Configuration
     <button type="submit" class="btn" id="saveConfigBtn">Save Configuration</button>
   </form>
 </div>
+
+<!-- Email Config Button -->
+<div class="email-config-section">
+  <button type="button" class="btn btn-secondary" id="emailConfigBtn">Email Configuration</button>
+  
+  <!-- Existing Emails Display -->
+  <div class="existing-emails" id="existingEmails">
+    {% if userConfigs.alert_emails %}
+      {% for email in userConfigs.alert_emails %}
+        <span class="email-tag">
+          {{ email }}
+          <span class="email-remove" data-email="{{ email }}">×</span>
+        </span>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- Email Config Popup -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Email Configuration</h3>
+      <button type="button" class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="emailConfigForm">
+        <div class="form-group">
+          <label for="emailInput">Email Addresses (comma separated)</label>
+          <textarea id="emailInput" name="emails" placeholder="Enter email addresses separated by commas"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn" id="saveEmailsBtn">Save Emails</button>
+          <button type="button" class="btn btn-cancel" id="cancelModal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
