@@ -93,8 +93,11 @@ function loadScriptOnce(src) {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();
     const s = document.createElement("script");
     s.src = src;
+    s.async = true;
     s.onload = () => resolve();
-    s.onerror = (e) => reject(e);
+    s.onerror = () => {
+      reject(new Error(`Failed to load script: ${src}`));
+    };
     document.head.appendChild(s);
   });
 }
