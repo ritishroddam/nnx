@@ -1,7 +1,10 @@
 let geofenceMap;
 let draw;
 let geofences = [];
-let selectedFeatureId = null; 
+let selectedFeatureId = null;
+let editingGeofenceId = null;
+let editOverlay = null;
+let editCancelBtn = null; 
 
 async function geofenceMapFunction() {
   const mapElement = document.getElementById("geofenceMap");
@@ -121,6 +124,18 @@ function wireUiButtons() {
   const del = document.getElementById("delete");
   if (del) del.addEventListener("click", deleteSelectedShape);
   if (saveBtn) saveBtn.type = "submit";
+
+  if (!editCancelBtn) {
+    editCancelBtn = document.createElement("button");
+    editCancelBtn.type = "button";
+    editCancelBtn.id = "cancelEditBtn";
+    editCancelBtn.className = "cancel-btn";
+    editCancelBtn.textContent = "Cancel Edit";
+    editCancelBtn.style.display = "none";
+    editCancelBtn.style.marginTop = "8px";
+    editCancelBtn.addEventListener("click", cancelEditGeofence);
+    if (saveBtn && saveBtn.parentNode) saveBtn.parentNode.appendChild(editCancelBtn);
+  }
 }
 
 function setMode(mode, btn) {
@@ -237,6 +252,39 @@ function hideDelete() {
 async function saveSelectedShape(e) {
   e.preventDefault();
 
+  if (editingGeofenceId && editOverlay) {
+    const coordsPayload = buildCoordinatesFromOverlay(editOverlay);
+    if (!coordsPayload) {
+      displayFlashMessage("Invalid edited shape", "danger");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/geofence/api/geofences/${editingGeofenceId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({ coordinates: coordsPayload }),
+      });
+
+      if (res.ok) {
+        displayFlashMessage("Geofence updated successfully!", "success");
+        cancelEditGeofence();
+        await loadSavedGeofences();
+      } else {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error("Update geofence error:", err);
+        displayFlashMessage("Error updating geofence: " + (err.error || "Unknown"), "danger");
+      }
+    } catch (err) {
+      console.error("Update geofence exception:", err);
+      displayFlashMessage("Error updating geofence", "danger");
+    }
+    return;
+  }
+
   const features = draw.getSnapshot();
   if (!features || features.length === 0) {
     displayFlashMessage("Please draw a geofence first", "warning");
@@ -297,6 +345,121 @@ function deleteSelectedShape() {
     selectedFeatureId = null;
     updateShapeData();
   }
+}
+
+function buildCoordinatesFromOverlay(overlay) {
+  if (!overlay) return null;
+  if (overlay instanceof google.maps.Circle) {
+    const c = overlay.getCenter();
+    return { center: { lat: c.lat(), lng: c.lng() }, radius: overlay.getRadius() };
+  }
+
+  if (overlay instanceof google.maps.Polygon) {
+    const path = overlay.getPath();
+    const pts = [];
+    for (let i = 0; i < path.getLength(); i++) {
+      const p = path.getAt(i);
+      pts.push({ lat: p.lat(), lng: p.lng() });
+    }
+    return { points: pts };
+  }
+  return null;
+}
+
+function startEditGeofence(gf) {
+  // cancel any previous edit
+  cancelEditGeofence();
+
+  editingGeofenceId = gf._id;
+  // populate form fields
+  const nameEl = document.getElementById("GeofenceName");
+  const locEl = document.getElementById("Location");
+  if (nameEl) nameEl.value = gf.name || "";
+  if (locEl) locEl.value = gf.location || "";
+
+  // create editable overlay on map
+  const coords = gf.coordinates || {};
+  if (gf.shape_type === "circle") {
+    const center = coords.center || coords.center;
+    if (!center || typeof coords.radius !== "number") {
+      displayFlashMessage("Cannot edit: invalid circle geometry", "danger");
+      editingGeofenceId = null;
+      return;
+    }
+    editOverlay = new google.maps.Circle({
+      center: new google.maps.LatLng(center.lat, center.lng),
+      radius: coords.radius,
+      editable: true,
+      draggable: true,
+      fillOpacity: 0.15,
+      strokeWeight: 2,
+      map: geofenceMap,
+    });
+
+    google.maps.event.addListener(editOverlay, "center_changed", updateEditShapeData);
+    google.maps.event.addListener(editOverlay, "radius_changed", updateEditShapeData);
+    google.maps.event.addListener(editOverlay, "dragend", updateEditShapeData);
+  } else {
+    // polygon (including rectangle stored as polygon)
+    const pts = (coords.points || []).map(p => ({ lat: p.lat, lng: p.lng }));
+    if (!pts.length) {
+      displayFlashMessage("Cannot edit: invalid polygon geometry", "danger");
+      editingGeofenceId = null;
+      return;
+    }
+    editOverlay = new google.maps.Polygon({
+      paths: pts,
+      editable: true,
+      strokeWeight: 2,
+      fillOpacity: 0.15,
+      map: geofenceMap,
+    });
+
+    const path = editOverlay.getPath();
+    google.maps.event.addListener(path, "insert_at", updateEditShapeData);
+    google.maps.event.addListener(path, "remove_at", updateEditShapeData);
+    google.maps.event.addListener(path, "set_at", updateEditShapeData);
+  }
+
+  // show cancel edit button
+  if (editCancelBtn) editCancelBtn.style.display = "inline";
+
+  // center map on overlay
+  if (gf.shape_type === "circle") {
+    geofenceMap.setCenter(new google.maps.LatLng(coords.center.lat, coords.center.lng));
+    geofenceMap.setZoom(14);
+  } else {
+    const b = new google.maps.LatLngBounds();
+    (coords.points || []).forEach(pt => b.extend(new google.maps.LatLng(pt.lat, pt.lng)));
+    if (!b.isEmpty()) geofenceMap.fitBounds(b);
+  }
+
+  // immediately populate shapeData for convenience
+  updateEditShapeData();
+}
+
+function updateEditShapeData() {
+  if (!editOverlay) return;
+  const coordsObj = buildCoordinatesFromOverlay(editOverlay);
+  if (!coordsObj) return;
+
+  const el = document.getElementById("shapeData");
+  if (el) el.value = JSON.stringify(coordsObj);
+
+  if (coordsObj.points) updatePointCount(coordsObj.points.length);
+  else updatePointCount(1);
+}
+
+function cancelEditGeofence() {
+  if (editOverlay) {
+    try { editOverlay.setMap(null); } catch (e) { /* ignore */ }
+    editOverlay = null;
+  }
+  editingGeofenceId = null;
+  const el = document.getElementById("shapeData");
+  if (el) el.value = "";
+  updatePointCount(0);
+  if (editCancelBtn) editCancelBtn.style.display = "none";
 }
 
 /* ---------- Load/render existing (unchanged) ---------- */
@@ -403,6 +566,11 @@ function renderGeofenceList() {
     const actions = document.createElement("div");
     actions.className = "geofence-actions";
 
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.className = "edit-btn";
+    editBtn.onclick = () => startEditGeofence(gf);
+
     const viewBtn = document.createElement("button");
     viewBtn.textContent = "View";
     viewBtn.className = "view-btn";
@@ -413,6 +581,7 @@ function renderGeofenceList() {
     delBtn.className = "delete-btn";
     delBtn.onclick = () => deleteGeofence(gf._id);
 
+    actions.appendChild(editBtn);
     actions.appendChild(viewBtn);
     actions.appendChild(delBtn);
 
