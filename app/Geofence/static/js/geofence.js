@@ -19,7 +19,7 @@ async function geofenceMapFunction() {
     disableDoubleClickZoom: true,
   });
 
-  const TerraNS = window.TerraDraw || {};
+  const TerraNS = window.terraDraw || window.TerraDraw || {};
   const {
     TerraDraw: TerraDrawCtor,
     TerraDrawSelectMode,
@@ -27,9 +27,12 @@ async function geofenceMapFunction() {
     TerraDrawRectangleMode,
     TerraDrawCircleMode,
   } = TerraNS;
+
   const AdapterCtor =
+    (window.terraDrawGoogleMapsAdapter && window.terraDrawGoogleMapsAdapter.TerraDrawGoogleMapsAdapter) ||
     window.TerraDrawGoogleMapsAdapter ||
-    window.terraDrawGoogleMapsAdapter?.TerraDrawGoogleMapsAdapter;
+    (window.terraDrawGoogleMapsAdapter && window.terraDrawGoogleMapsAdapter.TerraDrawGoogleMapsAdapter) ||
+    undefined;
 
   if (!TerraDrawCtor || !AdapterCtor) {
     console.error("TerraDraw or Google Maps adapter not found. Check script includes and versions.");
