@@ -267,7 +267,7 @@ async function saveSelectedShape(e) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRF-TOKEN": (typeof getCookie === "function" ? getCookie("csrf_access_token") : "") || "",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
     },
     body: JSON.stringify(payload),
   });
@@ -438,7 +438,15 @@ function zoomToGeofence(geofence) {
 }
 
 async function deleteGeofence(id) {
-  const res = await fetch(`/geofence/api/geofences/${id}`, { method: "DELETE" });
+  const res = await fetch(`/geofence/api/geofences/${id}`, 
+    { 
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
+    }
+  );
   if (res.ok) {
     displayFlashMessage("Geofence deleted", "success");
     await loadSavedGeofences();
@@ -451,7 +459,10 @@ async function deleteGeofence(id) {
 async function toggleGeofenceStatus(id, newStatus) {
   const res = await fetch(`/geofence/api/geofences/${id}/active`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers:{
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+      },
     body: JSON.stringify({ is_active: newStatus }),
   });
   if (!res.ok) {
