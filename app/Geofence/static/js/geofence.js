@@ -1,12 +1,15 @@
 let geofenceMap;
 let drawingManager = null;
-let selectedOverlay = null; // overlay returned by DrawingManager
-let drawnShape = null; // alias for currently selected overlay
+let selectedOverlay = null;
+let drawnShape = null;
 let geofences = [];
 
 let editingGeofence = null;
 let editingOverlay = null;
 let originalOverlayData = null;
+
+let terraDrawInstance = null;
+let terradrawAvailable = false;
 
 async function geofenceMapFunction() {
   const mapElement = document.getElementById("geofenceMap");
@@ -18,12 +21,6 @@ async function geofenceMapFunction() {
   try {
     const { Map } = await google.maps.importLibrary("maps");
     await google.maps.importLibrary("geometry");
-    // drawing library may be deprecated but import if available
-    try {
-      await google.maps.importLibrary("drawing");
-    } catch (err) {
-      console.warn("drawing import failed - ensure maps script includes drawing library", err);
-    }
 
     geofenceMap = new Map(mapElement, {
       center: { lat: 20.5937, lng: 78.9629 },
@@ -31,6 +28,8 @@ async function geofenceMapFunction() {
       disableDoubleClickZoom: true,
     });
 
+    // init tools (TerraDraw preferred)
+    await tryInitTerraDraw();
     initDrawingManager();
     wireUiButtons();
     loadSavedGeofences();
@@ -41,11 +40,160 @@ async function geofenceMapFunction() {
 }
 
 /* ---------- DrawingManager + overlay handling ---------- */
+async function tryInitTerraDraw() {
+  // If TerraDraw is not yet loaded, try to load via CDN (non-blocking)
+  if (!window.TerraDraw) {
+    // optional: CDN URL; remove or change if you host TerraDraw differently
+    const url = "https://unpkg.com/terradraw@latest/dist/terradraw.umd.js";
+    try {
+      await loadScriptOnce(url);
+    } catch (e) {
+      console.warn("Failed to load TerraDraw from CDN:", e);
+    }
+  }
+
+  if (!window.TerraDraw) {
+    console.info("TerraDraw not available; fallback to DrawingManager/manual drawing.");
+    terradrawAvailable = false;
+    return false;
+  }
+
+  try {
+    // create TerraDraw instance, adapter expects map to expose lat/lng conversions (we use google map)
+    terraDrawInstance = new window.TerraDraw({
+      // TerraDraw options are implementation-specific; we pass a map placeholder.
+      // The adapter below will convert TerraDraw events to google overlays.
+      map: geofenceMap
+    });
+
+    // TerraDraw events: created geometry -> handle create
+    terraDrawInstance.on && terraDrawInstance.on("create", (evt) => {
+      try {
+        handleTerraCreate(evt);
+      } catch (e) {
+        console.error("handleTerraCreate error:", e);
+      }
+    });
+
+    // update events keep shape data in sync
+    terraDrawInstance.on && terraDrawInstance.on("update", (evt) => updateShapeDataFromTerra(evt));
+
+    terradrawAvailable = true;
+    console.info("TerraDraw initialized and will be used for drawing.");
+    return true;
+  } catch (err) {
+    console.warn("TerraDraw initialization failed:", err);
+    terradrawAvailable = false;
+    return false;
+  }
+}
+
+function loadScriptOnce(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = (e) => reject(e);
+    document.head.appendChild(s);
+  });
+}
+
+function handleTerraCreate(evt) {
+  // TerraDraw event payloads vary by version. We handle common geometry types:
+  // evt.feature.geometry => GeoJSON geometry
+  const feature = evt.feature || evt;
+  if (!feature || !feature.geometry) {
+    console.warn("TerraDraw create event missing geometry", evt);
+    return;
+  }
+
+  // remove previous overlay
+  if (selectedOverlay) selectedOverlay.setMap(null);
+  if (drawnShape) drawnShape.setMap(null);
+  selectedOverlay = null;
+  drawnShape = null;
+
+  const geom = feature.geometry;
+  if (geom.type === "Polygon") {
+    // convert GeoJSON coords to google LatLng array (use first ring)
+    const ring = geom.coordinates[0] || [];
+    const path = ring.map(c => ({ lat: c[1], lng: c[0] }));
+    const overlay = new google.maps.Polygon({
+      paths: path,
+      editable: true,
+      draggable: true,
+      map: geofenceMap,
+      fillColor: "#FF0000",
+      fillOpacity: 0.2,
+      strokeColor: "#FF0000",
+      strokeWeight: 2,
+    });
+    selectedOverlay = overlay;
+    drawnShape = overlay;
+    wireOverlayChangeListeners(overlay);
+    updateShapeData();
+  } else if (geom.type === "Point" && feature.properties && feature.properties._radius) {
+    // circle encoded as point + radius property
+    const center = { lat: geom.coordinates[1], lng: geom.coordinates[0] };
+    const overlay = new google.maps.Circle({
+      center: center,
+      radius: Number(feature.properties._radius) || 0,
+      editable: true,
+      draggable: true,
+      map: geofenceMap,
+      fillColor: "#FF0000",
+      fillOpacity: 0.2,
+      strokeColor: "#FF0000",
+      strokeWeight: 2,
+    });
+    selectedOverlay = overlay;
+    drawnShape = overlay;
+    wireOverlayChangeListeners(overlay);
+    updateShapeData();
+  } else if (geom.type === "LineString" && feature.properties && feature.properties._isRectangle) {
+    // some tools encode rectangle as LineString or Polygon; attempt polygon conversion
+    const ring = geom.coordinates;
+    const path = ring.map(c => ({ lat: c[1], lng: c[0] }));
+    const overlay = new google.maps.Polygon({
+      paths: path,
+      editable: true,
+      draggable: true,
+      map: geofenceMap,
+      fillColor: "#FF0000",
+      fillOpacity: 0.2,
+      strokeColor: "#FF0000",
+      strokeWeight: 2,
+    });
+    selectedOverlay = overlay;
+    drawnShape = overlay;
+    wireOverlayChangeListeners(overlay);
+    updateShapeData();
+  } else {
+    console.warn("TerraDraw geometry type not handled:", geom.type, feature);
+  }
+
+  // show delete button if present
+  const deleteBtn = document.getElementById("delete");
+  if (deleteBtn) deleteBtn.style.display = "inline";
+}
+
+function updateShapeDataFromTerra(evt) {
+  // Try to sync TerraDraw updates to the hidden input by re-serializing selected overlay
+  // If TerraDraw provides GeoJSON feature, convert that; otherwise call updateShapeData()
+  if (evt && evt.feature && evt.feature.geometry) {
+    // create a temporary overlay representation and call updateShapeData path-based logic
+    // Simpler: call updateShapeData (it will read selectedOverlay/drawnShape we set earlier)
+    updateShapeData();
+  } else {
+    updateShapeData();
+  }
+}
+
 function initDrawingManager() {
   if (drawingManager) return;
 
   try {
-    // initialize DrawingManager; drawingControl disabled because we use custom buttons
     drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: null,
       drawingControl: false,
@@ -56,10 +204,8 @@ function initDrawingManager() {
     drawingManager.setMap(geofenceMap);
 
     google.maps.event.addListener(drawingManager, "overlaycomplete", function (event) {
-      // Stop drawing after overlay created
       try { drawingManager.setDrawingMode(null); } catch (e) {}
 
-      // remove previous temporary overlay
       if (selectedOverlay) {
         selectedOverlay.setMap(null);
         selectedOverlay = null;
@@ -70,20 +216,15 @@ function initDrawingManager() {
       selectedOverlay.type = event.type;
       drawnShape = selectedOverlay;
 
-      // ensure editable/draggable
       if (selectedOverlay.setEditable) selectedOverlay.setEditable(true);
       if (selectedOverlay.setDraggable) selectedOverlay.setDraggable(true);
 
-      // attach edit listeners so updateShapeData keeps the hidden input in-sync
       wireOverlayChangeListeners(selectedOverlay);
 
-      // present delete/save controls (template should have #delete and #save)
       const deleteBtn = document.getElementById("delete");
       if (deleteBtn) deleteBtn.style.display = "inline";
 
       updateShapeData();
-
-      // optional: open vehicle popup if present
       const vehiclePopup = document.getElementById("vehiclePopup");
       if (vehiclePopup) vehiclePopup.classList.add("active");
       if (typeof loadVehicles === "function") loadVehicles();
@@ -96,26 +237,20 @@ function initDrawingManager() {
 function wireOverlayChangeListeners(overlay) {
   try {
     if (!overlay) return;
-    // Circle listeners
-    if (overlay instanceof google.maps.Circle || overlay.type === google.maps.drawing.OverlayType.CIRCLE) {
+    if (overlay instanceof google.maps.Circle || overlay.type === google.maps.drawing?.OverlayType?.CIRCLE) {
       google.maps.event.addListener(overlay, "radius_changed", updateShapeData);
       google.maps.event.addListener(overlay, "center_changed", updateShapeData);
     }
-    // Rectangle listeners
-    if (overlay instanceof google.maps.Rectangle || overlay.type === google.maps.drawing.OverlayType.RECTANGLE) {
+    if (overlay instanceof google.maps.Rectangle || overlay.type === google.maps.drawing?.OverlayType?.RECTANGLE) {
       google.maps.event.addListener(overlay, "bounds_changed", updateShapeData);
     }
-    // Polygon listeners
-    if (overlay instanceof google.maps.Polygon || overlay.type === google.maps.drawing.OverlayType.POLYGON) {
+    if (overlay instanceof google.maps.Polygon || overlay.type === google.maps.drawing?.OverlayType?.POLYGON) {
       const path = overlay.getPath();
       google.maps.event.addListener(path, "set_at", updateShapeData);
       google.maps.event.addListener(path, "insert_at", updateShapeData);
       google.maps.event.addListener(path, "remove_at", updateShapeData);
     }
-    // click selects overlay
-    google.maps.event.addListener(overlay, "click", () => {
-      setSelection(overlay);
-    });
+    google.maps.event.addListener(overlay, "click", () => setSelection(overlay));
   } catch (e) {
     console.warn("wireOverlayChangeListeners failed:", e);
   }
@@ -155,43 +290,51 @@ function wireUiButtons() {
 }
 
 function startDrawingMode(type, btnEl) {
-  // UI active state
   document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
   if (btnEl) btnEl.classList.add("active");
 
-  // clear any existing selection
   clearSelection();
-  updateShapeData(); // clear hidden input
+  updateShapeData();
 
-  // set drawing mode on DrawingManager
+  // Prefer TerraDraw if available
+  if (terradrawAvailable && terraDrawInstance) {
+    try {
+      // Generic API: start(toolName) — adapt if your TerraDraw version uses different method names
+      const toolMap = {
+        circle: "circle",
+        polygon: "polygon",
+        rectangle: "rectangle"
+      };
+      const tool = toolMap[type] || null;
+      if (tool && terraDrawInstance.start) {
+        terraDrawInstance.start(tool);
+        return;
+      }
+    } catch (e) {
+      console.warn("TerraDraw start failed, falling back to DrawingManager", e);
+    }
+  }
+
+  // Fallback: DrawingManager
   if (!drawingManager) initDrawingManager();
   const mapType = google.maps.drawing ? google.maps.drawing.OverlayType : null;
   if (!mapType || !drawingManager) {
-    // DrawingManager not available -> fallback: set currentShapeType to handle manual drawing (not implemented here)
-    console.warn("DrawingManager unavailable - drawing won't start.");
+    console.warn("No drawing tool available.");
     return;
   }
 
-  if (type === "circle") {
-    drawingManager.setDrawingMode(mapType.CIRCLE);
-  } else if (type === "polygon") {
-    drawingManager.setDrawingMode(mapType.POLYGON);
-  } else if (type === "rectangle") {
-    drawingManager.setDrawingMode(mapType.RECTANGLE);
-  } else {
-    drawingManager.setDrawingMode(null);
-  }
+  if (type === "circle") drawingManager.setDrawingMode(mapType.CIRCLE);
+  else if (type === "polygon") drawingManager.setDrawingMode(mapType.POLYGON);
+  else if (type === "rectangle") drawingManager.setDrawingMode(mapType.RECTANGLE);
+  else drawingManager.setDrawingMode(null);
 }
 
 /* ---------- Shape serialization helpers ---------- */
 function rectangleBoundsToPolygonPoints(bounds) {
-  // Return clockwise polygon points from rectangle bounds
   const ne = bounds.getNorthEast();
   const sw = bounds.getSouthWest();
-  // compute corners
   const nw = new google.maps.LatLng(ne.lat(), sw.lng());
   const se = new google.maps.LatLng(sw.lat(), ne.lng());
-  // Clockwise: NE, SE, SW, NW
   return [
     { lat: ne.lat(), lng: ne.lng() },
     { lat: se.lat(), lng: se.lng() },
@@ -212,8 +355,7 @@ function updateShapeData() {
       return;
     }
 
-    // Circle
-    if (overlay instanceof google.maps.Circle || overlay.type === google.maps.drawing.OverlayType.CIRCLE) {
+    if (overlay instanceof google.maps.Circle || overlay.type === google.maps.drawing?.OverlayType?.CIRCLE) {
       const center = overlay.getCenter().toJSON();
       const radius = overlay.getRadius();
       el.value = JSON.stringify({ center: center, radius: radius });
@@ -221,8 +363,7 @@ function updateShapeData() {
       return;
     }
 
-    // Rectangle -> convert to polygon points
-    if (overlay instanceof google.maps.Rectangle || overlay.type === google.maps.drawing.OverlayType.RECTANGLE) {
+    if (overlay instanceof google.maps.Rectangle || overlay.type === google.maps.drawing?.OverlayType?.RECTANGLE) {
       const bounds = overlay.getBounds();
       const pts = rectangleBoundsToPolygonPoints(bounds);
       el.value = JSON.stringify({ points: pts });
@@ -230,7 +371,6 @@ function updateShapeData() {
       return;
     }
 
-    // Polygon
     if (overlay.getPath) {
       const pts = overlay.getPath().getArray().map(ll => ({ lat: ll.lat(), lng: ll.lng() }));
       el.value = JSON.stringify({ points: pts });
@@ -268,21 +408,16 @@ async function saveSelectedShape(ev) {
   let shape_type = null;
   let coordinates = null;
 
-  // Circle
-  if (overlay instanceof google.maps.Circle || overlay.type === google.maps.drawing.OverlayType.CIRCLE) {
+  if (overlay instanceof google.maps.Circle || overlay.type === google.maps.drawing?.OverlayType?.CIRCLE) {
     shape_type = "circle";
     const center = overlay.getCenter().toJSON();
     coordinates = { center: center, radius: overlay.getRadius() };
-  }
-  // Rectangle -> convert to polygon points (store as polygon)
-  else if (overlay instanceof google.maps.Rectangle || overlay.type === google.maps.drawing.OverlayType.RECTANGLE) {
+  } else if (overlay instanceof google.maps.Rectangle || overlay.type === google.maps.drawing?.OverlayType?.RECTANGLE) {
     shape_type = "polygon";
     const bounds = overlay.getBounds();
     const pts = rectangleBoundsToPolygonPoints(bounds);
     coordinates = { points: pts };
-  }
-  // Polygon
-  else {
+  } else {
     shape_type = "polygon";
     let pathArr = [];
     if (overlay.getPath) {
@@ -315,7 +450,6 @@ async function saveSelectedShape(ev) {
       displayFlashMessage("Geofence saved successfully!", "success");
       clearOverlay();
       loadSavedGeofences();
-      // reset form
       if (document.getElementById("geofenceForm")) document.getElementById("geofenceForm").reset();
       if (document.getElementById("shapeData")) document.getElementById("shapeData").value = "";
     } else {
@@ -391,7 +525,6 @@ function renderGeofencesOnMap() {
     const coords = gf.coordinates;
     let overlay = null;
 
-    // Set colors based on active status
     const fillColor = gf.is_active ? "#FF0000" : "#888888";
     const fillOpacity = gf.is_active ? 0.2 : 0.1;
     const strokeColor = gf.is_active ? "#FF0000" : "#666666";
@@ -427,7 +560,6 @@ function renderGeofencesOnMap() {
       path.forEach((latlng) => bounds.extend(latlng));
       hasGeofence = true;
     } else if (gf.shape_type === "rectangle") {
-      // Make sure this part is correct
       const rectBounds = new google.maps.LatLngBounds(
         new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
         new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
@@ -460,104 +592,104 @@ function renderGeofencesOnMap() {
 }
 
 function renderGeofenceList() {
-    const list = document.getElementById("geofenceList");
-    if (!list) return;
-    list.innerHTML = "";
+  const list = document.getElementById("geofenceList");
+  if (!list) return;
+  list.innerHTML = "";
 
-    geofences.forEach((gf, i) => {
-        const li = document.createElement("li");
-        li.className = "geofence-list-item";
-        li.dataset.geofenceId = gf._id;
+  geofences.forEach((gf, i) => {
+    const li = document.createElement("li");
+    li.className = "geofence-list-item";
+    li.dataset.geofenceId = gf._id;
 
-        const content = document.createElement("div");
-        content.className = "geofence-item-content";
+    const content = document.createElement("div");
+    content.className = "geofence-item-content";
 
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "geofence-item-name";
-        nameSpan.textContent = gf.name;
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "geofence-item-name";
+    nameSpan.textContent = gf.name;
 
-        const metaDiv = document.createElement("div");
-        metaDiv.className = "geofence-item-meta";
-        metaDiv.innerHTML = `
-            <div>Location: ${gf.location || 'N/A'}</div>
+    const metaDiv = document.createElement("div");
+    metaDiv.className = "geofence-item-meta";
+    metaDiv.innerHTML = `
+            <div>Location: ${gf.location || "N/A"}</div>
             <div>Type: ${gf.shape_type}</div>
             <div>Created by: ${gf.created_by}</div>
             <div>Created on:<br> ${new Date(gf.created_at).toLocaleString()}</div>
             <div class="geofence-status-container">
                 <span class="geofence-status-label">Status:</span>
                 <label class="geofence-status-switch">
-                    <input type="checkbox" ${gf.is_active ? 'checked' : ''} 
+                    <input type="checkbox" ${gf.is_active ? "checked" : ""} 
                            onchange="toggleGeofenceStatus('${gf._id}', this.checked)">
                     <span class="geofence-status-slider"></span>
                 </label>
-                <span class="geofence-status-text">${gf.is_active ? 'Active' : 'Inactive'}</span>
+                <span class="geofence-status-text">${gf.is_active ? "Active" : "Inactive"}</span>
             </div>
         `;
 
-        const actions = document.createElement("div");
-        actions.className = "geofence-actions";
+    const actions = document.createElement("div");
+    actions.className = "geofence-actions";
 
-        const viewBtn = document.createElement("button");
-        viewBtn.textContent = "View";
-        viewBtn.className = "view-btn";
-        viewBtn.onclick = () => zoomToGeofence(gf);
+    const viewBtn = document.createElement("button");
+    viewBtn.textContent = "View";
+    viewBtn.className = "view-btn";
+    viewBtn.onclick = () => zoomToGeofence(gf);
 
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.className = "edit-btn";
-        editBtn.onclick = () => startEditGeofence(gf, li);
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.className = "edit-btn";
+    editBtn.onclick = () => startEditGeofence(gf, li);
 
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "Delete";
-        delBtn.className = "delete-btn";
-        delBtn.onclick = () => deleteGeofence(gf._id);
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Delete";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => deleteGeofence(gf._id);
 
-        actions.appendChild(viewBtn);
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
+    actions.appendChild(viewBtn);
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
 
-        content.appendChild(nameSpan);
-        content.appendChild(metaDiv);
-        li.appendChild(content);
-        li.appendChild(actions);
+    content.appendChild(nameSpan);
+    content.appendChild(metaDiv);
+    li.appendChild(content);
+    li.appendChild(actions);
 
-        list.appendChild(li);
+    list.appendChild(li);
 
-        if (editingGeofence && editingGeofence._id === gf._id) {
-            const actionLi = document.createElement("li");
-            actionLi.className = "edit-action-bar-below";
-            actionLi.style.listStyle = "none";
-            actionLi.style.background = "transparent";
-            actionLi.style.display = "flex";
-            actionLi.style.justifyContent = "center";
-            actionLi.style.alignItems = "center";
-            actionLi.style.border = "none";
-            actionLi.style.boxShadow = "none";
-            actionLi.style.marginTop = "-10px";
-            actionLi.style.marginBottom = "10px";
+    if (editingGeofence && editingGeofence._id === gf._id) {
+      const actionLi = document.createElement("li");
+      actionLi.className = "edit-action-bar-below";
+      actionLi.style.listStyle = "none";
+      actionLi.style.background = "transparent";
+      actionLi.style.display = "flex";
+      actionLi.style.justifyContent = "center";
+      actionLi.style.alignItems = "center";
+      actionLi.style.border = "none";
+      actionLi.style.boxShadow = "none";
+      actionLi.style.marginTop = "-10px";
+      actionLi.style.marginBottom = "10px";
 
-            const saveBtn = document.createElement("button");
-            saveBtn.textContent = "Save";
-            saveBtn.className = "confirm-btn below";
-            saveBtn.onclick = saveEditGeofence;
+      const saveBtn = document.createElement("button");
+      saveBtn.textContent = "Save";
+      saveBtn.className = "confirm-btn below";
+      saveBtn.onclick = saveEditGeofence;
 
-            const cancelBtn = document.createElement("button");
-            cancelBtn.textContent = "Cancel";
-            cancelBtn.className = "cancel-btn below";
-            cancelBtn.onclick = cancelEditGeofence;
+      const cancelBtn = document.createElement("button");
+      cancelBtn.textContent = "Cancel";
+      cancelBtn.className = "cancel-btn below";
+      cancelBtn.onclick = cancelEditGeofence;
 
-            actionLi.appendChild(saveBtn);
-            actionLi.appendChild(cancelBtn);
+      actionLi.appendChild(saveBtn);
+      actionLi.appendChild(cancelBtn);
 
-            list.appendChild(actionLi);
-        }
-    });
+      list.appendChild(actionLi);
+    }
+  });
 }
 
 /* ---------- Init on window load ---------- */
 window.onload = async function () {
   try {
-    await backgroundMap(); // existing helper that sets up base map visuals
+    await backgroundMap();
   } catch (e) {
     console.warn("backgroundMap failed or missing:", e);
   }
