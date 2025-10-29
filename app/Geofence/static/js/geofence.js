@@ -71,7 +71,19 @@ async function geofenceMapFunction() {
     ],
   });
 
-  draw.start();
+  try {
+    if (google && google.maps && google.maps.event && typeof google.maps.event.addListenerOnce === "function") {
+      google.maps.event.addListenerOnce(geofenceMap, "idle", () => {
+        draw.start();
+      });
+    } else {
+      // Fallback if event API not available yet
+      setTimeout(() => draw.start(), 200);
+    }
+  } catch (err) {
+    // Defensive fallback
+    setTimeout(() => draw.start(), 200);
+  }
 
   draw.on("ready", () => {
     setMode("polygon");
