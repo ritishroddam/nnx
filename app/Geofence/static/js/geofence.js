@@ -34,8 +34,13 @@ async function geofenceMapFunction() {
     (window.terraDrawGoogleMapsAdapter && window.terraDrawGoogleMapsAdapter.TerraDrawGoogleMapsAdapter) ||
     undefined;
 
-  if (!TerraDrawCtor || !AdapterCtor) {
-    console.error("TerraDraw or Google Maps adapter not found. Check script includes and versions.");
+  if (!AdapterCtor) {
+    console.error("TerraDraw not found. Check script includes and versions.");
+    throw new Error("TerraDraw/Adapter UMD not available");
+  }
+
+  if (!AdapterCtor) {
+    console.error("Google Maps adapter not found. Check script includes and versions.");
     throw new Error("TerraDraw/Adapter UMD not available");
   }
 
