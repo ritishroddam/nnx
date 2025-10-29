@@ -1,4 +1,4 @@
-let map;
+let geofenceMap;
 let drawnShape = null;
 let geofences = [];
 let rectangle = null;
@@ -29,7 +29,7 @@ async function geofenceMap() {
     const { Map } = await google.maps.importLibrary("maps");
     await google.maps.importLibrary("geometry");
 
-    map = new Map(mapElement, {
+    geofenceMap = new Map(mapElement, {
       center: { lat: 20.5937, lng: 78.9629 },
       zoom: 5,
       disableDoubleClickZoom: true,
@@ -69,11 +69,11 @@ function setupEventListeners() {
 }
 
 function setupMapListeners() {
-  google.maps.event.clearListeners(map, 'mousedown');
-  google.maps.event.clearListeners(map, 'mousemove');
-  google.maps.event.clearListeners(map, 'mouseup');
-  google.maps.event.clearListeners(map, 'click');
-  google.maps.event.clearListeners(map, 'dblclick');
+  google.maps.event.clearListeners(geofenceMap, 'mousedown');
+  google.maps.event.clearListeners(geofenceMap, 'mousemove');
+  google.maps.event.clearListeners(geofenceMap, 'mouseup');
+  google.maps.event.clearListeners(geofenceMap, 'click');
+  google.maps.event.clearListeners(geofenceMap, 'dblclick');
 
   console.log(`Setting up map listeners for shape type: ${currentShapeType}`);
 
@@ -93,7 +93,7 @@ function startCircleDrawing(event) {
   clearShape();
   
   drawnShape = new google.maps.Circle({
-    map,
+    geofenceMap,
     center: circleStart,
     radius: 10,
     fillColor: "#FF0000",
@@ -133,7 +133,7 @@ function startRectangleDrawing(event) {
   clearShape();
 
   drawnShape = new google.maps.Rectangle({
-    map: map,
+    map: geofenceMap,
     bounds: new google.maps.LatLngBounds(rectStart, rectStart),
     fillColor: "#FF0000",
     fillOpacity: 0.35,
@@ -167,7 +167,7 @@ function handlePolygonClick(event) {
     clearShape();
     
     drawnShape = new google.maps.Polygon({
-      map,
+      geofenceMap,
       paths: [polygonPath],
       fillColor: "#FF0000",
       fillOpacity: 0.35,
@@ -177,7 +177,7 @@ function handlePolygonClick(event) {
     });
     
     polyPreview = new google.maps.Polyline({
-      map,
+      geofenceMap,
       path: polygonPath,
       strokeColor: "#FF0000",
       strokeOpacity: 0.6,
@@ -342,12 +342,12 @@ function setupCircleDrawing() {
   let tempCircle = null;
 
   // Clear any existing listeners first
-  google.maps.event.clearListeners(map, 'mousedown');
-  google.maps.event.clearListeners(map, 'mousemove');
-  google.maps.event.clearListeners(map, 'mouseup');
+  google.maps.event.clearListeners(geofenceMap, 'mousedown');
+  google.maps.event.clearListeners(geofenceMap, 'mousemove');
+  google.maps.event.clearListeners(geofenceMap, 'mouseup');
 
   // Mouse down to start drawing
-  google.maps.event.addListener(map, 'mousedown', (event) => {
+  google.maps.event.addListener(geofenceMap, 'mousedown', (event) => {
     if (currentShapeType !== "circle") return;
     
     circleStart = event.latLng;
@@ -361,7 +361,7 @@ function setupCircleDrawing() {
 
     // Create temporary circle
     tempCircle = new google.maps.Circle({
-      map: map,
+      map: geofenceMap,
       center: circleStart,
       radius: 1, // Start with small radius
       fillColor: "#FF0000",
@@ -374,7 +374,7 @@ function setupCircleDrawing() {
   });
 
   // Mouse move to update circle size
-  google.maps.event.addListener(map, 'mousemove', (event) => {
+  google.maps.event.addListener(geofenceMap, 'mousemove', (event) => {
     if (!circleDrawing || !tempCircle || currentShapeType !== "circle") return;
     
     const radius = google.maps.geometry.spherical.computeDistanceBetween(
@@ -385,7 +385,7 @@ function setupCircleDrawing() {
   });
 
   // Mouse up to finish drawing
-  google.maps.event.addListener(map, 'mouseup', (event) => {
+  google.maps.event.addListener(geofenceMap, 'mouseup', (event) => {
     if (!circleDrawing || !tempCircle || currentShapeType !== "circle") return;
     
     circleDrawing = false;
@@ -478,10 +478,10 @@ function setupPolygonDrawing() {
   let tempPolygon = null;
 
   // Clear any existing listeners first
-  google.maps.event.clearListeners(map, 'click');
-  google.maps.event.clearListeners(map, 'mousemove');
-  google.maps.event.clearListeners(map, 'dblclick');
-  google.maps.event.clearListeners(map, 'rightclick');
+  google.maps.event.clearListeners(geofenceMap, 'click');
+  google.maps.event.clearListeners(geofenceMap, 'mousemove');
+  google.maps.event.clearListeners(geofenceMap, 'dblclick');
+  google.maps.event.clearListeners(geofenceMap, 'rightclick');
 
   // Clear any existing preview
   if (polyPreview) {
@@ -490,7 +490,7 @@ function setupPolygonDrawing() {
   }
 
   // Single click to add points
-  google.maps.event.addListener(map, 'click', (event) => {
+  google.maps.event.addListener(geofenceMap, 'click', (event) => {
     if (currentShapeType !== "polygon") return;
 
     // Add point to path
@@ -503,7 +503,7 @@ function setupPolygonDrawing() {
 
     // Create or update polygon
     tempPolygon = new google.maps.Polygon({
-      map: map,
+      map: geofenceMap,
       paths: polygonPath,
       fillColor: "#FF0000",
       fillOpacity: 0.35,
@@ -520,7 +520,7 @@ function setupPolygonDrawing() {
     
     if (polygonPath.length > 1) {
       polyPreview = new google.maps.Polyline({
-        map: map,
+        map: geofenceMap,
         path: polygonPath,
         strokeColor: "#FF0000",
         strokeOpacity: 0.6,
@@ -532,7 +532,7 @@ function setupPolygonDrawing() {
   });
 
   // Double click to finish polygon
-  google.maps.event.addListener(map, 'dblclick', (event) => {
+  google.maps.event.addListener(geofenceMap, 'dblclick', (event) => {
     if (currentShapeType !== "polygon" || polygonPath.length < 3) return;
 
     // Finish the polygon
@@ -564,7 +564,7 @@ function setupPolygonDrawing() {
   });
 
   // Right click to remove last point
-  google.maps.event.addListener(map, 'rightclick', (event) => {
+  google.maps.event.addListener(geofenceMap, 'rightclick', (event) => {
     if (currentShapeType !== "polygon" || polygonPath.length === 0) return;
     
     polygonPath.pop();
@@ -575,7 +575,7 @@ function setupPolygonDrawing() {
     
     if (polygonPath.length > 0) {
       tempPolygon = new google.maps.Polygon({
-        map: map,
+        map: geofenceMap,
         paths: polygonPath,
         fillColor: "#FF0000",
         fillOpacity: 0.35,
@@ -626,11 +626,11 @@ function setupRectangleDrawing() {
   let localRectStart = null;
   let localRectDrawing = false;
 
-  google.maps.event.clearListeners(map, 'mousedown');
-  google.maps.event.clearListeners(map, 'mousemove');
-  google.maps.event.clearListeners(map, 'mouseup');
+  google.maps.event.clearListeners(geofenceMap, 'mousedown');
+  google.maps.event.clearListeners(geofenceMap, 'mousemove');
+  google.maps.event.clearListeners(geofenceMap, 'mouseup');
 
-  google.maps.event.addListener(map, 'mousedown', (event) => {
+  google.maps.event.addListener(geofenceMap, 'mousedown', (event) => {
     if (currentShapeType !== "rectangle") return;
     
     localRectStart = event.latLng;
@@ -639,7 +639,7 @@ function setupRectangleDrawing() {
     clearShape();
 
     drawnShape = new google.maps.Rectangle({
-      map: map,
+      map: geofenceMap,
       bounds: new google.maps.LatLngBounds(localRectStart, localRectStart),
       fillColor: "#FF0000",
       fillOpacity: 0.35,
@@ -649,7 +649,7 @@ function setupRectangleDrawing() {
     });
   });
 
-  google.maps.event.addListener(map, 'mousemove', (event) => {
+  google.maps.event.addListener(geofenceMap, 'mousemove', (event) => {
     if (!localRectDrawing || !localRectStart || currentShapeType !== "rectangle") return;
     
     const bounds = new google.maps.LatLngBounds(localRectStart, event.latLng);
@@ -657,7 +657,7 @@ function setupRectangleDrawing() {
     updateShapeData();
   });
 
-  google.maps.event.addListener(map, 'mouseup', () => {
+  google.maps.event.addListener(geofenceMap, 'mouseup', () => {
     if (!localRectDrawing || currentShapeType !== "rectangle") return;
     
     localRectDrawing = false;
@@ -1014,7 +1014,7 @@ function renderGeofencesOnMap() {
         fillOpacity: fillOpacity,
         strokeColor: strokeColor,
         strokeWeight: 2,
-        map: map,
+        map: geofenceMap,
         editable: false,
         draggable: false,
       });
@@ -1029,7 +1029,7 @@ function renderGeofencesOnMap() {
         fillOpacity: fillOpacity,
         strokeColor: strokeColor,
         strokeWeight: 2,
-        map: map,
+        map: geofenceMap,
         editable: false,
         draggable: false,
       });
@@ -1047,7 +1047,7 @@ function renderGeofencesOnMap() {
         fillOpacity: fillOpacity,
         strokeColor: strokeColor,
         strokeWeight: 2,
-        map: map,
+        map: geofenceMap,
         editable: false,
         draggable: false,
       });
@@ -1064,7 +1064,7 @@ function renderGeofencesOnMap() {
   });
 
   if (hasGeofence && !bounds.isEmpty()) {
-    map.fitBounds(bounds);
+    geofenceMap.fitBounds(bounds);
   }
 }
 
@@ -1092,7 +1092,7 @@ function startEditGeofence(gf, li) {
             fillOpacity: 0.35,
             strokeColor: "#FF0000",
             strokeWeight: 2,
-            map: map,
+            map: geofenceMap,
             editable: true,
             draggable: true
         });
@@ -1108,7 +1108,7 @@ function startEditGeofence(gf, li) {
             fillOpacity: 0.35,
             strokeColor: "#FF0000",
             strokeWeight: 2,
-            map: map,
+            map: geofenceMap,
             editable: true,
             draggable: true
         });
@@ -1124,7 +1124,7 @@ function startEditGeofence(gf, li) {
             fillOpacity: 0.35,
             strokeColor: "#FF0000",
             strokeWeight: 2,
-            map: map,
+            map: geofenceMap,
             editable: true,
             draggable: true
         });
@@ -1210,20 +1210,20 @@ function zoomToGeofence(geofence) {
     const coords = geofence.coordinates;
     
     if (geofence.shape_type === 'circle') {
-        map.setCenter(new google.maps.LatLng(coords.center.lat, coords.center.lng));
-        map.setZoom(15);
+        geofenceMap.setCenter(new google.maps.LatLng(coords.center.lat, coords.center.lng));
+        geofenceMap.setZoom(15);
     } else if (geofence.shape_type === 'polygon') {
         const bounds = new google.maps.LatLngBounds();
         coords.points.forEach(point => {
             bounds.extend(new google.maps.LatLng(point.lat, point.lng));
         });
-        map.fitBounds(bounds);
+        geofenceMap.fitBounds(bounds);
     } else if (geofence.shape_type === 'rectangle') {
         const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
             new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
         );
-        map.fitBounds(bounds);
+        geofenceMap.fitBounds(bounds);
     }
 }
 
