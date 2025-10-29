@@ -187,24 +187,14 @@ function updateShapeData() {
 function featureToCoordinatesPayload(feature) {
   const mode = (feature.properties && feature.properties.mode) || "";
 
-  if (mode === "rectangle" || (feature.geometry && feature.geometry.type === "Polygon" && mode !== "polygon" && mode !== "circle")) {
-    const ring = feature.geometry.coordinates[0] || [];
-    const points = ring.map(([lng, lat]) => ({ lat, lng }));
-    return { shape_type: "polygon", coordinates: { points } };
-  }
+  const props = feature.properties || {};
+  const centerProp = props.center || props._center || props.centerLatLng || null;
+  const radiusProp = (props.radius ?? props._radius);
 
-  if (mode === "polygon" || feature.geometry?.type === "Polygon") {
-    const ring = feature.geometry.coordinates[0] || [];
-    const points = ring.map(([lng, lat]) => ({ lat, lng }));
-    return { shape_type: "polygon", coordinates: { points } };
-  }
+  if (mode === "circle" || centerProp || typeof radiusProp === "number") {
 
-  if (mode === "circle") {
-    const center = feature.properties?.center;
-    const radius = feature.properties?.radius ?? feature.properties?._radius;
-
-    if (center && typeof radius === "number") {
-      return { shape_type: "circle", coordinates: { center, radius } };
+    if (centerProp && typeof radiusProp === "number") {
+      return { shape_type: "circle", coordinates: { center: centerProp, radius: radiusProp } };
     }
 
     const ring = feature.geometry?.coordinates?.[0] || [];
@@ -214,6 +204,12 @@ function featureToCoordinatesPayload(feature) {
       const r = averageRadius(centerLL, pts);
       return { shape_type: "circle", coordinates: { center: centerLL, radius: r } };
     }
+  }
+
+  if (mode === "rectangle" || feature.geometry?.type === "Polygon") {
+    const ring = feature.geometry?.coordinates?.[0] || [];
+    const points = ring.map(([lng, lat]) => ({ lat, lng }));
+    return { shape_type: "polygon", coordinates: { points } };
   }
 
   return null;
