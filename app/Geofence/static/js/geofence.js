@@ -13,7 +13,7 @@ let draw;
 let geofences = [];
 let selectedFeatureId = null;
 
-async function geofenceMapFunction() {
+export async function geofenceMapFunction() {
   const { Map } = await google.maps.importLibrary('maps');
   await google.maps.importLibrary('geometry');
 
@@ -372,7 +372,4 @@ async function toggleGeofenceStatus(id, newStatus) {
 }
 
 /* ---------- Init ---------- */
-window.onload = async function () {
-  try { await backgroundMap(); } catch (e) {}
-  await geofenceMapFunction();
-};
+export default geofenceMapFunction;
