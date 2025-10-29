@@ -36,6 +36,9 @@ async function geofenceMap() {
     });
 
     setupEventListeners();
+
+    setShapeType("circle");
+
     loadSavedGeofences();
   } catch (error) {
     console.error("Error creating map:", error);
@@ -63,60 +66,24 @@ function setupEventListeners() {
 
   const form = document.getElementById("geofenceForm");
   form.addEventListener("submit", handleFormSubmit);
-
-  setupMapListeners();
 }
 
 function setupMapListeners() {
-  // Clear any existing listeners first
   google.maps.event.clearListeners(map, 'mousedown');
   google.maps.event.clearListeners(map, 'mousemove');
   google.maps.event.clearListeners(map, 'mouseup');
   google.maps.event.clearListeners(map, 'click');
   google.maps.event.clearListeners(map, 'dblclick');
 
-  // Mouse down for circle and rectangle
-  google.maps.event.addListener(map, 'mousedown', (event) => {
-    if (currentShapeType === "circle") {
-      startCircleDrawing(event);
-    } else if (currentShapeType === "rectangle") {
-      startRectangleDrawing(event);
-    }
-  });
+  console.log(`Setting up map listeners for shape type: ${currentShapeType}`);
 
-  // Mouse move for all shapes
-  google.maps.event.addListener(map, 'mousemove', (event) => {
-    if (currentShapeType === "circle" && circleDrawing) {
-      updateCircleDrawing(event);
-    } else if (currentShapeType === "rectangle" && rectDrawing) {
-      updateRectangleDrawing(event);
-    } else if (currentShapeType === "polygon" && polygonDrawing && polyPreview) {
-      updatePolygonPreview(event);
-    }
-  });
-
-  // Mouse up for circle and rectangle
-  google.maps.event.addListener(map, 'mouseup', (event) => {
-    if (currentShapeType === "circle" && circleDrawing) {
-      finishCircleDrawing();
-    } else if (currentShapeType === "rectangle" && rectDrawing) {
-      finishRectangleDrawing();
-    }
-  });
-
-  // Click for polygon
-  google.maps.event.addListener(map, 'click', (event) => {
-    if (currentShapeType === "polygon") {
-      handlePolygonClick(event);
-    }
-  });
-
-  // Double click for polygon finish
-  google.maps.event.addListener(map, 'dblclick', (event) => {
-    if (currentShapeType === "polygon" && polygonDrawing) {
-      finishPolygonDrawing();
-    }
-  });
+  if (currentShapeType === "circle") {
+    setupCircleDrawing();
+  } else if (currentShapeType === "polygon") {
+    setupPolygonDrawing();
+  } else if (currentShapeType === "rectangle") {
+    setupRectangleDrawing();
+  }
 }
 
 function startCircleDrawing(event) {
@@ -255,139 +222,425 @@ function finishPolygonDrawing() {
   }
 }
 
+// function setupCircleDrawing() {
+//   let localCircleStart = null;
+//   let localCircleDrawing = false;
+
+//   // Clear any existing listeners first
+//   google.maps.event.clearListeners(map, 'mousedown');
+//   google.maps.event.clearListeners(map, 'mousemove');
+//   google.maps.event.clearListeners(map, 'mouseup');
+
+//   google.maps.event.addListener(map, 'mousedown', (event) => {
+//     if (currentShapeType !== "circle") return;
+    
+//     localCircleStart = event.latLng;
+//     localCircleDrawing = true;
+
+//     clearShape();
+    
+//     drawnShape = new google.maps.Circle({
+//       map,
+//       center: localCircleStart,
+//       radius: 10,
+//       fillColor: "#FF0000",
+//       fillOpacity: 0.35,
+//       strokeWeight: 2,
+//       editable: false,
+//       draggable: false,
+//     });
+//   });
+
+//   google.maps.event.addListener(map, 'mousemove', (event) => {
+//     if (currentShapeType !== "circle" || !localCircleDrawing || !drawnShape) return;
+    
+//     const radius = google.maps.geometry.spherical.computeDistanceBetween(
+//       localCircleStart, 
+//       event.latLng
+//     );
+//     drawnShape.setRadius(radius);
+//     updateShapeData();
+//   });
+
+//   google.maps.event.addListener(map, 'mouseup', () => {
+//     if (currentShapeType !== "circle" || !localCircleDrawing) return;
+//     localCircleDrawing = false;
+    
+//     if (drawnShape instanceof google.maps.Circle) {
+//       drawnShape.setEditable(true);
+//       drawnShape.setDraggable(true);
+//       drawnShape.addListener("radius_changed", updateShapeData);
+//       drawnShape.addListener("center_changed", updateShapeData);
+//       updateShapeData();
+//     }
+//   });
+// }
+
+// function setupPolygonDrawing() {
+//   let localPolygonDrawing = false;
+//   let localPolygonPath = [];
+
+//   google.maps.event.clearListeners(map, 'click');
+//   google.maps.event.clearListeners(map, 'mousemove');
+//   google.maps.event.clearListeners(map, 'dblclick');
+
+//   google.maps.event.addListener(map, 'click', (event) => {
+//     if (currentShapeType !== "polygon") return;
+
+//     if (!localPolygonDrawing) {
+//       localPolygonDrawing = true;
+//       localPolygonPath = [event.latLng];
+      
+//       clearShape();
+      
+//       drawnShape = new google.maps.Polygon({
+//         map,
+//         paths: [localPolygonPath],
+//         fillColor: "#FF0000",
+//         fillOpacity: 0.35,
+//         strokeWeight: 2,
+//         editable: false,
+//         draggable: false,
+//       });
+      
+//       if (polyPreview) {
+//         polyPreview.setMap(null);
+//       }
+//       polyPreview = new google.maps.Polyline({
+//         map,
+//         path: localPolygonPath,
+//         strokeColor: "#FF0000",
+//         strokeOpacity: 0.6,
+//         strokeWeight: 2,
+//       });
+//     } else {
+//       localPolygonPath.push(event.latLng);
+//       drawnShape.setPaths([localPolygonPath]);
+//       updateShapeData();
+//     }
+//   });
+
+//   google.maps.event.addListener(map, 'mousemove', (event) => {
+//     if (currentShapeType !== "polygon" || !localPolygonDrawing || !polyPreview) return;
+    
+//     const previewPath = [...localPolygonPath, event.latLng];
+//     polyPreview.setPath(previewPath);
+//   });
+
+//   google.maps.event.addListener(map, 'dblclick', (event) => {
+//     if (currentShapeType !== "polygon" || !localPolygonDrawing) return;
+    
+//     finishPolygonDrawing(localPolygonPath);
+//     localPolygonDrawing = false;
+//     localPolygonPath = [];
+//   });
+// }
+
 function setupCircleDrawing() {
   let circleStart = null;
   let circleDrawing = false;
+  let tempCircle = null;
 
+  // Clear any existing listeners first
+  google.maps.event.clearListeners(map, 'mousedown');
+  google.maps.event.clearListeners(map, 'mousemove');
+  google.maps.event.clearListeners(map, 'mouseup');
+
+  // Mouse down to start drawing
   google.maps.event.addListener(map, 'mousedown', (event) => {
     if (currentShapeType !== "circle") return;
+    
     circleStart = event.latLng;
     circleDrawing = true;
 
-    if (drawnShape) drawnShape.setMap(null);
-    
-    drawnShape = new google.maps.Circle({
-      map,
+    // Clear any existing shape
+    if (drawnShape) {
+      drawnShape.setMap(null);
+      drawnShape = null;
+    }
+
+    // Create temporary circle
+    tempCircle = new google.maps.Circle({
+      map: map,
       center: circleStart,
-      radius: 10, 
+      radius: 1, // Start with small radius
       fillColor: "#FF0000",
       fillOpacity: 0.35,
       strokeWeight: 2,
+      strokeColor: "#FF0000",
       editable: false,
       draggable: false,
     });
   });
 
+  // Mouse move to update circle size
   google.maps.event.addListener(map, 'mousemove', (event) => {
-    if (currentShapeType !== "circle" || !circleDrawing || !drawnShape) return;
+    if (!circleDrawing || !tempCircle || currentShapeType !== "circle") return;
     
     const radius = google.maps.geometry.spherical.computeDistanceBetween(
       circleStart, 
       event.latLng
     );
-    drawnShape.setRadius(radius);
+    tempCircle.setRadius(radius);
   });
 
-  google.maps.event.addListener(map, 'mouseup', () => {
-    if (currentShapeType !== "circle" || !circleDrawing) return;
+  // Mouse up to finish drawing
+  google.maps.event.addListener(map, 'mouseup', (event) => {
+    if (!circleDrawing || !tempCircle || currentShapeType !== "circle") return;
+    
     circleDrawing = false;
     
-    if (drawnShape instanceof google.maps.Circle) {
-      drawnShape.setEditable(true);
-      drawnShape.setDraggable(true);
-      drawnShape.addListener("radius_changed", updateShapeData);
-      drawnShape.addListener("center_changed", updateShapeData);
-      updateShapeData();
-    }
+    // Set the final circle as drawnShape
+    drawnShape = tempCircle;
+    tempCircle = null;
+    
+    // Make it editable
+    drawnShape.setEditable(true);
+    drawnShape.setDraggable(true);
+    
+    // Add listeners for changes
+    drawnShape.addListener("radius_changed", updateShapeData);
+    drawnShape.addListener("center_changed", updateShapeData);
+    
+    updateShapeData();
   });
 }
 
+// function setupPolygonDrawing() {
+//   // Clear any existing listeners first
+//   google.maps.event.clearListeners(map, 'click');
+//   google.maps.event.clearListeners(map, 'mousemove');
+//   google.maps.event.clearListeners(map, 'dblclick');
+
+//   let localPolygonDrawing = false;
+//   let localPolygonPath = [];
+
+//   google.maps.event.addListener(map, 'click', (event) => {
+//     if (currentShapeType !== "polygon") return;
+
+//     if (!localPolygonDrawing) {
+//       // Start new polygon
+//       localPolygonDrawing = true;
+//       localPolygonPath = [event.latLng];
+      
+//       clearShape();
+      
+//       drawnShape = new google.maps.Polygon({
+//         map: map,
+//         paths: [localPolygonPath],
+//         fillColor: "#FF0000",
+//         fillOpacity: 0.35,
+//         strokeWeight: 2,
+//         editable: false,
+//         draggable: false,
+//       });
+      
+//       // Create preview line
+//       polyPreview = new google.maps.Polyline({
+//         map: map,
+//         path: localPolygonPath,
+//         strokeColor: "#FF0000",
+//         strokeOpacity: 0.6,
+//         strokeWeight: 2,
+//       });
+//     } else {
+//       // Add point to existing polygon
+//       localPolygonPath.push(event.latLng);
+//       drawnShape.setPaths([localPolygonPath]);
+      
+//       // Update preview line
+//       if (polyPreview) {
+//         polyPreview.setPath(localPolygonPath);
+//       }
+//       updateShapeData();
+//     }
+//   });
+
+//   google.maps.event.addListener(map, 'mousemove', (event) => {
+//     if (currentShapeType !== "polygon" || !localPolygonDrawing || !polyPreview) return;
+    
+//     const previewPath = [...localPolygonPath, event.latLng];
+//     polyPreview.setPath(previewPath);
+//   });
+
+//   google.maps.event.addListener(map, 'dblclick', (event) => {
+//     if (currentShapeType !== "polygon" || !localPolygonDrawing) return;
+    
+//     // Finish the polygon
+//     finishPolygonDrawing(localPolygonPath);
+//     localPolygonDrawing = false;
+//     localPolygonPath = [];
+//   });
+// }
+
 function setupPolygonDrawing() {
-  let polygonDrawing = false;
+  let polygonPath = [];
   let tempPolygon = null;
 
+  // Clear any existing listeners first
+  google.maps.event.clearListeners(map, 'click');
+  google.maps.event.clearListeners(map, 'mousemove');
+  google.maps.event.clearListeners(map, 'dblclick');
+  google.maps.event.clearListeners(map, 'rightclick');
+
+  // Clear any existing preview
+  if (polyPreview) {
+    polyPreview.setMap(null);
+    polyPreview = null;
+  }
+
+  // Single click to add points
   google.maps.event.addListener(map, 'click', (event) => {
     if (currentShapeType !== "polygon") return;
 
-    if (!polygonDrawing) {
-      polygonDrawing = true;
-      polygonPath = [];
-      if (drawnShape) drawnShape.setMap(null);
-      if (polyPreview) polyPreview.setMap(null);
-      
-      drawnShape = new google.maps.Polygon({
-        map,
-        paths: [],
-        fillColor: "#FF0000",
-        fillOpacity: 0.35,
-        strokeWeight: 2,
-        editable: false,
-        draggable: false,
-      });
-      
+    // Add point to path
+    polygonPath.push(event.latLng);
+
+    // Remove existing temporary polygon
+    if (tempPolygon) {
+      tempPolygon.setMap(null);
+    }
+
+    // Create or update polygon
+    tempPolygon = new google.maps.Polygon({
+      map: map,
+      paths: polygonPath,
+      fillColor: "#FF0000",
+      fillOpacity: 0.35,
+      strokeWeight: 2,
+      strokeColor: "#FF0000",
+      editable: false,
+      draggable: false,
+    });
+
+    // Update preview line
+    if (polyPreview) {
+      polyPreview.setMap(null);
+    }
+    
+    if (polygonPath.length > 1) {
       polyPreview = new google.maps.Polyline({
-        map,
-        path: [],
+        map: map,
+        path: polygonPath,
         strokeColor: "#FF0000",
         strokeOpacity: 0.6,
         strokeWeight: 2,
       });
     }
-    
-    polygonPath.push(event.latLng);
-    drawnShape.setPath(polygonPath);
+
     updateShapeData();
   });
 
-  google.maps.event.addListener(map, 'mousemove', (event) => {
-    if (currentShapeType !== "polygon" || !polygonDrawing || !polyPreview) return;
-    
-    const previewPath = polygonPath.concat([event.latLng]);
-    polyPreview.setPath(previewPath);
-  });
-
+  // Double click to finish polygon
   google.maps.event.addListener(map, 'dblclick', (event) => {
-    if (currentShapeType !== "polygon" || !polygonDrawing) return;
-    
-    polygonDrawing = false;
-    if (polyPreview) {
-      polyPreview.setMap(null);
-      polyPreview = null;
-    }
-    
-    if (drawnShape instanceof google.maps.Polygon && polygonPath.length >= 3) {
+    if (currentShapeType !== "polygon" || polygonPath.length < 3) return;
+
+    // Finish the polygon
+    if (tempPolygon) {
+      drawnShape = tempPolygon;
+      tempPolygon = null;
+      
+      // Remove preview line
+      if (polyPreview) {
+        polyPreview.setMap(null);
+        polyPreview = null;
+      }
+
+      // Make it editable
       drawnShape.setEditable(true);
       drawnShape.setDraggable(true);
       
+      // Add listeners for changes
       const path = drawnShape.getPath();
-      path.addListener("set_at", updateShapeData);
-      path.addListener("insert_at", updateShapeData);
-      path.addListener("remove_at", updateShapeData);
+      google.maps.event.addListener(path, 'set_at', updateShapeData);
+      google.maps.event.addListener(path, 'insert_at', updateShapeData);
+      google.maps.event.addListener(path, 'remove_at', updateShapeData);
       
       updateShapeData();
-    } else {
-      drawnShape.setMap(null);
-      drawnShape = null;
-      displayFlashMessage("Polygon needs at least 3 points", "warning");
+      
+      // Reset for next polygon
+      polygonPath = [];
     }
+  });
+
+  // Right click to remove last point
+  google.maps.event.addListener(map, 'rightclick', (event) => {
+    if (currentShapeType !== "polygon" || polygonPath.length === 0) return;
+    
+    polygonPath.pop();
+    
+    if (tempPolygon) {
+      tempPolygon.setMap(null);
+    }
+    
+    if (polygonPath.length > 0) {
+      tempPolygon = new google.maps.Polygon({
+        map: map,
+        paths: polygonPath,
+        fillColor: "#FF0000",
+        fillOpacity: 0.35,
+        strokeWeight: 2,
+        strokeColor: "#FF0000",
+        editable: false,
+        draggable: false,
+      });
+    }
+    
+    // Update preview line
+    if (polyPreview) {
+      if (polygonPath.length > 1) {
+        polyPreview.setPath(polygonPath);
+      } else {
+        polyPreview.setMap(null);
+        polyPreview = null;
+      }
+    }
+    
+    updateShapeData();
   });
 }
 
+function finishPolygonDrawing(path) {
+  if (polyPreview) {
+    polyPreview.setMap(null);
+    polyPreview = null;
+  }
+  
+  if (drawnShape instanceof google.maps.Polygon && path.length >= 3) {
+    drawnShape.setEditable(true);
+    drawnShape.setDraggable(true);
+    
+    const drawnPath = drawnShape.getPath();
+    drawnPath.addListener("set_at", updateShapeData);
+    drawnPath.addListener("insert_at", updateShapeData);
+    drawnPath.addListener("remove_at", updateShapeData);
+    
+    updateShapeData();
+  } else {
+    clearShape();
+    displayFlashMessage("Polygon needs at least 3 points", "warning");
+  }
+}
+
 function setupRectangleDrawing() {
-  let rectStart = null;
-  let rectDrawing = false;
+  let localRectStart = null;
+  let localRectDrawing = false;
+
+  google.maps.event.clearListeners(map, 'mousedown');
+  google.maps.event.clearListeners(map, 'mousemove');
+  google.maps.event.clearListeners(map, 'mouseup');
 
   google.maps.event.addListener(map, 'mousedown', (event) => {
     if (currentShapeType !== "rectangle") return;
     
-    rectStart = event.latLng;
-    rectDrawing = true;
+    localRectStart = event.latLng;
+    localRectDrawing = true;
 
-    if (drawnShape) drawnShape.setMap(null);
+    clearShape();
 
     drawnShape = new google.maps.Rectangle({
       map: map,
-      bounds: new google.maps.LatLngBounds(rectStart, rectStart),
+      bounds: new google.maps.LatLngBounds(localRectStart, localRectStart),
       fillColor: "#FF0000",
       fillOpacity: 0.35,
       strokeWeight: 2,
@@ -397,16 +650,17 @@ function setupRectangleDrawing() {
   });
 
   google.maps.event.addListener(map, 'mousemove', (event) => {
-    if (!rectDrawing || !rectStart || currentShapeType !== "rectangle") return;
+    if (!localRectDrawing || !localRectStart || currentShapeType !== "rectangle") return;
     
-    const bounds = new google.maps.LatLngBounds(rectStart, event.latLng);
+    const bounds = new google.maps.LatLngBounds(localRectStart, event.latLng);
     drawnShape.setBounds(bounds);
+    updateShapeData();
   });
 
   google.maps.event.addListener(map, 'mouseup', () => {
-    if (!rectDrawing || currentShapeType !== "rectangle") return;
+    if (!localRectDrawing || currentShapeType !== "rectangle") return;
     
-    rectDrawing = false;
+    localRectDrawing = false;
     drawnShape.setEditable(true);
     drawnShape.setDraggable(true);
     drawnShape.addListener("bounds_changed", updateShapeData);
@@ -414,21 +668,9 @@ function setupRectangleDrawing() {
   });
 }
 
-// function setShapeType(type) {
-//   currentShapeType = type;
-//   clearShape();
-
-//   document.getElementById("circleBtn").classList.remove("active");
-//   document.getElementById("polygonBtn").classList.remove("active");
-//   document.getElementById("rectangleBtn").classList.remove("active");
-//   document.getElementById(`${type}Btn`).classList.add("active");
-
-//   document.getElementById("circleControls").style.display = type === "circle" ? "block" : "none";
-//   document.getElementById("polygonControls").style.display = type === "polygon" ? "block" : "none";
-//   document.getElementById("rectangleControls").style.display = type === "rectangle" ? "block" : "none";
-// }
-
 function setShapeType(type) {
+  console.log(`Switching to shape type: ${type}`);
+  
   currentShapeType = type;
   clearShape();
   resetDrawingState();
@@ -441,12 +683,13 @@ function setShapeType(type) {
   document.getElementById("circleControls").style.display = type === "circle" ? "block" : "none";
   document.getElementById("polygonControls").style.display = type === "polygon" ? "block" : "none";
   document.getElementById("rectangleControls").style.display = type === "rectangle" ? "block" : "none";
+
+  setupMapListeners();
 }
 
 function resetDrawingState() {
   circleDrawing = false;
   circleStart = null;
-  polygonDrawing = false;
   polygonPath = [];
   rectDrawing = false;
   rectStart = null;
@@ -524,6 +767,8 @@ async function handleFormSubmit(e) {
             document.getElementById("geofenceForm").reset();
             document.getElementById("shapeData").value = "";
             loadSavedGeofences();
+
+            setShapeType(currentShapeType);
         } else {
             const error = await response.json();
             console.error((error.error || JSON.stringify(error)));
@@ -540,7 +785,12 @@ function clearShape() {
     drawnShape.setMap(null);
     drawnShape = null;
   }
+  if (polyPreview) {
+    polyPreview.setMap(null);
+    polyPreview = null;
+  }
   document.getElementById("shapeData").value = "";
+  resetDrawingState();
 }
 
 async function loadSavedGeofences() {
@@ -581,7 +831,7 @@ function renderGeofenceList() {
             <div>Location: ${gf.location || 'N/A'}</div>
             <div>Type: ${gf.shape_type}</div>
             <div>Created by: ${gf.created_by}</div>
-            <div>Created:<br> ${new Date(gf.created_at).toLocaleString()}</div>
+            <div>Created on:<br> ${new Date(gf.created_at).toLocaleString()}</div>
             <div class="geofence-status-container">
                 <span class="geofence-status-label">Status:</span>
                 <label class="geofence-status-switch">
@@ -653,6 +903,88 @@ function renderGeofenceList() {
     });
 }
 
+// function renderGeofencesOnMap() {
+//   // Clear existing overlays
+//   geofences.forEach((gf) => {
+//     if (gf.mapOverlay) {
+//       gf.mapOverlay.setMap(null);
+//     }
+//   });
+
+//   const bounds = new google.maps.LatLngBounds();
+//   let hasGeofence = false;
+
+//   geofences.forEach((gf) => {
+//     const coords = gf.coordinates;
+//     let overlay = null;
+
+//     // Set colors based on active status
+//     const fillColor = gf.is_active ? "#FF0000" : "#888888";
+//     const fillOpacity = gf.is_active ? 0.2 : 0.1;
+//     const strokeColor = gf.is_active ? "#FF0000" : "#666666";
+
+//     if (gf.shape_type === "circle") {
+//       const center = new google.maps.LatLng(coords.center.lat, coords.center.lng);
+//       overlay = new google.maps.Circle({
+//         center: center,
+//         radius: coords.radius,
+//         fillColor: fillColor,
+//         fillOpacity: fillOpacity,
+//         strokeColor: strokeColor,
+//         strokeWeight: 2,
+//         map: map,
+//         editable: false,
+//         draggable: false,
+//       });
+//       const circleBounds = overlay.getBounds();
+//       if (circleBounds) bounds.union(circleBounds);
+//       hasGeofence = true;
+//     } else if (gf.shape_type === "polygon") {
+//       const path = coords.points.map((p) => new google.maps.LatLng(p.lat, p.lng));
+//       overlay = new google.maps.Polygon({
+//         paths: path,
+//         fillColor: fillColor,
+//         fillOpacity: fillOpacity,
+//         strokeColor: strokeColor,
+//         strokeWeight: 2,
+//         map: map,
+//         editable: false,
+//         draggable: false,
+//       });
+//       path.forEach((latlng) => bounds.extend(latlng));
+//       hasGeofence = true;
+//     } else if (gf.shape_type === "rectangle") {
+//       const rectBounds = new google.maps.LatLngBounds(
+//         new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
+//         new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
+//       );
+//       overlay = new google.maps.Rectangle({
+//         bounds: rectBounds,
+//         fillColor: fillColor,
+//         fillOpacity: fillOpacity,
+//         strokeColor: strokeColor,
+//         strokeWeight: 2,
+//         map: map,
+//         editable: false,
+//         draggable: false,
+//       });
+//       bounds.union(rectBounds);
+//       hasGeofence = true;
+//     }
+
+//     if (overlay) {
+//       gf.mapOverlay = overlay;
+//       overlay.addListener("click", () => {
+//         zoomToGeofence(gf);
+//       });
+//     }
+//   });
+
+//   if (hasGeofence && !bounds.isEmpty()) {
+//     map.fitBounds(bounds);
+//   }
+// }
+
 function renderGeofencesOnMap() {
   // Clear existing overlays
   geofences.forEach((gf) => {
@@ -704,6 +1036,7 @@ function renderGeofencesOnMap() {
       path.forEach((latlng) => bounds.extend(latlng));
       hasGeofence = true;
     } else if (gf.shape_type === "rectangle") {
+      // Make sure this part is correct
       const rectBounds = new google.maps.LatLngBounds(
         new google.maps.LatLng(coords.bounds.south, coords.bounds.west),
         new google.maps.LatLng(coords.bounds.north, coords.bounds.east)
@@ -844,11 +1177,11 @@ async function saveEditGeofence() {
             loadSavedGeofences();
         } else {
             const error = await response.json();
-            displayFlashMessage("Error updating geofence: ", 'danger');
+            displayFlashMessage("Error updating geofence: " + (error.error || 'Unknown error'), 'danger');
             console.error((error.error || JSON.stringify(error)));
         }
     } catch (error) {
-        displayFlashMessage("Error updating geofence: ", 'danger');
+        displayFlashMessage("Error updating geofence: " + error.message, 'danger');
         console.error(error.message);
     }
 }
@@ -909,15 +1242,15 @@ async function deleteGeofence(geofenceId) {
 
         if (response.ok) {
             displayFlashMessage('Geofence deleted successfully!', 'success');
-            loadSavedGeofences();
+            loadSavedGeofences(); 
         } else {
             const error = await response.json();
             console.error(error.error);
-            displayFlashMessage('Error deleting geofence: ', 'danger');
+            displayFlashMessage('Error deleting geofence: ' + (error.error || 'Unknown error'), 'danger');
         }
     } catch (error) {
         console.error('Error deleting geofence:', error);
-        displayFlashMessage('Error deleting geofence');
+        displayFlashMessage('Error deleting geofence: ' + error.message);
     }
 }
 
@@ -944,6 +1277,13 @@ async function toggleGeofenceStatus(geofenceId, newStatus) {
     } catch (error) {
         console.error('Error updating geofence status:', error);
         displayFlashMessage('Error updating geofence status', 'danger');
+    }
+}
+
+function updatePointCount(count) {
+    const pointCountElement = document.getElementById("pointCount");
+    if (pointCountElement) {
+        pointCountElement.textContent = count;
     }
 }
 

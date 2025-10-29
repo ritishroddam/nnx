@@ -42,6 +42,60 @@ def get_geofences():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# @geofence_bp.route('/api/geofences', methods=['POST'])
+# @jwt_required()
+# def create_geofence():
+#     try:
+#         claims = get_jwt()
+#         user_id = claims.get('user_id')
+#         username = claims.get('sub', 'Unknown')
+#         user_company = claims.get('company')
+        
+#         data = request.get_json()
+#         print("[DEBUG] Received geofence data:", data)
+#         print("[DEBUG] Coordinates type:", type(data.get('coordinates')), data.get('coordinates'))
+
+#         name = data.get('name')
+#         shape_type = data.get('shape_type')
+#         coordinates = data.get('coordinates')
+
+#         if not name or not shape_type or not coordinates:
+#             return jsonify({'error': 'Missing required fields'}), 400
+
+#         if shape_type == "circle":
+#             if not (isinstance(coordinates, dict) and "center" in coordinates and "radius" in coordinates):
+#                 return jsonify({'error': 'Invalid circle coordinates'}), 400
+#         elif shape_type == "polygon":
+#             if not (isinstance(coordinates, dict) and "points" in coordinates and isinstance(coordinates["points"], list)):
+#                 return jsonify({'error': 'Invalid polygon coordinates'}), 400
+#         elif shape_type == "rectangle":
+#             if not (isinstance(coordinates, dict) and "bounds" in coordinates):
+#                 return jsonify({'error': 'Invalid rectangle coordinates'}), 400
+#             coordinates = chenageRectangleToPolygon(coordinates)
+#             shape_type = "polygon"
+
+#         geofence_data = {
+#             'name': name,
+#             'location': data.get('location'),
+#             'shape_type': shape_type,
+#             'coordinates': coordinates,
+#             'created_by': username,
+#             'created_by_id': str(user_id),
+#             'company': user_company,
+#             'created_at': datetime.utcnow(),
+#             'is_active': True
+#         }
+        
+#         result = geofence_collection.insert_one(geofence_data)
+        
+#         return jsonify({
+#             'message': 'Geofence created successfully',
+#             'geofence_id': str(result.inserted_id)
+#         }), 201
+#     except Exception as e:
+#         print("[ERROR] Exception in create_geofence:", str(e))
+#         return jsonify({'error': str(e)}), 500
+
 @geofence_bp.route('/api/geofences', methods=['POST'])
 @jwt_required()
 def create_geofence():
@@ -71,8 +125,6 @@ def create_geofence():
         elif shape_type == "rectangle":
             if not (isinstance(coordinates, dict) and "bounds" in coordinates):
                 return jsonify({'error': 'Invalid rectangle coordinates'}), 400
-            coordinates = chenageRectangleToPolygon(coordinates)
-            shape_type = "polygon"
 
         geofence_data = {
             'name': name,
