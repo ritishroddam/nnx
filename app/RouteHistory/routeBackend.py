@@ -1,6 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, Blueprint, flash
-from pymongo import MongoClient
-from flask_cors import CORS
+from flask import jsonify, request, render_template, redirect, Blueprint, flash
 from datetime import datetime, timedelta
 import pytz
 import requests

@@ -30,6 +30,13 @@ async function geofenceMapFunction() {
 
     // init tools (TerraDraw preferred)
     await tryInitTerraDraw();
+
+    try{
+      await google.maps.importLibrary("drawing");
+    } catch(error){
+      console.error("Error loading darawing library:", error);
+    }
+
     initDrawingManager();
     wireUiButtons();
     loadSavedGeofences();
@@ -41,17 +48,6 @@ async function geofenceMapFunction() {
 
 /* ---------- DrawingManager + overlay handling ---------- */
 async function tryInitTerraDraw() {
-  // If TerraDraw is not yet loaded, try to load via CDN (non-blocking)
-  if (!window.TerraDraw) {
-    // optional: CDN URL; remove or change if you host TerraDraw differently
-    const url = "https://unpkg.com/terradraw@latest/dist/terradraw.umd.js";
-    try {
-      await loadScriptOnce(url);
-    } catch (e) {
-      console.warn("Failed to load TerraDraw from CDN:", e);
-    }
-  }
-
   if (!window.TerraDraw) {
     console.info("TerraDraw not available; fallback to DrawingManager/manual drawing.");
     terradrawAvailable = false;
@@ -59,14 +55,9 @@ async function tryInitTerraDraw() {
   }
 
   try {
-    // create TerraDraw instance, adapter expects map to expose lat/lng conversions (we use google map)
     terraDrawInstance = new window.TerraDraw({
-      // TerraDraw options are implementation-specific; we pass a map placeholder.
-      // The adapter below will convert TerraDraw events to google overlays.
       map: geofenceMap
     });
-
-    // TerraDraw events: created geometry -> handle create
     terraDrawInstance.on && terraDrawInstance.on("create", (evt) => {
       try {
         handleTerraCreate(evt);
@@ -74,8 +65,7 @@ async function tryInitTerraDraw() {
         console.error("handleTerraCreate error:", e);
       }
     });
-
-    // update events keep shape data in sync
+    
     terraDrawInstance.on && terraDrawInstance.on("update", (evt) => updateShapeDataFromTerra(evt));
 
     terradrawAvailable = true;

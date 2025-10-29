@@ -2,7 +2,9 @@
 
 {% block head %}
 <title>Geofence</title>
-<script src="https://unpkg.com/terradraw@latest/dist/terradraw.umd.js" integrity="" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/terradraw@1/dist/terradraw.umd.js"
+        referrerpolicy="no-referrer"
+        onerror="(function(){var s=document.createElement('script');s.src='{{ url_for('Geofence.static', filename='vendor/terradraw/terradraw.umd.js') }}';document.head.appendChild(s);}())"></script>
 <link rel="stylesheet" href="{{ url_for('Geofence.static', filename='css/geofence.css') }}" />
 <script defer src="{{ url_for('Geofence.static', filename='js/geofence.js') }}"></script>
 {% endblock %}
