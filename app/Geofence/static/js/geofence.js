@@ -14,7 +14,7 @@ let isDrawing = false;
 let circleCenter = null;
 let polyPreview = null;
 
-async function geofenceMap() {
+async function geofenceMapFunction() {
   const mapElement = document.getElementById("geofenceMap");
   if (!mapElement) {
     console.error("Map element not found!");
@@ -945,7 +945,7 @@ function updatePointCount(count) {
 window.onload = async function() {
   try{
       await backgroundMap();
-      await geofenceMap();
+      await geofenceMapFunction();
   } catch (e){
       console.error("Failed to load map", e);
       displayFlashMessage("Failed to load map for Geofence")
