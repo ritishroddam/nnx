@@ -2,11 +2,11 @@
 
 {% block head %}
 <title>Geofence</title>
-<script src="https://unpkg.com/terra-draw@latest/dist/terra-draw.umd.js"></script>
-<script src="https://unpkg.com/terra-draw-google-maps-adapter@latest/dist/terra-draw-google-maps-adapter.umd.js"></script>
+<script src="{{ url_for('Geofence.static', filename='js/terraDraw.js') }}"></script>
+<script src="{{ url_for('Geofence.static', filename='js/gmapsTerraAdapter.js') }}"></script>
 
 <link rel="stylesheet" href="{{ url_for('Geofence.static', filename='css/geofence.css') }}" />
-<script type="module" src="{{ url_for('Geofence.static', filename='js/geofence.js') }}"></script>
+<script defer src="{{ url_for('Geofence.static', filename='js/geofence.js') }}"></script>
 {% endblock %}
 
 {% block h1 %}
