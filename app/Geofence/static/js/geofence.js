@@ -19,28 +19,45 @@ async function geofenceMapFunction() {
     disableDoubleClickZoom: true,
   });
 
-  draw = new window.TerraDraw({
-    adapter: new window.TerraDrawGoogleMapsAdapter({
+  const TerraNS = window.TerraDraw || {};
+  const {
+    TerraDraw: TerraDrawCtor,
+    TerraDrawSelectMode,
+    TerraDrawPolygonMode,
+    TerraDrawRectangleMode,
+    TerraDrawCircleMode,
+  } = TerraNS;
+  const AdapterCtor =
+    window.TerraDrawGoogleMapsAdapter ||
+    window.terraDrawGoogleMapsAdapter?.TerraDrawGoogleMapsAdapter;
+
+  if (!TerraDrawCtor || !AdapterCtor) {
+    console.error("TerraDraw or Google Maps adapter not found. Check script includes and versions.");
+    throw new Error("TerraDraw/Adapter UMD not available");
+  }
+
+  draw = new TerraDrawCtor({
+    adapter: new AdapterCtor({
       map: geofenceMap,
       lib: google.maps,
       coordinatePrecision: 9,
     }),
     modes: [
-      new window.TerraDrawSelectMode({
+      new TerraDrawSelectMode({
         flags: {
           polygon: { feature: { draggable: true, rotateable: true, coordinates: { midpoints: true, draggable: true, deletable: true } } },
           rectangle: { feature: { draggable: true, rotateable: true, coordinates: { midpoints: true, draggable: true, deletable: true } } },
           circle: { feature: { draggable: true, rotateable: true, coordinates: { midpoints: true, draggable: true, deletable: true } } },
         },
       }),
-      new window.TerraDrawPolygonMode({
+      new TerraDrawPolygonMode({
         editable: true,
         styles: { fillColor: "#FF5722", outlineColor: "#FF5722" },
       }),
-      new window.TerraDrawRectangleMode({
+      new TerraDrawRectangleMode({
         styles: { fillColor: "#3F51B5", outlineColor: "#3F51B5" },
       }),
-      new window.TerraDrawCircleMode({
+      new TerraDrawCircleMode({
         styles: { fillColor: "#27AE60", outlineColor: "#27AE60" },
       }),
     ],
