@@ -57,6 +57,8 @@ function setShapeType(type) {
     none: null
   };
 
+  const mode = modeMap[type] || null;
+
   if (type === 'circle') {
     drawingManager.setDrawingMode(null);
   } else {
@@ -126,7 +128,7 @@ function setupEventListeners() {
   }
 
   const form = document.getElementById("geofenceForm");
-  form.addEventListener("submit", handleFormSubmit);
+  if (form) form.addEventListener("submit", handleFormSubmit);
 
   const saveBtn = document.getElementById("save");
   const deleteBtn = document.getElementById("delete");
