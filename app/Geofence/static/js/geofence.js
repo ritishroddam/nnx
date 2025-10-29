@@ -36,6 +36,9 @@ async function geofenceMap() {
     });
 
     setupEventListeners();
+
+    setShapeType("circle");
+
     loadSavedGeofences();
   } catch (error) {
     console.error("Error creating map:", error);
@@ -63,8 +66,6 @@ function setupEventListeners() {
 
   const form = document.getElementById("geofenceForm");
   form.addEventListener("submit", handleFormSubmit);
-
-  setupMapListeners();
 }
 
 // function setupMapListeners() {
@@ -432,8 +433,6 @@ function finishPolygonDrawing() {
 // }
 
 function setupCircleDrawing() {
-  let circleStart = null;
-  let circleDrawing = false;
 
   google.maps.event.addListener(map, 'mousedown', (event) => {
     if (currentShapeType !== "circle") return;
@@ -481,8 +480,6 @@ function setupCircleDrawing() {
 }
 
 function setupPolygonDrawing() {
-  let polygonDrawing = false;
-  let polygonPath = [];
 
   google.maps.event.addListener(map, 'click', (event) => {
     if (currentShapeType !== "polygon") return;
@@ -556,8 +553,6 @@ function setupPolygonDrawing() {
 }
 
 function setupRectangleDrawing() {
-  let rectStart = null;
-  let rectDrawing = false;
 
   google.maps.event.addListener(map, 'mousedown', (event) => {
     if (currentShapeType !== "rectangle") return;
@@ -709,6 +704,8 @@ async function handleFormSubmit(e) {
             document.getElementById("geofenceForm").reset();
             document.getElementById("shapeData").value = "";
             loadSavedGeofences();
+
+            setShapeType(currentShapeType);
         } else {
             const error = await response.json();
             console.error((error.error || JSON.stringify(error)));
@@ -718,7 +715,6 @@ async function handleFormSubmit(e) {
         console.error('Error saving geofence:', error);
         displayFlashMessage('Error saving geofence: ' + error.message, 'danger');
     }
-  setShapeType(currentShapeType);
 }
 
 function clearShape() {
