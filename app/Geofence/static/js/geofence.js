@@ -48,7 +48,6 @@ async function geofenceMap() {
 
 function setShapeType(type) {
   currentShapeType = type;
-  // ensure drawingManager is initialized
   if (!drawingManager) initDrawingManager();
 
   const modeMap = {
@@ -58,14 +57,50 @@ function setShapeType(type) {
     none: null
   };
 
-  const mode = modeMap[type] || null;
-  drawingManager.setDrawingMode(mode);
+  if (type === 'circle') {
+    drawingManager.setDrawingMode(null);
+  } else {
+    drawingManager.setDrawingMode(mode);
+  }
 
-  // clear any temporary preview shapes and selection
   clearSelection();
   if (polyPreview) {
     polyPreview.setMap(null);
     polyPreview = null;
+  }
+
+  const circleControls = document.getElementById("circleControls");
+  const polygonControls = document.getElementById("polygonControls");
+  const rectangleControls = document.getElementById("rectangleControls");
+  if (circleControls) circleControls.style.display = (type === "circle") ? "block" : "none";
+  if (polygonControls) polygonControls.style.display = (type === "polygon") ? "block" : "none";
+  if (rectangleControls) rectangleControls.style.display = (type === "rectangle") ? "block" : "none";
+  // ensure drawing state is clean
+  resetDrawingState();
+
+  setupMapListeners();
+}
+
+function setupMapListeners() {
+  // remove any map listeners first
+  google.maps.event.clearListeners(geofenceMap, 'mousedown');
+  google.maps.event.clearListeners(geofenceMap, 'mousemove');
+  google.maps.event.clearListeners(geofenceMap, 'mouseup');
+  google.maps.event.clearListeners(geofenceMap, 'click');
+  google.maps.event.clearListeners(geofenceMap, 'dblclick');
+
+  console.log(`Setting up map listeners for shape type: ${currentShapeType}`);
+
+  if (currentShapeType === "circle") {
+    setupCircleDrawing();
+  } else if (currentShapeType === "polygon" || currentShapeType === "rectangle") {
+    const modeMap = {
+      polygon: google.maps.drawing.OverlayType.POLYGON,
+      rectangle: google.maps.drawing.OverlayType.RECTANGLE
+    };
+    if (drawingManager) {
+      drawingManager.setDrawingMode(modeMap[currentShapeType]);
+    }
   }
 }
 
@@ -75,17 +110,20 @@ function setupEventListeners() {
   const rectangleBtn = document.getElementById("rectangleBtn");
   const radiusSlider = document.getElementById("radiusSlider");
 
-  circleBtn.addEventListener("click", () => setShapeType("circle"));
-  polygonBtn.addEventListener("click", () => setShapeType("polygon"));
-  rectangleBtn.addEventListener("click", () => setShapeType("rectangle"));
+  if (circleBtn) circleBtn.addEventListener("click", () => setShapeType("circle"));
+  if (polygonBtn) polygonBtn.addEventListener("click", () => setShapeType("polygon"));
+  if (rectangleBtn) rectangleBtn.addEventListener("click", () => setShapeType("rectangle"));
 
-  radiusSlider.addEventListener("input", (e) => {
-    document.getElementById("radiusValue").textContent = e.target.value;
-    if (drawnShape && drawnShape instanceof google.maps.Circle) {
-      drawnShape.setRadius(parseFloat(e.target.value));
-      updateShapeData();
-    }
-  });
+  if (radiusSlider) {
+    radiusSlider.addEventListener("input", (e) => {
+      const rv = document.getElementById("radiusValue");
+      if (rv) rv.textContent = e.target.value;
+      if (drawnShape && drawnShape instanceof google.maps.Circle) {
+        drawnShape.setRadius(parseFloat(e.target.value));
+        updateShapeData();
+      }
+    });
+  }
 
   const form = document.getElementById("geofenceForm");
   form.addEventListener("submit", handleFormSubmit);
@@ -472,6 +510,22 @@ function clearShape() {
   }
   document.getElementById("shapeData").value = "";
   resetDrawingState();
+}
+
+function resetDrawingState() {
+  try {
+    if (drawingManager) drawingManager.setDrawingMode(null);
+  } catch (e) {}
+  isDrawing = false;
+  circleCenter = null;
+  if (polyPreview) { polyPreview.setMap(null); polyPreview = null; }
+  // reset UI controls visibility
+  const circleControls = document.getElementById("circleControls");
+  const polygonControls = document.getElementById("polygonControls");
+  const rectangleControls = document.getElementById("rectangleControls");
+  if (circleControls) circleControls.style.display = "none";
+  if (polygonControls) polygonControls.style.display = "none";
+  if (rectangleControls) rectangleControls.style.display = "none";
 }
 
 async function loadSavedGeofences() {
@@ -887,11 +941,11 @@ function updatePointCount(count) {
 }
 
 window.onload = async function() {
-    try{
-        await backgroundMap();
-        await geofenceMap();
-    } catch (e){
-        console.error("Failed to load map", e);
-        displayFlashMessage("Failed to load map for Geofence")
-    }
+  try{
+      await backgroundMap();
+      await geofenceMap();
+  } catch (e){
+      console.error("Failed to load map", e);
+      displayFlashMessage("Failed to load map for Geofence")
+  }
 };
