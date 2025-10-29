@@ -1,11 +1,12 @@
-// Full replacement: use custom toolbar buttons but rely on Google DrawingManager for drawing.
-// Rectangles are converted to polygon points before saving.
-
 let geofenceMap;
 let drawingManager = null;
 let selectedOverlay = null; // overlay returned by DrawingManager
 let drawnShape = null; // alias for currently selected overlay
 let geofences = [];
+
+let editingGeofence = null;
+let editingOverlay = null;
+let originalOverlayData = null;
 
 async function geofenceMapFunction() {
   const mapElement = document.getElementById("geofenceMap");
