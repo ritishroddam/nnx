@@ -363,17 +363,14 @@ function buildCoordinatesFromOverlay(overlay) {
 }
 
 function startEditGeofence(gf) {
-  // cancel any previous edit
   cancelEditGeofence();
 
   editingGeofenceId = gf._id;
-  // populate form fields
   const nameEl = document.getElementById("GeofenceName");
   const locEl = document.getElementById("Location");
   if (nameEl) nameEl.value = gf.name || "";
   if (locEl) locEl.value = gf.location || "";
 
-  // create editable overlay on map
   const coords = gf.coordinates || {};
   if (gf.shape_type === "circle") {
     const center = coords.center || coords.center;
@@ -417,10 +414,8 @@ function startEditGeofence(gf) {
     google.maps.event.addListener(path, "set_at", updateEditShapeData);
   }
 
-  // show cancel edit button
   if (editCancelBtn) editCancelBtn.style.display = "inline";
 
-  // center map on overlay
   if (gf.shape_type === "circle") {
     geofenceMap.setCenter(new google.maps.LatLng(coords.center.lat, coords.center.lng));
     geofenceMap.setZoom(14);
@@ -430,7 +425,6 @@ function startEditGeofence(gf) {
     if (!b.isEmpty()) geofenceMap.fitBounds(b);
   }
 
-  // immediately populate shapeData for convenience
   updateEditShapeData();
 }
 
