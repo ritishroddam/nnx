@@ -403,7 +403,7 @@ input:checked + .switch::after {
     margin-top: 10px;
 }
 
-.confirm-btn.small, .cancel-btn.small {
+.confirm-btn.small, .cancel-btn.small, #cancelEditBtn {
     width: auto;
     min-width: 80px;
     padding: 8px 18px;
@@ -423,13 +423,13 @@ input:checked + .switch::after {
     background: #218838;
 }
 
-.cancel-btn.small {
+#cancelEditBtn {
     background: #dc3545;
     color: #fff;
     border: none;
 }
 
-.cancel-btn.small:hover {
+#cancelEditBtn:hover {
     background: #c82333;
 }
 
