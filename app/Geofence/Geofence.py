@@ -153,7 +153,7 @@ def update_geofence_status(geofence_id):
         
         is_active = data.get('is_active')
         if is_active is None:
-            return jsonify({'error': 'Missing is_active field'}), 400
+            return jsonify({'error': 'Failed to update status of geofence'}), 400
 
         query = {'_id': ObjectId(geofence_id)}
         if 'admin' not in user_roles:

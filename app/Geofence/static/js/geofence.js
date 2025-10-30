@@ -633,7 +633,7 @@ async function deleteGeofence(id) {
 }
 
 async function toggleGeofenceStatus(id, newStatus) {
-  const res = await fetch(`/geofence/api/geofences/${id}/active`, {
+  const res = await fetch(`/geofence/api/geofences/${id}/status`, {
     method: "PATCH",
     headers:{
         "Content-Type": "application/json",
@@ -645,6 +645,7 @@ async function toggleGeofenceStatus(id, newStatus) {
     const err = await res.json().catch(() => ({ error: "Unknown" }));
     displayFlashMessage("Update status failed: " + (err.error || "Unknown"), "danger");
   } else {
+    displayFlashMessage("Geofence updated successfully", "success");
     await loadSavedGeofences();
   }
 }
