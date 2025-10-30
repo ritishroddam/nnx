@@ -269,11 +269,6 @@ async function saveSelectedShape(e) {
         displayFlashMessage("Geofence updated successfully!", "success");
         cancelEditGeofence();
         await loadSavedGeofences();
-
-        document.getElementById("geofenceForm")?.reset();
-        draw.clear();
-        selectedFeatureId = null;
-        setMode("polygon");
       } else {
         const err = await res.json().catch(() => ({ error: "Unknown error" }));
         console.error("Update geofence error:", err);
