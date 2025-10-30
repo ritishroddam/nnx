@@ -452,10 +452,21 @@ function cancelEditGeofence() {
     editOverlay = null;
   }
   editingGeofenceId = null;
+
+  const nameEl = document.getElementById("GeofenceName");
+  const locEl = document.getElementById("Location");
+  if (nameEl) nameEl.value = "";
+  if (locEl) locEl.value = "";
+
   const el = document.getElementById("shapeData");
   if (el) el.value = "";
   updatePointCount(0);
   if (editCancelBtn) editCancelBtn.style.display = "none";
+
+  draw.clear();
+  selectedFeatureId = null;
+
+  setMode("polygon");
 }
 
 /* ---------- Load/render existing (unchanged) ---------- */
