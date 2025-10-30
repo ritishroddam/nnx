@@ -269,6 +269,8 @@ async function saveSelectedShape(e) {
         displayFlashMessage("Geofence updated successfully!", "success");
         cancelEditGeofence();
         await loadSavedGeofences();
+
+        location.reload();
       } else {
         const err = await res.json().catch(() => ({ error: "Unknown error" }));
         console.error("Update geofence error:", err);
