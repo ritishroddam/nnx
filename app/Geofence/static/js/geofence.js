@@ -446,10 +446,19 @@ function cancelEditGeofence() {
     editOverlay = null;
   }
   editingGeofenceId = null;
+  document.getElementById("geofenceForm")?.reset();
   const el = document.getElementById("shapeData");
   if (el) el.value = "";
   updatePointCount(0);
+
+  draw.clear();
+  selectedFeatureId = null;
+
+  setMode("polygon");
+
   if (editCancelBtn) editCancelBtn.style.display = "none";
+
+  loadSavedGeofences();
 }
 
 /* ---------- Load/render existing (unchanged) ---------- */

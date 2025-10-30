@@ -62,10 +62,6 @@
     border-radius: 4px;
 }
 
-.toggle-btn:last-child {
-    border-right: none;
-}
-
 .toggle-btn.active {
     background: #007bff;
     color: white;
@@ -75,11 +71,11 @@
     background: #e9ecef;
 }
 
-.toggle-btn.active + .toggle-btn {
+.toggle-btn.active .toggle-btn {
     border-left-color: #28a745;
 }
 
-.toggle-btn:has(+ .toggle-btn.active) {
+.toggle-btn:has(.toggle-btn.active) {
     border-right-color: #28a745;
 }
 
@@ -193,11 +189,11 @@
     transition: .4s;
 }
 
-input:checked + .switch::before {
+input:checked .switch::before {
     background-color: #007bff;
 }
 
-input:checked + .switch::after {
+input:checked .switch::after {
     transform: translateX(20px);
 }
 
@@ -565,15 +561,15 @@ input:checked + .switch::after {
     transition: .4s;
 }
 
-input:checked + .slider {
+input:checked .slider {
     background-color: #28a745;
 }
 
-input:focus + .slider {
+input:focus .slider {
     box-shadow: 0 0 1px #28a745;
 }
 
-input:checked + .slider:before {
+input:checked .slider:before {
     transform: translateX(26px);
 }
 
@@ -590,7 +586,6 @@ input:checked + .slider:before {
     color: #333;
 }
 
-/* Toggle Switch Styles for Geofence Status */
 .geofence-status-container {
     display: flex;
     align-items: center;
@@ -640,15 +635,15 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-.geofence-status-switch input:checked + .geofence-status-slider {
+.geofence-status-switch input:checked .geofence-status-slider {
     background-color: #28a745;
 }
 
-.geofence-status-switch input:focus + .geofence-status-slider {
+.geofence-status-switch input:focus .geofence-status-slider {
     box-shadow: 0 0 1px #28a745;
 }
 
-.geofence-status-switch input:checked + .geofence-status-slider:before {
+.geofence-status-switch input:checked .geofence-status-slider:before {
     transform: translateX(26px);
 }
 
