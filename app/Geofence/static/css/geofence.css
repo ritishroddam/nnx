@@ -427,6 +427,12 @@ input:checked + .switch::after {
     background: #dc3545;
     color: #fff;
     border: none;
+    width: 100%;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
 }
 
 #cancelEditBtn:hover {
