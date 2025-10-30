@@ -424,6 +424,16 @@ input:checked + .switch::after {
 }
 
 .cancel-btn.small {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+}
+
+.cancel-btn.small:hover {
+    background: #c82333;
+}
+
+.cancel-btn.small {
     background: #f5f5f5;
     color: #222;
     border: 1px solid #bbb;
