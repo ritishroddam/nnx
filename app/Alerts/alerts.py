@@ -423,6 +423,9 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
             "ignition": "1",
             "speed": {"$ne": "0.0"}
         }, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1))
+    
+    elif alert_type == "geofence_alerts":
+        return []
         
 def getSpeed_alerts(imeis, imeisWithSpeed, start_of_day, end_of_day):
     or_conditions = []
@@ -552,7 +555,7 @@ def notification_alerts():
     for alert_type in alert_types:
         if alert_type not in ["panic_alert", "main_power_alerts", "speeding_alerts", "harsh_break_alerts",
                               "harsh_acceleration_alerts", "gsm_low_alerts", "internal_battery_low_alerts",
-                              "main_power_off_alerts", "idle_alerts", "ignition_off_alerts", "ignition_on_alerts"]:
+                              "main_power_off_alerts", "idle_alerts", "ignition_off_alerts", "ignition_on_alerts", "geofence_alerts"]:
             return jsonify({"success": False, "message": f"Unsupported alert type: {alert_type}"}), 400
         if alert_type != "speeding_alerts":
             notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())    
