@@ -598,6 +598,10 @@ input:checked .slider:before {
     color: #333;
 }
 
+.dark-mode .geofence-status-label {
+    color: #f0f0f0;
+}
+
 .geofence-status-switch {
     position: relative;
     display: inline-block;
@@ -635,15 +639,15 @@ input:checked .slider:before {
     border-radius: 50%;
 }
 
-.geofence-status-switch input:checked .geofence-status-slider {
+.geofence-status-switch input:checked + .geofence-status-slider {
     background-color: #28a745;
 }
 
-.geofence-status-switch input:focus .geofence-status-slider {
+.geofence-status-switch input:focus + .geofence-status-slider {
     box-shadow: 0 0 1px #28a745;
 }
 
-.geofence-status-switch input:checked .geofence-status-slider:before {
+.geofence-status-switch input:checked + .geofence-status-slider:before {
     transform: translateX(26px);
 }
 
@@ -651,6 +655,10 @@ input:checked .slider:before {
     font-weight: bold;
     color: #333;
     min-width: 50px;
+}
+
+.dark-mode .geofence-status-text {
+    color: #f0f0f0;
 }
 
 @media (max-width: 768px) {
