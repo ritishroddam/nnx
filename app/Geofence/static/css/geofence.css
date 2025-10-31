@@ -295,7 +295,6 @@ input:checked .switch::after {
 
 .geofence-list-item {
     display: flex;
-    flex-direction: column;
     padding: 20px;
     margin-bottom: 16px;
     background: white;
