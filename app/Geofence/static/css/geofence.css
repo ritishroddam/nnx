@@ -195,11 +195,7 @@
     border-bottom-color: #333;
 }
 
-.saved-geofence{
-    border-top: 1px dashed #999;
-}
-
-.dark-mode .saved-geofence{
+.dark-mode .saved-geofence {
     border-top: 1px dashed #666;
 }
 
@@ -299,8 +295,7 @@ input:checked .switch::after {
 
 .geofence-list-item {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
     padding: 20px;
     margin-bottom: 16px;
     background: white;
@@ -308,6 +303,7 @@ input:checked .switch::after {
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     border: 1px solid #f1f5f9;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .dark-mode .geofence-list-item {
@@ -328,15 +324,20 @@ input:checked .switch::after {
 
 .geofence-item-content {
     flex: 1;
-    margin-right: 16px;
+}
+
+.geofence-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
 }
 
 .geofence-item-name {
     font-weight: 700;
-    display: block;
-    margin-bottom: 8px;
     font-size: 16px;
     color: #1a1a1a;
+    margin: 0;
 }
 
 .dark-mode .geofence-item-name {
@@ -347,6 +348,7 @@ input:checked .switch::after {
     font-size: 13px;
     color: #64748b;
     line-height: 1.5;
+    margin-bottom: 12px;
 }
 
 .dark-mode .geofence-item-meta {
@@ -356,7 +358,7 @@ input:checked .switch::after {
 .geofence-actions {
     display: flex;
     gap: 8px;
-    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .geofence-actions button {
@@ -401,7 +403,7 @@ input:checked .switch::after {
 }
 
 .geofence-actions button:hover {
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .map-container {
@@ -761,7 +763,7 @@ input:checked .slider:before {
     bottom: 0;
     background-color: #dc2626;
     transition: .4s;
-    border-radius: 28px;
+    border-radius: 24px;
     border: 2px solid transparent;
 }
 
@@ -772,8 +774,8 @@ input:checked .slider:before {
 .geofence-status-slider:before {
     position: absolute;
     content: "";
-    height: 20px;
-    width: 20px;
+    height: 16px;
+    width: 16px;
     left: 2px;
     bottom: 2px;
     background-color: white;
@@ -787,7 +789,7 @@ input:checked .slider:before {
 }
 
 .geofence-status-switch input:checked + .geofence-status-slider:before {
-    transform: translateX(24px);
+    transform: translateX(20px);
 }
 
 .geofence-status-text {
@@ -860,6 +862,16 @@ input:checked .slider:before {
     
     .geofence-actions button {
         flex: 1;
+    }
+
+    .geofence-item-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .geofence-status-switch {
+        align-self: flex-start;
     }
 }
 

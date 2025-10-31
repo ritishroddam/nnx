@@ -560,9 +560,22 @@ function renderGeofenceList() {
     const content = document.createElement("div");
     content.className = "geofence-item-content";
 
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "geofence-item-header";
+
     const nameSpan = document.createElement("span");
     nameSpan.className = "geofence-item-name";
     nameSpan.textContent = gf.name;
+
+    const statusSwitch = document.createElement("label");
+    statusSwitch.className = "geofence-status-switch";
+    statusSwitch.innerHTML = `
+      <input type="checkbox" ${gf.is_active ? "checked" : ""} onchange="toggleGeofenceStatus('${gf._id}', this.checked)">
+      <span class="geofence-status-slider"></span>
+    `;
+
+    headerDiv.appendChild(nameSpan);
+    headerDiv.appendChild(statusSwitch);
 
     const metaDiv = document.createElement("div");
     metaDiv.className = "geofence-item-meta";
@@ -570,15 +583,7 @@ function renderGeofenceList() {
       <div>Location: ${gf.location || "N/A"}</div>
       <div>Type: ${gf.shape_type}</div>
       <div>Created by: ${gf.created_by}</div>
-      <div>Created on:${new Date(gf.created_at).toLocaleString()}</div>
-      <div class="geofence-status-container">
-        <span class="geofence-status-label">Status:</span>
-        <label class="geofence-status-switch">
-          <input type="checkbox" ${gf.is_active ? "checked" : ""} onchange="toggleGeofenceStatus('${gf._id}', this.checked)">
-          <span class="geofence-status-slider"></span>
-        </label>
-        <span class="geofence-status-text">${gf.is_active ? "Active" : "Inactive"}</span>
-      </div>
+      <div>Created on: ${new Date(gf.created_at).toLocaleString()}</div>
     `;
 
     const actions = document.createElement("div");
@@ -603,11 +608,11 @@ function renderGeofenceList() {
     actions.appendChild(viewBtn);
     actions.appendChild(delBtn);
 
-    content.appendChild(nameSpan);
+    content.appendChild(headerDiv);
     content.appendChild(metaDiv);
+    content.appendChild(actions);
+    
     li.appendChild(content);
-    li.appendChild(actions);
-
     list.appendChild(li);
   });
 }
