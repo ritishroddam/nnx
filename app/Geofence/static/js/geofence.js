@@ -486,12 +486,17 @@ async function loadSavedGeofences() {
 }
 
 function renderGeofencesOnMap() {
-  geofences.forEach(gf => { 
-    if (gf.mapOverlay){
-       gf.mapOverlay.setMap(null); 
-       gf.mapOverlay = null;
-    }
-  });
+  // geofences.forEach(gf => { 
+  //   if (gf.mapOverlay){
+  //      gf.mapOverlay.setMap(null); 
+  //      gf.mapOverlay = null;
+  //   }
+  // });
+
+  if (window.geofenceOverlays) {
+    window.geofenceOverlays.forEach(overlay => overlay.setMap(null));
+  }
+  window.geofenceOverlays = [];
 
   const bounds = new google.maps.LatLngBounds();
   let hasGeofence = false;
@@ -534,6 +539,7 @@ function renderGeofencesOnMap() {
 
     if (overlay) {
       gf.mapOverlay = overlay;
+      window.geofenceOverlays.push(overlay);
       overlay.addListener("click", () => zoomToGeofence(gf));
     }
   });
