@@ -486,7 +486,12 @@ async function loadSavedGeofences() {
 }
 
 function renderGeofencesOnMap() {
-  geofences.forEach(gf => { if (gf.mapOverlay) gf.mapOverlay.setMap(null); });
+  geofences.forEach(gf => { 
+    if (gf.mapOverlay){
+       gf.mapOverlay.setMap(null); 
+       gf.mapOverlay = null;
+    }
+  });
 
   const bounds = new google.maps.LatLngBounds();
   let hasGeofence = false;
