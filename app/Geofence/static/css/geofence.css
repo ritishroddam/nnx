@@ -369,6 +369,7 @@ input:checked .switch::after {
     font-weight: 600;
     transition: all 0.2s ease;
     min-width: 70px;
+    width: 110px;
 }
 
 .view-btn {
@@ -468,16 +469,6 @@ input:checked .switch::after {
 
 .dark-mode #geofenceList li:hover {
     background: #4a4a4a;
-}
-
-.geofence-item-name {
-    font-weight: 500;
-    font-size: 14px;
-    color: #333;
-}
-
-.dark-mode .geofence-item-name {
-    color: #f0f0f0;
 }
 
 .geofence-actions {
