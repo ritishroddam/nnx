@@ -33,7 +33,7 @@ User Configuration
         <option value = "" {% if not userConfigs.alerts %}selected{% endif %}>None</option>
         {% set all_alert_types = [
           'speeding_alerts', 'harsh_break_alerts', 'harsh_acceleration_alerts', 'gsm_low_alerts',
-          'internal_battery_low_alerts', 'idle_alerts', 'ignition_off_alerts', 'ignition_on_alerts'
+          'internal_battery_low_alerts', 'idle_alerts', 'ignition_off_alerts', 'ignition_on_alerts', 'geofence_alerts'
         ] %}
         {% for alert in all_alert_types %}
         <option value="{{ alert }}" {% if alert in userConfigs.alerts %}selected{% endif %}>
