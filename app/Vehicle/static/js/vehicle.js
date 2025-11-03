@@ -499,7 +499,6 @@ function acknowledgeSOS(imei) {
   .then(data => {
     if (data.success) {
       console.log(`SOS acknowledged for ${imei}`);
-      // Update the UI to reflect the acknowledged state
       const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
       if (vehicleCard) {
         vehicleCard.classList.remove('sos-blink-card');

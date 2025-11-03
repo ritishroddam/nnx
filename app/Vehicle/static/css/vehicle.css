@@ -302,16 +302,6 @@ body {
   left: 31px;
 }
 
-/* .toggle-slider.active .map-option {
-  color: #ccc;
-  background: #222;
-} */
-
-/* .toggle-slider.active .list-option {
-  color: #fff;
-  background: #222;
-} */
-
 .icon-legend-container {
   position: absolute;
   top: 20px;
@@ -440,18 +430,6 @@ body {
 
 .vehicle-blink {
   animation: vehicle-blink-animation 1s alternate infinite;
-}
-
-@keyframes sos-blink-animation {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 
 #map-toggle {
@@ -618,7 +596,7 @@ input:checked + .slider:before {
 }
 
 .dark-mode .vehicle-table tr:hover {
-  background-color: #444;
+  background-color: #666;
 }
 
 .dark-mode .vehicle-table th {
@@ -714,21 +692,6 @@ input:checked + .slider:before {
   color: #e1bee7;
 }
 
-@media (max-width: 768px) {
-  .floating-card {
-    height: 50vh;
-  }
-
-  .search-container {
-    padding: 6px;
-  }
-
-  #vehicle-search {
-    padding: 6px;
-    font-size: 14px;
-  }
-}
-
 .info-window a {
   color: #336699;
   text-decoration: none;
@@ -751,7 +714,6 @@ input:checked + .slider:before {
   color: var(--text-color);
 }
 
-/* If you want the search container in the table to match the floating card */
 #vehicle-table-container .search-container {
   display: flex;
   margin: 0;
@@ -966,16 +928,6 @@ input:checked + .slider:before {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-@media (max-width: 600px) {
-  .info-window-show {
-    min-width: 220px;
-    max-width: 98vw;
-    padding: 10px 8px 8px 8px;
-  }
-}
-
-/* share location */
-
 #share-location-popup {
   background: #fff;
   border-radius: 12px;
@@ -1045,7 +997,6 @@ input:checked + .slider:before {
   margin-bottom: 12px;
 }
 
-/* Skeleton Loader for Vehicle Card Layout */
 .skeleton-card {
   background: #f3f3f3;
   border-radius: 12px;
@@ -1059,12 +1010,6 @@ input:checked + .slider:before {
   background: #e0e0e0;
   border-radius: 6px;
   animation: pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
 }
 
 .skeleton-circle {
@@ -1218,7 +1163,6 @@ input:checked + .slider:before {
   100% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
 }
 
-/* Responsive for skeleton loader */
 @media (max-width: 600px) {
   .skeleton-card {
     padding: 10px;
@@ -1234,5 +1178,43 @@ input:checked + .slider:before {
   .skeleton-status {
     width: 120px;
     height: 14px;
+  }
+  .info-window-show {
+    min-width: 220px;
+    max-width: 98vw;
+    padding: 10px 8px 8px 8px;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .floating-card {
+    height: 50vh;
+  }
+
+  .search-container {
+    padding: 6px;
+  }
+
+  #vehicle-search {
+    padding: 6px;
+    font-size: 14px;
+  }
+}
+
+@keyframes sos-blink-animation {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
