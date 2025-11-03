@@ -806,13 +806,13 @@ async function fallbackToDefaultLocation() {
   try {
     const { Map, TrafficLayer } = await google.maps.importLibrary("maps");
     console.log("Using fallback location: Bangalore");
-    const defaultLocation = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+    const defaultLocation = { lat: 12.9716, lng: 77.5946 }; 
     const darkMode = document.body.classList.contains("dark-mode");
 
     const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
     map = new Map(document.getElementById("map"), {
       center: defaultLocation,
-      zoom: 15,
+      zoom: 14,
       disableDefaultUI: true,
       mapId: mapId,
     });
