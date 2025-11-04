@@ -82,7 +82,7 @@ body {
   gap: 0;
   min-width: 0;
   max-width: 100%;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .vehicle-card-row {

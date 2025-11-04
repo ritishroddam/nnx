@@ -2013,10 +2013,13 @@ function addHoverListenersToCardsAndMarkers() {
 
           if (isDarkMode) {
             vehicleCard.style.backgroundColor = "black";
+            vehicleCard.style.color = "#fff";
+
             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
             if (vehicleHeader) {
               vehicleHeader.style.color = "#000000d0";
             }
+            
             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
             if (vehicleInfo) {
               vehicleInfo.style.color = "#000000d0"; 
@@ -2063,6 +2066,8 @@ function addHoverListenersToCardsAndMarkers() {
           vehicleCard.style.transition =
             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
           vehicleCard.style.backgroundColor = ""; 
+          vehicleCard.style.color = "";
+          
           const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
           if (vehicleHeader) {
             vehicleHeader.style.color = "";
