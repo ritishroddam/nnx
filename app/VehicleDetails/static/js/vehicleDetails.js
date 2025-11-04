@@ -380,6 +380,88 @@ function refreshVehicleCount() {
   fetchAndRenderVehicles(currentPage, currentRowsPerPage);
 }
 
+// function editVehicle(vehicleId) {
+//   const row = document.querySelector(`tr[data-id="${vehicleId}"]`);
+
+//   const licensePlateNumber = row.cells[0].innerText;
+//   const companyName = row.cells[1].innerText;
+//   const imei = row.cells[2].innerText;
+//   const sim = row.cells[3].innerText;
+//   const vehicleType = row.cells[4].innerText;
+//   const numberOfSeatsContainer = row.cells[5].innerText;
+//   const vehicleModel = row.cells[6].innerText;
+//   const vehicleMake = row.cells[7].innerText;
+//   const yearOfManufacture = row.cells[8].innerText;
+//   const dateOfPurchase = row.cells[9].innerText;
+//   const insuranceNumber = row.cells[10].innerText;
+//   const insuranceExpiryDate = row.cells[11].innerText;
+//   const driverName = row.cells[12].innerText;
+//   const currentStatus = row.cells[13].innerText;
+//   const location = row.cells[14].innerText;
+//   const odometerReading = row.cells[15].innerText;
+//   const serviceDueDate = row.cells[16].innerText;
+//   const slowSpeed = row.cells[17].innerText;
+//   const normalSpeed = row.cells[18].innerText;
+
+//   row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
+//   row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
+//   row.cells[2].innerHTML = `<input type="text" value="${imei}" data-key="imei" data-editable />`;
+//   row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="MobileNumber" data-editable />`;
+
+//   row.cells[4].innerHTML = `<select id="VehicleType" data-key="vehicle_type" data-editable>
+//     <option value="sedan" ${vehicleType === "sedan" ? "selected" : ""}>Sedan</option>
+//     <option value="suv" ${vehicleType === "suv" ? "selected" : ""}>SUV</option>
+//     <option value="van" ${vehicleType === "van" ? "selected" : ""}>Van</option>
+//     <option value="hatchback" ${vehicleType === "hatchback" ? "selected" : ""}>Hatchback</option>
+//     <option value="bus" ${vehicleType === "bus" ? "selected" : ""}>Bus</option>
+//     <option value="truck" ${vehicleType === "truck" ? "selected" : ""}>Truck</option>
+//     <option value="bike" ${vehicleType === "bike" ? "selected" : ""}>Bike</option>
+//   </select>`;
+//   const vehicleTypeSelectize = row.cells[4].querySelector("#VehicleType");
+//   $(vehicleTypeSelectize).selectize({
+//     create: false,
+//     sortField: "text",
+//     searchField: ["text"],
+//     dropdownParent: "body"
+//   });
+
+//   row.cells[5].innerHTML = `<input type="number" value="${numberOfSeatsContainer}" data-key="number_of_seats" data-editable />`;
+//   row.cells[6].innerHTML = `<input type="text" value="${vehicleModel}" data-key="vehicle_model" data-editable />`;
+//   row.cells[7].innerHTML = `<input type="text" value="${vehicleMake}" data-key="vehicle_make" data-editable />`;
+//   row.cells[8].innerHTML = `<input type="number" value="${yearOfManufacture}" data-key="year_of_manufacture" data-editable />`;
+//   row.cells[9].innerHTML = `<input type="date" value="${dateOfPurchase}" data-key="date_of_purchase" data-editable />`;
+//   row.cells[10].innerHTML = `<input type="text" value="${insuranceNumber}" data-key="insurance_name" data-editable />`;
+//   row.cells[11].innerHTML = `<input type="date" value="${insuranceExpiryDate}" data-key="insurance_expiry_date" data-editable />`;
+//   row.cells[12].innerHTML = `<input type="text" value="${driverName}" data-key="driver_name" data-editable />`;
+
+//   row.cells[13].innerHTML = `<select id = "currentStatus" data-key="current_status" data-editable>
+//     <option value="active" ${currentStatus === "active" ? "selected" : ""}>Active</option>
+//     <option value="inactive" ${currentStatus === "inactive" ? "selected" : ""}>Inactive</option>
+//   </select>`;
+//   const currentStatusSelectize = row.cells[13].querySelector("#currentStatus");
+//   $(currentStatusSelectize).selectize({
+//     create: false,
+//     sortField: "text",
+//     searchField: ["text"],
+//     dropdownParent: "body"
+//   });
+
+//   row.cells[14].innerHTML = `        <select id="Location" name="Location" data-editable data-key="location">
+//           <option value="">Select Location</option>
+//         </select>`;
+//   fetchCitiesEdit(row, location);
+
+//   row.cells[15].innerHTML = `<input type="number" value="${odometerReading}" data-key="odometer_reading" data-editable />`;
+//   row.cells[16].innerHTML = `<input type="date" value="${serviceDueDate}" data-key="service_due_date" data-editable />`;
+//   row.cells[17].innerHTML = `<input type="number" value="${slowSpeed}" data-key="slow_speed" data-editable />`;
+//   row.cells[18].innerHTML = `<input type="number" value="${normalSpeed}" data-key="normal_speed" data-editable />`;
+
+//   row.cells[19].innerHTML = `
+//     <button class="icon-btn edit-icon" onclick="saveVehicle('${vehicleId}')">💾</button>
+//     <button class="icon-btn delete-icon" onclick="cancelEdit('${vehicleId}')">❌</button>
+//   `;
+// }
+
 function editVehicle(vehicleId) {
   const row = document.querySelector(`tr[data-id="${vehicleId}"]`);
 
@@ -404,7 +486,9 @@ function editVehicle(vehicleId) {
   const normalSpeed = row.cells[18].innerText;
 
   row.cells[0].innerHTML = `<input type="text" value="${licensePlateNumber}" data-key="license_plate_number" data-editable />`;
-  row.cells[1].innerHTML = `<input type="text" value="${companyName}" data-key="company_name" data-editable />`;
+  row.cells[1].innerHTML = `<select id="companyNameEdit-${vehicleId}" data-key="company_name" data-editable>
+    <option value="">Select Company</option>
+  </select>`;
   row.cells[2].innerHTML = `<input type="text" value="${imei}" data-key="imei" data-editable />`;
   row.cells[3].innerHTML = `<input type="text" value="${sim}" data-key="MobileNumber" data-editable />`;
 
@@ -460,13 +544,142 @@ function editVehicle(vehicleId) {
     <button class="icon-btn edit-icon" onclick="saveVehicle('${vehicleId}')">💾</button>
     <button class="icon-btn delete-icon" onclick="cancelEdit('${vehicleId}')">❌</button>
   `;
+
+  populateCompanyDropdownForEdit(vehicleId, companyName);
 }
+
+async function populateCompanyDropdownForEdit(vehicleId, currentCompany) {
+  try {
+    const response = await fetch("/vehicleDetails/get_companies");
+    if (!response.ok) throw new Error("Failed to fetch companies");
+    
+    const companies = await response.json();
+    const companySelect = document.getElementById(`companyNameEdit-${vehicleId}`);
+    
+    while (companySelect.children.length > 1) {
+      companySelect.removeChild(companySelect.lastChild);
+    }
+    
+    companies.forEach(company => {
+      const option = document.createElement("option");
+      option.value = company.name;
+      option.textContent = company.name;
+      if (company.name === currentCompany) {
+        option.selected = true;
+      }
+      companySelect.appendChild(option);
+    });
+    
+    $(companySelect).selectize({
+      create: false,
+      sortField: "text",
+      searchField: ["text"],
+      dropdownParent: "body"
+    });
+    
+  } catch (error) {
+    console.error("Error fetching companies for edit:", error);
+    const row = document.querySelector(`tr[data-id="${vehicleId}"]`);
+    row.cells[1].innerHTML = `<input type="text" value="${currentCompany}" data-key="company_name" data-editable />`;
+  }
+}
+
+// function saveVehicle(vehicleID) {
+//   const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
+
+//   const licensePlateNumber = row.cells[0].querySelector("input").value.trim();
+//   const companyName = row.cells[1].querySelector("input").value.trim();
+//   const imei = row.cells[2].querySelector("input").value.trim();
+//   const sim = row.cells[3].querySelector("input").value.trim();
+//   const vehicleType = row.cells[4].querySelector("select").value.trim();
+//   const numberOfSeatsContainer = row.cells[5].querySelector("input").value.trim();
+//   const vehicleModel = row.cells[6].querySelector("input").value.trim();
+//   const vehicleMake = row.cells[7].querySelector("input").value.trim();
+//   const yearOfManufacture = row.cells[8].querySelector("input").value.trim();
+//   const dateOfPurchase = row.cells[9].querySelector("input").value.trim();
+//   const insuranceNumber = row.cells[10].querySelector("input").value.trim();
+//   const insuranceExpiryDate = row.cells[11].querySelector("input").value.trim();
+//   const driverName = row.cells[12].querySelector("input").value.trim();
+//   const currentStatus = row.cells[13].querySelector("select").value.trim();
+//   const location = row.cells[14].querySelector("select").value.trim();
+//   const odometerReading = row.cells[15].querySelector("input").value.trim();
+//   const serviceDueDate = row.cells[16].querySelector("input").value.trim();
+//   const slowSpeed = row.cells[17].querySelector("input").value.trim();
+//   const normalSpeed = row.cells[18].querySelector("input").value.trim();
+
+//   const updatedData = {
+//     LicensePlateNumber: String(licensePlateNumber),
+//     CompanyName: String(companyName),
+//     IMEI: String(imei),
+//     SIM: String(sim),
+//     VehicleType: String(vehicleType),
+//     NumberOfSeatsContainer: String(numberOfSeatsContainer),
+//     VehicleModel: String(vehicleModel),
+//     VehicleMake: String(vehicleMake),
+//     YearOfManufacture: String(yearOfManufacture),
+//     DateOfPurchase: String(dateOfPurchase),
+//     InsuranceNumber: String(insuranceNumber),
+//     InsuranceExpiry: String(insuranceExpiryDate),
+//     DriverName: String(driverName),
+//     CurrentStatus: String(currentStatus),
+//     Location: String(location),
+//     OdometerReading: String(odometerReading),
+//     ServiceDueDate: String(serviceDueDate),
+//     slowSpeed: String(slowSpeed),
+//     normalSpeed: String(normalSpeed),
+//   };
+
+//   fetch(`/vehicleDetails/edit_vehicle/${vehicleID}`, {
+//     method: "PATCH",
+//     headers: { 
+//       "Content-Type": "application/json",
+//       "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//      },
+//     body: JSON.stringify(updatedData),
+//   })
+//     .then((response) => response.json())
+//     .then((result) => {
+//       if (result.success) {
+//         row.cells[0].innerHTML = licensePlateNumber;
+//         row.cells[1].innerHTML = companyName;
+//         row.cells[2].innerHTML = imei;
+//         row.cells[3].innerHTML = sim;
+//         row.cells[4].innerHTML = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1);
+//         row.cells[5].innerHTML = numberOfSeatsContainer;
+//         row.cells[6].innerHTML = vehicleModel;
+//         row.cells[7].innerHTML = vehicleMake;
+//         row.cells[8].innerHTML = yearOfManufacture;
+//         row.cells[9].innerHTML = dateOfPurchase;
+//         row.cells[10].innerHTML = insuranceNumber;
+//         row.cells[11].innerHTML = insuranceExpiryDate;
+//         row.cells[12].innerHTML = driverName;
+//         row.cells[13].innerHTML = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
+//         row.cells[14].innerHTML = location;
+//         row.cells[15].innerHTML = odometerReading;
+//         row.cells[16].innerHTML = serviceDueDate;
+//         row.cells[17].innerHTML = slowSpeed;
+//         row.cells[18].innerHTML = normalSpeed;
+
+//         row.cells[19].innerHTML = `
+//           <button class="icon-btn edit-icon" onclick="editVehicle('${vehicleID}')">✏️</button>
+//         `;
+
+//         displayFlashMessage("Vehicle details updated successfully.", "success");
+//       } else {
+//         displayFlashMessage(`Error: ${result.message}`);
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error saving vehicle:", error);
+//       displayFlashMessage("An error occurred while saving. Please try again.");
+//     });
+// }
 
 function saveVehicle(vehicleID) {
   const row = document.querySelector(`tr[data-id="${vehicleID}"]`);
 
-  const licensePlateNumber = row.cells[0].querySelector("input").value.trim();
-  const companyName = row.cells[1].querySelector("input").value.trim();
+  const companyNameSelect = row.cells[1].querySelector("select");
+  const companyName = companyNameSelect ? companyNameSelect.value.trim() : row.cells[1].querySelector("input").value.trim();
   const imei = row.cells[2].querySelector("input").value.trim();
   const sim = row.cells[3].querySelector("input").value.trim();
   const vehicleType = row.cells[4].querySelector("select").value.trim();
