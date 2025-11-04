@@ -211,9 +211,8 @@ body {
   border: 1.5px solid #bbb;
   border-radius: 15px;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-  padding: 4px 10px;
+  padding: 2px 8px;
   transition: background 0.3s, border 0.3s;
-  margin-left: 12px;
 }
 
 .dark-mode .toggle-container {
@@ -1160,18 +1159,17 @@ input:checked + .slider:before {
 .geofence-toggle-container {
     display: flex;
     align-items: center;
-    margin-right: 15px;
 }
 
 .geofence-toggle-btn {
     background: #f8f9fa;
     border: 2px solid #dee2e6;
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 6px 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     color: #495057;
-    font-size: 16px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
