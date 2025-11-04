@@ -2147,8 +2147,8 @@ function addHoverListenersToCardsAndMarkers() {
           const isDarkMode = document.body.classList.contains("dark-mode");
 
           if (isDarkMode) {
-            vehicleCard.style.backgroundColor = "#333"; // Dark background for dark mode
-            vehicleCard.style.color = "#fff"; // White text for dark mode
+            vehicleCard.style.backgroundColor = "#333"; 
+            vehicleCard.style.color = "#fff";
             
             const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
             if (vehicleNumber) {
@@ -2170,8 +2170,8 @@ function addHoverListenersToCardsAndMarkers() {
               tag.style.color = "#fff";
             });
           } else {
-            vehicleCard.style.backgroundColor = "#f0f0f0"; // Light gray for light mode
-            vehicleCard.style.color = "#333"; // Dark text for light mode
+            vehicleCard.style.backgroundColor = "#ccc"; 
+            vehicleCard.style.color = "#333"; 
             
             const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
             if (vehicleNumber) {
@@ -2205,8 +2205,8 @@ function addHoverListenersToCardsAndMarkers() {
 
           vehicleCard.style.transition =
             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-          vehicleCard.style.backgroundColor = ""; // Reset to default
-          vehicleCard.style.color = ""; // Reset to default
+          vehicleCard.style.backgroundColor = ""; 
+          vehicleCard.style.color = "";
           
           const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
           if (vehicleNumber) {
