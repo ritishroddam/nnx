@@ -80,6 +80,9 @@ var manualClose = false;
 var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
+var geofenceToggle = false;
+var geofencePolygons = {};
+var geofenceButton = null;
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -94,6 +97,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     userRole: userRole,
     userName: userName,
   });
+  
+  geofenceButton = document.getElementById('geofence-toggle');
+  if (geofenceButton) {
+    geofenceButton.addEventListener('click', toggleGeofences);
+  }
 });
 
 socket.on("authentication_success", (data) => {
@@ -419,8 +427,97 @@ function updateVehicleCard(data) {
   }
 }
 
+async function toggleGeofences() {
+    try {
+        if (!geofenceToggle) {
+            const response = await fetch('/geofence/api/geofences');
+            if (!response.ok) throw new Error('Failed to fetch geofences');
+            
+            const geofences = await response.json();
+            
+            const activeGeofences = geofences.filter(geofence => geofence.is_active === true);
+            
+            activeGeofences.forEach(geofence => {
+                let polygon;
+                
+                if (geofence.shape_type === 'polygon') {
+                    const coordinates = geofence.coordinates.points.map(point => ({
+                        lat: point.lat,
+                        lng: point.lng
+                    }));
+                    
+                    polygon = new google.maps.Polygon({
+                        paths: coordinates,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.15,
+                        map: map,
+                        title: geofence.name
+                    });
+                } else if (geofence.shape_type === 'circle') {
+                    const center = geofence.coordinates.center;
+                    const radius = geofence.coordinates.radius;
+                    
+                    polygon = new google.maps.Circle({
+                        center: new google.maps.LatLng(center.lat, center.lng),
+                        radius: radius,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.15,
+                        map: map,
+                        title: geofence.name
+                    });
+                }
+                
+                if (polygon) {
+                    geofencePolygons[geofence._id] = polygon;
+                    
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div class="geofence-info">
+                                <h4>${geofence.name}</h4>
+                                <p><strong>Type:</strong> ${geofence.shape_type}</p>
+                                <p><strong>Location:</strong> ${geofence.location || 'N/A'}</p>
+                                <p><strong>Created by:</strong> ${geofence.created_by}</p>
+                            </div>
+                        `
+                    });
+                    
+                    if (geofence.shape_type === 'polygon') {
+                        polygon.addListener('click', (event) => {
+                            infoWindow.setPosition(event.latLng);
+                            infoWindow.open(map);
+                        });
+                    } else if (geofence.shape_type === 'circle') {
+                        polygon.addListener('click', (event) => {
+                            infoWindow.setPosition(event.latLng);
+                            infoWindow.open(map);
+                        });
+                    }
+                }
+            });
+            
+            geofenceToggle = true;
+            geofenceButton.classList.add('active');
+        } else {
+            Object.values(geofencePolygons).forEach(polygon => {
+                polygon.setMap(null);
+            });
+            geofencePolygons = {};
+            geofenceToggle = false;
+            geofenceButton.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Error toggling geofences:', error);
+    }
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of the earth in km
+  const R = 6371; 
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
   const a = 
@@ -428,7 +525,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
     Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c; // Distance in km
+  return R * c; 
 }
 
 function deg2rad(deg) {
@@ -459,8 +556,7 @@ function triggerSOS(imei, marker) {
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
 
-    // Find nearby vehicles
-    const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
+    const nearbyVehicles = findNearbyVehicles(vehicle, 5);
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
 
     // setTimeout(() => {
@@ -475,15 +571,12 @@ function acknowledgeSOS(imei) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle) return;
 
-  // Remove the visual SOS indicators
   removeSOS(imei);
   
-  // Update the vehicle data to mark SOS as acknowledged
   vehicle.sos = "0";
   vehicle.sosActive = false;
   vehicleData.set(imei, vehicle);
   
-  // Send acknowledgment to server
   fetch('/alerts/acknowledge_sos', {
     method: 'POST',
     headers: {
@@ -518,7 +611,7 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
   const sosLon = parseFloat(sosVehicle.longitude);
 
   vehicleData.forEach((vehicle, imei) => {
-    if (imei === sosVehicle.imei) return; // Skip the SOS vehicle itself
+    if (imei === sosVehicle.imei) return; 
     
     const vehicleLat = parseFloat(vehicle.latitude);
     const vehicleLon = parseFloat(vehicle.longitude);
@@ -526,8 +619,7 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
     if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
       const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
       if (distance <= radiusKm) {
-        // Calculate estimated time to reach (assuming average speed of 40km/h)
-        const estimatedTime = (distance / 40) * 60; // in minutes
+        const estimatedTime = (distance / 40) * 60; 
         nearby.push({
           vehicle,
           distance: distance.toFixed(2),
@@ -537,7 +629,6 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
     }
   });
 
-  // Sort by distance (nearest first)
   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
   return nearby;
 }
@@ -584,7 +675,6 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.innerHTML = content;
   document.body.appendChild(popup);
 
-  // Style the popup
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
@@ -2147,7 +2237,7 @@ function addHoverListenersToCardsAndMarkers() {
           const isDarkMode = document.body.classList.contains("dark-mode");
 
           if (isDarkMode) {
-            vehicleCard.style.backgroundColor = "#444"; 
+            vehicleCard.style.backgroundColor = "#555"; 
             vehicleCard.style.color = "#fff";
             
             const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
