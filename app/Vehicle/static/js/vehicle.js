@@ -2147,7 +2147,7 @@ function addHoverListenersToCardsAndMarkers() {
           const isDarkMode = document.body.classList.contains("dark-mode");
 
           if (isDarkMode) {
-            vehicleCard.style.backgroundColor = "#555"; 
+            vehicleCard.style.backgroundColor = "#444"; 
             vehicleCard.style.color = "#fff";
             
             const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
