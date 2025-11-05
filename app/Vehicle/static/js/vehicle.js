@@ -83,6 +83,9 @@ var lastDataReceivedTime = {};
 var geofenceToggle = false;
 var geofencePolygons = {};
 var geofenceButton = null;
+let currentPage = 1;
+let totalPages = 1;
+let currentSearch = '';
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -1608,12 +1611,20 @@ function showMapView() {
   updateMap();
 }
 
+// function showListView() {
+//   document.getElementById("map").style.display = "none";
+//   document.getElementById("vehicle-table-container").style.display = "block";
+//   document.querySelector(".floating-card").style.display = "none";
+//   document.querySelector(".icon-legend-container").style.display = "none";
+//   populateVehicleTable();
+// }
+
 function showListView() {
-  document.getElementById("map").style.display = "none";
-  document.getElementById("vehicle-table-container").style.display = "block";
-  document.querySelector(".floating-card").style.display = "none";
-  document.querySelector(".icon-legend-container").style.display = "none";
-  populateVehicleTable();
+    document.getElementById("map").style.display = "none";
+    document.getElementById("vehicle-table-container").style.display = "block";
+    document.querySelector(".floating-card").style.display = "none";
+    document.querySelector(".icon-legend-container").style.display = "none";
+    populateVehicleTable(1, currentSearch);
 }
 
 function formatLastUpdatedText(date, time) {
@@ -1646,129 +1657,313 @@ function formatLastUpdatedText(date, time) {
   return lastUpdatedText;
 }
 
-async function populateVehicleTable() {
-  const tableBody = document
-    .getElementById("vehicle-table")
-    .getElementsByTagName("tbody")[0];
-  tableBody.innerHTML = ""; 
-  const isDarkMode = document.body.classList.contains("dark-mode");
+// async function populateVehicleTable() {
+//   const tableBody = document
+//     .getElementById("vehicle-table")
+//     .getElementsByTagName("tbody")[0];
+//   tableBody.innerHTML = ""; 
+//   const isDarkMode = document.body.classList.contains("dark-mode");
 
-  showHidecar();
-  const listContainer = document.getElementById("vehicle-list");
-  const countContainer = document.getElementById("vehicle-count");
-  listContainer.innerHTML = "";
-  countContainer.innerText = vehicleData.length;
+//   showHidecar();
+//   const listContainer = document.getElementById("vehicle-list");
+//   const countContainer = document.getElementById("vehicle-count");
+//   listContainer.innerHTML = "";
+//   countContainer.innerText = vehicleData.length;
 
-  vehicleData.forEach((vehicle, imei) => {
-    const vehicleElement = document.createElement("div");
-    vehicleElement.classList.add("vehicle-card");
-    vehicleElement.setAttribute("data-imei", vehicle.imei);
+//   vehicleData.forEach((vehicle, imei) => {
+//     const vehicleElement = document.createElement("div");
+//     vehicleElement.classList.add("vehicle-card");
+//     vehicleElement.setAttribute("data-imei", vehicle.imei);
 
-    const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-    const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+//     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+//     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
-    const speedValue =
-      vehicle.speed !== null && vehicle.speed !== undefined
-        ? convertSpeedToKmh(vehicle.speed).toFixed(2)
-        : null;
+//     const speedValue =
+//       vehicle.speed !== null && vehicle.speed !== undefined
+//         ? convertSpeedToKmh(vehicle.speed).toFixed(2)
+//         : null;
 
-    const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
-    const address = vehicle.address || "Location unknown";
-    const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
+//     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
+//     const address = vehicle.address || "Location unknown";
+//     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
 
-    const now = new Date();
-    const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-    const timeDiff = Math.abs(now - lastUpdated);
-    let statusText =  vehicle.status;
+//     const now = new Date();
+//     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+//     const timeDiff = Math.abs(now - lastUpdated);
+//     let statusText =  vehicle.status;
 
-    const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
-    const iconRed = "color:#d32f2f;";
-    const sosIcon =
-      vehicle.sos === "1"
-        ? `<span class="material-symbols-outlined" style="${
-            iconStyle + iconRed
-          }">sos</span>`
-        : "";
-    const gpsIcon =
-      statusText === "Offline" ? "location_disabled" : "my_location";
+//     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+//     const iconRed = "color:#d32f2f;";
+//     const sosIcon =
+//       vehicle.sos === "1"
+//         ? `<span class="material-symbols-outlined" style="${
+//             iconStyle + iconRed
+//           }">sos</span>`
+//         : "";
+//     const gpsIcon =
+//       statusText === "Offline" ? "location_disabled" : "my_location";
     
-    let ignitionIcon, ignitionColor;
-    if (vehicle.ignition === "0") {
-      ignitionIcon = "key_off";
-      ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
-    } else {
-      ignitionIcon = "key";
-      ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+//     let ignitionIcon, ignitionColor;
+//     if (vehicle.ignition === "0") {
+//       ignitionIcon = "key_off";
+//       ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
+//     } else {
+//       ignitionIcon = "key";
+//       ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+//     }
+
+//     const ASUgsmValue = parseInt(vehicle.gsm);
+
+//     let gsmIcon, gsmColor;
+
+//     if (ASUgsmValue == 0) {
+//       gsmIcon = "signal_cellular_null";
+//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
+//     } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+//       gsmIcon = "signal_cellular_1_bar";
+//       gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; 
+//     } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+//       gsmIcon = "signal_cellular_2_bar";
+//       gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
+//     } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+//       gsmIcon = "signal_cellular_3_bar";
+//       gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
+//     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+//       gsmIcon = "signal_cellular_4_bar";
+//       gsmColor = isDarkMode ? "#81c784" : "#4caf50";
+//     } else {
+//       gsmIcon = "signal_cellular_off";
+//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
+//     }    
+
+//     console.log(vehicle.imei);
+
+//     const row = tableBody.insertRow();
+//     row.insertCell(0).innerText = vehicle.LicensePlateNumber
+//       ? vehicle.LicensePlateNumber
+//       : vehicle.imei;
+//     row.insertCell(1).innerText = vehicle.VehicleType;
+//     row.insertCell(2).innerText = formatLastUpdatedText(
+//       vehicle.date,
+//       vehicle.time
+//     );
+
+//     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
+//     row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
+//     row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
+
+//     const speedCell = row.insertCell(6);
+//     speedCell.innerText = speed;
+//     if (speedValue !== null && parseFloat(speedValue) > 60) {
+//       speedCell.style.border = "2px solid red";
+//     }
+
+//     row.insertCell(7).innerText = vehicle.distance
+//       ? parseFloat(vehicle.distance).toFixed(2)
+//       : "N/A";
+//     row.insertCell(8).innerText = vehicle.odometer; 
+
+//     const icons = `
+//       <div class="vehicle-table-icons">
+//         ${sosIcon}
+//         <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+//         <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
+//         <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+//       </div>
+//     `;
+//     row.insertCell(9).innerHTML = icons;
+
+//     row.style.cursor = "pointer";
+//     row.addEventListener("click", function (e) {
+//       if (e.target.tagName.toLowerCase() === "a") return;
+//       window.open(url, "_blank");
+//     });
+//   });
+//   showHidecar();
+// }
+
+async function populateVehicleTable(page = 1, search = '') {
+    try {
+        showSkeletonLoader();
+        
+        const params = new URLSearchParams({
+            page: page,
+            per_page: 10,
+            ...(search && { search: search })
+        });
+
+        const response = await fetch(`/vehicle/api/vehicles?${params}`);
+        if (!response.ok) throw new Error("Failed to fetch vehicle data");
+        
+        const data = await response.json();
+        
+        const tableBody = document.getElementById("vehicle-table").getElementsByTagName("tbody")[0];
+        tableBody.innerHTML = "";
+        
+        const isDarkMode = document.body.classList.contains("dark-mode");
+
+        // Update pagination info
+        currentPage = data.page;
+        totalPages = data.total_pages;
+        currentSearch = search;
+
+        // Update vehicle count
+        const countContainer = document.getElementById("vehicle-count");
+        countContainer.innerText = data.total_count;
+
+        data.vehicles.forEach((vehicle) => {
+            const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+            const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+            const speedValue = vehicle.speed !== null && vehicle.speed !== undefined
+                ? convertSpeedToKmh(vehicle.speed).toFixed(2)
+                : null;
+            const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
+            const address = vehicle.address || "Location unknown";
+            const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
+
+            const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+            const iconRed = "color:#d32f2f;";
+            const sosIcon = vehicle.sos === "1"
+                ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>`
+                : "";
+            const gpsIcon = vehicle.status === "offline" ? "location_disabled" : "my_location";
+            
+            let ignitionIcon, ignitionColor;
+            if (vehicle.ignition === "0") {
+                ignitionIcon = "key_off";
+                ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
+            } else {
+                ignitionIcon = "key";
+                ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+            }
+
+            const ASUgsmValue = parseInt(vehicle.gsm);
+            let gsmIcon, gsmColor;
+
+            if (ASUgsmValue == 0) {
+                gsmIcon = "signal_cellular_null";
+                gsmColor = isDarkMode ? "#ff5252" : "#d32f2f";
+            } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+                gsmIcon = "signal_cellular_1_bar";
+                gsmColor = isDarkMode ? "#ffb74d" : "#ff9800";
+            } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+                gsmIcon = "signal_cellular_2_bar";
+                gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
+            } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+                gsmIcon = "signal_cellular_3_bar";
+                gsmColor = isDarkMode ? "#d4e157" : "#cddc39";
+            } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+                gsmIcon = "signal_cellular_4_bar";
+                gsmColor = isDarkMode ? "#81c784" : "#4caf50";
+            } else {
+                gsmIcon = "signal_cellular_off";
+                gsmColor = isDarkMode ? "#ff5252" : "#d32f2f";
+            }
+
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerText = vehicle.LicensePlateNumber || vehicle.imei;
+            row.insertCell(1).innerText = vehicle.VehicleType;
+            row.insertCell(2).innerText = formatLastUpdatedText(vehicle.date, vehicle.time);
+            row.insertCell(3).innerText = address;
+            row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
+            row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
+
+            const speedCell = row.insertCell(6);
+            speedCell.innerText = speed;
+            if (speedValue !== null && parseFloat(speedValue) > 60) {
+                speedCell.style.border = "2px solid red";
+            }
+
+            row.insertCell(7).innerText = vehicle.distance ? parseFloat(vehicle.distance).toFixed(2) : "N/A";
+            row.insertCell(8).innerText = vehicle.odometer || "N/A";
+
+            const icons = `
+                <div class="vehicle-table-icons">
+                    ${sosIcon}
+                    <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+                    <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
+                    <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+                </div>
+            `;
+            row.insertCell(9).innerHTML = icons;
+
+            row.style.cursor = "pointer";
+            row.addEventListener("click", function (e) {
+                if (e.target.tagName.toLowerCase() === "a") return;
+                window.open(url, "_blank");
+            });
+        });
+
+        updatePaginationControls();
+        hideSkeletonLoader();
+        
+    } catch (error) {
+        console.error("Error populating vehicle table:", error);
+        hideSkeletonLoader();
+    }
+}
+
+function updatePaginationControls() {
+    let paginationContainer = document.getElementById("vehicle-pagination");
+    
+    if (!paginationContainer) {
+        paginationContainer = document.createElement("div");
+        paginationContainer.id = "vehicle-pagination";
+        paginationContainer.className = "pagination-container";
+        
+        const tableContainer = document.querySelector(".vehicle-table-container");
+        tableContainer.appendChild(paginationContainer);
     }
 
-    const ASUgsmValue = parseInt(vehicle.gsm);
-
-    let gsmIcon, gsmColor;
-
-    if (ASUgsmValue == 0) {
-      gsmIcon = "signal_cellular_null";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-    } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
-      gsmIcon = "signal_cellular_1_bar";
-      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; 
-    } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
-      gsmIcon = "signal_cellular_2_bar";
-      gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
-    } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
-      gsmIcon = "signal_cellular_3_bar";
-      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
-    } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
-      gsmIcon = "signal_cellular_4_bar";
-      gsmColor = isDarkMode ? "#81c784" : "#4caf50";
-    } else {
-      gsmIcon = "signal_cellular_off";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-    }    
-
-    console.log(vehicle.imei);
-
-    const row = tableBody.insertRow();
-    row.insertCell(0).innerText = vehicle.LicensePlateNumber
-      ? vehicle.LicensePlateNumber
-      : vehicle.imei;
-    row.insertCell(1).innerText = vehicle.VehicleType;
-    row.insertCell(2).innerText = formatLastUpdatedText(
-      vehicle.date,
-      vehicle.time
-    );
-
-    row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
-    row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
-    row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
-
-    const speedCell = row.insertCell(6);
-    speedCell.innerText = speed;
-    if (speedValue !== null && parseFloat(speedValue) > 60) {
-      speedCell.style.border = "2px solid red";
-    }
-
-    row.insertCell(7).innerText = vehicle.distance
-      ? parseFloat(vehicle.distance).toFixed(2)
-      : "N/A";
-    row.insertCell(8).innerText = vehicle.odometer; 
-
-    const icons = `
-      <div class="vehicle-table-icons">
-        ${sosIcon}
-        <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-        <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
-        <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
-      </div>
+    paginationContainer.innerHTML = `
+        <div class="pagination-info">
+            Page ${currentPage} of ${totalPages} (Total: ${document.getElementById("vehicle-count").innerText} vehicles)
+        </div>
+        <div class="pagination-controls">
+            <button class="pagination-btn" onclick="changePage(1)" ${currentPage === 1 ? 'disabled' : ''}>
+                First
+            </button>
+            <button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                Previous
+            </button>
+            
+            ${generatePageNumbers()}
+            
+            <button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                Next
+            </button>
+            <button class="pagination-btn" onclick="changePage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
+                Last
+            </button>
+        </div>
     `;
-    row.insertCell(9).innerHTML = icons;
+}
 
-    row.style.cursor = "pointer";
-    row.addEventListener("click", function (e) {
-      if (e.target.tagName.toLowerCase() === "a") return;
-      window.open(url, "_blank");
-    });
-  });
-  showHidecar();
+function generatePageNumbers() {
+    let pageNumbers = '';
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers += `
+            <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="changePage(${i})">
+                ${i}
+            </button>
+        `;
+    }
+    
+    return pageNumbers;
+}
+
+function changePage(page) {
+    if (page < 1 || page > totalPages) return;
+    populateVehicleTable(page, currentSearch);
 }
 
 document
@@ -1952,21 +2147,24 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
-function searchTable() {
-  const searchTerm = document
-    .getElementById("table-vehicle-search")
-    .value.trim()
-    .toLowerCase();
-  const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
+// function searchTable() {
+//   const searchTerm = document.getElementById("table-vehicle-search").value.trim().toLowerCase();
+//   const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
 
-  tableRows.forEach((row) => {
-    const plateNumber = row.cells[0].textContent.toLowerCase();
-    if (plateNumber.includes(searchTerm)) {
-      row.style.display = "";
-    } else {
-      row.style.display = "none";
-    }
-  });
+//   tableRows.forEach((row) => {
+//     const plateNumber = row.cells[0].textContent.toLowerCase();
+//     if (plateNumber.includes(searchTerm)) {
+//       row.style.display = "";
+//     } else {
+//       row.style.display = "none";
+//     }
+//   });
+// }
+
+function searchTable() {
+    const searchTerm = document.getElementById("table-vehicle-search").value.trim();
+    currentSearch = searchTerm;
+    populateVehicleTable(1, searchTerm);
 }
 
 function searchVehicle() {
