@@ -137,6 +137,9 @@ def get_alerts():
             date = record['date_time']
             istDate = date.astimezone(timezone(timedelta(hours=5, minutes=30)))
             record['date_time'] = istDate.strftime('%d-%b-%Y %I:%M:%S %p')
+            
+            record['_id'] = str(record['_id'])
+            
             record.pop('imei', None)
     
     return jsonify({
