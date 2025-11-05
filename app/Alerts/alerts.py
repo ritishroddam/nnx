@@ -251,8 +251,8 @@ def notification_alerts():
     main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_off")
     
     notifications = (
-        enrich(panic_alerts, "Panic Alert") +
-        enrich(main_power_off_alerts, "Main Power Discontinue Alert") 
+        enrich(panic_alerts, "panic_alert") +
+        enrich(main_power_off_alerts, "main_power_off_alerts") 
     )
     
     if not alertConfig or not alertConfig.get("alerts") or "" in alertConfig["alerts"]:
