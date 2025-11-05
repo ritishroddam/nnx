@@ -12,7 +12,8 @@ from app.utils import roles_required, get_filtered_results # type: ignore
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
 alertCollectionKeys = {
-    'panic': 'panic', 'speeding': 'speedingAlerts', 
+    'panic_alerts': 'panic', 'panic': 'panic',
+    'speeding': 'speedingAlerts', 
     'harsh_break': 'harshBrakes', 'harsh_acceleration': 'harshAccelerations', 
     'gsm_low': 'gsmSignalLows', 'internal_battery_low': 'internalBatteryLows', 
     'main_power_off': 'powerSupplyDissconnects', 'idle': 'idles', 
