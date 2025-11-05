@@ -20,6 +20,15 @@ alertCollectionKeys = {
     'geofence_in': 'geodenceIns', 'geofence_out': 'geofenceOuts'
 }
 
+alertConfigKeys = {
+    "panic_alert": 'panic', "main_power_alerts": 'powerSupplyDissconnects', 
+    "speeding_alerts": 'speedingAlerts', "harsh_break_alerts": 'harshBrakes',
+    "harsh_acceleration_alerts": 'harshAccelerations', "gsm_low_alerts": 'gsmSignalLows', 
+    "internal_battery_low_alerts": 'internalBatteryLows', "main_power_off_alerts": 'powerSupplyDissconnects', 
+    "idle_alerts": 'idle', "ignition_off_alerts": 'ignitionOffs', 
+    "ignition_on_alerts": 'ignitionOns', "geofence_alerts": 'geofence'
+}
+
 speedingCollection = db['speedingAlerts']
 harshBrakeCollection = db['harshBrakes']
 harshAccelerationCollection = db['harshAccelerations']
@@ -171,47 +180,9 @@ def get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type):
         },
     }
     
-    collection = db[alertCollectionKeys[alert_type]]
+    collection = db[alertConfigKeys[alert_type]]
     
     return collection.find(query, {"_id": 1, "date_time": 1, "imei": 1}).sort("date_time", -1)
-
-def enrich(alerts, alert_type):
-    enriched = []
-    vehicles = db['vehicle_inventory'].find(
-        {"IMEI": {"$in": imeis}},
-        {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
-    )
-    vehicle_map = {vehicle["IMEI"]: vehicle for vehicle in vehicles}
-    ist = pytz.timezone("Asia/Kolkata")
-        
-    acknowledged_ids = set(
-        ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
-    )
-        
-    for alert in alerts:
-        if str(alert["_id"]) in acknowledged_ids:
-            continue
-        vehicle = vehicle_map.get(alert["imei"])
-        dt_utc = alert.get("date_time")
-        if dt_utc:
-            dt_ist = dt_utc.astimezone(ist)
-            date_time_str = dt_ist.isoformat()
-        else:
-            date_time_str = ""
-                
-        is_acknowledged = str(alert["_id"]) in acknowledged_ids
-                
-        enriched.append({
-            "id": str(alert["_id"]),
-            "type": alert_type,
-            "alert_type": alert_type,
-            "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
-            "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
-            "date_time": date_time_str,
-            "acknowledged": is_acknowledged
-        })
-        
-    return enriched
 
 @alerts_bp.route('/notification_alerts', methods=['GET'])
 @jwt_required()
@@ -237,6 +208,44 @@ def notification_alerts():
 
     if not imeis:
         return
+    
+    def enrich(alerts, alert_type):
+        enriched = []
+        vehicles = db['vehicle_inventory'].find(
+            {"IMEI": {"$in": imeis}},
+            {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
+        )
+        vehicle_map = {vehicle["IMEI"]: vehicle for vehicle in vehicles}
+        ist = pytz.timezone("Asia/Kolkata")
+
+        acknowledged_ids = set(
+            ack['alert_id'] for ack in db['Ack_alerts'].find({}, {'alert_id': 1})
+        )
+
+        for alert in alerts:
+            if str(alert["_id"]) in acknowledged_ids:
+                continue
+            vehicle = vehicle_map.get(alert["imei"])
+            dt_utc = alert.get("date_time")
+            if dt_utc:
+                dt_ist = dt_utc.astimezone(ist)
+                date_time_str = dt_ist.isoformat()
+            else:
+                date_time_str = ""
+
+            is_acknowledged = str(alert["_id"]) in acknowledged_ids
+
+            enriched.append({
+                "id": str(alert["_id"]),
+                "type": alert_type,
+                "alert_type": alert_type,
+                "vehicle": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                "vehicle_number": vehicle["LicensePlateNumber"] if vehicle else "Unknown",
+                "date_time": date_time_str,
+                "acknowledged": is_acknowledged
+            })
+
+        return enriched
     
     panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic")
     main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_off")
@@ -270,8 +279,12 @@ def notification_alerts():
                               "harsh_acceleration_alerts", "gsm_low_alerts", "internal_battery_low_alerts",
                               "main_power_off_alerts", "idle_alerts", "ignition_off_alerts", "ignition_on_alerts", "geofence_alerts"]:
             return jsonify({"success": False, "message": f"Unsupported alert type: {alert_type}"}), 400
-        if alert_type:
-            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())    
+        
+        if alert_type == 'geofence_alerts':
+            notifications += get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceIns")
+            notifications += get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceOuts")
+        else:
+            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type)    
 
     notifications.sort(key=lambda x: x["date_time"], reverse=True)
 
