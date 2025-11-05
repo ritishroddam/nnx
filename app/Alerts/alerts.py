@@ -26,7 +26,7 @@ alertConfigKeys = {
     "harsh_acceleration_alerts": 'harshAccelerations', "gsm_low_alerts": 'gsmSignalLows', 
     "internal_battery_low_alerts": 'internalBatteryLows', "main_power_off_alerts": 'powerSupplyDissconnects', 
     "idle_alerts": 'idle', "ignition_off_alerts": 'ignitionOffs', 
-    "ignition_on_alerts": 'ignitionOns', 'geodenceIns': 'geodenceIns',
+    "ignition_on_alerts": 'ignitionOns', 'geofenceIns': 'geofenceIns',
     'geofenceOuts': 'geofenceOuts'
 }
 
@@ -39,7 +39,7 @@ mainPowerSupplyDissconnectCollection = db['powerSupplyDissconnects']
 idleCollection = db['idles']
 ignitionOnCollection = db['ignitionOns']
 ignitionOffCollection = db['ignitionOffs']
-geofenceInCollection = db['geodenceIns']
+geofenceInCollection = db['geofenceIns']
 geofenceOutCollection = db['geofenceOuts']
 panicCollection = db['panic']
 
