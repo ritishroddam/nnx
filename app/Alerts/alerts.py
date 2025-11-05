@@ -26,7 +26,8 @@ alertConfigKeys = {
     "harsh_acceleration_alerts": 'harshAccelerations', "gsm_low_alerts": 'gsmSignalLows', 
     "internal_battery_low_alerts": 'internalBatteryLows', "main_power_off_alerts": 'powerSupplyDissconnects', 
     "idle_alerts": 'idle', "ignition_off_alerts": 'ignitionOffs', 
-    "ignition_on_alerts": 'ignitionOns', "geofence_alerts": 'geofence'
+    "ignition_on_alerts": 'ignitionOns', 'geodenceIns': 'geodenceIns',
+    'geofenceOuts': 'geofenceOuts'
 }
 
 speedingCollection = db['speedingAlerts']
