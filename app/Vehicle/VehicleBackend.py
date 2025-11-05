@@ -340,117 +340,50 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
         vehicles.append(vehicle)
     return vehicles
 
-# @vehicle_bp.route('/api/vehicles', methods=['GET'])
-# @jwt_required()
-# @roles_required('admin', 'user', 'clientAdmin')
-# def get_vehicles():
-#     try:
-#         claims = get_jwt()
-#         user_roles = claims.get('roles', [])
-#         vehicles = []
-
-#         if 'admin' in user_roles:
-#             inventory_data = list(vehicle_inventory_collection.find())
-#         elif 'user' in user_roles:
-#             userID = claims.get('user_id')
-#             userCompany = claims.get('company')
-#             inventory_data = list(vehicle_inventory_collection.find({
-#                 'CompanyName': userCompany,
-#                 'AssignedUsers': ObjectId(userID),
-#             }))
-#         else:
-#             userCompany = claims.get('company')
-#             inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
-
-#         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
-#         if not imei_list:
-#             return jsonify([]), 200
-
-#         distances = getVehicleDistances(imei_list)
-#         stoppage_times = getStopTimeToday(imei_list)
-#         print("Getting Vehicle statuses")
-#         statuses, missingImeis = getVehicleStatus(imei_list)
-
-#         print("Building vehicle data")
-#         vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list, missingImeis)
-
-#         print("[DEBUG] Processed vehicle data")
-        
-#         for vehicle in vehicles:
-#             print(vehicle)
-#             vehicle['_id'] = str(vehicle['_id'])
-#             lat = vehicle.get('latitude')
-#             lng = vehicle.get('longitude')
-#             vehicle['location'] = geocodeInternal(lat, lng)
-
-#         return jsonify(vehicles), 200
-#     except Exception as e:
-#         print("Error fetching vehicle data:", e)
-#         return jsonify({'error': str(e)}), 500
-
 @vehicle_bp.route('/api/vehicles', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'user', 'clientAdmin')
 def get_vehicles():
     try:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
-        search = request.args.get('search', '', type=str)
-        
         claims = get_jwt()
         user_roles = claims.get('roles', [])
         vehicles = []
 
         if 'admin' in user_roles:
-            inventory_query = {}
+            inventory_data = list(vehicle_inventory_collection.find())
         elif 'user' in user_roles:
             userID = claims.get('user_id')
             userCompany = claims.get('company')
-            inventory_query = {
+            inventory_data = list(vehicle_inventory_collection.find({
                 'CompanyName': userCompany,
                 'AssignedUsers': ObjectId(userID),
-            }
+            }))
         else:
             userCompany = claims.get('company')
-            inventory_query = {'CompanyName': userCompany}
-
-        if search:
-            inventory_query['LicensePlateNumber'] = {'$regex': search, '$options': 'i'}
-
-        total_count = vehicle_inventory_collection.count_documents(inventory_query)
-        
-        skip = (page - 1) * per_page
-        inventory_data = list(vehicle_inventory_collection.find(inventory_query).skip(skip).limit(per_page))
+            inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
 
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         if not imei_list:
-            return jsonify({
-                'vehicles': [],
-                'total_count': total_count,
-                'page': page,
-                'per_page': per_page,
-                'total_pages': 0
-            }), 200
+            return jsonify([]), 200
 
         distances = getVehicleDistances(imei_list)
         stoppage_times = getStopTimeToday(imei_list)
+        print("Getting Vehicle statuses")
         statuses, missingImeis = getVehicleStatus(imei_list)
 
+        print("Building vehicle data")
         vehicles = build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei_list, missingImeis)
 
+        print("[DEBUG] Processed vehicle data")
+        
         for vehicle in vehicles:
+            print(vehicle)
             vehicle['_id'] = str(vehicle['_id'])
             lat = vehicle.get('latitude')
             lng = vehicle.get('longitude')
             vehicle['location'] = geocodeInternal(lat, lng)
 
-        return jsonify({
-            'vehicles': vehicles,
-            'total_count': total_count,
-            'page': page,
-            'per_page': per_page,
-            'total_pages': (total_count + per_page - 1) // per_page
-        }), 200
+        return jsonify(vehicles), 200
     except Exception as e:
         print("Error fetching vehicle data:", e)
         return jsonify({'error': str(e)}), 500
