@@ -12,8 +12,7 @@ from app.utils import roles_required, get_filtered_results # type: ignore
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
 alertCollectionKeys = {
-    'panic_alerts': 'panic', 'panic': 'panic',
-    'speeding': 'speedingAlerts', 
+    'panic': 'panic', 'speeding': 'speedingAlerts', 
     'harsh_break': 'harshBrakes', 'harsh_acceleration': 'harshAccelerations', 
     'gsm_low': 'gsmSignalLows', 'internal_battery_low': 'internalBatteryLows', 
     'main_power_off': 'powerSupplyDissconnects', 'idle': 'idles', 
@@ -239,8 +238,8 @@ def notification_alerts():
     if not imeis:
         return
     
-    panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alerts")
-    main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
+    panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic")
+    main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_off")
     
     notifications = (
         enrich(panic_alerts, "Panic Alert") +
