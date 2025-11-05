@@ -273,7 +273,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   searchBtn.addEventListener("click", function () {
     currentPage = 1;
-    loadAllCounts();
     loadAlerts();
   });
 
@@ -301,90 +300,6 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     acknowledgeAlert();
   });
-
-  async function loadAllCounts() {
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
-    const vehicleNumber = document.getElementById("alertVehicleNumber").value;
-
-    try {
-      const panicResponse = await fetch(`/alerts/panic_count`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-        },
-        body: JSON.stringify({
-          startDate: startDate,
-          endDate: endDate,
-          vehicleNumber: vehicleNumber,
-        }),
-      });
-
-      const panicData = await panicResponse.json();
-      if (panicData.success) {
-        const card = document.querySelector(
-          '.alert-card[data-endpoint="panic"]'
-        );
-        if (card) {
-          const countElement = card.querySelector(".alert-count");
-          if (countElement) {
-            countElement.textContent = panicData.count;
-            countElement.classList.remove("loading-count");
-          }
-        }
-      }
-
-      const endpoints = [
-        "speeding",
-        "harsh_break",
-        "harsh_acceleration",
-        "gsm_low",
-        "internal_battery_low",
-        "main_power_off",
-        "idle",
-        "ignition_off",
-        "ignition_on",
-      ];
-
-      await Promise.all(
-        endpoints.map(async (endpoint) => {
-          try {
-            const response = await fetch(`/alerts/${endpoint}_count`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-              },
-              body: JSON.stringify({
-                startDate: startDate,
-                endDate: endDate,
-                vehicleNumber: vehicleNumber,
-              }),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-              const card = document.querySelector(
-                `.alert-card[data-endpoint="${endpoint}"]`
-              );
-              if (card) {
-                const countElement = card.querySelector(".alert-count");
-                if (countElement) {
-                  countElement.textContent = data.count;
-                  countElement.classList.remove("loading-count");
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`Error loading count for ${endpoint}:`, error);
-          }
-        })
-      );
-    } catch (error) {
-      console.error("Error loading counts:", error);
-    }
-  }
 
   function loadAlerts() {
     const startDate = document.getElementById("startDate").value;
