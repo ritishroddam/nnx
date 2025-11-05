@@ -247,12 +247,12 @@ def notification_alerts():
 
         return enriched
     
-    panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic")
-    main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_off")
+    panic_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "panic_alert")
+    main_power_off_alerts = get_filtered_alerts(imeis, start_of_day, end_of_day, "main_power_alerts")
     
     notifications = (
-        enrich(panic_alerts, "panic_alert") +
-        enrich(main_power_off_alerts, "main_power_off_alerts") 
+        enrich(panic_alerts, "Panic Alert") +
+        enrich(main_power_off_alerts, "Main Power Discontinue Alert") 
     )
     
     if not alertConfig or not alertConfig.get("alerts") or "" in alertConfig["alerts"]:
@@ -281,10 +281,10 @@ def notification_alerts():
             return jsonify({"success": False, "message": f"Unsupported alert type: {alert_type}"}), 400
         
         if alert_type == 'geofence_alerts':
-            notifications += get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceIns")
-            notifications += get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceOuts")
+            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceIns"), 'Geofence Entry')
+            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceOuts"), 'Genofence Exit')
         else:
-            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type)    
+            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())
 
     notifications.sort(key=lambda x: x["date_time"], reverse=True)
 
