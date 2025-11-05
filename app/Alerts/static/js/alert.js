@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tableHead) {
         tableHead.innerHTML = `
             <th>Vehicle Number</th>
-            <th>Alert Type</th>
+            ${isIdle ? '<th>Idle Message</th>' : ''}
             ${showSpeedValue ? '<th>Speed</th>' : ''}
             ${showGeofenceName ? '<th>Geofence Name</th>' : ''}
             <th>Time</th>
@@ -594,21 +594,9 @@ document.addEventListener("DOMContentLoaded", function () {
         row.dataset.alertId = alert._id;
         row.dataset.latlng = `${alert.latitude || "N/A"}, ${alert.longitude || "N/A"}`;
 
-        if (alert.alert_type) {
-            const alertTypeClass = alert.alert_type.toLowerCase().replace(/\s+/g, "-");
-            row.classList.add(`alert-type-${alertTypeClass}`);
-        }
-
-        const alertType = alert.alert_type || alert.type || "Unknown Alert";
-        let alertTypeDisplay = alertType;
-        if (alertType.startsWith("Speeding Alert") && alert.speed) {
-            alertTypeDisplay += ` (${alert.speed} km/h)`;
-        }
-
         let rowHtml = `
-            <td>${alert.vehicle_number || "N/A"}</td>
-            <td>${alert.driver || "N/A"}</td>
-            <td>${alertTypeDisplay} ${isIdle ? alert.alertMessage ?? "N/A" : ""}</td>
+            <td>${alert.LicensePlateNumber || "N/A"}</td>
+            <td>Idle ${isIdle ? alert.alertMessage ?? "N/A" : ""}</td>
             ${showSpeedValue ? `<td>${alert.speed ?? "N/A"}</td>` : ""}
             ${showGeofenceName ? `<td>${alert.geofenceName ?? "N/A"}</td>` : ""}
             <td>${alert.date_time}</td>
