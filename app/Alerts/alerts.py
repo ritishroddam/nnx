@@ -17,7 +17,7 @@ alertCollectionKeys = {
     'gsm_low': 'gsmSignalLows', 'internal_battery_low': 'internalBatteryLows', 
     'main_power_off': 'powerSupplyDissconnects', 'idle': 'idles', 
     'ignition_off': 'ignitionOffs', 'ignition_on': 'ignitionOns', 
-    'geofence_in': 'geodenceIns', 'geofence_out': 'geofenceOuts'
+    'geofence_in': 'geofenceIns', 'geofence_out': 'geofenceOuts'
 }
 
 alertConfigKeys = {
