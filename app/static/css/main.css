@@ -393,7 +393,7 @@ body {
 }
 
 .notification i.fa-bell {
-  font-size: 24px;
+  font-size: 20px;
   color: #222;
   filter: none;
   font-weight: 900;
@@ -412,8 +412,8 @@ body {
   background: #dc3545;
   color: #fff;
   font-size: 10px;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -541,8 +541,8 @@ body.dark-mode .profile-hover .profile-settings-link {
 }
 
 .theme-toggle {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   background-color: #ffd700;
   border-radius: 10px;
   display: flex;

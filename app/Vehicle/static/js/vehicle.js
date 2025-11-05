@@ -80,6 +80,9 @@ var manualClose = false;
 var dataAvailable = true;
 var sosActiveMarkers = {};
 var lastDataReceivedTime = {};
+var geofenceToggle = false;
+var geofencePolygons = {};
+var geofenceButton = null;
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -94,6 +97,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     userRole: userRole,
     userName: userName,
   });
+  
+  geofenceButton = document.getElementById('geofence-toggle');
+  if (geofenceButton) {
+    geofenceButton.addEventListener('click', toggleGeofences);
+  }
 });
 
 socket.on("authentication_success", (data) => {
@@ -419,8 +427,97 @@ function updateVehicleCard(data) {
   }
 }
 
+async function toggleGeofences() {
+    try {
+        if (!geofenceToggle) {
+            const response = await fetch('/geofence/api/geofences');
+            if (!response.ok) throw new Error('Failed to fetch geofences');
+            
+            const geofences = await response.json();
+            
+            const activeGeofences = geofences.filter(geofence => geofence.is_active === true);
+            
+            activeGeofences.forEach(geofence => {
+                let polygon;
+                
+                if (geofence.shape_type === 'polygon') {
+                    const coordinates = geofence.coordinates.points.map(point => ({
+                        lat: point.lat,
+                        lng: point.lng
+                    }));
+                    
+                    polygon = new google.maps.Polygon({
+                        paths: coordinates,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.15,
+                        map: map,
+                        title: geofence.name
+                    });
+                } else if (geofence.shape_type === 'circle') {
+                    const center = geofence.coordinates.center;
+                    const radius = geofence.coordinates.radius;
+                    
+                    polygon = new google.maps.Circle({
+                        center: new google.maps.LatLng(center.lat, center.lng),
+                        radius: radius,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.15,
+                        map: map,
+                        title: geofence.name
+                    });
+                }
+                
+                if (polygon) {
+                    geofencePolygons[geofence._id] = polygon;
+                    
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div class="geofence-info">
+                                <h4>${geofence.name}</h4>
+                                <p><strong>Type:</strong> ${geofence.shape_type}</p>
+                                <p><strong>Location:</strong> ${geofence.location || 'N/A'}</p>
+                                <p><strong>Created by:</strong> ${geofence.created_by}</p>
+                            </div>
+                        `
+                    });
+                    
+                    if (geofence.shape_type === 'polygon') {
+                        polygon.addListener('click', (event) => {
+                            infoWindow.setPosition(event.latLng);
+                            infoWindow.open(map);
+                        });
+                    } else if (geofence.shape_type === 'circle') {
+                        polygon.addListener('click', (event) => {
+                            infoWindow.setPosition(event.latLng);
+                            infoWindow.open(map);
+                        });
+                    }
+                }
+            });
+            
+            geofenceToggle = true;
+            geofenceButton.classList.add('active');
+        } else {
+            Object.values(geofencePolygons).forEach(polygon => {
+                polygon.setMap(null);
+            });
+            geofencePolygons = {};
+            geofenceToggle = false;
+            geofenceButton.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Error toggling geofences:', error);
+    }
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of the earth in km
+  const R = 6371; 
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
   const a = 
@@ -428,7 +525,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
     Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c; // Distance in km
+  return R * c; 
 }
 
 function deg2rad(deg) {
@@ -459,8 +556,7 @@ function triggerSOS(imei, marker) {
     sosActiveMarkers[imei] = sosDiv;
     marker.content.classList.add("vehicle-blink");
 
-    // Find nearby vehicles
-    const nearbyVehicles = findNearbyVehicles(vehicle, 5); // 5km radius
+    const nearbyVehicles = findNearbyVehicles(vehicle, 5);
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
 
     // setTimeout(() => {
@@ -475,15 +571,12 @@ function acknowledgeSOS(imei) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle) return;
 
-  // Remove the visual SOS indicators
   removeSOS(imei);
   
-  // Update the vehicle data to mark SOS as acknowledged
   vehicle.sos = "0";
   vehicle.sosActive = false;
   vehicleData.set(imei, vehicle);
   
-  // Send acknowledgment to server
   fetch('/alerts/acknowledge_sos', {
     method: 'POST',
     headers: {
@@ -499,7 +592,6 @@ function acknowledgeSOS(imei) {
   .then(data => {
     if (data.success) {
       console.log(`SOS acknowledged for ${imei}`);
-      // Update the UI to reflect the acknowledged state
       const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
       if (vehicleCard) {
         vehicleCard.classList.remove('sos-blink-card');
@@ -519,7 +611,7 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
   const sosLon = parseFloat(sosVehicle.longitude);
 
   vehicleData.forEach((vehicle, imei) => {
-    if (imei === sosVehicle.imei) return; // Skip the SOS vehicle itself
+    if (imei === sosVehicle.imei) return; 
     
     const vehicleLat = parseFloat(vehicle.latitude);
     const vehicleLon = parseFloat(vehicle.longitude);
@@ -527,8 +619,7 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
     if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
       const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
       if (distance <= radiusKm) {
-        // Calculate estimated time to reach (assuming average speed of 40km/h)
-        const estimatedTime = (distance / 40) * 60; // in minutes
+        const estimatedTime = (distance / 40) * 60; 
         nearby.push({
           vehicle,
           distance: distance.toFixed(2),
@@ -538,7 +629,6 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
     }
   });
 
-  // Sort by distance (nearest first)
   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
   return nearby;
 }
@@ -585,7 +675,6 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.innerHTML = content;
   document.body.appendChild(popup);
 
-  // Style the popup
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
@@ -1956,6 +2045,142 @@ function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
   map.panTo(newLatLng);
 }
 
+// function addHoverListenersToCardsAndMarkers() {
+//   const vehicleCards = document.querySelectorAll(".vehicle-card");
+//   vehicleCards.forEach((card) => {
+//     card.addEventListener("mouseover", () => {
+//       const imei = card.getAttribute("data-imei");
+//       const marker = markers[imei];
+//       if (marker) {
+
+//         let latLng = new google.maps.LatLng(
+//           marker.position.lat,
+//           marker.position.lng
+//         );
+
+//         map.setZoom(19);
+//         panToWithOffset(latLng, -200, 0);
+
+//         const coords = {
+//           lat: marker.position.lat,
+//           lon: marker.position.lng,
+//         };
+
+//         const address = marker.device.address || "Location unknown";
+//         setInfoWindowContent(
+//           infoWindow,
+//           marker,
+//           latLng,
+//           marker.device,
+//           address
+//         );
+//         infoWindow.open(map, marker);
+//       }
+//     });
+
+//     card.addEventListener("mouseout", () => {
+//       infoWindow.close();
+//     });
+//   });
+
+//   Object.keys(markers).forEach((imei) => {
+//     const marker = markers[imei];
+//     if (marker) {
+//       marker.addEventListener("mouseover", () => {
+//         const vehicleCard = document.querySelector(
+//           `.vehicle-card[data-imei="${imei}"]`
+//         );
+//         if (vehicleCard) {
+//           vehicleCard.scrollIntoView({
+//             behavior: "smooth",
+//             block: "nearest",
+//             inline: "nearest",
+//           });
+
+//           vehicleCard.classList.add("highlight");
+
+//           const isDarkMode = document.body.classList.contains("dark-mode");
+
+//           if (isDarkMode) {
+//             vehicleCard.style.backgroundColor = "black";
+//             vehicleCard.style.color = "#fff";
+
+//             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
+//             if (vehicleHeader) {
+//               vehicleHeader.style.color = "#000000d0";
+//             }
+            
+//             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
+//             if (vehicleInfo) {
+//               vehicleInfo.style.color = "#000000d0"; 
+
+//               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
+//               vehicleInfoStrong.forEach((tag) => {
+//                 tag.style.color = "#000000d0";
+//               });
+//               const vehicleInfoA = vehicleCard.querySelector("a");
+//               if (vehicleInfoA) {
+//                 vehicleInfoA.style.color = "#000000d0"; 
+//               }
+//             }
+//           } else {
+//             vehicleCard.style.backgroundColor = "#ccc"; 
+//             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
+//             if (vehicleHeader) {
+//               vehicleHeader.style.color = "#ccc"; 
+//             }
+//             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
+//             if (vehicleInfo) {
+//               vehicleInfo.style.color = "#ccc"; 
+
+//               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
+//               vehicleInfoStrong.forEach((tag) => {
+//                 tag.style.color = "#ccc"; 
+//               });
+//               const vehicleInfoA = vehicleCard.querySelector("a");
+//               if (vehicleInfoA) {
+//                 vehicleInfoA.style.color = "#ccc"; 
+//               }
+//             }
+//           }
+//         }
+//       });
+
+//       marker.addEventListener("mouseout", () => {
+//         const vehicleCard = document.querySelector(
+//           `.vehicle-card[data-imei="${imei}"]`
+//         );
+//         if (vehicleCard) {
+//           vehicleCard.classList.remove("highlight");
+
+//           vehicleCard.style.transition =
+//             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
+//           vehicleCard.style.backgroundColor = ""; 
+//           vehicleCard.style.color = "";
+
+//           const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
+//           if (vehicleHeader) {
+//             vehicleHeader.style.color = "";
+//           }
+//           const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
+//           if (vehicleInfo) {
+//             vehicleInfo.style.color = ""; 
+
+//             const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
+//             vehicleInfoStrong.forEach((tag) => {
+//               tag.style.color = ""; 
+//             });
+//             const vehicleInfoA = vehicleCard.querySelector("a");
+//             if (vehicleInfoA) {
+//               vehicleInfoA.style.color = ""; 
+//             }
+//           }
+//         }
+//       });
+//     }
+//   });
+// }
+
 function addHoverListenersToCardsAndMarkers() {
   const vehicleCards = document.querySelectorAll(".vehicle-card");
   vehicleCards.forEach((card) => {
@@ -1963,7 +2188,6 @@ function addHoverListenersToCardsAndMarkers() {
       const imei = card.getAttribute("data-imei");
       const marker = markers[imei];
       if (marker) {
-
         let latLng = new google.maps.LatLng(
           marker.position.lat,
           marker.position.lng
@@ -2013,43 +2237,51 @@ function addHoverListenersToCardsAndMarkers() {
           const isDarkMode = document.body.classList.contains("dark-mode");
 
           if (isDarkMode) {
-            vehicleCard.style.backgroundColor = "black";
-            const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-            if (vehicleHeader) {
-              vehicleHeader.style.color = "#000000d0";
+            vehicleCard.style.backgroundColor = "#555"; 
+            vehicleCard.style.color = "#fff";
+            
+            const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
+            if (vehicleNumber) {
+              vehicleNumber.style.color = "#fff";
             }
-            const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-            if (vehicleInfo) {
-              vehicleInfo.style.color = "#000000d0"; 
-
-              const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-              vehicleInfoStrong.forEach((tag) => {
-                tag.style.color = "#000000d0";
-              });
-              const vehicleInfoA = vehicleCard.querySelector("a");
-              if (vehicleInfoA) {
-                vehicleInfoA.style.color = "#000000d0"; 
-              }
+            
+            const locationText = vehicleCard.querySelector(".location-text");
+            if (locationText) {
+              locationText.style.color = "#ccc";
             }
+            
+            const lastUpdatedText = vehicleCard.querySelector(".last-updated-text");
+            if (lastUpdatedText) {
+              lastUpdatedText.style.color = "#aaa";
+            }
+            
+            const strongElements = vehicleCard.querySelectorAll("strong");
+            strongElements.forEach((tag) => {
+              tag.style.color = "#fff";
+            });
           } else {
             vehicleCard.style.backgroundColor = "#ccc"; 
-            const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-            if (vehicleHeader) {
-              vehicleHeader.style.color = "#ccc"; 
+            vehicleCard.style.color = "#333"; 
+            
+            const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
+            if (vehicleNumber) {
+              vehicleNumber.style.color = "#000";
             }
-            const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-            if (vehicleInfo) {
-              vehicleInfo.style.color = "#ccc"; 
-
-              const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-              vehicleInfoStrong.forEach((tag) => {
-                tag.style.color = "#ccc"; 
-              });
-              const vehicleInfoA = vehicleCard.querySelector("a");
-              if (vehicleInfoA) {
-                vehicleInfoA.style.color = "#ccc"; 
-              }
+            
+            const locationText = vehicleCard.querySelector(".location-text");
+            if (locationText) {
+              locationText.style.color = "#666";
             }
+            
+            const lastUpdatedText = vehicleCard.querySelector(".last-updated-text");
+            if (lastUpdatedText) {
+              lastUpdatedText.style.color = "#222";
+            }
+            
+            const strongElements = vehicleCard.querySelectorAll("strong");
+            strongElements.forEach((tag) => {
+              tag.style.color = "#000";
+            });
           }
         }
       });
@@ -2064,23 +2296,27 @@ function addHoverListenersToCardsAndMarkers() {
           vehicleCard.style.transition =
             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
           vehicleCard.style.backgroundColor = ""; 
-          const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-          if (vehicleHeader) {
-            vehicleHeader.style.color = "";
+          vehicleCard.style.color = "";
+          
+          const vehicleNumber = vehicleCard.querySelector(".vehicle-number");
+          if (vehicleNumber) {
+            vehicleNumber.style.color = "";
           }
-          const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-          if (vehicleInfo) {
-            vehicleInfo.style.color = ""; 
-
-            const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-            vehicleInfoStrong.forEach((tag) => {
-              tag.style.color = ""; 
-            });
-            const vehicleInfoA = vehicleCard.querySelector("a");
-            if (vehicleInfoA) {
-              vehicleInfoA.style.color = ""; 
-            }
+          
+          const locationText = vehicleCard.querySelector(".location-text");
+          if (locationText) {
+            locationText.style.color = "";
           }
+          
+          const lastUpdatedText = vehicleCard.querySelector(".last-updated-text");
+          if (lastUpdatedText) {
+            lastUpdatedText.style.color = "";
+          }
+          
+          const strongElements = vehicleCard.querySelectorAll("strong");
+          strongElements.forEach((tag) => {
+            tag.style.color = "";
+          });
         }
       });
     }

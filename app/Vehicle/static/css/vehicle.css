@@ -82,7 +82,7 @@ body {
   gap: 0;
   min-width: 0;
   max-width: 100%;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .vehicle-card-row {
@@ -211,9 +211,8 @@ body {
   border: 1.5px solid #bbb;
   border-radius: 15px;
   box-shadow: 0 4px 24px rgba(44,62,80,0.08);
-  padding: 4px 10px;
+  padding: 2px 8px;
   transition: background 0.3s, border 0.3s;
-  margin-left: 12px;
 }
 
 .dark-mode .toggle-container {
@@ -301,16 +300,6 @@ body {
 .toggle-slider.active .slider-button {
   left: 31px;
 }
-
-/* .toggle-slider.active .map-option {
-  color: #ccc;
-  background: #222;
-} */
-
-/* .toggle-slider.active .list-option {
-  color: #fff;
-  background: #222;
-} */
 
 .icon-legend-container {
   position: absolute;
@@ -440,18 +429,6 @@ body {
 
 .vehicle-blink {
   animation: vehicle-blink-animation 1s alternate infinite;
-}
-
-@keyframes sos-blink-animation {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 
 #map-toggle {
@@ -618,7 +595,7 @@ input:checked + .slider:before {
 }
 
 .dark-mode .vehicle-table tr:hover {
-  background-color: #444;
+  background-color: #666;
 }
 
 .dark-mode .vehicle-table th {
@@ -714,21 +691,6 @@ input:checked + .slider:before {
   color: #e1bee7;
 }
 
-@media (max-width: 768px) {
-  .floating-card {
-    height: 50vh;
-  }
-
-  .search-container {
-    padding: 6px;
-  }
-
-  #vehicle-search {
-    padding: 6px;
-    font-size: 14px;
-  }
-}
-
 .info-window a {
   color: #336699;
   text-decoration: none;
@@ -751,7 +713,6 @@ input:checked + .slider:before {
   color: var(--text-color);
 }
 
-/* If you want the search container in the table to match the floating card */
 #vehicle-table-container .search-container {
   display: flex;
   margin: 0;
@@ -966,16 +927,6 @@ input:checked + .slider:before {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-@media (max-width: 600px) {
-  .info-window-show {
-    min-width: 220px;
-    max-width: 98vw;
-    padding: 10px 8px 8px 8px;
-  }
-}
-
-/* share location */
-
 #share-location-popup {
   background: #fff;
   border-radius: 12px;
@@ -1045,7 +996,6 @@ input:checked + .slider:before {
   margin-bottom: 12px;
 }
 
-/* Skeleton Loader for Vehicle Card Layout */
 .skeleton-card {
   background: #f3f3f3;
   border-radius: 12px;
@@ -1059,12 +1009,6 @@ input:checked + .slider:before {
   background: #e0e0e0;
   border-radius: 6px;
   animation: pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
 }
 
 .skeleton-circle {
@@ -1212,13 +1156,89 @@ input:checked + .slider:before {
   bottom: auto !important;
 }
 
+.geofence-toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.geofence-toggle-btn {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #495057;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.geofence-toggle-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.geofence-toggle-btn.active {
+    background: #007bff;
+    border-color: #0056b3;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+.geofence-toggle-btn.active:hover {
+    background: #0056b3;
+    border-color: #004085;
+}
+
+body.dark-mode .geofence-toggle-btn {
+    background: #495057;
+    border-color: #6c757d;
+    color: #f8f9fa;
+}
+
+body.dark-mode .geofence-toggle-btn:hover {
+    background: #6c757d;
+    border-color: #adb5bd;
+}
+
+body.dark-mode .geofence-toggle-btn.active {
+    background: #0d6efd;
+    border-color: #0a58ca;
+}
+
+.geofence-info {
+    padding: 8px;
+    min-width: 200px;
+}
+
+.geofence-info h4 {
+    margin: 0 0 8px 0;
+    color: #d32f2f;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.geofence-info p {
+    margin: 4px 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.geofence-info strong {
+    color: #333;
+}
+
 @keyframes sosBlink {
   0% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
   50% { border-color: transparent; box-shadow: none; }
   100% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
 }
 
-/* Responsive for skeleton loader */
 @media (max-width: 600px) {
   .skeleton-card {
     padding: 10px;
@@ -1234,5 +1254,43 @@ input:checked + .slider:before {
   .skeleton-status {
     width: 120px;
     height: 14px;
+  }
+  .info-window-show {
+    min-width: 220px;
+    max-width: 98vw;
+    padding: 10px 8px 8px 8px;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .floating-card {
+    height: 50vh;
+  }
+
+  .search-container {
+    padding: 6px;
+  }
+
+  #vehicle-search {
+    padding: 6px;
+    font-size: 14px;
+  }
+}
+
+@keyframes sos-blink-animation {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }

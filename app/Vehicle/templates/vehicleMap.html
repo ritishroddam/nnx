@@ -16,8 +16,13 @@ Vehicle Map
 {% endblock %}
 
 {% block topbar_icons %}
+<div class="geofence-toggle-container">
+  <button id="geofence-toggle" class="geofence-toggle-btn" title="Toggle Geofences">
+    <i class="fas fa-draw-polygon"></i>
+  </button>
+</div>
+
 <div class="filter-container">
-  <label for="speed-filter">Filter by Speed:</label>
   <select id="speed-filter" class="speed-filter" onchange="filterVehicles()">
     <option value="all">All</option>
     <option value="0">No Speed</option>
@@ -28,6 +33,7 @@ Vehicle Map
     <option value="sos">SOS alert</option>
   </select>
 </div>
+
 <div class="toggle-container">
   <div class="toggle-slider">
     <div class="toggle-option map-option active"> <i class="fa-solid fa-map"></i></div>
