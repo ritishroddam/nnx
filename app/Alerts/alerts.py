@@ -60,30 +60,6 @@ def getVehicles():
     else:
         return vehicle_inventory.find({'CompanyName': userCompany}, {"IMEI": 1, "normalSpeed": 1,"_id": 0})
 
-def get_alert_type(alert_type):
-    if alert_type == "panic":
-        return "Panic Alert"
-    elif alert_type == "speeding":
-        return "Speeding Alert"
-    elif alert_type == "harsh_break":
-        return "Harsh Break Alert"
-    elif alert_type == "harsh_acceleration":
-        return "Harsh Acceleration Alert"
-    elif alert_type == "gsm_low":
-        return "GSM Signal Low Alert"
-    elif alert_type == "internal_battery_low":
-        return "Internal Battery Low Alert"
-    elif alert_type == "main_power_off":
-        return "Main Power Off Alert"
-    elif alert_type == "idle":
-        return "Idle Alert"
-    elif alert_type == "ignition_off":
-        return "Ignition Off Alert"
-    elif alert_type == "ignition_on":
-        return "Ignition On Alert"
-    else:
-        return "Unknown Alert"
-
 @alerts_bp.route('/get_alerts', methods=['POST'])
 @jwt_required()
 def get_alerts():
@@ -112,8 +88,7 @@ def get_alerts():
             
     start_date = start_date.astimezone(timezone.utc)
     end_date = end_date.astimezone(timezone.utc)
-    
-    imei = None
+
     if not vehicle_number:
         vehicles = getVehicles()
         if not vehicles:
@@ -155,13 +130,14 @@ def get_alerts():
     total_count = collection.count_documents(query)
 
     # Apply pagination
-    records = collection.find(query, {'imei': 0}).sort('date_time', -1).skip(skip).limit(per_page)
+    records = list(collection.find(query, {'imei': 0}).sort('date_time', -1).skip(skip).limit(per_page))
     
     for record in records:
         if 'date_time' in record:
             date = record['date_time']
             istDate = date.astimezone(timezone(timedelta(hours=5, minutes=30)))
             record['date_time'] = istDate.strftime('%d-%b-%Y %I:%M:%S %p')
+            record.pop('imei', None)
     
     return jsonify({
         "success": True, 

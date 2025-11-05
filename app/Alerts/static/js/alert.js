@@ -558,12 +558,26 @@ document.addEventListener("DOMContentLoaded", function () {
         currentEndpoint === "main_power_off"
     );
 
+    const showSpeedValue = (
+        currentEndpoint === "speeding"
+    );
+
+    const showGeofenceName = (
+        currentEndpoint === "geofence_in" ||
+        currentEndpoint === "geofence_out"
+    );
+
+    const isIdle = (
+        currentEndpoint === "idle"
+    )
+
     const tableHead = document.querySelector("#alertsTable thead tr");
     if (tableHead) {
         tableHead.innerHTML = `
             <th>Vehicle Number</th>
-            <th>Driver</th>
             <th>Alert Type</th>
+            ${showSpeedValue ? '<th>Speed</th>' : ''}
+            ${showGeofenceName ? '<th>Geofence Name</th>' : ''}
             <th>Time</th>
             <th>Location</th>
             ${showStatusAndAction ? '<th>Status</th><th>Action</th>' : ''}
@@ -594,8 +608,10 @@ document.addEventListener("DOMContentLoaded", function () {
         let rowHtml = `
             <td>${alert.vehicle_number || "N/A"}</td>
             <td>${alert.driver || "N/A"}</td>
-            <td>${alertTypeDisplay}</td>
-            <td>${formatDateTime(alert.date_time)}</td>
+            <td>${alertTypeDisplay} ${isIdle ? `<td>${alert.alertMessage ?? "N/A"}</td>` : ""}</td>
+            ${showSpeedValue ? `<td>${alert.speed ?? "N/A"}</td>` : ""}
+            ${showGeofenceName ? `<td>${alert.geofenceName ?? "N/A"}</td>` : ""}
+            <td>${alert.date_time}</td>
             <td>${alert.location || "N/A"}</td>
         `;
 
