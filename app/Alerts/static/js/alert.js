@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </tr>
         `;
 
-    fetch(`/alerts/${currentEndpoint}_alerts`, {
+    fetch(`/alerts/get_alerts`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -406,6 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
         startDate: startDate,
         endDate: endDate,
         vehicleNumber: vehicleNumber,
+        alertType: currentEndpoint,
       }),
     })
       .then((response) => response.json())
