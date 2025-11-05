@@ -262,7 +262,7 @@ def notification_alerts():
         
         if alert_type == 'geofence_alerts':
             notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceIns"), 'Geofence Entry')
-            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceOuts"), 'Genofence Exit')
+            notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, "geofenceOuts"), 'Geofence Exit')
         else:
             notifications += enrich(get_filtered_alerts(imeis, start_of_day, end_of_day, alert_type), alert_type.replace("_alerts", "").replace("_", " ").title())
 
