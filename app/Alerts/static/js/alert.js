@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let rowHtml = `
             <td>${alert.LicensePlateNumber || "N/A"}</td>
-            <td>Idle ${isIdle ? alert.alertMessage ?? "N/A" : ""}</td>
+            <td>${isIdle ? `Idle ${alert.alertMessage ?? "N/A"} : ""}</td>
             ${showSpeedValue ? `<td>${alert.speed ?? "N/A"}</td>` : ""}
             ${showGeofenceName ? `<td>${alert.geofenceName ?? "N/A"}</td>` : ""}
             <td>${alert.date_time}</td>
