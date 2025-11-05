@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
+  $("#alertVehicleNumber").selectize({
+    placeholder: "Search Vehicles",
+    searchField: "text",
+    create: false,
+  });
+
   const ackModal = document.getElementById("ackModal");
   const ackForm = document.getElementById("ackForm");
   const searchBtn = document.getElementById("searchAlerts");
