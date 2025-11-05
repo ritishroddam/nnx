@@ -16,9 +16,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentEndpoint =
     sessionStorage.getItem("currentAlertEndpoint") || "panic";
   let currentAlertId = null;
-  const ITEMS_PER_PAGE = 100;
-  let allAlerts = [];
+  let ITEMS_PER_PAGE = 100;         // keep default page size
+  let allAlerts = [];               // holds current page rows only
   let currentPage = 1;
+  let totalAlertsCount = 0;         // total from backend
+  let totalPages = 1;
 
 
   socket.emit("join_alerts");
@@ -301,7 +303,8 @@ document.addEventListener("DOMContentLoaded", function () {
     acknowledgeAlert();
   });
 
-  function loadAlerts() {
+async function loadAlerts(page = 1) {
+    currentPage = page || 1;
     const startDate = document.getElementById("startDate").value;
     const endDate = document.getElementById("endDate").value;
     const vehicleNumber = document.getElementById("alertVehicleNumber").value;
@@ -317,88 +320,85 @@ document.addEventListener("DOMContentLoaded", function () {
             </tr>
         `;
 
-    fetch(`/alerts/get_alerts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-      },
-      body: JSON.stringify({
-        startDate: startDate,
-        endDate: endDate,
-        vehicleNumber: vehicleNumber,
-        alertType: currentEndpoint,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          allAlerts = data.alerts;
-          currentPage = 1;
-          updateTableAndPagination();
-        } else {
-          throw new Error(data.message || "Failed to fetch alerts");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        showToast(error.message || "Failed to fetch alerts", "error");
-        tableBody.innerHTML = `<tr><td colspan="7" class="error-message">Error loading alerts</td></tr>`;
+    try {
+      const res = await fetch(`/alerts/get_alerts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({
+          startDate: startDate,
+          endDate: endDate,
+          vehicleNumber: vehicleNumber,
+          alertType: currentEndpoint,
+          page: currentPage,
+          per_page: ITEMS_PER_PAGE
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || `Server error ${res.status}`);
+      }
+
+      // backend returns only the requested page rows
+      allAlerts = data.alerts || [];
+      currentPage = data.page || currentPage;
+      ITEMS_PER_PAGE = data.per_page || ITEMS_PER_PAGE;
+      totalAlertsCount = data.count || 0;
+      totalPages = data.total_pages || Math.ceil((totalAlertsCount || 0) / ITEMS_PER_PAGE);
+
+      updateTableAndPagination();
+    } catch (error) {
+      console.error("Error:", error);
+      showToast(error.message || "Failed to fetch alerts", "error");
+      tableBody.innerHTML = `<tr><td colspan="7" class="error-message">Error loading alerts</td></tr>`;
+    }
   }
 
   function updateTableAndPagination() {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedAlerts = allAlerts.slice(
-      startIndex,
-      startIndex + ITEMS_PER_PAGE
-    );
-
-    displayAlerts(paginatedAlerts);
+    // display the current page rows returned by backend
+    displayAlerts(allAlerts);
     updatePagination();
   }
 
   function updatePagination() {
-    const paginationContainer = document.querySelector(".pagination-container"); // Select only one container
+    const paginationContainer = document.querySelector(".pagination-container");
     if (!paginationContainer) {
       console.error("No pagination container found in the DOM.");
       return;
     }
 
-    const totalPages = Math.ceil(allAlerts.length / ITEMS_PER_PAGE);
-
     paginationContainer.innerHTML = "";
 
     const totalAlertsSpan = document.createElement("span");
     totalAlertsSpan.className = "total-alerts";
-    totalAlertsSpan.textContent = `Total Alerts: ${allAlerts.length}`;
+    totalAlertsSpan.textContent = `Total Alerts: ${totalAlertsCount}`;
     paginationContainer.appendChild(totalAlertsSpan);
 
-    if (allAlerts.length <= ITEMS_PER_PAGE) return;
+    if (totalPages <= 1) return;
 
-    const paginationDiv = createPaginationControls(totalPages);
-
+    const paginationDiv = createPaginationControls(totalPages, currentPage);
     paginationContainer.appendChild(paginationDiv);
   }
 
-  function createPaginationControls(totalPages) {
+function createPaginationControls(totalPagesArg, currentPageArg) {
     const paginationDiv = document.createElement("div");
     paginationDiv.className = "pagination";
 
     const prevButton = document.createElement("button");
     prevButton.innerHTML = "&laquo; Previous";
-    prevButton.disabled = currentPage === 1;
+    prevButton.disabled = currentPageArg === 1;
     prevButton.addEventListener("click", () => {
-      if (currentPage > 1) {
-        currentPage--;
-        updateTableAndPagination();
-      }
+      if (currentPageArg > 1) loadAlerts(currentPageArg - 1);
     });
     paginationDiv.appendChild(prevButton);
 
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const maxVisiblePages = 7;
+    let startPage = Math.max(1, currentPageArg - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPagesArg, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -407,10 +407,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (startPage > 1) {
       const firstPageButton = document.createElement("button");
       firstPageButton.textContent = "1";
-      firstPageButton.addEventListener("click", () => {
-        currentPage = 1;
-        updateTableAndPagination();
-      });
+      firstPageButton.addEventListener("click", () => loadAlerts(1));
       paginationDiv.appendChild(firstPageButton);
 
       if (startPage > 2) {
@@ -423,41 +420,32 @@ document.addEventListener("DOMContentLoaded", function () {
     for (let i = startPage; i <= endPage; i++) {
       const pageButton = document.createElement("button");
       pageButton.textContent = i;
-      if (i === currentPage) {
+      if (i === currentPageArg) {
         pageButton.classList.add("active");
         pageButton.disabled = true;
       }
-      pageButton.addEventListener("click", () => {
-        currentPage = i;
-        updateTableAndPagination();
-      });
+      pageButton.addEventListener("click", () => loadAlerts(i));
       paginationDiv.appendChild(pageButton);
     }
 
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
+    if (endPage < totalPagesArg) {
+      if (endPage < totalPagesArg - 1) {
         const ellipsis = document.createElement("span");
         ellipsis.textContent = "...";
         paginationDiv.appendChild(ellipsis);
       }
 
       const lastPageButton = document.createElement("button");
-      lastPageButton.textContent = totalPages;
-      lastPageButton.addEventListener("click", () => {
-        currentPage = totalPages;
-        updateTableAndPagination();
-      });
+      lastPageButton.textContent = totalPagesArg;
+      lastPageButton.addEventListener("click", () => loadAlerts(totalPagesArg));
       paginationDiv.appendChild(lastPageButton);
     }
 
     const nextButton = document.createElement("button");
     nextButton.innerHTML = "Next &raquo;";
-    nextButton.disabled = currentPage === totalPages;
+    nextButton.disabled = currentPageArg === totalPagesArg;
     nextButton.addEventListener("click", () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        updateTableAndPagination();
-      }
+      if (currentPageArg < totalPagesArg) loadAlerts(currentPageArg + 1);
     });
     paginationDiv.appendChild(nextButton);
 
