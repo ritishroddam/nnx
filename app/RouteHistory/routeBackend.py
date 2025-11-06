@@ -1,7 +1,5 @@
 from flask import jsonify, request, render_template, redirect, Blueprint, flash
-from datetime import datetime, timedelta
-import pytz
-import requests
+from datetime import datetime, timedelta, timezone
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
@@ -17,17 +15,6 @@ data_collection = db["vehicle_inventory"]
 atlanta_collection = db["atlanta"]
 atlantaAIS140_collection = db['atlantaAis140']
 company_collection = db["customers_list"]
-
-def convertDate(ddmmyy, hhmmss):
-    day = int(ddmmyy[0:2])
-    month = int(ddmmyy[2:4])
-    year = 2000 + int(ddmmyy[4:6])  
-    
-    hour = int(hhmmss[0:2])
-    minute = int(hhmmss[2:4])
-    second = int(hhmmss[4:6])
-    
-    return datetime(year, month, day, hour, minute, second, tzinfo=pytz.UTC)
 
 def deltaTimeString(status_time_delta):
     days = status_time_delta.days
@@ -104,7 +91,7 @@ def show_vehicle_data(LicensePlateNumber):
                 five_minutes_ago = now - timedelta(hours=1)
 
                 for entry in vehicle_data:
-                    if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo=pytz.UTC):
+                    if entry.get("date_time") and entry.get("date_time") > five_minutes_ago.replace(tzinfo = timezone.utc):
                         if recent_data is None:
                             recent_data = []
                         if entry.get("speed") != "0.0":
@@ -177,11 +164,11 @@ def show_vehicle_data(LicensePlateNumber):
 @jwt_required()
 def fetch_live_data(imei):
     try:
-        now = datetime.now().astimezone(pytz.UTC)
+        now = datetime.now().astimezone(timezone.utc)
         thirty_minutes_ago = now - timedelta(minutes=30)
 
         projection = {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "date_time": 1, "course": 1}
-        date_filter = {"date_time": {"$gte": thirty_minutes_ago.replace(tzinfo=pytz.UTC)}}
+        date_filter = {"date_time": {"$gte": thirty_minutes_ago.replace(tzinfo = timezone.utc)}}
         
         liveData = getData(imei, date_filter, projection)
 
@@ -289,7 +276,7 @@ def fetch_vehicle_alerts(imei):
         if not alerts:
             return jsonify([])
 
-        ist = pytz.timezone("Asia/Kolkata")
+        ist = timezone(timedelta(hours=5, minutes=30))
 
         formatted_alerts = [
             {
@@ -339,9 +326,21 @@ def get_vehicle_path():
     imei_numeric = request.args.get("imei")
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
-
-    iso_start_date = convertDate(start_date, "000000")
-    iso_end_date = convertDate(end_date, "235959")
+    
+    IST = timezone(timedelta(hours=5, minutes=30))
+    
+    if start_date and end_date:
+        start_date = datetime.fromisoformat(start_date) 
+        end_date = datetime.fromisoformat(end_date) 
+        
+        iso_start_date = start_date.replace(tzinfo=IST)
+        iso_end_date = end_date.replace(tzinfo=IST)
+    else:
+        iso_start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        iso_end_date = datetime.now()
+        
+    iso_start_date = start_date.astimezone(timezone.utc)
+    iso_end_date = end_date.astimezone(timezone.utc)
 
     try:
         data_record = data_collection.find_one({"IMEI": str(imei_numeric)})
@@ -366,7 +365,7 @@ def get_vehicle_path():
         if not records_list:
             return jsonify({"error": f"No path data found for the specified IMEI {imei_numeric} and date range {iso_start_date} and {iso_end_date} "}), 404
 
-        ist = pytz.timezone("Asia/Kolkata")
+        ist = timezone(timedelta(hours=5, minutes=30))
 
         path_data = []
         for record in reversed(records_list):
