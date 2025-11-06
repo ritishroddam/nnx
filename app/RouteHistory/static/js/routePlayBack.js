@@ -619,10 +619,8 @@ document
       return;
     }
 
-    const start_date = formatDateToDB(
-      document.getElementById("start_date").value
-    );
-    const end_date = formatDateToDB(document.getElementById("end_date").value);
+    const start_date = document.getElementById("start_date").value;
+    const end_date = document.getElementById("end_date").value;
 
     const fetchUrl = `/routeHistory/get_vehicle_path?imei=${userEnteredImei}&start_date=${start_date}&end_date=${end_date}`;
 
