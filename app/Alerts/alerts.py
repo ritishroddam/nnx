@@ -77,7 +77,9 @@ def get_alerts():
     start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_date = datetime.fromisoformat(end_date) if end_date else datetime.now()
     
-    print(end_date, start_date)
+    IST = timezone(timedelta(hours=5, minutes=30))
+    start_date = start_date.replace(tzinfo=IST)
+    end_date = end_date.replace(tzinfo=IST)
     
     if not vehicle_number: 
         max_allowed_end = start_date + timedelta(hours=24)
@@ -139,7 +141,7 @@ def get_alerts():
     for record in records:
         if 'date_time' in record:
             date = record['date_time']
-            istDate = date.astimezone(timezone(timedelta(hours=5, minutes=30)))
+            istDate = date.astimezone(IST)
             record['date_time'] = istDate.strftime('%d-%b-%Y %I:%M:%S %p')
             
             record['_id'] = str(record['_id'])
