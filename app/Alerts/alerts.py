@@ -92,8 +92,6 @@ def get_alerts():
             
     start_date = start_date.astimezone(timezone.utc)
     end_date = end_date.astimezone(timezone.utc)
-    
-    print(end_date, start_date)
 
     if not vehicle_number:
         vehicles = getVehicles()
