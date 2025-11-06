@@ -211,17 +211,34 @@ function parseLocal(dtStr){
   return isNaN(d)?null:d;
 }
 
+function getFilenameFromDisposition(disposition) {
+  if (!disposition) return null;
+  // Handles: filename*=UTF-8''encodedname ; filename="name" ; filename=name
+  const rfc5987 = /filename\*=UTF-8''([^;]+)/i;
+  const quoted = /filename="([^"]+)"/i;
+  const simple = /filename=([^;]+)/i;
+  let m = disposition.match(rfc5987);
+  if (m && m[1]) return decodeURIComponent(m[1].trim());
+  m = disposition.match(quoted);
+  if (m && m[1]) return m[1].trim();
+  m = disposition.match(simple);
+  if (m && m[1]) return m[1].trim();
+  return null;
+}
+
 function downloadReport(reportId){
   fetch(`/reports/download_report/${reportId}`,{
     headers:{'X-CSRF-TOKEN':getCookie('csrf_access_token')}
   }).then(resp=>{
-    if(!resp.ok)return resp.json().then(j=>{throw new Error(j.message||'Download failed')});
-    return resp.blob();
-  }).then(blob=>{
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='report.xlsx';
+    if(!resp.ok) return resp.json().then(j=>{ throw new Error(j.message||'Download failed') });
+    const disposition = resp.headers.get('Content-Disposition') || '';
+    const filename = getFilenameFromDisposition(disposition) || 'report.xlsx';
+    return resp.blob().then(blob => ({ blob, filename }));
+  }).then(({ blob, filename })=>{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(url);
