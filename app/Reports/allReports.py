@@ -899,7 +899,16 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
         if vehicle_number == "all":
             vehicles = list(get_vehicle_data_for_claims(claims))    
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
-            imeis = list(imei_to_plate.keys())
+            vehicleInvyImeis = list(imei_to_plate.keys())
+            
+            # Get distinct IMEIs from 'atlanta' collection (apply date filter if present)
+
+            atlantaImeis = db['atlanta'].distinct('imei')
+            ais140Imeis = db['atlantaAis140'].distinct('imei')
+            combinedImeis = set(atlantaImeis + ais140Imeis)
+                
+            imeis = [i for i in vehicleInvyImeis if i in set(combinedImeis)]
+            
             total = max(1, len(imeis))
             all_dfs = []    
             if report_type not in report_configs:
