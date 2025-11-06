@@ -8,7 +8,7 @@
     background-color: #f8f9fa;
     border-right: 1px solid #dee2e6;
     overflow-y: auto;
-    padding: 15px;
+    padding: 10px;
 }
 
 .dark-mode .alert-sidebar {
@@ -40,7 +40,7 @@
 .alert-card {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
+    padding: 10px 15px;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
