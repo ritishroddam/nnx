@@ -51,7 +51,7 @@
     box-shadow: 0px 0px 10px #cccccc90;
 }
 
-.alert-card:hover {
+.alert-card:hover { 
     background-color: #f1f1f1;
 }
 
