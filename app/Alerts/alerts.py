@@ -74,12 +74,18 @@ def get_alerts():
     if not alert_type:
         return jsonify({"success": False, "message": "Please select a alert type"}), 404
     
-    start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    end_date = datetime.fromisoformat(end_date) if end_date else datetime.now()
-    
     IST = timezone(timedelta(hours=5, minutes=30))
-    start_date = start_date.replace(tzinfo=IST)
-    end_date = end_date.replace(tzinfo=IST)
+    
+    if start_date and end_date:
+        start_date = datetime.fromisoformat(start_date) 
+        end_date = datetime.fromisoformat(end_date) 
+        
+        end_date = end_date.replace(tzinfo=IST)
+        start_date = start_date.replace(tzinfo=IST)
+    else:
+        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = datetime.now()
+        
     
     if not vehicle_number: 
         max_allowed_end = start_date + timedelta(hours=24)
