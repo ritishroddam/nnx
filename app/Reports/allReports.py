@@ -1,12 +1,9 @@
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
-from datetime import timezone as timeZ
-from numpy import record
+from datetime import timezone
 from pymongo import ASCENDING, DESCENDING
 import pandas as pd
-import pytz
-from pytz import timezone
 from io import BytesIO
 import os
 from collections import OrderedDict
@@ -40,7 +37,7 @@ s3 = session.client('s3',
     aws_secret_access_key=SPACES_SECRET
 )
 
-IST = timezone('Asia/Kolkata')
+IST = timezone(timedelta(hours=5, minutes=30))
 
 FIELD_COLLECTION_MAP = {
     'atlanta': ['status', 'time', 'gps', 'latitude', 'longitude', 'speed', 
@@ -140,7 +137,7 @@ def format_duration_hms(total_seconds):
         return "0 s"
 
 def _update_report(report_id, fields):
-    db['generated_reports'].update_one({'_id': ObjectId(report_id)}, {'$set': {**fields, 'updated_at': datetime.now(timeZ.utc)}})
+    db['generated_reports'].update_one({'_id': ObjectId(report_id)}, {'$set': {**fields, 'updated_at': datetime.now(timezone.utc)}})
 
 def _extract_range(date_filter):
     start_dt_utc = end_dt_utc = None
@@ -150,7 +147,7 @@ def _extract_range(date_filter):
             start_dt_utc = dt_part.get('$gte')
             end_dt_utc = dt_part.get('$lte') or dt_part.get('$lt')
     if start_dt_utc and not end_dt_utc:
-        end_dt_utc = datetime.now(timeZ.utc)
+        end_dt_utc = datetime.now(timezone.utc)
     return start_dt_utc, end_dt_utc
 
 def save_and_return_report(output, report_type, vehicle_number, override_user_id, date_filter=None):
@@ -165,7 +162,7 @@ def save_and_return_report(output, report_type, vehicle_number, override_user_id
             end_dt_utc = dt_part.get('$lte') or dt_part.get('$lt')
 
     if start_dt_utc and not end_dt_utc:
-        end_dt_utc = datetime.now(timeZ.utc)
+        end_dt_utc = datetime.now(timezone.utc)
 
     def _fmt(dt):
         if isinstance(dt, datetime):
@@ -201,7 +198,7 @@ def save_and_return_report(output, report_type, vehicle_number, override_user_id
         'filename': report_filename,
         'path': remote_path,
         'size': size_bytes,
-        'generated_at': datetime.now(pytz.UTC),
+        'generated_at': datetime.now(timezone.utc),
         'vehicle_number': vehicle_number,
         'report_type': report_type,
         'range_start_utc': start_dt_utc,
@@ -295,22 +292,21 @@ def processTravelPathDistanceRecord(records):
 
 def get_date_range_filter(date_range, from_date=None, to_date=None):
     print(f"[DEBUG] Generating date range filter for date_range={date_range}, from_date={from_date}, to_date={to_date}")
-    tz = pytz.UTC
-    now = datetime.now(tz)
-
+    ist = timezone(timedelta(hours=5, minutes=30))
+    now_ist = datetime.now(ist)
+    now = now_ist.astimezone(timezone.utc)
+    
     if date_range == "last24hours":
         return {'date_time': {'$gte': now - timedelta(hours=24)}}
     elif date_range == "today":
-        today_start = datetime(now.year, now.month, now.day, tzinfo=tz)
+        today_start = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
         return {'date_time': {'$gte': today_start}}
     elif date_range == "yesterday":
-        ist = timezone('Asia/Kolkata')
-        now_ist = datetime.now(ist)
         today_ist = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
         yesterday_start_ist = today_ist - timedelta(days=1)
         yesterday_end_ist = today_ist
-        yesterday_start_utc = yesterday_start_ist.astimezone(pytz.UTC)
-        yesterday_end_utc = yesterday_end_ist.astimezone(pytz.UTC)
+        yesterday_start_utc = yesterday_start_ist.astimezone(timezone.utc)
+        yesterday_end_utc = yesterday_end_ist.astimezone(timezone.utc)
         return {'date_time': {'$gte': yesterday_start_utc, '$lt': yesterday_end_utc}}
     elif date_range == "last7days":
         return {'date_time': {'$gte': now - timedelta(days=7)}}
@@ -318,11 +314,11 @@ def get_date_range_filter(date_range, from_date=None, to_date=None):
         return {'date_time': {'$gte': now - timedelta(days=30)}}
     elif date_range == "custom" and from_date and to_date:
         try:
-            from_datetime = datetime.strptime(from_date, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
-            to_datetime = datetime.strptime(to_date, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
-            three_months_ago = now - timedelta(days=90)
-            if from_datetime < three_months_ago or to_datetime < three_months_ago:
-                raise ValueError("Date range cannot be older than 3 months")
+            from_datetime = datetime.strptime(from_date, "%Y-%m-%dT%H:%M").replace(tzinfo = timezone.utc)
+            to_datetime = datetime.strptime(to_date, "%Y-%m-%dT%H:%M").replace(tzinfo = timezone.utc)
+
+            if (to_datetime - from_datetime) > timedelta(days = 30):
+                raise ValueError("Date range cannot be greater than 30 days")
             if from_datetime > to_datetime:
                 raise ValueError("From date cannot be after To date")
             return {'date_time': {'$gte': from_datetime, '$lte': to_datetime}}
@@ -708,7 +704,7 @@ def process_ignition_report(imei, vehicle_number, date_filter):
                     start_odo = end_odo = None
 
         if current_start is not None:
-            calc_stop = datetime.now(pytz.UTC)
+            calc_stop = datetime.now(timezone.utc)
             end_lat = last_valid_lat if last_valid_lat is not None else start_lat
             end_lng = last_valid_lng if last_valid_lng is not None else start_lng
             push_block(current_start, calc_stop, start_lat, start_lng, end_lat, end_lng, start_odo, end_odo, ongoing=True)
@@ -1311,7 +1307,7 @@ def generate_report_task(self, params):
         _update_report(report_id, {
             'status': 'SUCCESS',
             'progress': 100,
-            'generated_at': datetime.now(pytz.UTC),
+            'generated_at': datetime.now(timezone.utc),
             'filename': report_filename,
             'path': remote_path,
             'size': size_bytes,
@@ -1326,7 +1322,7 @@ def generate_report_task(self, params):
             _update_report(params.get("report_id"), {
                 'status': 'FAILURE',
                 'progress': 100,
-                'generated_at': datetime.now(pytz.UTC),
+                'generated_at': datetime.now(timezone.utc),
                 'error_message': str(e)[:500]
             })
         except Exception:
@@ -1359,8 +1355,8 @@ def generate_report_async():
         'vehicle_number': vehicle_number,
         'status': 'IN_PROGRESS',
         'progress': 0,
-        'created_at': datetime.now(pytz.UTC),
-        'updated_at': datetime.now(pytz.UTC),
+        'created_at': datetime.now(timezone.utc),
+        'updated_at': datetime.now(timezone.utc),
         'generated_at': None,
         'size': 0,
         'path': None,
@@ -1417,7 +1413,7 @@ def report_status(task_id):
 def get_recent_reports():
     try:
         date_range = request.args.get('range', 'today')
-        now = datetime.now(timeZ.utc)
+        now = datetime.now(timezone.utc)
         if date_range == 'today':
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
             end_date = None
@@ -1496,6 +1492,8 @@ def download_report(report_id):
         excel_buffer.seek(0)
 
         xlsx_name = os.path.splitext(report['filename'])[0] + '.xlsx'
+        
+        print(xlsx_name)
 
         return send_file(
             excel_buffer,
