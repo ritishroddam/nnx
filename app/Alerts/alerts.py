@@ -77,6 +77,8 @@ def get_alerts():
     start_date = datetime.fromisoformat(start_date) if start_date else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end_date = datetime.fromisoformat(end_date) if end_date else datetime.now()
     
+    print(end_date, start_date)
+    
     if not vehicle_number: 
         max_allowed_end = start_date + timedelta(hours=24)
         if end_date > max_allowed_end:
