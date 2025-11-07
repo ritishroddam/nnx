@@ -5,6 +5,10 @@ let selectedFeatureId = null;
 let editingGeofenceId = null;
 let editOverlay = null;
 let editCancelBtn = null; 
+let searchInput;
+let searchResults;
+let searchBox;
+let placesService;
 
 async function geofenceMapFunction() {
   const mapElement = document.getElementById("geofenceMap");
@@ -15,6 +19,8 @@ async function geofenceMapFunction() {
 
   const { Map } = await google.maps.importLibrary("maps");
   await google.maps.importLibrary("geometry");
+
+  await google.maps.importLibrary("places");
 
   geofenceMap = new Map(mapElement, {
     center: { lat: 20.5937, lng: 78.9629 },
@@ -78,14 +84,13 @@ async function geofenceMapFunction() {
     if (google && google.maps && google.maps.event && typeof google.maps.event.addListenerOnce === "function") {
       google.maps.event.addListenerOnce(geofenceMap, "idle", () => {
         draw.start();
+        initSearchBox();
       });
     } else {
-      // Fallback if event API not available yet
-      setTimeout(() => draw.start(), 200);
+      setTimeout(() => { draw.start(); initSearchBox(); }, 200);
     }
   } catch (err) {
-    // Defensive fallback
-    setTimeout(() => draw.start(), 200);
+    setTimeout(() => { draw.start(); initSearchBox();}, 200);
   }
 
   draw.on("ready", () => {
@@ -142,6 +147,11 @@ function setMode(mode, btn) {
   document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
   draw.setMode(mode);
+  
+  if (window.searchMarker) {
+    window.searchMarker.setMap(null);
+    window.searchMarker = null;
+  }
 }
 
 function updateShapeData() {
@@ -323,6 +333,12 @@ async function saveSelectedShape(e) {
     document.getElementById("geofenceForm")?.reset();
     document.getElementById("shapeData").value = "";
     updatePointCount(0);
+
+    if (window.searchMarker) {
+      window.searchMarker.setMap(null);
+      window.searchMarker = null;
+    }
+
     await loadSavedGeofences();
   } else {
     const err = await res.json().catch(() => ({ error: "Unknown error" }));
@@ -340,6 +356,11 @@ function deleteSelectedShape() {
     draw.removeFeatures([id]);
     selectedFeatureId = null;
     updateShapeData();
+
+  if (window.searchMarker) {
+    window.searchMarker.setMap(null);
+    window.searchMarker = null;
+  }
   }
 }
 
@@ -363,17 +384,14 @@ function buildCoordinatesFromOverlay(overlay) {
 }
 
 function startEditGeofence(gf) {
-  // cancel any previous edit
   cancelEditGeofence();
 
   editingGeofenceId = gf._id;
-  // populate form fields
   const nameEl = document.getElementById("GeofenceName");
   const locEl = document.getElementById("Location");
   if (nameEl) nameEl.value = gf.name || "";
   if (locEl) locEl.value = gf.location || "";
 
-  // create editable overlay on map
   const coords = gf.coordinates || {};
   if (gf.shape_type === "circle") {
     const center = coords.center || coords.center;
@@ -396,7 +414,6 @@ function startEditGeofence(gf) {
     google.maps.event.addListener(editOverlay, "radius_changed", updateEditShapeData);
     google.maps.event.addListener(editOverlay, "dragend", updateEditShapeData);
   } else {
-    // polygon (including rectangle stored as polygon)
     const pts = (coords.points || []).map(p => ({ lat: p.lat, lng: p.lng }));
     if (!pts.length) {
       displayFlashMessage("Cannot edit: invalid polygon geometry", "danger");
@@ -417,10 +434,8 @@ function startEditGeofence(gf) {
     google.maps.event.addListener(path, "set_at", updateEditShapeData);
   }
 
-  // show cancel edit button
   if (editCancelBtn) editCancelBtn.style.display = "inline";
 
-  // center map on overlay
   if (gf.shape_type === "circle") {
     geofenceMap.setCenter(new google.maps.LatLng(coords.center.lat, coords.center.lng));
     geofenceMap.setZoom(14);
@@ -430,7 +445,6 @@ function startEditGeofence(gf) {
     if (!b.isEmpty()) geofenceMap.fitBounds(b);
   }
 
-  // immediately populate shapeData for convenience
   updateEditShapeData();
 }
 
@@ -465,6 +479,11 @@ function cancelEditGeofence() {
 
   draw.clear();
   selectedFeatureId = null;
+
+  if (window.searchMarker) {
+    window.searchMarker.setMap(null);
+    window.searchMarker = null;
+  }
 
   setMode("polygon");
 }
@@ -664,6 +683,120 @@ async function toggleGeofenceStatus(id, newStatus) {
     displayFlashMessage("Geofence updated successfully", "success");
     await loadSavedGeofences();
   }
+}
+
+function initSearchBox() {
+    searchInput = document.getElementById('search-input');
+    searchResults = document.getElementById('search-results');
+    
+    if (!searchInput) return;
+    
+    searchBox = new google.maps.places.SearchBox(searchInput);
+    
+    searchBox.addListener('places_changed', onPlacesChanged);
+    
+    searchInput.addEventListener('input', handleSearchInput);
+    searchInput.addEventListener('focus', showSearchResults);
+    document.addEventListener('click', hideSearchResults);
+}
+
+function handleSearchInput(e) {
+    if (e.target.value.length > 2) {
+        searchBox.setBounds(geofenceMap.getBounds());
+    } else {
+        hideSearchResults();
+    }
+}
+
+function onPlacesChanged() {
+    const places = searchBox.getPlaces();
+    
+    if (places.length === 0) {
+        return;
+    }
+    
+    clearSearchResults();
+    
+    places.forEach(place => {
+        if (!place.geometry || !place.geometry.location) {
+            return;
+        }
+        
+        const resultItem = document.createElement('div');
+        resultItem.className = 'search-result-item';
+        resultItem.innerHTML = `
+            <strong>${place.name}</strong><br>
+            <small>${place.formatted_address || ''}</small>
+        `;
+        
+        resultItem.addEventListener('click', () => {
+            selectPlace(place);
+        });
+        
+        searchResults.appendChild(resultItem);
+    });
+    
+    showSearchResults();
+    
+    if (places.length === 1) {
+        selectPlace(places[0]);
+    } else if (places.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        places.forEach(place => {
+            if (place.geometry && place.geometry.location) {
+                bounds.extend(place.geometry.location);
+            }
+        });
+        geofenceMap.fitBounds(bounds);
+    }
+}
+
+function selectPlace(place) {
+    if (!place.geometry || !place.geometry.location) return;
+    
+    geofenceMap.setCenter(place.geometry.location);
+    geofenceMap.setZoom(14);
+    
+    searchInput.value = place.name;
+    hideSearchResults();
+    
+    addSearchMarker(place);
+    
+    const locationField = document.getElementById('Location');
+    if (locationField && !locationField.value) {
+        locationField.value = place.formatted_address || place.name;
+    }
+}
+
+function addSearchMarker(place) {
+    if (window.searchMarker) {
+        window.searchMarker.setMap(null);
+    }
+    
+    window.searchMarker = new google.maps.Marker({
+        position: place.geometry.location,
+        map: geofenceMap,
+        title: place.name,
+        icon: {
+            url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNy41ODYgMiA0IDUuNTg2IDQgMTBDNCAxNC40MTQgNy41ODYgMTggMTIgMThDMTYuNDE0IDE4IDIwIDE0LjQxNCAyMCAxMEMyMCA1LjU4NiAxNi40MTQgMiAxMiAyWk0xMiAxNkM4LjY4NiAxNiA2IDEzLjMxNCA2IDEwQzYgNi42ODYgOC42ODYgNCAxMiA0QzE1LjMxNCA0IDE4IDYuNjg2IDE4IDEwQzE4IDEzLjMxNCAxNS4zMTQgMTYgMTIgMTZaIiBmaWxsPSIjNDI4NUY0Ii8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTAiIHI9IjMiIGZpbGw9IiM0Mjg1RjQiLz4KPC9zdmc+',
+            scaledSize: new google.maps.Size(24, 24),
+            anchor: new google.maps.Point(12, 12)
+        }
+    });
+}
+
+function showSearchResults() {
+    if (searchResults.children.length > 0) {
+        searchResults.style.display = 'block';
+    }
+}
+
+function hideSearchResults() {
+    searchResults.style.display = 'none';
+}
+
+function clearSearchResults() {
+    searchResults.innerHTML = '';
 }
 
 /* ---------- Init ---------- */
