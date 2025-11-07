@@ -838,6 +838,25 @@ input:checked .slider:before {
     border-bottom: none;
 }
 
+.btn-toggle .toggle-btn.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-toggle .toggle-btn {
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-toggle .toggle-btn:hover {
+    background-color: #e0e0e0;
+}
+
 @media (max-width: 768px) {
     .geofence-layout {
         flex-direction: column;

@@ -94,7 +94,7 @@ async function geofenceMapFunction() {
   }
 
   draw.on("ready", () => {
-    setMode("polygon");
+    setMode("select");
     wireUiButtons();
   });
 
@@ -103,6 +103,7 @@ async function geofenceMapFunction() {
     updateShapeData();
     showDelete();
   });
+
   draw.on("deselect", () => {
     selectedFeatureId = null;
     updateShapeData();
@@ -114,11 +115,13 @@ async function geofenceMapFunction() {
 }
 
 function wireUiButtons() {
+  const panBtn = document.getElementById("panBtn");
   const circleBtn = document.getElementById("circleBtn");
   const polygonBtn = document.getElementById("polygonBtn");
   const rectangleBtn = document.getElementById("rectangleBtn");
   const saveBtn = document.querySelector('#geofenceForm .confirm-btn');
 
+  if (panBtn) panBtn.addEventListener("click", () => setMode("select", panBtn));
   if (circleBtn) circleBtn.addEventListener("click", () => setMode("circle", circleBtn));
   if (polygonBtn) polygonBtn.addEventListener("click", () => setMode("polygon", polygonBtn));
   if (rectangleBtn) rectangleBtn.addEventListener("click", () => setMode("rectangle", rectangleBtn));
@@ -147,6 +150,12 @@ function setMode(mode, btn) {
   document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
   draw.setMode(mode);
+
+  if (mode === "select") {
+    draw.clear();
+    selectedFeatureId = null;
+    updateShapeData();
+  }
   
   if (window.searchMarker) {
     window.searchMarker.setMap(null);
