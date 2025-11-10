@@ -1,3 +1,13 @@
+window.onload = initMap();
+
+const socket = io("https://cordonnx.com", {
+    transports: ["websocket"],
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+})
+
 let map;
 let markers = {};
 
@@ -10,6 +20,7 @@ async function initMap() {
         mapId: "dc4a8996aab2cac9",
         zoom: 10,
     })
+
     vehiclesData.forEach(vehicle => {
         if (vehicle.latitude && vehicle.longitude) {
             const latLng = new google.maps.LatLng(
@@ -52,44 +63,38 @@ async function initMap() {
             if (map.getZoom() > 15) map.setZoom(15);
             google.maps.event.removeListener(listener);
         });
-    
-    setupSocketConnection();
 }
 }
 
-function setupSocketConnection() {
-    const socket = io("https://cordonnx.com", {
-        transports: ["websocket"],
-        reconnection: true,
-    })
-    socket.on("connect", () => {
-        console.log("Connected to socket for live updates");
-        vehiclesData.forEach(vehicle => {
-            socket.emit("subscribe_vehicle_updates", {
-                LicensePlateNumber: vehicle.licensePlateNumber
-            });
+socket.on("connect", () => {
+    console.log("Connected to socket for live updates");
+    vehiclesData.forEach(vehicle => {
+        socket.emit("subscribe_vehicle_updates", {
+            LicensePlateNumber: vehicle.licensePlateNumber
         });
-    })
-    socket.on("vehicle_live_update", (data) => {
-        if (data && data.latitude && data.longitude && markers[data.LicensePlateNumber]) {
-            const marker = markers[data.LicensePlateNumber];
-            const newPosition = new google.maps.LatLng(
-                parseFloat(data.latitude),
-                parseFloat(data.longitude)
-            );
-            
-            marker.position = newPosition;
-            
-            updateVehicleInfo(data);
-        }
-    })
-    socket.on("subscription_success", (data) => {
-        console.log("Subscription successful:", data);
-    })
-    socket.on("subscription_error", (error) => {
-        console.error("Subscription error:", error);
     });
-}
+})
+
+socket.on("subscription_success", (data) => {
+  console.log("Subscription successful:", data);
+});
+
+socket.on("subscription_error", (error) => {
+  console.error("Subscription error:", error);
+});
+
+socket.on("vehicle_live_update", (data) => {
+    if (data && data.latitude && data.longitude && markers[data.LicensePlateNumber]) {
+        const marker = markers[data.LicensePlateNumber];
+        const newPosition = new google.maps.LatLng(
+            parseFloat(data.latitude),
+            parseFloat(data.longitude)
+        );
+            
+        marker.position = newPosition;   
+        updateVehicleInfo(data);
+    }
+})
 
 function updateVehicleInfo(vehicleData) {
     const vehicleElement = document.querySelector(`[data-license-plate="${vehicleData.LicensePlateNumber}"]`);
@@ -102,6 +107,4 @@ function updateVehicleInfo(vehicleData) {
         if (speedEl) speedEl.textContent = `Speed: ${vehicleData.speed || 'Unknown'} km/h`;
         if (updateEl) updateEl.textContent = `Last Update: ${new Date().toLocaleString()}`;
     }
-
-initMap();
 }
