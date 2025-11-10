@@ -735,14 +735,27 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
+.dark-mode  #vehicle-table-container .search-container button {
+    color: #222;
+}
+
 #vehicle-table tbody tr.selected {
     background-color: #e3f2fd !important;
     border: 2px solid #2196f3;
 }
 
+.dark-mode #vehicle-table tbody tr.selected {
+    background-color: #1565c0 !important;
+    border: 2px solid #64b5f6;
+}
+
 #vehicle-table tbody tr:hover {
     background-color: #f5f5f5;
     cursor: pointer;
+}
+
+.dark-mode #vehicle-table tbody tr:hover {
+    background-color: #444;
 }
 
 .location-text {
