@@ -83,6 +83,10 @@ var lastDataReceivedTime = {};
 var geofenceToggle = false;
 var geofencePolygons = {};
 var geofenceButton = null;
+let currentPage = 1;
+const perPage = 100;
+let totalPages = 1;
+let totalVehicles = 0;
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -266,17 +270,80 @@ async function updateData(data) {
   return data;
 }
 
-async function fetchVehicleData() {
+// async function fetchVehicleData() {
+//   try {
+//     showSkeletonLoader(); 
+
+//     const response = await fetch("/vehicle/api/vehicles");
+//     if (!response.ok) throw new Error("Failed to fetch vehicle data");
+
+//     const data = await response.json();
+//     const now = new Date();
+
+//     data.forEach((vehicle) => {
+//       const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+//       const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+//       if (vehicle.sos === "1" && hoursSinceUpdate > 1) {
+//         vehicle.sos = "0"; 
+//       }
+
+//       if (!vehicle.VehicleType) {
+//         vehicle.VehicleType = 'car';
+//       }
+
+//       vehicleData.set(vehicle.imei, {
+//         LicensePlateNumber: vehicle.LicensePlateNumber,
+//         VehicleType: vehicle.VehicleType,
+//         speed: vehicle.speed,
+//         latitude: vehicle.latitude,
+//         longitude: vehicle.longitude,
+//         date: vehicle.date,
+//         time: vehicle.time,
+//         course: vehicle.course,
+//         address: vehicle.location || "Location unknown",
+//         status: vehicle.status,
+//         imei: vehicle.imei,
+//         ignition: vehicle.ignition,
+//         gsm: vehicle.gsm_sig,
+//         sos: vehicle.sos,
+//         distance: vehicle.distance || 0,
+//         odometer: vehicle.odometer,
+//         stoppage_time: vehicle.stoppage_time,
+//         stoppage_time_delta: vehicle.stoppage_time_delta,
+//         status_time_delta: vehicle.status_time_delta,
+//         status_time_str: vehicle.status_time_str,
+//         normalSpeed: vehicle.normalSpeed,
+//         slowSpeed: vehicle.slowSpeed,
+//       });
+//     });
+//   } catch (error) {
+//     console.error("Error fetching vehicle data:", error);
+//     return [];
+//   }
+// }
+
+async function fetchVehicleData(page = 1) {
   try {
     showSkeletonLoader(); 
-
-    const response = await fetch("/vehicle/api/vehicles");
+    
+    const response = await fetch(`/vehicle/api/vehicles?page=${page}&per_page=${perPage}`);
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
     const data = await response.json();
+    
+    const vehicles = data.vehicles;
+    const pagination = data.pagination;
+    
+    currentPage = pagination.page;
+    totalPages = pagination.pages;
+    totalVehicles = pagination.total;
+    
     const now = new Date();
 
-    data.forEach((vehicle) => {
+    vehicleData.clear();
+
+    vehicles.forEach((vehicle) => {
       const lastUpdated = convertToDate(vehicle.date, vehicle.time);
       const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
 
@@ -313,11 +380,84 @@ async function fetchVehicleData() {
         slowSpeed: vehicle.slowSpeed,
       });
     });
+    
+    updatePaginationControls();
+    
+    return vehicles;
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     return [];
   }
 }
+
+function addPaginationControls() {
+  const tableContainer = document.getElementById("vehicle-table-container");
+  const existingPagination = document.getElementById("table-pagination");
+  
+  if (existingPagination) {
+    existingPagination.remove();
+  }
+  
+  const paginationDiv = document.createElement("div");
+  paginationDiv.id = "table-pagination";
+  paginationDiv.className = "table-pagination";
+  paginationDiv.innerHTML = `
+    <div class="pagination-info">
+      Showing ${((currentPage - 1) * perPage) + 1} to ${Math.min(currentPage * perPage, totalVehicles)} of ${totalVehicles} vehicles
+    </div>
+    <div class="pagination-controls">
+      <button id="first-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>First</button>
+      <button id="prev-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+      <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+      <button id="next-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+      <button id="last-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Last</button>
+    </div>
+  `;
+  
+  const tableHeader = tableContainer.querySelector('.table-header-container');
+  tableHeader.appendChild(paginationDiv);
+  
+  document.getElementById('first-page').addEventListener('click', () => loadPage(1));
+  document.getElementById('prev-page').addEventListener('click', () => loadPage(currentPage - 1));
+  document.getElementById('next-page').addEventListener('click', () => loadPage(currentPage + 1));
+  document.getElementById('last-page').addEventListener('click', () => loadPage(totalPages));
+}
+
+function updatePaginationControls() {
+  const paginationDiv = document.getElementById("table-pagination");
+  if (paginationDiv) {
+    paginationDiv.innerHTML = `
+      <div class="pagination-info">
+        Showing ${((currentPage - 1) * perPage) + 1} to ${Math.min(currentPage * perPage, totalVehicles)} of ${totalVehicles} vehicles
+      </div>
+      <div class="pagination-controls">
+        <button id="first-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>First</button>
+        <button id="prev-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+        <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+        <button id="next-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+        <button id="last-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Last</button>
+      </div>
+    `;
+    
+    document.getElementById('first-page').addEventListener('click', () => loadPage(1));
+    document.getElementById('prev-page').addEventListener('click', () => loadPage(currentPage - 1));
+    document.getElementById('next-page').addEventListener('click', () => loadPage(currentPage + 1));
+    document.getElementById('last-page').addEventListener('click', () => loadPage(totalPages));
+  }
+}
+
+async function loadPage(page) {
+  if (page < 1 || page > totalPages) return;
+  
+  await fetchVehicleData(page);
+  
+  if (document.getElementById("vehicle-table-container").style.display !== "none") {
+    populateVehicleTable();
+  }
+  
+  updateMap();
+}
+
 
 function updateVehicleCard(data) {
   const imei = data.imei;
@@ -1613,6 +1753,11 @@ function showListView() {
   document.getElementById("vehicle-table-container").style.display = "block";
   document.querySelector(".floating-card").style.display = "none";
   document.querySelector(".icon-legend-container").style.display = "none";
+
+  if (!document.getElementById("table-pagination")) {
+    addPaginationControls();
+  }
+
   populateVehicleTable();
 }
 
@@ -2328,7 +2473,7 @@ window.filterVehicles = filterVehicles;
 window.onload = async function () {
   document.querySelector(".block-container").style.display = "none";
   await initMap();
-  await fetchVehicleData();
+  await fetchVehicleData(1);
   updateMap();
 
   hideSkeletonLoader();
