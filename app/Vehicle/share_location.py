@@ -57,18 +57,22 @@ def api_share_location():
 
 @share_location_bp.route('/share-multiple-locations', methods=['POST'])
 @jwt_required()
-def shareMultipleVehicleLinks():
+def api_share_multiple_locations():
     claims = get_jwt()
     user_id = claims.get('user_id')
     data = request.get_json()
-    licensePlateNumber = data.get('LicensePlateNumber')
+    licensePlateNumbers = data.get('LicensePlateNumbers')  
     from_str = data.get('from_datetime')
     to_str = data.get('to_datetime')
-    if not licensePlateNumber or not from_str or not to_str:
-        return jsonify({"error": "LicensePlateNumber, from_datetime, and to_datetime required"}), 400
+    
+    if not licensePlateNumbers or not from_str or not to_str:
+        return jsonify({"error": "LicensePlateNumbers, from_datetime, and to_datetime required"}), 400
+
+    if not isinstance(licensePlateNumbers, list):
+        return jsonify({"error": "LicensePlateNumbers should be an array"}), 400
 
     try:
-        local_tz = pytz.timezone("Asia/Kolkata")  # or your local timezone
+        local_tz = pytz.timezone("Asia/Kolkata")
         from_naive = datetime.strptime(from_str, "%Y-%m-%dT%H:%M")
         to_naive = datetime.strptime(to_str, "%Y-%m-%dT%H:%M")
         from_datetime = local_tz.localize(from_naive).astimezone(pytz.UTC)
@@ -76,9 +80,77 @@ def shareMultipleVehicleLinks():
     except Exception:
         return jsonify({"error": "Invalid datetime format"}), 400
 
-    token = create_share_link(licensePlateNumber, from_datetime, to_datetime, user_id)
-    link = url_for('ShareLocation.view_share_location', token=token, _external=True)
+    token = create_share_link(licensePlateNumbers, from_datetime, to_datetime, user_id)
+    link = url_for('ShareLocation.view_multiple_share_locations', token=token, _external=True)
     return jsonify({"link": link})
+
+@share_location_bp.route('/shared-multiple/<token>')
+def view_multiple_share_locations(token):
+    info = links_collection.find_one({"token": token})
+    now = datetime.now(timezone.utc)  
+    
+    if not info or now < info['from_datetime'] or now > info['to_datetime']:
+        return jsonify({"error": "Link expired"}), 410
+
+    licensePlateNumbers = info['licensePlateNumber'] 
+    vehicles_data = []
+    
+    for licensePlateNumber in licensePlateNumbers:
+        vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber},{"_id": 0, "IMEI":1})
+        if not vehicle:
+            continue
+            
+        latestLocation = db['atlantaLatest'].find_one(
+            {"_id": vehicle.get("IMEI")},
+            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1},
+        )
+        
+        if not latestLocation:
+            doc = db['atlantaAis140_latest'].find_one({"_id": vehicle.get("IMEI")})
+            if doc and "gps" in doc and "telemetry" in doc:
+                latestLocation = {
+                "latitude": doc["gps"].get("lat"),
+                "longitude": doc["gps"].get("lon"),
+                "speed": doc["telemetry"].get("speed"),
+                "date_time": doc["gps"].get("timestamp"),
+                "ignition": doc["telemetry"].get("ignition"),
+                }
+            else:
+                latestLocation = None
+
+        if latestLocation:
+            location = geocodeInternal(latestLocation.get("latitude"), latestLocation.get("longitude"))
+            
+            utc_dt = latestLocation.get("date_time")
+            ist_tz = pytz.timezone("Asia/Kolkata")
+            ist_dt = utc_dt.astimezone(ist_tz) if utc_dt else None
+            
+            vehicleDetails = {
+                "licensePlateNumber": licensePlateNumber,
+                "latitude": latestLocation.get("latitude"),
+                "longitude": latestLocation.get("longitude"),
+                "location": location,
+                "speed": latestLocation.get("speed"),
+                "date_time": str(ist_dt.strftime("%Y-%m-%d %H:%M:%S")) if ist_dt else None,
+                "ignition": latestLocation.get("ignition"),
+            }
+            vehicles_data.append(vehicleDetails)
+    
+    if not vehicles_data:
+        return jsonify({"error": "No location data found for any of the vehicles"}), 404
+    
+    from_datetime = info.get("from_datetime").astimezone(ist_tz) if info.get("from_datetime") else None
+    to_datetime = info.get("to_datetime").astimezone(ist_tz) if info.get("to_datetime") else None
+    created_by = info.get("created_by")
+    
+    share_info = {
+        "vehicles": vehicles_data,
+        "from_datetime": from_datetime,
+        "to_datetime": to_datetime.replace(tzinfo=None),
+        "created_by": created_by
+    }
+    
+    return render_template('share_multiple_locations.html', share_info=share_info, token=token)
 
 @share_location_bp.route('/<licensePlateNumber>/<token>')
 def view_share_location(licensePlateNumber, token):
