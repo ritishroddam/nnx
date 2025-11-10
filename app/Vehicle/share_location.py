@@ -55,7 +55,7 @@ def api_share_location():
     link = url_for('ShareLocation.view_share_location', licensePlateNumber = licensePlateNumber, token=token, _external=True)
     return jsonify({"link": link})
 
-@share_location_bp.route('/share-multiple-locations')
+@share_location_bp.route('/share-multiple-locations', methods=['POST'])
 @jwt_required
 def shareMultipleVehicleLinks():
     claims = get_jwt()
