@@ -2085,6 +2085,124 @@ function populateVehicleTable() {
   showHidecar();
 }
 
+// function showMultiShareLocationPopup() {
+//     if (selectedVehicles.size === 0) {
+//         alert('Please select at least one vehicle');
+//         return;
+//     }
+
+//     const oldPopup = document.getElementById("multi-share-location-popup");
+//     if (oldPopup) oldPopup.remove();
+
+//     const popup = document.createElement("div");
+//     popup.id = "multi-share-location-popup";
+    
+//     const selectedPlates = Array.from(selectedVehicles).map(imei => {
+//         const vehicle = vehicleData.get(imei);
+//         return vehicle.LicensePlateNumber || imei;
+//     }).join(', ');
+    
+//     popup.innerHTML = `
+//     <div class="share-popup-content" style="min-width: 500px;">
+//       <h3>Share Live Location - Multiple Vehicles</h3>
+//       <div style="margin-bottom: 10px;">
+//         <strong>Selected Vehicles:</strong> ${selectedPlates}
+//       </div>
+//       <div>
+//         <label for="multi-from-datetime">From:</label>
+//         <input type="datetime-local" id="multi-from-datetime" style="margin-bottom:8px; width: 100%;">
+//       </div>
+//       <div>
+//         <label for="multi-to-datetime">To:</label>
+//         <input type="datetime-local" id="multi-to-datetime" style="margin-bottom:8px; width: 100%;">
+//       </div>
+//       <button id="generate-multi-share-link" style="background:#388e3c;color:#fff; padding: 8px 16px;">Generate Share Links</button>
+//       <div style="margin-top:10px;">
+//         <textarea id="multi-share-links-input" readonly style="width:100%; height: 120px; resize: vertical;" placeholder="Generated links will appear here..."></textarea>
+//       </div>
+//       <button id="close-multi-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
+//     </div>
+//   `;
+//   document.body.appendChild(popup);
+
+//   popup.style.position = "fixed";
+//   popup.style.left = "50%";
+//   popup.style.top = "50%";
+//   popup.style.transform = "translate(-50%, -50%)";
+//   popup.style.zIndex = "9999";
+//   popup.style.backgroundColor = "white";
+//   popup.style.padding = "20px";
+//   popup.style.borderRadius = "8px";
+//   popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+//   popup.style.maxWidth = "90%";
+//   popup.style.maxHeight = "90%";
+//   popup.style.overflow = "auto";
+
+//   const now = new Date();
+//   const pad = (n) => n.toString().padStart(2, "0");
+//   const toISOStringLocal = (d) =>
+//     `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+//   document.getElementById("multi-from-datetime").value = toISOStringLocal(now);
+//   const toDate = new Date(now.getTime() + 15 * 60000);
+//   document.getElementById("multi-to-datetime").value = toISOStringLocal(toDate);
+
+//   document.getElementById("close-multi-share-popup").onclick = () => {
+//     popup.remove();
+//     selectedVehicles.clear();
+//     document.querySelectorAll('#vehicle-table tbody tr.selected').forEach(row => {
+//         row.classList.remove('selected');
+//     });
+//     updateMultiShareButton();
+//   };
+
+//   document.getElementById("generate-multi-share-link").onclick = async function () {
+//     const from_datetime = document.getElementById("multi-from-datetime").value;
+//     const to_datetime = document.getElementById("multi-to-datetime").value;
+//     const textarea = document.getElementById("multi-share-links-input");
+//     textarea.value = "Generating links...";
+
+//     if (!from_datetime || !to_datetime) {
+//       textarea.value = "Please select both date and time.";
+//       return;
+//     }
+
+//     try {
+//       const links = [];
+//       const imeis = Array.from(selectedVehicles);
+      
+//       for (const imei of imeis) {
+//         const vehicle = vehicleData.get(imei);
+//         if (vehicle && vehicle.LicensePlateNumber) {
+//           const res = await fetch(`/shareLocation/share-location`, {
+//             method: "POST",
+//             headers: { 
+//               "Content-Type": "application/json",
+//               "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+//             },
+//             body: JSON.stringify({
+//               LicensePlateNumber: vehicle.LicensePlateNumber,
+//               from_datetime,
+//               to_datetime,
+//             }),
+//           });
+          
+//           const data = await res.json();
+//           if (data.link) {
+//             links.push(`${vehicle.LicensePlateNumber}: ${data.link}`);
+//           } else {
+//             links.push(`${vehicle.LicensePlateNumber}: Failed to generate link - ${data.error || 'Unknown error'}`);
+//           }
+//         }
+//       }
+      
+//       textarea.value = links.join('\n\n');
+//     } catch (e) {
+//       textarea.value = "Failed to generate links: " + e.message;
+//     }
+//   };
+// }
+
 function showMultiShareLocationPopup() {
     if (selectedVehicles.size === 0) {
         alert('Please select at least one vehicle');
@@ -2099,14 +2217,14 @@ function showMultiShareLocationPopup() {
     
     const selectedPlates = Array.from(selectedVehicles).map(imei => {
         const vehicle = vehicleData.get(imei);
-        return vehicle.LicensePlateNumber || imei;
-    }).join(', ');
+        return vehicle.LicensePlateNumber;
+    }).filter(plate => plate); 
     
     popup.innerHTML = `
     <div class="share-popup-content" style="min-width: 500px;">
       <h3>Share Live Location - Multiple Vehicles</h3>
       <div style="margin-bottom: 10px;">
-        <strong>Selected Vehicles:</strong> ${selectedPlates}
+        <strong>Selected Vehicles (${selectedPlates.length}):</strong> ${selectedPlates.join(', ')}
       </div>
       <div>
         <label for="multi-from-datetime">From:</label>
@@ -2116,13 +2234,15 @@ function showMultiShareLocationPopup() {
         <label for="multi-to-datetime">To:</label>
         <input type="datetime-local" id="multi-to-datetime" style="margin-bottom:8px; width: 100%;">
       </div>
-      <button id="generate-multi-share-link" style="background:#388e3c;color:#fff; padding: 8px 16px;">Generate Share Links</button>
+      <button id="generate-multi-share-link" style="background:#388e3c;color:#fff; padding: 8px 16px;">Generate Share Link</button>
       <div style="margin-top:10px;">
-        <textarea id="multi-share-links-input" readonly style="width:100%; height: 120px; resize: vertical;" placeholder="Generated links will appear here..."></textarea>
+        <input id="multi-share-link-input" type="text" readonly style="width:100%; padding: 8px;" placeholder="Single share link will appear here...">
+        <button id="copy-multi-link" style="margin-top:5px; padding: 5px 10px; background:#1976d2; color:white; border:none; border-radius:3px; cursor:pointer;">Copy Link</button>
       </div>
       <button id="close-multi-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
     </div>
   `;
+  
   document.body.appendChild(popup);
 
   popup.style.position = "fixed";
@@ -2156,49 +2276,51 @@ function showMultiShareLocationPopup() {
     updateMultiShareButton();
   };
 
+  document.getElementById("copy-multi-link").onclick = function() {
+    const input = document.getElementById("multi-share-link-input");
+    input.select();
+    document.execCommand("copy");
+    alert("Link copied to clipboard!");
+  };
+
   document.getElementById("generate-multi-share-link").onclick = async function () {
     const from_datetime = document.getElementById("multi-from-datetime").value;
     const to_datetime = document.getElementById("multi-to-datetime").value;
-    const textarea = document.getElementById("multi-share-links-input");
-    textarea.value = "Generating links...";
+    const input = document.getElementById("multi-share-link-input");
+    input.value = "Generating share link...";
 
     if (!from_datetime || !to_datetime) {
-      textarea.value = "Please select both date and time.";
+      input.value = "Please select both date and time.";
       return;
     }
 
     try {
-      const links = [];
-      const imeis = Array.from(selectedVehicles);
-      
-      for (const imei of imeis) {
+      const selectedPlates = Array.from(selectedVehicles).map(imei => {
         const vehicle = vehicleData.get(imei);
-        if (vehicle && vehicle.LicensePlateNumber) {
-          const res = await fetch(`/shareLocation/share-location`, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-            },
-            body: JSON.stringify({
-              LicensePlateNumber: vehicle.LicensePlateNumber,
-              from_datetime,
-              to_datetime,
-            }),
-          });
-          
-          const data = await res.json();
-          if (data.link) {
-            links.push(`${vehicle.LicensePlateNumber}: ${data.link}`);
-          } else {
-            links.push(`${vehicle.LicensePlateNumber}: Failed to generate link - ${data.error || 'Unknown error'}`);
-          }
-        }
-      }
+        return vehicle.LicensePlateNumber;
+      }).filter(plate => plate);
+
+      const res = await fetch(`/shareLocation/share-multiple-locations`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+        },
+        body: JSON.stringify({
+          LicensePlateNumbers: selectedPlates,
+          from_datetime,
+          to_datetime,
+        }),
+      });
       
-      textarea.value = links.join('\n\n');
+      const data = await res.json();
+      if (data.link) {
+        input.value = data.link;
+      } else {
+        input.value = data.error || 'Failed to generate share link';
+      }
     } catch (e) {
-      textarea.value = "Failed to generate links: " + e.message;
+      input.value = "Failed to generate share link: " + e.message;
     }
   };
 }

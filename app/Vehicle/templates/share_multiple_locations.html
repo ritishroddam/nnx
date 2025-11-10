@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shared Vehicle Locations</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/cordonNXTabIcon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/share_location.css') }}">
+    
+    <script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
+            ({ key: "AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84", v: "weekly" });</script>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Shared Vehicle Locations</h2>
+        <div class="vehicle-count">
+            <strong>Tracking {{ share_info.vehicles|length }} vehicle(s)</strong>
+        </div>
+        <div id="map" style="height: 500px; width: 100%;"></div>
+        <div class="info">
+            <p><strong>Link Expires at:</strong> <span id="expires-at">{{ share_info.to_datetime }}</span></p>
+            <div class="vehicles-list">
+                <h3>Vehicles:</h3>
+                <div id="vehicles-container">
+                    {% for vehicle in share_info.vehicles %}
+                    <div class="vehicle-info" data-license-plate="{{ vehicle.licensePlateNumber }}">
+                        <p><strong>{{ vehicle.licensePlateNumber }}</strong></p>
+                        <p>Location: {{ vehicle.location|default("Unknown Location") }}</p>
+                        <p>Speed: 
+                            {% if vehicle.speed is not none and vehicle.speed != '' %}
+                              {{ vehicle.speed }} km/h
+                            {% else %}
+                              Unknown Speed
+                            {% endif %}
+                        </p>
+                        <p>Last Update: {{ vehicle.date_time }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
