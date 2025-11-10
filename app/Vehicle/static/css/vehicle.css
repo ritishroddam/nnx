@@ -808,6 +808,7 @@ input:checked + .slider:before {
   color: #2e7d32;
   font-weight: 600;
 }
+
 .dark-mode .vehicle-status-moving {
   color: #4caf50;
 }
@@ -816,6 +817,7 @@ input:checked + .slider:before {
   color: #d32f2f;
   font-weight: 600;
 }
+
 .dark-mode .vehicle-status-stopped {
   color: #ff5252;
 }
@@ -824,6 +826,7 @@ input:checked + .slider:before {
   color: #616161;
   font-weight: 600;
 }
+
 .dark-mode .vehicle-status-offline {
   color: #b0b0b0;
 }
@@ -968,15 +971,18 @@ input:checked + .slider:before {
   margin-top: 0;
   font-size: 20px;
 }
+
 .share-popup-content label {
   font-weight: 500;
   margin-right: 8px;
 }
+
 .share-popup-content select, .share-popup-content input {
   font-size: 15px;
   padding: 4px 8px;
   margin-top: 6px;
 }
+
 .share-popup-content button {
   margin-top: 12px;
   padding: 6px 18px;
@@ -987,6 +993,7 @@ input:checked + .slider:before {
   color: #fff;
   cursor: pointer;
 }
+
 .share-popup-content button#close-share-popup {
   background: #888;
 }
