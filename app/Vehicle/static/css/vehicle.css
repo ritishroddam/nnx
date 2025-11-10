@@ -1233,6 +1233,52 @@ body.dark-mode .geofence-toggle-btn.active {
     color: #333;
 }
 
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+}
+
+.pagination-btn:disabled {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 14px;
+  color: var(--text-color);
+  margin: 0 10px;
+}
+
 @keyframes sosBlink {
   0% { border-color: red; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
   50% { border-color: transparent; box-shadow: none; }
