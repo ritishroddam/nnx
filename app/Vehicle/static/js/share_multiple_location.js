@@ -1,7 +1,5 @@
 let map;
 let markers = {};
-const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
-const shareToken = "{{ token }}";
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
