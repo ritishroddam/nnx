@@ -15,6 +15,7 @@ share_location_bp = Blueprint('ShareLocation', __name__, static_folder='static',
 
 share_links = {}
 links_collection = db['share_links']
+
 def create_share_link(licensePlateNumber, from_datetime, to_datetime, created_by):
     token = secrets.token_urlsafe(16)
     share_link = {
@@ -52,6 +53,31 @@ def api_share_location():
 
     token = create_share_link(licensePlateNumber, from_datetime, to_datetime, user_id)
     link = url_for('ShareLocation.view_share_location', licensePlateNumber = licensePlateNumber, token=token, _external=True)
+    return jsonify({"link": link})
+
+@share_location_bp.route('/share-multiple-locations')
+@jwt_required
+def shareMultipleVehicleLinks():
+    claims = get_jwt()
+    user_id = claims.get('user_id')
+    data = request.get_json()
+    licensePlateNumber = data.get('LicensePlateNumber')
+    from_str = data.get('from_datetime')
+    to_str = data.get('to_datetime')
+    if not licensePlateNumber or not from_str or not to_str:
+        return jsonify({"error": "LicensePlateNumber, from_datetime, and to_datetime required"}), 400
+
+    try:
+        local_tz = pytz.timezone("Asia/Kolkata")  # or your local timezone
+        from_naive = datetime.strptime(from_str, "%Y-%m-%dT%H:%M")
+        to_naive = datetime.strptime(to_str, "%Y-%m-%dT%H:%M")
+        from_datetime = local_tz.localize(from_naive).astimezone(pytz.UTC)
+        to_datetime = local_tz.localize(to_naive).astimezone(pytz.UTC)
+    except Exception:
+        return jsonify({"error": "Invalid datetime format"}), 400
+
+    token = create_share_link(licensePlateNumber, from_datetime, to_datetime, user_id)
+    link = url_for('ShareLocation.view_share_location', token=token, _external=True)
     return jsonify({"link": link})
 
 @share_location_bp.route('/<licensePlateNumber>/<token>')
