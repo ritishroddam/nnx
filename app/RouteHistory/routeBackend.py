@@ -368,7 +368,7 @@ def get_vehicle_path():
         ist = timezone(timedelta(hours=5, minutes=30))
 
         path_data = []
-        for record in reversed(records_list):
+        for record in records_list:
             
             if not record['latitude'] or not record['longitude']:
                 continue
