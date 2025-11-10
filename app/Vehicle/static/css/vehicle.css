@@ -735,6 +735,16 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
+#vehicle-table tbody tr.selected {
+    background-color: #e3f2fd !important;
+    border: 2px solid #2196f3;
+}
+
+#vehicle-table tbody tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
 .location-text {
   font-family: Arial, sans-serif;
   color: #777;
