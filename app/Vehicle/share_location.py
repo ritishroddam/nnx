@@ -56,7 +56,7 @@ def api_share_location():
     return jsonify({"link": link})
 
 @share_location_bp.route('/share-multiple-locations', methods=['POST'])
-@jwt_required
+@jwt_required()
 def shareMultipleVehicleLinks():
     claims = get_jwt()
     user_id = claims.get('user_id')
