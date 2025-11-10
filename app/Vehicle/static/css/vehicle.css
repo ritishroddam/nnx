@@ -1237,7 +1237,6 @@ body.dark-mode .geofence-toggle-btn.active {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
   padding: 10px;
   background-color: var(--card-bg);
   border-radius: 8px;
