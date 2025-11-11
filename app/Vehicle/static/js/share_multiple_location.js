@@ -15,7 +15,8 @@ let trackedVehicle = null;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker")
+    const bounds = new google.maps.LatLngBounds();
     
     map = new Map(document.getElementById("map"), {
         mapId: "dc4a8996aab2cac9",
@@ -28,6 +29,8 @@ async function initMap() {
                 parseFloat(vehicle.latitude),
                 parseFloat(vehicle.longitude)
             );
+            
+            bounds.extend(latLng)
 
             // Get course from vehicle data (convert to number)
             const course = vehicle.course ? parseFloat(vehicle.course) : 0;
@@ -72,28 +75,14 @@ async function initMap() {
         }
     })
 
-    // Fit map to bounds
-    if (vehiclesData.length > 0) {
-        const bounds = new google.maps.LatLngBounds();
-        vehiclesData.forEach(vehicle => {
-            if (vehicle.latitude && vehicle.longitude) {
-                bounds.extend(new google.maps.LatLng(
-                    parseFloat(vehicle.latitude),
-                    parseFloat(vehicle.longitude)
-                ));
-            }
-        });
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds);
         
-        if (!bounds.isEmpty()) {
-            map.fitBounds(bounds);
-            
-            const listener = google.maps.event.addListener(map, "idle", function () {
-                if (map.getZoom() > 15) map.setZoom(15);
-                google.maps.event.removeListener(listener);
-            });
-        }
+        const listener = google.maps.event.addListener(map, "idle", function () {
+            if (map.getZoom() > 15) map.setZoom(15);
+            google.maps.event.removeListener(listener);
+        });
     }
-    
     setupCardHoverEvents();
 }
 
@@ -109,11 +98,11 @@ function createRotatableMarker(course = 0) {
     
     const carImg = document.createElement("img");
     carImg.src = "/static/images/car_green.png";
-    carImg.style.width = "24px";
+    carImg.style.width = "24px"; // Slightly smaller to fit in container
     carImg.style.height = "24px";
     carImg.style.transform = `rotate(${course}deg)`;
     carImg.style.transition = "transform 0.3s ease";
-    carImg.style.transformOrigin = "center center";
+    carImg.style.transformOrigin = "center center"; // Ensure rotation around center
     carImg.alt = "Vehicle";
     
     container.appendChild(carImg);
@@ -125,24 +114,12 @@ function updateMarkerRotation(marker, newCourse) {
     const container = marker.content;
     const img = container.querySelector('img');
     if (img) {
+        // Convert course to number and ensure it's a valid degree value
         const course = parseFloat(newCourse) || 0;
         img.style.transform = `rotate(${course}deg)`;
         console.log(`Rotated marker ${marker.licensePlate} to ${course}°`);
     }
     marker.currentCourse = newCourse;
-}
-
-// Simple distance calculation function
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Earth's radius in meters
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
 }
 
 // Smooth animation for marker movement with rotation
@@ -152,15 +129,12 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
     const startTime = performance.now();
     
     // Calculate distance for animation speed adjustment
-    const distance = calculateDistance(
-        startPosition.lat(), startPosition.lng(),
-        newPosition.lat(), newPosition.lng()
+    const distance = google.maps.geometry.spherical.computeDistanceBetween(
+        startPosition, newPosition
     );
     
-    // Adjust duration based on distance - longer distance = longer animation
-    const adjustedDuration = Math.min(duration, Math.max(1000, distance / 2));
-    
-    console.log(`Animating ${marker.licensePlate} for ${adjustedDuration}ms over ${distance.toFixed(2)}m`);
+    // Adjust duration based on distance
+    const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
     
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
@@ -174,8 +148,6 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
         
         const currentLatLng = new google.maps.LatLng(lat, lng);
-        
-        // Update marker position
         marker.position = currentLatLng;
         marker.currentPosition = currentLatLng;
         
@@ -199,7 +171,6 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
             if (newCourse !== undefined) {
                 updateMarkerRotation(marker, newCourse);
             }
-            console.log(`Animation completed for ${marker.licensePlate}`);
         }
     }
     
@@ -295,7 +266,6 @@ socket.on("vehicle_live_update", (data) => {
         
         console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°`);
         
-        // Start animation
         animateMarker(marker, newPosition, newCourse, 2000);
         
         updateVehicleInfo(data);
@@ -305,8 +275,6 @@ socket.on("vehicle_live_update", (data) => {
             card.setAttribute('data-latitude', data.latitude);
             card.setAttribute('data-longitude', data.longitude);
         }
-    } else {
-        console.log('Marker not found or invalid data for:', data?.LicensePlateNumber);
     }
 });
 
@@ -331,7 +299,6 @@ function updateVehicleInfo(vehicleData) {
     }
 }
 
-// Debug function to check marker rotations
 function debugMarkerRotations() {
     console.log('Current marker rotations:');
     Object.keys(markers).forEach(licensePlate => {
