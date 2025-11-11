@@ -1,6 +1,3 @@
-from email import header
-from pydoc import isdata
-from turtle import distance
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
@@ -10,8 +7,6 @@ import pandas as pd
 from io import BytesIO
 import os
 from collections import OrderedDict
-
-from requests import head
 import boto3
 from botocore.client import Config
 from bson import ObjectId
