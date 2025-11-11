@@ -562,7 +562,7 @@ def processInitialGeofenceReport(imeis, imei_to_plate, date_filter, geofences, g
             dfs.append(blankDf)
         
         headerDf = pd.DataFrame([{
-            "Vehicle Number": f"--- {geofenceName} ---",
+            "Vehicle Number": f"--- Geofence Name: {geofenceName} ---",
             "ENTRY DATE & TIME": "",
             "ENTRY LOCATION": "",
             "EXIT DATE & TIME": "",
@@ -627,7 +627,7 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
             dfs.append(blankDf)
         
         df = pd.DataFrame([{
-            "Vehicle Number": f"--- {companyName} ---",
+            "Vehicle Number": f"--- Company Name: {companyName} ---",
             "ENTRY DATE & TIME": "",
             "ENTRY LOCATION": "",
             "EXIT DATE & TIME": "",
@@ -651,7 +651,7 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
             first_geofence = False
             
             headerDf = pd.DataFrame([{
-                "Vehicle Number": f"--- {geofenceName} ---",
+                "Vehicle Number": f"--- Geofence Name: {geofenceName} ---",
                 "ENTRY DATE & TIME": "",
                 "ENTRY LOCATION": "",
                 "EXIT DATE & TIME": "",
@@ -1563,7 +1563,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     continue
                 
                 header = pd.DataFrame([{
-                    "Vehicle Number": f"--- {geofenceName} ---",
+                    "Vehicle Number": f"--- Geofence Name: {geofenceName} ---",
                     "ENTRY DATE & TIME": "",
                     "ENTRY LOCATION": "",
                     "EXIT DATE & TIME": "",
