@@ -56,20 +56,20 @@ FIELD_COLLECTION_MAP = {
 }       
 
 report_configs = {
-    'daily-distance': {
+    'travelPath': {
         'collection': 'atlanta',
         'fields': ["date_time", "odometer", "latitude", "longitude", "speed"],
         'query': {"gps": "A"},
         'sheet_name': "Travel Path Report",
         'post_process': lambda df, _: process_travel_path_report(df)
     },
-    'odometer-daily-distance': {
+    'distance': {
         'collection': 'atlanta',
         'fields': ["date_time", "odometer", "latitude", "longitude"],
         'query': {"gps": "A"},
         'sheet_name': "Distance Report",
     },
-    'distance-speed-range': {
+    'speed': {
         'collection': 'atlanta',
         'fields': ["date_time", "speed", "latitude", "longitude"],
         'query': {"gps": "A"},
@@ -881,7 +881,7 @@ REPORT_PROCESSORS = {
     "stoppage": process_stoppage_report,
     "idle": process_idle_report,
     "ignition": process_ignition_report,
-    "distance-speed-range": process_speed_report,
+    "speed": process_speed_report,
 }   
 
 def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_progress=None):
@@ -973,7 +973,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     all_dfs.append(dfs)
                     report_progress(((idx + 1) / total) * 100)
 
-            elif report_type == "odometer-daily-distance":
+            elif report_type == "distance":
                 config = report_configs[report_type]
                 fields = config['fields']
                 for idx, imei in enumerate(imeis):
@@ -1039,7 +1039,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     all_dfs.append(df)
                     report_progress(((idx + 1) / total) * 100)
 
-            elif report_type == "distance-speed-range":
+            elif report_type == "speed":
                 config = report_configs[report_type]
                 fields = config['fields']
 
@@ -1084,7 +1084,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 for idx, imei in enumerate(imeis):
                     records = getData(imei, date_filter, projection)
                     print(f"[DEBUG] [process_df] Starting Location column block")
-                    if report_type == 'daily-distance':
+                    if report_type == 'travelPath':
                         records = processTravelPathDistanceRecord(records)
 
                     for record in records:
@@ -1124,7 +1124,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 raise ValueError(f"No Data Found")  
             final_df = pd.concat(all_dfs, ignore_index=True)    
             all_possible_columns = ['Vehicle Number']
-            if report_type == 'odometer-daily-distance':
+            if report_type == 'distance':
                 all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
             elif report_type == 'stoppage' or report_type == 'idle':
@@ -1134,12 +1134,12 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     'START DATE & TIME', 'START LOCATION', 'STOP DATE & TIME', 'STOP LOCATION',
                     'DURATION (min)', 'DISTANCE (km)'
                 ])
-            elif report_type == 'distance-speed-range':
+            elif report_type == 'speed':
                 all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
             elif report_type == 'panic':
                 all_possible_columns.extend(["Latitude & Longitude", "DATE & TIME", "LOCATION"])
             else:
-                if report_type == 'daily-distance':
+                if report_type == 'travelPath':
                     all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
                 else:
                     all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed', 'Average Speed', 'Maximum Speed'])
@@ -1189,7 +1189,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
             if isinstance(df, Exception):
                 raise df
-        elif report_type == "odometer-daily-distance":
+        elif report_type == "distance":
             df = process_distance_report(imei, license_plate, date_filter)
 
             if isinstance(df, Exception):
@@ -1203,7 +1203,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
             if not isinstance(df, pd.DataFrame) or df.empty:
                 raise ValueError(f"No Data Found")
-        elif report_type == "distance-speed-range":
+        elif report_type == "speed":
                 config = report_configs[report_type]
                 fields = config['fields']
                 df = process_speed_report(imei, vehicle, date_filter)
@@ -1218,7 +1218,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
             records = getData(imei, date_filter, projection)
             print(f"[DEBUG] [process_df] Starting Location column block")
-            if report_type == 'daily-distance':
+            if report_type == 'travelPath':
                 records = processTravelPathDistanceRecord(records)
             for record in records:
 
@@ -1236,7 +1236,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             raise ValueError(f"No Data Found")  
         # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
-        if report_type == 'odometer-daily-distance':
+        if report_type == 'distance':
             all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
         elif report_type == 'stoppage' or report_type == 'idle':
@@ -1246,12 +1246,12 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 'START DATE & TIME', 'START LOCATION', 'STOP DATE & TIME', 'STOP LOCATION',
                 'DURATION (min)', 'DISTANCE (km)'
             ])
-        elif report_type == 'distance-speed-range':
+        elif report_type == 'speed':
             all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
         elif report_type == 'panic':
             all_possible_columns.extend(["Latitude & Longitude", "DATE & TIME", "LOCATION"])
         else:
-            if report_type == 'daily-distance':
+            if report_type == 'travelPath':
                 all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
             else:
                 all_possible_columns.extend(['date_time', 'latitude', 'longitude', 'Location', 'speed'])
