@@ -106,5 +106,56 @@ def get_vehicle_data_for_claims(claims):
         cursor = vehicle_inventory.find({'CompanyName': user_company})
     return list(cursor)
 
+def getGeofences(claims, *, company: str | None = None, created_by: str | None = None):
+    """
+    Returns (geofences:set, geofenceDict:dict, companies:set, companiesDict:dict)
+    - For non-admin users companies / companiesDict may be empty.
+    """
+    user_roles = claims.get('roles', [])
+    user_company = claims.get('company')
+    user_name = claims.get('username')
+
+    geofenceCollection = db['geofences']
+
+    geofences = set()
+    geofenceDict = {}
+    companies = set()
+    companiesDict = {}
+
+    query = {}
+    query['is_active'] = True
+    
+    if 'admin' in user_roles:
+        if company:
+            query['company'] = company
+        if created_by:
+            query['created_by'] = created_by
+        cursor = geofenceCollection.find(query)
+    elif 'user' in user_roles:
+        query['created_by'] = user_name
+        cursor = geofenceCollection.find(query)
+    else:
+        query['company'] = user_company
+        cursor = geofenceCollection.find(query)
+
+    is_admin = 'admin' in user_roles
+
+    for geofence in cursor:
+        geofenceName = geofence.get('name')
+        company = geofence.get('company')
+
+        if company in (None, '', 'None'):
+            continue
+
+        if geofenceName:
+            geofences.add(geofenceName)
+            geofenceDict[geofenceName] = geofence
+
+            if is_admin:
+                companies.add(company)
+                companiesDict.setdefault(company, []).append(geofenceName)
+
+    return geofences, geofenceDict, companies, companiesDict
+
 def admin_required(fn):
     return roles_required('admin')(fn)

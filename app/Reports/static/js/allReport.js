@@ -6,7 +6,8 @@ const REPORT_TITLE_MAP = {
   'idle':'Idle Report',
   'ignition':'Ignition Report',
   'daily':'Daily Report',
-  'panic':'Panic Report'
+  'panic':'Panic Report',
+  'geofence': 'Geofence Report'
 };
 
 const MAX_CUSTOM_RANGE_MS = 30 * 24 * 60 * 60 * 1000;

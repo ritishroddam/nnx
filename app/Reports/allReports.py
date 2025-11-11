@@ -1,3 +1,6 @@
+from email import header
+from pydoc import isdata
+from turtle import distance
 from flask import render_template, Blueprint, request, jsonify, send_file, Response
 import json
 from datetime import datetime, timedelta
@@ -7,15 +10,19 @@ import pandas as pd
 from io import BytesIO
 import os
 from collections import OrderedDict
+
+from requests import head
 import boto3
 from botocore.client import Config
 from bson import ObjectId
 from collections import defaultdict
 from math import radians, cos, sin, asin, sqrt
+from geopy.distance import geodesic
+
 from app.database import db
 from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
-from app.utils import roles_required, get_vehicle_data, get_vehicle_data_for_claims
+from app.utils import roles_required, get_vehicle_data, get_vehicle_data_for_claims, getGeofences
 from app.geocoding import geocodeInternal
 from app.parser import atlantaAis140ToFront, getData, getDataForDistanceReport
 from celery import states
@@ -108,6 +115,12 @@ report_configs = {
         'query': ['this is a placeholder, and am to lazy to remove this'],
         'sheet_name': 'Panic Report'
     },
+    'geofence': {
+        'collection': 'atlanta',
+        'fields': [],
+        'query': {},
+        'sheet_name': 'Geofence Report'
+    }
 }
 
 def safe_geocode(lat, lng):
@@ -149,6 +162,34 @@ def _extract_range(date_filter):
     if start_dt_utc and not end_dt_utc:
         end_dt_utc = datetime.now(timezone.utc)
     return start_dt_utc, end_dt_utc
+
+def _point_in_polygon(point, polygon):
+    """Ray-casting algorithm to determine if point (lat, lon) is inside polygon."""
+    try:
+        lat, lon = point
+        x = lon
+        y = lat
+        inside = False
+        n = len(polygon)
+        for i in range(n):
+            lat_i, lon_i = polygon[i]
+            lat_j, lon_j = polygon[(i + 1) % n]
+            xi, yi = lon_i, lat_i
+            xj, yj = lon_j, lat_j
+            intersect = ((yi > y) != (yj > y)) and \
+                        (x < (xj - xi) * (y - yi) / ((yj - yi) if (yj - yi) != 0 else 1e-12) + xi)
+            if intersect:
+                inside = not inside
+        return inside
+    except Exception as e:
+        print(f'[ERROR] in point_in_polygon: {e}')
+
+def _is_within_circle(vehicle_coords, circleCenter, circleRadius):
+    try:
+        distance = geodesic(vehicle_coords, circleCenter).meters
+        return distance <= circleRadius
+    except Exception as e:
+        print(f'[ERROR] in is_within_circle: {e}')
 
 def save_and_return_report(output, report_type, vehicle_number, override_user_id, date_filter=None):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
@@ -358,6 +399,274 @@ def process_panic_report(imei, vehicle_number, date_filter):
     except Exception as e:
         print("[DEBUG] Error generating Idle Report: ", e)
         return e
+
+def determineIfInGeofence(lat, lon, geofenceData):
+    shape_type = geofenceData.get('shape_type')
+    
+    if shape_type == 'polygon':
+        points = geofenceData.get('coordinates', {}).get('points', [])
+        if not points:
+            return False
+
+        polygon = [(p["lat"], p["lng"]) for p in points]
+
+        return _point_in_polygon((lat, lon), polygon)
+
+    elif shape_type == 'circle':
+        coords = geofenceData.get('coordinates', {})
+        center = coords.get('center', {})
+        radius = coords.get('radius')
+
+        if not center or not radius:
+            return False
+
+        circleCenter = (center.get('lat'), center.get('lng'))
+        return _is_within_circle((lat, lon), circleCenter, radius)
+
+def processGeofenceReportRecords(imei, date_filter, vehicle_number, geofences, geofenceDict):
+    projection = {"_id": 0, "latitude": 1, "longitude": 1, "date_time": 1, "ignition": 1, "odometer": 1}
+    
+    data_asc = getData(imei, date_filter, projection)
+    
+    recordsGeofenceWise = {geofence: [] for geofence in geofences}
+    
+    if not data_asc:
+        return recordsGeofenceWise
+
+    for idx, datum in enumerate(data_asc):
+        try:
+            lat = float(datum.get('latitude'))
+            lon = float(datum.get('longitude'))
+        except Exception:
+            continue
+        
+        for geofence in geofences:
+            geofenceData = geofenceDict.get(geofence)
+            
+            if not geofenceData:
+                continue
+
+            if not determineIfInGeofence(lat, lon, geofenceData):
+                continue
+            
+            entry_time = datum.get('date_time')
+            entryLat = lat
+            entryLon = lon
+            odometer_start = float(datum.get('odometer', '0.00') or 0.0)
+            
+            exit_time = entry_time
+            exitLat = lat
+            exitLon = lon
+            odometer_end = odometer_start
+            
+            index = idx + 1
+            
+            while index < len(data_asc):
+                nextDatum = data_asc[index]
+                
+                try:
+                    lat = float(nextDatum.get('latitude'))
+                    lon = float(nextDatum.get('longitude'))
+                except Exception:
+                    index += 1
+                    continue
+                    
+                isStillInGeofence = determineIfInGeofence(lat, lon, geofenceData)
+                
+                if isStillInGeofence:
+                    index += 1
+                    continue
+                
+                exitLat = lat
+                exitLon = lon
+                exit_time = nextDatum.get('date_time')
+                odometer_end = float(nextDatum.get('odometer', odometer_end) or odometer_end)
+                
+                break
+            
+            duration_min = 0.0
+            try:
+                duration_min = round(((exit_time - entry_time).total_seconds() / 60.0), 2)
+            except Exception:
+                pass
+
+            distanceTravelled = round(odometer_end - odometer_start, 3)
+            
+            try:
+                entryLocation = geocodeInternal(entryLat, entryLon)
+            except Exception:
+                entryLocation = "Location Not Available"
+            
+            if entryLat == exitLat and entryLon == exitLon:
+                exitLocation = entryLocation
+            else:
+                try:
+                    exitLocation = geocodeInternal(exitLat, exitLon)
+                except Exception:
+                    exitLocation = "Location Not Available"
+
+            df = pd.DataFrame([{
+                "Vehicle Number": vehicle_number,
+                "ENTRY DATE & TIME": entry_time.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "ENTRY LOCATION": entryLocation,
+                "EXIT DATE & TIME": exit_time.astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p'),
+                "EXIT LOCATION": exitLocation,
+                "DURATION (min)": duration_min,
+                "DISTANCE TRAVELLED(km)": distanceTravelled,
+            }])
+            
+            recordsGeofenceWise[geofence].append(df)
+    
+    return recordsGeofenceWise
+
+def processInitialGeofenceReport(imeis, imei_to_plate, date_filter, geofences, geofenceDict):
+    recordsGeofenceWise = {geofence: [] for geofence in geofences}
+    
+    for imei in imeis:
+        vehicle = imei_to_plate.get(imei)
+        
+        if not vehicle:
+            continue
+        
+        license_plate = vehicle["LicensePlateNumber"]
+        
+        geofenceRecords = processGeofenceReportRecords(imei, date_filter, license_plate, geofences, geofenceDict)
+        
+        for geofence, records in geofenceRecords.items():
+            if records:
+                recordsGeofenceWise[geofence].extend(records)
+
+    dfs= []
+    isdata = False
+    
+    blankDf = pd.DataFrame([{
+        "Vehicle Number": "",
+        "ENTRY DATE & TIME": "",
+        "ENTRY LOCATION": "",
+        "EXIT DATE & TIME": "",
+        "EXIT LOCATION": "",
+        "DURATION (min)": "",
+        "DISTANCE TRAVELLED(km)": "",
+    }])
+    
+    for geofenceName, vehicleData in recordsGeofenceWise.items():
+        if not vehicleData:
+            continue
+        
+        if dfs:
+            dfs.append(blankDf)
+        
+        headerDf = pd.DataFrame([{
+            "Vehicle Number": f"--- {geofenceName} ---",
+            "ENTRY DATE & TIME": "",
+            "ENTRY LOCATION": "",
+            "EXIT DATE & TIME": "",
+            "EXIT LOCATION": "",
+            "DURATION (min)": "",
+            "DISTANCE TRAVELLED(km)": "",
+        }])
+        dfs.append(headerDf)
+        
+        dfs.append(blankDf)
+            
+        for vehicleDataFrame in vehicleData:
+            if isinstance(vehicleDataFrame, pd.DataFrame) and not vehicleDataFrame.empty:
+                isdata = True
+                dfs.append(vehicleDataFrame)
+    
+    if not isdata:
+        return []
+    
+    return dfs
+
+def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geofences, geofenceDict, companies, companiesDict):
+    companyWiseRecords = {company: {geofence: [] for geofence in companiesDict.get(company, [])} for company in companies}
+    
+    for company in companies:
+        geofencesNames = companiesDict[company]
+        companyGeofences = companyWiseRecords[company]
+        
+        for imei in imeis:
+            vehicle = imei_to_plate.get(imei)
+            
+            if not vehicle:
+                continue
+            
+            license_plate = vehicle["LicensePlateNumber"]
+            
+            if vehicle.get('CompanyName', '') != company:
+                continue
+            
+            recordsGeofenceWise = processGeofenceReportRecords(imei, date_filter, license_plate, geofencesNames, geofenceDict)
+            
+            for geofence, records in recordsGeofenceWise.items():
+                if records:
+                    companyGeofences[geofence].extend(records)
+    
+    dfs= []
+    isData = False
+    
+    blankDf = pd.DataFrame([{
+        "Vehicle Number": "",
+        "ENTRY DATE & TIME": "",
+        "ENTRY LOCATION": "",
+        "EXIT DATE & TIME": "",
+        "EXIT LOCATION": "",
+        "DURATION (min)": "",
+        "DISTANCE TRAVELLED(km)": "",
+    }])
+    
+    for companyName, companyGeofecnesRecords in companyWiseRecords.items():
+        
+        if dfs:
+            dfs.append(blankDf)
+        
+        df = pd.DataFrame([{
+            "Vehicle Number": f"--- {companyName} ---",
+            "ENTRY DATE & TIME": "",
+            "ENTRY LOCATION": "",
+            "EXIT DATE & TIME": "",
+            "EXIT LOCATION": "",
+            "DURATION (min)": "",
+            "DISTANCE TRAVELLED(km)": "",
+        }])
+        
+        dfs.append(df)
+
+        dfs.append(blankDf)
+        
+        first_geofence = True
+        for geofenceName, vehicleData in companyGeofecnesRecords.items():
+            if not vehicleData:
+                continue
+            
+            if not first_geofence:
+                dfs.append(blankDf)
+            
+            first_geofence = False
+            
+            headerDf = pd.DataFrame([{
+                "Vehicle Number": f"--- {geofenceName} ---",
+                "ENTRY DATE & TIME": "",
+                "ENTRY LOCATION": "",
+                "EXIT DATE & TIME": "",
+                "EXIT LOCATION": "",
+                "DURATION (min)": "",
+                "DISTANCE TRAVELLED(km)": "",
+            }])
+            dfs.append(headerDf)
+            
+            dfs.append(blankDf)
+                
+            for vehicleDataFrame in vehicleData:
+                if isinstance(vehicleDataFrame, pd.DataFrame) and not vehicleDataFrame.empty:
+                    isData = True
+                    dfs.append(vehicleDataFrame)
+    
+    if not isData:
+        return []
+           
+    return dfs
 
 def process_idle_report(imei, vehicle_number, date_filter):
     try:
@@ -972,6 +1281,22 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     
                     all_dfs.append(dfs)
                     report_progress(((idx + 1) / total) * 100)
+                    
+            elif report_type == 'geofence':
+                config = report_configs[report_type]
+                fields = config['fields']
+                post_process = config.get('post_process')   
+                projection = {field: 1 for field in fields + ["imei"]}
+                
+                geofences, geofenceDict, companies, companiesDict = getGeofences(claims)
+                
+                if companies:
+                    dfs = processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geofences, geofenceDict, companies, companiesDict)
+                else:                    
+                    dfs = processInitialGeofenceReport(imeis, imei_to_plate, date_filter, geofences, geofenceDict)
+                    
+                if dfs:
+                    all_dfs.extend(dfs)
 
             elif report_type == "distance":
                 config = report_configs[report_type]
@@ -1073,6 +1398,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                         all_dfs.append(sep_dict)
                     all_dfs.append(df)
                     report_progress(((idx + 1) / total) * 100)
+
             else:
                 config = report_configs[report_type]
                 fields = config['fields']
@@ -1120,10 +1446,13 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                             all_dfs.append(pd.DataFrame([sep_dict]))
                             all_dfs.append(processed)
                         report_progress(((idx + 1) / total) * 100)  
+            
             if not all_dfs:
-                raise ValueError(f"No Data Found")  
-            final_df = pd.concat(all_dfs, ignore_index=True)    
+                raise ValueError(f"No Data Found")
+            
+            final_df = pd.concat(all_dfs, ignore_index=True)  
             all_possible_columns = ['Vehicle Number']
+            
             if report_type == 'distance':
                 all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
                                  'End Odometer', 'End Location'])
@@ -1138,6 +1467,8 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
             elif report_type == 'panic':
                 all_possible_columns.extend(["Latitude & Longitude", "DATE & TIME", "LOCATION"])
+            elif report_type == 'geofence':
+                all_possible_columns.extend(["ENTRY DATE & TIME", "ENTRY LOCATION", "EXIT DATE & TIME", "EXIT LOCATION", "DURATION (min)", "DISTANCE TRAVELLED(km)"])
             else:
                 if report_type == 'travelPath':
                     all_possible_columns.extend(['date_time', 'odometer', 'distance', 'latitude', 'longitude', 'Location', 'speed'])
@@ -1154,7 +1485,13 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 ordered_data = add_speed_metrics(ordered_data)  
             report_progress(100)
             return ordered_data 
-        # Single vehicle
+
+        ######################################################
+        ######################################################
+        ####################Single Vehicle####################
+        ######################################################
+        ######################################################
+
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number}
         )
@@ -1209,6 +1546,35 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 df = process_speed_report(imei, vehicle, date_filter)
                 if isinstance(df, Exception):
                     raise df
+        elif report_type == 'geofence':
+            geofences, geofenceDict, companies, companiesDict = getGeofences(claims, company=vehicle.get('CompanyName'))
+            
+            geofencesRecords = processGeofenceReportRecords(imei, date_filter, license_plate, geofences, geofenceDict)
+            
+            dfs = []
+            
+            for geofenceName, records in geofencesRecords.items():
+                if not records:
+                    continue
+                
+                header = pd.DataFrame([{
+                    "Vehicle Number": f"--- {geofenceName} ---",
+                    "ENTRY DATE & TIME": "",
+                    "ENTRY LOCATION": "",
+                    "EXIT DATE & TIME": "",
+                    "EXIT LOCATION": "",
+                    "DURATION (min)": "",
+                    "DISTANCE TRAVELLED(km)": "",
+                }])
+                
+                dfs.append(header)
+                
+                dfs.extend(records)
+                
+            if not dfs:
+                raise ValueError("No Data Found")
+            df = pd.concat(dfs, ignore_index=True)
+            
         else:
             config = report_configs[report_type]
             fields = config['fields']
@@ -1248,6 +1614,8 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             ])
         elif report_type == 'speed':
             all_possible_columns.extend(["DATE & TIME", "Latitude & Longitude", "LOCATION", "SPEED"])
+        elif report_type == 'geofence':
+            all_possible_columns.extend(["ENTRY DATE & TIME", "ENTRY LOCATION", "EXIT DATE & TIME", "EXIT LOCATION", "DURATION (min)", "DISTANCE TRAVELLED(km)"])
         elif report_type == 'panic':
             all_possible_columns.extend(["Latitude & Longitude", "DATE & TIME", "LOCATION"])
         else:
