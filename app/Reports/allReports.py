@@ -430,10 +430,7 @@ def processGeofenceReportRecords(imei, date_filter, vehicle_number, geofences, g
 
     consumed_until = {g: 0 for g in geofences}
     
-    for idx, datum in enumerate(data_asc):
-        if idx < consumed_until.get(geofence, 0):
-            continue
-        
+    for idx, datum in enumerate(data_asc):        
         try:
             lat = float(datum.get('latitude'))
             lon = float(datum.get('longitude'))
@@ -441,6 +438,9 @@ def processGeofenceReportRecords(imei, date_filter, vehicle_number, geofences, g
             continue
         
         for geofence in geofences:
+            if idx < consumed_until.get(geofence, 0):
+                continue
+            
             geofenceData = geofenceDict.get(geofence)
             
             if not geofenceData:
