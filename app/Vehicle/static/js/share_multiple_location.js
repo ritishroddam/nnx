@@ -10,6 +10,7 @@ const socket = io("https://cordonnx.com", {
 
 let map;
 let markers = {};
+let activeInfoWindow = null;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -29,19 +30,27 @@ async function initMap() {
             );
             
             bounds.extend(latLng)
+
             const carContent = document.createElement("img");
             carContent.src = "/static/images/car_green.png";
             carContent.style.width = "18px";
             carContent.style.height = "32px";
             carContent.alt = "Vehicle"
+
             const marker = new AdvancedMarkerElement({
                 position: latLng,
                 map: map,
                 title: vehicle.licensePlateNumber,
                 content: carContent,
             })
+
             markers[vehicle.licensePlateNumber] = marker
+
             marker.addListener('click', () => {
+                if (activeInfoWindow) {
+                    activeInfoWindow.close();
+                }
+
                 const infoWindow = new google.maps.InfoWindow({
                     content: `
                         <div>
@@ -53,9 +62,12 @@ async function initMap() {
                     `
                 });
                 infoWindow.open(map, marker);
+                activeInfoWindow = infoWindow;
+                highlightVehicleCard(vehicle.licensePlateNumber);
             });
         }
     })
+
     if (!bounds.isEmpty()) {
         map.fitBounds(bounds);
         
@@ -64,6 +76,54 @@ async function initMap() {
             google.maps.event.removeListener(listener);
         });
 }
+setupCardHoverEvents();
+}
+
+function setupCardHoverEvents() {
+    const vehicleCards = document.querySelectorAll('.vehicle-card');
+    
+    vehicleCards.forEach(card => {
+        const licensePlate = card.getAttribute('data-license-plate');
+        const latitude = card.getAttribute('data-latitude');
+        const longitude = card.getAttribute('data-longitude');
+        
+        if (latitude && longitude) {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('active');
+                
+                zoomToVehicle(licensePlate, parseFloat(latitude), parseFloat(longitude));
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('active');
+            });
+        }
+    });
+}
+
+function zoomToVehicle(licensePlate, lat, lng) {
+    if (!map) return;
+    
+    const marker = markers[licensePlate];
+    if (marker) {
+        map.setCenter({ lat, lng });
+        
+        if (map.getZoom() < 14) {
+            map.setZoom(14);
+        }
+    }
+}
+
+function highlightVehicleCard(licensePlate) {
+    const allCards = document.querySelectorAll('.vehicle-card');
+    allCards.forEach(card => card.classList.remove('active'));
+    
+    const targetCard = document.querySelector(`[data-license-plate="${licensePlate}"]`);
+    if (targetCard) {
+        targetCard.classList.add('active');
+        
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 }
 
 socket.on("connect", () => {
@@ -93,18 +153,32 @@ socket.on("vehicle_live_update", (data) => {
             
         marker.position = newPosition;   
         updateVehicleInfo(data);
-    }
-})
 
-function updateVehicleInfo(vehicleData) {
-    const vehicleElement = document.querySelector(`[data-license-plate="${vehicleData.LicensePlateNumber}"]`);
-    if (vehicleElement) {
-        const locationEl = vehicleElement.querySelector('p:nth-child(2)');
-        const speedEl = vehicleElement.querySelector('p:nth-child(3)');
-        const updateEl = vehicleElement.querySelector('p:nth-child(4)');
-        
-        if (locationEl) locationEl.textContent = `Location: ${vehicleData.address || 'Unknown Location'}`;
-        if (speedEl) speedEl.textContent = `Speed: ${vehicleData.speed || 'Unknown'} km/h`;
-        if (updateEl) updateEl.textContent = `Last Update: ${new Date().toLocaleString()}`;
+        const card = document.querySelector(`[data-license-plate="${data.LicensePlateNumber}"]`);
+                if (card) {
+                    card.setAttribute('data-latitude', data.latitude);
+                    card.setAttribute('data-longitude', data.longitude);
+                }
     }
-}
+});
+
+ function updateVehicleInfo(vehicleData) {
+            const vehicleElement = document.querySelector(`[data-license-plate="${vehicleData.LicensePlateNumber}"]`);
+            if (vehicleElement) {
+                const locationEl = vehicleElement.querySelector('.detail-row:nth-child(3) .detail-value');
+                const speedEl = vehicleElement.querySelector('.detail-row:nth-child(2) .detail-value');
+                const updateEl = vehicleElement.querySelector('.detail-row:nth-child(1) .detail-value');
+                
+                if (locationEl) locationEl.textContent = vehicleData.address || 'Unknown Location';
+                if (speedEl) {
+                    if (vehicleData.speed && vehicleData.speed !== '' && parseInt(vehicleData.speed) === 0) {
+                        speedEl.textContent = `Stopped: ${vehicleData.speed} kmph, since 0 seconds`;
+                    } else if (vehicleData.speed && vehicleData.speed !== '') {
+                        speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
+                    } else {
+                        speedEl.textContent = 'Unknown Speed';
+                    }
+                }
+                if (updateEl) updateEl.textContent = new Date().toLocaleString();
+            }
+        }

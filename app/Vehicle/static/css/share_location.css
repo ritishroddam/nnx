@@ -7,7 +7,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -25,13 +25,28 @@
             border-left: 4px solid #3498db;
         }
         
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .cards-container {
+            flex: 0 0 350px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .map-container {
+            flex: 1;
+        }
+        
         #map {
             height: 500px;
             width: 100%;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
         }
         
         .info {
@@ -50,9 +65,9 @@
         }
         
         #vehicles-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
         .vehicle-card {
@@ -60,13 +75,20 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             padding: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
             border-left: 4px solid #3498db;
+            cursor: pointer;
         }
         
         .vehicle-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            border-left-color: #e74c3c;
+        }
+        
+        .vehicle-card.active {
+            border-left-color: #e74c3c;
+            background-color: #f9f9f9;
         }
         
         .vehicle-header {
@@ -108,17 +130,32 @@
             flex: 1;
         }
         
-        .last-update {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed #eee;
+        .cards-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .cards-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .cards-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .cards-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
         
         @media (max-width: 768px) {
-            #vehicles-container {
-                grid-template-columns: 1fr;
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .cards-container {
+                flex: 1;
+                max-height: 300px;
             }
             
             .container {
