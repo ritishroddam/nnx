@@ -1,7 +1,7 @@
 const REPORT_TITLE_MAP = {
-  'daily-distance':'Travel Path Report',
-  'odometer-daily-distance':'Distance Report',
-  'distance-speed-range':'Speed Report',
+  'travelPath':'Travel Path Report',
+  'distance':'Distance Report',
+  'speed':'Speed Report',
   'stoppage':'Stoppage Report',
   'idle':'Idle Report',
   'ignition':'Ignition Report',
