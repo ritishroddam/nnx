@@ -428,7 +428,12 @@ def processGeofenceReportRecords(imei, date_filter, vehicle_number, geofences, g
     if not data_asc:
         return recordsGeofenceWise
 
+    consumed_until = {g: 0 for g in geofences}
+    
     for idx, datum in enumerate(data_asc):
+        if idx < consumed_until.get(geofence, 0):
+            continue
+        
         try:
             lat = float(datum.get('latitude'))
             lon = float(datum.get('longitude'))
@@ -447,7 +452,10 @@ def processGeofenceReportRecords(imei, date_filter, vehicle_number, geofences, g
             entry_time = datum.get('date_time')
             entryLat = lat
             entryLon = lon
-            odometer_start = float(datum.get('odometer', '0.00') or 0.0)
+            try:
+                odometer_start = float(datum.get('odometer', 0) or 0.0)
+            except Exception:
+                odometer_start = 0.0
             
             exit_time = entry_time
             exitLat = lat
@@ -511,6 +519,8 @@ def processGeofenceReportRecords(imei, date_filter, vehicle_number, geofences, g
             }])
             
             recordsGeofenceWise[geofence].append(df)
+            
+            consumed_until[geofence] = index
     
     return recordsGeofenceWise
 
