@@ -11,8 +11,7 @@ const socket = io("https://cordonnx.com", {
 let map;
 let markers = {};
 let activeInfoWindow = null;
-let trackedVehicle = null; 
-let animationInterval = null;
+let trackedVehicle = null;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -33,7 +32,11 @@ async function initMap() {
             
             bounds.extend(latLng)
 
-            const markerElement = createRotatableMarker(vehicle.course || 0);
+            // Get course from vehicle data (convert to number)
+            const course = vehicle.course ? parseFloat(vehicle.course) : 0;
+            
+            // Create marker with proper rotation
+            const markerElement = createRotatableMarker(course);
             
             const marker = new AdvancedMarkerElement({
                 position: latLng,
@@ -42,9 +45,10 @@ async function initMap() {
                 content: markerElement,
             })
 
+            // Store marker data
             marker.licensePlate = vehicle.licensePlateNumber;
             marker.currentPosition = latLng;
-            marker.currentCourse = vehicle.course || 0;
+            marker.currentCourse = course;
 
             markers[vehicle.licensePlateNumber] = marker
 
@@ -59,6 +63,7 @@ async function initMap() {
                             <h3>${vehicle.licensePlateNumber}</h3>
                             <p>Location: ${vehicle.location || 'Unknown'}</p>
                             <p>Speed: ${vehicle.speed || 'Unknown'} km/h</p>
+                            <p>Course: ${course}°</p>
                             <p>Last Update: ${vehicle.date_time || 'Unknown'}</p>
                         </div>
                     `
@@ -81,48 +86,64 @@ async function initMap() {
     setupCardHoverEvents();
 }
 
+// Create a properly rotatable marker element
 function createRotatableMarker(course = 0) {
     const container = document.createElement("div");
     container.style.position = "relative";
     container.style.width = "32px";
     container.style.height = "32px";
+    container.style.display = "flex";
+    container.style.alignItems = "center";
+    container.style.justifyContent = "center";
     
     const carImg = document.createElement("img");
     carImg.src = "/static/images/car_green.png";
-    carImg.style.width = "100%";
-    carImg.style.height = "100%";
+    carImg.style.width = "24px"; // Slightly smaller to fit in container
+    carImg.style.height = "24px";
     carImg.style.transform = `rotate(${course}deg)`;
-    carImg.style.transition = "transform 0.5s ease";
+    carImg.style.transition = "transform 0.3s ease";
+    carImg.style.transformOrigin = "center center"; // Ensure rotation around center
     carImg.alt = "Vehicle";
     
     container.appendChild(carImg);
     return container;
 }
 
+// Update marker rotation with proper course handling
 function updateMarkerRotation(marker, newCourse) {
-    const img = marker.content.querySelector('img');
+    const container = marker.content;
+    const img = container.querySelector('img');
     if (img) {
-        img.style.transform = `rotate(${newCourse}deg)`;
+        // Convert course to number and ensure it's a valid degree value
+        const course = parseFloat(newCourse) || 0;
+        img.style.transform = `rotate(${course}deg)`;
+        console.log(`Rotated marker ${marker.licensePlate} to ${course}°`);
     }
     marker.currentCourse = newCourse;
 }
 
+// Smooth animation for marker movement with rotation
 function animateMarker(marker, newPosition, newCourse, duration = 2000) {
     const startPosition = marker.currentPosition;
+    const startCourse = marker.currentCourse || 0;
     const startTime = performance.now();
     
+    // Calculate distance for animation speed adjustment
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
         startPosition, newPosition
     );
     
+    // Adjust duration based on distance
     const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
     
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / adjustedDuration, 1);
         
+        // Easing function for smooth movement
         const easeProgress = easeInOutCubic(progress);
         
+        // Interpolate position
         const lat = startPosition.lat() + (newPosition.lat() - startPosition.lat()) * easeProgress;
         const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
         
@@ -130,6 +151,13 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         marker.position = currentLatLng;
         marker.currentPosition = currentLatLng;
         
+        // Interpolate rotation if course changed
+        if (newCourse !== undefined && newCourse !== startCourse) {
+            const currentCourse = startCourse + (newCourse - startCourse) * easeProgress;
+            updateMarkerRotation(marker, currentCourse);
+        }
+        
+        // If this is the tracked vehicle, keep the map centered on it
         if (trackedVehicle === marker.licensePlate) {
             map.setCenter(currentLatLng);
         }
@@ -137,15 +165,19 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
+            // Final position and rotation
             marker.position = newPosition;
             marker.currentPosition = newPosition;
-            updateMarkerRotation(marker, newCourse);
+            if (newCourse !== undefined) {
+                updateMarkerRotation(marker, newCourse);
+            }
         }
     }
     
     requestAnimationFrame(animate);
 }
 
+// Easing function for smooth animation
 function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -161,7 +193,7 @@ function setupCardHoverEvents() {
         if (latitude && longitude) {
             card.addEventListener('mouseenter', () => {
                 card.classList.add('active');
-                trackedVehicle = licensePlate; 
+                trackedVehicle = licensePlate;
                 
                 const marker = markers[licensePlate];
                 if (marker) {
@@ -174,7 +206,7 @@ function setupCardHoverEvents() {
             
             card.addEventListener('mouseleave', () => {
                 card.classList.remove('active');
-                trackedVehicle = null; 
+                trackedVehicle = null;
             });
         }
     });
@@ -229,7 +261,10 @@ socket.on("vehicle_live_update", (data) => {
             parseFloat(data.longitude)
         );
         
-        const newCourse = data.course || marker.currentCourse || 0;
+        // Get course from update data (ensure it's a number)
+        const newCourse = data.course ? parseFloat(data.course) : marker.currentCourse;
+        
+        console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°`);
         
         animateMarker(marker, newPosition, newCourse, 2000);
         
@@ -264,11 +299,12 @@ function updateVehicleInfo(vehicleData) {
     }
 }
 
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        if (animationInterval) {
-            clearInterval(animationInterval);
-        }
-    } else {
-    }
-});
+function debugMarkerRotations() {
+    console.log('Current marker rotations:');
+    Object.keys(markers).forEach(licensePlate => {
+        const marker = markers[licensePlate];
+        console.log(`${licensePlate}: ${marker.currentCourse}°`);
+    });
+}
+
+setTimeout(debugMarkerRotations, 3000);
