@@ -11,6 +11,8 @@ const socket = io("https://cordonnx.com", {
 let map;
 let markers = {};
 let activeInfoWindow = null;
+let trackedVehicle = null; 
+let animationInterval = null;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -31,18 +33,18 @@ async function initMap() {
             
             bounds.extend(latLng)
 
-            const carContent = document.createElement("img");
-            carContent.src = "/static/images/car_green.png";
-            carContent.style.width = "18px";
-            carContent.style.height = "32px";
-            carContent.alt = "Vehicle"
-
+            const markerElement = createRotatableMarker(vehicle.course || 0);
+            
             const marker = new AdvancedMarkerElement({
                 position: latLng,
                 map: map,
                 title: vehicle.licensePlateNumber,
-                content: carContent,
+                content: markerElement,
             })
+
+            marker.licensePlate = vehicle.licensePlateNumber;
+            marker.currentPosition = latLng;
+            marker.currentCourse = vehicle.course || 0;
 
             markers[vehicle.licensePlateNumber] = marker
 
@@ -75,8 +77,77 @@ async function initMap() {
             if (map.getZoom() > 15) map.setZoom(15);
             google.maps.event.removeListener(listener);
         });
+    }
+    setupCardHoverEvents();
 }
-setupCardHoverEvents();
+
+function createRotatableMarker(course = 0) {
+    const container = document.createElement("div");
+    container.style.position = "relative";
+    container.style.width = "32px";
+    container.style.height = "32px";
+    
+    const carImg = document.createElement("img");
+    carImg.src = "/static/images/car_green.png";
+    carImg.style.width = "100%";
+    carImg.style.height = "100%";
+    carImg.style.transform = `rotate(${course}deg)`;
+    carImg.style.transition = "transform 0.5s ease";
+    carImg.alt = "Vehicle";
+    
+    container.appendChild(carImg);
+    return container;
+}
+
+function updateMarkerRotation(marker, newCourse) {
+    const img = marker.content.querySelector('img');
+    if (img) {
+        img.style.transform = `rotate(${newCourse}deg)`;
+    }
+    marker.currentCourse = newCourse;
+}
+
+function animateMarker(marker, newPosition, newCourse, duration = 2000) {
+    const startPosition = marker.currentPosition;
+    const startTime = performance.now();
+    
+    const distance = google.maps.geometry.spherical.computeDistanceBetween(
+        startPosition, newPosition
+    );
+    
+    const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
+    
+    function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / adjustedDuration, 1);
+        
+        const easeProgress = easeInOutCubic(progress);
+        
+        const lat = startPosition.lat() + (newPosition.lat() - startPosition.lat()) * easeProgress;
+        const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
+        
+        const currentLatLng = new google.maps.LatLng(lat, lng);
+        marker.position = currentLatLng;
+        marker.currentPosition = currentLatLng;
+        
+        if (trackedVehicle === marker.licensePlate) {
+            map.setCenter(currentLatLng);
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            marker.position = newPosition;
+            marker.currentPosition = newPosition;
+            updateMarkerRotation(marker, newCourse);
+        }
+    }
+    
+    requestAnimationFrame(animate);
+}
+
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 function setupCardHoverEvents() {
@@ -90,12 +161,20 @@ function setupCardHoverEvents() {
         if (latitude && longitude) {
             card.addEventListener('mouseenter', () => {
                 card.classList.add('active');
+                trackedVehicle = licensePlate; 
                 
-                zoomToVehicle(licensePlate, parseFloat(latitude), parseFloat(longitude));
+                const marker = markers[licensePlate];
+                if (marker) {
+                    map.setCenter(marker.currentPosition);
+                    if (map.getZoom() < 14) {
+                        map.setZoom(14);
+                    }
+                }
             });
             
             card.addEventListener('mouseleave', () => {
                 card.classList.remove('active');
+                trackedVehicle = null; 
             });
         }
     });
@@ -121,7 +200,6 @@ function highlightVehicleCard(licensePlate) {
     const targetCard = document.querySelector(`[data-license-plate="${licensePlate}"]`);
     if (targetCard) {
         targetCard.classList.add('active');
-        
         targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
@@ -150,35 +228,47 @@ socket.on("vehicle_live_update", (data) => {
             parseFloat(data.latitude),
             parseFloat(data.longitude)
         );
-            
-        marker.position = newPosition;   
+        
+        const newCourse = data.course || marker.currentCourse || 0;
+        
+        animateMarker(marker, newPosition, newCourse, 2000);
+        
         updateVehicleInfo(data);
 
         const card = document.querySelector(`[data-license-plate="${data.LicensePlateNumber}"]`);
-                if (card) {
-                    card.setAttribute('data-latitude', data.latitude);
-                    card.setAttribute('data-longitude', data.longitude);
-                }
+        if (card) {
+            card.setAttribute('data-latitude', data.latitude);
+            card.setAttribute('data-longitude', data.longitude);
+        }
     }
 });
 
- function updateVehicleInfo(vehicleData) {
-            const vehicleElement = document.querySelector(`[data-license-plate="${vehicleData.LicensePlateNumber}"]`);
-            if (vehicleElement) {
-                const locationEl = vehicleElement.querySelector('.detail-row:nth-child(3) .detail-value');
-                const speedEl = vehicleElement.querySelector('.detail-row:nth-child(2) .detail-value');
-                const updateEl = vehicleElement.querySelector('.detail-row:nth-child(1) .detail-value');
-                
-                if (locationEl) locationEl.textContent = vehicleData.address || 'Unknown Location';
-                if (speedEl) {
-                    if (vehicleData.speed && vehicleData.speed !== '' && parseInt(vehicleData.speed) === 0) {
-                        speedEl.textContent = `Stopped: ${vehicleData.speed} kmph, since 0 seconds`;
-                    } else if (vehicleData.speed && vehicleData.speed !== '') {
-                        speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
-                    } else {
-                        speedEl.textContent = 'Unknown Speed';
-                    }
-                }
-                if (updateEl) updateEl.textContent = new Date().toLocaleString();
+function updateVehicleInfo(vehicleData) {
+    const vehicleElement = document.querySelector(`[data-license-plate="${vehicleData.LicensePlateNumber}"]`);
+    if (vehicleElement) {
+        const locationEl = vehicleElement.querySelector('.detail-row:nth-child(3) .detail-value');
+        const speedEl = vehicleElement.querySelector('.detail-row:nth-child(2) .detail-value');
+        const updateEl = vehicleElement.querySelector('.detail-row:nth-child(1) .detail-value');
+        
+        if (locationEl) locationEl.textContent = vehicleData.address || 'Unknown Location';
+        if (speedEl) {
+            if (vehicleData.speed && vehicleData.speed !== '' && parseInt(vehicleData.speed) === 0) {
+                speedEl.textContent = `Stopped: ${vehicleData.speed} kmph, since 0 seconds`;
+            } else if (vehicleData.speed && vehicleData.speed !== '') {
+                speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
+            } else {
+                speedEl.textContent = 'Unknown Speed';
             }
         }
+        if (updateEl) updateEl.textContent = new Date().toLocaleString();
+    }
+}
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        if (animationInterval) {
+            clearInterval(animationInterval);
+        }
+    } else {
+    }
+});
