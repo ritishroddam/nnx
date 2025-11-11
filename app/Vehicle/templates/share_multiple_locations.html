@@ -4,8 +4,142 @@
     <meta charset="UTF-8">
     <title>Shared Vehicle Locations</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/cordonNXTabIcon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/share_location.css') }}">
-    <script defer src="{{ url_for('Vehicle.static', filename='js/share_multiple_location.js') }}"></script>
+    <style>
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        /* Vehicle count styling */
+        .vehicle-count {
+            background-color: #e8f4fd;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        /* Map container */
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        /* Info section */
+        .info {
+            margin-top: 20px;
+        }
+        
+        .info p {
+            margin: 5px 0;
+        }
+        
+        /* Vehicles list */
+        .vehicles-list h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        
+        #vehicles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Vehicle card styling */
+        .vehicle-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 4px solid #3498db;
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+        
+        .vehicle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+        
+        .vehicle-number {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        
+        .vehicle-status {
+            font-size: 1.2em;
+        }
+        
+        .vehicle-details {
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #555;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .last-update {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #eee;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #vehicles-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
     
     <script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
             ({ key: "AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84", v: "weekly" });</script>
@@ -30,17 +164,41 @@
                 <h3>Vehicles:</h3>
                 <div id="vehicles-container">
                     {% for vehicle in share_info.vehicles %}
-                    <div class="vehicle-info" data-license-plate="{{ vehicle.licensePlateNumber }}">
-                        <p><strong>{{ vehicle.licensePlateNumber }}</strong></p>
-                        <p>Location: {{ vehicle.location|default("Unknown Location") }}</p>
-                        <p>Speed: 
-                            {% if vehicle.speed is not none and vehicle.speed != '' %}
-                              {{ vehicle.speed }} km/h
-                            {% else %}
-                              Unknown Speed
-                            {% endif %}
-                        </p>
-                        <p>Last Update: {{ vehicle.date_time }}</p>
+                    <div class="vehicle-card" data-license-plate="{{ vehicle.licensePlateNumber }}">
+                        <div class="vehicle-header">
+                            <span class="vehicle-number">{{ vehicle.licensePlateNumber }}</span>
+                            <span class="vehicle-status">💶️</span>
+                        </div>
+                        <div class="vehicle-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Last Update</span>
+                                <span class="detail-value">{{ vehicle.date_time }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value">
+                                    {% if vehicle.speed is not none and vehicle.speed != '' and vehicle.speed|int == 0 %}
+                                      Stopped: {{ vehicle.speed }} kmph, since 0 seconds
+                                    {% elif vehicle.speed is not none and vehicle.speed != '' %}
+                                      Moving: {{ vehicle.speed }} kmph
+                                    {% else %}
+                                      Unknown Speed
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Location</span>
+                                <span class="detail-value">{{ vehicle.location|default("Unknown Location") }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Distance Today</span>
+                                <span class="detail-value">0.0 km</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Stoppage Today</span>
+                                <span class="detail-value">0 seconds</span>
+                            </div>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
