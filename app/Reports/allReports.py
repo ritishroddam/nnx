@@ -1187,8 +1187,6 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 
             imeis = getCollectionImeis(vehicleInvyImeis)
             
-            
-            
             total = max(1, len(imeis))
             all_dfs = []    
             if report_type not in report_configs:
