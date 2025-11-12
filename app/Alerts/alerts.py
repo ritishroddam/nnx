@@ -6,7 +6,7 @@ from bson import ObjectId
 
 from app.database import db
 from app.geocoding import geocodeInternal
-from app.utils import roles_required, get_filtered_results
+from app.utils import roles_required, get_filtered_results, get_vehicle_data
 from app.parser import getCollectionImeis
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
@@ -291,7 +291,7 @@ def notification_alerts():
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    vehicleData = getVehicles()
+    vehicleData = get_vehicle_data()
     if not vehicleData:
         vehicles = []
     else:
