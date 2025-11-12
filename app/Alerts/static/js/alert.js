@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   socket.on("new_alert", (data) => {
     console.log("New alert received:", data);
     if (shouldDisplayAlert(data.alert)) {
-      showToast("New alert received", "info");
+      displayFlashMessage("New alert received", "info");
 
       const endpoint = data.alert.alert_type.toLowerCase().replace(/\s+/g, "_");
       fetchCountForEndpoint(endpoint);
@@ -353,7 +353,7 @@ async function loadAlerts(page = 1) {
       updateTableAndPagination();
     } catch (error) {
       console.error("Error:", error);
-      showToast(error.message || "Failed to fetch alerts", "error");
+      displayFlashMessage(error.message || "Failed to fetch alerts", "danger");
       tableBody.innerHTML = `<tr><td colspan="7" class="error-message">Error loading alerts</td></tr>`;
     }
   }
@@ -540,7 +540,7 @@ function createPaginationControls(totalPagesArg, currentPageArg) {
     const reason = document.getElementById("ackReason").value;
 
     if (!pressedFor) {
-      showToast("Please select a reason", "error");
+      displayFlashMessage("Please select a reason", "danger");
       return;
     }
 
@@ -572,7 +572,7 @@ function createPaginationControls(totalPagesArg, currentPageArg) {
       })
       .then((data) => {
         if (data.success) {
-          showToast(
+          displayFlashMessage(
             data.message || "Alert acknowledged successfully",
             "success"
           );
@@ -599,39 +599,12 @@ function createPaginationControls(totalPagesArg, currentPageArg) {
       })
       .catch((error) => {
         console.error("Acknowledgment error:", error);
-        showToast(error.message || "Failed to acknowledge alert", "error");
+        displayFlashMessage(error.message || "Failed to acknowledge alert", "danger");
       })
       .finally(() => {
         ackBtn.disabled = false;
         ackBtn.innerHTML = originalText;
       });
-  }
-
-  function showToast(message, type = "success") {
-    document
-      .querySelectorAll(".toast-notification")
-      .forEach((el) => el.remove());
-
-    const toast = document.createElement("div");
-    toast.className = `toast-notification ${type}`;
-    toast.innerHTML = `
-            <i class="fas ${
-              type === "success" ? "fa-check-circle" : "fa-exclamation-circle"
-            }"></i>
-            <span>${message}</span>
-        `;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.classList.add("show");
-    }, 10);
-
-    setTimeout(() => {
-      toast.classList.remove("show");
-      setTimeout(() => {
-        toast.remove();
-      }, 300);
-    }, 5000);
   }
 
   function formatDateTime(dateTimeString) {
