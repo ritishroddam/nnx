@@ -298,6 +298,7 @@ def page():
         vehicleInvyImeis = [v['IMEI'] for v in vehicleData]
         imeis = getCollectionImeis(vehicleInvyImeis)
         print(imeis)
+        print(vehicleData)
         vehicles = list(v['LicensePlateNumber'] for v in vehicleData if v['IMEI'] in imeis)
         print(vehicles)
     
