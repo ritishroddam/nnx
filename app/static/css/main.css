@@ -699,3 +699,8 @@ body.dark-mode .profile-hover .profile-settings-link {
   text-decoration: none;
   font-size: 13px;
 }
+
+.material-symbols-outlined.fill {
+  font-variation-settings:
+  'FILL' 1,
+}
