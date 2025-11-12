@@ -626,7 +626,10 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
         if dfs:
             dfs.append(blankDf)
         
-        df = pd.DataFrame([{
+        companyAdded =False
+        first_geofence = True
+        
+        companyHeaderDf = pd.DataFrame([{
             "Vehicle Number": f"--- Company Name: {companyName} ---",
             "ENTRY DATE & TIME": "",
             "ENTRY LOCATION": "",
@@ -636,19 +639,9 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
             "DISTANCE TRAVELLED(km)": "",
         }])
         
-        dfs.append(df)
-
-        dfs.append(blankDf)
-        
-        first_geofence = True
         for geofenceName, vehicleData in companyGeofecnesRecords.items():
             if not vehicleData:
                 continue
-            
-            if not first_geofence:
-                dfs.append(blankDf)
-            
-            first_geofence = False
             
             headerDf = pd.DataFrame([{
                 "Vehicle Number": f"--- Geofence Name: {geofenceName} ---",
@@ -659,13 +652,24 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
                 "DURATION (min)": "",
                 "DISTANCE TRAVELLED(km)": "",
             }])
-            dfs.append(headerDf)
-            
-            dfs.append(blankDf)
                 
             for vehicleDataFrame in vehicleData:
                 if isinstance(vehicleDataFrame, pd.DataFrame) and not vehicleDataFrame.empty:
                     isData = True
+                    
+                    if not companyAdded:
+                        dfs.append(companyHeaderDf)
+                        companyAdded = True
+                    else:
+                        dfs.append(blankDf)
+
+                    if not first_geofence:
+                        dfs.append(blankDf)
+
+                    first_geofence = False
+
+                    dfs.append(headerDf)
+                    dfs.append(blankDf)
                     dfs.append(vehicleDataFrame)
     
     if not isData:
