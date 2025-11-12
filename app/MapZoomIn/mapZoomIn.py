@@ -30,7 +30,7 @@ def home():
             print(f"[DEBUG] Error fetching company data: {e}")
             companyLatLng = {'lat': "15.34776", 'lng': "75.13378"}
         
-        if company.get('lat', '') in (None, "",) or company.get('lng', '') in (None, "",):
+        if companyLatLng.get('lat', '') in (None, "",) or companyLatLng.get('lng', '') in (None, "",):
             companyLatLng = {'lat': "15.34776", 'lng': "75.13378"}
             
     return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
