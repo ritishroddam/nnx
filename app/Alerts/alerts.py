@@ -291,17 +291,13 @@ def notification_alerts():
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    vehicleData = get_vehicle_data()
+    vehicleData = list(get_vehicle_data())
     if not vehicleData:
         vehicles = []
     else:
         vehicleInvyImeis = [v['IMEI'] for v in vehicleData]
-        print(vehicleInvyImeis)
         imeis = getCollectionImeis(vehicleInvyImeis)
-        print(imeis)
-        print(list(vehicleData))
         vehicles = list(v['LicensePlateNumber'] for v in vehicleData if v['IMEI'] in imeis)
-        print(vehicles)
     
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
