@@ -661,14 +661,14 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
                         dfs.append(companyHeaderDf)
                         companyAdded = True
 
-                    if not first_geofence:
-                        dfs.append(blankDf)
-
-                    first_geofence = False
                     if not geofenceNameAdded:
+                        if not first_geofence:
+                            dfs.append(blankDf)
                         dfs.append(headerDf)
                         dfs.append(blankDf)
                         geofenceNameAdded =True
+                        first_geofence = False
+                    
                         
                     dfs.append(vehicleDataFrame)
     
