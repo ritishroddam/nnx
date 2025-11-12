@@ -611,23 +611,9 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
     dfs= []
     isData = False
     
-    blankDf = pd.DataFrame([{
-        "Vehicle Number": "",
-        "ENTRY DATE & TIME": "",
-        "ENTRY LOCATION": "",
-        "EXIT DATE & TIME": "",
-        "EXIT LOCATION": "",
-        "DURATION (min)": "",
-        "DISTANCE TRAVELLED(km)": "",
-    }])
-    
     for companyName, companyGeofecnesRecords in companyWiseRecords.items():
         
-        if dfs:
-            dfs.append(blankDf)
-        
         companyAdded =False
-        first_geofence = True
         
         companyHeaderDf = pd.DataFrame([{
             "Vehicle Number": f"--- Company Name: {companyName} ---",
@@ -662,13 +648,8 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
                         companyAdded = True
 
                     if not geofenceNameAdded:
-                        if not first_geofence:
-                            dfs.append(blankDf)
                         dfs.append(headerDf)
-                        dfs.append(blankDf)
                         geofenceNameAdded =True
-                        first_geofence = False
-                    
                         
                     dfs.append(vehicleDataFrame)
     
