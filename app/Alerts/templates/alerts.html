@@ -90,7 +90,7 @@ Alerts
                 <select id="alertVehicleNumber" name="vehicleNumber">
                     <option value="">All Vehicles</option>
                     {% for vehicle in vehicles %}
-                    <option value="{{ vehicle.LicensePlateNumber }}">{{ vehicle.LicensePlateNumber }}</option>
+                    <option value="{{ vehicle }}">{{ vehicle }}</option>
                     {% endfor %}
                 </select>
             </div>
