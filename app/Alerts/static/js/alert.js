@@ -512,10 +512,8 @@ function createPaginationControls(totalPagesArg, currentPageArg) {
                 : `<span class="status-badge pending">Pending</span>`;
 
             const showAcknowledgeBtn = (
-                alertType === "Panic Alert" ||
-                alertType.startsWith("Speeding Alert") ||
-                alertType === "Main Power Discontinue Alert" ||
-                alertType === "Main Supply Remove Alert"
+                currentEndpoint === "panic" ||
+                currentEndpoint === "main_power_off"
             );
 
             const actionBtn = (alert.acknowledged || !showAcknowledgeBtn)
