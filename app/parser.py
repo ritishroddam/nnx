@@ -28,11 +28,15 @@ FLAT_TO_AIS140 = {
     "timestamp": "timestamp",
 }
 
-def getCollectionImeis(vehicleInvyImeis):
+def getCollectionImeis(vehicleInvyImeis=None):
     atlantaImeis = db['atlanta'].distinct('imei')
     ais140Imeis = db['atlantaAis140'].distinct('imei')
-    combinedImeis = set(atlantaImeis + ais140Imeis)    
-    return [i for i in vehicleInvyImeis if i in set(combinedImeis)]
+    combinedImeis = set(atlantaImeis) | set(ais140Imeis)
+
+    if vehicleInvyImeis:
+        return [i for i in vehicleInvyImeis if i in combinedImeis]
+
+    return list(combinedImeis)
 
 def _convert_date_time_emit(date):
     if not date:

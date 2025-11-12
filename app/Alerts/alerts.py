@@ -291,7 +291,14 @@ def notification_alerts():
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    vehicles = list(db['vehicle_inventory'].find({},{"LicensePlateNumber": 1, "_id": 0}))
+    vehicleData = getVehicles()
+    if not vehicleData:
+        vehicles = []
+    else:
+        vehicleInvyImeis = [v['IMEI'] for v in vehicleData]
+        imeis = getCollectionImeis(vehicleInvyImeis)
+        vehicles = list(db['vehicle_inventory'].find({'imeis': {'$in': imeis}},{"LicensePlateNumber": 1, "_id": 0}))
+    
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now
