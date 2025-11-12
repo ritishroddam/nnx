@@ -544,22 +544,9 @@ def processInitialGeofenceReport(imeis, imei_to_plate, date_filter, geofences, g
     dfs= []
     isdata = False
     
-    blankDf = pd.DataFrame([{
-        "Vehicle Number": "",
-        "ENTRY DATE & TIME": "",
-        "ENTRY LOCATION": "",
-        "EXIT DATE & TIME": "",
-        "EXIT LOCATION": "",
-        "DURATION (min)": "",
-        "DISTANCE TRAVELLED(km)": "",
-    }])
-    
     for geofenceName, vehicleData in recordsGeofenceWise.items():
         if not vehicleData:
             continue
-        
-        if dfs:
-            dfs.append(blankDf)
         
         headerDf = pd.DataFrame([{
             "Vehicle Number": f"--- Geofence Name: {geofenceName} ---",
@@ -571,8 +558,6 @@ def processInitialGeofenceReport(imeis, imei_to_plate, date_filter, geofences, g
             "DISTANCE TRAVELLED(km)": "",
         }])
         dfs.append(headerDf)
-        
-        dfs.append(blankDf)
             
         for vehicleDataFrame in vehicleData:
             if isinstance(vehicleDataFrame, pd.DataFrame) and not vehicleDataFrame.empty:
