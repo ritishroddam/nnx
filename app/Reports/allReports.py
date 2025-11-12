@@ -652,7 +652,7 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
                 "DURATION (min)": "",
                 "DISTANCE TRAVELLED(km)": "",
             }])
-                
+            geofenceNameAdded = False
             for vehicleDataFrame in vehicleData:
                 if isinstance(vehicleDataFrame, pd.DataFrame) and not vehicleDataFrame.empty:
                     isData = True
@@ -660,16 +660,15 @@ def processInitialGeofenceReportForAdmin(imeis, imei_to_plate, date_filter, geof
                     if not companyAdded:
                         dfs.append(companyHeaderDf)
                         companyAdded = True
-                    else:
-                        dfs.append(blankDf)
 
                     if not first_geofence:
                         dfs.append(blankDf)
 
                     first_geofence = False
-
-                    dfs.append(headerDf)
-                    dfs.append(blankDf)
+                    if not geofenceNameAdded:
+                        dfs.append(headerDf)
+                        dfs.append(blankDf)
+                        
                     dfs.append(vehicleDataFrame)
     
     if not isData:
