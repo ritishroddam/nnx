@@ -19,7 +19,7 @@ from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 from app.models import User
 from app.utils import roles_required, get_vehicle_data, get_vehicle_data_for_claims, getGeofences
 from app.geocoding import geocodeInternal
-from app.parser import atlantaAis140ToFront, getData, getDataForDistanceReport
+from app.parser import atlantaAis140ToFront, getData, getDataForDistanceReport, getCollectionImeis
 from celery import states
 from app.celery_app import celery as celery_app
 
@@ -1184,12 +1184,10 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
             vehicles = list(get_vehicle_data_for_claims(claims))    
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             vehicleInvyImeis = list(imei_to_plate.keys())
-
-            atlantaImeis = db['atlanta'].distinct('imei')
-            ais140Imeis = db['atlantaAis140'].distinct('imei')
-            combinedImeis = set(atlantaImeis + ais140Imeis)
                 
-            imeis = [i for i in vehicleInvyImeis if i in set(combinedImeis)]
+            imeis = getCollectionImeis(vehicleInvyImeis)
+            
+            
             
             total = max(1, len(imeis))
             all_dfs = []    

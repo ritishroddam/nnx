@@ -6,7 +6,7 @@ from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
-from app.parser import atlantaAis140ToFront
+from app.parser import atlantaAis140ToFront, getCollectionImeis
 from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime, getTimeAnalysisBasedOnTime
 
 
@@ -67,7 +67,9 @@ def dashboard_data():
 def atlanta_pie_data():
     try:
         # Get all active IMEIs
-        imeis = list(get_vehicle_data().distinct("IMEI"))
+        vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
+        
+        imeis = getCollectionImeis(vehicleInvyImeis)
         
         # Get latest record for each IMEI
         latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
@@ -125,9 +127,9 @@ def atlanta_pie_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def atlanta_distance_data():
     try:
-        imeis = list(get_vehicle_data().distinct("IMEI"))
-
-        distanceKeys = {}
+        vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
+        
+        imeis = getCollectionImeis(vehicleInvyImeis)
 
         startTime = datetime.now()
         for i in range(6, -1, -1):
@@ -184,7 +186,9 @@ def get_vehicle_range_data():
         start_of_day = utc_now - delta
         end_of_day = utc_now
         
-        imeis = list(get_vehicle_data().distinct("IMEI"))
+        vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
+        
+        imeis = getCollectionImeis(vehicleInvyImeis)
    
         # Execute all pipelines
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)

@@ -1,13 +1,13 @@
-import time
-from flask import Blueprint, render_template, request, jsonify, url_for # type: ignore
+from flask import Blueprint, render_template, request, jsonify, url_for
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from datetime import datetime, timedelta, timezone
-import pytz # type: ignore
-from app.database import db # type: ignore
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt # type: ignore
-from app.geocoding import geocodeInternal # type: ignore
-from bson import ObjectId # type: ignore
-from functools import wraps
-from app.utils import roles_required, get_filtered_results # type: ignore
+import pytz
+from bson import ObjectId
+
+from app.database import db
+from app.geocoding import geocodeInternal
+from app.utils import roles_required, get_filtered_results
+from app.parser import getCollectionImeis
 
 alerts_bp = Blueprint('Alerts', __name__, static_folder='static', template_folder='templates')
 
@@ -104,8 +104,10 @@ def get_alerts():
         if not vehicles:
             return jsonify({"success": False, "message": "No vehicles found for the user"}), 404
         
-        imeis = [v['IMEI'] for v in vehicles]
-
+        vehicleInvyImeis = [v['IMEI'] for v in vehicles]
+        
+        imeis = getCollectionImeis(vehicleInvyImeis)
+        
     try:
         page = int(page) if page else 1
     except (TypeError, ValueError):
@@ -194,7 +196,9 @@ def notification_alerts():
     if not vehicles:
         return jsonify({"success": False, "message": "No vehicles found for the user"}), 404
     
-    imeis = [v['IMEI'] for v in vehicles]
+    vehicleInvyImeis = [v['IMEI'] for v in vehicles]
+    
+    imeis = getCollectionImeis(vehicleInvyImeis)
 
     if not imeis:
         return
@@ -287,8 +291,7 @@ def notification_alerts():
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    imeis = list(get_filtered_results("atlanta").distinct("imei"))
-    vehicles = list(db['vehicle_inventory'].find({"IMEI": {"$in": imeis}}, {"LicensePlateNumber": 1, "_id": 0}))
+    vehicles = list(db['vehicle_inventory'].find({},{"LicensePlateNumber": 1, "_id": 0}))
     now = datetime.now()
     default_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     default_end = now

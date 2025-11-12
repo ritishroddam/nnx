@@ -6,10 +6,11 @@ from pytz import timezone
 from bson import ObjectId
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
 from app.models import User
-from app.utils import roles_required
+from app.utils import roles_required, get_vehicle_data
 from app.geocoding import geocodeInternal
-from app.parser import atlantaAis140ToFront
+from app.parser import atlantaAis140ToFront, getCollectionImeis
 from app.Dashboard.dashboardHelper import getDistanceBasedOnTime
 
 vehicle_bp = Blueprint('Vehicle', __name__, static_folder='static', template_folder='templates')
@@ -354,20 +355,12 @@ def get_vehicles():
         user_roles = claims.get('roles', [])
         vehicles = []
 
-        if 'admin' in user_roles:
-            inventory_data = list(vehicle_inventory_collection.find())
-        elif 'user' in user_roles:
-            userID = claims.get('user_id')
-            userCompany = claims.get('company')
-            inventory_data = list(vehicle_inventory_collection.find({
-                'CompanyName': userCompany,
-                'AssignedUsers': ObjectId(userID),
-            }))
-        else:
-            userCompany = claims.get('company')
-            inventory_data = list(vehicle_inventory_collection.find({'CompanyName': userCompany}))
-
-        imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
+        inventory_data = get_vehicle_data()
+        
+        vehicleInvyImeis = list(inventory_data.distinct("IMEI"))
+        
+        imei_list = getCollectionImeis(vehicleInvyImeis)
+        
         if not imei_list:
             return jsonify({
                 'vehicles': [],
