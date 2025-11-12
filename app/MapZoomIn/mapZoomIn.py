@@ -28,9 +28,9 @@ def home():
             companyLatLng = company_collection.find_one({'_id': ObjectId(companyId)}, {'_id': 0,'lat': 1, 'lng': 1})
         except Exception as e:
             print(f"[DEBUG] Error fetching company data: {e}")
-            companyLatLng = {'lat': "15.34776", 'lng': "75.13378"}
+            companyLatLng = {'lat': "13.01387976", 'lng': "77.6486188"}
         
         if companyLatLng.get('lat', '') in (None, "",) or companyLatLng.get('lng', '') in (None, "",):
-            companyLatLng = {'lat': "15.34776", 'lng': "75.13378"}
+            companyLatLng = {'lat': "13.01387976", 'lng': "77.6486188"}
             
     return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
