@@ -64,7 +64,6 @@ async function initMap() {
                             <h3>${vehicle.licensePlateNumber}</h3>
                             <p>Location: ${vehicle.location || 'Unknown'}</p>
                             <p>Speed: ${vehicle.speed || 'Unknown'} km/h</p>
-                            <p>Course: ${course}°</p>
                             <p>Last Update: ${vehicle.date_time || 'Unknown'}</p>
                         </div>
                     `
