@@ -251,8 +251,8 @@ function setupCardHoverEvents() {
                 const marker = markers[licensePlate];
                 if (marker) {
                     map.setCenter(marker.currentPosition);
-                    if (map.getZoom() < 16) {
-                        map.setZoom(16);
+                    if (map.getZoom() < 12) {
+                        map.setZoom(12);
                     }
                 }
             });
