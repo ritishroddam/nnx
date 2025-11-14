@@ -20,7 +20,7 @@ async function initMap() {
     
     map = new Map(document.getElementById("map"), {
         mapId: "dc4a8996aab2cac9",
-        zoom: 12,
+        zoom: 14,
     })
 
     vehiclesData.forEach(vehicle => {
