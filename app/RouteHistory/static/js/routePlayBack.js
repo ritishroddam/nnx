@@ -247,18 +247,24 @@ function updateLiveMapPolyline(updatedData) {
     let direction = rotation || 0;
     if (i < liveCoords.length - 1) {
       const nextCoord = liveCoords[i + 1];
-      direction = getRotation(nextCoord, coord);
+      // bearing from current coord to next coord
+      direction = getRotation(coord, nextCoord);
     }
 
     const arrowContent = document.createElement("div");
-    arrowContent.style.width = "10px";
-    arrowContent.style.height = "10px";
-    arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-    arrowContent.style.borderLeft = "5px solid transparent";
-    arrowContent.style.borderRight = "5px solid transparent";
+    // Create a centered triangle arrow and rotate it to match bearing
+    arrowContent.style.width = "0";
+    arrowContent.style.height = "0";
     arrowContent.style.position = "absolute";
-    arrowContent.style.transform = `rotate(${direction}deg)`;
+    arrowContent.style.backgroundColor = "transparent";
+    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+    arrowContent.style.borderLeft = "6px solid transparent";
+    arrowContent.style.borderRight = "6px solid transparent";
+    // center the arrow over the point and rotate
+    arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction}deg)`;
+    arrowContent.style.opacity = "0.95";
+    arrowContent.style.zIndex = 800;
+    arrowContent.style.pointerEvents = "none";
 
     const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
       position: coord,
@@ -332,9 +338,9 @@ async function plotPolyLineLiveMap(liveData) {
     livePathPolyline = new google.maps.Polyline({
       path: liveCoords,
       geodesic: true,
-      strokeColor: polylineColor,
-      strokeOpacity: 0.9,
-      strokeWeight: 3,
+        strokeColor: polylineColor,
+        strokeOpacity: 0.95,
+        strokeWeight: 4,
       map: liveMaps,
     });
 
@@ -359,19 +365,22 @@ async function plotPolyLineLiveMap(liveData) {
       let direction = rotation || 0;
       if (i < liveCoords.length - 1) {
         const nextCoord = liveCoords[i + 1];
-        direction = getRotation(nextCoord, coord);
+        direction = getRotation(coord, nextCoord);
       }
-      // For the last coord, rotation stays as 0 or you can use previous rotation
 
+      // create centered triangle arrow
       const arrowContent = document.createElement("div");
-      arrowContent.style.width = "10px";
-      arrowContent.style.height = "10px";
-      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-      arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-      arrowContent.style.borderLeft = "5px solid transparent";
-      arrowContent.style.borderRight = "5px solid transparent";
+      arrowContent.style.width = "0";
+      arrowContent.style.height = "0";
       arrowContent.style.position = "absolute";
-      arrowContent.style.transform = `rotate(${direction}deg)`;
+      arrowContent.style.backgroundColor = "transparent";
+      arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+      arrowContent.style.borderLeft = "6px solid transparent";
+      arrowContent.style.borderRight = "6px solid transparent";
+      arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction}deg)`;
+      arrowContent.style.opacity = "0.95";
+      arrowContent.style.zIndex = 800;
+      arrowContent.style.pointerEvents = "none";
 
       const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
         position: coord,
@@ -686,14 +695,21 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
 
   overlay.onAdd = function () {
     const div = document.createElement("div");
-    div.style.width = "15px";
-    div.style.height = "15px";
+    // create a centered triangular arrow using CSS borders and rotate to bearing
+    div.style.width = "0";
+    div.style.height = "0";
     div.style.position = "absolute";
-    div.style.transform = `rotate(${calculateBearingGoogle(nextCoord, coord)}deg)`;
-    div.style.backgroundImage = "url('/static/images/Arrow.png')";
-    div.style.backgroundSize = "contain";
-    div.style.backgroundRepeat = "no-repeat";
+    const darkModeLocal = document.body.classList.contains("dark-mode");
+    const arrowColorLocal = darkModeLocal ? '#fff' : '#2a2a2a';
+    div.style.borderTop = `12px solid ${arrowColorLocal}`;
+    div.style.borderLeft = "7px solid transparent";
+    div.style.borderRight = "7px solid transparent";
+    // center the arrow on the lat/lng point and rotate towards nextCoord
+    const bearing = calculateBearingGoogle(coord, nextCoord);
+    div.style.transform = `translate(-50%, -50%) rotate(${bearing}deg)`;
     div.style.cursor = "pointer";
+    div.style.opacity = "0.95";
+    div.style.zIndex = 700;
 
     // Add click listener for InfoWindow
     div.addEventListener("click", () => {
