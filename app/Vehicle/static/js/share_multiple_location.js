@@ -20,7 +20,7 @@ async function initMap() {
     
     map = new Map(document.getElementById("map"), {
         mapId: "dc4a8996aab2cac9",
-        zoom: 14,
+        zoom: 16,
     })
 
     vehiclesData.forEach(vehicle => {
@@ -80,7 +80,7 @@ async function initMap() {
         map.fitBounds(bounds);
         
         const listener = google.maps.event.addListener(map, "idle", function () {
-            if (map.getZoom() > 15) map.setZoom(15);
+            if (map.getZoom() > 16) map.setZoom(16);
             google.maps.event.removeListener(listener);
         });
     }
@@ -251,8 +251,8 @@ function setupCardHoverEvents() {
                 const marker = markers[licensePlate];
                 if (marker) {
                     map.setCenter(marker.currentPosition);
-                    if (map.getZoom() < 12) {
-                        map.setZoom(12);
+                    if (map.getZoom() < 16) {
+                        map.setZoom(16);
                     }
                 }
             });
