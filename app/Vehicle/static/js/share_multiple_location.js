@@ -127,7 +127,6 @@ function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicle
 }
 
 function getMarkerColor(speed, lastUpdate) {
-    // Check if no update in last 24 hours
     if (lastUpdate) {
         const lastUpdateTime = new Date(lastUpdate).getTime();
         const currentTime = new Date().getTime();
@@ -138,17 +137,16 @@ function getMarkerColor(speed, lastUpdate) {
         }
     }
     
-    // Convert speed to number
     const speedNum = parseFloat(speed) || 0;
     
-    if (speedNum === 0) {
-        return 'yellow';  // Stopped
+    if (speedNum === 0 || speedNum < 0.1) {
+        return 'yellow';  
     } else if (speedNum > 60) {
-        return 'red';      // Speed > 60
+        return 'red';     
     } else if (speedNum > 40) {
-        return 'blue';     // Speed > 40
+        return 'blue';   
     } else {
-        return 'green';    // Moving but speed <= 40
+        return 'green';  
     }
 }
 
