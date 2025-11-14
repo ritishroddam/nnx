@@ -382,7 +382,8 @@ async function plotPolyLineLiveMap(liveData) {
         const nextCoord = liveCoords[i + 1];
         direction = getRotation(coord, nextCoord);
       }
-
+      // Create a fresh arrow element per coordinate (CSS-triangle)
+      const arrowContent = document.createElement("div");
       arrowContent.style.width = "0";
       arrowContent.style.height = "0";
       arrowContent.style.position = "absolute";
@@ -708,13 +709,23 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
 
   overlay.onAdd = function () {
     const div = document.createElement("div");
+    const darkModeLocal = document.body.classList.contains("dark-mode");
+    const arrowColorLocal = darkModeLocal ? '#fff' : '#2a2a2a';
     div.style.width = "0";
-    div.style
+    div.style.height = "0";
+    div.style.position = "absolute";
+    div.style.backgroundColor = "transparent";
+    div.style.borderTop = `12px solid ${arrowColorLocal}`;
+    div.style.borderLeft = "7px solid transparent";
+    div.style.borderRight = "7px solid transparent";
     const bearing = calculateBearingGoogle(coord, nextCoord);
+    // arrows were previously flipped; keep +180 to match path direction
     div.style.transform = `translate(-50%, -50%) rotate(${bearing + 180}deg)`;
     div.style.cursor = "pointer";
     div.style.opacity = "0.95";
     div.style.zIndex = 700;
+
+    // Add click listener for InfoWindow
     div.addEventListener("click", () => {
       const infoWindow = new google.maps.InfoWindow({
         content: infoWindowContent,
@@ -731,8 +742,10 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
   overlay.draw = function () {
     const projection = this.getProjection();
     const position = projection.fromLatLngToDivPixel(new google.maps.LatLng(coord.lat, coord.lng));
-    this.div.style.left = `${position.x}px`;
-    this.div.style.top = `${position.y}px`;
+    if (this.div) {
+      this.div.style.left = `${position.x}px`;
+      this.div.style.top = `${position.y}px`;
+    }
   };
 
   overlay.onRemove = function () {
