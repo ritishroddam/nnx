@@ -90,7 +90,7 @@ def view_multiple_share_locations(token):
     now = datetime.now(timezone.utc)  
     
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
-        return jsonify({"error": "Link expired"}), 410
+        return render_template('link_expired.html'), 410
 
     licensePlateNumbers = info['licensePlateNumber'] 
     vehicles_data = []
@@ -160,7 +160,7 @@ def view_share_location(licensePlateNumber, token):
     now = datetime.now(timezone.utc)  
     
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
-        return jsonify({"error": "Link expired"}), 410
+        return render_template('link_expired.html'), 410
 
     licensePlateNumber = info['licensePlateNumber']
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber},{"_id": 0, "IMEI":1})
