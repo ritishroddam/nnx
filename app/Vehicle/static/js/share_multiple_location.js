@@ -272,8 +272,8 @@ function zoomToVehicle(licensePlate, lat, lng) {
     if (marker) {
         map.setCenter({ lat, lng });
         
-        if (map.getZoom() < 12) {
-            map.setZoom(12);
+        if (map.getZoom() < 14) {
+            map.setZoom(14);
         }
     }
 }
