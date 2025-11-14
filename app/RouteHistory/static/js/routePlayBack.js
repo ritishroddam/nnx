@@ -259,19 +259,14 @@ function updateLiveMapPolyline(updatedData) {
       direction = getRotation(coord, nextCoord);
     }
 
-    const arrowContent = document.createElement("div");
-    arrowContent.style.width = "0";
-    arrowContent.style.height = "0";
-    arrowContent.style.position = "absolute";
-    arrowContent.style.backgroundColor = "transparent";
-    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-    arrowContent.style.borderLeft = "6px solid transparent";
-    arrowContent.style.borderRight = "6px solid transparent";
-    // center the arrow over the point and rotate (arrow graphic points opposite, add 180°)
+    // use SVG arrow for crisper rendering
+    const arrowSizeW = 14;
+    const arrowSizeH = 18;
+    const arrowContent = createSvgArrowElement(arrowSizeW, arrowSizeH, arrowColor);
+    // center + rotate (arrow points up by default, add 180° because earlier arrows pointed opposite)
     arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction + 180}deg)`;
     arrowContent.style.opacity = "0.95";
     arrowContent.style.zIndex = 800;
-    arrowContent.style.pointerEvents = "none";
 
     const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
       position: coord,
@@ -304,6 +299,35 @@ function getRotation(coord, nextCoord) {
   let brng = Math.atan2(y, x);
   brng = toDeg(brng);
   return (brng + 360) % 360; // Normalize to 0-360
+}
+
+// Helper: create an SVG arrow element wrapped in a div for crisp rendering
+function createSvgArrowElement(width = 20, height = 20, color = '#2a2a2a') {
+  const container = document.createElement('div');
+  container.style.width = `${width}px`;
+  container.style.height = `${height}px`;
+  container.style.position = 'absolute';
+  container.style.background = 'transparent';
+  container.style.pointerEvents = 'none';
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.justifyContent = 'center';
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.style.display = 'block';
+
+  const poly = document.createElementNS(ns, 'polygon');
+  // Triangle pointing up: top center then bottom-right then bottom-left
+  poly.setAttribute('points', '10,0 20,20 0,20');
+  poly.setAttribute('fill', color);
+  svg.appendChild(poly);
+
+  container.appendChild(svg);
+  return container;
 }
 
 async function plotPolyLineLiveMap(liveData) {
@@ -384,16 +408,10 @@ async function plotPolyLineLiveMap(liveData) {
         direction = getRotation(coord, nextCoord);
       }
 
-      // create centered triangle arrow
-      const arrowContent = document.createElement("div");
-      arrowContent.style.width = "0";
-      arrowContent.style.height = "0";
-      arrowContent.style.position = "absolute";
-      arrowContent.style.backgroundColor = "transparent";
-      arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-      arrowContent.style.borderLeft = "6px solid transparent";
-      arrowContent.style.borderRight = "6px solid transparent";
-      // arrow graphic points opposite by default, add 180° to align
+      // use SVG arrow for crisper rendering
+      const innerArrowW = 14;
+      const innerArrowH = 18;
+      const arrowContent = createSvgArrowElement(innerArrowW, innerArrowH, arrowColor);
       arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction + 180}deg)`;
       arrowContent.style.opacity = "0.95";
       arrowContent.style.zIndex = 800;
@@ -711,26 +729,18 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
   const overlay = new google.maps.OverlayView();
 
   overlay.onAdd = function () {
-    const div = document.createElement("div");
-    // create a centered triangular arrow using CSS borders and rotate to bearing
-    div.style.width = "0";
-    div.style.height = "0";
-    div.style.position = "absolute";
     const darkModeLocal = document.body.classList.contains("dark-mode");
     const arrowColorLocal = darkModeLocal ? '#fff' : '#2a2a2a';
-    div.style.borderTop = `12px solid ${arrowColorLocal}`;
-    div.style.borderLeft = "7px solid transparent";
-    div.style.borderRight = "7px solid transparent";
-    // center the arrow on the lat/lng point and rotate towards nextCoord
+    const arrowEl = createSvgArrowElement(16, 20, arrowColorLocal);
     const bearing = calculateBearingGoogle(coord, nextCoord);
-    // overlay arrow graphic points opposite by default, add 180° to align
-    div.style.transform = `translate(-50%, -50%) rotate(${bearing + 180}deg)`;
-    div.style.cursor = "pointer";
-    div.style.opacity = "0.95";
-    div.style.zIndex = 700;
+    arrowEl.style.transform = `translate(-50%, -50%) rotate(${bearing + 180}deg)`;
+    arrowEl.style.cursor = "pointer";
+    arrowEl.style.opacity = "0.95";
+    arrowEl.style.zIndex = 700;
+    // enable pointer events so clicks work on overlay arrows
+    arrowEl.style.pointerEvents = 'auto';
 
-    // Add click listener for InfoWindow
-    div.addEventListener("click", () => {
+    arrowEl.addEventListener("click", () => {
       const infoWindow = new google.maps.InfoWindow({
         content: infoWindowContent,
       });
@@ -738,9 +748,9 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
       infoWindow.open(map);
     });
 
-    this.div = div;
+    this.div = arrowEl;
     const panes = this.getPanes();
-    panes.overlayMouseTarget.appendChild(div);
+    panes.overlayMouseTarget.appendChild(arrowEl);
   };
 
   overlay.draw = function () {
