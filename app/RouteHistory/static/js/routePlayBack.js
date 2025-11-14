@@ -189,15 +189,24 @@ function updateLiveMapVehicleData(updatedData) {
     speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
   }
 
-  const vehicleContent = document.createElement("img");
-  vehicleContent.src = iconUrl;
-  vehicleContent.style.width = `${size.width}px`;
-  vehicleContent.style.height = `${size.height}px`;
-  vehicleContent.style.position = "absolute";
-  vehicleContent.alt = vehicleType;
-  vehicleContent.style.transform = `rotate(${rotation}deg)`;
+  // Create a centered wrapper for the live vehicle marker
+  const vehicleImg = document.createElement("img");
+  vehicleImg.src = iconUrl;
+  vehicleImg.alt = vehicleType;
+  vehicleImg.style.width = '100%';
+  vehicleImg.style.height = '100%';
 
-  markerLive.content = vehicleContent;
+  const liveWrapper = document.createElement("div");
+  liveWrapper.style.position = "absolute";
+  liveWrapper.style.width = `${size.width}px`;
+  liveWrapper.style.height = `${size.height}px`;
+  liveWrapper.style.display = 'flex';
+  liveWrapper.style.alignItems = 'center';
+  liveWrapper.style.justifyContent = 'center';
+  liveWrapper.style.transform = `translate(-50%, -50%) rotate(${rotation || 0}deg)`;
+  liveWrapper.appendChild(vehicleImg);
+
+  markerLive.content = liveWrapper;
 
   startMarkerInfo = new google.maps.InfoWindow({
     content: `<div>
@@ -247,12 +256,10 @@ function updateLiveMapPolyline(updatedData) {
     let direction = rotation || 0;
     if (i < liveCoords.length - 1) {
       const nextCoord = liveCoords[i + 1];
-      // bearing from current coord to next coord
       direction = getRotation(coord, nextCoord);
     }
 
     const arrowContent = document.createElement("div");
-    // Create a centered triangle arrow and rotate it to match bearing
     arrowContent.style.width = "0";
     arrowContent.style.height = "0";
     arrowContent.style.position = "absolute";
@@ -260,8 +267,8 @@ function updateLiveMapPolyline(updatedData) {
     arrowContent.style.borderTop = `10px solid ${arrowColor}`;
     arrowContent.style.borderLeft = "6px solid transparent";
     arrowContent.style.borderRight = "6px solid transparent";
-    // center the arrow over the point and rotate
-    arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction}deg)`;
+    // center the arrow over the point and rotate (arrow graphic points opposite, add 180°)
+    arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction + 180}deg)`;
     arrowContent.style.opacity = "0.95";
     arrowContent.style.zIndex = 800;
     arrowContent.style.pointerEvents = "none";
@@ -344,21 +351,30 @@ async function plotPolyLineLiveMap(liveData) {
       map: liveMaps,
     });
 
+    // Wrap image in a centered container so the marker is centered on the polyline
     const vehicleContent = document.createElement("img");
     vehicleContent.src = iconUrl;
-    vehicleContent.style.width = `${size.width}px`;
-    vehicleContent.style.height = `${size.height}px`;
-    vehicleContent.style.position = "absolute";
     vehicleContent.alt = vehicleType;
-    vehicleContent.style.filter = darkMode ? "brightness(1.5)" : "";
-    vehicleContent.style.transform = `rotate(${recentData.course || 0}deg)`;
+    vehicleContent.style.width = '100%';
+    vehicleContent.style.height = '100%';
 
-    markerLive = new google.maps.marker.AdvancedMarkerElement({
-      position: liveCoords[liveCoords.length - 1],
-      map: liveMaps,
-      title: "Start",
-      content: vehicleContent,
-    });
+    const vehicleWrapper = document.createElement("div");
+    vehicleWrapper.style.position = "absolute";
+    vehicleWrapper.style.width = `${size.width}px`;
+    vehicleWrapper.style.height = `${size.height}px`;
+    vehicleWrapper.style.display = 'flex';
+    vehicleWrapper.style.alignItems = 'center';
+    vehicleWrapper.style.justifyContent = 'center';
+    vehicleWrapper.style.transform = `translate(-50%, -50%) rotate(${recentData.course || 0}deg)`;
+    if (darkMode) vehicleContent.style.filter = "brightness(1.5)";
+    vehicleWrapper.appendChild(vehicleContent);
+
+      markerLive = new google.maps.marker.AdvancedMarkerElement({
+        position: liveCoords[liveCoords.length - 1],
+        map: liveMaps,
+        title: "Start",
+        content: vehicleWrapper,
+      });
 
     for (let i = 0; i < liveCoords.length; i++) {
       const coord = liveCoords[i];
@@ -377,7 +393,8 @@ async function plotPolyLineLiveMap(liveData) {
       arrowContent.style.borderTop = `10px solid ${arrowColor}`;
       arrowContent.style.borderLeft = "6px solid transparent";
       arrowContent.style.borderRight = "6px solid transparent";
-      arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction}deg)`;
+      // arrow graphic points opposite by default, add 180° to align
+      arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction + 180}deg)`;
       arrowContent.style.opacity = "0.95";
       arrowContent.style.zIndex = 800;
       arrowContent.style.pointerEvents = "none";
@@ -706,7 +723,8 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
     div.style.borderRight = "7px solid transparent";
     // center the arrow on the lat/lng point and rotate towards nextCoord
     const bearing = calculateBearingGoogle(coord, nextCoord);
-    div.style.transform = `translate(-50%, -50%) rotate(${bearing}deg)`;
+    // overlay arrow graphic points opposite by default, add 180° to align
+    div.style.transform = `translate(-50%, -50%) rotate(${bearing + 180}deg)`;
     div.style.cursor = "pointer";
     div.style.opacity = "0.95";
     div.style.zIndex = 700;
@@ -811,19 +829,28 @@ async function plotPathOnMap(pathCoordinates) {
   deckLayers = [pathLayer];
   deckInitialized = true;
 
+  // Create a centered wrapper for the vehicle so it's anchored on the path
   const vehicleContent = document.createElement("img");
   vehicleContent.src = iconUrl;
-  vehicleContent.style.width = `${size.width}px`;
-  vehicleContent.style.height = `${size.height}px`;
-  vehicleContent.style.position = "absolute";
   vehicleContent.alt = vehicleType;
-  vehicleContent.style.transform = `rotate(${pathCoordinates[0]?.course || 0}deg)`;
+  vehicleContent.style.width = '100%';
+  vehicleContent.style.height = '100%';
+
+  const vehicleWrapper = document.createElement("div");
+  vehicleWrapper.style.position = "absolute";
+  vehicleWrapper.style.width = `${size.width}px`;
+  vehicleWrapper.style.height = `${size.height}px`;
+  vehicleWrapper.style.display = 'flex';
+  vehicleWrapper.style.alignItems = 'center';
+  vehicleWrapper.style.justifyContent = 'center';
+  vehicleWrapper.style.transform = `translate(-50%, -50%) rotate(${pathCoordinates[0]?.course || 0}deg)`;
+  vehicleWrapper.appendChild(vehicleContent);
 
   carMarker = new google.maps.marker.AdvancedMarkerElement({
     position: coords[0],
     map: map,
     title: "Vehicle",
-    content: vehicleContent,
+    content: vehicleWrapper,
     zIndex: 1000,
   });
   window.__allMapMarkers.push(carMarker);
@@ -941,7 +968,7 @@ function updateCarPosition(index) {
 
   carMarker.position = point;
   if (carMarker.content) {
-    carMarker.content.style.transform = `rotate(${bearing}deg)`;
+    carMarker.content.style.transform = `translate(-50%, -50%) rotate(${bearing}deg)`;
   }
 
   const carLatLng = new google.maps.LatLng(point.lat, point.lng);
@@ -985,7 +1012,7 @@ function moveCar() {
         if (carMarker) {
           carMarker.position = { lat, lng };
           if (carMarker.content) {
-            carMarker.content.style.transform = `rotate(${stepBearing}deg)`;
+            carMarker.content.style.transform = `translate(-50%, -50%) rotate(${stepBearing}deg)`;
           }
         }
 
