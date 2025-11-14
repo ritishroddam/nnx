@@ -180,7 +180,7 @@ function updateMarkerColor(marker, speed, lastUpdate) {
     marker.lastUpdate = lastUpdate;
 }
 
-function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, duration = 10000) {
+function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, duration = 12000) {
     const startPosition = marker.currentPosition;
     const startCourse = marker.currentCourse || 0;
     const startTime = performance.now();
