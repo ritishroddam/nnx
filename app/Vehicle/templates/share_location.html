@@ -15,6 +15,7 @@
             ({ key: "AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84", v: "weekly" });</script>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84&libraries=geometry"></script>
 </head>
 
 <body>
@@ -40,6 +41,9 @@
         window.licensePlateNumber = "{{ vehicle.LicensePlateNumber }}";
         window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
         window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
+        window.vehicleSpeed = "{{ vehicle.speed|default(0) }}";
+        window.vehicleCourse = "{{ vehicle.course|default(0) }}";
+        window.vehicleLastUpdate = "{{ vehicle.date_time }}";
         window.shareToken = "{{ token }}";
     </script>
 </body>
