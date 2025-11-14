@@ -32,10 +32,8 @@ async function initMap() {
             
             bounds.extend(latLng)
 
-            // Get course from vehicle data (convert to number)
             const course = vehicle.course ? parseFloat(vehicle.course) : 0;
             
-            // Create marker with proper rotation
             const markerElement = createRotatableMarker(course);
             
             const marker = new AdvancedMarkerElement({
@@ -45,7 +43,6 @@ async function initMap() {
                 content: markerElement,
             })
 
-            // Store marker data
             marker.licensePlate = vehicle.licensePlateNumber;
             marker.currentPosition = latLng;
             marker.currentCourse = course;
@@ -86,11 +83,10 @@ async function initMap() {
     setupCardHoverEvents();
 }
 
-// Create a properly rotatable marker element
 function createRotatableMarker(course = 0) {
     const container = document.createElement("div");
     container.style.position = "relative";
-    container.style.width = "32px";
+    container.style.width = "16px";
     container.style.height = "32px";
     container.style.display = "flex";
     container.style.alignItems = "center";
@@ -98,23 +94,21 @@ function createRotatableMarker(course = 0) {
     
     const carImg = document.createElement("img");
     carImg.src = "/static/images/car_green.png";
-    carImg.style.width = "24px"; // Slightly smaller to fit in container
+    carImg.style.width = "24px"; 
     carImg.style.height = "24px";
     carImg.style.transform = `rotate(${course}deg)`;
     carImg.style.transition = "transform 0.3s ease";
-    carImg.style.transformOrigin = "center center"; // Ensure rotation around center
+    carImg.style.transformOrigin = "center center"; 
     carImg.alt = "Vehicle";
     
     container.appendChild(carImg);
     return container;
 }
 
-// Update marker rotation with proper course handling
 function updateMarkerRotation(marker, newCourse) {
     const container = marker.content;
     const img = container.querySelector('img');
     if (img) {
-        // Convert course to number and ensure it's a valid degree value
         const course = parseFloat(newCourse) || 0;
         img.style.transform = `rotate(${course}deg)`;
         console.log(`Rotated marker ${marker.licensePlate} to ${course}°`);
@@ -122,28 +116,23 @@ function updateMarkerRotation(marker, newCourse) {
     marker.currentCourse = newCourse;
 }
 
-// Smooth animation for marker movement with rotation
 function animateMarker(marker, newPosition, newCourse, duration = 2000) {
     const startPosition = marker.currentPosition;
     const startCourse = marker.currentCourse || 0;
     const startTime = performance.now();
     
-    // Calculate distance for animation speed adjustment
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
         startPosition, newPosition
     );
     
-    // Adjust duration based on distance
     const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
     
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / adjustedDuration, 1);
         
-        // Easing function for smooth movement
         const easeProgress = easeInOutCubic(progress);
         
-        // Interpolate position
         const lat = startPosition.lat() + (newPosition.lat() - startPosition.lat()) * easeProgress;
         const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
         
@@ -151,13 +140,11 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         marker.position = currentLatLng;
         marker.currentPosition = currentLatLng;
         
-        // Interpolate rotation if course changed
         if (newCourse !== undefined && newCourse !== startCourse) {
             const currentCourse = startCourse + (newCourse - startCourse) * easeProgress;
             updateMarkerRotation(marker, currentCourse);
         }
         
-        // If this is the tracked vehicle, keep the map centered on it
         if (trackedVehicle === marker.licensePlate) {
             map.setCenter(currentLatLng);
         }
@@ -165,7 +152,6 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            // Final position and rotation
             marker.position = newPosition;
             marker.currentPosition = newPosition;
             if (newCourse !== undefined) {
@@ -177,7 +163,6 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
     requestAnimationFrame(animate);
 }
 
-// Easing function for smooth animation
 function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -261,7 +246,6 @@ socket.on("vehicle_live_update", (data) => {
             parseFloat(data.longitude)
         );
         
-        // Get course from update data (ensure it's a number)
         const newCourse = data.course ? parseFloat(data.course) : marker.currentCourse;
         
         console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°`);
