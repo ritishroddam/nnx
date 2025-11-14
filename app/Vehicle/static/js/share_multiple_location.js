@@ -328,15 +328,31 @@ function updateVehicleInfo(vehicleData) {
         
         if (locationEl) locationEl.textContent = vehicleData.address || 'Unknown Location';
         if (speedEl) {
-            if (vehicleData.speed && vehicleData.speed !== '' && parseInt(vehicleData.speed) === 0) {
-                speedEl.textContent = `Stopped: ${vehicleData.speed} kmph, since 0 seconds`;
-            } else if (vehicleData.speed && vehicleData.speed !== '') {
-                speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
+            if (vehicleData.speed && vehicleData.speed !== '' && vehicleData.speed !== null) {
+                const speedNum = parseInt(vehicleData.speed);
+                if (speedNum === 0) {
+                    speedEl.textContent = `Stopped: ${vehicleData.speed} kmph`;
+                } else {
+                    speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
+                }
             } else {
-                speedEl.textContent = 'Unknown Speed';
+                speedEl.textContent = 'No Speed';
             }
         }
-        if (updateEl) updateEl.textContent = new Date().toLocaleString();
+        if (updateEl) {
+            // Format date as dd/mm/yyyy and time in 12-hour format
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            updateEl.textContent = `${day}/${month}/${year} ${timeStr}`;
+        }
     }
 }
 

@@ -13,6 +13,40 @@
     <script>
         const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
         const shareToken = "{{ token }}";
+
+        // Format date function
+        function formatDateTime(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const timeStr = date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            return `${day}/${month}/${year} ${timeStr}`;
+        }
+
+        // Format speed display
+        function formatSpeed(speed) {
+            if (speed === null || speed === undefined || speed === '') {
+                return 'No Speed';
+            }
+            const speedNum = parseInt(speed);
+            if (speedNum === 0) {
+                return `Stopped: ${speed} kmph`;
+            }
+            return `Moving: ${speed} kmph`;
+        }
+
+        // Initialize formatted data
+        vehiclesData.forEach(vehicle => {
+            vehicle.formattedDateTime = formatDateTime(vehicle.date_time);
+            vehicle.formattedSpeed = formatSpeed(vehicle.speed);
+        });
     </script>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -40,17 +74,17 @@
                             <div class="vehicle-details">
                                 <div class="detail-row">
                                     <span class="detail-label">Last Update</span>
-                                    <span class="detail-value">{{ vehicle.date_time }}</span>
+                                    <span class="detail-value update-time">{{ vehicle.date_time }}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Status</span>
-                                    <span class="detail-value">
+                                    <span class="detail-value speed-status">
                                         {% if vehicle.speed is not none and vehicle.speed != '' and vehicle.speed|int == 0 %}
-                                          Stopped: {{ vehicle.speed }} kmph, since 0 seconds
+                                          Stopped: {{ vehicle.speed }} kmph
                                         {% elif vehicle.speed is not none and vehicle.speed != '' %}
                                           Moving: {{ vehicle.speed }} kmph
                                         {% else %}
-                                          Unknown Speed
+                                          No Speed
                                         {% endif %}
                                     </span>
                                 </div>
@@ -75,5 +109,26 @@
             <p><strong>Link Expires at:</strong> <span id="expires-at">{{ share_info.to_datetime }}</span></p>
         </div>
     </div>
+
+    <script>
+        // Format all the initial dates displayed on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateTimeElements = document.querySelectorAll('.update-time');
+            updateTimeElements.forEach(el => {
+                const dateStr = el.textContent.trim();
+                if (dateStr) {
+                    el.textContent = formatDateTime(dateStr);
+                }
+            });
+
+            const speedElements = document.querySelectorAll('.speed-status');
+            speedElements.forEach(el => {
+                const speedText = el.textContent.trim();
+                if (speedText === 'Unknown Speed') {
+                    el.textContent = 'No Speed';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

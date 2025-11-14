@@ -217,14 +217,33 @@ function updateVehicleData(vehicleData) {
   document.getElementById("location").textContent =
     vehicleData.location || "Unknown Location";
 
-  const speedText =
-    (vehicleData.speed !== null && vehicleData.speed !== undefined)
-      ? `${vehicleData.speed} km/h`
-      : "Unknown Speed";
-  document.getElementById("speed").textContent = speedText;
+  if (vehicleData.speed && vehicleData.speed !== '' && vehicleData.speed !== null) {
+    const speedNum = parseInt(vehicleData.speed);
+    if (speedNum === 0) {
+      document.getElementById("speed").textContent = `Stopped: ${vehicleData.speed} km/h`;
+    } else {
+      document.getElementById("speed").textContent = `Moving: ${vehicleData.speed} km/h`;
+    }
+  } else {
+    document.getElementById("speed").textContent = 'No Speed';
+  }
 
-  document.getElementById("lastUpdate").textContent =
-    vehicleData.date_time || "Unknown Date/Time";
+  // Format date as dd/mm/yyyy and time in 12-hour format
+  if (vehicleData.date_time) {
+    const dateObj = new Date(vehicleData.date_time);
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    const timeStr = dateObj.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: true 
+    });
+    document.getElementById("lastUpdate").textContent = `${day}/${month}/${year} ${timeStr}`;
+  } else {
+    document.getElementById("lastUpdate").textContent = "Unknown Date/Time";
+  }
 }
 
 async function initMap() {
