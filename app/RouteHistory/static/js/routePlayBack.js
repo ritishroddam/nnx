@@ -136,13 +136,13 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
 function getVehicleIconSize(vehicleType) {
   switch(vehicleType.toLowerCase()) {
     case 'truck':
-      return { width: 18, height: 60 };
+      return { width: 24, height: 80 };
     case 'bus':
-      return { width: 22, height: 50 };
+      return { width: 35, height: 80 };
     case 'bike':
-      return { width: 14, height: 38 };
+      return { width: 21, height: 56 };
     default: // car
-      return { width: 18, height: 32 };
+      return { width: 29, height: 56 };
   }
 }
 
