@@ -48,11 +48,6 @@ function showSkeletonLoader() {
   vehicleList.innerHTML = `<div id="skeleton-loader">${skeletonHTML}</div>`;
 }
 
-/////////////////////////////////////////////////////
-/////////////////////////////////////////////////////
-////// Vehicle tracking and management script ///////
-/////////////////////////////////////////////////////
-/////////////////////////////////////////////////////
 
 const sidebar = document.querySelector('.sidebar');
 const floatingCard = document.querySelector('.floating-card');
@@ -270,59 +265,6 @@ async function updateData(data) {
   
   return data;
 }
-
-// async function fetchVehicleData() {
-//   try {
-//     showSkeletonLoader(); 
-
-//     const response = await fetch("/vehicle/api/vehicles");
-//     if (!response.ok) throw new Error("Failed to fetch vehicle data");
-
-//     const data = await response.json();
-//     const now = new Date();
-
-//     data.forEach((vehicle) => {
-//       const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-//       const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
-
-//       if (vehicle.sos === "1" && hoursSinceUpdate > 1) {
-//         vehicle.sos = "0"; 
-//       }
-
-//       if (!vehicle.VehicleType) {
-//         vehicle.VehicleType = 'car';
-//       }
-
-//       vehicleData.set(vehicle.imei, {
-//         LicensePlateNumber: vehicle.LicensePlateNumber,
-//         VehicleType: vehicle.VehicleType,
-//         speed: vehicle.speed,
-//         latitude: vehicle.latitude,
-//         longitude: vehicle.longitude,
-//         date: vehicle.date,
-//         time: vehicle.time,
-//         course: vehicle.course,
-//         address: vehicle.location || "Location unknown",
-//         status: vehicle.status,
-//         imei: vehicle.imei,
-//         ignition: vehicle.ignition,
-//         gsm: vehicle.gsm_sig,
-//         sos: vehicle.sos,
-//         distance: vehicle.distance || 0,
-//         odometer: vehicle.odometer,
-//         stoppage_time: vehicle.stoppage_time,
-//         stoppage_time_delta: vehicle.stoppage_time_delta,
-//         status_time_delta: vehicle.status_time_delta,
-//         status_time_str: vehicle.status_time_str,
-//         normalSpeed: vehicle.normalSpeed,
-//         slowSpeed: vehicle.slowSpeed,
-//       });
-//     });
-//   } catch (error) {
-//     console.error("Error fetching vehicle data:", error);
-//     return [];
-//   }
-// }
 
 async function fetchVehicleData(page = 1) {
   try {
@@ -700,9 +642,6 @@ function triggerSOS(imei, marker) {
     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
 
-    // setTimeout(() => {
-    //   removeSOS(imei);
-    // }, 60000); 
   vehicle.sosActive = true;
   vehicleData.set(imei, vehicle);
   }
@@ -1241,7 +1180,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   infoWindow.setHeaderContent(headerContent);
   infoWindow.setContent(content);
-  // infoWindow.setPosition(latLng);
 }
 
 document.body.addEventListener("click", function (e) {
@@ -1808,7 +1746,6 @@ function updateMultiShareButton() {
     let multiShareBtn = document.getElementById('multi-share-btn');
     
     if (!multiShareBtn && selectedVehicles.size > 0) {
-        // Create multi-share button
         multiShareBtn = document.createElement('button');
         multiShareBtn.id = 'multi-share-btn';
         multiShareBtn.innerHTML = 'Share Selected Vehicles';
@@ -1829,131 +1766,6 @@ function updateMultiShareButton() {
         multiShareBtn.remove();
     }
 }
-
-// async function populateVehicleTable() {
-//   const tableBody = document
-//     .getElementById("vehicle-table")
-//     .getElementsByTagName("tbody")[0];
-//   tableBody.innerHTML = ""; 
-//   const isDarkMode = document.body.classList.contains("dark-mode");
-
-//   showHidecar();
-//   const listContainer = document.getElementById("vehicle-list");
-//   const countContainer = document.getElementById("vehicle-count");
-//   listContainer.innerHTML = "";
-//   countContainer.innerText = vehicleData.length;
-
-//   vehicleData.forEach((vehicle, imei) => {
-//     const vehicleElement = document.createElement("div");
-//     vehicleElement.classList.add("vehicle-card");
-//     vehicleElement.setAttribute("data-imei", vehicle.imei);
-
-//     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-//     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
-//     const speedValue =
-//       vehicle.speed !== null && vehicle.speed !== undefined
-//         ? convertSpeedToKmh(vehicle.speed).toFixed(2)
-//         : null;
-
-//     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
-//     const address = vehicle.address || "Location unknown";
-//     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
-
-//     const now = new Date();
-//     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-//     const timeDiff = Math.abs(now - lastUpdated);
-//     let statusText =  vehicle.status;
-
-//     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
-//     const iconRed = "color:#d32f2f;";
-//     const sosIcon =
-//       vehicle.sos === "1"
-//         ? `<span class="material-symbols-outlined" style="${
-//             iconStyle + iconRed
-//           }">sos</span>`
-//         : "";
-//     const gpsIcon =
-//       statusText === "Offline" ? "location_disabled" : "my_location";
-    
-//     let ignitionIcon, ignitionColor;
-//     if (vehicle.ignition === "0") {
-//       ignitionIcon = "key_off";
-//       ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
-//     } else {
-//       ignitionIcon = "key";
-//       ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
-//     }
-
-//     const ASUgsmValue = parseInt(vehicle.gsm);
-
-//     let gsmIcon, gsmColor;
-
-//     if (ASUgsmValue == 0) {
-//       gsmIcon = "signal_cellular_null";
-//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-//     } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
-//       gsmIcon = "signal_cellular_1_bar";
-//       gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; 
-//     } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
-//       gsmIcon = "signal_cellular_2_bar";
-//       gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
-//     } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
-//       gsmIcon = "signal_cellular_3_bar";
-//       gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
-//     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
-//       gsmIcon = "signal_cellular_4_bar";
-//       gsmColor = isDarkMode ? "#81c784" : "#4caf50";
-//     } else {
-//       gsmIcon = "signal_cellular_off";
-//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-//     }    
-
-//     console.log(vehicle.imei);
-
-//     const row = tableBody.insertRow();
-//     row.insertCell(0).innerText = vehicle.LicensePlateNumber
-//       ? vehicle.LicensePlateNumber
-//       : vehicle.imei;
-//     row.insertCell(1).innerText = vehicle.VehicleType;
-//     row.insertCell(2).innerText = formatLastUpdatedText(
-//       vehicle.date,
-//       vehicle.time
-//     );
-
-//     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
-//     row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
-//     row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
-
-//     const speedCell = row.insertCell(6);
-//     speedCell.innerText = speed;
-//     if (speedValue !== null && parseFloat(speedValue) > 60) {
-//       speedCell.style.border = "2px solid red";
-//     }
-
-//     row.insertCell(7).innerText = vehicle.distance
-//       ? parseFloat(vehicle.distance).toFixed(2)
-//       : "N/A";
-//     row.insertCell(8).innerText = vehicle.odometer; 
-
-//     const icons = `
-//       <div class="vehicle-table-icons">
-//         ${sosIcon}
-//         <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-//         <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
-//         <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
-//       </div>
-//     `;
-//     row.insertCell(9).innerHTML = icons;
-
-//     row.style.cursor = "pointer";
-//     row.addEventListener("click", function (e) {
-//       if (e.target.tagName.toLowerCase() === "a") return;
-//       window.open(url, "_blank");
-//     });
-//   });
-//   showHidecar();
-// }
 
 function populateVehicleTable() {
   const tableBody = document
@@ -2084,124 +1896,6 @@ function populateVehicleTable() {
   updateMultiShareButton();
   showHidecar();
 }
-
-// function showMultiShareLocationPopup() {
-//     if (selectedVehicles.size === 0) {
-//         alert('Please select at least one vehicle');
-//         return;
-//     }
-
-//     const oldPopup = document.getElementById("multi-share-location-popup");
-//     if (oldPopup) oldPopup.remove();
-
-//     const popup = document.createElement("div");
-//     popup.id = "multi-share-location-popup";
-    
-//     const selectedPlates = Array.from(selectedVehicles).map(imei => {
-//         const vehicle = vehicleData.get(imei);
-//         return vehicle.LicensePlateNumber || imei;
-//     }).join(', ');
-    
-//     popup.innerHTML = `
-//     <div class="share-popup-content" style="min-width: 500px;">
-//       <h3>Share Live Location - Multiple Vehicles</h3>
-//       <div style="margin-bottom: 10px;">
-//         <strong>Selected Vehicles:</strong> ${selectedPlates}
-//       </div>
-//       <div>
-//         <label for="multi-from-datetime">From:</label>
-//         <input type="datetime-local" id="multi-from-datetime" style="margin-bottom:8px; width: 100%;">
-//       </div>
-//       <div>
-//         <label for="multi-to-datetime">To:</label>
-//         <input type="datetime-local" id="multi-to-datetime" style="margin-bottom:8px; width: 100%;">
-//       </div>
-//       <button id="generate-multi-share-link" style="background:#388e3c;color:#fff; padding: 8px 16px;">Generate Share Links</button>
-//       <div style="margin-top:10px;">
-//         <textarea id="multi-share-links-input" readonly style="width:100%; height: 120px; resize: vertical;" placeholder="Generated links will appear here..."></textarea>
-//       </div>
-//       <button id="close-multi-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
-//     </div>
-//   `;
-//   document.body.appendChild(popup);
-
-//   popup.style.position = "fixed";
-//   popup.style.left = "50%";
-//   popup.style.top = "50%";
-//   popup.style.transform = "translate(-50%, -50%)";
-//   popup.style.zIndex = "9999";
-//   popup.style.backgroundColor = "white";
-//   popup.style.padding = "20px";
-//   popup.style.borderRadius = "8px";
-//   popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-//   popup.style.maxWidth = "90%";
-//   popup.style.maxHeight = "90%";
-//   popup.style.overflow = "auto";
-
-//   const now = new Date();
-//   const pad = (n) => n.toString().padStart(2, "0");
-//   const toISOStringLocal = (d) =>
-//     `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-
-//   document.getElementById("multi-from-datetime").value = toISOStringLocal(now);
-//   const toDate = new Date(now.getTime() + 15 * 60000);
-//   document.getElementById("multi-to-datetime").value = toISOStringLocal(toDate);
-
-//   document.getElementById("close-multi-share-popup").onclick = () => {
-//     popup.remove();
-//     selectedVehicles.clear();
-//     document.querySelectorAll('#vehicle-table tbody tr.selected').forEach(row => {
-//         row.classList.remove('selected');
-//     });
-//     updateMultiShareButton();
-//   };
-
-//   document.getElementById("generate-multi-share-link").onclick = async function () {
-//     const from_datetime = document.getElementById("multi-from-datetime").value;
-//     const to_datetime = document.getElementById("multi-to-datetime").value;
-//     const textarea = document.getElementById("multi-share-links-input");
-//     textarea.value = "Generating links...";
-
-//     if (!from_datetime || !to_datetime) {
-//       textarea.value = "Please select both date and time.";
-//       return;
-//     }
-
-//     try {
-//       const links = [];
-//       const imeis = Array.from(selectedVehicles);
-      
-//       for (const imei of imeis) {
-//         const vehicle = vehicleData.get(imei);
-//         if (vehicle && vehicle.LicensePlateNumber) {
-//           const res = await fetch(`/shareLocation/share-location`, {
-//             method: "POST",
-//             headers: { 
-//               "Content-Type": "application/json",
-//               "X-CSRF-TOKEN": getCookie("csrf_access_token"),
-//             },
-//             body: JSON.stringify({
-//               LicensePlateNumber: vehicle.LicensePlateNumber,
-//               from_datetime,
-//               to_datetime,
-//             }),
-//           });
-          
-//           const data = await res.json();
-//           if (data.link) {
-//             links.push(`${vehicle.LicensePlateNumber}: ${data.link}`);
-//           } else {
-//             links.push(`${vehicle.LicensePlateNumber}: Failed to generate link - ${data.error || 'Unknown error'}`);
-//           }
-//         }
-//       }
-      
-//       textarea.value = links.join('\n\n');
-//     } catch (e) {
-//       textarea.value = "Failed to generate links: " + e.message;
-//     }
-//   };
-// }
 
 function showMultiShareLocationPopup() {
     if (selectedVehicles.size === 0) {
@@ -2426,7 +2120,7 @@ function getVehicleIconSize(vehicleType) {
       return { width: 35, height: 80 }; 
     case 'bike':
       return { width: 21, height: 56 }; 
-    default: // car
+    default: 
       return { width: 29, height: 56 }; 
   }
 }
@@ -2598,142 +2292,6 @@ function panToWithOffset(latLng, offsetX = -50, offsetY = 0) {
     .fromPointToLatLng(worldCoordinateNewCenter);
   map.panTo(newLatLng);
 }
-
-// function addHoverListenersToCardsAndMarkers() {
-//   const vehicleCards = document.querySelectorAll(".vehicle-card");
-//   vehicleCards.forEach((card) => {
-//     card.addEventListener("mouseover", () => {
-//       const imei = card.getAttribute("data-imei");
-//       const marker = markers[imei];
-//       if (marker) {
-
-//         let latLng = new google.maps.LatLng(
-//           marker.position.lat,
-//           marker.position.lng
-//         );
-
-//         map.setZoom(19);
-//         panToWithOffset(latLng, -200, 0);
-
-//         const coords = {
-//           lat: marker.position.lat,
-//           lon: marker.position.lng,
-//         };
-
-//         const address = marker.device.address || "Location unknown";
-//         setInfoWindowContent(
-//           infoWindow,
-//           marker,
-//           latLng,
-//           marker.device,
-//           address
-//         );
-//         infoWindow.open(map, marker);
-//       }
-//     });
-
-//     card.addEventListener("mouseout", () => {
-//       infoWindow.close();
-//     });
-//   });
-
-//   Object.keys(markers).forEach((imei) => {
-//     const marker = markers[imei];
-//     if (marker) {
-//       marker.addEventListener("mouseover", () => {
-//         const vehicleCard = document.querySelector(
-//           `.vehicle-card[data-imei="${imei}"]`
-//         );
-//         if (vehicleCard) {
-//           vehicleCard.scrollIntoView({
-//             behavior: "smooth",
-//             block: "nearest",
-//             inline: "nearest",
-//           });
-
-//           vehicleCard.classList.add("highlight");
-
-//           const isDarkMode = document.body.classList.contains("dark-mode");
-
-//           if (isDarkMode) {
-//             vehicleCard.style.backgroundColor = "black";
-//             vehicleCard.style.color = "#fff";
-
-//             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-//             if (vehicleHeader) {
-//               vehicleHeader.style.color = "#000000d0";
-//             }
-            
-//             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-//             if (vehicleInfo) {
-//               vehicleInfo.style.color = "#000000d0"; 
-
-//               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-//               vehicleInfoStrong.forEach((tag) => {
-//                 tag.style.color = "#000000d0";
-//               });
-//               const vehicleInfoA = vehicleCard.querySelector("a");
-//               if (vehicleInfoA) {
-//                 vehicleInfoA.style.color = "#000000d0"; 
-//               }
-//             }
-//           } else {
-//             vehicleCard.style.backgroundColor = "#ccc"; 
-//             const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-//             if (vehicleHeader) {
-//               vehicleHeader.style.color = "#ccc"; 
-//             }
-//             const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-//             if (vehicleInfo) {
-//               vehicleInfo.style.color = "#ccc"; 
-
-//               const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-//               vehicleInfoStrong.forEach((tag) => {
-//                 tag.style.color = "#ccc"; 
-//               });
-//               const vehicleInfoA = vehicleCard.querySelector("a");
-//               if (vehicleInfoA) {
-//                 vehicleInfoA.style.color = "#ccc"; 
-//               }
-//             }
-//           }
-//         }
-//       });
-
-//       marker.addEventListener("mouseout", () => {
-//         const vehicleCard = document.querySelector(
-//           `.vehicle-card[data-imei="${imei}"]`
-//         );
-//         if (vehicleCard) {
-//           vehicleCard.classList.remove("highlight");
-
-//           vehicleCard.style.transition =
-//             "background-color 0.3s ease-in-out, color 0.3s ease-in-out";
-//           vehicleCard.style.backgroundColor = ""; 
-//           vehicleCard.style.color = "";
-
-//           const vehicleHeader = vehicleCard.querySelector(".vehicle-header");
-//           if (vehicleHeader) {
-//             vehicleHeader.style.color = "";
-//           }
-//           const vehicleInfo = vehicleCard.querySelector(".vehicle-info");
-//           if (vehicleInfo) {
-//             vehicleInfo.style.color = ""; 
-
-//             const vehicleInfoStrong = vehicleCard.querySelectorAll("strong");
-//             vehicleInfoStrong.forEach((tag) => {
-//               tag.style.color = ""; 
-//             });
-//             const vehicleInfoA = vehicleCard.querySelector("a");
-//             if (vehicleInfoA) {
-//               vehicleInfoA.style.color = ""; 
-//             }
-//           }
-//         }
-//       });
-//     }
-//   });
-// }
 
 function addHoverListenersToCardsAndMarkers() {
   const vehicleCards = document.querySelectorAll(".vehicle-card");

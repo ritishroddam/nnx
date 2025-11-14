@@ -43,7 +43,7 @@ def api_share_location():
         return jsonify({"error": "LicensePlateNumber, from_datetime, and to_datetime required"}), 400
 
     try:
-        local_tz = pytz.timezone("Asia/Kolkata")  # or your local timezone
+        local_tz = pytz.timezone("Asia/Kolkata")  
         from_naive = datetime.strptime(from_str, "%Y-%m-%dT%H:%M")
         to_naive = datetime.strptime(to_str, "%Y-%m-%dT%H:%M")
         from_datetime = local_tz.localize(from_naive).astimezone(pytz.UTC)

@@ -52,15 +52,13 @@ socket.on("vehicle_live_update", (data) => {
   console.log("Vehicle live update:", data);
 });
 
-// Create a properly rotatable marker element
-// Create a properly rotatable marker element
 function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicleType = 'car') {
   function _getVehicleIconSize(type) {
     switch ((type || 'car').toLowerCase()) {
       case 'truck': return { width: 24, height: 80 };
       case 'bus':   return { width: 35, height: 80 };
       case 'bike':  return { width: 21, height: 56 };
-      default:      return { width: 29, height: 56 }; // car
+      default:      return { width: 29, height: 56 }; 
     }
   }
 
@@ -76,7 +74,6 @@ function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicle
   
   const carImg = document.createElement("img");
   
-  // Determine color based on speed and last update time
   const color = getMarkerColor(speed, lastUpdate);
   carImg.src = `/static/images/car_${color}.png`;
   carImg.style.width = `${size.width}px`;
@@ -92,9 +89,7 @@ function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicle
   return container;
 }
 
-// Get marker color based on speed and last update time
 function getMarkerColor(speed, lastUpdate) {
-  // Check if no update in last 24 hours
   if (lastUpdate) {
     const lastUpdateTime = new Date(lastUpdate).getTime();
     const currentTime = new Date().getTime();
@@ -105,21 +100,19 @@ function getMarkerColor(speed, lastUpdate) {
     }
   }
   
-  // Convert speed to number
   const speedNum = parseFloat(speed) || 0;
   
   if (speedNum === 0) {
-    return 'yellow';  // Stopped
+    return 'yellow';  
   } else if (speedNum > 60) {
-    return 'red';      // Speed > 60
+    return 'red';     
   } else if (speedNum > 40) {
-    return 'blue';     // Speed > 40
+    return 'blue';    
   } else {
-    return 'green';    // Moving but speed <= 40
+    return 'green';   
   }
 }
 
-// Update marker rotation with proper course handling
 function updateMarkerRotation(marker, newCourse) {
   const container = marker.content;
   const img = container.querySelector('img');
@@ -131,7 +124,6 @@ function updateMarkerRotation(marker, newCourse) {
   marker.currentCourse = newCourse;
 }
 
-// Update marker color based on speed and last update
 function updateMarkerColor(marker, speed, lastUpdate) {
   const container = marker.content;
   const img = container.querySelector('img');
@@ -149,28 +141,23 @@ function updateMarkerColor(marker, speed, lastUpdate) {
   marker.lastUpdate = lastUpdate;
 }
 
-// Smooth animation for marker movement with rotation
 function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, duration = 2000) {
   const startPosition = marker.currentPosition;
   const startCourse = marker.currentCourse || 0;
   const startTime = performance.now();
   
-  // Calculate distance for animation speed adjustment
   const distance = google.maps.geometry.spherical.computeDistanceBetween(
     startPosition, newPosition
   );
   
-  // Adjust duration based on distance
   const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
   
   function animate(currentTime) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / adjustedDuration, 1);
     
-    // Easing function for smooth movement
     const easeProgress = easeInOutCubic(progress);
     
-    // Interpolate position
     const lat = startPosition.lat() + (newPosition.lat() - startPosition.lat()) * easeProgress;
     const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
     
@@ -178,25 +165,21 @@ function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 
     marker.position = currentLatLng;
     marker.currentPosition = currentLatLng;
     
-    // Interpolate rotation if course changed
     if (newCourse !== undefined && newCourse !== startCourse) {
       const currentCourse = startCourse + (newCourse - startCourse) * easeProgress;
       updateMarkerRotation(marker, currentCourse);
     }
     
-    // Keep map centered on marker
     map.setCenter(currentLatLng);
     
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      // Final position and rotation
       marker.position = newPosition;
       marker.currentPosition = newPosition;
       if (newCourse !== undefined) {
         updateMarkerRotation(marker, newCourse);
       }
-      // Update color at the end of animation
       if (newSpeed !== undefined || newLastUpdate !== undefined) {
         updateMarkerColor(marker, newSpeed, newLastUpdate);
       }
@@ -206,7 +189,6 @@ function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 
   requestAnimationFrame(animate);
 }
 
-// Easing function for smooth animation
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -222,7 +204,6 @@ function updateMarkerPosition(latitude, longitude, course, speed, lastUpdate) {
   
   const latLng = new google.maps.LatLng(latitude, longitude);
   
-  // Use animation instead of direct position update
   animateMarker(vehicleMarker, latLng, course, speed, lastUpdate, 2000);
 }
 
@@ -241,7 +222,6 @@ function updateVehicleData(vehicleData) {
     document.getElementById("speed").textContent = 'No Speed';
   }
 
-  // Format date as dd/mm/yyyy and time in 12-hour format
   if (vehicleData.date_time) {
     const dateObj = new Date(vehicleData.date_time);
     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -273,13 +253,11 @@ async function initMap() {
     zoom: 16,
   });
 
-  // Get initial values from window variables if available
   const initialCourse = window.vehicleCourse ? parseFloat(window.vehicleCourse) : 0;
   const initialSpeed = window.vehicleSpeed ? parseFloat(window.vehicleSpeed) : 0;
   const initialLastUpdate = window.vehicleLastUpdate || null;
   const initialVehicleType = window.vehicleType || 'car';
 
-  // Create rotatable marker with proper color and size based on vehicle type
   const markerContent = createRotatableMarker(initialCourse, initialSpeed, initialLastUpdate, initialVehicleType);
 
   vehicleMarker = new AdvancedMarkerElement({
@@ -289,7 +267,6 @@ async function initMap() {
     content: markerContent,
   });
 
-  // Store marker data
   vehicleMarker.currentPosition = latLng;
   vehicleMarker.currentCourse = initialCourse;
   vehicleMarker.currentSpeed = initialSpeed;

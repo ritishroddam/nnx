@@ -14,7 +14,6 @@
         const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
         const shareToken = "{{ token }}";
 
-        // Format date function
         function formatDateTime(dateStr) {
             if (!dateStr) return 'Unknown';
             const date = new Date(dateStr);
@@ -30,7 +29,6 @@
             return `${day}/${month}/${year} ${timeStr}`;
         }
 
-        // Format speed display
         function formatSpeed(speed) {
             if (speed === null || speed === undefined || speed === '') {
                 return 'No Speed';
@@ -42,7 +40,6 @@
             return `Moving: ${speed} kmph`;
         }
 
-        // Initialize formatted data
         vehiclesData.forEach(vehicle => {
             vehicle.formattedDateTime = formatDateTime(vehicle.date_time);
             vehicle.formattedSpeed = formatSpeed(vehicle.speed);
@@ -111,7 +108,6 @@
     </div>
 
     <script>
-        // Format all the initial dates displayed on page load
         document.addEventListener('DOMContentLoaded', function() {
             const updateTimeElements = document.querySelectorAll('.update-time');
             updateTimeElements.forEach(el => {

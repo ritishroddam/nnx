@@ -106,7 +106,6 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
   const basePath = "/static/images/";
   let vehiclePrefix;
   
-  // Determine vehicle type prefix
   switch(vehicleType.toLowerCase()) {
     case 'truck':
       vehiclePrefix = 'truck';
@@ -117,11 +116,10 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
     case 'bike':
       vehiclePrefix = 'bike';
       break;
-    default: // Default to car for sedan, suv, hatchback, van, etc.
+    default: 
       vehiclePrefix = 'car';
   }
 
-  // Determine color based on speed
   if (speedInKmh === 0) {
     return `${basePath}${vehiclePrefix}_yellow.png`;
   } else if (speedInKmh > 0 && speedInKmh <= 40) {
@@ -141,7 +139,7 @@ function getVehicleIconSize(vehicleType) {
       return { width: 35, height: 80 };
     case 'bike':
       return { width: 21, height: 56 };
-    default: // car
+    default: 
       return { width: 29, height: 56 };
   }
 }
@@ -189,7 +187,6 @@ function updateLiveMapVehicleData(updatedData) {
     speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
   }
 
-  // Create a centered wrapper for the live vehicle marker
   const vehicleImg = document.createElement("img");
   vehicleImg.src = iconUrl;
   vehicleImg.alt = vehicleType;
@@ -287,7 +284,6 @@ function updateLiveMapPolyline(updatedData) {
 }
 
 function getRotation(coord, nextCoord) {
-  // Convert degrees to radians
   const toRad = deg => deg * Math.PI / 180;
   const toDeg = rad => rad * 180 / Math.PI;
 
@@ -302,7 +298,7 @@ function getRotation(coord, nextCoord) {
             Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
   let brng = Math.atan2(y, x);
   brng = toDeg(brng);
-  return (brng + 360) % 360; // Normalize to 0-360
+  return (brng + 360) % 360;
 }
 
 async function plotPolyLineLiveMap(liveData) {
@@ -336,7 +332,6 @@ async function plotPolyLineLiveMap(liveData) {
       speed = `<p><strong>Speed:</strong> ${recentData.speed}</p>`;
     }
 
-    // Detect dark mode
     const darkMode = document.body.classList.contains("dark-mode");
     const arrowColor = darkMode ? "#fff" : "#2a2a2a";
     const polylineColor = darkMode ? "#00bfff" : "#505050";
@@ -350,7 +345,6 @@ async function plotPolyLineLiveMap(liveData) {
       map: liveMaps,
     });
 
-    // Wrap image in a centered container so the marker is centered on the polyline
     const vehicleContent = document.createElement("img");
     vehicleContent.src = iconUrl;
     vehicleContent.alt = vehicleType;
@@ -382,7 +376,7 @@ async function plotPolyLineLiveMap(liveData) {
         const nextCoord = liveCoords[i + 1];
         direction = getRotation(coord, nextCoord);
       }
-      // Create a fresh arrow element per coordinate (CSS-triangle)
+
       const arrowContent = document.createElement("div");
       arrowContent.style.width = "0";
       arrowContent.style.height = "0";
@@ -719,13 +713,11 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
     div.style.borderLeft = "7px solid transparent";
     div.style.borderRight = "7px solid transparent";
     const bearing = calculateBearingGoogle(coord, nextCoord);
-    // arrows were previously flipped; keep +180 to match path direction
     div.style.transform = `translate(-50%, -50%) rotate(${bearing + 180}deg)`;
     div.style.cursor = "pointer";
     div.style.opacity = "0.95";
     div.style.zIndex = 700;
 
-    // Add click listener for InfoWindow
     div.addEventListener("click", () => {
       const infoWindow = new google.maps.InfoWindow({
         content: infoWindowContent,
@@ -827,7 +819,6 @@ async function plotPathOnMap(pathCoordinates) {
   deckLayers = [pathLayer];
   deckInitialized = true;
 
-  // Create a centered wrapper for the vehicle so it's anchored on the path
   const vehicleContent = document.createElement("img");
   vehicleContent.src = iconUrl;
   vehicleContent.alt = vehicleType;

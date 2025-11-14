@@ -497,7 +497,6 @@ function cancelEditGeofence() {
   setMode("polygon");
 }
 
-/* ---------- Load/render existing (unchanged) ---------- */
 async function loadSavedGeofences() {
   try {
     const response = await fetch("/geofence/api/geofences");
@@ -514,12 +513,6 @@ async function loadSavedGeofences() {
 }
 
 function renderGeofencesOnMap() {
-  // geofences.forEach(gf => { 
-  //   if (gf.mapOverlay){
-  //      gf.mapOverlay.setMap(null); 
-  //      gf.mapOverlay = null;
-  //   }
-  // });
 
   if (window.geofenceOverlays) {
     window.geofenceOverlays.forEach(overlay => overlay.setMap(null));
@@ -808,7 +801,6 @@ function clearSearchResults() {
     searchResults.innerHTML = '';
 }
 
-/* ---------- Init ---------- */
 window.onload = async function () {
   try { await backgroundMap(); } catch (e) {}
   await geofenceMapFunction();
