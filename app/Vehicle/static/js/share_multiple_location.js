@@ -36,7 +36,7 @@ async function initMap() {
             const speed = vehicle.speed ? parseFloat(vehicle.speed) : 0;
             const lastUpdate = vehicle.date_time || null;
             
-            const markerElement = createRotatableMarker(course, speed, lastUpdate);
+            const markerElement = createRotatableMarker(course, speed, lastUpdate, vehicle.type || 'car');
             
             const marker = new AdvancedMarkerElement({
                 position: latLng,
@@ -87,11 +87,23 @@ async function initMap() {
     setupCardHoverEvents();
 }
 
-function createRotatableMarker(course = 0, speed = 0, lastUpdate = null) {
+function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicleType = 'car') {
+    // helper to determine icon size by vehicle type
+    function _getVehicleIconSize(type) {
+        switch ((type || 'car').toLowerCase()) {
+            case 'truck': return { width: 24, height: 80 };
+            case 'bus':   return { width: 35, height: 80 };
+            case 'bike':  return { width: 21, height: 56 };
+            default:      return { width: 29, height: 56 }; // car
+        }
+    }
+
+    const size = _getVehicleIconSize(vehicleType);
+
     const container = document.createElement("div");
     container.style.position = "relative";
-    container.style.width = "16px";
-    container.style.height = "32px";
+    container.style.width = `${size.width}px`;
+    container.style.height = `${size.height}px`;
     container.style.display = "flex";
     container.style.alignItems = "center";
     container.style.justifyContent = "center";
@@ -101,8 +113,8 @@ function createRotatableMarker(course = 0, speed = 0, lastUpdate = null) {
     // Determine color based on speed and last update time
     const color = getMarkerColor(speed, lastUpdate);
     carImg.src = `/static/images/car_${color}.png`;
-    carImg.style.width = "24px"; 
-    carImg.style.height = "24px";
+    carImg.style.width = `${size.width}px`;
+    carImg.style.height = `${size.height}px`;
     carImg.style.transform = `rotate(${course}deg)`;
     carImg.style.transition = "transform 0.3s ease";
     carImg.style.transformOrigin = "center center"; 
@@ -110,6 +122,7 @@ function createRotatableMarker(course = 0, speed = 0, lastUpdate = null) {
     
     container.appendChild(carImg);
     container.currentColor = color;
+    container.vehicleType = vehicleType;
     return container;
 }
 
