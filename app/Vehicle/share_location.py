@@ -102,7 +102,7 @@ def view_multiple_share_locations(token):
             
         latestLocation = db['atlantaLatest'].find_one(
             {"_id": vehicle.get("IMEI")},
-            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1},
+            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1, "course": 1},
         )
         
         if not latestLocation:
@@ -114,6 +114,7 @@ def view_multiple_share_locations(token):
                 "speed": doc["telemetry"].get("speed"),
                 "date_time": doc["gps"].get("timestamp"),
                 "ignition": doc["telemetry"].get("ignition"),
+                "course": doc["gps"].get("heading", 0),
                 }
             else:
                 latestLocation = None
@@ -133,6 +134,7 @@ def view_multiple_share_locations(token):
                 "speed": latestLocation.get("speed"),
                 "date_time": str(ist_dt.strftime("%Y-%m-%d %H:%M:%S")) if ist_dt else None,
                 "ignition": latestLocation.get("ignition"),
+                "course": latestLocation.get("course", 0),
             }
             vehicles_data.append(vehicleDetails)
     
@@ -167,7 +169,7 @@ def view_share_location(licensePlateNumber, token):
     
     latestLocation = db['atlantaLatest'].find_one(
         {"_id": vehicle.get("IMEI")},
-        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1},
+        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1, "course": 1},
     )
     
     if not latestLocation:
@@ -179,6 +181,7 @@ def view_share_location(licensePlateNumber, token):
             "speed": doc["telemetry"].get("speed"),
             "date_time": doc["gps"].get("timestamp"),
             "ignition": doc["telemetry"].get("ignition"),
+            "course": doc["gps"].get("heading", 0),
             }
         else:
             latestLocation = None
@@ -213,6 +216,7 @@ def view_share_location(licensePlateNumber, token):
         "location": location,
         "speed": latestLocation.get("speed"),
         "date_time": str(ist_dt.strftime("%Y-%m-%d %H:%M:%S")) if ist_dt else None,
+        "course": latestLocation.get("course", 0),
     }
     
     print(f"Vehicle Details: {vehicleDetails}")

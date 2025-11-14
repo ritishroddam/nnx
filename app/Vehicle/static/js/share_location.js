@@ -40,15 +40,109 @@ socket.on("vehicle_live_update", (data) => {
     longitude: data.longitude,
     location: data.address || "",
     speed: (data.speed !== null && data.speed !== undefined) ? data.speed : null,
-    date_time: data.date_time || ""
+    date_time: data.date_time || "",
+    course: data.course ? parseFloat(data.course) : vehicleMarker.currentCourse || 0
   }
 
-  updateMarkerPostion(parseFloat(vehicleData.latitude), parseFloat(vehicleData.longitude));
+  updateMarkerPosition(parseFloat(vehicleData.latitude), parseFloat(vehicleData.longitude), vehicleData.course);
   updateVehicleData(vehicleData);
   console.log("Vehicle live update:", data);
 });
 
-function updateMarkerPostion(latitude, longitude) {
+// Create a properly rotatable marker element
+function createRotatableMarker(course = 0) {
+  const container = document.createElement("div");
+  container.style.position = "relative";
+  container.style.width = "32px";
+  container.style.height = "32px";
+  container.style.display = "flex";
+  container.style.alignItems = "center";
+  container.style.justifyContent = "center";
+  
+  const carImg = document.createElement("img");
+  carImg.src = "/static/images/car_green.png";
+  carImg.style.width = "24px";
+  carImg.style.height = "24px";
+  carImg.style.transform = `rotate(${course}deg)`;
+  carImg.style.transition = "transform 0.3s ease";
+  carImg.style.transformOrigin = "center center";
+  carImg.alt = "Vehicle";
+  
+  container.appendChild(carImg);
+  return container;
+}
+
+// Update marker rotation with proper course handling
+function updateMarkerRotation(marker, newCourse) {
+  const container = marker.content;
+  const img = container.querySelector('img');
+  if (img) {
+    const course = parseFloat(newCourse) || 0;
+    img.style.transform = `rotate(${course}deg)`;
+    console.log(`Rotated marker to ${course}°`);
+  }
+  marker.currentCourse = newCourse;
+}
+
+// Smooth animation for marker movement with rotation
+function animateMarker(marker, newPosition, newCourse, duration = 2000) {
+  const startPosition = marker.currentPosition;
+  const startCourse = marker.currentCourse || 0;
+  const startTime = performance.now();
+  
+  // Calculate distance for animation speed adjustment
+  const distance = google.maps.geometry.spherical.computeDistanceBetween(
+    startPosition, newPosition
+  );
+  
+  // Adjust duration based on distance
+  const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
+  
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / adjustedDuration, 1);
+    
+    // Easing function for smooth movement
+    const easeProgress = easeInOutCubic(progress);
+    
+    // Interpolate position
+    const lat = startPosition.lat() + (newPosition.lat() - startPosition.lat()) * easeProgress;
+    const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
+    
+    const currentLatLng = new google.maps.LatLng(lat, lng);
+    marker.position = currentLatLng;
+    marker.currentPosition = currentLatLng;
+    
+    // Interpolate rotation if course changed
+    if (newCourse !== undefined && newCourse !== startCourse) {
+      const currentCourse = startCourse + (newCourse - startCourse) * easeProgress;
+      updateMarkerRotation(marker, currentCourse);
+    }
+    
+    // Keep map centered on marker
+    map.setCenter(currentLatLng);
+    
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      // Final position and rotation
+      marker.position = newPosition;
+      marker.currentPosition = newPosition;
+      if (newCourse !== undefined) {
+        updateMarkerRotation(marker, newCourse);
+      }
+    }
+  }
+  
+  requestAnimationFrame(animate);
+}
+
+// Easing function for smooth animation
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function updateMarkerPosition(latitude, longitude, course) {
   if (!vehicleMarker) {
     console.warn("Marker is not initialized yet.");
     return;
@@ -58,8 +152,9 @@ function updateMarkerPostion(latitude, longitude) {
   openMap();
   
   const latLng = new google.maps.LatLng(latitude, longitude);
-  vehicleMarker.position = latLng;
-  map.setCenter(latLng);
+  
+  // Use animation instead of direct position update
+  animateMarker(vehicleMarker, latLng, course, 2000);
 }
 
 function updateVehicleData(vehicleData) {
@@ -90,19 +185,20 @@ async function initMap() {
     zoom: 16,
   });
 
-  const carContent = document.createElement("img");
-  carContent.src = "/static/images/car_green.png";
-  carContent.style.width = "18px";
-  carContent.style.height = "32px";
-  carContent.style.position = "absolute";
-  carContent.alt = "Car";
+  // Create rotatable marker with initial course
+  const initialCourse = 0;
+  const markerContent = createRotatableMarker(initialCourse);
 
   vehicleMarker = new AdvancedMarkerElement({
     position: latLng,
     map: map,
     title: "Vehicle Location",
-    content: carContent,
+    content: markerContent,
   });
+
+  // Store marker data
+  vehicleMarker.currentPosition = latLng;
+  vehicleMarker.currentCourse = initialCourse;
 
   url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   openMap();
