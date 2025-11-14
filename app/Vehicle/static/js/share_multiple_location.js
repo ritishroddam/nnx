@@ -58,13 +58,28 @@ async function initMap() {
                     activeInfoWindow.close();
                 }
 
+                let formattedDateTime = 'Unknown';
+                if (vehicle.date_time) {
+                    const dateObj = new Date(vehicle.date_time);
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const timeStr = dateObj.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    formattedDateTime = `${day}/${month}/${year} ${timeStr}`;
+                }
+
                 const infoWindow = new google.maps.InfoWindow({
                     content: `
                         <div>
                             <h3>${vehicle.licensePlateNumber}</h3>
                             <p>Location: ${vehicle.location || 'Unknown'}</p>
                             <p>Speed: ${vehicle.speed || 'Unknown'} km/h</p>
-                            <p>Last Update: ${vehicle.date_time || 'Unknown'}</p>
+                            <p>Last Update: ${formattedDateTime}</p>
                         </div>
                     `
                 });
@@ -87,13 +102,12 @@ async function initMap() {
 }
 
 function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicleType = 'car') {
-    // helper to determine icon size by vehicle type
     function _getVehicleIconSize(type) {
         switch ((type || 'car').toLowerCase()) {
             case 'truck': return { width: 24, height: 80 };
             case 'bus':   return { width: 35, height: 80 };
             case 'bike':  return { width: 21, height: 56 };
-            default:      return { width: 29, height: 56 }; // car
+            default:      return { width: 29, height: 56 }; 
         }
     }
 
@@ -109,7 +123,6 @@ function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicle
     
     const carImg = document.createElement("img");
     
-    // Determine color based on speed and last update time
     const color = getMarkerColor(speed, lastUpdate);
     carImg.src = `/static/images/car_${color}.png`;
     carImg.style.width = `${size.width}px`;
@@ -218,7 +231,6 @@ function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 
             if (newCourse !== undefined) {
                 updateMarkerRotation(marker, newCourse);
             }
-            // Update color at the end of animation
             if (newSpeed !== undefined || newLastUpdate !== undefined) {
                 updateMarkerColor(marker, newSpeed, newLastUpdate);
             }
@@ -350,7 +362,6 @@ function updateVehicleInfo(vehicleData) {
             }
         }
         if (updateEl) {
-            // Format date as dd/mm/yyyy and time in 12-hour format
             const now = new Date();
             const day = String(now.getDate()).padStart(2, '0');
             const month = String(now.getMonth() + 1).padStart(2, '0');
