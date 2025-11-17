@@ -173,23 +173,74 @@ def show_vehicle_data(LicensePlateNumber):
         
         alerts = []
         for collection_name, alert_type in alert_collections.items():
-            collection = db[collection_name]
-            collection_alerts = list(collection.find({
+            try:
+                collection = db[collection_name]
+                # Try with imei field first
+                collection_alerts = list(collection.find({
+                    "imei": vehicleData['IMEI'],
+                    "date_time": {"$gte": one_month_ago}
+                }).sort("date_time", -1))
+                
+                print(f"DEBUG: Found {len(collection_alerts)} alerts in {collection_name} for IMEI {vehicleData['IMEI']}")
+                
+                for alert in collection_alerts:
+                    alert['alert_type'] = alert_type
+                    # Ensure date_time is a datetime object
+                    if 'date_time' in alert and not isinstance(alert['date_time'], datetime):
+                        try:
+                            alert['date_time'] = datetime.fromisoformat(str(alert['date_time']))
+                        except:
+                            alert['date_time'] = datetime.now(timezone.utc)
+                    # Get location - geocode if latitude/longitude exist
+                    if not alert.get('location'):
+                        if alert.get('latitude') and alert.get('longitude'):
+                            try:
+                                location = geocodeInternal(alert.get('latitude'), alert.get('longitude'))
+                                alert['location'] = location if location else 'Unknown Location'
+                            except:
+                                alert['location'] = 'Unknown Location'
+                        else:
+                            alert['location'] = 'Unknown Location'
+                    alerts.append(alert)
+            except Exception as e:
+                print(f"DEBUG: Error processing {collection_name}: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        # Also try sos_logs as fallback
+        try:
+            sos_collection = db['sos_logs']
+            sos_alerts = list(sos_collection.find({
                 "imei": vehicleData['IMEI'],
                 "date_time": {"$gte": one_month_ago}
             }).sort("date_time", -1))
             
-            for alert in collection_alerts:
-                alert['alert_type'] = alert_type
-                # Get location - geocode if latitude/longitude exist
+            print(f"DEBUG: Found {len(sos_alerts)} SOS alerts for IMEI {vehicleData['IMEI']}")
+            
+            for alert in sos_alerts:
+                alert['alert_type'] = 'SOS Alert'
+                # Ensure date_time is a datetime object
+                if 'date_time' in alert and not isinstance(alert['date_time'], datetime):
+                    try:
+                        alert['date_time'] = datetime.fromisoformat(str(alert['date_time']))
+                    except:
+                        alert['date_time'] = datetime.now(timezone.utc)
                 if not alert.get('location'):
                     if alert.get('latitude') and alert.get('longitude'):
-                        location = geocodeInternal(alert.get('latitude'), alert.get('longitude'))
-                        alert['location'] = location if location else 'Unknown Location'
+                        try:
+                            location = geocodeInternal(alert.get('latitude'), alert.get('longitude'))
+                            alert['location'] = location if location else 'Unknown Location'
+                        except:
+                            alert['location'] = 'Unknown Location'
                     else:
                         alert['location'] = 'Unknown Location'
                 alerts.append(alert)
+        except Exception as e:
+            print(f"DEBUG: Error processing sos_logs: {e}")
+            import traceback
+            traceback.print_exc()
         
+        print(f"DEBUG: Total alerts collected: {len(alerts)}")
         # Sort all alerts by date_time descending
         alerts.sort(key=lambda x: x.get('date_time', datetime.min), reverse=True)
 
