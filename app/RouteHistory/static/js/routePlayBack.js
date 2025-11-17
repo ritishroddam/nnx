@@ -2,6 +2,10 @@ window.onload = async () => {
   await backgroundMap();
   await initMap();
   await initialLiveMap();
+  geofenceButton = document.getElementById('geofence-toggle');
+  if (geofenceButton) {
+    geofenceButton.addEventListener('click', toggleGeofences);
+  }
 };
 
 const dataElement = document.getElementById("vehicle-data");
@@ -697,6 +701,107 @@ let deckOverlay;
 let deckLayers = [];
 let deckInitialized = false;
 let carIconUrl = "/static/images/car_green.png";
+let geofenceToggle = false;
+let geofencePolygons = {};
+let geofenceButton = null;
+
+async function toggleGeofences() {
+    try {
+        if (!geofenceToggle) {
+            const response = await fetch('/geofence/api/geofences');
+            if (!response.ok) throw new Error('Failed to fetch geofences');
+            
+            const geofences = await response.json();
+            
+            const activeGeofences = geofences.filter(geofence => geofence.is_active === true);
+            
+            activeGeofences.forEach(geofence => {
+                // Add geofence to both maps (live map and route history map)
+                const mapsToUpdate = [map, liveMaps];
+                
+                mapsToUpdate.forEach(currentMap => {
+                    if (!currentMap) return;
+                    
+                    let polygon;
+                    
+                    if (geofence.shape_type === 'polygon') {
+                        const coordinates = geofence.coordinates.points.map(point => ({
+                            lat: point.lat,
+                            lng: point.lng
+                        }));
+                        
+                        polygon = new google.maps.Polygon({
+                            paths: coordinates,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.15,
+                            map: currentMap,
+                            title: geofence.name
+                        });
+                    } else if (geofence.shape_type === 'circle') {
+                        const center = geofence.coordinates.center;
+                        const radius = geofence.coordinates.radius;
+                        
+                        polygon = new google.maps.Circle({
+                            center: new google.maps.LatLng(center.lat, center.lng),
+                            radius: radius,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.15,
+                            map: currentMap,
+                            title: geofence.name
+                        });
+                    }
+                    
+                    if (polygon) {
+                        // Store with a unique key combining map identifier and geofence id
+                        const mapKey = currentMap === liveMaps ? 'live' : 'route';
+                        geofencePolygons[`${mapKey}_${geofence._id}`] = polygon;
+                        
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
+                                <div class="geofence-info">
+                                    <h4>${geofence.name}</h4>
+                                    <p><strong>Type:</strong> ${geofence.shape_type}</p>
+                                    <p><strong>Location:</strong> ${geofence.location || 'N/A'}</p>
+                                    <p><strong>Created by:</strong> ${geofence.created_by}</p>
+                                </div>
+                            `
+                        });
+                        
+                        if (geofence.shape_type === 'polygon') {
+                            polygon.addListener('click', (event) => {
+                                infoWindow.setPosition(event.latLng);
+                                infoWindow.open(currentMap);
+                            });
+                        } else if (geofence.shape_type === 'circle') {
+                            polygon.addListener('click', (event) => {
+                                infoWindow.setPosition(event.latLng);
+                                infoWindow.open(currentMap);
+                            });
+                        }
+                    }
+                });
+            });
+            
+            geofenceToggle = true;
+            geofenceButton.classList.add('active');
+        } else {
+            Object.values(geofencePolygons).forEach(polygon => {
+                polygon.setMap(null);
+            });
+            geofencePolygons = {};
+            geofenceToggle = false;
+            geofenceButton.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Error toggling geofences:', error);
+    }
+}
 
 function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
   const overlay = new google.maps.OverlayView();
