@@ -283,7 +283,6 @@ def fetch_vehicle_alerts(imei):
                 "timestamp": alert["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p"),
                 "location": f"{alert['latitude']}, {alert['longitude']}",
                 "severity": "Critical",
-                "status": "Active",
             }
             for alert in alerts
         ]

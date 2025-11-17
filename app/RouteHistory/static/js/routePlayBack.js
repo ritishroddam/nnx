@@ -1194,10 +1194,6 @@ function fetchAndDisplayAlerts(imei) {
         severityCell.textContent = alert.latitude ? "Critical" : "Warning";
         row.appendChild(severityCell);
 
-        const statusCell = document.createElement("td");
-        statusCell.textContent = "Active";
-        row.appendChild(statusCell);
-
         alertsTableBody.appendChild(row);
       });
     })
