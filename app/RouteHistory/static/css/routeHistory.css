@@ -252,10 +252,12 @@ button {
   color: #6c757d;
   font-weight: 500;
   min-width: 120px;
+  text-transform: uppercase;
 }
 
 .dark-mode .info-row span {
   color: #aaa;
+  text-transform: uppercase;
 }
 
 .info-row strong {
@@ -265,10 +267,12 @@ button {
   word-break: break-word;
   color: #222;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
 .dark-mode .info-row strong {
   color: #fff;
+  text-transform: uppercase;
 }
 
 .chart-section {
