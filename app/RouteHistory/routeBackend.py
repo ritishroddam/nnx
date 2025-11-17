@@ -153,12 +153,38 @@ def show_vehicle_data(LicensePlateNumber):
                 "IMEI": vehicleData.get("IMEI", "Unknown"),
             })
 
-        # Fetch alerts from last 1 month only
+        # Fetch alerts from last 1 month only - from multiple alert collections
         one_month_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        alerts = list(db['sos_logs'].find({
-            "imei": vehicleData['IMEI'],
-            "date_time": {"$gte": one_month_ago}
-        }).sort("date_time", -1))
+        
+        alert_collections = {
+            'speedingAlerts': 'Overspeeding Alert',
+            'harshBrakes': 'Harsh Brake Alert',
+            'harshAccelerations': 'Harsh Acceleration Alert',
+            'panic': 'Panic Alert',
+            'gsmSignalLows': 'GSM Signal Low Alert',
+            'internalBatteryLows': 'Internal Battery Low Alert',
+            'powerSupplyDissconnects': 'Power Supply Disconnect Alert',
+            'idles': 'Idle Alert',
+            'ignitionOffs': 'Ignition Off Alert',
+            'ignitionOns': 'Ignition On Alert',
+            'geofenceIns': 'Geofence In Alert',
+            'geofenceOuts': 'Geofence Out Alert',
+        }
+        
+        alerts = []
+        for collection_name, alert_type in alert_collections.items():
+            collection = db[collection_name]
+            collection_alerts = list(collection.find({
+                "imei": vehicleData['IMEI'],
+                "date_time": {"$gte": one_month_ago}
+            }).sort("date_time", -1))
+            
+            for alert in collection_alerts:
+                alert['alert_type'] = alert_type
+                alerts.append(alert)
+        
+        # Sort all alerts by date_time descending
+        alerts.sort(key=lambda x: x.get('date_time', datetime.min), reverse=True)
 
         return render_template('vehicle.html', vehicle_data=processed_data, recent_data=recent_data, alerts=alerts)
     except Exception as e:

@@ -157,7 +157,7 @@ Vehicle Data
             <td>{{ alert["location"] if alert.get('location') else 'Unknown' }}</td>
             <td>
               <span class="severity-badge severity-critical">
-                SOS Alert
+                {{ alert.get('alert_type', 'Alert') }}
               </span>
             </td>
           </tr>
