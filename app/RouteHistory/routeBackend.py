@@ -181,6 +181,13 @@ def show_vehicle_data(LicensePlateNumber):
             
             for alert in collection_alerts:
                 alert['alert_type'] = alert_type
+                # Get location - geocode if latitude/longitude exist
+                if not alert.get('location'):
+                    if alert.get('latitude') and alert.get('longitude'):
+                        location = geocodeInternal(alert.get('latitude'), alert.get('longitude'))
+                        alert['location'] = location if location else 'Unknown Location'
+                    else:
+                        alert['location'] = 'Unknown Location'
                 alerts.append(alert)
         
         # Sort all alerts by date_time descending
