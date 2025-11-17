@@ -716,7 +716,6 @@ async function toggleGeofences() {
             const activeGeofences = geofences.filter(geofence => geofence.is_active === true);
             
             activeGeofences.forEach(geofence => {
-                // Add geofence to both maps (live map and route history map)
                 const mapsToUpdate = [map, liveMaps];
                 
                 mapsToUpdate.forEach(currentMap => {
@@ -1146,7 +1145,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td>${alert.timestamp}</td>
                         <td>${alert.location}</td>
                         <td>${alert.severity}</td>
-                        <td>${alert.status}</td>
                     </tr>
                 `;
             tbody.innerHTML += row;
