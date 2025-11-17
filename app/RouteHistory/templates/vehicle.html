@@ -135,7 +135,7 @@ Vehicle Data
   <div class="alarm-header">
     <h3>
       <i class="fas fa-bell alarm-icon"></i>
-      {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alarms
+      {{ vehicle_data[0]['License Plate Number'] if vehicle_data else 'No Data Available'}} : Alerts
     </h3>
     <span class="alarm-count">{{ alerts|length }} active alerts</span>
   </div>
@@ -147,26 +147,24 @@ Vehicle Data
           <th>TIMESTAMP</th>
           <th>LOCATION</th>
           <th>SEVERITY</th>
-          <th>STATUS</th>
         </tr>
       </thead>
       <tbody>
         {% if alerts %}
           {% for alert in alerts %}
-          <tr class="alarm-severity-{{ alert['severity']|lower }}">
-            <td>{{ alert["timestamp"] }}</td>
-            <td>{{ alert["location"] }}</td>
+          <tr class="alarm-severity-critical">
+            <td>{{ alert["date_time"].strftime('%d-%m-%Y %H:%M:%S') if alert.get('date_time') else 'N/A' }}</td>
+            <td>{{ alert["location"] if alert.get('location') else 'Unknown' }}</td>
             <td>
-              <span class="severity-badge severity-{{ alert['severity']|lower }}">
-                {{ alert["severity"] }}
+              <span class="severity-badge severity-critical">
+                SOS Alert
               </span>
             </td>
-            <td>{{ alert["status"] }}</td>
           </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="4" class="no-alerts">No alerts found for the selected vehicle</td>
+            <td colspan="3" class="no-alerts">No alerts found for the selected vehicle in the past month</td>
           </tr>
         {% endif %}
       </tbody>

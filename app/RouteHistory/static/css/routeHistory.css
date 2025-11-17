@@ -366,22 +366,17 @@ button {
 
 .alarm-table th:nth-child(1), 
 .alarm-table td:nth-child(1) {
-  width: 20%; 
+  width: 25%; 
 }
 
 .alarm-table th:nth-child(2), 
 .alarm-table td:nth-child(2) {
-  width: 20%; 
+  width: 40%; 
 }
 
 .alarm-table th:nth-child(3), 
 .alarm-table td:nth-child(3) {
-  width: 20%; 
-}
-
-.alarm-table th:nth-child(4), 
-.alarm-table td:nth-child(4) {
-  width: 20%; 
+  width: 25%; 
 }
 
 .severity-badge {

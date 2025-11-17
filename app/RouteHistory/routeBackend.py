@@ -153,7 +153,12 @@ def show_vehicle_data(LicensePlateNumber):
                 "IMEI": vehicleData.get("IMEI", "Unknown"),
             })
 
-        alerts = list(db['sos_logs'].find({"imei": vehicleData['IMEI']}))
+        # Fetch alerts from last 1 month only
+        one_month_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        alerts = list(db['sos_logs'].find({
+            "imei": vehicleData['IMEI'],
+            "date_time": {"$gte": one_month_ago}
+        }).sort("date_time", -1))
 
         return render_template('vehicle.html', vehicle_data=processed_data, recent_data=recent_data, alerts=alerts)
     except Exception as e:
