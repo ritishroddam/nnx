@@ -489,7 +489,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   liveTracking();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
-  const labels = recentData.map((data) => data.time);
+  // Convert time to 12-hour format with AM/PM
+  function formatTo12Hour(timeStr) {
+    // Accepts time as 'HHMMSS' or 'HHMM' or ISO string
+    if (/^\d{6}$/.test(timeStr)) {
+      // HHMMSS
+      const h = parseInt(timeStr.slice(0,2), 10);
+      const m = parseInt(timeStr.slice(2,4), 10);
+      const s = parseInt(timeStr.slice(4,6), 10);
+      let period = h >= 12 ? 'PM' : 'AM';
+      let hour = h % 12 || 12;
+      return `${hour}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')} ${period}`;
+    } else if (/^\d{4}$/.test(timeStr)) {
+      // HHMM
+      const h = parseInt(timeStr.slice(0,2), 10);
+      const m = parseInt(timeStr.slice(2,4), 10);
+      let period = h >= 12 ? 'PM' : 'AM';
+      let hour = h % 12 || 12;
+      return `${hour}:${m.toString().padStart(2,'0')} ${period}`;
+    } else {
+      // Try ISO or fallback
+      const d = new Date(timeStr);
+      if (!isNaN(d.getTime())) {
+        let h = d.getHours();
+        let m = d.getMinutes();
+        let s = d.getSeconds();
+        let period = h >= 12 ? 'PM' : 'AM';
+        let hour = h % 12 || 12;
+        return `${hour}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')} ${period}`;
+      }
+      return timeStr;
+    }
+  }
+
+  const labels = recentData.map((data) => formatTo12Hour(data.time));
   const speeds = recentData.map((data) => data.speed); 
 
   const ctx = document.getElementById("speedChart").getContext("2d");
@@ -513,7 +546,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         x: {
           title: {
             display: true,
-            text: "Time",
+            text: "Time (12hr)",
           },
         },
         y: {
