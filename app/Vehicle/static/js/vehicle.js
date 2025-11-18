@@ -1294,13 +1294,15 @@ function updateMap() {
     firstFit = false;
 
     const boundsCenter = bounds.getCenter();
-    const offset = -2;
-    const newCenter = {
-      lat: boundsCenter.lat(),
-      lng: boundsCenter.lng() + offset,
-    };
+    // const offset = -2;
+    // const newCenter = {
+    //   lat: boundsCenter.lat(),
+    //   lng: boundsCenter.lng() + offset,
+    // };
 
-    map.setCenter(newCenter);
+    // map.setCenter(newCenter);
+
+    map.setCenter(boundsCenter);
 
     const listener = google.maps.event.addListener(map, "idle", function () {
       if (map.getZoom() < 7) {
