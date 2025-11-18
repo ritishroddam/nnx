@@ -336,19 +336,56 @@ async function fetchVehicleData(page = 1) {
 function addPaginationControls() {
   const tableContainer = document.getElementById("vehicle-table-container");
   const existingPagination = document.getElementById("table-pagination");
-  // Pagination UI intentionally disabled for vehicle table.
-  // Remove existing pagination element if present to ensure no pagination controls are shown.
+  
   if (existingPagination) {
     existingPagination.remove();
   }
-  return;
+  
+  const paginationDiv = document.createElement("div");
+  paginationDiv.id = "table-pagination";
+  paginationDiv.className = "table-pagination";
+  paginationDiv.innerHTML = `
+    <div class="pagination-info">
+      Showing ${((currentPage - 1) * perPage) + 1} to ${Math.min(currentPage * perPage, totalVehicles)} of ${totalVehicles} vehicles
+    </div>
+    <div class="pagination-controls">
+      <button id="first-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>First</button>
+      <button id="prev-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+      <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+      <button id="next-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+      <button id="last-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Last</button>
+    </div>
+  `;
+  
+  const tableHeader = tableContainer.querySelector('.table-header-container');
+  tableHeader.appendChild(paginationDiv);
+  
+  document.getElementById('first-page').addEventListener('click', () => loadPage(1));
+  document.getElementById('prev-page').addEventListener('click', () => loadPage(currentPage - 1));
+  document.getElementById('next-page').addEventListener('click', () => loadPage(currentPage + 1));
+  document.getElementById('last-page').addEventListener('click', () => loadPage(totalPages));
 }
 
 function updatePaginationControls() {
   const paginationDiv = document.getElementById("table-pagination");
-  // Pagination update disabled. If pagination element exists, hide it.
   if (paginationDiv) {
-    paginationDiv.style.display = 'none';
+    paginationDiv.innerHTML = `
+      <div class="pagination-info">
+        Showing ${((currentPage - 1) * perPage) + 1} to ${Math.min(currentPage * perPage, totalVehicles)} of ${totalVehicles} vehicles
+      </div>
+      <div class="pagination-controls">
+        <button id="first-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>First</button>
+        <button id="prev-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+        <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+        <button id="next-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+        <button id="last-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Last</button>
+      </div>
+    `;
+    
+    document.getElementById('first-page').addEventListener('click', () => loadPage(1));
+    document.getElementById('prev-page').addEventListener('click', () => loadPage(currentPage - 1));
+    document.getElementById('next-page').addEventListener('click', () => loadPage(currentPage + 1));
+    document.getElementById('last-page').addEventListener('click', () => loadPage(totalPages));
   }
 }
 
@@ -2078,13 +2115,13 @@ function adjustFloatingCardHeight() {
 function getVehicleIconSize(vehicleType) {
   switch(vehicleType.toLowerCase()) {
     case 'truck':
-      return { width: 20, height: 64 }; 
+      return { width: 24, height: 80 }; 
     case 'bus':
-      return { width: 28, height: 64 }; 
+      return { width: 35, height: 80 }; 
     case 'bike':
-      return { width: 18, height: 45 }; 
+      return { width: 21, height: 56 }; 
     default: 
-      return { width: 24, height: 45 }; //car
+      return { width: 29, height: 56 }; 
   }
 }
 
