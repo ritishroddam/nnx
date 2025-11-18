@@ -348,9 +348,6 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
 @roles_required('admin', 'user', 'clientAdmin')
 def get_vehicles():
     try:
-        # Server-side pagination removed: always return all vehicles
-        # (Frontend handles UI; if you later want to re-enable pagination,
-        # re-add `page` and `per_page` params and slice the `vehicles` list.)
         
         claims = get_jwt()
         user_roles = claims.get('roles', [])
@@ -384,7 +381,6 @@ def get_vehicles():
             lng = vehicle.get('longitude')
             vehicle['location'] = geocodeInternal(lat, lng)
 
-        # Return all vehicles (no server-side pagination)
         return jsonify({
             'vehicles': vehicles
         }), 200
