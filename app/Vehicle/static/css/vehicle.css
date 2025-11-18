@@ -1370,17 +1370,3 @@ body.dark-mode .geofence-toggle-btn.active {
     opacity: 1;
   }
 }
-
-/* Custom marker styling for AdvancedMarkerElement content */
-.custom-marker {
-  display: block;
-  /* Ensure rotation happens around bottom-center so the bottom of the icon sits on the map point */
-  transform-origin: center bottom;
-  pointer-events: auto;
-}
-
-.custom-marker img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}

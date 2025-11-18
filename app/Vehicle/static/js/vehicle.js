@@ -2092,8 +2092,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   markerContent.style.width = `${size.width}px`;
   markerContent.style.height = `${size.height}px`;
   markerContent.style.transform = `rotate(${rotation}deg)`;
-  // Rotate around the bottom-center so the vehicle's wheels point to the map location
-  markerContent.style.transformOrigin = 'center bottom';
 
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
@@ -2108,9 +2106,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
     position: latLng, 
     map: map,
     title: `License Plate Number: ${device.LicensePlateNumber}`,
-    // anchor sets the pixel point in the content that is tied to the LatLng position.
-    // Use bottom-center so the icon's bottom center aligns to the geographic point (road).
-    anchor: new google.maps.Point(Math.round(size.width / 2), Math.round(size.height)),
     content: markerContent,
   });
 
@@ -2139,7 +2134,6 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   markerContent.style.width = `${size.width}px`;
   markerContent.style.height = `${size.height}px`;
   markerContent.style.transform = `rotate(${rotation}deg)`;
-  markerContent.style.transformOrigin = 'center bottom';
 
   const markerImage = document.createElement("img");
   markerImage.src = iconUrl;
@@ -2152,13 +2146,6 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
 
   marker.position = latLng; 
   marker.content = markerContent;
-  // Update anchor as well in case the marker already existed
-  try {
-    marker.anchor = new google.maps.Point(Math.round(size.width / 2), Math.round(size.height));
-  } catch (e) {
-    // Some environments may not allow setting anchor after creation; ignore if not supported
-    console.warn('Could not set marker.anchor:', e);
-  }
 
   const coords = {
     lat: latLng.lat(),
