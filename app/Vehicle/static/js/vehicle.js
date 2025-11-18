@@ -1488,42 +1488,18 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType, dayDiff) {
   }
 }
 
-// function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
-//   const speedInKmh = convertSpeedToKmh(speed);
-//   const type = vehicleType || 'car'; 
-  
-//   const now = new Date();
-//   const lastUpdateTime = convertToDate(date, time);
-  
-//   const timeDiff = now - lastUpdateTime;
-//   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-  
-//   let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, type, dayDiff);
-  
-//   return iconUrl;
-// }
-
-function getVehicleIconBySpeed(speed, imei, date, time, vehicleType, status) {
+function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
+  const speedInKmh = convertSpeedToKmh(speed);
   const type = vehicleType || 'car'; 
+  
   const now = new Date();
   const lastUpdateTime = convertToDate(date, time);
+  
   const timeDiff = now - lastUpdateTime;
   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-
-  let iconUrl;
-  if (dayDiff >= 1) {
-    iconUrl = `/static/images/${type}_black.png`;
-  } else if (status === "stopped") {
-    iconUrl = `/static/images/${type}_yellow.png`;
-  } else if (status === "moving" && speed > 0 && speed <= 40) {
-    iconUrl = `/static/images/${type}_green.png`;
-  } else if (status === "moving" && speed > 40 && speed <= 60) {
-    iconUrl = `/static/images/${type}_blue.png`;
-  } else if (status === "moving" && speed > 60) {
-    iconUrl = `/static/images/${type}_red.png`;
-  } else {
-    iconUrl = `/static/images/${type}_yellow.png`;
-  }
+  
+  let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, type, dayDiff);
+  
   return iconUrl;
 }
 
@@ -2093,13 +2069,13 @@ function adjustFloatingCardHeight() {
 function getVehicleIconSize(vehicleType) {
   switch(vehicleType.toLowerCase()) {
     case 'truck':
-      return { width: 18, height: 60 }; 
+      return { width: 24, height: 80 }; 
     case 'bus':
-      return { width: 26, height: 60 }; 
+      return { width: 35, height: 80 }; 
     case 'bike':
-      return { width: 15, height: 40 }; 
+      return { width: 21, height: 56 }; 
     default: 
-      return { width: 20, height: 40 }; 
+      return { width: 29, height: 56 }; 
   }
 }
 
