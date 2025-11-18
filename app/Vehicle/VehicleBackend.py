@@ -348,7 +348,6 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
 @roles_required('admin', 'user', 'clientAdmin')
 def get_vehicles():
     try:
-        # server-side pagination removed — return full dataset
         claims = get_jwt()
         user_roles = claims.get('roles', [])
         vehicles = []
@@ -378,7 +377,6 @@ def get_vehicles():
             lng = vehicle.get('longitude')
             vehicle['location'] = geocodeInternal(lat, lng)
 
-        # Return all vehicles (no pagination)
         return jsonify({'vehicles': vehicles}), 200
     except Exception as e:
         print("Error fetching vehicle data:", e)

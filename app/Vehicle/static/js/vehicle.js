@@ -270,16 +270,13 @@ async function fetchVehicleData(page = 1) {
   try {
     showSkeletonLoader(); 
     
-    // Request all vehicles (server no longer paginates)
     const response = await fetch(`/vehicle/api/vehicles`);
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
     const data = await response.json();
     
-    // backend now returns { vehicles: [...] }
     const vehicles = data.vehicles || [];
     
-    // client-side pagination removed — keep simple counters for compatibility
     currentPage = 1;
     totalPages = 1;
     totalVehicles = vehicles.length;
@@ -325,9 +322,6 @@ async function fetchVehicleData(page = 1) {
         slowSpeed: vehicle.slowSpeed,
       });
     });
-    
-    // pagination UI removed — ensure no DOM pagination is left
-    // updatePaginationControls();  <- removed
 
     return vehicles;
   } catch (error) {
@@ -337,20 +331,16 @@ async function fetchVehicleData(page = 1) {
 }
 
 function addPaginationControls() {
-  // Server-side pagination removed — ensure any existing pagination DOM is cleared.
   const existingPagination = document.getElementById("table-pagination");
   if (existingPagination) existingPagination.remove();
-  // No new pagination UI is created.
 }
 
 function updatePaginationControls() {
-  // No-op: pagination removed. Remove existing if any.
   const existingPagination = document.getElementById("table-pagination");
   if (existingPagination) existingPagination.remove();
 }
 
 async function loadPage(page) {
-  // Pagination client-side navigation removed — always fetch full data.
   await fetchVehicleData();
   
   if (document.getElementById("vehicle-table-container").style.display !== "none") {
@@ -1294,13 +1284,6 @@ function updateMap() {
     firstFit = false;
 
     const boundsCenter = bounds.getCenter();
-    // const offset = -2;
-    // const newCenter = {
-    //   lat: boundsCenter.lat(),
-    //   lng: boundsCenter.lng() + offset,
-    // };
-
-    // map.setCenter(newCenter);
 
     map.setCenter(boundsCenter);
 
