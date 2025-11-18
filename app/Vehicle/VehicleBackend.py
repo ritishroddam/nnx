@@ -348,8 +348,9 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
 @roles_required('admin', 'user', 'clientAdmin')
 def get_vehicles():
     try:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 100, type=int)
+        # Server-side pagination removed: always return all vehicles
+        # (Frontend handles UI; if you later want to re-enable pagination,
+        # re-add `page` and `per_page` params and slice the `vehicles` list.)
         
         claims = get_jwt()
         user_roles = claims.get('roles', [])
@@ -363,13 +364,7 @@ def get_vehicles():
         
         if not imei_list:
             return jsonify({
-                'vehicles': [],
-                'pagination': {
-                    'page': page,
-                    'per_page': per_page,
-                    'total': 0,
-                    'pages': 0
-                }
+                'vehicles': []
             }), 200
 
         distances = getVehicleDistances(imei_list)
@@ -389,21 +384,9 @@ def get_vehicles():
             lng = vehicle.get('longitude')
             vehicle['location'] = geocodeInternal(lat, lng)
 
-        total_vehicles = len(vehicles)
-        total_pages = (total_vehicles + per_page - 1) // per_page
-        
-        start_idx = (page - 1) * per_page
-        end_idx = start_idx + per_page
-        paginated_vehicles = vehicles[start_idx:end_idx]
-
+        # Return all vehicles (no server-side pagination)
         return jsonify({
-            'vehicles': paginated_vehicles,
-            'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total': total_vehicles,
-                'pages': total_pages
-            }
+            'vehicles': vehicles
         }), 200
     except Exception as e:
         print("Error fetching vehicle data:", e)
