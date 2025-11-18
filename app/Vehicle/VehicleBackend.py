@@ -348,9 +348,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
 @roles_required('admin', 'user', 'clientAdmin')
 def get_vehicles():
     try:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 100, type=int)
-        
+        # server-side pagination removed — return full dataset
         claims = get_jwt()
         user_roles = claims.get('roles', [])
         vehicles = []
@@ -362,15 +360,7 @@ def get_vehicles():
         imei_list = getCollectionImeis(vehicleInvyImeis)
         
         if not imei_list:
-            return jsonify({
-                'vehicles': [],
-                'pagination': {
-                    'page': page,
-                    'per_page': per_page,
-                    'total': 0,
-                    'pages': 0
-                }
-            }), 200
+            return jsonify({'vehicles': []}), 200
 
         distances = getVehicleDistances(imei_list)
         stoppage_times = getStopTimeToday(imei_list)
@@ -383,28 +373,13 @@ def get_vehicles():
         print("[DEBUG] Processed vehicle data")
         
         for vehicle in vehicles:
-            print(vehicle)
             vehicle['_id'] = str(vehicle['_id'])
             lat = vehicle.get('latitude')
             lng = vehicle.get('longitude')
             vehicle['location'] = geocodeInternal(lat, lng)
 
-        total_vehicles = len(vehicles)
-        total_pages = (total_vehicles + per_page - 1) // per_page
-        
-        start_idx = (page - 1) * per_page
-        end_idx = start_idx + per_page
-        paginated_vehicles = vehicles[start_idx:end_idx]
-
-        return jsonify({
-            'vehicles': paginated_vehicles,
-            'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total': total_vehicles,
-                'pages': total_pages
-            }
-        }), 200
+        # Return all vehicles (no pagination)
+        return jsonify({'vehicles': vehicles}), 200
     except Exception as e:
         print("Error fetching vehicle data:", e)
         return jsonify({'error': str(e)}), 500

@@ -270,17 +270,19 @@ async function fetchVehicleData(page = 1) {
   try {
     showSkeletonLoader(); 
     
-    const response = await fetch(`/vehicle/api/vehicles?page=${page}&per_page=${perPage}`);
+    // Request all vehicles (server no longer paginates)
+    const response = await fetch(`/vehicle/api/vehicles`);
     if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
     const data = await response.json();
     
-    const vehicles = data.vehicles;
-    const pagination = data.pagination;
+    // backend now returns { vehicles: [...] }
+    const vehicles = data.vehicles || [];
     
-    currentPage = pagination.page;
-    totalPages = pagination.pages;
-    totalVehicles = pagination.total;
+    // client-side pagination removed — keep simple counters for compatibility
+    currentPage = 1;
+    totalPages = 1;
+    totalVehicles = vehicles.length;
     
     const now = new Date();
 
@@ -324,8 +326,9 @@ async function fetchVehicleData(page = 1) {
       });
     });
     
-    updatePaginationControls();
-    
+    // pagination UI removed — ensure no DOM pagination is left
+    // updatePaginationControls();  <- removed
+
     return vehicles;
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
@@ -334,65 +337,21 @@ async function fetchVehicleData(page = 1) {
 }
 
 function addPaginationControls() {
-  const tableContainer = document.getElementById("vehicle-table-container");
+  // Server-side pagination removed — ensure any existing pagination DOM is cleared.
   const existingPagination = document.getElementById("table-pagination");
-  
-  if (existingPagination) {
-    existingPagination.remove();
-  }
-  
-  const paginationDiv = document.createElement("div");
-  paginationDiv.id = "table-pagination";
-  paginationDiv.className = "table-pagination";
-  paginationDiv.innerHTML = `
-    <div class="pagination-info">
-      Showing ${((currentPage - 1) * perPage) + 1} to ${Math.min(currentPage * perPage, totalVehicles)} of ${totalVehicles} vehicles
-    </div>
-    <div class="pagination-controls">
-      <button id="first-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>First</button>
-      <button id="prev-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
-      <span class="page-info">Page ${currentPage} of ${totalPages}</span>
-      <button id="next-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
-      <button id="last-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Last</button>
-    </div>
-  `;
-  
-  const tableHeader = tableContainer.querySelector('.table-header-container');
-  tableHeader.appendChild(paginationDiv);
-  
-  document.getElementById('first-page').addEventListener('click', () => loadPage(1));
-  document.getElementById('prev-page').addEventListener('click', () => loadPage(currentPage - 1));
-  document.getElementById('next-page').addEventListener('click', () => loadPage(currentPage + 1));
-  document.getElementById('last-page').addEventListener('click', () => loadPage(totalPages));
+  if (existingPagination) existingPagination.remove();
+  // No new pagination UI is created.
 }
 
 function updatePaginationControls() {
-  const paginationDiv = document.getElementById("table-pagination");
-  if (paginationDiv) {
-    paginationDiv.innerHTML = `
-      <div class="pagination-info">
-        Showing ${((currentPage - 1) * perPage) + 1} to ${Math.min(currentPage * perPage, totalVehicles)} of ${totalVehicles} vehicles
-      </div>
-      <div class="pagination-controls">
-        <button id="first-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>First</button>
-        <button id="prev-page" class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
-        <span class="page-info">Page ${currentPage} of ${totalPages}</span>
-        <button id="next-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
-        <button id="last-page" class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}>Last</button>
-      </div>
-    `;
-    
-    document.getElementById('first-page').addEventListener('click', () => loadPage(1));
-    document.getElementById('prev-page').addEventListener('click', () => loadPage(currentPage - 1));
-    document.getElementById('next-page').addEventListener('click', () => loadPage(currentPage + 1));
-    document.getElementById('last-page').addEventListener('click', () => loadPage(totalPages));
-  }
+  // No-op: pagination removed. Remove existing if any.
+  const existingPagination = document.getElementById("table-pagination");
+  if (existingPagination) existingPagination.remove();
 }
 
 async function loadPage(page) {
-  if (page < 1 || page > totalPages) return;
-  
-  await fetchVehicleData(page);
+  // Pagination client-side navigation removed — always fetch full data.
+  await fetchVehicleData();
   
   if (document.getElementById("vehicle-table-container").style.display !== "none") {
     populateVehicleTable();
@@ -1122,11 +1081,6 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     gsmColor = "#d32f2f";
   }
 
-  const distance = device.distance
-    ? parseFloat(device.distance).toFixed(1)
-    : "--";
-  const stoppage = device.stoppage_time || "--";
-
   const headerContent = document.createElement("div");
   headerContent.innerHTML = `
       <div class="info-header">
@@ -1836,7 +1790,7 @@ function populateVehicleTable() {
       gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
       gsmIcon = "signal_cellular_4_bar";
-      gsmColor = isDarkMode ? "#81c784" : "#4caf50";
+      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; 
     } else {
       gsmIcon = "signal_cellular_off";
       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
