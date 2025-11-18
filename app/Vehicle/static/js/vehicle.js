@@ -2115,13 +2115,13 @@ function adjustFloatingCardHeight() {
 function getVehicleIconSize(vehicleType) {
   switch(vehicleType.toLowerCase()) {
     case 'truck':
-      return { width: 24, height: 80 }; 
+      return { width: 20, height: 64 }; 
     case 'bus':
-      return { width: 35, height: 80 }; 
+      return { width: 28, height: 64 }; 
     case 'bike':
-      return { width: 21, height: 56 }; 
+      return { width: 18, height: 45 }; 
     default: 
-      return { width: 29, height: 56 }; 
+      return { width: 24, height: 45 }; //car
   }
 }
 
