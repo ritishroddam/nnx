@@ -363,20 +363,23 @@ def get_status_data():
             main_power = vehicle.get("main_power", "1")
             gps = vehicle.get("gps", True)
 
-            if ignition == "1" and speed > 0 and not is_offline:
+            # Status counters - mutually exclusive categories
+            if is_offline:
+                counters['offlineVehicles'] += 1
+            elif ignition == "1" and speed > 0 and not is_offline:
                 counters['runningVehicles'] += 1
             elif ignition == "1" and speed == 0 and not is_offline:
                 counters['idleVehicles'] += 1
             elif ignition == "0" and speed == 0 and not is_offline:
                 counters['parkedVehicles'] += 1
             
+            # Speed category counters - independent of status
             if ignition == "1" and 40 <= speed < 60 and not is_offline:
                 counters['speedVehicles'] += 1
             elif ignition == "1" and speed >= 60 and not is_offline:
                 counters['overspeedVehicles'] += 1
             
-            if is_offline:
-                counters['offlineVehicles'] += 1
+            # Other independent counters
             if main_power == "0":
                 counters['disconnectedVehicles'] += 1
             if not gps:
