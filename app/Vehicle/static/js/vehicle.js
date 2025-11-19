@@ -1947,7 +1947,7 @@ function showMultiShareLocationPopup() {
     const input = document.getElementById("multi-share-link-input");
     input.select();
     document.execCommand("copy");
-    alert("Link copied to clipboard!");
+    displayFlashMessage("Link copied to clipboard!", "success");
   };
 
   document.getElementById("generate-multi-share-link").onclick = async function () {
