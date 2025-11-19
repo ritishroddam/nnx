@@ -78,6 +78,8 @@ var lastDataReceivedTime = {};
 var geofenceToggle = false;
 var geofencePolygons = {};
 var geofenceButton = null;
+var selectToggleButton = null;
+var selectMode = false;
 let currentPage = 1;
 const perPage = 100;
 let totalPages = 1;
@@ -101,6 +103,24 @@ document.addEventListener("DOMContentLoaded", async function () {
   geofenceButton = document.getElementById('geofence-toggle');
   if (geofenceButton) {
     geofenceButton.addEventListener('click', toggleGeofences);
+  }
+  
+  // Select toggle (enable selecting rows for multi-share)
+  selectToggleButton = document.getElementById('select-toggle');
+  if (selectToggleButton) {
+    selectToggleButton.addEventListener('click', function () {
+      selectMode = !selectMode;
+      selectToggleButton.classList.toggle('active', selectMode);
+      if (selectMode) {
+        selectToggleButton.title = 'Selection mode enabled: click rows to select vehicles';
+      } else {
+        selectToggleButton.title = 'Enable selection mode for multi-share';
+        // clear current selection when disabling selection mode
+        selectedVehicles.clear();
+        document.querySelectorAll('#vehicle-table tbody tr.selected').forEach(row => row.classList.remove('selected'));
+        updateMultiShareButton();
+      }
+    });
   }
 });
 
@@ -1786,9 +1806,23 @@ function populateVehicleTable() {
     row.style.cursor = "pointer";
     
     row.addEventListener('click', function(e) {
-      if (e.target.tagName.toLowerCase() === 'a' || e.target.closest('a')) {
+      // Ignore clicks on links or icon controls
+      if (e.target.tagName && e.target.tagName.toLowerCase() === 'a') return;
+      if (e.target.closest && e.target.closest('a')) return;
+      if (e.target.closest && e.target.closest('.vehicle-table-icons')) return;
+      if (e.target.classList && e.target.classList.contains('material-symbols-outlined')) return;
+
+      if (selectMode) {
+        // In selection mode, toggle selection of the row
+        toggleRowSelection(this, imei);
+      } else {
+        // Not in selection mode: open vehicle details on single click
+        try {
+          window.open(url, '_blank');
+        } catch (err) {
+          console.error('Failed to open vehicle details:', err);
+        }
       }
-      toggleRowSelection(this, imei);
     });
 
     row.insertCell(0).innerText = vehicle.LicensePlateNumber
