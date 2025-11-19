@@ -291,28 +291,42 @@ def get_vehicle_range_data():
                 "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
             }
             
+            # Always append for no filter, or apply status filter
             if not status_filter:
                 vehicle_data.append(vehicle_info)
             else:
-                speed = float(vehicle_info.get("speed", 0))
-                ignition = vehicle_info.get("ignition", "0")
+                try:
+                    speed = float(vehicle_info.get("speed", 0))
+                except (ValueError, TypeError):
+                    speed = 0.0
+                
+                ignition = str(vehicle_info.get("ignition", "0"))
                 is_offline = vehicle_info.get("is_offline", False)
-                main_power = vehicle_info.get("main_power", "1")
+                main_power = str(vehicle_info.get("main_power", "1"))
+                
+                # Debug: log vehicle being evaluated
+                print(f"DEBUG Filter: {vehicle_info.get('registration')} - speed={speed}, ignition={ignition}, offline={is_offline}, filter={status_filter}")
+                
+                should_include = False
                 
                 if status_filter == "running" and ignition == "1" and speed > 0 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "idle" and ignition == "1" and speed == 0 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "parked" and ignition == "0" and speed == 0 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "speed" and ignition == "1" and 40 <= speed < 60 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "overspeed" and ignition == "1" and speed >= 60 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "offline" and is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "disconnected" and main_power == "0":
+                    should_include = True
+                
+                if should_include:
                     vehicle_data.append(vehicle_info)
+                    print(f"  → INCLUDED in {status_filter}")
         
         return jsonify(vehicle_data), 200
         
@@ -367,8 +381,7 @@ def get_status_data():
             main_power = str(vehicle.get("main_power", "1"))
             gps = vehicle.get("gps", True)
 
-            print(f"Vehicle {vehicle.get('registration', 'N/A')}: speed={speed}, ignition={ignition}, is_offline={is_offline}, main_power={main_power}")
-
+            # Status counters - mutually exclusive categories
             if is_offline:
                 counters['offlineVehicles'] += 1
             elif ignition == "1" and speed > 0 and not is_offline:
