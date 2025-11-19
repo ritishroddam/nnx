@@ -291,7 +291,6 @@ def get_vehicle_range_data():
                 "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
             }
             
-            # Always append for no filter, or apply status filter
             if not status_filter:
                 vehicle_data.append(vehicle_info)
             else:
@@ -304,7 +303,6 @@ def get_vehicle_range_data():
                 is_offline = vehicle_info.get("is_offline", False)
                 main_power = str(vehicle_info.get("main_power", "1"))
                 
-                # Debug: log vehicle being evaluated
                 print(f"DEBUG Filter: {vehicle_info.get('registration')} - speed={speed}, ignition={ignition}, offline={is_offline}, filter={status_filter}")
                 
                 should_include = False
@@ -381,7 +379,6 @@ def get_status_data():
             main_power = str(vehicle.get("main_power", "1"))
             gps = vehicle.get("gps", True)
 
-            # Status counters - mutually exclusive categories
             if is_offline:
                 counters['offlineVehicles'] += 1
             elif ignition == "1" and speed > 0 and not is_offline:
