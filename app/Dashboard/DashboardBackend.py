@@ -357,13 +357,18 @@ def get_status_data():
         }
 
         for vehicle in vehicle_data:
-            speed = float(vehicle.get("speed", 0))
-            ignition = vehicle.get("ignition", "0")
+            try:
+                speed = float(vehicle.get("speed", 0))
+            except (ValueError, TypeError):
+                speed = 0.0
+            
+            ignition = str(vehicle.get("ignition", "0"))
             is_offline = vehicle.get("is_offline", False)
-            main_power = vehicle.get("main_power", "1")
+            main_power = str(vehicle.get("main_power", "1"))
             gps = vehicle.get("gps", True)
 
-            # Status counters - mutually exclusive categories
+            print(f"Vehicle {vehicle.get('registration', 'N/A')}: speed={speed}, ignition={ignition}, is_offline={is_offline}, main_power={main_power}")
+
             if is_offline:
                 counters['offlineVehicles'] += 1
             elif ignition == "1" and speed > 0 and not is_offline:
@@ -373,13 +378,11 @@ def get_status_data():
             elif ignition == "0" and speed == 0 and not is_offline:
                 counters['parkedVehicles'] += 1
             
-            # Speed category counters - independent of status
             if ignition == "1" and 40 <= speed < 60 and not is_offline:
                 counters['speedVehicles'] += 1
             elif ignition == "1" and speed >= 60 and not is_offline:
                 counters['overspeedVehicles'] += 1
             
-            # Other independent counters
             if main_power == "0":
                 counters['disconnectedVehicles'] += 1
             if not gps:
