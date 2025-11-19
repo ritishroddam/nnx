@@ -2,6 +2,10 @@ window.onload = async () => {
   await backgroundMap();
   await initMap();
   await initialLiveMap();
+  geofenceButton = document.getElementById('geofence-toggle');
+  if (geofenceButton) {
+    geofenceButton.addEventListener('click', toggleGeofences);
+  }
 };
 
 const dataElement = document.getElementById("vehicle-data");
@@ -106,7 +110,6 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
   const basePath = "/static/images/";
   let vehiclePrefix;
   
-  // Determine vehicle type prefix
   switch(vehicleType.toLowerCase()) {
     case 'truck':
       vehiclePrefix = 'truck';
@@ -117,11 +120,10 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
     case 'bike':
       vehiclePrefix = 'bike';
       break;
-    default: // Default to car for sedan, suv, hatchback, van, etc.
+    default: 
       vehiclePrefix = 'car';
   }
 
-  // Determine color based on speed
   if (speedInKmh === 0) {
     return `${basePath}${vehiclePrefix}_yellow.png`;
   } else if (speedInKmh > 0 && speedInKmh <= 40) {
@@ -136,13 +138,13 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType) {
 function getVehicleIconSize(vehicleType) {
   switch(vehicleType.toLowerCase()) {
     case 'truck':
-      return { width: 18, height: 60 };
+      return { width: 24, height: 80 };
     case 'bus':
-      return { width: 22, height: 50 };
+      return { width: 35, height: 80 };
     case 'bike':
-      return { width: 14, height: 38 };
-    default: // car
-      return { width: 18, height: 32 };
+      return { width: 21, height: 56 };
+    default: 
+      return { width: 29, height: 56 };
   }
 }
 
@@ -189,15 +191,23 @@ function updateLiveMapVehicleData(updatedData) {
     speed = `<p><strong>Speed:</strong> ${updatedData.speed}</p>`;
   }
 
-  const vehicleContent = document.createElement("img");
-  vehicleContent.src = iconUrl;
-  vehicleContent.style.width = `${size.width}px`;
-  vehicleContent.style.height = `${size.height}px`;
-  vehicleContent.style.position = "absolute";
-  vehicleContent.alt = vehicleType;
-  vehicleContent.style.transform = `rotate(${rotation}deg)`;
+  const vehicleImg = document.createElement("img");
+  vehicleImg.src = iconUrl;
+  vehicleImg.alt = vehicleType;
+  vehicleImg.style.width = '100%';
+  vehicleImg.style.height = '100%';
 
-  markerLive.content = vehicleContent;
+  const liveWrapper = document.createElement("div");
+  liveWrapper.style.position = "absolute";
+  liveWrapper.style.width = `${size.width}px`;
+  liveWrapper.style.height = `${size.height}px`;
+  liveWrapper.style.display = 'flex';
+  liveWrapper.style.alignItems = 'center';
+  liveWrapper.style.justifyContent = 'center';
+  liveWrapper.style.transform = `translate(-50%, -50%) rotate(${rotation || 0}deg)`;
+  liveWrapper.appendChild(vehicleImg);
+
+  markerLive.content = liveWrapper;
 
   startMarkerInfo = new google.maps.InfoWindow({
     content: `<div>
@@ -247,18 +257,21 @@ function updateLiveMapPolyline(updatedData) {
     let direction = rotation || 0;
     if (i < liveCoords.length - 1) {
       const nextCoord = liveCoords[i + 1];
-      direction = getRotation(nextCoord, coord);
+      direction = getRotation(coord, nextCoord);
     }
 
     const arrowContent = document.createElement("div");
-    arrowContent.style.width = "10px";
-    arrowContent.style.height = "10px";
-    arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-    arrowContent.style.borderLeft = "5px solid transparent";
-    arrowContent.style.borderRight = "5px solid transparent";
+    arrowContent.style.width = "0";
+    arrowContent.style.height = "0";
     arrowContent.style.position = "absolute";
-    arrowContent.style.transform = `rotate(${direction}deg)`;
+    arrowContent.style.backgroundColor = "transparent";
+    arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+    arrowContent.style.borderLeft = "6px solid transparent";
+    arrowContent.style.borderRight = "6px solid transparent";
+    arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction + 180}deg)`;
+    arrowContent.style.opacity = "0.95";
+    arrowContent.style.zIndex = 800;
+    arrowContent.style.pointerEvents = "none";
 
     const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
       position: coord,
@@ -275,7 +288,6 @@ function updateLiveMapPolyline(updatedData) {
 }
 
 function getRotation(coord, nextCoord) {
-  // Convert degrees to radians
   const toRad = deg => deg * Math.PI / 180;
   const toDeg = rad => rad * 180 / Math.PI;
 
@@ -290,7 +302,7 @@ function getRotation(coord, nextCoord) {
             Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
   let brng = Math.atan2(y, x);
   brng = toDeg(brng);
-  return (brng + 360) % 360; // Normalize to 0-360
+  return (brng + 360) % 360;
 }
 
 async function plotPolyLineLiveMap(liveData) {
@@ -324,7 +336,6 @@ async function plotPolyLineLiveMap(liveData) {
       speed = `<p><strong>Speed:</strong> ${recentData.speed}</p>`;
     }
 
-    // Detect dark mode
     const darkMode = document.body.classList.contains("dark-mode");
     const arrowColor = darkMode ? "#fff" : "#2a2a2a";
     const polylineColor = darkMode ? "#00bfff" : "#505050";
@@ -332,46 +343,56 @@ async function plotPolyLineLiveMap(liveData) {
     livePathPolyline = new google.maps.Polyline({
       path: liveCoords,
       geodesic: true,
-      strokeColor: polylineColor,
-      strokeOpacity: 0.9,
-      strokeWeight: 3,
+        strokeColor: polylineColor,
+        strokeOpacity: 0.95,
+        strokeWeight: 4,
       map: liveMaps,
     });
 
     const vehicleContent = document.createElement("img");
     vehicleContent.src = iconUrl;
-    vehicleContent.style.width = `${size.width}px`;
-    vehicleContent.style.height = `${size.height}px`;
-    vehicleContent.style.position = "absolute";
     vehicleContent.alt = vehicleType;
-    vehicleContent.style.filter = darkMode ? "brightness(1.5)" : "";
-    vehicleContent.style.transform = `rotate(${recentData.course || 0}deg)`;
+    vehicleContent.style.width = '100%';
+    vehicleContent.style.height = '100%';
 
-    markerLive = new google.maps.marker.AdvancedMarkerElement({
-      position: liveCoords[liveCoords.length - 1],
-      map: liveMaps,
-      title: "Start",
-      content: vehicleContent,
-    });
+    const vehicleWrapper = document.createElement("div");
+    vehicleWrapper.style.position = "absolute";
+    vehicleWrapper.style.width = `${size.width}px`;
+    vehicleWrapper.style.height = `${size.height}px`;
+    vehicleWrapper.style.display = 'flex';
+    vehicleWrapper.style.alignItems = 'center';
+    vehicleWrapper.style.justifyContent = 'center';
+    vehicleWrapper.style.transform = `translate(-50%, -50%) rotate(${recentData.course || 0}deg)`;
+    if (darkMode) vehicleContent.style.filter = "brightness(1.5)";
+    vehicleWrapper.appendChild(vehicleContent);
+
+      markerLive = new google.maps.marker.AdvancedMarkerElement({
+        position: liveCoords[liveCoords.length - 1],
+        map: liveMaps,
+        title: "Start",
+        content: vehicleWrapper,
+      });
 
     for (let i = 0; i < liveCoords.length; i++) {
       const coord = liveCoords[i];
       let direction = rotation || 0;
       if (i < liveCoords.length - 1) {
         const nextCoord = liveCoords[i + 1];
-        direction = getRotation(nextCoord, coord);
+        direction = getRotation(coord, nextCoord);
       }
-      // For the last coord, rotation stays as 0 or you can use previous rotation
 
       const arrowContent = document.createElement("div");
-      arrowContent.style.width = "10px";
-      arrowContent.style.height = "10px";
-      arrowContent.style.backgroundColor = "rgba(204, 204, 204, 0.2)";
-      arrowContent.style.borderTop = `10px solid ${arrowColor}`;
-      arrowContent.style.borderLeft = "5px solid transparent";
-      arrowContent.style.borderRight = "5px solid transparent";
+      arrowContent.style.width = "0";
+      arrowContent.style.height = "0";
       arrowContent.style.position = "absolute";
-      arrowContent.style.transform = `rotate(${direction}deg)`;
+      arrowContent.style.backgroundColor = "transparent";
+      arrowContent.style.borderTop = `10px solid ${arrowColor}`;
+      arrowContent.style.borderLeft = "6px solid transparent";
+      arrowContent.style.borderRight = "6px solid transparent";
+      arrowContent.style.transform = `translate(-50%, -50%) rotate(${direction + 180}deg)`;
+      arrowContent.style.opacity = "0.95";
+      arrowContent.style.zIndex = 800;
+      arrowContent.style.pointerEvents = "none";
 
       const liveMarkers = new google.maps.marker.AdvancedMarkerElement({
         position: coord,
@@ -468,7 +489,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   liveTracking();
   const recentdataElement = document.getElementById("recent-data");
   const recentData = JSON.parse(recentdataElement.textContent);
-  const labels = recentData.map((data) => data.time);
+  function formatTo12Hour(timeStr) {
+    if (/^\d{6}$/.test(timeStr)) {
+      const h = parseInt(timeStr.slice(0,2), 10);
+      const m = parseInt(timeStr.slice(2,4), 10);
+      const s = parseInt(timeStr.slice(4,6), 10);
+      let period = h >= 12 ? 'PM' : 'AM';
+      let hour = h % 12 || 12;
+      return `${hour}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')} ${period}`;
+    } else if (/^\d{4}$/.test(timeStr)) {
+      const h = parseInt(timeStr.slice(0,2), 10);
+      const m = parseInt(timeStr.slice(2,4), 10);
+      let period = h >= 12 ? 'PM' : 'AM';
+      let hour = h % 12 || 12;
+      return `${hour}:${m.toString().padStart(2,'0')} ${period}`;
+    } else {
+      const d = new Date(timeStr);
+      if (!isNaN(d.getTime())) {
+        let h = d.getHours();
+        let m = d.getMinutes();
+        let s = d.getSeconds();
+        let period = h >= 12 ? 'PM' : 'AM';
+        let hour = h % 12 || 12;
+        return `${hour}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')} ${period}`;
+      }
+      return timeStr;
+    }
+  }
+
+  const labels = recentData.map((data) => formatTo12Hour(data.time));
   const speeds = recentData.map((data) => data.speed); 
 
   const ctx = document.getElementById("speedChart").getContext("2d");
@@ -492,7 +541,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         x: {
           title: {
             display: true,
-            text: "Time",
+            text: "Time (12hr)",
           },
         },
         y: {
@@ -680,22 +729,126 @@ let deckOverlay;
 let deckLayers = [];
 let deckInitialized = false;
 let carIconUrl = "/static/images/car_green.png";
+let geofenceToggle = false;
+let geofencePolygons = {};
+let geofenceButton = null;
+
+async function toggleGeofences() {
+    try {
+        if (!geofenceToggle) {
+            const response = await fetch('/geofence/api/geofences');
+            if (!response.ok) throw new Error('Failed to fetch geofences');
+            
+            const geofences = await response.json();
+            
+            const activeGeofences = geofences.filter(geofence => geofence.is_active === true);
+            
+            activeGeofences.forEach(geofence => {
+                const mapsToUpdate = [map, liveMaps];
+                
+                mapsToUpdate.forEach(currentMap => {
+                    if (!currentMap) return;
+                    
+                    let polygon;
+                    
+                    if (geofence.shape_type === 'polygon') {
+                        const coordinates = geofence.coordinates.points.map(point => ({
+                            lat: point.lat,
+                            lng: point.lng
+                        }));
+                        
+                        polygon = new google.maps.Polygon({
+                            paths: coordinates,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.15,
+                            map: currentMap,
+                            title: geofence.name
+                        });
+                    } else if (geofence.shape_type === 'circle') {
+                        const center = geofence.coordinates.center;
+                        const radius = geofence.coordinates.radius;
+                        
+                        polygon = new google.maps.Circle({
+                            center: new google.maps.LatLng(center.lat, center.lng),
+                            radius: radius,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.15,
+                            map: currentMap,
+                            title: geofence.name
+                        });
+                    }
+                    
+                    if (polygon) {
+                        const mapKey = currentMap === liveMaps ? 'live' : 'route';
+                        geofencePolygons[`${mapKey}_${geofence._id}`] = polygon;
+                        
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
+                                <div class="geofence-info">
+                                    <h4>${geofence.name}</h4>
+                                    <p><strong>Type:</strong> ${geofence.shape_type}</p>
+                                    <p><strong>Location:</strong> ${geofence.location || 'N/A'}</p>
+                                    <p><strong>Created by:</strong> ${geofence.created_by}</p>
+                                </div>
+                            `
+                        });
+                        
+                        if (geofence.shape_type === 'polygon') {
+                            polygon.addListener('click', (event) => {
+                                infoWindow.setPosition(event.latLng);
+                                infoWindow.open(currentMap);
+                            });
+                        } else if (geofence.shape_type === 'circle') {
+                            polygon.addListener('click', (event) => {
+                                infoWindow.setPosition(event.latLng);
+                                infoWindow.open(currentMap);
+                            });
+                        }
+                    }
+                });
+            });
+            
+            geofenceToggle = true;
+            geofenceButton.classList.add('active');
+        } else {
+            Object.values(geofencePolygons).forEach(polygon => {
+                polygon.setMap(null);
+            });
+            geofencePolygons = {};
+            geofenceToggle = false;
+            geofenceButton.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Error toggling geofences:', error);
+    }
+}
 
 function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
   const overlay = new google.maps.OverlayView();
 
   overlay.onAdd = function () {
     const div = document.createElement("div");
-    div.style.width = "15px";
-    div.style.height = "15px";
+    const darkModeLocal = document.body.classList.contains("dark-mode");
+    const arrowColorLocal = darkModeLocal ? '#fff' : '#2a2a2a';
+    div.style.width = "0";
+    div.style.height = "0";
     div.style.position = "absolute";
-    div.style.transform = `rotate(${calculateBearingGoogle(nextCoord, coord)}deg)`;
-    div.style.backgroundImage = "url('/static/images/Arrow.png')";
-    div.style.backgroundSize = "contain";
-    div.style.backgroundRepeat = "no-repeat";
+    div.style.backgroundColor = "transparent";
+    div.style.borderTop = `12px solid ${arrowColorLocal}`;
+    div.style.borderLeft = "7px solid transparent";
+    div.style.borderRight = "7px solid transparent";
+    const bearing = calculateBearingGoogle(coord, nextCoord);
+    div.style.transform = `translate(-50%, -50%) rotate(${bearing + 180}deg)`;
     div.style.cursor = "pointer";
+    div.style.opacity = "0.95";
+    div.style.zIndex = 700;
 
-    // Add click listener for InfoWindow
     div.addEventListener("click", () => {
       const infoWindow = new google.maps.InfoWindow({
         content: infoWindowContent,
@@ -712,8 +865,10 @@ function createArrowOverlay(coord, nextCoord, map, infoWindowContent) {
   overlay.draw = function () {
     const projection = this.getProjection();
     const position = projection.fromLatLngToDivPixel(new google.maps.LatLng(coord.lat, coord.lng));
-    this.div.style.left = `${position.x}px`;
-    this.div.style.top = `${position.y}px`;
+    if (this.div) {
+      this.div.style.left = `${position.x}px`;
+      this.div.style.top = `${position.y}px`;
+    }
   };
 
   overlay.onRemove = function () {
@@ -797,17 +952,25 @@ async function plotPathOnMap(pathCoordinates) {
 
   const vehicleContent = document.createElement("img");
   vehicleContent.src = iconUrl;
-  vehicleContent.style.width = `${size.width}px`;
-  vehicleContent.style.height = `${size.height}px`;
-  vehicleContent.style.position = "absolute";
   vehicleContent.alt = vehicleType;
-  vehicleContent.style.transform = `rotate(${pathCoordinates[0]?.course || 0}deg)`;
+  vehicleContent.style.width = '100%';
+  vehicleContent.style.height = '100%';
+
+  const vehicleWrapper = document.createElement("div");
+  vehicleWrapper.style.position = "absolute";
+  vehicleWrapper.style.width = `${size.width}px`;
+  vehicleWrapper.style.height = `${size.height}px`;
+  vehicleWrapper.style.display = 'flex';
+  vehicleWrapper.style.alignItems = 'center';
+  vehicleWrapper.style.justifyContent = 'center';
+  vehicleWrapper.style.transform = `translate(-50%, -50%) rotate(${pathCoordinates[0]?.course || 0}deg)`;
+  vehicleWrapper.appendChild(vehicleContent);
 
   carMarker = new google.maps.marker.AdvancedMarkerElement({
     position: coords[0],
     map: map,
     title: "Vehicle",
-    content: vehicleContent,
+    content: vehicleWrapper,
     zIndex: 1000,
   });
   window.__allMapMarkers.push(carMarker);
@@ -925,7 +1088,7 @@ function updateCarPosition(index) {
 
   carMarker.position = point;
   if (carMarker.content) {
-    carMarker.content.style.transform = `rotate(${bearing}deg)`;
+    carMarker.content.style.transform = `translate(-50%, -50%) rotate(${bearing}deg)`;
   }
 
   const carLatLng = new google.maps.LatLng(point.lat, point.lng);
@@ -969,7 +1132,7 @@ function moveCar() {
         if (carMarker) {
           carMarker.position = { lat, lng };
           if (carMarker.content) {
-            carMarker.content.style.transform = `rotate(${stepBearing}deg)`;
+            carMarker.content.style.transform = `translate(-50%, -50%) rotate(${stepBearing}deg)`;
           }
         }
 
@@ -1009,7 +1172,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td>${alert.timestamp}</td>
                         <td>${alert.location}</td>
                         <td>${alert.severity}</td>
-                        <td>${alert.status}</td>
                     </tr>
                 `;
             tbody.innerHTML += row;
@@ -1056,10 +1218,6 @@ function fetchAndDisplayAlerts(imei) {
         const severityCell = document.createElement("td");
         severityCell.textContent = alert.latitude ? "Critical" : "Warning";
         row.appendChild(severityCell);
-
-        const statusCell = document.createElement("td");
-        statusCell.textContent = "Active";
-        row.appendChild(statusCell);
 
         alertsTableBody.appendChild(row);
       });

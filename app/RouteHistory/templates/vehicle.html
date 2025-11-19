@@ -14,6 +14,14 @@
 Vehicle Data
 {% endblock %}
 
+{% block topbar_icons %}
+<div class="geofence-toggle-container">
+  <button id="geofence-toggle" class="geofence-toggle-btn" title="Toggle Geofences">
+    <i class="fas fa-draw-polygon"></i>
+  </button>
+</div>
+{% endblock %}
+
 {% block block_container %}
 
 <div class="header">
@@ -139,7 +147,6 @@ Vehicle Data
           <th>TIMESTAMP</th>
           <th>LOCATION</th>
           <th>SEVERITY</th>
-          <th>STATUS</th>
         </tr>
       </thead>
       <tbody>
@@ -153,7 +160,6 @@ Vehicle Data
                 {{ alert["severity"] }}
               </span>
             </td>
-            <td>{{ alert["status"] }}</td>
           </tr>
           {% endfor %}
         {% else %}

@@ -283,14 +283,12 @@ def fetch_vehicle_alerts(imei):
                 "timestamp": alert["date_time"].astimezone(ist).strftime("%d-%m-%Y %I:%M:%S %p"),
                 "location": f"{alert['latitude']}, {alert['longitude']}",
                 "severity": "Critical",
-                "status": "Active",
             }
             for alert in alerts
         ]
 
         return jsonify(formatted_alerts)
     except Exception as e:
-        print(f"Error fetching alerts for IMEI {imei}: {e}")
         return jsonify({"error": "Error fetching alerts"}), 500
 
 @route_bp.route("/alerts", methods=["GET"])
@@ -316,7 +314,6 @@ def get_alerts():
         return jsonify(formatted_alerts)
 
     except Exception as e:
-        print(f"Error fetching alerts for IMEI: {imei}. Error: {e}")
         return jsonify({"error": "Error fetching alerts"}), 500
 
 

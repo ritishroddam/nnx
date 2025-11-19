@@ -66,12 +66,10 @@ def dashboard_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def atlanta_pie_data():
     try:
-        # Get all active IMEIs
         vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
         
         imeis = getCollectionImeis(vehicleInvyImeis)
         
-        # Get latest record for each IMEI
         latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
 
         atlantaAis140Records = list(atlantaAis140Collection.find({"_id": {"$in": imeis}}))
@@ -107,16 +105,16 @@ def atlanta_pie_data():
                 if speed > 0:
                     moving_vehicles += 1
                 else:
-                    idle_vehicles += 1  # Only count as idle if ignition is ON and speed is 0
+                    idle_vehicles += 1  
             else:
-                parked_vehicles += 1  # Separate count for parked vehicles
+                parked_vehicles += 1 
         
         return jsonify({
             "total_devices": len(imeis),
             "moving_vehicles": moving_vehicles,
             "offline_vehicles": offline_vehicles,
-            "idle_vehicles": idle_vehicles,   # This will now match the status cards
-            "parked_vehicles": parked_vehicles  # Optional: track parked separately
+            "idle_vehicles": idle_vehicles,   
+            "parked_vehicles": parked_vehicles  
         }), 200
     except Exception as e:
         print(f"🚨 Error fetching pie chart data: {e}")
@@ -130,8 +128,10 @@ def atlanta_distance_data():
         vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
         
         imeis = getCollectionImeis(vehicleInvyImeis)
-
         startTime = datetime.now()
+
+        distanceKeys = {}
+
         for i in range(6, -1, -1):
             date = datetime.now(timezone.utc) - timedelta(days=i)
             start_of_day = date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -190,7 +190,6 @@ def get_vehicle_range_data():
         
         imeis = getCollectionImeis(vehicleInvyImeis)
    
-        # Execute all pipelines
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
         speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)
         time_results = getTimeAnalysisBasedOnTime(imeis, start_of_day, end_of_day)
@@ -207,7 +206,6 @@ def get_vehicle_range_data():
             data = atlantaAis140ToFront(doc)
             latest_results.append(data)
         
-        # Convert to dictionaries for fast lookup
         speed_dict = {result['imei']: result for result in speed_results}
         distance_dict = {result['imei']: result for result in distance_results}
         latest_dict = {result['_id']: result for result in latest_results}
@@ -216,7 +214,6 @@ def get_vehicle_range_data():
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         vehicle_data = []
         
-        # Combine results for each IMEI
         for imei in imeis:
             distance = distance_dict.get(imei, {})
             speeds = speed_dict.get(imei, {})
@@ -228,7 +225,6 @@ def get_vehicle_range_data():
                 
             vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
             
-            # Calculate driving time, idle time, and stops from time records
             driving_time = timedelta()
             idle_time = timedelta()
             number_of_stops = 0
@@ -254,7 +250,6 @@ def get_vehicle_range_data():
                 prev_ignition = ignition
                 prev_time = curr_time
             
-            # Parse last update time
             last_update = None
             if latest.get("date") and latest.get("time"):
                 try:
@@ -296,29 +291,40 @@ def get_vehicle_range_data():
                 "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
             }
             
-            # Apply status filtering
             if not status_filter:
                 vehicle_data.append(vehicle_info)
             else:
-                speed = float(vehicle_info.get("speed", 0))
-                ignition = vehicle_info.get("ignition", "0")
+                try:
+                    speed = float(vehicle_info.get("speed", 0))
+                except (ValueError, TypeError):
+                    speed = 0.0
+                
+                ignition = str(vehicle_info.get("ignition", "0"))
                 is_offline = vehicle_info.get("is_offline", False)
-                main_power = vehicle_info.get("main_power", "1")
+                main_power = str(vehicle_info.get("main_power", "1"))
+                
+                print(f"DEBUG Filter: {vehicle_info.get('registration')} - speed={speed}, ignition={ignition}, offline={is_offline}, filter={status_filter}")
+                
+                should_include = False
                 
                 if status_filter == "running" and ignition == "1" and speed > 0 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "idle" and ignition == "1" and speed == 0 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "parked" and ignition == "0" and speed == 0 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "speed" and ignition == "1" and 40 <= speed < 60 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "overspeed" and ignition == "1" and speed >= 60 and not is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "offline" and is_offline:
-                    vehicle_data.append(vehicle_info)
+                    should_include = True
                 elif status_filter == "disconnected" and main_power == "0":
+                    should_include = True
+                
+                if should_include:
                     vehicle_data.append(vehicle_info)
+                    print(f"  → INCLUDED in {status_filter}")
         
         return jsonify(vehicle_data), 200
         
@@ -363,13 +369,19 @@ def get_status_data():
         }
 
         for vehicle in vehicle_data:
-            speed = float(vehicle.get("speed", 0))
-            ignition = vehicle.get("ignition", "0")
+            try:
+                speed = float(vehicle.get("speed", 0))
+            except (ValueError, TypeError):
+                speed = 0.0
+            
+            ignition = str(vehicle.get("ignition", "0"))
             is_offline = vehicle.get("is_offline", False)
-            main_power = vehicle.get("main_power", "1")
+            main_power = str(vehicle.get("main_power", "1"))
             gps = vehicle.get("gps", True)
 
-            if ignition == "1" and speed > 0 and not is_offline:
+            if is_offline:
+                counters['offlineVehicles'] += 1
+            elif ignition == "1" and speed > 0 and not is_offline:
                 counters['runningVehicles'] += 1
             elif ignition == "1" and speed == 0 and not is_offline:
                 counters['idleVehicles'] += 1
@@ -381,8 +393,6 @@ def get_status_data():
             elif ignition == "1" and speed >= 60 and not is_offline:
                 counters['overspeedVehicles'] += 1
             
-            if is_offline:
-                counters['offlineVehicles'] += 1
             if main_power == "0":
                 counters['disconnectedVehicles'] += 1
             if not gps:

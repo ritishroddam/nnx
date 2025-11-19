@@ -20,7 +20,7 @@ async function initMap() {
     
     map = new Map(document.getElementById("map"), {
         mapId: "dc4a8996aab2cac9",
-        zoom: 10,
+        zoom: 16,
     })
 
     vehiclesData.forEach(vehicle => {
@@ -32,11 +32,11 @@ async function initMap() {
             
             bounds.extend(latLng)
 
-            // Get course from vehicle data (convert to number)
             const course = vehicle.course ? parseFloat(vehicle.course) : 0;
+            const speed = vehicle.speed ? parseFloat(vehicle.speed) : 0;
+            const lastUpdate = vehicle.date_time || null;
             
-            // Create marker with proper rotation
-            const markerElement = createRotatableMarker(course);
+            const markerElement = createRotatableMarker(course, speed, lastUpdate, vehicle.type || 'car');
             
             const marker = new AdvancedMarkerElement({
                 position: latLng,
@@ -45,10 +45,11 @@ async function initMap() {
                 content: markerElement,
             })
 
-            // Store marker data
             marker.licensePlate = vehicle.licensePlateNumber;
             marker.currentPosition = latLng;
             marker.currentCourse = course;
+            marker.currentSpeed = speed;
+            marker.lastUpdate = lastUpdate;
 
             markers[vehicle.licensePlateNumber] = marker
 
@@ -57,14 +58,28 @@ async function initMap() {
                     activeInfoWindow.close();
                 }
 
+                let formattedDateTime = 'Unknown';
+                if (vehicle.date_time) {
+                    const dateObj = new Date(vehicle.date_time);
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    const timeStr = dateObj.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    formattedDateTime = `${day}/${month}/${year} ${timeStr}`;
+                }
+
                 const infoWindow = new google.maps.InfoWindow({
                     content: `
                         <div>
                             <h3>${vehicle.licensePlateNumber}</h3>
                             <p>Location: ${vehicle.location || 'Unknown'}</p>
                             <p>Speed: ${vehicle.speed || 'Unknown'} km/h</p>
-                            <p>Course: ${course}°</p>
-                            <p>Last Update: ${vehicle.date_time || 'Unknown'}</p>
+                            <p>Last Update: ${formattedDateTime}</p>
                         </div>
                     `
                 });
@@ -79,42 +94,78 @@ async function initMap() {
         map.fitBounds(bounds);
         
         const listener = google.maps.event.addListener(map, "idle", function () {
-            if (map.getZoom() > 15) map.setZoom(15);
+            if (map.getZoom() > 16) map.setZoom(16);
             google.maps.event.removeListener(listener);
         });
     }
     setupCardHoverEvents();
 }
 
-// Create a properly rotatable marker element
-function createRotatableMarker(course = 0) {
+function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicleType = 'car') {
+    function _getVehicleIconSize(type) {
+        switch ((type || 'car').toLowerCase()) {
+            case 'truck': return { width: 24, height: 80 };
+            case 'bus':   return { width: 35, height: 80 };
+            case 'bike':  return { width: 21, height: 56 };
+            default:      return { width: 29, height: 56 }; 
+        }
+    }
+
+    const size = _getVehicleIconSize(vehicleType);
+
     const container = document.createElement("div");
     container.style.position = "relative";
-    container.style.width = "32px";
-    container.style.height = "32px";
+    container.style.width = `${size.width}px`;
+    container.style.height = `${size.height}px`;
     container.style.display = "flex";
     container.style.alignItems = "center";
     container.style.justifyContent = "center";
     
     const carImg = document.createElement("img");
-    carImg.src = "/static/images/car_green.png";
-    carImg.style.width = "24px"; // Slightly smaller to fit in container
-    carImg.style.height = "24px";
+    
+    const color = getMarkerColor(speed, lastUpdate);
+    carImg.src = `/static/images/car_${color}.png`;
+    carImg.style.width = `${size.width}px`;
+    carImg.style.height = `${size.height}px`;
     carImg.style.transform = `rotate(${course}deg)`;
     carImg.style.transition = "transform 0.3s ease";
-    carImg.style.transformOrigin = "center center"; // Ensure rotation around center
+    carImg.style.transformOrigin = "center center"; 
     carImg.alt = "Vehicle";
     
     container.appendChild(carImg);
+    container.currentColor = color;
+    container.vehicleType = vehicleType;
     return container;
 }
 
-// Update marker rotation with proper course handling
+function getMarkerColor(speed, lastUpdate) {
+    if (lastUpdate) {
+        const lastUpdateTime = new Date(lastUpdate).getTime();
+        const currentTime = new Date().getTime();
+        const hoursDiff = (currentTime - lastUpdateTime) / (1000 * 60 * 60);
+        
+        if (hoursDiff > 24) {
+            return 'black';
+        }
+    }
+    
+    const speedNum = parseFloat(speed) || 0;
+    
+    if (speedNum === 0 || speedNum < 0.1) {
+        return 'yellow';  
+    } else if (speedNum > 60) {
+        return 'red';     
+    } else if (speedNum > 40) {
+        return 'blue';   
+    } else {
+        return 'green';  
+    }
+}
+
 function updateMarkerRotation(marker, newCourse) {
     const container = marker.content;
     const img = container.querySelector('img');
     if (img) {
-        // Convert course to number and ensure it's a valid degree value
         const course = parseFloat(newCourse) || 0;
         img.style.transform = `rotate(${course}deg)`;
         console.log(`Rotated marker ${marker.licensePlate} to ${course}°`);
@@ -122,28 +173,40 @@ function updateMarkerRotation(marker, newCourse) {
     marker.currentCourse = newCourse;
 }
 
-// Smooth animation for marker movement with rotation
-function animateMarker(marker, newPosition, newCourse, duration = 2000) {
+function updateMarkerColor(marker, speed, lastUpdate) {
+    const container = marker.content;
+    const img = container.querySelector('img');
+    if (img) {
+        const newColor = getMarkerColor(speed, lastUpdate);
+        const oldColor = container.currentColor;
+        
+        if (newColor !== oldColor) {
+            img.src = `/static/images/car_${newColor}.png`;
+            container.currentColor = newColor;
+            console.log(`Updated marker ${marker.licensePlate} color from ${oldColor} to ${newColor}`);
+        }
+    }
+    marker.currentSpeed = speed;
+    marker.lastUpdate = lastUpdate;
+}
+
+function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, duration = 12000) {
     const startPosition = marker.currentPosition;
     const startCourse = marker.currentCourse || 0;
     const startTime = performance.now();
     
-    // Calculate distance for animation speed adjustment
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
         startPosition, newPosition
     );
     
-    // Adjust duration based on distance
     const adjustedDuration = Math.min(duration, Math.max(1000, distance / 5));
     
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / adjustedDuration, 1);
         
-        // Easing function for smooth movement
         const easeProgress = easeInOutCubic(progress);
         
-        // Interpolate position
         const lat = startPosition.lat() + (newPosition.lat() - startPosition.lat()) * easeProgress;
         const lng = startPosition.lng() + (newPosition.lng() - startPosition.lng()) * easeProgress;
         
@@ -151,13 +214,11 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         marker.position = currentLatLng;
         marker.currentPosition = currentLatLng;
         
-        // Interpolate rotation if course changed
         if (newCourse !== undefined && newCourse !== startCourse) {
             const currentCourse = startCourse + (newCourse - startCourse) * easeProgress;
             updateMarkerRotation(marker, currentCourse);
         }
         
-        // If this is the tracked vehicle, keep the map centered on it
         if (trackedVehicle === marker.licensePlate) {
             map.setCenter(currentLatLng);
         }
@@ -165,11 +226,13 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            // Final position and rotation
             marker.position = newPosition;
             marker.currentPosition = newPosition;
             if (newCourse !== undefined) {
                 updateMarkerRotation(marker, newCourse);
+            }
+            if (newSpeed !== undefined || newLastUpdate !== undefined) {
+                updateMarkerColor(marker, newSpeed, newLastUpdate);
             }
         }
     }
@@ -177,7 +240,6 @@ function animateMarker(marker, newPosition, newCourse, duration = 2000) {
     requestAnimationFrame(animate);
 }
 
-// Easing function for smooth animation
 function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -198,8 +260,8 @@ function setupCardHoverEvents() {
                 const marker = markers[licensePlate];
                 if (marker) {
                     map.setCenter(marker.currentPosition);
-                    if (map.getZoom() < 14) {
-                        map.setZoom(14);
+                    if (map.getZoom() < 16) {
+                        map.setZoom(16);
                     }
                 }
             });
@@ -219,8 +281,8 @@ function zoomToVehicle(licensePlate, lat, lng) {
     if (marker) {
         map.setCenter({ lat, lng });
         
-        if (map.getZoom() < 12) {
-            map.setZoom(12);
+        if (map.getZoom() < 16) {
+            map.setZoom(16);
         }
     }
 }
@@ -261,12 +323,13 @@ socket.on("vehicle_live_update", (data) => {
             parseFloat(data.longitude)
         );
         
-        // Get course from update data (ensure it's a number)
         const newCourse = data.course ? parseFloat(data.course) : marker.currentCourse;
+        const newSpeed = data.speed ? parseFloat(data.speed) : marker.currentSpeed;
+        const newLastUpdate = data.date_time || new Date().toISOString();
         
-        console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°`);
+        console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°, Speed: ${newSpeed} km/h`);
         
-        animateMarker(marker, newPosition, newCourse, 2000);
+        animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 2000);
         
         updateVehicleInfo(data);
 
@@ -287,15 +350,30 @@ function updateVehicleInfo(vehicleData) {
         
         if (locationEl) locationEl.textContent = vehicleData.address || 'Unknown Location';
         if (speedEl) {
-            if (vehicleData.speed && vehicleData.speed !== '' && parseInt(vehicleData.speed) === 0) {
-                speedEl.textContent = `Stopped: ${vehicleData.speed} kmph, since 0 seconds`;
-            } else if (vehicleData.speed && vehicleData.speed !== '') {
-                speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
+            if (vehicleData.speed && vehicleData.speed !== '' && vehicleData.speed !== null) {
+                const speedNum = parseInt(vehicleData.speed);
+                if (speedNum === 0) {
+                    speedEl.textContent = `Stopped: ${vehicleData.speed} kmph`;
+                } else {
+                    speedEl.textContent = `Moving: ${vehicleData.speed} kmph`;
+                }
             } else {
-                speedEl.textContent = 'Unknown Speed';
+                speedEl.textContent = 'No Speed';
             }
         }
-        if (updateEl) updateEl.textContent = new Date().toLocaleString();
+        if (updateEl) {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            updateEl.textContent = `${day}/${month}/${year} ${timeStr}`;
+        }
     }
 }
 

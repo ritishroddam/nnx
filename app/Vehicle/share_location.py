@@ -43,7 +43,7 @@ def api_share_location():
         return jsonify({"error": "LicensePlateNumber, from_datetime, and to_datetime required"}), 400
 
     try:
-        local_tz = pytz.timezone("Asia/Kolkata")  # or your local timezone
+        local_tz = pytz.timezone("Asia/Kolkata")  
         from_naive = datetime.strptime(from_str, "%Y-%m-%dT%H:%M")
         to_naive = datetime.strptime(to_str, "%Y-%m-%dT%H:%M")
         from_datetime = local_tz.localize(from_naive).astimezone(pytz.UTC)
@@ -90,7 +90,7 @@ def view_multiple_share_locations(token):
     now = datetime.now(timezone.utc)  
     
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
-        return jsonify({"error": "Link expired"}), 410
+        return render_template('link_expired.html'), 410
 
     licensePlateNumbers = info['licensePlateNumber'] 
     vehicles_data = []
@@ -102,7 +102,7 @@ def view_multiple_share_locations(token):
             
         latestLocation = db['atlantaLatest'].find_one(
             {"_id": vehicle.get("IMEI")},
-            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1},
+            {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1, "course": 1},
         )
         
         if not latestLocation:
@@ -114,6 +114,7 @@ def view_multiple_share_locations(token):
                 "speed": doc["telemetry"].get("speed"),
                 "date_time": doc["gps"].get("timestamp"),
                 "ignition": doc["telemetry"].get("ignition"),
+                "course": doc["gps"].get("heading", 0),
                 }
             else:
                 latestLocation = None
@@ -133,6 +134,7 @@ def view_multiple_share_locations(token):
                 "speed": latestLocation.get("speed"),
                 "date_time": str(ist_dt.strftime("%Y-%m-%d %H:%M:%S")) if ist_dt else None,
                 "ignition": latestLocation.get("ignition"),
+                "course": latestLocation.get("course", 0),
             }
             vehicles_data.append(vehicleDetails)
     
@@ -158,7 +160,7 @@ def view_share_location(licensePlateNumber, token):
     now = datetime.now(timezone.utc)  
     
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
-        return jsonify({"error": "Link expired"}), 410
+        return render_template('link_expired.html'), 410
 
     licensePlateNumber = info['licensePlateNumber']
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber},{"_id": 0, "IMEI":1})
@@ -167,7 +169,7 @@ def view_share_location(licensePlateNumber, token):
     
     latestLocation = db['atlantaLatest'].find_one(
         {"_id": vehicle.get("IMEI")},
-        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1},
+        {"_id": 0, "latitude": 1, "longitude": 1, "speed": 1, "date_time": 1, "ignition": 1, "course": 1},
     )
     
     if not latestLocation:
@@ -179,6 +181,7 @@ def view_share_location(licensePlateNumber, token):
             "speed": doc["telemetry"].get("speed"),
             "date_time": doc["gps"].get("timestamp"),
             "ignition": doc["telemetry"].get("ignition"),
+            "course": doc["gps"].get("heading", 0),
             }
         else:
             latestLocation = None
@@ -213,6 +216,7 @@ def view_share_location(licensePlateNumber, token):
         "location": location,
         "speed": latestLocation.get("speed"),
         "date_time": str(ist_dt.strftime("%Y-%m-%d %H:%M:%S")) if ist_dt else None,
+        "course": latestLocation.get("course", 0),
     }
     
     print(f"Vehicle Details: {vehicleDetails}")

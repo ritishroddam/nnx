@@ -15,6 +15,24 @@
             ({ key: "AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84", v: "weekly" });</script>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84&libraries=geometry"></script>
+    <script>
+        // Format date/time helper
+        function formatDateTime(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const timeStr = date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            return `${day}/${month}/${year} ${timeStr}`;
+        }
+    </script>
 </head>
 
 <body>
@@ -27,19 +45,35 @@
             <p><strong>Location:</strong> <span id="location">{{ vehicle.location|default("Unknown Location") }}</span></p>
             <p><strong>Speed:</strong> <span id="speed">
                 {% if vehicle.speed is not none and vehicle.speed != '' %}
-                  {{ vehicle.speed }} km/h
+                  {% if vehicle.speed|int == 0 %}
+                    Stopped: {{ vehicle.speed }} km/h
+                  {% else %}
+                    Moving: {{ vehicle.speed }} km/h
+                  {% endif %}
                 {% else %}
-                  Unknown Speed
+                  No Speed
                 {% endif %}
             </span></p>
             <button id="route-btn">Open in Google Maps</button>
         </div>
     </div>
     <script>
+        // Format initial date display
+        document.addEventListener('DOMContentLoaded', function() {
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            if (lastUpdateEl && lastUpdateEl.textContent.trim()) {
+                lastUpdateEl.textContent = formatDateTime(lastUpdateEl.textContent.trim());
+            }
+        });
+    </script>
+    <script>
         let vehicleMarker, url, map;
         window.licensePlateNumber = "{{ vehicle.LicensePlateNumber }}";
         window.vehicleLat = "{{ vehicle.latitude|default(0) }};"
         window.vehicleLng = "{{ vehicle.longitude|default(0) }};"
+        window.vehicleSpeed = "{{ vehicle.speed|default(0) }}";
+        window.vehicleCourse = "{{ vehicle.course|default(0) }}";
+        window.vehicleLastUpdate = "{{ vehicle.date_time }}";
         window.shareToken = "{{ token }}";
     </script>
 </body>
