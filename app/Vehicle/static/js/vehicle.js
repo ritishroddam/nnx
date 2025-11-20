@@ -68,7 +68,7 @@ var markers = {};
 var markerCluster = null;
 var simpleMarkers = {};
 var clusterActive = false;
-const CLUSTER_ZOOM_THRESHOLD = 8; // zoom level below or equal to this will show clusters
+const CLUSTER_ZOOM_THRESHOLD = 8; 
 var geocoder;
 var addressCache = {};
 var refreshInterval = 5000;
@@ -1361,13 +1361,18 @@ function updateMap() {
         // Update simple marker position if it exists
         if (simpleMarkers[imei]) {
           simpleMarkers[imei].setPosition(latLng);
+          
+          // Ensure simple marker is properly added to cluster if clustering is active
+          if (clusterActive && markerCluster && !simpleMarkers[imei]._inCluster) {
+            markerCluster.addMarker(simpleMarkers[imei]);
+            simpleMarkers[imei]._inCluster = true;
+          }
         }
       } else {
         markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
         
         // Set initial visibility based on clustering state
         if (clusterActive) {
-          // When clustering is active, hide advanced markers
           try {
             if (markers[imei] && typeof markers[imei].setMap === 'function') {
               markers[imei].setMap(null);
@@ -1376,17 +1381,6 @@ function updateMap() {
             }
           } catch (e) {
             console.warn('Failed to hide advanced marker in clustering mode', e);
-          }
-        } else {
-          // When clustering is inactive, show advanced markers
-          try {
-            if (markers[imei] && typeof markers[imei].setMap === 'function') {
-              markers[imei].setMap(map);
-            } else {
-              markers[imei].map = map;
-            }
-          } catch (e) {
-            console.warn('Failed to show advanced marker in non-clustering mode', e);
           }
         }
       }
@@ -1743,12 +1737,18 @@ function updateVehicleData(vehicle) {
     try {
       if (simpleMarkers[imei]) {
         simpleMarkers[imei].setPosition(latLng);
+        
+        // If clustering is active, ensure simple marker is in cluster
+        if (clusterActive && markerCluster && !simpleMarkers[imei]._inCluster) {
+          markerCluster.addMarker(simpleMarkers[imei]);
+          simpleMarkers[imei]._inCluster = true;
+        }
       }
     } catch (e) {
       console.warn('Error updating simple marker position in updateVehicleData', e);
     }
     
-    // Ensure visibility follows clustering rules
+    // Ensure advanced marker visibility follows clustering rules
     if (clusterActive) {
       // When clustering is active, hide advanced markers
       try {
