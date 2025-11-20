@@ -65,10 +65,6 @@ sidebar.addEventListener('mouseleave', () => {
 let vehicleData = new Map();
 var map;
 var markers = {};
-var markerCluster = null;
-var simpleMarkers = {};
-var clusterActive = false;
-const CLUSTER_ZOOM_THRESHOLD = 8; 
 var geocoder;
 var addressCache = {};
 var refreshInterval = 5000;
@@ -1261,77 +1257,6 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
-// function updateMap() {
-//   const bounds = new google.maps.LatLngBounds();
-//   dataAvailable = true;
-//   countdownTimer = refreshInterval / 1000;
-
-//   vehicleData.forEach((device, imei) => {
-//     if (
-//       device.latitude &&
-//       device.longitude &&
-//       device.speed != null &&
-//       device.course != null
-//     ) {
-//       const latLng = parseCoordinates(device.latitude, device.longitude);
-//       const iconUrl = getVehicleIconBySpeed(
-//         device.speed,
-//         imei,
-//         device.date,
-//         device.time,
-//         device.VehicleType || 'car'
-//       );
-//       const rotation = device.course;
-
-//       if (markers[imei]) {
-//         updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
-//         markers[imei].device = device;
-//       } else {
-//         markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
-//         try {
-//           if (clusterActive && markers[imei] && typeof markers[imei].setMap === 'function') {
-//             markers[imei].setMap(null);
-//           }
-//         } catch (e) {
-//           console.warn('Failed to hide newly created advanced marker when clustering active', e);
-//         }
-//       }
-
-//       if (device.sos === "1") {
-//         triggerSOS(imei, markers[imei]);
-//       } else {
-//         removeSOS(imei);
-//       }
-
-//       lastDataReceivedTime[imei] = new Date(`${device.date}T${device.time}`);
-//       bounds.extend(latLng);
-//     }
-
-//     checkForDataTimeout(imei);
-//   });
-
-//   if (!bounds.isEmpty() && firstFit) {
-//     map.fitBounds(bounds);
-//     firstFit = false;
-
-//     const boundsCenter = bounds.getCenter();
-
-//     map.setCenter(boundsCenter);
-
-//     const listener = google.maps.event.addListener(map, "idle", function () {
-//       if (map.getZoom() < 7) {
-//         map.setZoom(7);
-//       }
-//       google.maps.event.removeListener(listener);
-//     });
-//   }
-
-//   const vehiclesArray = Array.from(vehicleData.values());
-//   renderVehicleCards(vehiclesArray);
-//   hideSkeletonLoader();
-//   filterVehicles();
-// }
-
 function updateMap() {
   const bounds = new google.maps.LatLngBounds();
   dataAvailable = true;
@@ -1357,32 +1282,8 @@ function updateMap() {
       if (markers[imei]) {
         updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
         markers[imei].device = device;
-        
-        // Update simple marker position if it exists
-        if (simpleMarkers[imei]) {
-          simpleMarkers[imei].setPosition(latLng);
-          
-          // Ensure simple marker is properly added to cluster if clustering is active
-          if (clusterActive && markerCluster && !simpleMarkers[imei]._inCluster) {
-            markerCluster.addMarker(simpleMarkers[imei]);
-            simpleMarkers[imei]._inCluster = true;
-          }
-        }
       } else {
         markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
-        
-        // Set initial visibility based on clustering state
-        if (clusterActive) {
-          try {
-            if (markers[imei] && typeof markers[imei].setMap === 'function') {
-              markers[imei].setMap(null);
-            } else {
-              markers[imei].map = null;
-            }
-          } catch (e) {
-            console.warn('Failed to hide advanced marker in clustering mode', e);
-          }
-        }
       }
 
       if (device.sos === "1") {
@@ -1403,6 +1304,7 @@ function updateMap() {
     firstFit = false;
 
     const boundsCenter = bounds.getCenter();
+
     map.setCenter(boundsCenter);
 
     const listener = google.maps.event.addListener(map, "idle", function () {
@@ -1493,17 +1395,7 @@ function filterVehicles() {
         break;
     }
 
-    try {
-      if (marker && typeof marker.setMap === 'function') {
-        if (isVisible) marker.setMap(map);
-        else marker.setMap(null);
-      } else {
-        marker.map = isVisible ? map : null;
-      }
-    } catch (e) {
-      console.warn('Failed to toggle marker map in filterVehicles', e);
-      marker.map = isVisible ? map : null;
-    }
+    marker.map = isVisible ? map : null;
 
     if (isVisible) {
       filteredVehicles.push(marker.device);
@@ -1650,61 +1542,6 @@ function checkForDataTimeout(imei) {
   }
 }
 
-// function updateVehicleData(vehicle) {
-//   const imei = vehicle.imei;
-//   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
-//   const iconUrl = getVehicleIconBySpeed(
-//     vehicle.speed,
-//     imei,
-//     vehicle.date,
-//     vehicle.time,
-//     vehicle.VehicleType || 'car'
-//   );
-//   const rotation = vehicle.course;
-
-//   if (markers[imei]) {
-//     markers[imei].device = vehicle;
-//     animateMarker(markers[imei], latLng);
-//     updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
-
-//     const markerContent = markers[imei].content;
-//     const markerImage = markerContent.querySelector("img");
-//     if (markerImage) {
-//     markerImage.src = iconUrl;
-//     const size = getVehicleIconSize(vehicle.VehicleType || 'car');
-//     const markerContent = markers[imei].content;
-//     markerContent.style.width = `${size.width}px`;
-//     markerContent.style.height = `${size.height}px`;
-//     markerContent.style.transform = `rotate(${rotation}deg)`;
-//     }
-//     try {
-//       if (simpleMarkers[imei]) simpleMarkers[imei].setPosition(latLng);
-//     } catch (e) {
-//       console.warn('Error updating simple marker position in updateVehicleData', e);
-//     }
-//   } else {
-//     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
-//     try {
-//       if (clusterActive && markers[imei] && typeof markers[imei].setMap === 'function') {
-//         markers[imei].setMap(null);
-//       }
-//     } catch (e) {
-//       console.warn('Failed to hide newly created advanced marker when clustering active (updateVehicleData)', e);
-//     }
-//   }
-
-//   if (vehicle.sos === "1") {
-//     triggerSOS(imei, markers[imei]);
-//   } else {
-//     removeSOS(imei);
-//   }
-
-//   lastDataReceivedTime[imei] = new Date();
-//   filterVehicles();
-//   addHoverListenersToCardsAndMarkers();
-//   showHidecar();
-// }
-
 function updateVehicleData(vehicle) {
   const imei = vehicle.imei;
   const latLng = parseCoordinates(vehicle.latitude, vehicle.longitude); 
@@ -1725,69 +1562,15 @@ function updateVehicleData(vehicle) {
     const markerContent = markers[imei].content;
     const markerImage = markerContent.querySelector("img");
     if (markerImage) {
-      markerImage.src = iconUrl;
-      const size = getVehicleIconSize(vehicle.VehicleType || 'car');
-      const markerContent = markers[imei].content;
-      markerContent.style.width = `${size.width}px`;
-      markerContent.style.height = `${size.height}px`;
-      markerContent.style.transform = `rotate(${rotation}deg)`;
-    }
-    
-    // Update simple marker position if it exists
-    try {
-      if (simpleMarkers[imei]) {
-        simpleMarkers[imei].setPosition(latLng);
-        
-        // If clustering is active, ensure simple marker is in cluster
-        if (clusterActive && markerCluster && !simpleMarkers[imei]._inCluster) {
-          markerCluster.addMarker(simpleMarkers[imei]);
-          simpleMarkers[imei]._inCluster = true;
-        }
-      }
-    } catch (e) {
-      console.warn('Error updating simple marker position in updateVehicleData', e);
-    }
-    
-    // Ensure advanced marker visibility follows clustering rules
-    if (clusterActive) {
-      // When clustering is active, hide advanced markers
-      try {
-        if (markers[imei] && typeof markers[imei].setMap === 'function') {
-          markers[imei].setMap(null);
-        } else {
-          markers[imei].map = null;
-        }
-      } catch (e) {
-        console.warn('Failed to hide advanced marker in clustering mode during update', e);
-      }
-    } else {
-      // When clustering is inactive, show advanced markers
-      try {
-        if (markers[imei] && typeof markers[imei].setMap === 'function') {
-          markers[imei].setMap(map);
-        } else {
-          markers[imei].map = map;
-        }
-      } catch (e) {
-        console.warn('Failed to show advanced marker in non-clustering mode during update', e);
-      }
+    markerImage.src = iconUrl;
+    const size = getVehicleIconSize(vehicle.VehicleType || 'car');
+    const markerContent = markers[imei].content;
+    markerContent.style.width = `${size.width}px`;
+    markerContent.style.height = `${size.height}px`;
+    markerContent.style.transform = `rotate(${rotation}deg)`;
     }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
-    
-    // Set initial visibility based on clustering state for new markers
-    if (clusterActive) {
-      // When clustering is active, hide advanced markers
-      try {
-        if (markers[imei] && typeof markers[imei].setMap === 'function') {
-          markers[imei].setMap(null);
-        } else {
-          markers[imei].map = null;
-        }
-      } catch (e) {
-        console.warn('Failed to hide newly created advanced marker when clustering active', e);
-      }
-    }
   }
 
   if (vehicle.sos === "1") {
@@ -2286,179 +2069,6 @@ async function initMap() {
 
   geocoder = new google.maps.Geocoder();
   infoWindow = new google.maps.InfoWindow();
-
-  // Initialize MarkerClusterer for clustering simple google.maps.Marker instances
-  try {
-    if (window.markerClusterer && typeof markerClusterer.MarkerClusterer === 'function') {
-      markerCluster = new markerClusterer.MarkerClusterer({ map: map, markers: [] });
-    } else if (typeof MarkerClusterer === 'function') {
-      markerCluster = new MarkerClusterer({ map: map, markers: [] });
-    }
-  } catch (e) {
-    console.warn('MarkerClusterer initialization failed:', e);
-    markerCluster = null;
-  }
-
-  // Toggle between cluster view and advanced markers depending on zoom
-  // map.addListener && map.addListener('zoom_changed', function () {
-  //   try {
-  //     const z = map.getZoom();
-  //     if (z <= CLUSTER_ZOOM_THRESHOLD) {
-  //       // enable clustering: hide advanced markers and let clusterer show clusters
-  //       if (!clusterActive) {
-  //         clusterActive = true;
-  //         Object.keys(markers).forEach((imei) => {
-  //           try {
-  //             if (markers[imei]) {
-  //               if (typeof markers[imei].setMap === 'function') markers[imei].setMap(null);
-  //               else markers[imei].map = null;
-  //             }
-  //           } catch (e) {
-  //             console.warn('Error hiding advanced marker for clustering', e);
-  //           }
-  //           const sm = simpleMarkers[imei];
-  //           if (sm && markerCluster && !sm._inCluster) {
-  //             markerCluster.addMarker(sm);
-  //             sm._inCluster = true;
-  //           }
-  //         });
-  //       }
-  //     } else {
-  //       // disable clustering: remove cluster markers and show advanced markers
-  //       if (clusterActive) {
-  //         clusterActive = false;
-  //         try { markerCluster && markerCluster.clearMarkers && markerCluster.clearMarkers(); } catch(e){}
-  //         Object.keys(simpleMarkers).forEach((k) => {
-  //           try { simpleMarkers[k]._inCluster = false; } catch(e){}
-  //         });
-  //         Object.keys(markers).forEach((imei) => {
-  //           try {
-  //             if (markers[imei]) {
-  //               if (typeof markers[imei].setMap === 'function') markers[imei].setMap(map);
-  //               else markers[imei].map = map;
-  //             }
-  //           } catch (e) {
-  //             console.warn('Error showing advanced marker after clustering', e);
-  //           }
-  //         });
-  //       }
-  //     }
-  //   } catch (e) {
-  //     console.error('Error handling zoom change for clustering:', e);
-  //   }
-  // });
-
-  // Toggle between cluster view and advanced markers depending on zoom
-map.addListener && map.addListener('zoom_changed', function () {
-  try {
-    const z = map.getZoom();
-    if (z <= CLUSTER_ZOOM_THRESHOLD) {
-      // enable clustering: hide advanced markers and let clusterer show clusters
-      if (!clusterActive) {
-        clusterActive = true;
-        Object.keys(markers).forEach((imei) => {
-          try {
-            if (markers[imei]) {
-              if (typeof markers[imei].setMap === 'function') markers[imei].setMap(null);
-              else markers[imei].map = null;
-            }
-          } catch (e) {
-            console.warn('Error hiding advanced marker for clustering', e);
-          }
-          
-          // Add simple marker to cluster
-          const sm = simpleMarkers[imei];
-          if (sm && markerCluster && !sm._inCluster) {
-            try {
-              markerCluster.addMarker(sm);
-              sm._inCluster = true;
-            } catch (e) {
-              console.warn('Error adding marker to cluster', e);
-            }
-          }
-        });
-      }
-    } else {
-      // disable clustering: remove cluster markers and show advanced markers
-      if (clusterActive) {
-        clusterActive = false;
-        try { 
-          if (markerCluster && markerCluster.clearMarkers) {
-            markerCluster.clearMarkers();
-          }
-        } catch(e) {
-          console.warn('Error clearing markers from cluster', e);
-        }
-        
-        // Remove simple markers from cluster
-        Object.keys(simpleMarkers).forEach((k) => {
-          try { 
-            simpleMarkers[k]._inCluster = false;
-            if (simpleMarkers[k].setMap) {
-              simpleMarkers[k].setMap(null);
-            }
-          } catch(e) {
-            console.warn('Error removing simple marker from cluster', e);
-          }
-        });
-        
-        // Show advanced markers
-        Object.keys(markers).forEach((imei) => {
-          try {
-            if (markers[imei]) {
-              if (typeof markers[imei].setMap === 'function') markers[imei].setMap(map);
-              else markers[imei].map = map;
-            }
-          } catch (e) {
-            console.warn('Error showing advanced marker after clustering', e);
-          }
-        });
-      }
-    }
-  } catch (e) {
-    console.error('Error handling zoom change for clustering:', e);
-  }
-});
-
-  try {
-    const initZoom = map.getZoom();
-    if (initZoom <= CLUSTER_ZOOM_THRESHOLD) {
-      clusterActive = true;
-        Object.keys(markers).forEach((imei) => {
-          try {
-            if (markers[imei]) {
-              if (typeof markers[imei].setMap === 'function') markers[imei].setMap(null);
-              else markers[imei].map = null;
-            }
-          } catch (e) {
-            console.warn('Error hiding advanced marker during initial clustering', e);
-          }
-          const sm = simpleMarkers[imei];
-          if (sm && markerCluster && !sm._inCluster) {
-            markerCluster.addMarker(sm);
-            sm._inCluster = true;
-          }
-        });
-    } else {
-    clusterActive = false;
-    try { markerCluster && markerCluster.clearMarkers && markerCluster.clearMarkers(); } catch(e){}
-    Object.keys(simpleMarkers).forEach((k) => {
-      try { simpleMarkers[k]._inCluster = false; } catch(e){}
-    });
-    Object.keys(markers).forEach((imei) => {
-      try {
-        if (markers[imei]) {
-          if (typeof markers[imei].setMap === 'function') markers[imei].setMap(map);
-          else markers[imei].map = map;
-        }
-      } catch (e) {
-        console.warn('Error restoring advanced marker during initial clustering', e);
-      }
-    });
-    }
-  } catch (e) {
-    console.warn('Initial clustering check failed', e);
-  }
 }
 
 const themeToggle = document.getElementById("theme-toggle");
@@ -2488,64 +2098,6 @@ function getVehicleIconSize(vehicleType) {
   }
 }
 
-// function createAdvancedMarker(latLng, iconUrl, rotation, device) {
-//   if (!(latLng instanceof google.maps.LatLng)) {
-//     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
-//   }
-
-//   const vehicleType = device.VehicleType || 'car';
-//   const size = getVehicleIconSize(vehicleType);
-  
-//   const markerContent = document.createElement("div");
-//   markerContent.className = "custom-marker";
-//   markerContent.style.width = `${size.width}px`;
-//   markerContent.style.height = `${size.height}px`;
-//   markerContent.style.transform = `rotate(${rotation}deg)`;
-
-//   const markerImage = document.createElement("img");
-//   markerImage.src = iconUrl;
-//   markerImage.alt = "Vehicle Icon";
-//   markerImage.style.width = "100%";
-//   markerImage.style.height = "100%";
-//   markerImage.style.display = "block";
-
-//   markerContent.appendChild(markerImage);
-
-//   const marker = new google.maps.marker.AdvancedMarkerElement({
-//     position: latLng, 
-//     map: map,
-//     title: `License Plate Number: ${device.LicensePlateNumber}`,
-//     content: markerContent,
-//   });
-
-//   marker.device = device;
-
-//   const coords = {
-//     lat: latLng.lat(),
-//     lon: latLng.lng(),
-//   };
-
-//   addMarkerClickListener(marker, latLng, device, coords);
-
-//   // Also create a simple google.maps.Marker for clustering (markerClusterer uses google.maps.Marker)
-//   try {
-//     const simple = new google.maps.Marker({
-//       position: latLng,
-//       title: device.LicensePlateNumber || device.imei,
-//     });
-//     simple.deviceImei = device.imei;
-//     simpleMarkers[device.imei] = simple;
-//     if (markerCluster) {
-//       markerCluster.addMarker(simple);
-//       simple._inCluster = true;
-//     }
-//   } catch (e) {
-//     console.warn('Failed to create simple marker for clustering', e);
-//   }
-
-//   return marker;
-// }
-
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
@@ -2569,12 +2121,9 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
-  // Set initial map based on clustering state
-  const initialMap = clusterActive ? null : map;
-
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng, 
-    map: initialMap, // Set map based on clustering state
+    map: map,
     title: `License Plate Number: ${device.LicensePlateNumber}`,
     content: markerContent,
   });
@@ -2587,25 +2136,6 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   };
 
   addMarkerClickListener(marker, latLng, device, coords);
-
-  // Also create a simple google.maps.Marker for clustering
-  try {
-    const simple = new google.maps.Marker({
-      position: latLng,
-      title: device.LicensePlateNumber || device.imei,
-      map: null, // Always start with no map for simple markers
-    });
-    simple.deviceImei = device.imei;
-    simpleMarkers[device.imei] = simple;
-    
-    // Only add to cluster if clustering is active
-    if (clusterActive && markerCluster) {
-      markerCluster.addMarker(simple);
-      simple._inCluster = true;
-    }
-  } catch (e) {
-    console.warn('Failed to create simple marker for clustering', e);
-  }
 
   return marker;
 }
@@ -2641,15 +2171,6 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lon: latLng.lng(),
   };
   addMarkerClickListener(marker, latLng, marker.device, coords);
-  // update simple marker position if present
-  try {
-    const imei = marker.device && marker.device.imei;
-    if (imei && simpleMarkers[imei]) {
-      simpleMarkers[imei].setPosition(latLng);
-    }
-  } catch (e) {
-    console.warn('Failed to update simple marker position', e);
-  }
 }
 
 function searchTable() {
