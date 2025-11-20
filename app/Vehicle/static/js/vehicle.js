@@ -65,6 +65,10 @@ sidebar.addEventListener('mouseleave', () => {
 let vehicleData = new Map();
 var map;
 var markers = {};
+var markerCluster = null;
+var simpleMarkers = {};
+var clusterActive = false;
+const CLUSTER_ZOOM_THRESHOLD = 8; // zoom level below or equal to this will show clusters
 var geocoder;
 var addressCache = {};
 var refreshInterval = 5000;
@@ -1569,6 +1573,11 @@ function updateVehicleData(vehicle) {
     markerContent.style.height = `${size.height}px`;
     markerContent.style.transform = `rotate(${rotation}deg)`;
     }
+    try {
+      if (simpleMarkers[imei]) simpleMarkers[imei].setPosition(latLng);
+    } catch (e) {
+      console.warn('Error updating simple marker position in updateVehicleData', e);
+    }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
   }
@@ -2069,6 +2078,79 @@ async function initMap() {
 
   geocoder = new google.maps.Geocoder();
   infoWindow = new google.maps.InfoWindow();
+
+  // Initialize MarkerClusterer for clustering simple google.maps.Marker instances
+  try {
+    if (window.markerClusterer && typeof markerClusterer.MarkerClusterer === 'function') {
+      markerCluster = new markerClusterer.MarkerClusterer({ map: map, markers: [] });
+    } else if (typeof MarkerClusterer === 'function') {
+      markerCluster = new MarkerClusterer({ map: map, markers: [] });
+    }
+  } catch (e) {
+    console.warn('MarkerClusterer initialization failed:', e);
+    markerCluster = null;
+  }
+
+  // Toggle between cluster view and advanced markers depending on zoom
+  map.addListener && map.addListener('zoom_changed', function () {
+    try {
+      const z = map.getZoom();
+      if (z <= CLUSTER_ZOOM_THRESHOLD) {
+        // enable clustering: hide advanced markers and let clusterer show clusters
+        if (!clusterActive) {
+          clusterActive = true;
+          Object.keys(markers).forEach((imei) => {
+            if (markers[imei]) markers[imei].map = null;
+              const sm = simpleMarkers[imei];
+              if (sm && markerCluster && !sm._inCluster) {
+                markerCluster.addMarker(sm);
+                sm._inCluster = true;
+              }
+          });
+        }
+      } else {
+        // disable clustering: remove cluster markers and show advanced markers
+        if (clusterActive) {
+          clusterActive = false;
+          try { markerCluster && markerCluster.clearMarkers && markerCluster.clearMarkers(); } catch(e){}
+          Object.keys(simpleMarkers).forEach((k) => {
+            try { simpleMarkers[k]._inCluster = false; } catch(e){}
+          });
+          Object.keys(markers).forEach((imei) => {
+            if (markers[imei]) markers[imei].map = map;
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error handling zoom change for clustering:', e);
+    }
+  });
+  // run once to set initial clustering state
+  try {
+    const initZoom = map.getZoom();
+    if (initZoom <= CLUSTER_ZOOM_THRESHOLD) {
+      clusterActive = true;
+        Object.keys(markers).forEach((imei) => {
+          if (markers[imei]) markers[imei].map = null;
+          const sm = simpleMarkers[imei];
+          if (sm && markerCluster && !sm._inCluster) {
+            markerCluster.addMarker(sm);
+            sm._inCluster = true;
+          }
+        });
+    } else {
+    clusterActive = false;
+    try { markerCluster && markerCluster.clearMarkers && markerCluster.clearMarkers(); } catch(e){}
+    Object.keys(simpleMarkers).forEach((k) => {
+      try { simpleMarkers[k]._inCluster = false; } catch(e){}
+    });
+    Object.keys(markers).forEach((imei) => {
+      if (markers[imei]) markers[imei].map = map;
+    });
+    }
+  } catch (e) {
+    console.warn('Initial clustering check failed', e);
+  }
 }
 
 const themeToggle = document.getElementById("theme-toggle");
@@ -2137,6 +2219,22 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   addMarkerClickListener(marker, latLng, device, coords);
 
+  // Also create a simple google.maps.Marker for clustering (markerClusterer uses google.maps.Marker)
+  try {
+    const simple = new google.maps.Marker({
+      position: latLng,
+      title: device.LicensePlateNumber || device.imei,
+    });
+    simple.deviceImei = device.imei;
+    simpleMarkers[device.imei] = simple;
+    if (markerCluster) {
+      markerCluster.addMarker(simple);
+      simple._inCluster = true;
+    }
+  } catch (e) {
+    console.warn('Failed to create simple marker for clustering', e);
+  }
+
   return marker;
 }
 
@@ -2171,6 +2269,15 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
     lon: latLng.lng(),
   };
   addMarkerClickListener(marker, latLng, marker.device, coords);
+  // update simple marker position if present
+  try {
+    const imei = marker.device && marker.device.imei;
+    if (imei && simpleMarkers[imei]) {
+      simpleMarkers[imei].setPosition(latLng);
+    }
+  } catch (e) {
+    console.warn('Failed to update simple marker position', e);
+  }
 }
 
 function searchTable() {
