@@ -1261,6 +1261,77 @@ function addMarkerClickListener(marker, latLng, device, coords) {
   });
 }
 
+// function updateMap() {
+//   const bounds = new google.maps.LatLngBounds();
+//   dataAvailable = true;
+//   countdownTimer = refreshInterval / 1000;
+
+//   vehicleData.forEach((device, imei) => {
+//     if (
+//       device.latitude &&
+//       device.longitude &&
+//       device.speed != null &&
+//       device.course != null
+//     ) {
+//       const latLng = parseCoordinates(device.latitude, device.longitude);
+//       const iconUrl = getVehicleIconBySpeed(
+//         device.speed,
+//         imei,
+//         device.date,
+//         device.time,
+//         device.VehicleType || 'car'
+//       );
+//       const rotation = device.course;
+
+//       if (markers[imei]) {
+//         updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
+//         markers[imei].device = device;
+//       } else {
+//         markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
+//         try {
+//           if (clusterActive && markers[imei] && typeof markers[imei].setMap === 'function') {
+//             markers[imei].setMap(null);
+//           }
+//         } catch (e) {
+//           console.warn('Failed to hide newly created advanced marker when clustering active', e);
+//         }
+//       }
+
+//       if (device.sos === "1") {
+//         triggerSOS(imei, markers[imei]);
+//       } else {
+//         removeSOS(imei);
+//       }
+
+//       lastDataReceivedTime[imei] = new Date(`${device.date}T${device.time}`);
+//       bounds.extend(latLng);
+//     }
+
+//     checkForDataTimeout(imei);
+//   });
+
+//   if (!bounds.isEmpty() && firstFit) {
+//     map.fitBounds(bounds);
+//     firstFit = false;
+
+//     const boundsCenter = bounds.getCenter();
+
+//     map.setCenter(boundsCenter);
+
+//     const listener = google.maps.event.addListener(map, "idle", function () {
+//       if (map.getZoom() < 7) {
+//         map.setZoom(7);
+//       }
+//       google.maps.event.removeListener(listener);
+//     });
+//   }
+
+//   const vehiclesArray = Array.from(vehicleData.values());
+//   renderVehicleCards(vehiclesArray);
+//   hideSkeletonLoader();
+//   filterVehicles();
+// }
+
 function updateMap() {
   const bounds = new google.maps.LatLngBounds();
   dataAvailable = true;
@@ -1286,14 +1357,37 @@ function updateMap() {
       if (markers[imei]) {
         updateAdvancedMarker(markers[imei], latLng, iconUrl, rotation);
         markers[imei].device = device;
+        
+        // Update simple marker position if it exists
+        if (simpleMarkers[imei]) {
+          simpleMarkers[imei].setPosition(latLng);
+        }
       } else {
         markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
-        try {
-          if (clusterActive && markers[imei] && typeof markers[imei].setMap === 'function') {
-            markers[imei].setMap(null);
+        
+        // Set initial visibility based on clustering state
+        if (clusterActive) {
+          // When clustering is active, hide advanced markers
+          try {
+            if (markers[imei] && typeof markers[imei].setMap === 'function') {
+              markers[imei].setMap(null);
+            } else {
+              markers[imei].map = null;
+            }
+          } catch (e) {
+            console.warn('Failed to hide advanced marker in clustering mode', e);
           }
-        } catch (e) {
-          console.warn('Failed to hide newly created advanced marker when clustering active', e);
+        } else {
+          // When clustering is inactive, show advanced markers
+          try {
+            if (markers[imei] && typeof markers[imei].setMap === 'function') {
+              markers[imei].setMap(map);
+            } else {
+              markers[imei].map = map;
+            }
+          } catch (e) {
+            console.warn('Failed to show advanced marker in non-clustering mode', e);
+          }
         }
       }
 
@@ -1315,7 +1409,6 @@ function updateMap() {
     firstFit = false;
 
     const boundsCenter = bounds.getCenter();
-
     map.setCenter(boundsCenter);
 
     const listener = google.maps.event.addListener(map, "idle", function () {
@@ -2232,6 +2325,64 @@ function getVehicleIconSize(vehicleType) {
   }
 }
 
+// function createAdvancedMarker(latLng, iconUrl, rotation, device) {
+//   if (!(latLng instanceof google.maps.LatLng)) {
+//     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
+//   }
+
+//   const vehicleType = device.VehicleType || 'car';
+//   const size = getVehicleIconSize(vehicleType);
+  
+//   const markerContent = document.createElement("div");
+//   markerContent.className = "custom-marker";
+//   markerContent.style.width = `${size.width}px`;
+//   markerContent.style.height = `${size.height}px`;
+//   markerContent.style.transform = `rotate(${rotation}deg)`;
+
+//   const markerImage = document.createElement("img");
+//   markerImage.src = iconUrl;
+//   markerImage.alt = "Vehicle Icon";
+//   markerImage.style.width = "100%";
+//   markerImage.style.height = "100%";
+//   markerImage.style.display = "block";
+
+//   markerContent.appendChild(markerImage);
+
+//   const marker = new google.maps.marker.AdvancedMarkerElement({
+//     position: latLng, 
+//     map: map,
+//     title: `License Plate Number: ${device.LicensePlateNumber}`,
+//     content: markerContent,
+//   });
+
+//   marker.device = device;
+
+//   const coords = {
+//     lat: latLng.lat(),
+//     lon: latLng.lng(),
+//   };
+
+//   addMarkerClickListener(marker, latLng, device, coords);
+
+//   // Also create a simple google.maps.Marker for clustering (markerClusterer uses google.maps.Marker)
+//   try {
+//     const simple = new google.maps.Marker({
+//       position: latLng,
+//       title: device.LicensePlateNumber || device.imei,
+//     });
+//     simple.deviceImei = device.imei;
+//     simpleMarkers[device.imei] = simple;
+//     if (markerCluster) {
+//       markerCluster.addMarker(simple);
+//       simple._inCluster = true;
+//     }
+//   } catch (e) {
+//     console.warn('Failed to create simple marker for clustering', e);
+//   }
+
+//   return marker;
+// }
+
 function createAdvancedMarker(latLng, iconUrl, rotation, device) {
   if (!(latLng instanceof google.maps.LatLng)) {
     latLng = new google.maps.LatLng(latLng.lat, latLng.lng);
@@ -2255,9 +2406,12 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   markerContent.appendChild(markerImage);
 
+  // Set initial map based on clustering state
+  const initialMap = clusterActive ? null : map;
+
   const marker = new google.maps.marker.AdvancedMarkerElement({
     position: latLng, 
-    map: map,
+    map: initialMap, // Set map based on clustering state
     title: `License Plate Number: ${device.LicensePlateNumber}`,
     content: markerContent,
   });
@@ -2271,15 +2425,18 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   addMarkerClickListener(marker, latLng, device, coords);
 
-  // Also create a simple google.maps.Marker for clustering (markerClusterer uses google.maps.Marker)
+  // Also create a simple google.maps.Marker for clustering
   try {
     const simple = new google.maps.Marker({
       position: latLng,
       title: device.LicensePlateNumber || device.imei,
+      map: clusterActive ? null : map, // Set initial map for simple marker too
     });
     simple.deviceImei = device.imei;
     simpleMarkers[device.imei] = simple;
-    if (markerCluster) {
+    
+    // Only add to cluster if clustering is active
+    if (clusterActive && markerCluster) {
       markerCluster.addMarker(simple);
       simple._inCluster = true;
     }
