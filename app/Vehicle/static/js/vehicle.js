@@ -1288,6 +1288,13 @@ function updateMap() {
         markers[imei].device = device;
       } else {
         markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, device);
+        try {
+          if (clusterActive && markers[imei] && typeof markers[imei].setMap === 'function') {
+            markers[imei].setMap(null);
+          }
+        } catch (e) {
+          console.warn('Failed to hide newly created advanced marker when clustering active', e);
+        }
       }
 
       if (device.sos === "1") {
@@ -1399,7 +1406,17 @@ function filterVehicles() {
         break;
     }
 
-    marker.map = isVisible ? map : null;
+    try {
+      if (marker && typeof marker.setMap === 'function') {
+        if (isVisible) marker.setMap(map);
+        else marker.setMap(null);
+      } else {
+        marker.map = isVisible ? map : null;
+      }
+    } catch (e) {
+      console.warn('Failed to toggle marker map in filterVehicles', e);
+      marker.map = isVisible ? map : null;
+    }
 
     if (isVisible) {
       filteredVehicles.push(marker.device);
@@ -1580,6 +1597,13 @@ function updateVehicleData(vehicle) {
     }
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
+    try {
+      if (clusterActive && markers[imei] && typeof markers[imei].setMap === 'function') {
+        markers[imei].setMap(null);
+      }
+    } catch (e) {
+      console.warn('Failed to hide newly created advanced marker when clustering active (updateVehicleData)', e);
+    }
   }
 
   if (vehicle.sos === "1") {
@@ -2100,12 +2124,19 @@ async function initMap() {
         if (!clusterActive) {
           clusterActive = true;
           Object.keys(markers).forEach((imei) => {
-            if (markers[imei]) markers[imei].map = null;
-              const sm = simpleMarkers[imei];
-              if (sm && markerCluster && !sm._inCluster) {
-                markerCluster.addMarker(sm);
-                sm._inCluster = true;
+            try {
+              if (markers[imei]) {
+                if (typeof markers[imei].setMap === 'function') markers[imei].setMap(null);
+                else markers[imei].map = null;
               }
+            } catch (e) {
+              console.warn('Error hiding advanced marker for clustering', e);
+            }
+            const sm = simpleMarkers[imei];
+            if (sm && markerCluster && !sm._inCluster) {
+              markerCluster.addMarker(sm);
+              sm._inCluster = true;
+            }
           });
         }
       } else {
@@ -2117,7 +2148,14 @@ async function initMap() {
             try { simpleMarkers[k]._inCluster = false; } catch(e){}
           });
           Object.keys(markers).forEach((imei) => {
-            if (markers[imei]) markers[imei].map = map;
+            try {
+              if (markers[imei]) {
+                if (typeof markers[imei].setMap === 'function') markers[imei].setMap(map);
+                else markers[imei].map = map;
+              }
+            } catch (e) {
+              console.warn('Error showing advanced marker after clustering', e);
+            }
           });
         }
       }
@@ -2131,7 +2169,14 @@ async function initMap() {
     if (initZoom <= CLUSTER_ZOOM_THRESHOLD) {
       clusterActive = true;
         Object.keys(markers).forEach((imei) => {
-          if (markers[imei]) markers[imei].map = null;
+          try {
+            if (markers[imei]) {
+              if (typeof markers[imei].setMap === 'function') markers[imei].setMap(null);
+              else markers[imei].map = null;
+            }
+          } catch (e) {
+            console.warn('Error hiding advanced marker during initial clustering', e);
+          }
           const sm = simpleMarkers[imei];
           if (sm && markerCluster && !sm._inCluster) {
             markerCluster.addMarker(sm);
@@ -2145,7 +2190,14 @@ async function initMap() {
       try { simpleMarkers[k]._inCluster = false; } catch(e){}
     });
     Object.keys(markers).forEach((imei) => {
-      if (markers[imei]) markers[imei].map = map;
+      try {
+        if (markers[imei]) {
+          if (typeof markers[imei].setMap === 'function') markers[imei].setMap(map);
+          else markers[imei].map = map;
+        }
+      } catch (e) {
+        console.warn('Error restoring advanced marker during initial clustering', e);
+      }
     });
     }
   } catch (e) {
