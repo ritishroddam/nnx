@@ -363,6 +363,12 @@
 .ack-submit-btn {
     background: #4a90e2;
     color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+}
+
+.ack-submit-btn:hover {
+    background: #357abd;
 }
 
 .ack-btn {
