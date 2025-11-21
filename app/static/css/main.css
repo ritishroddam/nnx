@@ -275,6 +275,7 @@ body {
 .submenu li {
   padding: 8px 0;
   border: 1.5px solid transparent;
+  font-size: 12px;
 }
 
 .submenu a {
