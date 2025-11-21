@@ -614,10 +614,7 @@
 .total-alerts {
     display: block;
     text-align: right;
-    margin-top: 10px;
-    font-weight: bold;
-    color: #333;
-    margin-right: 10px;
+    color: #555;
 }
 
 .dark-mode .total-alerts {
