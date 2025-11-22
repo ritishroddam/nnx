@@ -32,6 +32,6 @@ def home():
         
         if companyLatLng.get('lat', '') in (None, "",) or companyLatLng.get('lng', '') in (None, "",):
             companyLatLng = {'lat': "13.01387976", 'lng': "77.6486188"}
-            company += " Please contact Cordon Telematics to update company location, To reflect your company's location on map"
+            company += " Please contact Cordon Telematics to update company location, To reflect your company location on map"
             
     return render_template('mapZoomIn.html', companyLatLng=companyLatLng, companyName=company)
