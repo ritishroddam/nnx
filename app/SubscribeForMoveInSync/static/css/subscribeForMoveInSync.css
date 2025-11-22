@@ -186,7 +186,7 @@ select {
 
 .dark-mode .primary-btn:hover:not(:disabled),
 .dark-mode .danger-btn:hover:not(:disabled) {
-  background: #1f1f1f;
+  background: #ccc;
 }
 
 .table-card__header {
