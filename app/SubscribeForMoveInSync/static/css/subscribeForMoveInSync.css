@@ -156,30 +156,21 @@ select {
 
 .primary-btn,
 .danger-btn {
-  width: 100%;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.primary-btn {
-  background: black;
-  color: #ccc;
-}
-
-.danger-btn {
-  background: black;
-  color: #ccc;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    background: black;
+    color: #ccc;
 }
 
 .dark-mode .primary-btn,
 .dark-mode .danger-btn {
-  background: #111;
-  color: #ccc;
-  border: 1px solid #444;
+  background: #ccc;
+  color: black;
 }
 
 .primary-btn:disabled,
