@@ -38,7 +38,7 @@
 .alert-card {
     display: flex;
     align-items: center;
-    padding: 10px 15px;
+    padding: 8px 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     cursor: pointer;
@@ -363,6 +363,12 @@
 .ack-submit-btn {
     background: #4a90e2;
     color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+}
+
+.ack-submit-btn:hover {
+    background: #357abd;
 }
 
 .ack-btn {
@@ -572,6 +578,7 @@
     border-radius: 4px;
     background: white;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 170px;
 }
 
 .selectize-dropdown {
@@ -613,10 +620,7 @@
 .total-alerts {
     display: block;
     text-align: right;
-    margin-top: 10px;
-    font-weight: bold;
-    color: #333;
-    margin-right: 10px;
+    color: #555;
 }
 
 .dark-mode .total-alerts {
