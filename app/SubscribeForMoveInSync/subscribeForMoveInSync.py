@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required
 from app.models import User
 from app.utils import roles_required
 
-subscribeForMoveInSync_bp = Blueprint('SubscribeForPushAPI', __name__, static_folder='static', template_folder='templates')
+subscribeForMoveInSync_bp = Blueprint('SubscribeForMoveInSync', __name__, static_folder='static', template_folder='templates')
 
 vehicleCollection = db['vehicle_inventory']
 moveInSyncSubscribed = db['moveInSyncSubscriptions']
