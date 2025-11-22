@@ -106,8 +106,8 @@ def get_alerts():
         
         vehicleInvyImeis = [v['IMEI'] for v in vehicles]
         
-        imeis = getCollectionImeis(vehicleInvyImeis)
-        
+        imeis = getCollectionImeis(vehicleInvyImeis)      
+    
     try:
         page = int(page) if page else 1
     except (TypeError, ValueError):
@@ -122,6 +122,9 @@ def get_alerts():
     collection = db[alertCollectionKeys[alert_type]]
 
     if not vehicle_number:
+        if not imeis:
+            return jsonify({"success": True, "alerts": [], "count": 0, "page": page, "per_page": per_page, "total_pages": 0})
+        
         query = {
             'imei': {'$in': imeis},
             'date_time': {
@@ -202,6 +205,9 @@ def notification_alerts():
 
     if not vehicles:
         return jsonify({"success": False, "message": "No vehicles found for the user"}), 404
+    
+    if not imeis:
+        return jsonify({"success": True, "count": 0, "alerts": []})
     
     def enrich(alerts, alert_type):
         enriched = []
@@ -297,6 +303,10 @@ def page():
     else:
         vehicleInvyImeis = [v['IMEI'] for v in vehicleData]
         imeis = getCollectionImeis(vehicleInvyImeis)
+        
+        if not imeis:
+            vehicles = []
+        
         vehicles = list(v['LicensePlateNumber'] for v in vehicleData if v['IMEI'] in imeis)
     
     now = datetime.now()

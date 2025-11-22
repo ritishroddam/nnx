@@ -70,6 +70,15 @@ def atlanta_pie_data():
         
         imeis = getCollectionImeis(vehicleInvyImeis)
         
+        if not imeis:
+            return jsonify({
+                "total_devices": 0,
+                "moving_vehicles": 0,
+                "offline_vehicles": 0,
+                "idle_vehicles": 0,   
+                "parked_vehicles": 0  
+            }), 200
+        
         latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
 
         atlantaAis140Records = list(atlantaAis140Collection.find({"_id": {"$in": imeis}}))
@@ -128,6 +137,13 @@ def atlanta_distance_data():
         vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
         
         imeis = getCollectionImeis(vehicleInvyImeis)
+        
+        if not imeis:
+            return jsonify({
+                "labels": [],
+                "distances": []
+            }), 200
+        
         startTime = datetime.now()
 
         distanceKeys = {}
@@ -189,6 +205,9 @@ def get_vehicle_range_data():
         vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
         
         imeis = getCollectionImeis(vehicleInvyImeis)
+        
+        if not imeis:
+            return jsonify([]), 200
    
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
         speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)

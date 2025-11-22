@@ -1187,6 +1187,9 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 
             imeis = getCollectionImeis(vehicleInvyImeis)
             
+            if not imeis:
+                raise ValueError("No vehicles found for the report.")
+            
             total = max(1, len(imeis))
             all_dfs = []    
             if report_type not in report_configs:
