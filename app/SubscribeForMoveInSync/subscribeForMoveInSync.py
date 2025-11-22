@@ -27,7 +27,7 @@ def index():
     
     notSubcribedVehiclesNumbers = [vehicle['LicensePlateNumber'] for vehicle in notSubcribedVehicles]
     
-    companies = companyColection.distinct("CompanyName")
+    companies = companyColection.distinct("Company Name")
     
     return render_template('subscribeForMoveInSync.html', 
         subscribedVehicles = subscribedVehicles,
@@ -51,7 +51,7 @@ def subscribeVehicles():
             companyName = request.form.get('companyName')
             if not companyName:
                 return jsonify({"message": "Company name is required if no vehicle numbers are provided"}), 400
-            if not companyColection.find_one({"CompanyName": companyName}):
+            if not companyColection.find_one({"Company Name": companyName}):
                 return jsonify({"message": "Invalid company name provided"}), 400
             
             vehicleDetails = list(vehicleCollection.find({"CompanyName": companyName}, {"_id": 0,}))
@@ -90,7 +90,7 @@ def unsubscribeVehicles():
         else:
             companyName = request.form.get('companyName')
             
-            if not companyColection.find_one({"CompanyName": companyName}):
+            if not companyColection.find_one({"Company Name": companyName}):
                 return jsonify({"message": "Invalid company name provided"}), 400
             
             if not companyName:
