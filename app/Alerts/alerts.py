@@ -200,8 +200,8 @@ def notification_alerts():
     
     imeis = getCollectionImeis(vehicleInvyImeis)
 
-    if not imeis:
-        return
+    if not vehicles:
+        return jsonify({"success": False, "message": "No vehicles found for the user"}), 404
     
     def enrich(alerts, alert_type):
         enriched = []
