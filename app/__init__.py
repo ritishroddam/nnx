@@ -373,6 +373,7 @@ def create_app(config_name='default'):
     from app.MapZoomIn.mapZoomIn import mapZoomIn_bp
     from app.RawLogs.rawLogs import rawLogs_bp
     from app.Geofence.Geofence import geofence_bp
+    from app.SubscribeForMoveInSync.subscribeForMoveInSync import subscribeForMoveInSync_bp
 
     app.register_blueprint(vehicle_bp, url_prefix='/vehicle')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
@@ -390,6 +391,7 @@ def create_app(config_name='default'):
     app.register_blueprint(mapZoomIn_bp, url_prefix='/mapZoomIn')
     app.register_blueprint(rawLogs_bp, url_prefix='/rawLogs')
     app.register_blueprint(geofence_bp, url_prefix='/geofence')
+    app.register_blueprint(subscribeForMoveInSync_bp, url_prefix='/subscribeForMoveInSync')
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
