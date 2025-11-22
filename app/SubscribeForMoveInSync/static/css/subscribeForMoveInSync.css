@@ -4,6 +4,10 @@
   gap: 24px;
 }
 
+.dark-mode .subscription-wrapper {
+  color: #ccc;
+}
+
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -17,25 +21,23 @@
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
 }
 
-.dark-mode .summary-card {
-  background: #1f1f1f;
-  color: #f4f4f4;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.08);
-}
-
 .summary-card .label {
   font-size: 0.9rem;
   color: #6b7280;
 }
 
 .dark-mode .summary-card .label {
-  color: #d1d5db;
+  color: #aaaaaa;
 }
 
 .summary-card .value {
   font-size: 2rem;
   font-weight: 600;
   margin-top: 4px;
+}
+
+.dark-mode .summary-card .value {
+  color: #ccc;
 }
 
 .toggle-bar {
@@ -48,7 +50,12 @@
 }
 
 .dark-mode .toggle-bar {
-  background: #2b2b2b;
+  background: #050505;
+  border: 1px solid #333;
+}
+
+.dark-mode .toggle-btn {
+  color: #ccc;
 }
 
 .toggle-btn {
@@ -63,8 +70,13 @@
 
 .toggle-btn.active {
   background: #000;
-  color: #fff;
+  color: #ccc;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+.dark-mode .toggle-btn.active {
+  background: #fff;
+  color: #000;
 }
 
 .panel {
@@ -92,12 +104,13 @@
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
+.dark-mode .summary-card,
 .dark-mode .card,
 .dark-mode .table-card,
 .dark-mode .info-card {
-  background: #1c1c1c;
-  color: #f5f5f5;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.08);
+  background: #000;
+  border: 1px solid #333;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.08);
 }
 
 .card h3,
@@ -137,7 +150,7 @@ select {
 
 .dark-mode select {
   background: #2b2b2b;
-  color: #f5f5f5;
+  color: #ccc;
   border-color: #3f3f3f;
 }
 
@@ -153,13 +166,20 @@ select {
 }
 
 .primary-btn {
-  background: #111827;
-  color: #fff;
+  background: black;
+  color: #ccc;
 }
 
 .danger-btn {
-  background: #dc2626;
-  color: #fff;
+  background: black;
+  color: #ccc;
+}
+
+.dark-mode .primary-btn,
+.dark-mode .danger-btn {
+  background: #111;
+  color: #ccc;
+  border: 1px solid #444;
 }
 
 .primary-btn:disabled,
@@ -173,6 +193,11 @@ select {
   transform: translateY(-1px);
 }
 
+.dark-mode .primary-btn:hover:not(:disabled),
+.dark-mode .danger-btn:hover:not(:disabled) {
+  background: #1f1f1f;
+}
+
 .table-card__header {
   display: flex;
   justify-content: space-between;
@@ -182,6 +207,11 @@ select {
 
 .table-wrapper {
   overflow-x: auto;
+}
+
+.dark-mode .table-wrapper {
+  border: 1px solid #1f1f1f;
+  background: #050505;
 }
 
 table {
@@ -201,13 +231,17 @@ td {
   border-color: #3f3f3f;
 }
 
+.dark-mode .table-card__header span,
+.dark-mode th,
+.dark-mode td,
+.dark-mode .info-card p,
+.dark-mode .info-card li {
+  color: #ccc;
+}
+
 th {
   font-weight: 600;
   color: #6b7280;
-}
-
-.dark-mode th {
-  color: #d1d5db;
 }
 
 .empty-row {
@@ -222,7 +256,7 @@ th {
 }
 
 .dark-mode .info-card ul {
-  color: #d1d5db;
+  color: #ccc;
 }
 
 @media (max-width: 768px) {
