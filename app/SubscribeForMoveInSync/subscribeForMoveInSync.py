@@ -55,6 +55,11 @@ def subscribeVehicles():
                 return jsonify({"message": "Invalid company name provided"}), 400
             
             vehicleDetails = list(vehicleCollection.find({"CompanyName": companyName}, {"_id": 0,}))
+            
+            alreadySubscribedVehicles = moveInSyncSubscribed.distinct("LicensePlateNumber", {"CompanyName": companyName})
+            
+            vehicleDetails = [vehicle for vehicle in vehicleDetails if vehicle["LicensePlateNumber"] not in alreadySubscribedVehicles]
+            
             if not vehicleDetails:
                 return jsonify({"message": "No vehicles found for the provided company name"}), 404
             
