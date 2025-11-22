@@ -36,7 +36,7 @@ def getCollectionImeis(vehicleInvyImeis=None):
     if vehicleInvyImeis:
         return [i for i in vehicleInvyImeis if i in combinedImeis]
 
-    return list(combinedImeis)
+    return []
 
 def _convert_date_time_emit(date):
     if not date:
