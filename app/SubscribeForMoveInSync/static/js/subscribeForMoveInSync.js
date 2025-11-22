@@ -7,16 +7,35 @@ document.addEventListener("DOMContentLoaded", () => {
 function initToggle() {
   const buttons = document.querySelectorAll(".toggle-btn");
   const panels = document.querySelectorAll(".panel");
+  const toggleBar = document.querySelector(".toggle-bar");
+  if (!buttons.length || !toggleBar) return;
+
+  const setActivePanel = (targetId) => {
+    buttons.forEach((b) => b.classList.toggle("active", b.dataset.target === targetId));
+    panels.forEach((panel) => panel.classList.toggle("active", panel.id === targetId));
+  };
+
+  const flipPanels = () => {
+    const activeBtn = document.querySelector(".toggle-btn.active");
+    const nextBtn = Array.from(buttons).find((btn) => btn !== activeBtn);
+    if (nextBtn) setActivePanel(nextBtn.dataset.target);
+  };
 
   buttons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      buttons.forEach((b) => b.classList.remove("active"));
-      panels.forEach((panel) => panel.classList.remove("active"));
-
-      btn.classList.add("active");
-      const target = document.getElementById(btn.dataset.target);
-      if (target) target.classList.add("active");
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (btn.classList.contains("active")) {
+        flipPanels();
+      } else {
+        setActivePanel(btn.dataset.target);
+      }
     });
+  });
+
+  toggleBar.addEventListener("click", (event) => {
+    if (!event.target.closest(".toggle-btn")) {
+      flipPanels();
+    }
   });
 }
 
