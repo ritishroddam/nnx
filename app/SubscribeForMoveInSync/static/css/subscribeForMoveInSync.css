@@ -184,6 +184,37 @@ select {
   transform: translateY(-1px);
 }
 
+.manual-entry {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manual-entry textarea {
+  width: 100%;
+  min-height: 80px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  resize: vertical;
+  font-size: 0.95rem;
+}
+
+.manual-entry small {
+  color: #6b7280;
+}
+
+.dark-mode .manual-entry textarea {
+  background: black;
+  border-color: #333;
+  color: #ccc;
+}
+
+.dark-mode .manual-entry small {
+  color: #ccc;
+}
+
 .dark-mode .primary-btn:hover:not(:disabled),
 .dark-mode .danger-btn:hover:not(:disabled) {
   background: #ccc;

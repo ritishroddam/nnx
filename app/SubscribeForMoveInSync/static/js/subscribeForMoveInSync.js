@@ -63,6 +63,7 @@ function wireForms() {
       id: "subscribeVehiclesForm",
       url: cfg.subscribeUrl,
       requiresVehicle: true,
+      freeTextFieldId: "subscribeVehiclesManual",
     },
     {
       id: "subscribeCompanyForm",
@@ -73,6 +74,7 @@ function wireForms() {
       id: "unsubscribeVehiclesForm",
       url: cfg.unsubscribeUrl,
       requiresVehicle: true,
+      freeTextFieldId: "unsubscribeVehiclesManual",
     },
     {
       id: "unsubscribeCompanyForm",
@@ -91,15 +93,38 @@ function wireForms() {
   });
 }
 
+function collectVehicleNumbers(form, formData, fieldId) {
+  const selectValues = formData.getAll("vehicleNumbers");
+  const manualValues = parseManualVehicleInput(form, fieldId);
+  const normalized = [...selectValues, ...manualValues]
+    .map((value) => value && value.toString().trim().toUpperCase())
+    .filter(Boolean);
+
+  const unique = [...new Set(normalized)];
+  formData.delete("vehicleNumbers");
+  unique.forEach((plate) => formData.append("vehicleNumbers", plate));
+  return unique;
+}
+
+function parseManualVehicleInput(form, fieldId) {
+  if (!fieldId) return [];
+  const field = form.querySelector(`#${fieldId}`);
+  if (!field || !field.value) return [];
+  return field.value
+    .split(/[\n,]/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
 async function handleMoveInSyncSubmit(event, options) {
   event.preventDefault();
   const form = event.currentTarget;
   const formData = new FormData(form);
 
   if (options.requiresVehicle) {
-    const vehicles = formData.getAll("vehicleNumbers").filter(Boolean);
+    const vehicles = collectVehicleNumbers(form, formData, options.freeTextFieldId);
     if (!vehicles.length) {
-      displayFlashMessage("Select at least one vehicle.", "warning");
+      displayFlashMessage("Provide at least one vehicle.", "warning");
       return;
     }
   }
@@ -128,6 +153,10 @@ async function handleMoveInSyncSubmit(event, options) {
 
     if (response.ok) {
       displayFlashMessage(payload.message || "Request completed.", "success");
+      if (options.freeTextFieldId) {
+        const field = form.querySelector(`#${options.freeTextFieldId}`);
+        if (field) field.value = "";
+      }
       setTimeout(() => window.location.reload(), 1200);
     } else {
       displayFlashMessage(
