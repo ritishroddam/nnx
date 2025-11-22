@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>MoveInSync Subscriptions</title>
+<link rel="stylesheet" href="{{ url_for('SubscribeForPushAPI.static', filename='css/subscribeForMoveInSync.css') }}">
+<script defer src="{{ url_for('SubscribeForPushAPI.static', filename='js/subscribeForMoveInSync.js') }}"></script>
+{% endblock %}
+
+{% block h1 %}MoveInSync Subscriptions{% endblock %}
+
+{% block block_container %}
+<div class="subscription-wrapper">
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="label">Subscribed Vehicles</div>
+      <div class="value">{{ subscribedVehiclesNumber|length }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Available to Subscribe</div>
+      <div class="value">{{ notSubcribedVehiclesNumbers|length }}</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Companies</div>
+      <div class="value">{{ companies|length }}</div>
+    </div>
+  </div>
+
+  <div class="toggle-bar">
+    <button class="toggle-btn active" data-target="subscribe-view">Subscribe</button>
+    <button class="toggle-btn" data-target="unsubscribe-view">Unsubscribe</button>
+  </div>
+
+  <section id="subscribe-view" class="panel active">
+    <div class="form-grid">
+      <div class="card">
+        <h3>Subscribe by Vehicle</h3>
+        <p>Select one or more vehicles that are not yet subscribed.</p>
+        <form id="subscribeVehiclesForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="subscribeVehiclesSelect">Vehicle Numbers</label>
+          <select id="subscribeVehiclesSelect" name="vehicleNumbers" multiple>
+            {% for number in notSubcribedVehiclesNumbers %}
+            <option value="{{ number }}">{{ number }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="primary-btn">Subscribe Selected</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Subscribe by Company</h3>
+        <p>Subscribe every vehicle that belongs to a company.</p>
+        <form id="subscribeCompanyForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="subscribeCompanySelect">Company</label>
+          <select id="subscribeCompanySelect" name="companyName">
+            <option value="" selected disabled>Select company</option>
+            {% for company in companies %}
+            <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="primary-btn">Subscribe Company Fleet</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-card__header">
+        <h3>Currently Subscribed Vehicles</h3>
+        <span>{{ subscribedVehicles|length }} total</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>License Plate</th>
+              <th>IMEI</th>
+              <th>Company</th>
+              <th>Subscribed At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if subscribedVehicles %}
+              {% for vehicle in subscribedVehicles %}
+              <tr>
+                <td>{{ vehicle.LicensePlateNumber }}</td>
+                <td>{{ vehicle.imei or 'N/A' }}</td>
+                <td>{{ vehicle.CompanyName or 'N/A' }}</td>
+                <td>{{ vehicle.SubscribedAt.strftime('%d-%b-%Y %H:%M') if vehicle.SubscribedAt else 'N/A' }}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="4" class="empty-row">No active subscriptions.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="unsubscribe-view" class="panel">
+    <div class="form-grid">
+      <div class="card">
+        <h3>Unsubscribe by Vehicle</h3>
+        <p>Remove one or more vehicles from MoveInSync.</p>
+        <form id="unsubscribeVehiclesForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="unsubscribeVehiclesSelect">Vehicle Numbers</label>
+          <select id="unsubscribeVehiclesSelect" name="vehicleNumbers" multiple>
+            {% for number in subscribedVehiclesNumber %}
+            <option value="{{ number }}">{{ number }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="danger-btn">Unsubscribe Selected</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Unsubscribe by Company</h3>
+        <p>Remove every vehicle of a company.</p>
+        <form id="unsubscribeCompanyForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="unsubscribeCompanySelect">Company</label>
+          <select id="unsubscribeCompanySelect" name="companyName">
+            <option value="" selected disabled>Select company</option>
+            {% for company in companies %}
+            <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="danger-btn">Unsubscribe Company Fleet</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Need a reminder?</h3>
+      <p>Subscribing by company overrides the vehicle list and queues every available vehicle for MoveInSync.</p>
+      <ul>
+        <li>Vehicle-level actions expect at least one selection.</li>
+        <li>Company-level actions require a single company.</li>
+        <li>All requests call the REST routes already exposed in the backend.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+  window.moveInSyncConfig = {
+    subscribeUrl: "{{ url_for('SubscribeForPushAPI.subscribeVehicles') }}",
+    unsubscribeUrl: "{{ url_for('SubscribeForPushAPI.unsubscribeVehicles') }}"
+  };
+</script>
+{% endblock %}
