@@ -55,20 +55,16 @@
       <div class="card">
         <h3>Subscribe by Company</h3>
         <p>Subscribe every vehicle that belongs to a company.</p>
-        <form id="unsubscribeVehiclesForm">
+        <form id="subscribeCompanyForm">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <label for="unsubscribeVehiclesSelect">Vehicle Numbers</label>
-          <select id="unsubscribeVehiclesSelect" name="vehicleNumbers" multiple>
-            {% for number in subscribedVehiclesNumber %}
-            <option value="{{ number }}">{{ number }}</option>
+          <label for="subscribeCompanySelect">Company</label>
+          <select id="subscribeCompanySelect" name="companyName">
+            <option value="" selected disabled>Select company</option>
+            {% for company in companies %}
+            <option value="{{ company }}">{{ company }}</option>
             {% endfor %}
           </select>
-          <div class="manual-entry">
-            <label for="unsubscribeVehiclesManual">Or paste comma/newline separated license plates</label>
-            <textarea id="unsubscribeVehiclesManual" placeholder="KA01AB1234, mh02cd5678"></textarea>
-            <small>Mixed casing is fine; invalid entries will be reported back from the API.</small>
-          </div>
-          <button type="submit" class="danger-btn">Unsubscribe Selected</button>
+          <button type="submit" class="primary-btn">Subscribe Company Fleet</button>
         </form>
       </div>
     </div>
@@ -122,6 +118,11 @@
             <option value="{{ number }}">{{ number }}</option>
             {% endfor %}
           </select>
+          <div class="manual-entry">
+            <label for="unsubscribeVehiclesManual">Or paste comma/newline separated license plates</label>
+            <textarea id="unsubscribeVehiclesManual" placeholder="KA01AB1234, mh02cd5678"></textarea>
+            <small>Mixed casing is fine; invalid entries will be reported back from the API.</small>
+          </div>
           <button type="submit" class="danger-btn">Unsubscribe Selected</button>
         </form>
       </div>
