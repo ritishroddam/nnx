@@ -148,8 +148,8 @@
 
 <script>
   window.moveInSyncConfig = {
-    subscribeUrl: "{{ url_for('SubscribeForPushAPI.subscribeVehicles') }}",
-    unsubscribeUrl: "{{ url_for('SubscribeForPushAPI.unsubscribeVehicles') }}"
+    subscribeUrl: "{{ url_for('SubscribeForMoveInSync.subscribeVehicles') }}",
+    unsubscribeUrl: "{{ url_for('SubscribeForMoveInSync.unsubscribeVehicles') }}"
   };
 </script>
 {% endblock %}
