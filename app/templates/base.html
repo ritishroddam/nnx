@@ -56,7 +56,7 @@
                     <i class="fa-solid fa-sun"></i>
                 </div>
                 <div class="notification" id="notification-bell">
-                    <i class="fa-solid fa-bell"></i>
+                    <i class="material-symbols-outlined">notification_sound</i>
                     <span class="badge" id="notification-count">0</span>
                     <div class="notification-dropdown" id="notification-dropdown" style="display:none;">
                         <div class="notification-header">New Alerts</div>
@@ -75,14 +75,14 @@
                                 {% if role == 'clientAdmin' %}
                                 <p>
                                     <a href="{{ url_for('CompanyConfig.home') }}" class="profile-settings-link">
-                                        <i class="fa-solid fa-building-columns"></i> Company Settings
+                                        <i class="material-symbols-outlined">corporate_fare</i> Company Settings
                                     </a>
                                 </p>
                                 {% endif %}
 
                                 <p>
                                     <a href="{{ url_for('userConfig.page') }}" class="profile-settings-link">
-                                        <i class="fa-solid fa-user"></i> Profile Settings
+                                        <i class="material-symbols-outlined">manage_accounts</i> Profile Settings
                                     </a>
                                 </p>
 
@@ -115,38 +115,38 @@
                     {% if role == 'admin' or role == 'clientAdmin' or role == 'user' %}
                     <li>
                         <a href="{{url_for('Dashboard.page')}}" class="menu-item">
-                            <i class="fa-solid fa-chart-bar"></i> <span class="sidebar-text">Fleet Analytics</span>
+                            <i class="material-symbols-outlined">graph_5</i> <span class="sidebar-text">Fleet Analytics</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{url_for('Vehicle.map')}}" class="menu-item nav-link">
-                            <i class="fa-solid fa-map-location-dot"></i> <span class="sidebar-text">Live Vehicles</span>
+                            <i class="material-symbols-outlined">globe_location_pin</i> <span class="sidebar-text">Live Vehicles</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{url_for('Alerts.page')}}" class="menu-item nav-link">
-                            <i class="fa-solid fa-bell"></i> <span class="sidebar-text">Alerts</span>
+                            <i class="material-symbols-outlined">circle_notifications</i> <span class="sidebar-text">Alerts</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{url_for('Reports.index')}}" class="menu-item">
-                            <i class="fa-solid fa-file-alt"></i> <span class="sidebar-text">Reports</span>
+                            <i class="material-symbols-outlined">analytics</i> <span class="sidebar-text">Reports</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{url_for('Geofence.page')}}" class="menu-item">
-                            <i class="fa-solid fa-map"></i> <span class="sidebar-text">Geofence</span>
+                            <i class="material-symbols-outlined"></i> <span class="sidebar-text">Geofence</span>
                         </a>
                     </li>
                     {% if role == 'admin' %}
                     <li>
                         <a href="{{url_for('RawLogs.home')}}" class="menu-item">
-                            <i class="fa-solid fa-database"></i> <span class="sidebar-text">Raw Logs</span>
+                            <i class="material-symbols-outlined">backup_table</i> <span class="sidebar-text">Raw Logs</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{url_for('SubscribeForMoveInSync.index')}}" class="menu-item">
-                            <i class="fa-solid fa-database"></i> <span class="sidebar-text">Raw Logs</span>
+                            <i class="material-symbols-outlined">api</i> <span class="sidebar-text">MoveInSync Subscriptions</span>
                         </a>
                     </li>
                     {% endif %}
@@ -161,17 +161,17 @@
                     {% if role == 'admin' %}
                     <li class="dropdown">
                         <a href="#" class="menu-item">
-                            <i class="fa-solid fa-user"></i> <span class="sidebar-text">Register</span>
+                            <i class="material-symbols-outlined">person_add</i> <span class="sidebar-text">Register</span>
                             <span class="arrow">&#x25BC;</span>
                         </a>
                         <ul class="submenu">
-                            <li><i class="fa-solid fa-id-card" style='white-space:pre'></i>
+                            <li><i class="material-symbols-outlined" style='white-space:pre'>id_card</i>
                                 <a href="{{ url_for('auth.register_client_admin') }}">Clients</a> 
                                 </li>
-                            <li><i class="fa-solid fa-user" style='white-space:pre'></i>
+                            <li><i class="material-symbols-outlined" style='white-space:pre'>person_add</i>
                                 <a href="{{ url_for('auth.register') }}">Sub-Accounts</a> 
                             </li>
-                            <li><i class="fa-solid fa-user" style='white-space:pre'></i>
+                            <li><i class="material-symbols-outlined" style='white-space:pre'>user_attributes</i>
                                 <a href="{{ url_for('auth.register_inventory') }}">Inventory Accounts</a> 
                             </li>
                         </ul>
@@ -185,13 +185,13 @@
                     {% if role == 'admin'%}
                     <li class="dropdown">
                         <a href="#" class="menu-item">
-                            <i class="fa-solid fa-archive"></i>
+                            <i class="material-symbols-outlined">inventory_2</i>
                             <span class="sidebar-text">Inventory</span>
                             <span class="arrow">&#x25BC;</span>
                         </a>
                         <ul class="submenu">
                             <li>
-                                <i class="fa-solid fa-building" style='white-space:pre'></i>
+                                <i class="material-symbols-outlined" style='white-space:pre'>corporate_fare</i>
                                 <a href="{{url_for('CompanyDetails.page')}}">
                                     Company Details
                                 </a>
@@ -200,7 +200,7 @@
 
                         <ul class="submenu">
                             <li>
-                                <i class="fa-solid fa-microchip" style='white-space:pre'></i>
+                                <i class="material-symbols-outlined" style='white-space:pre'>developer_board</i>
                                 <a href="{{url_for('DeviceInvy.page')}}">
                                     Device Inventory
                                 </a>
@@ -209,7 +209,7 @@
 
                         <ul class="submenu">
                             <li>
-                                <i class="fa-solid fa-sim-card" style='white-space:pre'></i>
+                                <i class="material-symbols-outlined" style='white-space:pre'>sim_card</i>
                                 <a href="{{url_for('SimInvy.page')}}">
                                     Sim Inventory
                                 </a>
@@ -218,7 +218,7 @@
 
                         <ul class="submenu">
                             <li>
-                                <i class="fa-solid fa-warehouse" style='white-space:pre'></i>
+                                <i class="material-symbols-outlined" style='white-space:pre'>car_gear</i>
                                 <a href="{{url_for('VehicleDetails.page')}}">
                                     Vehicle Details
                                 </a>
