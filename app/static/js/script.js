@@ -132,11 +132,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (darkModePreference === "true") {
     body.classList.add("dark-mode");
     themeToggle.classList.add("dark");
-    themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+    themeToggle.innerHTML = '<i class="material-symbols-outlined">dark_mode</i>';
   } else {
     body.classList.remove("dark-mode");
     themeToggle.classList.remove("dark");
-    themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    themeToggle.innerHTML = '<i class="material-symbols-outlined">light_mode</i>';
     isDarkModeMap = false;
   }
 
@@ -147,9 +147,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     setCookie("darkMode", isDarkMode);
 
     if (isDarkMode) {
-      themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      themeToggle.innerHTML = '<i class="material-symbols-outlined">dark_mode</i>';
     } else {
-      themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      themeToggle.innerHTML = '<i class="material-symbols-outlined">light_mode</i>';
     }
 
     await backgroundMap();
