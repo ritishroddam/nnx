@@ -25,24 +25,11 @@ company_config_collection = db['company_config']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    vehicles = list(vehicle_collection.find({}, {'AssignedUsers': 0}))
-    
-    company_names = set()
-    for vehicle in vehicles:
-        if 'CompanyName' in vehicle and vehicle['CompanyName']:
-            company_names.add(vehicle['CompanyName'])
-    
-    vehicle_data = []
-    for vehicle in vehicles:
-        vehicle_dict = dict(vehicle)
-        vehicle_dict['_id'] = str(vehicle['_id'])
-        vehicle_data.append(vehicle_dict)
-    
-    companies_data = [{"name": name} for name in sorted(company_names)]
+    companiesData = list(companies_collection.find({}, {"_id": 0, "Company Name": 1}))
+    companies_data = [{"name": company["Company Name"]} for company in companiesData]
     
     return render_template(
         'vehicleDetails.html',
-        vehicles=vehicle_data,
         companies=companies_data
     )
 
