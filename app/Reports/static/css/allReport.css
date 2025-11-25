@@ -1105,6 +1105,12 @@ input[type="datetime-local"] {
   transform: scale(1.02);
 }
 
+.ClickToView {
+  font-size: 10px;
+  color: #ccc;
+  margin-top: 4px;
+}
+
 @media (max-width: 500px) {
   #deleteConfirmModal .modal-content {
     width: 95%;
