@@ -465,6 +465,7 @@
 .vehicleLiveTable .sort-icon {
   margin-left: 4px;
   font-size: 14px;
+  cursor: pointer;
 }
 
 .card-chart {
