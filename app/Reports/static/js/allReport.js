@@ -308,7 +308,7 @@ function renderRecentReports(reports){
     const genTime = r.generated_at ? new Date(r.generated_at) : (r.created_at ? new Date(r.created_at) : null);
     const fromStr = r.range_start_utc ? new Date(r.range_start_utc).toLocaleString() : '—';
     const toStr = r.range_end_utc ? new Date(r.range_end_utc).toLocaleString() : '—';
-    const statusBadge = isSuccess ? '<span class="statusBadge badge-success">Ready</span>' :
+    const statusBadge = isSuccess ? '<span class="statusBadge badge-success">Ready</span><h6 class="ClickToView">Click To View</h6>' :
                          isFail ? '<span class="statusBadge badge-fail">Failed</span>' :
                          `<span class="statusBadge badge-progress">In&nbsp;progress</span>`;
 
