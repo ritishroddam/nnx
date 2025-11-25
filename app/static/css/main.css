@@ -285,7 +285,7 @@ body {
 .submenu a {
   text-decoration: none;
   color: #222;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .dark-mode .submenu a {
@@ -293,7 +293,7 @@ body {
 }
 
 .submenu li:hover {
-  background-color: rgba(0, 0, 0, 0.10); /* subtle translucent for light mode */
+  background-color: rgba(0, 0, 0, 0.10); 
   border-radius: 5px;
   padding-left: 10%;
   border: 1.5px solid #bbb;
