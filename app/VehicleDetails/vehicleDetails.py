@@ -163,6 +163,8 @@ def edit_vehicle(vehicle_id):
         updated_data = request.json
 
         updated_data = {key: value for key, value in updated_data.items() if value.strip()}
+        
+        updated_data["LicensePlateNumber"] = updated_data["LicensePlateNumber"].strip().upper()
 
         if "IMEI" in updated_data:
             duplicate_imei = vehicle_collection.find_one({
