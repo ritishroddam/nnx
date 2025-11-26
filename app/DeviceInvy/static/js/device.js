@@ -574,7 +574,7 @@ function editDevice(deviceId) {
   }
 
   row.cells[0].innerHTML = `<input type="text" value="${imei}" id="editIMEI" maxlength="15" oninput="validateIMEI(this)" />`;
-  row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" maxlength="13" oninput="validateGLNumber(this)" />`;
+  row.cells[1].innerHTML = `<input type="text" value="${glNumber}" id="editGLNumber" oninput="validateGLNumber(this)" />`;
   row.cells[4].innerHTML = `<input type="text" value="${deviceModel}" />`;
   row.cells[5].innerHTML = `<input type="text" value="${deviceMake}" />`;
   row.cells[6].innerHTML = `<input type="date" value="${dateIn}" id="editDateIn" />`;
@@ -640,13 +640,6 @@ function validateIMEI(input) {
   }
 }
 
-function validateGLNumber(input) {
-  let glNumber = input.value;
-  if (!/^\d{0,13}$/.test(glNumber)) {
-    input.value = glNumber.slice(0, 13); 
-  }
-}
-
 function saveDevice(deviceId) {
   const row = document.querySelector(`tr[data-id='${deviceId}']`);
   const imeiValue = row.cells[0].querySelector("input").value.trim();
@@ -663,10 +656,6 @@ function saveDevice(deviceId) {
 
   if (imeiValue.length !== 15 || isNaN(imeiValue)) {
     displayFlashMessage("IMEI must be exactly 15 digits and numeric.", "warning");
-    return;
-  }
-  if (glNumberValue && (glNumberValue.length !== 13 || isNaN(glNumberValue))) {
-    displayFlashMessage("SL Number must be exactly 13 digits if entered.", "warning");
     return;
   }
   if (dateIn > today) {
