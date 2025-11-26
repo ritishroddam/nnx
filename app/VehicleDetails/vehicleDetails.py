@@ -1,3 +1,4 @@
+from pickle import FALSE
 from flask import Flask, Blueprint, render_template, request, redirect, url_for, jsonify, flash, send_file, Response
 from pymongo import MongoClient
 import pandas as pd
@@ -96,12 +97,23 @@ def manual_entry():
     data = request.form.to_dict()
     data = {key.strip(): value.strip() for key, value in data.items()}  
     
-    vehicleNumbersDict = vehicle_collection.find({}, {"LicensePlateNumber": 1})
-    vehicleNumbersList = [vehicle['LicensePlateNumber'] for vehicle in vehicleNumbersDict]
+    flag = False
+    required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyName', 'VehicleType']
+    for field in required_fields:
+        if not data.get(field):
+            flag = True
+            flash(f"{field} is required.", "danger")
     
-    if data['LicensePlateNumber'] in vehicleNumbersList:
+    if flag:
+        return redirect(url_for('VehicleDetails.page'))
+        
+    isVehiclePresent = vehicle_collection.find_one({'LicensePlateNumber': data['LicensePlateNumber']}, {"LicensePlateNumber": 1})
+    
+    if isVehiclePresent:
         flash(f"License Plate Number {data['LicensePlateNumber']} already exists", "danger")
         return redirect(url_for('VehicleDetails.page'))
+    
+    data['LicensePlateNumber'] = data['LicensePlateNumber'].strip().upper()
     
     data['CompanyName'] = data.get('CompanyName', '')
     
@@ -110,12 +122,6 @@ def manual_entry():
     if not company:
         flash("Invalid company name", "danger")
         return redirect(url_for('VehicleDetails.page'))
-
-    required_fields = ['LicensePlateNumber', 'IMEI', 'SIM', 'Location', 'CompanyName', 'VehicleType']
-    for field in required_fields:
-        if not data.get(field):
-            flash(f"{field} is required.", "danger")
-            return redirect(url_for('VehicleDetails.page'))
 
     if data['VehicleType'] in ['bus', "sedan", "hatchback", "suv", "van"] and not data.get('NumberOfSeatsContainer'):
         flash(f"Number of seats is required {data['VehicleType']}.", "danger")
@@ -227,7 +233,7 @@ def upload_vehicle_file():
 
         records = []
         for index, row in df.iterrows():
-            license_plate_number = str(row['LicensePlateNumber']).strip()
+            license_plate_number = str(row['LicensePlateNumber']).strip().upper()
             companyName = str(row['CompanyName']).strip()
             imei = str(row['IMEI']).strip()
             sim = str(row['SIM']).strip()
@@ -290,13 +296,6 @@ def upload_vehicle_file():
             else:
                 slowSpeed = slowSpeed if slowSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}SlowSpeed", "20")
                 normalSpeed = normalSpeed if normalSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}NormalSpeed", "60")
-            
-            
-            pattern1 = re.compile(r'^[A-Z]{2}\d{2}[A-Z]*\d{4}$')
-            pattern2 = re.compile(r'^\d{2}BH\d{4}[A-Z]{1,2}$') 
-            if not (pattern1.match(license_plate_number) or pattern2.match(license_plate_number)):
-                flash(f"License Plate Number {license_plate_number} is invalid.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
             
             company = db['customers_list'].find_one({"Company Name": companyName})
             if not company:
