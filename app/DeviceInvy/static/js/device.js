@@ -145,14 +145,14 @@ async function updateAllCountersFromServer() {
     }
     
     const totalDevices = (data.status["New Stock"] || 0) + 
-                        (data.status["In use"] || 0) + 
+                        (data.status["In Use"] || 0) + 
                         (data.status["Available"] || 0) + 
                         (data.status["Discarded"] || 0);
     
     document.getElementById("totalCount").textContent = totalDevices;
     
     document.getElementById("newStockCount").textContent = data.status["New Stock"] || 0;
-    document.getElementById("inUseCount").textContent = data.status["In use"] || 0;
+    document.getElementById("inUseCount").textContent = data.status["In Use"] || 0;
     document.getElementById("availableCount").textContent = data.status["Available"] || 0;
     document.getElementById("discardedCount").textContent = data.status["Discarded"] || 0;
     
@@ -382,7 +382,7 @@ function updateStatusCounts(devicesData = null) {
       const statusCell = device.cells[11];
       let status = statusCell.textContent.trim();
       if (status === "New Stock") newStockCount++;
-      if (status === "In use") inUseCount++;
+      if (status === "In Use") inUseCount++;
       if (status === "Available") availableCount++;
       if (status === "Discarded") discardedCount++;
     }
@@ -534,7 +534,7 @@ function updateStatusCountsFromData(devices) {
 
     const status = device.Status || '';
     if (status === "New Stock") newStockCount++;
-    if (status === "In use") inUseCount++;
+    if (status === "In Use") inUseCount++;
     if (status === "Available") availableCount++;
     if (status === "Discarded") discardedCount++;
   });
@@ -592,7 +592,7 @@ function editDevice(deviceId) {
   row.cells[11].innerHTML = `
     <select id="editStatus">
       <option value="New Stock" ${status === "New Stock" ? "selected" : ""}>New Stock</option>
-      <option value="In use" ${status === "In use" ? "selected" : ""}>In use</option>
+      <option value="In Use" ${status === "In Use" ? "selected" : ""}>In Use</option>
       <option value="Available" ${status === "Available" ? "selected" : ""}>Available</option>
       <option value="Scrap" ${status === "Scrap" || status === "Discarded" ? "selected" : ""}>Scrap</option>
     </select>

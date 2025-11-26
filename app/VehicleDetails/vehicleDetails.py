@@ -113,6 +113,22 @@ def manual_entry():
         flash(f"License Plate Number {data['LicensePlateNumber']} already exists", "danger")
         return redirect(url_for('VehicleDetails.page'))
     
+    if not sim_collection.find_one({"MobileNumber": data['SIM']}):
+        flash(f"For vehicle {data['LicensePlateNumber']}, SIM {data['SIM']} does not exist in SIM inventory.", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    if not device_collection.find_one({"IMEI": data['IMEI']}):
+        flash(f"For vehicle {data['LicensePlateNumber']}, IMEI {data['IMEI']} does not exist in Device inventory.", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    if vehicle_collection.find_one({"IMEI": data['IMEI']}):
+        flash(f"IMEI Number {data['IMEI']} has already been allocated to another License Plate Number", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    if vehicle_collection.find_one({"SIM": data['SIM']}):
+        flash(f"Sim Number {data['SIM']} has already been allocated to another License Plate Number", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
     data['LicensePlateNumber'] = data['LicensePlateNumber'].strip().upper()
     
     data['CompanyName'] = data.get('CompanyName', '')
@@ -150,6 +166,8 @@ def manual_entry():
     
     try:
         vehicle_collection.insert_one(data)
+        device_collection.update_one({"IMEI": data['IMEI']}, {"$set": {"Status": "In Use"}})
+        sim_collection.update_one({"MobileNumber": data['SIM']}, {"$set": {"status": "In Use"}})
         flash("Vehicle added successfully!", "success")
     except Exception as e:
         flash(f"Error adding vehicle: {str(e)}", "danger")
@@ -189,6 +207,10 @@ def edit_vehicle(vehicle_id):
             {"$set": updated_data}
         )
         if result.modified_count > 0:
+            if "IMEI" in updated_data:
+                device_collection.update_one({"IMEI": updated_data['IMEI']}, {"$set": {"Status": "In Use"}})
+            if "SIM" in updated_data:
+                sim_collection.update_one({"MobileNumber": updated_data['SIM']}, {"$set": {"status": "In Use"}})
             return jsonify({"success": True, "message": "Vehicle updated successfully!"}), 200
         else:
             return jsonify({"success": False, "message": "No changes were made."}), 400
@@ -234,6 +256,8 @@ def upload_vehicle_file():
                 return redirect(url_for('VehicleDetails.page'))
 
         records = []
+        simRecords = []
+        deviceRecords = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip().upper()
             companyName = str(row['CompanyName']).strip()
@@ -339,6 +363,14 @@ def upload_vehicle_file():
                 flash(f"For vehicle {license_plate_number}, Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
+            if not sim_collection.find_one({"MobileNumber": sim}):
+                flash(f"For vehicle {license_plate_number}, SIM {sim} does not exist in SIM inventory.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if not device_collection.find_one({"IMEI": imei}):
+                flash(f"For vehicle {license_plate_number}, IMEI {imei} does not exist in Device inventory.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+                
             record = {
                 "LicensePlateNumber": license_plate_number,
                 "CompanyName": companyName,
@@ -362,9 +394,13 @@ def upload_vehicle_file():
             }
 
             records.append(record)
+            simRecords.append(sim)
+            deviceRecords.append(imei)
 
         if records:
             vehicle_collection.insert_many(records)
+            sim_collection.update_many({"MobileNumber": {"$in": simRecords}}, {"$set": {"status": "In Use"}})
+            device_collection.update_many({"IMEI": {"$in": deviceRecords}}, {"$set": {"Status": "In Use"}})
             flash("File uploaded and SIMs added successfully!", "success")
         else:
             flash("No records found in the file", "danger")
