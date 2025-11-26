@@ -319,7 +319,7 @@ def upload_file():
             status_raw = str(row['Status']).strip() if 'Status' in row and pd.notnull(row['Status']) else "New Stock"
             status = ' '.join(word.capitalize() for word in status_raw.split())
 
-            if vendor not in ["Airtel", "Vodafone", "Bspl", "Jio"]:
+            if vendor not in ["Airtel", "Vodafone", "BSNL", "Jio"]:
                 flash(f"Invalid Vendor '{vendor}' at row {index + 2}. Must be 'Airtel' or 'Vodafone' or 'BSNL' or 'Jio'.", "danger")
                 return redirect(url_for('SimInvy.page'))
 
