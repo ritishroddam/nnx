@@ -113,6 +113,22 @@ def manual_entry():
         flash(f"License Plate Number {data['LicensePlateNumber']} already exists", "danger")
         return redirect(url_for('VehicleDetails.page'))
     
+    if not sim_collection.find_one({"MobileNumber": data['SIM']}):
+        flash(f"For vehicle {data['LicensePlateNumber']}, SIM {data['SIM']} does not exist in SIM inventory.", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    if not device_collection.find_one({"IMEI": data['IMEI']}):
+        flash(f"For vehicle {data['LicensePlateNumber']}, IMEI {data['IMEI']} does not exist in Device inventory.", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    if vehicle_collection.find_one({"IMEI": data['IMEI']}):
+        flash(f"IMEI Number {data['IMEI']} has already been allocated to another License Plate Number", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
+    if vehicle_collection.find_one({"SIM": data['SIM']}):
+        flash(f"Sim Number {data['SIM']} has already been allocated to another License Plate Number", "danger")
+        return redirect(url_for('VehicleDetails.page'))
+    
     data['LicensePlateNumber'] = data['LicensePlateNumber'].strip().upper()
     
     data['CompanyName'] = data.get('CompanyName', '')
@@ -347,6 +363,14 @@ def upload_vehicle_file():
                 flash(f"For vehicle {license_plate_number}, Sim Number {sim} has already been allocated to another License Plate Number", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
+            if not sim_collection.find_one({"MobileNumber": sim}):
+                flash(f"For vehicle {license_plate_number}, SIM {sim} does not exist in SIM inventory.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if not device_collection.find_one({"IMEI": imei}):
+                flash(f"For vehicle {license_plate_number}, IMEI {imei} does not exist in Device inventory.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+                
             record = {
                 "LicensePlateNumber": license_plate_number,
                 "CompanyName": companyName,
