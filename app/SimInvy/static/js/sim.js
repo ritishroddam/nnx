@@ -149,14 +149,6 @@ document.addEventListener("DOMContentLoaded", function() {
         mobileError.classList.add("hidden");
       }
 
-      if (simNumber.length < 19  || simNumber.length > 22 || isNaN(simNumber)) {
-        simError.textContent = "SIM Number must be from 19 to 22 digits.";
-        simError.classList.remove("hidden");
-        isValid = false;
-      } else {
-        simError.classList.add("hidden");
-      }
-
       if (!isValid) {
         event.preventDefault();
       }
@@ -259,7 +251,7 @@ function renderSimTable(sims) {
     row.className = status.toLowerCase().replace(/\s/g, '-');
     row.innerHTML = `
       <td>${sim.MobileNumber}</td>
-      <td>${sim.SimNumber}</td>
+      <td>${sim.SimNumber || ''}</td>
       <td>${sim.IMEI || 'N/A'}</td>
       <td>${sim.DateIn || ''}</td>
       <td>${sim.DateOut || ''}</td>
@@ -522,11 +514,6 @@ function saveSim(simId) {
   const mobileRegex = /^\d{10,17}$/; 
   if (!mobileRegex.test(mobile)) {
     displayFlashMessage("Mobile Number must be 10 to 17 digits.", "danger");
-    return;
-  }
-
-  if (![19, 20, 21, 22].includes(simNumber.length) || isNaN(simNumber)) {
-    displayFlashMessage("SIM Number must be numeric and 19–22 digits long.", "danger");
     return;
   }
 
