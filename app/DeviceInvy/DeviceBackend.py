@@ -66,21 +66,8 @@ def get_devices_paginated():
         per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        status_q = request.args.get('status', '').strip()
-
-        status_values = {"New Stock", "In use", "Available", "Discarded"}
-        query = {}
-        if status_q:
-            if status_q in status_values:
-                if status_q == 'Discarded':
-                    query['$or'] = [{'Status': 'Discarded'}, {'Status': 'Scrap'}]
-                else:
-                    query['Status'] = status_q
-            else:
-                query['Package'] = status_q
-
-        total = collection.count_documents(query)
-        devices = list(collection.find(query).skip(skip).limit(per_page))
+        total = collection.count_documents()
+        devices = list(collection.find().skip(skip).limit(per_page))
 
         imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
 
@@ -199,7 +186,7 @@ def manual_entry():
         data['Package'] = 'None'
         data['Tenure'] = None 
     
-    if not data['Status']:
+    if not data.get('Status'):
         data['Status'] = 'New Stock'
         data['Package'] = 'None'
         data['Tenure'] = None
@@ -212,9 +199,6 @@ def manual_entry():
         if collection.find_one({"GLNumber": gl_number}):
             flash("SL Number already exists", "danger")
             return redirect(url_for('DeviceInvy.page'))
-    
-    if data.get('OutwardTo'):
-        data['Status'] = 'Active'
 
     package_type = data.get("Package", "")
     tenure = data.get("Tenure", "").strip() if package_type == "Package" else None
@@ -304,9 +288,16 @@ def upload_file():
                 if collection.find_one({"GLNumber": gl_number}):
                     flash(f"Duplicate SL Number at row {index + 2}", "danger")
                     return redirect(url_for('DeviceInvy.page'))
-                
-            if not row['Status']:
+            
+            status = row.get('Status', 'New Stock')
+            if status in ['New Stock', 'Available']:
+                row['Package'] = 'None'
+                row['Tenure'] = None
+            
+            if not row.get('Status'):
                 row['Status'] = 'New Stock'
+                row['Package'] = 'None'
+                row['Tenure'] = None
 
             package_type = str(row.get("Package", "")).strip()
             tenure = str(row.get("Tenure", "")).strip() if package_type == "Package" else None
