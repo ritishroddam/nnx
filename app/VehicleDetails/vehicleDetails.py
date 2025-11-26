@@ -191,6 +191,10 @@ def edit_vehicle(vehicle_id):
             {"$set": updated_data}
         )
         if result.modified_count > 0:
+            if "IMEI" in updated_data:
+                device_collection.update_one({"IMEI": updated_data['IMEI']}, {"$set": {"Status": "In Use"}})
+            if "SIM" in updated_data:
+                sim_collection.update_one({"MobileNumber": updated_data['SIM']}, {"$set": {"status": "In Use"}})
             return jsonify({"success": True, "message": "Vehicle updated successfully!"}), 200
         else:
             return jsonify({"success": False, "message": "No changes were made."}), 400
