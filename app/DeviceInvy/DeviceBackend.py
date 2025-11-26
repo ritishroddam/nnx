@@ -66,8 +66,8 @@ def get_devices_paginated():
         per_page = int(request.args.get('per_page', 100))
         skip = (page - 1) * per_page
 
-        total = collection.count_documents()
-        devices = list(collection.find().skip(skip).limit(per_page))
+        total = collection.count_documents({})
+        devices = list(collection.find({}).skip(skip).limit(per_page))
 
         imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
 
