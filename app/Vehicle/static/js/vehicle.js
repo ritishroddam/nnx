@@ -1004,6 +1004,11 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     device.speed !== null && device.speed !== undefined
       ? `${convertSpeedToKmh(device.speed).toFixed(0)} kmph`
       : '<span class="missing-data">Unknown</span>';
+  const distance =
+    device.distance !== undefined && device.distance !== null
+      ? parseFloat(device.distance).toFixed(1)
+      : "0";
+  const stoppage = device.stoppage_time || "--";
   const lat = latLng.lat() || '<span class="missing-data">Unknown</span>';
   const lon = latLng.lng() || '<span class="missing-data">Unknown</span>';
   const date = device.date || "N/A";
