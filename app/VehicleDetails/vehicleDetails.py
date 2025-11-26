@@ -150,6 +150,8 @@ def manual_entry():
     
     try:
         vehicle_collection.insert_one(data)
+        device_collection.update_one({"IMEI": data['IMEI']}, {"$set": {"Status": "In Use"}})
+        sim_collection.update_one({"MobileNumber": data['SIM']}, {"$set": {"status": "In Use"}})
         flash("Vehicle added successfully!", "success")
     except Exception as e:
         flash(f"Error adding vehicle: {str(e)}", "danger")
@@ -234,6 +236,8 @@ def upload_vehicle_file():
                 return redirect(url_for('VehicleDetails.page'))
 
         records = []
+        simRecords = []
+        deviceRecords = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip().upper()
             companyName = str(row['CompanyName']).strip()
@@ -362,9 +366,13 @@ def upload_vehicle_file():
             }
 
             records.append(record)
+            simRecords.append(sim)
+            deviceRecords.append(imei)
 
         if records:
             vehicle_collection.insert_many(records)
+            sim_collection.update_many({"MobileNumber": {"$in": simRecords}}, {"$set": {"status": "In Use"}})
+            device_collection.update_many({"IMEI": {"$in": deviceRecords}}, {"$set": {"Status": "In Use"}})
             flash("File uploaded and SIMs added successfully!", "success")
         else:
             flash("No records found in the file", "danger")
