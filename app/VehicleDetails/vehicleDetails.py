@@ -258,6 +258,7 @@ def upload_vehicle_file():
         records = []
         simRecords = []
         deviceRecords = []
+        list_of_license_plates = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip().upper()
             companyName = str(row['CompanyName']).strip()
@@ -287,6 +288,10 @@ def upload_vehicle_file():
                 service_due_date = str(row['ServiceDueDate']).strip()
             slowSpeed = str(row['slowSpeed']).strip()
             normalSpeed = str(row['normalSpeed']).strip()
+            
+            if license_plate_number in list_of_license_plates:
+                flash(f"Duplicate License Plate Number {license_plate_number} found in the file at row {index}.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
             
             if not license_plate_number or not imei or not sim:
                 flash(f"For row {index} LicensePlateNumber, IMEI, and SIM are required.", "danger")
@@ -392,7 +397,8 @@ def upload_vehicle_file():
             records.append(record)
             simRecords.append(sim)
             deviceRecords.append(imei)
-
+            list_of_license_plates.append(license_plate_number)
+            
         if records:
             vehicle_collection.insert_many(records)
             sim_collection.update_many({"MobileNumber": {"$in": simRecords}}, {"$set": {"status": "In Use"}})
