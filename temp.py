@@ -624,6 +624,6 @@ from config import config
 mongo_client = MongoClient("mongodb+srv://doadmin:4T81NSqj572g3o9f@db-mongodb-blr1-27716-c2bd0cae.mongo.ondigitalocean.com/admin?tls=true&authSource=admin", tz_aware=True)
 db = mongo_client["nnx"]
 
-simCollection = db["sim_inventory"]
+simCollection = db["vehicle_inventory"]
 
-simCollection.delete_many({"MobileNumber": {"$in": list}})
+simCollection.delete_many({"LicensePlateNumber": {"$nin": ["KA63UK2500", "KA63UK0025"]}})

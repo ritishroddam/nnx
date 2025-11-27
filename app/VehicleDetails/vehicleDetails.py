@@ -411,6 +411,8 @@ def upload_vehicle_file():
             list_of_imeis.append(imei)
             list_of_sims.append(sim)
             
+            print(f"Prepared record for License Plate Number: {list_of_license_plates}")
+            
         if records:
             vehicle_collection.insert_many(records)
             sim_collection.update_many({"MobileNumber": {"$in": simRecords}}, {"$set": {"status": "In Use"}})
