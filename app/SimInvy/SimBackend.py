@@ -268,6 +268,7 @@ def upload_file():
                     sim_number = None
                     
             if sim_number:
+                print(sim_number)
                 if collection.find_one({"SimNumber": sim_number}):
                     flash(f"Duplicate SIM Number at row {index + 2}", "danger")
                     return redirect(url_for('SimInvy.page'))
