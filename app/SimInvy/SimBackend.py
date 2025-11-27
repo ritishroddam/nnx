@@ -260,9 +260,14 @@ def upload_file():
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
 
-            if row.get('SimNumber'):
-                sim_number = str(row['SimNumber']).strip()
-            
+            sim_number_raw = row.get('SimNumber')
+            sim_number = None
+            if sim_number_raw is not None and not pd.isnull(sim_number_raw):
+                sim_number = str(sim_number_raw).strip()
+                if sim_number.lower() == "nan":
+                    sim_number = None
+                    
+            if sim_number:
                 if collection.find_one({"SimNumber": sim_number}):
                     flash(f"Duplicate SIM Number at row {index + 2}", "danger")
                     return redirect(url_for('SimInvy.page'))
