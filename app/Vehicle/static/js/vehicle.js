@@ -1058,7 +1058,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   `;
 
     listContainer.appendChild(vehicleElement);
-    addHoverListenersForVehicle(data.imei);
+    addHoverListenersForVehicle(vehicle.imei);
   });
 
   showHidecar();
@@ -1605,7 +1605,6 @@ function updateVehicleData(vehicle) {
 
   lastDataReceivedTime[imei] = new Date();
   updateVehicleVisibility(imei);
-  addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
 
@@ -2395,10 +2394,6 @@ function addHoverListenersForVehicle(imei) {
       resetVehicleCardStyles(vehicleCard);
     });
   }
-}
-
-function addHoverListenersToCardsAndMarkers() {
-  vehicleData.forEach((_, imei) => addHoverListenersForVehicle(imei));
 }
 
 window.applyFilterToAllVehicles = applyFilterToAllVehicles;
