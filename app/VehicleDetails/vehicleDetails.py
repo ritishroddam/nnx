@@ -288,13 +288,15 @@ def upload_vehicle_file():
             slowSpeed = str(row['slowSpeed']).strip()
             normalSpeed = str(row['normalSpeed']).strip()
             
-            if not license_plate_number or not imei or not sim or not location:
-                flash(f"For row {index} LicensePlateNumber, IMEI, SIM, and Location are required.", "danger")
+            if not license_plate_number or not imei or not sim:
+                flash(f"For row {index} LicensePlateNumber, IMEI, and SIM are required.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
-            if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
-                flash(f"For vehicle {license_plate_number} Vehicle Type: {vehicle_type} is invalid.", "danger")
-                return redirect(url_for('VehicleDetails.page'))
+            vehicle_type = vehicle_type if vehicle_type != 'nan' else None
+            if vehicle_type:
+                if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
+                    flash(f"For vehicle {license_plate_number} Vehicle Type: {vehicle_type} is invalid.", "danger")
+                    return redirect(url_for('VehicleDetails.page'))
             
             
             companyId = companies_collection.find_one({"Company Name": companyName}, {"_id": 1})
@@ -322,20 +324,16 @@ def upload_vehicle_file():
             else:
                 slowSpeed = slowSpeed if slowSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}SlowSpeed", "20")
                 normalSpeed = normalSpeed if normalSpeed != 'nan' else speedConfigs.get(f"{vehicle_type}NormalSpeed", "60")
-            
-            company = db['customers_list'].find_one({"Company Name": companyName})
-            if not company:
-                flash(f"For vehcile {license_plate_number} Company Name invalid", "danger")
-                return redirect(url_for('VehicleDetails.page'))
 
             if not (10 <= len(sim) <= 15):
                 flash(f"For vehicle {license_plate_number}, SIM {sim} must be between 10 and 15 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
-            if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
-                if not number_of_seats:
-                    flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
-                    return redirect(url_for('VehicleDetails.page'))
+            if vehicle_type:
+                if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
+                    if not number_of_seats:
+                        flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
+                        return redirect(url_for('VehicleDetails.page'))
 
             if len(imei) != 15:
                 flash(f"For vehicle {license_plate_number}, IMEI {imei} must be 15 characters long.", "danger")
@@ -376,7 +374,7 @@ def upload_vehicle_file():
                 "CompanyName": companyName,
                 "IMEI": imei,
                 "SIM": sim,
-                "VehicleType": vehicle_type,
+                "VehicleType": vehicle_type if vehicle_type else "",
                 "NumberOfSeatsContainer": number_of_seats,
                 "VehicleModel": vehicle_model,
                 "VehicleMake": vehicle_make,
