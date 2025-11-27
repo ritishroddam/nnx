@@ -259,6 +259,8 @@ def upload_vehicle_file():
         simRecords = []
         deviceRecords = []
         list_of_license_plates = []
+        list_of_imeis = []
+        list_of_sims = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip().upper()
             companyName = str(row['CompanyName']).strip()
@@ -291,6 +293,14 @@ def upload_vehicle_file():
             
             if license_plate_number in list_of_license_plates:
                 flash(f"Duplicate License Plate Number {license_plate_number} found in the file at row {index}.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if imei in list_of_imeis:
+                flash(f"Duplicate IMEI {imei} found in the file at row {index}.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if sim in list_of_sims:
+                flash(f"Duplicate SIM {sim} found in the file at row {index}.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
             
             if not license_plate_number or not imei or not sim:
@@ -398,6 +408,8 @@ def upload_vehicle_file():
             simRecords.append(sim)
             deviceRecords.append(imei)
             list_of_license_plates.append(license_plate_number)
+            list_of_imeis.append(imei)
+            list_of_sims.append(sim)
             
         if records:
             vehicle_collection.insert_many(records)
