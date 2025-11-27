@@ -85,6 +85,7 @@ const perPage = 100;
 let totalPages = 1;
 let totalVehicles = 0;
 let selectedVehicles = new Set();
+let currentFilterValue = "all";
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -120,6 +121,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         document.querySelectorAll('#vehicle-table tbody tr.selected').forEach(row => row.classList.remove('selected'));
         updateMultiShareButton();
       }
+    });
+  }
+
+  const speedFilter = document.getElementById("speed-filter");
+  if (speedFilter) {
+    speedFilter.addEventListener("change", (event) => {
+      currentFilterValue = event.target.value || "all";
+      applyFilterToAllVehicles();
     });
   }
 });
@@ -187,6 +196,65 @@ function formatTimeDelta(timeDelta){
     return `${minutes} minutes ${remainingSeconds} seconds`;
   }
   return `${seconds} seconds`;
+}
+
+function shouldDisplayVehicle(device, now = new Date()) {
+  const speedKmh = device.speed ? convertSpeedToKmh(device.speed) : 0;
+  const hasSOS = device.sos === "1";
+  const lastUpdate = convertToDate(device.date, device.time);
+  const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
+  const slowSpeedThreshold = device.slowSpeed;
+  const normalSpeedThreshold = device.normalSpeed;
+
+  switch (currentFilterValue) {
+    case "0":
+      return speedKmh === 0 && hoursSinceLastUpdate < 24;
+    case "0-40":
+      return (
+        speedKmh > 0 &&
+        speedKmh <= slowSpeedThreshold &&
+        hoursSinceLastUpdate < 24
+      );
+    case "40-60":
+      return (
+        speedKmh > slowSpeedThreshold &&
+        speedKmh <= normalSpeedThreshold &&
+        hoursSinceLastUpdate < 24
+      );
+    case "60+":
+      return speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
+    case "sos":
+      return hasSOS && hoursSinceLastUpdate < 24;
+    case "offline":
+      return hoursSinceLastUpdate > 24;
+    default:
+      return true;
+  }
+}
+
+function updateVehicleVisibility(imei, now = new Date()) {
+  const marker = markers[imei];
+  if (!marker) return;
+
+  const visible = shouldDisplayVehicle(marker.device, now);
+  marker.map = visible ? map : null;
+
+  const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+  if (card) {
+    card.style.display = visible ? "" : "none";
+  }
+}
+
+function applyFilterToAllVehicles() {
+  const now = new Date();
+  vehicleData.forEach((_, imei) => updateVehicleVisibility(imei, now));
+  const visibleCount = document.querySelectorAll(
+    ".vehicle-card:not([style*='display: none'])"
+  ).length;
+  const headingText = getHeadingText(currentFilterValue);
+  document.getElementById(
+    "vehicle-counter"
+  ).innerHTML = `${headingText}: <span id="vehicle-count">${visibleCount}</span>`;
 }
 
 async function updateData(data) {
@@ -1323,7 +1391,7 @@ function updateMap() {
   const vehiclesArray = Array.from(vehicleData.values());
   renderVehicleCards(vehiclesArray);
   hideSkeletonLoader();
-  filterVehicles();
+  applyFilterToAllVehicles();
 }
 
 function animateMarker(marker, newPosition, duration = 15000) {
@@ -1355,58 +1423,6 @@ function animateMarker(marker, newPosition, duration = 15000) {
   }
 
   requestAnimationFrame(moveMarker);
-}
-
-function filterVehicles() {
-  const filterValue = document.getElementById("speed-filter").value;
-  let filteredVehicles = [];
-  const now = new Date();
-
-  Object.keys(markers).forEach((imei) => {
-    const marker = markers[imei];
-    const speedKmh = marker.device.speed
-      ? convertSpeedToKmh(marker.device.speed)
-      : 0; 
-    const hasSOS = marker.device.sos === "1"; 
-    const lastUpdate = convertToDate(marker.device.date, marker.device.time);
-    const hoursSinceLastUpdate = (now - lastUpdate) / (1000 * 60 * 60);
-    const slowSpeedThreshold = marker.device.slowSpeed;
-    const normalSpeedThreshold = marker.device.normalSpeed;
-
-    let isVisible = false;
-
-    switch (filterValue) {
-      case "0":
-        isVisible = speedKmh === 0 && hoursSinceLastUpdate < 24;
-        break;
-      case "0-40":
-        isVisible = speedKmh > 0 && speedKmh <= slowSpeedThreshold && hoursSinceLastUpdate < 24;
-        break;
-      case "40-60":
-        isVisible =
-          speedKmh > slowSpeedThreshold && speedKmh <= normalSpeedThreshold && hoursSinceLastUpdate < 24;
-        break;
-      case "60+":
-        isVisible = speedKmh > normalSpeedThreshold && hoursSinceLastUpdate < 24;
-        break;
-      case "sos":
-        isVisible = hasSOS && hoursSinceLastUpdate < 24;
-        break;
-      case "offline":
-        isVisible = hoursSinceLastUpdate > 24;
-        break;
-      default: 
-        isVisible = true;
-        break;
-    }
-
-    marker.map = isVisible ? map : null;
-
-    if (isVisible) {
-      filteredVehicles.push(marker.device);
-    }
-  });
-  renderVehicleCards(filteredVehicles, filterValue);
 }
 
 function parseCoordinates(lat, lng) {
@@ -1585,7 +1601,7 @@ function updateVehicleData(vehicle) {
   }
 
   lastDataReceivedTime[imei] = new Date();
-  filterVehicles();
+  updateVehicleVisibility(imei);
   addHoverListenersToCardsAndMarkers();
   showHidecar();
 }
@@ -2413,7 +2429,7 @@ function addHoverListenersToCardsAndMarkers() {
   });
 }
 
-window.filterVehicles = filterVehicles;
+window.applyFilterToAllVehicles = applyFilterToAllVehicles;
 
 window.onload = async function () {
   document.querySelector(".block-container").style.display = "none";
