@@ -294,10 +294,14 @@ def upload_vehicle_file():
 
             vehicle_type = vehicle_type if vehicle_type != 'nan' else None
             if vehicle_type:
-                if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
+                print(vehicle_type)
+                if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
+                    if not number_of_seats:
+                        flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
+                        return redirect(url_for('VehicleDetails.page'))
+                else:
                     flash(f"For vehicle {license_plate_number} Vehicle Type: {vehicle_type} is invalid.", "danger")
                     return redirect(url_for('VehicleDetails.page'))
-            
             
             companyId = companies_collection.find_one({"Company Name": companyName}, {"_id": 1})
 
@@ -328,12 +332,6 @@ def upload_vehicle_file():
             if not (10 <= len(sim) <= 15):
                 flash(f"For vehicle {license_plate_number}, SIM {sim} must be between 10 and 15 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
-            
-            if vehicle_type:
-                if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
-                    if not number_of_seats:
-                        flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
-                        return redirect(url_for('VehicleDetails.page'))
 
             if len(imei) != 15:
                 flash(f"For vehicle {license_plate_number}, IMEI {imei} must be 15 characters long.", "danger")
