@@ -344,7 +344,7 @@ function renderRecentReports(reports){
         ${err}
       </div>
       <div class="report-actions">
-        <button title="Download" ${isSuccess?'':'disabled'} onclick="downloadReport('${r._id}')"><i class="fas fa-download"></i></button>
+        <button title="Download" ${isSuccess?'':'disabled'} onclick="downloadReport('${r._id}')"><i class="material-symbols-outlined">download</i></button>
       </div>`;
     c.appendChild(div);
   });

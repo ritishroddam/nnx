@@ -502,13 +502,13 @@ Register Sub Account
     <!-- Search and Filter Section -->
     <div class="search-filter-section">
         <div class="search-container">
-            <i class="fas fa-search"></i>
+            <i class="material-symbols-outlined">search</i>
             <input type="text" id="user-search" placeholder="Search by username, email, or company...">
         </div>
 
         <div class="filter-container">
             <button id="add-admin-btn" class="btn-add-admin">
-                <i class="fas fa-plus"></i> Add New Client Admin
+                <i class="material-symbols-outlined">person_add</i> Add New Client Admin
             </button>
         </div>
     </div>
@@ -587,16 +587,16 @@ Register Sub Account
                 <td>
                     <div class="action-buttons">
                         <button class="btn-action btn-edit" data-user-id="{{ user._id }}">
-                            <i class="fas fa-edit"></i>
+                            <i class="material-symbols-outlined">edit</i>
                         </button>
                         <button class="btn-action btn-save" data-user-id="{{ user._id }}">
-                            <i class="fas fa-save"></i>
+                            <i class="material-symbols-outlined">save</i>
                         </button>
                         <button class="btn-action btn-cancel" data-user-id="{{ user._id }}">
-                            <i class="fas fa-times"></i>
+                            <i class="material-symbols-outlined">close</i>
                         </button>
                         <button class="btn-action btn-delete" data-user-id="{{ user._id }}">
-                            <i class="fas fa-trash"></i>
+                            <i class="material-symbols-outlined">delete</i>
                         </button>
                         <!-- Add the disable button -->
                         <button class="icon-btn disable-btn" title="{{ 'Enable' if user.disabled == 1 else 'Disable' }}">

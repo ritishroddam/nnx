@@ -220,7 +220,6 @@ async function loadNotifications() {
           `;
           
           li.addEventListener("click", function(e) {
-            // Only navigate if not clicking the mark-read button
             if (!e.target.closest('.mark-read-btn')) {
               window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
                 alert.type
@@ -228,7 +227,6 @@ async function loadNotifications() {
             }
           });
 
-          // Add click handler for mark-read button
           const markReadBtn = li.querySelector('.mark-read-btn');
           if (markReadBtn) {
             markReadBtn.addEventListener("click", async function(e) {
