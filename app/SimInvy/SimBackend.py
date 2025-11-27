@@ -260,8 +260,15 @@ def upload_file():
                 flash(f"Invalid Mobile Number length at row {index + 2}, column 'MobileNumber' (Length: {len(mobile_number)})", "danger")
                 return redirect(url_for('SimInvy.page'))
 
-            if collection.find_one({"MobileNumber": mobile_number}) or collection.find_one({"SimNumber": sim_number}):
-                flash(f"Duplicate Mobile Number or SIM Number at row {index + 2}", "danger")
+            if row.get('SimNumber'):
+                sim_number = str(row['SimNumber']).strip()
+            
+                if collection.find_one({"SimNumber": sim_number}):
+                    flash(f"Duplicate SIM Number at row {index + 2}", "danger")
+                    return redirect(url_for('SimInvy.page'))
+                
+            if collection.find_one({"MobileNumber": mobile_number}):
+                flash(f"Duplicate Mobile Number at row {index + 2}", "danger")
                 return redirect(url_for('SimInvy.page'))
 
             record = {
@@ -272,8 +279,7 @@ def upload_file():
                 "status": status   
             }
             
-            if row.get('SimNumber'):
-                sim_number = str(row['SimNumber']).strip()
+            if sim_number:
                 record['SimNumber'] = sim_number
 
             records.append(record)
