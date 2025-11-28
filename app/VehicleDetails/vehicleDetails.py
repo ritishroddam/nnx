@@ -258,6 +258,9 @@ def upload_vehicle_file():
         records = []
         simRecords = []
         deviceRecords = []
+        list_of_license_plates = []
+        list_of_imeis = []
+        list_of_sims = []
         for index, row in df.iterrows():
             license_plate_number = str(row['LicensePlateNumber']).strip().upper()
             companyName = str(row['CompanyName']).strip()
@@ -288,16 +291,32 @@ def upload_vehicle_file():
             slowSpeed = str(row['slowSpeed']).strip()
             normalSpeed = str(row['normalSpeed']).strip()
             
+            if license_plate_number in list_of_license_plates:
+                flash(f"Duplicate License Plate Number {license_plate_number} found in the file at row {index + 2}.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if imei in list_of_imeis:
+                flash(f"Duplicate IMEI {imei} found in the file at row {index + 2}.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
+            if sim in list_of_sims:
+                flash(f"Duplicate SIM {sim} found in the file at row {index + 2}.", "danger")
+                return redirect(url_for('VehicleDetails.page'))
+            
             if not license_plate_number or not imei or not sim:
                 flash(f"For row {index} LicensePlateNumber, IMEI, and SIM are required.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
 
             vehicle_type = vehicle_type if vehicle_type != 'nan' else None
             if vehicle_type:
-                if vehicle_type not in ['bus', "sedan", "hatchback", "suv", "van", "truck", "bike"]:
+                print(vehicle_type)
+                if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
+                    if not number_of_seats:
+                        flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
+                        return redirect(url_for('VehicleDetails.page'))
+                else:
                     flash(f"For vehicle {license_plate_number} Vehicle Type: {vehicle_type} is invalid.", "danger")
                     return redirect(url_for('VehicleDetails.page'))
-            
             
             companyId = companies_collection.find_one({"Company Name": companyName}, {"_id": 1})
 
@@ -328,12 +347,6 @@ def upload_vehicle_file():
             if not (10 <= len(sim) <= 15):
                 flash(f"For vehicle {license_plate_number}, SIM {sim} must be between 10 and 15 characters long.", "danger")
                 return redirect(url_for('VehicleDetails.page'))
-            
-            if vehicle_type:
-                if vehicle_type in ['bus', "sedan", "hatchback", "suv", "van"]:
-                    if not number_of_seats:
-                        flash(f"For vehicle {license_plate_number}, Number of seats is required for vehicle type: {vehicle_type}.", "danger")
-                        return redirect(url_for('VehicleDetails.page'))
 
             if len(imei) != 15:
                 flash(f"For vehicle {license_plate_number}, IMEI {imei} must be 15 characters long.", "danger")
@@ -394,7 +407,10 @@ def upload_vehicle_file():
             records.append(record)
             simRecords.append(sim)
             deviceRecords.append(imei)
-
+            list_of_license_plates.append(license_plate_number)
+            list_of_imeis.append(imei)
+            list_of_sims.append(sim)
+            
         if records:
             vehicle_collection.insert_many(records)
             sim_collection.update_many({"MobileNumber": {"$in": simRecords}}, {"$set": {"status": "In Use"}})
