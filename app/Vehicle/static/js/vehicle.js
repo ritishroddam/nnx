@@ -150,8 +150,6 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
-let oldDataMain = {};
-
 socket.on("vehicle_update", async function (data) {
   try {
     const updatedData = await updateData(data);
@@ -172,14 +170,6 @@ socket.on("vehicle_update", async function (data) {
     updateVehicleCard(updatedData);
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
-  }
-});
-
-socket.on("sos_alert", function (data) {
-  console.log("SOS alert received:", data);
-  const imei = data.imei;
-  if (markers[imei]) {
-    triggerSOS(imei, markers[imei]);
   }
 });
 
@@ -661,11 +651,7 @@ function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle) return;
 
-  const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-  const now = new Date();
-  const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
-
-  if (hoursSinceUpdate > 1) {
+  if((data.sos === "1" || data.sos === 1) && (oldDataMain[imei] === "0" || oldDataMain[imei] === 0)) {
     console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
     return;
   }
@@ -1365,12 +1351,6 @@ function updateMap() {
         addHoverListenersForVehicle(imei);
       }
 
-      if (device.sos === "1") {
-        triggerSOS(imei, markers[imei]);
-      } else {
-        removeSOS(imei);
-      }
-
       lastDataReceivedTime[imei] = new Date(`${device.date}T${device.time}`);
       bounds.extend(latLng);
     }
@@ -1599,12 +1579,6 @@ function updateVehicleData(vehicle) {
   } else {
     markers[imei] = createAdvancedMarker(latLng, iconUrl, rotation, vehicle);
     addHoverListenersForVehicle(imei);
-  }
-
-  if (vehicle.sos === "1") {
-    triggerSOS(imei, markers[imei]);
-  } else {
-    removeSOS(imei);
   }
 
   lastDataReceivedTime[imei] = new Date();

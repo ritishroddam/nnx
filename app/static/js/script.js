@@ -73,7 +73,7 @@ let oldDataMain = {};
 socket.on("vehicle_update", async function (data) {
   try {
     imei = data.imei;
-    if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
+    if((data.sos === "1" || data.sos === 1) && (oldDataMain[imei] === "0" || oldDataMain[imei] === 0)) {
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`, "danger", "sos");
       data = null;
     }
