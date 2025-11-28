@@ -83,7 +83,7 @@ def geocodeInternal(lat,lng):
 
         reverse_geocode_result = gmaps.reverse_geocode((lat, lng))
         if not reverse_geocode_result:
-            print("Geocoding API failed")
+            print("[GEOCODING INTERNAL] Geocoding API failed")
             return "Address unavailable"
 
         address = reverse_geocode_result[0]['formatted_address']
