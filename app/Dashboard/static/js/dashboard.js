@@ -723,6 +723,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       await fetchVehicleDistances(currentRange);
     });
   });  
+  getLocation();
+  setInterval(updateClockAndDate, 1000);
+  updateClockAndDate();
+
+  await fetchDashboardData();
+  await renderPieChart();
 
   await fetchVehicleDistances();
 
@@ -736,13 +742,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     XLSX.writeFile(wb, "vehicle_data.xlsx");
   });
-
-  getLocation();
-  setInterval(updateClockAndDate, 1000);
-  updateClockAndDate();
-
-  await fetchDashboardData();
-  await renderPieChart();
 });
 
 let map, trafficLayer, marker;
