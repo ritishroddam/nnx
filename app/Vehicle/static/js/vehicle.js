@@ -150,6 +150,8 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
+let oldDataMain = {};
+
 socket.on("vehicle_update", async function (data) {
   try {
     const updatedData = await updateData(data);
@@ -159,11 +161,13 @@ socket.on("vehicle_update", async function (data) {
     const now = new Date();
     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
 
-    if (data.sos === "1" && hoursSinceUpdate <= 1) {
+    if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
       triggerSOS(data.imei, markers[data.imei]);
     } else if (data.sos === "1") {
       console.log(`Old SOS alert ignored for ${data.imei}`);
     }
+
+    oldDataMain[data.imei] = data.sos;
 
     updateVehicleCard(updatedData);
   } catch (error) {
