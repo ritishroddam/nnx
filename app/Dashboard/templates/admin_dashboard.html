@@ -46,7 +46,7 @@ Dashboard
     </div>
     {% endif %}
     
-    <div class="status-container">
+    <!-- <div class="status-container">
     <div class="status-card" id="running-vehicles">
         <div class="status-row">
             <i class="material-symbols-outlined">delivery_truck_speed</i>
@@ -97,6 +97,65 @@ Dashboard
         </div>
         <div class="status-label">Disconnected</div>
     </div>
+</div> -->
+
+<div class="status-container">
+  <!-- First row with 4 cards -->
+  <div class="status-row-container">
+    <div class="status-card" id="running-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">delivery_truck_speed</i>
+            <div class="status-count" id="running-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Running</div>
+    </div>
+    <div class="status-card" id="idle-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">hourglass_top</i>
+            <div class="status-count" id="idle-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Idle</div>
+    </div>
+    <div class="status-card" id="parked-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">parking_sign</i>
+            <div class="status-count" id="parked-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Parked</div>
+    </div>
+    <div class="status-card" id="speed-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">avg_pace</i>
+            <div class="status-count" id="speed-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Speed (40-60)</div>
+    </div>
+  </div>
+  
+  <!-- Second row with 3 cards -->
+  <div class="status-row-container">
+    <div class="status-card" id="overspeed-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">speed</i>
+            <div class="status-count" id="overspeed-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Over Speed (60+)</div>
+    </div>
+    <div class="status-card" id="offline-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">android_cell_4_bar_off</i>
+            <div class="status-count" id="offline-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Offline</div>
+    </div>
+    <div class="status-card" id="disconnected-vehicles">
+        <div class="status-row">
+            <i class="material-symbols-outlined">power_off</i>
+            <div class="status-count" id="disconnected-vehicles-count">0 / 0</div>
+        </div>
+        <div class="status-label">Disconnected</div>
+    </div>
+  </div>
 </div>
 
     <div class="title-with-line">
