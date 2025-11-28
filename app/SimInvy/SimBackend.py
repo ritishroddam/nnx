@@ -497,14 +497,8 @@ def get_sims_paginated():
         if status_q and status_q != 'All':
             if status_q in ['Active', 'Inactive']:
                 mongo_query['isActive'] = True if status_q == 'Active' else False
-            elif status_q == 'Allocated':
-                vehicle_collection = db['vehicle_inventory']
-                vehicle_sims = list(vehicle_collection.find({}, {'sim_number': 1}))
-                allocated_set = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
-                if allocated_set:
-                    mongo_query['SimNumber'] = {'$in': list(allocated_set)}
-                else:
-                    mongo_query['SimNumber'] = {'$in': []}
+            elif status_q == 'In Use':
+                mongo_query['status'] = 'In Use'
             else:
                 mongo_query['status'] = status_q
 
@@ -518,16 +512,17 @@ def get_sims_paginated():
 
         total = collection.count_documents(mongo_query)
         sims = list(collection.find(mongo_query).skip(skip).limit(per_page))
+        simList = [sim.get('MobileNumber') for sim in sims]
 
         vehicle_collection = db['vehicle_inventory']
-        vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
-        sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
+        vehicles = list(vehicle_collection.find({"SIM": {"$in": simList}}, {'SIM': 1, 'IMEI': 1}))
+        sim_to_imei = {v.get('SIM'): v.get('IMEI') for v in vehicles}
 
         processed = []
         for sim in sims:
-            sim_number = sim.get('SimNumber', '')
+            mobile_number = sim.get('MobileNumber', '')
             sim['_id'] = str(sim.get('_id'))
-            sim['IMEI'] = sim_to_imei.get(sim_number, 'N/A')
+            sim['IMEI'] = sim_to_imei.get(mobile_number, 'N/A')
             sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
             sim['lastEditedAt'] = sim.get('lastEditedAt', '')
             processed.append(sim)
