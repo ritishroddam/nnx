@@ -86,6 +86,9 @@ let totalPages = 1;
 let totalVehicles = 0;
 let selectedVehicles = new Set();
 let currentFilterValue = "all";
+let lastSecondRender = 0;
+let lastMinuteRender = 0;
+let lastHourRender = 0;
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -270,6 +273,7 @@ async function updateData(data) {
     const timeDiff = Math.abs(now - lastUpdated);
     let statusText;
     let speed = parseFloat(data.speed) || 0;
+    data.lastUpdatedDate = lastUpdated;
 
     if (timeDiff > 24 * 60 * 60 * 1000) {
       statusText = "offline";
@@ -309,6 +313,8 @@ async function updateData(data) {
     data["stoppage_time_delta"] = 0;
     const now = new Date();
     const timeDiff = Math.abs(now - lastUpdated);
+    data.lastUpdatedDate = lastUpdated;
+
     let statusText = data.status;
     let speed = parseFloat(data.speed) || 0;
 
@@ -400,6 +406,7 @@ async function fetchVehicleData(page = 1) {
         status_time_str: vehicle.status_time_str,
         normalSpeed: vehicle.normalSpeed,
         slowSpeed: vehicle.slowSpeed,
+        lastUpdatedDate: lastUpdated,
       });
     });
 
@@ -1337,6 +1344,127 @@ function getCarIconUrlBySpeed(speedInKmh) {
   }
 }
 
+function formatLastUpdatedFromDate(lastUpdated, now = new Date()) {
+  const timeDiff = Math.abs(now - lastUpdated);
+  let lastUpdatedText = "";
+
+  if (timeDiff < 60 * 1000) {
+    const seconds = Math.floor(timeDiff / 1000);
+    lastUpdatedText = ` ${seconds} seconds ago`;
+  } else if (timeDiff < 60 * 60 * 1000) {
+    const minutes = Math.floor(timeDiff / (1000 * 60));
+    lastUpdatedText = ` ${minutes} minutes ago`;
+  } else if (timeDiff < 24 * 60 * 60 * 1000) {
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    lastUpdatedText = ` ${hours} hours ${minutes} minutes ago`;
+  } else if (timeDiff < 48 * 60 * 60 * 1000) {
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    lastUpdatedText = ` ${days} day ${hours} hours ago`;
+  } else {
+    // fallback to absolute when very old
+    const { formattedDate, formattedTime } = formatDateTime(
+      // reconstruct the "date" and "time" style output
+      lastUpdatedToDDMMYY(lastUpdated),
+      lastUpdatedToHHMMSS(lastUpdated)
+    );
+    lastUpdatedText = formattedTime + " " + formattedDate;
+  }
+
+  return lastUpdatedText;
+}
+
+function lastUpdatedToDDMMYY(d) {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = String(d.getFullYear()).slice(-2);
+  return dd + mm + yy;
+}
+
+function lastUpdatedToHHMMSS(d) {
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return hh + mm + ss;
+}
+
+function updateLastUpdatedForRange(now, minAgeMs, maxAgeMs) {
+  vehicleData.forEach((vehicle, imei) => {
+    const last = vehicle.lastUpdatedDate
+      ? vehicle.lastUpdatedDate
+      : convertToDate(vehicle.date, vehicle.time);
+
+    const ageMs = now - last;
+    if (ageMs < minAgeMs || ageMs >= maxAgeMs) {
+      return;
+    }
+
+    const text = formatLastUpdatedFromDate(last, now);
+
+    // Update card view
+    const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+    if (card) {
+      const span = card.querySelector(".last-updated-text");
+      if (span) span.textContent = text;
+    }
+
+    // Update table view
+    const row = document.querySelector(
+      `#vehicle-table tbody tr[data-imei="${imei}"]`
+    );
+    if (row) {
+      const cell = row.querySelector(".last-updated-cell");
+      if (cell) cell.textContent = text;
+    }
+  });
+}
+
+function startHybridLastUpdatedLoop() {
+  function tick(timestamp) {
+    if (!lastSecondRender) {
+      lastSecondRender = timestamp;
+      lastMinuteRender = timestamp;
+      lastHourRender = timestamp;
+    }
+
+    const now = new Date();
+
+    // < 1 minute old → update every second
+    if (timestamp - lastSecondRender >= 1000) {
+      updateLastUpdatedForRange(now, 0, 60 * 1000);
+      lastSecondRender = timestamp;
+    }
+
+    // 1 minute – 1 day old → update every minute
+    if (timestamp - lastMinuteRender >= 60 * 1000) {
+      updateLastUpdatedForRange(
+        now,
+        60 * 1000,
+        24 * 60 * 60 * 1000
+      );
+      lastMinuteRender = timestamp;
+    }
+
+    // > 1 day old → update every hour
+    if (timestamp - lastHourRender >= 60 * 60 * 1000) {
+      updateLastUpdatedForRange(
+        now,
+        24 * 60 * 60 * 1000,
+        Infinity
+      );
+      lastHourRender = timestamp;
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+
 function convertToDate(ddmmyyyy, hhmmss) {
   let day = ddmmyyyy.substring(0, 2);
   let month = ddmmyyyy.substring(2, 4);
@@ -1600,31 +1728,7 @@ function refreshLastUpdatedDisplay() {
 
 function formatLastUpdatedText(date, time, now = new Date()) {
   const lastUpdated = convertToDate(date, time);
-  const timeDiff = Math.abs(now - lastUpdated);
-  let lastUpdatedText = "";
-
-  if (timeDiff < 60 * 1000) {
-    const seconds = Math.floor(timeDiff / 1000);
-    lastUpdatedText = ` ${seconds} seconds ago`;
-  } else if (timeDiff < 60 * 60 * 1000) {
-    const minutes = Math.floor(timeDiff / (1000 * 60));
-    lastUpdatedText = ` ${minutes} minutes ago`;
-  } else if (timeDiff < 24 * 60 * 60 * 1000) {
-    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-    lastUpdatedText = ` ${hours} hours ${minutes} minutes ago`;
-  } else if (timeDiff < 48 * 60 * 60 * 1000) {
-    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-    );
-    lastUpdatedText = ` ${days} day ${hours} hours ago`;
-  } else {
-    const { formattedDate, formattedTime } = formatDateTime(date, time);
-    lastUpdatedText = formattedTime + " " + formattedDate;
-  }
-
-  return lastUpdatedText;
+  return formatLastUpdatedFromDate(lastUpdated, now);
 }
 
 function toggleRowSelection(row, imei) {
@@ -2335,5 +2439,5 @@ window.onload = async function () {
       }
     });
 
-  setInterval(refreshLastUpdatedDisplay, 1 * 1000);
+  startHybridLastUpdatedLoop();
 };
