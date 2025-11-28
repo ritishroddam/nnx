@@ -165,8 +165,6 @@ socket.on("vehicle_update", async function (data) {
       console.log(`Old SOS alert ignored for ${data.imei}`);
     }
 
-    oldDataMain[data.imei] = data.sos;
-
     updateVehicleCard(updatedData);
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
@@ -651,7 +649,7 @@ function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle) return;
 
-  if((data.sos === "1" || data.sos === 1) && (oldDataMain[imei] === "0" || oldDataMain[imei] === 0)) {
+  if(vehicle.sosActive){
     console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
     return;
   }
