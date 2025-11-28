@@ -519,9 +519,9 @@ def get_sims_paginated():
 
         processed = []
         for sim in sims:
-            sim_number = sim.get('SimNumber', '')
+            mobile_number = sim.get('MobileNumber', '')
             sim['_id'] = str(sim.get('_id'))
-            sim['IMEI'] = sim_to_imei.get(sim_number, 'N/A')
+            sim['IMEI'] = sim_to_imei.get(mobile_number, 'N/A')
             sim['lastEditedBy'] = sim.get('lastEditedBy', 'N/A')
             sim['lastEditedAt'] = sim.get('lastEditedAt', '')
             processed.append(sim)
