@@ -45,8 +45,14 @@ Dashboard
       </div>
     </div>
     {% endif %}
-    
-    <div class="status-container">
+
+<div class="title-with-line">
+  <span>Configured Vehicle's</span>
+  <hr>
+</div>
+
+<div class="status-container">
+  <div class="status-row-container">
     <div class="status-card" id="running-vehicles">
         <div class="status-row">
             <i class="material-symbols-outlined">delivery_truck_speed</i>
@@ -75,7 +81,9 @@ Dashboard
         </div>
         <div class="status-label">Speed (40-60)</div>
     </div>
-    <br>
+  </div>
+  
+  <div class="status-row-container">
     <div class="status-card" id="overspeed-vehicles">
         <div class="status-row">
             <i class="material-symbols-outlined">speed</i>
@@ -97,12 +105,14 @@ Dashboard
         </div>
         <div class="status-label">Disconnected</div>
     </div>
+  </div>
 </div>
 
-    <div class="title-with-line">
-      <span>Information</span>
-      <hr>
-    </div>
+
+<div class="title-with-line">
+  <span>Information</span>
+  <hr>
+</div>
 
     <div class="dashboard-row">
       <div class="graph-container">

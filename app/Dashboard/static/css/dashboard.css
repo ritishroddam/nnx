@@ -575,7 +575,7 @@
 }
 
 .table-container {
-  max-height: 70vh;
+  max-height: 60vh;
   overflow-y: auto;
 }
 
@@ -603,7 +603,7 @@
 
 /* //////////////////////////////////// */
 
-.status-container {
+/* .status-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -612,6 +612,116 @@
   padding: 18px 0 18px 0;
   margin: 24px 0 18px 0;
   box-shadow: none;
+  gap: 0;
+}
+
+.status-card {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.dark-mode .status-container {
+  color: #ccc;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.dark-mode .status-card {
+  color: #ccc;
+}
+
+.status-card i {
+  font-size: 1.1em;
+  color: #111;
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.dark-mode .status-card i {
+  color: #ccc;
+}
+
+.status-label {
+  font-size: .9em;
+  font-weight: 700;
+  color: #111;
+  margin-top: 0.3em;
+  margin-bottom: 0;
+  line-height: 1.1;
+  word-break: break-word;
+  letter-spacing: 0.01em;
+}
+
+.dark-mode .status-label {
+  color: #ccc;
+}
+
+.status-card span {
+  display: block;
+  font-size: 16px;
+}
+
+.status-count {
+  font-size: 2.0em;
+  font-weight: 500;
+  color: #111;
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.dark-mode .status-count {
+  color: #ccc;
+}
+
+.status-card span:not(.status-count) {
+  display: block;
+  font-size: 1.05em;
+  font-weight: 600;
+  color: #111;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.status-card > * {
+  margin-bottom: 0;
+} */
+
+.status-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  border-radius: 28px;
+  padding: 18px 0;
+  margin: 24px 0 18px 0;
+  box-shadow: none;
+  gap: 16px;
+}
+
+.status-row-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
   gap: 0;
 }
 
