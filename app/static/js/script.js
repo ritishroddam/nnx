@@ -68,12 +68,16 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
+let oldDataMain = {};
+
 socket.on("vehicle_update", async function (data) {
   try {
-    if(data.sos === "1" || data.sos === 1) {
+    imei = data.imei;
+    if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`, "danger", "sos");
       data = null;
     }
+    oldDataMain[imei] = data.sos;
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
   }
