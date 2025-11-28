@@ -420,124 +420,246 @@ function updatePaginationControls() {
   if (existingPagination) existingPagination.remove();
 }
 
-async function loadPage(page) {
-  await fetchVehicleData();
-  
-  if (document.getElementById("vehicle-table-container").style.display !== "none") {
-    populateVehicleTable();
-  }
-  
-  updateMap();
-}
+function buildVehicleCardTemplate(vehicle, isDarkMode) {
+  const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+  const now = new Date();
+  const isToday = lastUpdated.toDateString() === now.toDateString();
+  const timeDiff = Math.abs(now - lastUpdated);
+  const secondsDiff = Math.floor(timeDiff / 1000);
+  const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+  const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
+  const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
 
+  let statusText = vehicle.status;
+  let statusColor;
+  if (statusText === "offline") {
+    statusText = "Offline";
+    statusColor = isDarkMode ? "#616161" : "#9e9e9e";
+  } else if (statusText === "stopped") {
+    statusText = "Stopped";
+    statusColor = isDarkMode ? "#d32f2f" : "#f44336";
+  } else if (statusText === "idle") {
+    statusText = "Idle";
+    statusColor = isDarkMode ? "#ff9800" : "#f57c00";
+  } else if (statusText === "moving") {
+    statusText = "Moving";
+    statusColor = isDarkMode ? "#4caf50" : "#2e7d32";
+  } else {
+    statusText = "Unknown";
+    statusColor = isDarkMode ? "#9e9e9e" : "#616161";
+  }
+
+  let sinceText = "";
+  if (vehicle.status_time_str) {
+    sinceText = `since ${vehicle.status_time_str}`;
+  } else if (hoursDiff > 0) {
+    sinceText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
+  } else if (minutesDiff > 0) {
+    sinceText = `since ${minutesDiff} min`;
+  } else {
+    sinceText = `since ${secondsDiff} sec`;
+  }
+
+  const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+  const iconRed = "color:#d32f2f;";
+  const gpsIcon = statusText === "Offline" ? "location_disabled" : "my_location";
+
+  let ignitionIcon, ignitionColor;
+  if (vehicle.ignition === "0") {
+    ignitionIcon = "key_off";
+    ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
+  } else {
+    ignitionIcon = "key";
+    ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+  }
+
+  const ASUgsmValue = parseInt(vehicle.gsm ?? "0", 10);
+  let gsmIcon = "signal_cellular_off";
+  let gsmColor = isDarkMode ? "#ff5252" : "#d32f2f";
+  if (ASUgsmValue === 0) {
+    gsmIcon = "signal_cellular_null";
+    gsmColor = isDarkMode ? "#ff5252" : "#d32f2f";
+  } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+    gsmIcon = "signal_cellular_1_bar";
+    gsmColor = isDarkMode ? "#ffb74d" : "#ff9800";
+  } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+    gsmIcon = "signal_cellular_2_bar";
+    gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
+  } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+    gsmIcon = "signal_cellular_3_bar";
+    gsmColor = isDarkMode ? "#d4e157" : "#cddc39";
+  } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+    gsmIcon = "signal_cellular_4_bar";
+    gsmColor = isDarkMode ? "#81c784" : "#4caf50";
+  }
+
+  const sosIcon =
+    vehicle.sos === "1"
+      ? `<span class="material-symbols-outlined" style="${iconStyle + iconRed}">sos</span>`
+      : "";
+
+  const iconRow = `
+      <span
+        class="material-symbols-outlined"
+        style="${iconStyle}cursor:pointer;"
+        title="View Vehicle Info"
+        onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">arrow_forward</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="${vehicle.ignition === "1" ? "Ignition On" : "Ignition Off"}">${ignitionIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal Strength">${gsmIcon}</span>
+      ${sosIcon}
+    `;
+
+  const listener =
+    vehicle.LicensePlateNumber === "Unknown" || !vehicle.LicensePlateNumber
+      ? vehicle.imei
+      : vehicle.LicensePlateNumber;
+
+  const template = `
+    <div style="display:flex;align-items:stretch;justify-content:space-between;">
+      <div style="flex:1;">
+        <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:22px;" title="${gpsIcon === "location_disabled" ? "GPS Offline" : "GPS Active"}">${gpsIcon}</span>
+          <span class="vehicle-number"
+                style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
+                onclick="vehicleInfoPage('${vehicle.LicensePlateNumber || vehicle.imei}')">
+            ${listener}
+          </span>
+          <span style="margin-left:4px;">
+            ${iconRow}
+          </span>
+        </div>
+        <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
+          <strong> Last Update : </strong> <span class="last-updated-text">${formatLastUpdatedText(
+            vehicle.date,
+            vehicle.time
+          )}</span>
+        </div>
+        <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
+          ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
+        </div>
+        <div class="vehicle-card-row location-text" style="margin-top:2px;font-size:12px;line-height:1.2;">
+         <strong> Location : </strong> ${vehicle.address || "Location unknown"}
+        </div>
+        <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
+          <div>
+            <div style="font-size:13px;color:#777; font-weight:600;">Distance Today</div>
+            <div style="font-weight:300;">${
+              vehicle.distance ? parseFloat(vehicle.distance).toFixed(1) : "0"
+            } km</div>
+          </div>
+          <div>
+            <div style="font-size:13px;color:#777; font-weight:600;">Stoppage Today</div>
+            <div style="font-weight:300;">${vehicle.stoppage_time || "--"}</div>
+          </div>
+        </div>
+      </div>
+      <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
+      <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+       <span class="material-symbols-outlined info-bottom-action vertical-bar" title="Share Location" style="cursor:pointer;">moved_location</span>
+      </div>
+    </div>
+  `;
+
+  return {
+    template,
+    isSosBlink: vehicle.sos === "1" && isToday,
+    isSosHistoric: vehicle.sos === "1" && !isToday,
+  };
+}
 
 function updateVehicleCard(data) {
   const imei = data.imei;
   const vehicleCard = document.querySelector(
     `.vehicle-card[data-imei="${imei}"]`
   );
+  const listContainer = document.getElementById("vehicle-list");
+  if (!vehicleCard && !listContainer) return;
 
-  const latitude = data.latitude ? parseFloat(data.latitude) : null;
-  const longitude = data.longitude ? parseFloat(data.longitude) : null;
-  const url = `/routeHistory/vehicle/${data.LicensePlateNumber}`;
-
-  const lastUpdated = convertToDate(data.date, data.time);
-  const now = new Date();
-  const timeDiff = Math.abs(now - lastUpdated);
-  const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-  const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-  const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-
-  let statusText, statusClass;
-  const speed = data.speed ? convertSpeedToKmh(data.speed) : 0;
-  statusText = data.status;
-
-  if (statusText === "offline") {
-    statusText = "Offline";
-    statusClass = "vehicle-status-offline";
-  } else if (statusText === "stopped") {
-    statusText = "Stopped";
-    statusClass = "vehicle-status-stopped";
-  } else if (statusText === "idle") {
-    statusText = "Idle";
-    statusClass = "vehicle-status-idle";
-  }
-  else if (statusText === "moving") {
-    statusText = "Moving";
-    statusClass = "vehicle-status-moving";
-  }
-  else {
-    statusText = "Unknown";
-    statusClass = "vehicle-status-unknown";
-  }
-
-  let timeText;
-  if (data.status_time_str) {
-    timeText = `since ${data.status_time_str}`;
-  } else if (daysDiff > 0) {
-    timeText = `since ${daysDiff} day${daysDiff > 1 ? "s" : ""}`;
-  } else if (hoursDiff > 0) {
-    timeText = `since ${hoursDiff} hour${hoursDiff > 1 ? "s" : ""}`;
-  } else {
-    timeText = `since ${minutesDiff} min${minutesDiff > 1 ? "s" : ""}`;
-  }
+  const isDarkMode = document.body.classList.contains("dark-mode");
+  const { template, isSosBlink, isSosHistoric } = buildVehicleCardTemplate(
+    data,
+    isDarkMode
+  );
 
   if (vehicleCard) {
-    if (vehicleCard && vehicleCard.querySelector(".vehicle-info")) {
-      vehicleCard.querySelector(".vehicle-info").innerHTML = `
-      <div class="vehicle-status ${statusClass}">
-        ${statusText}: ${speed.toFixed(2)} km/h${
-        speed === 0 ? `, ${timeText}` : ""
-      }
-      </div>
-      <strong>Lat&Lon:</strong> ${
-        latitude && longitude
-          ? `${latitude.toFixed(4)},${longitude.toFixed(4)}`
-          : "N/A"
-      } <br>
-      <strong>Distance Travelled:</strong> ${
-        data.distance ? parseFloat(data.distance).toFixed(2) : "NA"
-      } km <br>
-      <strong>Last Update:</strong> ${formatLastUpdatedText(
-        data.date,
-        data.time
-      )} <br>
-      <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-      <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-    `;
-    }
-  } else {
-    const listContainer = document.getElementById("vehicle-list");
+    vehicleCard.innerHTML = template;
+    vehicleCard.classList.remove("sos-blink-card", "sos-historic-card");
+    vehicleCard.classList.toggle("sos-blink-card", isSosBlink);
+    vehicleCard.classList.toggle(
+      "sos-historic-card",
+      !isSosBlink && isSosHistoric
+    );
+    vehicleCard.style.zIndex = isSosBlink ? "10" : "";
+  } else if (listContainer) {
     const vehicleElement = document.createElement("div");
     vehicleElement.classList.add("vehicle-card");
     vehicleElement.setAttribute("data-imei", data.imei);
-    vehicleElement.innerHTML = `
-      <div class="vehicle-header">${data.LicensePlateNumber || data.imei} - ${
-      data.status || "Unknown"
-    }</div>
-      <div class="vehicle-info">
-        <div class="vehicle-status ${statusClass}">
-          ${statusText}: ${speed.toFixed(2)} km/h${
-      speed === 0 ? `, ${timeText}` : ""
-    }
-        </div>
-        <strong>Lat&Lon:</strong> ${
-          latitude && longitude
-            ? `${latitude.toFixed(4)},${longitude.toFixed(4)}`
-            : "N/A"
-        } <br>
-        <strong>Distance Travelled:</strong> ${data.distance || "NA"} km <br>
-        <strong>Last Update:</strong> ${formatLastUpdatedText(
-          data.date,
-          data.time
-        )} <br>
-        <strong>Location:</strong> ${data.address || "Location unknown"} <br>
-        <strong>Data:</strong> <a href="${url}" target="_blank">View Data</a>
-      </div>
-    `;
+    vehicleElement.innerHTML = template;
+    vehicleElement.classList.toggle("sos-blink-card", isSosBlink);
+    vehicleElement.classList.toggle(
+      "sos-historic-card",
+      !isSosBlink && isSosHistoric
+    );
+    vehicleElement.style.zIndex = isSosBlink ? "10" : "";
     listContainer.appendChild(vehicleElement);
     addHoverListenersForVehicle(data.imei);
   }
+}
+
+function renderVehicleCards(vehicles, filterValue = "all") {
+  if (document.getElementById("toggle-card-switch").checked === false) {
+    hideCard();
+    const vehicleCounter = document.getElementById("vehicle-counter");
+    const vehicleCount = document.getElementById("vehicle-count");
+    vehicleCount.innerText = vehicles.length;
+    let headingText = "Total Vehicles";
+    headingText = getHeadingText(filterValue);
+    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+    return;
+  }
+
+  let vehiclesArray = vehicles;
+  if (vehicles instanceof Map) {
+    vehiclesArray = Array.from(vehicles.values());
+  } else if (!Array.isArray(vehicles)) {
+    vehiclesArray = [];
+  }
+
+  const listContainer = document.getElementById("vehicle-list");
+  const vehicleCounter = document.getElementById("vehicle-counter");
+  const vehicleCount = document.getElementById("vehicle-count");
+
+  listContainer.innerHTML = "";
+  vehicleCount.innerText = vehicles.length;
+
+  let headingText = "Total Vehicles";
+  headingText = getHeadingText(filterValue);
+  vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+
+  vehiclesArray.forEach((vehicle) => {
+    const vehicleElement = document.createElement("div");
+    vehicleElement.classList.add("vehicle-card");
+    vehicleElement.setAttribute("data-imei", vehicle.imei);
+    const isDarkMode = document.body.classList.contains("dark-mode");
+    const { template, isSosBlink, isSosHistoric } = buildVehicleCardTemplate(
+      vehicle,
+      isDarkMode
+    );
+
+    vehicleElement.innerHTML = template;
+    vehicleElement.classList.toggle("sos-blink-card", isSosBlink);
+    vehicleElement.classList.toggle(
+      "sos-historic-card",
+      !isSosBlink && isSosHistoric
+    );
+    vehicleElement.style.zIndex = isSosBlink ? "10" : "";
+
+    listContainer.appendChild(vehicleElement);
+    addHoverListenersForVehicle(vehicle.imei);
+  });
+
+  showHidecar();
 }
 
 async function toggleGeofences() {
@@ -831,225 +953,6 @@ function getHeadingText(filterValue) {
     default:
       return "Total Vehicles";
   }
-}
-
-function renderVehicleCards(vehicles, filterValue = "all") {
-  if (document.getElementById("toggle-card-switch").checked === false) {
-    hideCard();
-
-    const vehicleCounter = document.getElementById("vehicle-counter");
-    const vehicleCount = document.getElementById("vehicle-count");
-    vehicleCount.innerText = vehicles.length;
-
-    let headingText = "Total Vehicles";
-    headingText = getHeadingText(filterValue);
-
-    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
-    return;
-  }
-
-  let vehiclesArray = vehicles;
-
-  if (vehicles instanceof Map) {
-    vehiclesArray = Array.from(vehicles.values());
-  } else if (!Array.isArray(vehicles)) {
-    vehiclesArray = [];
-  }
-
-  const listContainer = document.getElementById("vehicle-list");
-  const vehicleCounter = document.getElementById("vehicle-counter");
-  const vehicleCount = document.getElementById("vehicle-count");
-
-  listContainer.innerHTML = "";
-  vehicleCount.innerText = vehicles.length;
-
-  let headingText = "Total Vehicles";
-  headingText = getHeadingText(filterValue);
-
-  vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
-
-  vehiclesArray.forEach((vehicle) => {
-    const vehicleElement = document.createElement("div");
-    vehicleElement.classList.add("vehicle-card");
-
-    const hasSOS = vehicle.sos === "1";
-
-    if (vehicle.sos === "1") {
-      vehicleElement.classList.add("sos-blink-card");
-      vehicleElement.style.zIndex = "10";
-    }
-    vehicleElement.setAttribute("data-imei", vehicle.imei);
-    const isDarkMode = document.body.classList.contains("dark-mode");
-
-    const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-    const now = new Date();
-    const isToday = lastUpdated.toDateString() === now.toDateString();
-    const timeDiff = Math.abs(now - lastUpdated);
-    const secondsDiff = Math.floor(timeDiff / 1000);
-    const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-    const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-    let statusText,
-      statusColor,
-      gpsIcon,
-      sosIcon,
-      ignitionIcon,
-      ignitionColor,
-      gsmIcon,
-      gsmColor;
-    const speed = vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0;
-    const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
-    const iconRed = "color:#d32f2f;";
-
-    statusText = vehicle.status;
-
-    if (hasSOS) {
-      if (isToday) {
-        vehicleElement.classList.add("sos-blink-card"); 
-      } else {
-        vehicleElement.classList.add("sos-historic-card"); 
-      }
-    }
-
-    if (statusText === "offline") {
-      statusText = "Offline";
-      statusColor = isDarkMode ? "#616161" : "#9e9e9e"; 
-    } else if (statusText === "stopped") {
-      statusText = "Stopped";
-      statusColor = isDarkMode ? "#d32f2f" : "#f44336";
-    } else if (statusText === "idle") {
-      statusText = "Idle";
-      statusColor = isDarkMode ? "#ff9800" : "#f57c00"; 
-    }else if (statusText === "moving") {
-      statusText = "Moving";
-      statusColor = isDarkMode ? "#4caf50" : "#2e7d32"; 
-    }else {
-      statusText = "Unknown";
-      statusColor = isDarkMode ? "#9e9e9e" : "#616161"; 
-    }
-
-    let sinceText = "";
-    if (vehicle.status_time_str) {
-      sinceText = `since ${vehicle.status_time_str}`;
-    } else if (hoursDiff > 0) {
-      sinceText = `since ${hoursDiff} min`;
-    } else if (minutesDiff > 0) {
-      sinceText = `since ${minutesDiff} min`;
-    } else {
-      sinceText = `since ${secondsDiff} sec`;
-    }
-
-    if (statusText === "Offline") {
-      gpsIcon = "location_disabled";
-    } else {
-      gpsIcon = "my_location";
-    }
-
-    if (vehicle.sos === "1") {
-      sosIcon = `      <span class="material-symbols-outlined" style="${
-        iconStyle + iconRed
-      }">sos</span>`;
-    }
-
-    if (vehicle.ignition === "0") {
-      ignitionIcon = "key_off";
-      ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
-    } else {
-      ignitionIcon = "key";
-      ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
-    }
-
-    const ASUgsmValue = parseInt(vehicle.gsm);
-
-    if (ASUgsmValue == 0) {
-      gsmIcon = "signal_cellular_null";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-    } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
-      gsmIcon = "signal_cellular_1_bar";
-      gsmColor = isDarkMode ? "#ffb74d" : "#ff9800";
-    } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
-      gsmIcon = "signal_cellular_2_bar";
-      gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
-    } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
-      gsmIcon = "signal_cellular_3_bar";
-      gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
-    } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
-      gsmIcon = "signal_cellular_4_bar";
-      gsmColor = isDarkMode ? "#81c784" : "#4caf50"; 
-    } else {
-      gsmIcon = "signal_cellular_off";
-      gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-    }
-
-    const iconRow = `
-      <span
-        class="material-symbols-outlined"
-        style="${iconStyle}cursor:pointer;"
-        title="View Vehicle Info"
-        onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="${vehicle.ignition === "1" ? "Ignition On" : "Ignition Off"}">${ignitionIcon}</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal Strength">${gsmIcon}</span>
-      ${sosIcon ? `<span class="material-symbols-outlined" style="${iconStyle}" title="SOS Alert">sos</span>` : ""}
-    `;
-    var listener;
-    if (vehicle.LicensePlateNumber === "Unknown"){
-      listener = vehicle.imei;
-    }else{
-      listener = vehicle.LicensePlateNumber;
-    }
-    vehicleElement.innerHTML = `
-    <div style="display:flex;align-item s:stretch;justify-content:space-between;">
-      <div style="flex:1;">
-        <div class="vehicle-card-row" style="display:flex;align-items:center;gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:22px;" title="${gpsIcon === "location_disabled" ? "GPS Offline" : "GPS Active"}">${gpsIcon}</span>
-          <span class="vehicle-number"
-                style="font-family:'Roboto Mono',monospace;font-weight:700;font-size:22px;cursor:pointer;"
-                onclick="vehicleInfoPage('${
-                  vehicle.LicensePlateNumber || vehicle.imei
-                }')">
-            ${listener}
-          </span>
-          <span style="margin-left:4px;">
-            ${iconRow}
-          </span>
-        </div>
-        <div class="divider" style="height:1px;background:#eee;margin:8px 0;"></div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:14px;color:#222;">
-          <strong> Last Update : </strong> <span class="last-updated-text">${formatLastUpdatedText(
-            vehicle.date,
-            vehicle.time
-          )}</span>
-        </div>
-        <div class="vehicle-card-row" style="margin-top:2px;font-size:16px;font-weight:500;color:${statusColor};">
-          ${statusText} : ${speed} kmph, <span style="color:${statusColor};font-weight:400;">${sinceText}</span>
-        </div>
-        <div class="vehicle-card-row location-text" style="margin-top:2px;font-size:12px;line-height:1.2;">
-         <strong> Location : </strong> ${vehicle.address || "Location unknown"}
-        </div>
-        <div class="vehicle-card-row" style="margin-top:10px;display:flex;justify-content:space-between;font-size:16px;">
-          <div>
-            <div style="font-size:13px;color:#777; font-weight:600;">Distance Today</div>
-            <div style="font-weight:300;">${
-              vehicle.distance ? parseFloat(vehicle.distance).toFixed(1) : "0"
-            } km</div>
-          </div>
-          <div>
-            <div style="font-size:13px;color:#777; font-weight:600;">Stoppage Today</div>
-            <div style="font-weight:300;">${vehicle.stoppage_time || "--"}</div>
-          </div>
-        </div>
-      </div>
-      <div class="vertical-divider" style="width:1px; background:#eee; margin:0 16px;"></div>
-      <div class="vehicle-card-actions" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
-       <span class="material-symbols-outlined info-bottom-action vertical-bar" title="Share Location" style="cursor:pointer;">moved_location</span>
-      </div>
-    </div>
-  `;
-
-    listContainer.appendChild(vehicleElement);
-    addHoverListenersForVehicle(vehicle.imei);
-  });
-
-  showHidecar();
 }
 
 function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
