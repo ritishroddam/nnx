@@ -1561,9 +1561,45 @@ function showListView() {
   populateVehicleTable();
 }
 
-function formatLastUpdatedText(date, time) {
-  const lastUpdated = convertToDate(date, time);
+function refreshLastUpdatedDisplay() {
   const now = new Date();
+  document.querySelectorAll(".vehicle-card").forEach((card) => {
+    const imei = card.getAttribute("data-imei");
+    if (!imei) return;
+    const vehicle = vehicleData.get(imei);
+    if (!vehicle) return;
+
+    const span = card.querySelector(".last-updated-text");
+    if (span) {
+      span.textContent = formatLastUpdatedText(
+        vehicle.date,
+        vehicle.time,
+        now
+      );
+    }
+  });
+
+  document
+    .querySelectorAll("#vehicle-table tbody tr")
+    .forEach((row) => {
+      const imei = row.getAttribute("data-imei");
+      if (!imei) return;
+      const vehicle = vehicleData.get(imei);
+      if (!vehicle) return;
+
+      const cell = row.querySelector(".last-updated-cell");
+      if (cell) {
+        cell.textContent = formatLastUpdatedText(
+          vehicle.date,
+          vehicle.time,
+          now
+        );
+      }
+    });
+}
+
+function formatLastUpdatedText(date, time, now = new Date()) {
+  const lastUpdated = convertToDate(date, time);
   const timeDiff = Math.abs(now - lastUpdated);
   let lastUpdatedText = "";
 
@@ -1731,7 +1767,10 @@ function populateVehicleTable() {
       ? vehicle.LicensePlateNumber
       : vehicle.imei;
     row.insertCell(1).innerText = vehicle.VehicleType;
-    row.insertCell(2).innerText = formatLastUpdatedText(
+
+    const lastUpdatedCell = row.insertCell(2);
+    lastUpdatedCell.classList.add("last-updated-cell");
+    lastUpdatedCell.innerText = formatLastUpdatedText(
       vehicle.date,
       vehicle.time
     );
@@ -2295,4 +2334,6 @@ window.onload = async function () {
         searchTable();
       }
     });
+
+  setInterval(refreshLastUpdatedDisplay, 1 * 1000);
 };
