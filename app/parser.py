@@ -119,9 +119,9 @@ def getData(imei, date_filter, projection, speedThreshold = None):
         dt_filter = date_filter.get("date_time")
 
     if not speedThreshold:
-        ais140_query = {"imei": imei}
+        ais140_query = {"imei": imei, "gps.gpsStatus": 1}
     else:
-        ais140_query = {"imei": imei, "telemetry.speed": {"$gt": float(speedThreshold)}}
+        ais140_query = {"imei": imei, "gps.gpsStatus": 1, "telemetry.speed": {"$gt": float(speedThreshold)}}
     
     if dt_filter is not None:
         ais140_query["gps.timestamp"] = dt_filter
@@ -177,6 +177,7 @@ def getDataForDistanceReport(imei, date_filter):
     
     query = {
        "imei": imei,
+       "gps.gpsStatus": 1,
        "gps.timestamp": date_filter.get("date_time"),
     }
     

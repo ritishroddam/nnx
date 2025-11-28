@@ -192,7 +192,7 @@ def fetch_live_data(imei):
                         ais140_projection[path] = 1
                         
                 pipeline = [
-                    {"$match": {"imei": imei}},
+                    {"$match": {"imei": imei, "gps.gpsStatus": 1}},
                     {"$sort": {"gps.timestamp": -1}},
                     {"$project": projection},
                     {"$limit": 1}
