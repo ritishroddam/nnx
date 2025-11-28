@@ -512,9 +512,10 @@ def get_sims_paginated():
 
         total = collection.count_documents(mongo_query)
         sims = list(collection.find(mongo_query).skip(skip).limit(per_page))
+        simList = [sim.get('MobileNumber') for sim in sims]
 
         vehicle_collection = db['vehicle_inventory']
-        vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'IMEI': 1}))
+        vehicles = list(vehicle_collection.find({"SIM": {"$in": simList}}, {'SIM': 1, 'IMEI': 1}))
         sim_to_imei = {v.get('SIM'): v.get('IMEI') for v in vehicles}
 
         processed = []
