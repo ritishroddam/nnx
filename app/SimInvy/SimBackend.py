@@ -515,7 +515,7 @@ def get_sims_paginated():
 
         vehicle_collection = db['vehicle_inventory']
         vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'IMEI': 1}))
-        sim_to_imei = {v.get('SIM'): v.get('IMEI', 'N/A') for v in vehicles if 'SIM' in v}
+        sim_to_imei = {v.get('SIM'): v.get('IMEI') for v in vehicles}
 
         processed = []
         for sim in sims:
