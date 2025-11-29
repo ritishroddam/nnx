@@ -80,6 +80,8 @@ def atlanta_pie_data():
                 "idle_vehicles": 0,   
                 "parked_vehicles": 0  
             }), 200
+            
+        print(f"Total IMEIs to process: {imeis}")
         
         latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
 
