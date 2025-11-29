@@ -472,7 +472,7 @@ function buildVehicleCardTemplate(vehicle, isDarkMode) {
   const gpsIcon = statusText === "Offline" ? "location_disabled" : "my_location";
 
   let ignitionIcon, ignitionColor;
-  if (vehicle.ignition === "0") {
+  if (vehicle.ignition === "0" || vehicle.ignition === 0) {
     ignitionIcon = "key_off";
     ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
   } else {
@@ -511,7 +511,7 @@ function buildVehicleCardTemplate(vehicle, isDarkMode) {
         style="${iconStyle}cursor:pointer;"
         title="View Vehicle Info"
         onclick="vehicleInfoPage('${vehicle.LicensePlateNumber}')">arrow_forward</span>
-      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="${vehicle.ignition === "1" ? "Ignition On" : "Ignition Off"}">${ignitionIcon}</span>
+      <span class="material-symbols-outlined" style="${iconStyle} color: ${ignitionColor}" title="${(vehicle.ignition === "1" || vehicle.ignition === 1) ? "Ignition On" : "Ignition Off"}">${ignitionIcon}</span>
       <span class="material-symbols-outlined" style="${iconStyle} color: ${gsmColor}" title="GSM Signal Strength">${gsmIcon}</span>
       ${sosIcon}
     `;
@@ -1027,7 +1027,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
 
   let ignitionIcon, ignitionColor;
   
-  if (device.ignition === "0") {
+  if (device.ignition === "0" || device.ignition === 0) {
     ignitionIcon = "key_off";
     ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
   } else {
@@ -1811,7 +1811,7 @@ function populateVehicleTable() {
       statusText === "Offline" ? "location_disabled" : "my_location";
     
     let ignitionIcon, ignitionColor;
-    if (vehicle.ignition === "0") {
+    if (vehicle.ignition === "0" || vehicle.ignition === 0) {
       ignitionIcon = "key_off";
       ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
     } else {
