@@ -89,6 +89,7 @@ let currentFilterValue = "all";
 let lastSecondRender = 0;
 let lastMinuteRender = 0;
 let lastHourRender = 0;
+let totalVehicleCardCount = 0;
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -240,16 +241,30 @@ function updateVehicleVisibility(imei, now = new Date()) {
   }
 }
 
+function setVehicleCardCount(count) {
+  totalVehicleCardCount = count;
+  updateVehicleCounterDisplay();
+}
+
+function incrementVehicleCardCount() {
+  setVehicleCardCount(totalVehicleCardCount + 1);
+}
+
+function resetVehicleCardCount() {
+  setVehicleCardCount(0);
+}
+
+function updateVehicleCounterDisplay() {
+  const vehicleCounter = document.getElementById("vehicle-counter");
+  if (!vehicleCounter) return;
+  const headingText = getHeadingText(currentFilterValue);
+  vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${totalVehicleCardCount}</span>`;
+}
+
 function applyFilterToAllVehicles() {
   const now = new Date();
   vehicleData.forEach((_, imei) => updateVehicleVisibility(imei, now));
-  const visibleCount = document.querySelectorAll(
-    ".vehicle-card:not([style*='display: none'])"
-  ).length;
-  const headingText = getHeadingText(currentFilterValue);
-  document.getElementById(
-    "vehicle-counter"
-  ).innerHTML = `${headingText}: <span id="vehicle-count">${visibleCount}</span>`;
+  updateVehicleCounterDisplay();
 }
 
 async function updateData(data) {
@@ -610,6 +625,7 @@ function updateVehicleCard(data) {
     );
     vehicleElement.style.zIndex = isSosBlink ? "10" : "";
     listContainer.appendChild(vehicleElement);
+    incrementVehicleCardCount();
     addHoverListenersForVehicle(data.imei);
   }
 }
@@ -617,12 +633,7 @@ function updateVehicleCard(data) {
 function renderVehicleCards(vehicles, filterValue = "all") {
   if (document.getElementById("toggle-card-switch").checked === false) {
     hideCard();
-    const vehicleCounter = document.getElementById("vehicle-counter");
-    const vehicleCount = document.getElementById("vehicle-count");
-    vehicleCount.innerText = vehicles.length;
-    let headingText = "Total Vehicles";
-    headingText = getHeadingText(filterValue);
-    vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+    updateVehicleCounterDisplay();
     return;
   }
 
@@ -634,15 +645,8 @@ function renderVehicleCards(vehicles, filterValue = "all") {
   }
 
   const listContainer = document.getElementById("vehicle-list");
-  const vehicleCounter = document.getElementById("vehicle-counter");
-  const vehicleCount = document.getElementById("vehicle-count");
-
   listContainer.innerHTML = "";
-  vehicleCount.innerText = vehicles.length;
-
-  let headingText = "Total Vehicles";
-  headingText = getHeadingText(filterValue);
-  vehicleCounter.innerHTML = `${headingText}: <span id="vehicle-count">${vehicles.length}</span>`;
+  resetVehicleCardCount();
 
   vehiclesArray.forEach((vehicle) => {
     const vehicleElement = document.createElement("div");
@@ -663,6 +667,7 @@ function renderVehicleCards(vehicles, filterValue = "all") {
     vehicleElement.style.zIndex = isSosBlink ? "10" : "";
 
     listContainer.appendChild(vehicleElement);
+    incrementVehicleCardCount();
     addHoverListenersForVehicle(vehicle.imei);
   });
 
@@ -1779,6 +1784,7 @@ function populateVehicleTable() {
   const listContainer = document.getElementById("vehicle-list");
   const countContainer = document.getElementById("vehicle-count");
   listContainer.innerHTML = "";
+  resetVehicleCardCount();
   countContainer.innerText = vehicleData.size;
 
   vehicleData.forEach((vehicle, imei) => {
