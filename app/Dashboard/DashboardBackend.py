@@ -87,7 +87,7 @@ def atlanta_pie_data():
 
         print(f"Total latest records fetched: {len(latest_records)}")
         
-        atlantaAis140Records = list(atlantaAis140Collection.find({"_id": {"$in": imeis}}))
+        atlantaAis140Records = list(atlantaAis140LatestCollection.find({"_id": {"$in": imeis}}))
 
         print(f"Total latest records fetched: {len(atlantaAis140Records)}")
         
