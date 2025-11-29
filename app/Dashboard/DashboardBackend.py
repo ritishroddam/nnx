@@ -88,6 +88,8 @@ def atlanta_pie_data():
         for doc in atlantaAis140Records:
             data = atlantaAis140ToFront(doc)
             latest_records.append(data)
+            
+        print(f"Total latest records fetched: {len(latest_records)}")
 
         now = datetime.now(timezone.utc)
         twenty_four_hours_ago = now - timedelta(hours=24)
