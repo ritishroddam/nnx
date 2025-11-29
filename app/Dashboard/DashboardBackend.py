@@ -2,12 +2,14 @@ import traceback
 from unittest import result
 from flask import Blueprint, jsonify, render_template, request
 from datetime import datetime, timedelta, timezone
-from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
+from app.database import db
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
 from app.parser import atlantaAis140ToFront, getCollectionImeis
 from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime, getTimeAnalysisBasedOnTime
+from app.geocoding import safe_geocode
 
 
 dashboard_bp = Blueprint('Dashboard', __name__, static_folder='static', template_folder='templates')
@@ -78,14 +80,22 @@ def atlanta_pie_data():
                 "idle_vehicles": 0,   
                 "parked_vehicles": 0  
             }), 200
+            
+        print(f"Total IMEIs to process: {imeis}")
         
         latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
 
-        atlantaAis140Records = list(atlantaAis140Collection.find({"_id": {"$in": imeis}}))
+        print(f"Total latest records fetched: {len(latest_records)}")
+        
+        atlantaAis140Records = list(atlantaAis140LatestCollection.find({"_id": {"$in": imeis}}))
 
+        print(f"Total latest records fetched: {len(atlantaAis140Records)}")
+        
         for doc in atlantaAis140Records:
             data = atlantaAis140ToFront(doc)
             latest_records.append(data)
+            
+        print(f"Total latest records fetched: {len(latest_records)}")
 
         now = datetime.now(timezone.utc)
         twenty_four_hours_ago = now - timedelta(hours=24)
@@ -109,8 +119,8 @@ def atlanta_pie_data():
                 
             speed = float(latest_data.get("speed", 0))
             ignition = latest_data.get("ignition", "0")
-            
-            if ignition == "1":
+            print(speed, ignition)
+            if ignition == "1" or ignition == 1:
                 if speed > 0:
                     moving_vehicles += 1
                 else:
@@ -119,7 +129,7 @@ def atlanta_pie_data():
                 parked_vehicles += 1 
         
         return jsonify({
-            "total_devices": len(imeis),
+            "total_devices": len(latest_records),
             "moving_vehicles": moving_vehicles,
             "offline_vehicles": offline_vehicles,
             "idle_vehicles": idle_vehicles,   
@@ -288,7 +298,7 @@ def get_vehicle_range_data():
                 "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
                 "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
                 "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
-                "location": vehicle_doc.get("Location", "Location unknown"),
+                "location": safe_geocode(latest.get("latitude"), latest.get("longitude")),
                 "latitude": latest.get("latitude", "N/A"),
                 "longitude": latest.get("longitude", "N/A"),
                 "speed": latest.get("speed", "0.0"),

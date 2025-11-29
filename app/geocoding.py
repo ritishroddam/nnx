@@ -17,6 +17,14 @@ collection.create_index([("lat", ASCENDING), ("lng", ASCENDING)])
 DIRECTIONS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 BEARING_DEGREES = 360 / len(DIRECTIONS)
 
+def safe_geocode(lat, lng):
+    try:
+        if lat in (None, "",) or lng in (None, "",):
+            return "Location Not Available"
+        return geocodeInternal(float(lat), float(lng))
+    except Exception:
+        return "Location Not Available"
+
 def calculate_bearing(coord1, coord2):
     lat1, lon1 = radians(coord1[0]), radians(coord1[1])
     lat2, lon2 = radians(coord2[0]), radians(coord2[1])
