@@ -75,7 +75,7 @@ function animateMarker(newPosition, duration = 60000, marker = markerLive) {
 }
 
 function getStatus(ignition, speed) {
-  if (ignition === "1") {
+  if (ignition === "1" || ignition === 1) {
     if (speed > 0) {
       return "Moving";
     } else {
