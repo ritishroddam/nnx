@@ -75,9 +75,11 @@ socket.on("vehicle_update", async function (data) {
     imei = data.imei;
     if((data.sos === "1" || data.sos === 1) && (oldDataMain[imei] === "0" || oldDataMain[imei] === 0)) {
       displayFlashMessage(`SOS Alert for ${data.LicensePlateNumber}`, "danger", "sos");
+      oldDataMain[imei] = data.sos;
       data = null;
     }
     oldDataMain[imei] = data.sos;
+    data = null;
   } catch (error) {
     console.error("Error in vehicle_update handler:", error);
   }
