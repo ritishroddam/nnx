@@ -129,7 +129,7 @@ def atlanta_pie_data():
                 parked_vehicles += 1 
         
         return jsonify({
-            "total_devices": len(imeis),
+            "total_devices": len(latest_records),
             "moving_vehicles": moving_vehicles,
             "offline_vehicles": offline_vehicles,
             "idle_vehicles": idle_vehicles,   
