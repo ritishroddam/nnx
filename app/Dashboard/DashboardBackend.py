@@ -83,8 +83,12 @@ def atlanta_pie_data():
         
         latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
 
+        print(f"Total latest records fetched: {len(latest_records)}")
+        
         atlantaAis140Records = list(atlantaAis140Collection.find({"_id": {"$in": imeis}}))
 
+        print(f"Total latest records fetched: {len(atlantaAis140Records)}")
+        
         for doc in atlantaAis140Records:
             data = atlantaAis140ToFront(doc)
             latest_records.append(data)
