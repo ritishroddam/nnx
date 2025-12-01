@@ -110,7 +110,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     geofenceButton.addEventListener('click', toggleGeofences);
   }
   
-  // Select toggle (enable selecting rows for multi-share)
   selectToggleButton = document.getElementById('select-toggle');
   if (selectToggleButton) {
     selectToggleButton.addEventListener('click', function () {
@@ -120,7 +119,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         selectToggleButton.title = 'Selection mode enabled: click rows to select vehicles';
       } else {
         selectToggleButton.title = 'Enable selection mode for multi-share';
-        // clear current selection when disabling selection mode
         selectedVehicles.clear();
         document.querySelectorAll('#vehicle-table tbody tr.selected').forEach(row => row.classList.remove('selected'));
         updateMultiShareButton();
@@ -185,13 +183,11 @@ socket.on("vehicle_update", async function (data) {
     const now = new Date();
     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
 
-    // Fix SOS detection - check if SOS state changed to active
     if ((data.sos === "1" || data.sos === 1) && 
         (!oldData || oldData.sos !== "1")) {
       console.log(`SOS triggered for ${data.imei}`);
       triggerSOS(data.imei, markers[data.imei]);
     } 
-    // If SOS was active but now is not, remove it
     else if (oldData && oldData.sos === "1" && 
              (data.sos === "0" || data.sos === 0)) {
       removeSOS(data.imei);
@@ -842,53 +838,45 @@ function triggerSOS(imei, marker) {
     return;
   }
 
-  // Check if SOS is already active for this vehicle
   if (vehicle.sosActive) {
     console.log(`SOS already active for ${imei}`);
     return;
   }
 
-  // Update vehicle data with SOS active flag
   vehicle.sosActive = true;
   vehicle.sos = "1";
   vehicleData.set(imei, vehicle);
 
   console.log(`Triggering SOS for ${imei}`);
 
-  // Add flashing effect to marker
   if (!sosActiveMarkers[imei]) {
-    // Store the original marker content before modifying
     const originalContent = marker.content.innerHTML;
     marker.content.dataset.originalContent = originalContent;
     
-    // Create a wrapper div to contain both icon and SOS indicator
     const wrapperDiv = document.createElement("div");
     wrapperDiv.className = "sos-marker-wrapper";
     wrapperDiv.style.position = "relative";
     wrapperDiv.style.display = "inline-block";
     
-    // Add the original marker content
     const iconContainer = document.createElement("div");
     iconContainer.className = "marker-icon-container";
     iconContainer.innerHTML = originalContent;
     
-    // Create SOS siren/alert element
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink-indicator";
     sosDiv.innerHTML = "🚨";
     sosDiv.style.position = "absolute";
-    sosDiv.style.top = "-35px"; // Position above the icon
+    sosDiv.style.top = "-35px"; 
     sosDiv.style.left = "50%";
     sosDiv.style.transform = "translateX(-50%)";
     sosDiv.style.fontSize = "24px";
     sosDiv.style.fontWeight = "bold";
     sosDiv.style.color = "#ff0000";
     sosDiv.style.textShadow = "0 0 5px #fff, 0 0 10px #ff0000";
-    sosDiv.style.pointerEvents = "none"; // Allow click-through
+    sosDiv.style.pointerEvents = "none"; 
     sosDiv.style.zIndex = "1001";
     sosDiv.style.animation = "sosIndicatorBlink 1s infinite alternate";
     
-    // Create pulsing circle effect
     const pulseCircle = document.createElement("div");
     pulseCircle.className = "sos-pulse-circle";
     pulseCircle.style.position = "absolute";
@@ -903,25 +891,19 @@ function triggerSOS(imei, marker) {
     pulseCircle.style.zIndex = "999";
     pulseCircle.style.animation = "pulseCircle 1.5s infinite";
     
-    // Assemble the wrapper
     wrapperDiv.appendChild(pulseCircle);
     wrapperDiv.appendChild(iconContainer);
     wrapperDiv.appendChild(sosDiv);
     
-    // Replace marker content with wrapper
     marker.content.innerHTML = "";
     marker.content.appendChild(wrapperDiv);
     
-    // Ensure marker content still has hover and click listeners
     marker.content.style.cursor = "pointer";
     marker.content.style.pointerEvents = "auto";
     
-    // Add blink effect to vehicle icon itself
     const markerImage = marker.content.querySelector("img");
     if (markerImage) {
-      // Store original icon to restore later
       markerImage.dataset.originalSrc = markerImage.src;
-      // Change to red alert icon or add red tint
       markerImage.style.filter = "hue-rotate(300deg) brightness(1.2)";
       markerImage.classList.add("vehicle-sos-icon");
     }
@@ -932,52 +914,42 @@ function triggerSOS(imei, marker) {
       pulseCircle: pulseCircle
     };
     
-    // Add hover listeners to ensure they still work
     setupSOSHoverListeners(marker, imei);
     
-    // Find and show nearby vehicles
     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
     console.log(`Found ${nearbyVehicles.length} nearby vehicles`);
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
     
-    // Also trigger audio alert (optional)
     playSOSAlertSound();
     
-    // Ensure the vehicle card also gets highlighted
     highlightSOSVehicleCard(imei);
   }
 }
 
 function setupSOSHoverListeners(marker, imei) {
-  // Remove existing listeners if any
   if (marker.__hoverListenersBound) {
     marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
     marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
   }
   
-  // Create new hover handlers
   const mouseoverHandler = () => {
     const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
     if (!vehicleCard) return;
     
-    // Scroll card into view
     vehicleCard.scrollIntoView({
       behavior: "smooth",
       block: "nearest",
       inline: "nearest"
     });
     
-    // Highlight vehicle card with SOS-specific styling
     vehicleCard.classList.add("sos-hover-highlight");
     
-    // Add intense glow effect to marker during hover
     const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
     if (sosIndicator) {
       sosIndicator.style.animation = "sosIndicatorBlink 0.3s infinite alternate";
       sosIndicator.style.fontSize = "28px";
     }
     
-    // Highlight on map with info window
     const latLng = new google.maps.LatLng(
       marker.position.lat,
       marker.position.lng
@@ -995,7 +967,6 @@ function setupSOSHoverListeners(marker, imei) {
       );
       infoWindow.open(map, marker);
       
-      // Briefly zoom closer
       const currentZoom = map.getZoom();
       if (currentZoom < 16) {
         map.setZoom(16);
@@ -1010,7 +981,6 @@ function setupSOSHoverListeners(marker, imei) {
       vehicleCard.classList.remove("sos-hover-highlight");
     }
     
-    // Restore normal SOS blinking
     const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
     if (sosIndicator) {
       sosIndicator.style.animation = "sosIndicatorBlink 1s infinite alternate";
@@ -1020,7 +990,6 @@ function setupSOSHoverListeners(marker, imei) {
     infoWindow.close();
   };
   
-  // Add click handler for SOS markers
   const clickHandler = (e) => {
     e.stopPropagation();
     const vehicle = vehicleData.get(imei);
@@ -1039,7 +1008,6 @@ function setupSOSHoverListeners(marker, imei) {
       );
       infoWindow.open(map, marker);
       
-      // Show acknowledge button in info window for SOS
       const acknowledgeBtn = document.createElement('button');
       acknowledgeBtn.textContent = '🚨 Acknowledge SOS';
       acknowledgeBtn.style.backgroundColor = '#ff0000';
@@ -1056,7 +1024,6 @@ function setupSOSHoverListeners(marker, imei) {
         infoWindow.close();
       };
       
-      // Append to info window content
       setTimeout(() => {
         const infoContent = document.querySelector('.gm-style-iw');
         if (infoContent) {
@@ -1069,12 +1036,10 @@ function setupSOSHoverListeners(marker, imei) {
     }
   };
   
-  // Attach listeners
   marker.content.addEventListener('mouseover', mouseoverHandler);
   marker.content.addEventListener('mouseout', mouseoutHandler);
   marker.content.addEventListener('click', clickHandler);
   
-  // Store references for cleanup
   marker.__mouseoverHandler = mouseoverHandler;
   marker.__mouseoutHandler = mouseoutHandler;
   marker.__clickHandler = clickHandler;
@@ -1084,10 +1049,8 @@ function setupSOSHoverListeners(marker, imei) {
 function highlightSOSVehicleCard(imei) {
   const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
   if (vehicleCard) {
-    // Add SOS-specific card styling
     vehicleCard.classList.add("sos-active-card");
     
-    // Ensure card is visible and scroll into view
     vehicleCard.style.display = "block";
     vehicleCard.scrollIntoView({
       behavior: "smooth",
@@ -1095,7 +1058,6 @@ function highlightSOSVehicleCard(imei) {
       inline: "nearest"
     });
     
-    // Add hover listeners to card
     vehicleCard.addEventListener('mouseenter', function() {
       const marker = markers[imei];
       if (marker) {
@@ -1104,11 +1066,9 @@ function highlightSOSVehicleCard(imei) {
           marker.position.lng
         );
         
-        // Zoom and center on marker
         map.setZoom(18);
         panToWithOffset(latLng, -250, 0);
         
-        // Show info window
         const vehicle = vehicleData.get(imei);
         if (vehicle) {
           const address = vehicle.address || "Location unknown";
@@ -1219,23 +1179,21 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
       console.log(`Distance to ${vehicle.LicensePlateNumber}: ${distance.toFixed(2)} km`);
       
       if (distance <= radiusKm) {
-        const estimatedTime = (distance / 40) * 60; // Assuming 40 km/h average speed
+        const estimatedTime = (distance / 40) * 60; 
         
-        // Get vehicle status for ETA calculation
         let statusText = vehicle.status || "unknown";
         let estimatedTimeAdjusted = estimatedTime;
         
-        // Adjust ETA based on vehicle status
         if (statusText === "moving" && vehicle.speed > 20) {
-          estimatedTimeAdjusted = (distance / 60) * 60; // If moving fast, assume 60 km/h
+          estimatedTimeAdjusted = (distance / 60) * 60; 
         } else if (statusText === "stopped" || statusText === "idle") {
-          estimatedTimeAdjusted = estimatedTime * 1.5; // Add buffer for stopped/idle vehicles
+          estimatedTimeAdjusted = estimatedTime * 1.5; 
         }
         
         nearby.push({
           vehicle: vehicle,
           distance: distance.toFixed(2),
-          estimatedTime: Math.max(1, Math.ceil(estimatedTimeAdjusted)), // At least 1 minute
+          estimatedTime: Math.max(1, Math.ceil(estimatedTimeAdjusted)), 
           status: statusText,
           speed: vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0
         });
@@ -1431,7 +1389,6 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.innerHTML = content;
   document.body.appendChild(popup);
 
-  // Style the popup
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
@@ -1445,14 +1402,12 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.maxHeight = "80vh";
   popup.style.overflow = "hidden";
 
-  // Add event listeners
   document.getElementById("acknowledge-sos-btn").onclick = () => {
     acknowledgeSOS(sosVehicle.imei);
     popup.remove();
   };
 
   document.getElementById("view-on-map-btn").onclick = () => {
-    // Center map on SOS vehicle
     const latLng = new google.maps.LatLng(
       parseFloat(sosVehicle.latitude),
       parseFloat(sosVehicle.longitude)
@@ -1460,7 +1415,6 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
     map.setZoom(16);
     map.panTo(latLng);
     
-    // Highlight the SOS vehicle
     const marker = markers[sosVehicle.imei];
     if (marker) {
       const address = sosVehicle.address || "Location unknown";
@@ -1476,7 +1430,6 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
 
 function playSOSAlertSound() {
   try {
-    // Create audio context for alert sound
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -1484,7 +1437,6 @@ function playSOSAlertSound() {
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    // Configure SOS sound pattern (short beeps)
     oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
     oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
     
@@ -1494,7 +1446,6 @@ function playSOSAlertSound() {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.2);
     
-    // Repeat pattern
     setTimeout(() => {
       const oscillator2 = audioContext.createOscillator();
       const gainNode2 = audioContext.createGain();
@@ -1946,9 +1897,7 @@ function formatLastUpdatedFromDate(lastUpdated, now = new Date()) {
     );
     lastUpdatedText = ` ${days} day ${hours} hours ago`;
   } else {
-    // fallback to absolute when very old
     const { formattedDate, formattedTime } = formatDateTime(
-      // reconstruct the "date" and "time" style output
       lastUpdatedToDDMMYY(lastUpdated),
       lastUpdatedToHHMMSS(lastUpdated)
     );
@@ -1985,14 +1934,12 @@ function updateLastUpdatedForRange(now, minAgeMs, maxAgeMs) {
 
     const text = formatLastUpdatedFromDate(last, now);
 
-    // Update card view
     const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
     if (card) {
       const span = card.querySelector(".last-updated-text");
       if (span) span.textContent = text;
     }
 
-    // Update table view
     const row = document.querySelector(
       `#vehicle-table tbody tr[data-imei="${imei}"]`
     );
@@ -2013,13 +1960,11 @@ function startHybridLastUpdatedLoop() {
 
     const now = new Date();
 
-    // < 1 minute old → update every second
     if (timestamp - lastSecondRender >= 1000) {
       updateLastUpdatedForRange(now, 0, 60 * 1000);
       lastSecondRender = timestamp;
     }
 
-    // 1 minute – 1 day old → update every minute
     if (timestamp - lastMinuteRender >= 60 * 1000) {
       updateLastUpdatedForRange(
         now,
@@ -2029,7 +1974,6 @@ function startHybridLastUpdatedLoop() {
       lastMinuteRender = timestamp;
     }
 
-    // > 1 day old → update every hour
     if (timestamp - lastHourRender >= 60 * 60 * 1000) {
       updateLastUpdatedForRange(
         now,
@@ -2224,15 +2168,12 @@ function removeSOS(imei) {
   const popup = document.getElementById("sos-nearby-popup");
   if (popup) popup.remove();
 
-  // Remove SOS visual effects from marker
   const marker = markers[imei];
   if (marker && marker.content) {
-    // Restore original content
     if (marker.content.dataset.originalContent) {
       marker.content.innerHTML = marker.content.dataset.originalContent;
     }
     
-    // Remove hover listeners
     if (marker.__hoverListenersBound) {
       marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
       marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
@@ -2243,11 +2184,9 @@ function removeSOS(imei) {
       delete marker.__clickHandler;
     }
     
-    // Restore original hover listeners
     addHoverListenersForVehicle(imei);
   }
 
-  // Clean up SOS active markers
   if (sosActiveMarkers[imei]) {
     if (sosActiveMarkers[imei].wrapper) {
       sosActiveMarkers[imei].wrapper.remove();
@@ -2262,13 +2201,11 @@ function removeSOS(imei) {
     vehicleData.set(imei, vehicle);
   }
 
-  // Update vehicle card styling
   const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
   if (vehicleCard) {
     vehicleCard.classList.remove("sos-active-card", "sos-blink-card", "sos-hover-highlight");
   }
 
-  // Update vehicle card content
   updateVehicleCard(vehicle);
 }
 
@@ -2482,17 +2419,14 @@ function populateVehicleTable() {
     row.style.cursor = "pointer";
     
     row.addEventListener('click', function(e) {
-      // Ignore clicks on links or icon controls
       if (e.target.tagName && e.target.tagName.toLowerCase() === 'a') return;
       if (e.target.closest && e.target.closest('a')) return;
       if (e.target.closest && e.target.closest('.vehicle-table-icons')) return;
       if (e.target.classList && e.target.classList.contains('material-symbols-outlined')) return;
 
       if (selectMode) {
-        // In selection mode, toggle selection of the row
         toggleRowSelection(this, imei);
       } else {
-        // Not in selection mode: open vehicle details on single click
         try {
           window.open(url, '_blank');
         } catch (err) {
@@ -3062,7 +2996,6 @@ function addHoverListenersForVehicle(imei) {
       const currentMarker = markers[imei];
       if (!currentMarker) return;
 
-      // Check if this is an SOS vehicle
       const isSOSVehicle = vehicleData.get(imei)?.sos === "1";
       
       const latLng = new google.maps.LatLng(
@@ -3070,7 +3003,6 @@ function addHoverListenersForVehicle(imei) {
         currentMarker.position.lng
       );
       
-      // Different zoom levels for SOS vs normal vehicles
       if (isSOSVehicle) {
         map.setZoom(18);
       } else {
@@ -3089,9 +3021,7 @@ function addHoverListenersForVehicle(imei) {
       );
       infoWindow.open(map, currentMarker);
       
-      // Special handling for SOS vehicles
       if (isSOSVehicle) {
-        // Add SOS acknowledge button to info window
         setTimeout(() => {
           const infoWindowContent = document.querySelector('.gm-style-iw');
           if (infoWindowContent && !infoWindowContent.querySelector('.sos-ack-button')) {
@@ -3136,8 +3066,6 @@ function addHoverListenersForVehicle(imei) {
   }
 
   if (marker && !marker.__hoverListenersBound && !vehicleData.get(imei)?.sosActive) {
-    // Only set up default hover listeners if not an active SOS vehicle
-    // (SOS vehicles get special listeners in setupSOSHoverListeners)
     marker.__hoverListenersBound = true;
 
     marker.addEventListener("mouseover", () => {
