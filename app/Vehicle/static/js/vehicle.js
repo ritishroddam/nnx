@@ -1039,6 +1039,23 @@ function setupSOSHoverListeners(marker, imei) {
       );
       infoWindow.open(map, marker);
       
+      // Show acknowledge button in info window for SOS
+      const acknowledgeBtn = document.createElement('button');
+      acknowledgeBtn.textContent = '🚨 Acknowledge SOS';
+      acknowledgeBtn.style.backgroundColor = '#ff0000';
+      acknowledgeBtn.style.color = 'white';
+      acknowledgeBtn.style.border = 'none';
+      acknowledgeBtn.style.padding = '8px 16px';
+      acknowledgeBtn.style.borderRadius = '4px';
+      acknowledgeBtn.style.cursor = 'pointer';
+      acknowledgeBtn.style.marginTop = '10px';
+      acknowledgeBtn.style.fontWeight = 'bold';
+      
+      acknowledgeBtn.onclick = () => {
+        acknowledgeSOS(imei);
+        infoWindow.close();
+      };
+      
       // Append to info window content
       setTimeout(() => {
         const infoContent = document.querySelector('.gm-style-iw');
@@ -1391,6 +1408,11 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
 
  content += `
         <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="acknowledge-sos-btn" 
+                  style="padding: 10px 20px; background-color: #4caf50; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            ✅ Acknowledge SOS
+          </button>
           <button id="view-on-map-btn" 
                   style="padding: 10px 20px; background-color: #2196f3; color: white; 
                          border: none; border-radius: 4px; cursor: pointer;">
