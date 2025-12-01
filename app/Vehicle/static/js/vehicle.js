@@ -154,8 +154,30 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
+// socket.on("vehicle_update", async function (data) {
+//   try {
+//     const updatedData = await updateData(data);
+//     updateVehicleData(updatedData);
+
+//     const lastUpdated = convertToDate(data.date, data.time);
+//     const now = new Date();
+//     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
+
+//     if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
+//       triggerSOS(data.imei, markers[data.imei]);
+//     } else if (data.sos === "1") {
+//       console.log(`Old SOS alert ignored for ${data.imei}`);
+//     }
+
+//     updateVehicleCard(updatedData);
+//   } catch (error) {
+//     console.error("Error in vehicle_update handler:", error);
+//   }
+// });
+
 socket.on("vehicle_update", async function (data) {
   try {
+    const oldData = vehicleData.get(data.imei);
     const updatedData = await updateData(data);
     updateVehicleData(updatedData);
 
@@ -163,10 +185,16 @@ socket.on("vehicle_update", async function (data) {
     const now = new Date();
     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
 
-    if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
+    // Fix SOS detection - check if SOS state changed to active
+    if ((data.sos === "1" || data.sos === 1) && 
+        (!oldData || oldData.sos !== "1")) {
+      console.log(`SOS triggered for ${data.imei}`);
       triggerSOS(data.imei, markers[data.imei]);
-    } else if (data.sos === "1") {
-      console.log(`Old SOS alert ignored for ${data.imei}`);
+    } 
+    // If SOS was active but now is not, remove it
+    else if (oldData && oldData.sos === "1" && 
+             (data.sos === "0" || data.sos === 0)) {
+      removeSOS(data.imei);
     }
 
     updateVehicleCard(updatedData);
@@ -779,31 +807,136 @@ function deg2rad(deg) {
   return deg * (Math.PI/180);
 }
 
+// function triggerSOS(imei, marker) {
+//   const vehicle = vehicleData.get(imei);
+//   if (!vehicle) return;
+
+//   if(vehicle.sosActive){
+//     console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
+//     return;
+//   }
+
+//   if (!sosActiveMarkers[imei]) {
+//     const sosDiv = document.createElement("div");
+//     sosDiv.className = "sos-blink";
+//     sosDiv.style.position = "absolute";
+//     sosDiv.style.top = "50%";
+//     sosDiv.style.left = "50%";
+//     sosDiv.style.pointerEvents = "none";
+//     marker.content.appendChild(sosDiv);
+//     sosActiveMarkers[imei] = sosDiv;
+//     marker.content.classList.add("vehicle-blink");
+
+//     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
+//     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
+
+//   vehicle.sosActive = true;
+//   vehicleData.set(imei, vehicle);
+//   }
+// }
+
 function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
-  if (!vehicle) return;
-
-  if(vehicle.sosActive){
-    console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
+  if (!vehicle || !marker) {
+    console.error(`No vehicle or marker found for ${imei}`);
     return;
   }
 
+  // Check if SOS is already active for this vehicle
+  if (vehicle.sosActive) {
+    console.log(`SOS already active for ${imei}`);
+    return;
+  }
+
+  // Update vehicle data with SOS active flag
+  vehicle.sosActive = true;
+  vehicle.sos = "1";
+  vehicleData.set(imei, vehicle);
+
+  console.log(`Triggering SOS for ${imei}`);
+
+  // Add flashing effect to marker
   if (!sosActiveMarkers[imei]) {
+    // Create and add SOS siren/alert element
     const sosDiv = document.createElement("div");
     sosDiv.className = "sos-blink";
+    sosDiv.innerHTML = "🚨"; // Emergency siren emoji
     sosDiv.style.position = "absolute";
-    sosDiv.style.top = "50%";
+    sosDiv.style.top = "-25px";
     sosDiv.style.left = "50%";
+    sosDiv.style.transform = "translateX(-50%)";
+    sosDiv.style.fontSize = "20px";
+    sosDiv.style.fontWeight = "bold";
+    sosDiv.style.color = "#ff0000";
+    sosDiv.style.textShadow = "0 0 5px #fff, 0 0 10px #ff0000";
     sosDiv.style.pointerEvents = "none";
-    marker.content.appendChild(sosDiv);
+    sosDiv.style.zIndex = "1000";
+    sosDiv.style.animation = "sosBlink 1s infinite alternate";
+    
+    // Add CSS animation if not already present
+    if (!document.querySelector('#sos-animation-style')) {
+      const style = document.createElement('style');
+      style.id = 'sos-animation-style';
+      style.textContent = `
+        @keyframes sosBlink {
+          0% { opacity: 1; transform: translateX(-50%) scale(1); }
+          50% { opacity: 0.5; transform: translateX(-50%) scale(1.2); }
+          100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+        
+        .vehicle-blink {
+          animation: vehicleBlink 0.8s infinite alternate;
+        }
+        
+        @keyframes vehicleBlink {
+          0% { filter: brightness(1) drop-shadow(0 0 5px red); }
+          100% { filter: brightness(1.5) drop-shadow(0 0 15px red); }
+        }
+        
+        .sos-blink-card {
+          animation: sosCardBlink 1s infinite alternate;
+          border: 2px solid red;
+          background-color: rgba(255, 0, 0, 0.1) !important;
+        }
+        
+        @keyframes sosCardBlink {
+          0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+          100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Append to marker
+    if (marker.content) {
+      marker.content.style.position = "relative";
+      marker.content.appendChild(sosDiv);
+    } else {
+      console.error("Marker content not found");
+    }
+    
     sosActiveMarkers[imei] = sosDiv;
-    marker.content.classList.add("vehicle-blink");
+    
+    // Add blink effect to vehicle icon
+    if (marker.content) {
+      marker.content.classList.add("vehicle-blink");
+      
+      // Change marker icon to red alert version
+      const markerImage = marker.content.querySelector("img");
+      if (markerImage) {
+        // Store original icon to restore later
+        markerImage.dataset.originalSrc = markerImage.src;
+        markerImage.src = "/static/images/car_red_alert.png"; // Create this icon or use existing red car
+      }
+    }
 
+    // Find and show nearby vehicles
     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
+    console.log(`Found ${nearbyVehicles.length} nearby vehicles`);
     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
-
-  vehicle.sosActive = true;
-  vehicleData.set(imei, vehicle);
+    
+    // Also trigger audio alert (optional)
+    playSOSAlertSound();
   }
 }
 
@@ -845,10 +978,45 @@ function acknowledgeSOS(imei) {
   });
 }
 
+// function findNearbyVehicles(sosVehicle, radiusKm) {
+//   const nearby = [];
+//   const sosLat = parseFloat(sosVehicle.latitude);
+//   const sosLon = parseFloat(sosVehicle.longitude);
+
+//   vehicleData.forEach((vehicle, imei) => {
+//     if (imei === sosVehicle.imei) return; 
+    
+//     const vehicleLat = parseFloat(vehicle.latitude);
+//     const vehicleLon = parseFloat(vehicle.longitude);
+    
+//     if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
+//       const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
+//       if (distance <= radiusKm) {
+//         const estimatedTime = (distance / 40) * 60; 
+//         nearby.push({
+//           vehicle,
+//           distance: distance.toFixed(2),
+//           estimatedTime: estimatedTime.toFixed(0)
+//         });
+//       }
+//     }
+//   });
+
+//   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+//   return nearby;
+// }
+
 function findNearbyVehicles(sosVehicle, radiusKm) {
   const nearby = [];
   const sosLat = parseFloat(sosVehicle.latitude);
   const sosLon = parseFloat(sosVehicle.longitude);
+  
+  console.log(`Finding vehicles near ${sosVehicle.LicensePlateNumber} at ${sosLat}, ${sosLon}`);
+
+  if (isNaN(sosLat) || isNaN(sosLon)) {
+    console.error("Invalid SOS vehicle coordinates");
+    return nearby;
+  }
 
   vehicleData.forEach((vehicle, imei) => {
     if (imei === sosVehicle.imei) return; 
@@ -858,20 +1026,105 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
     
     if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
       const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
+      console.log(`Distance to ${vehicle.LicensePlateNumber}: ${distance.toFixed(2)} km`);
+      
       if (distance <= radiusKm) {
-        const estimatedTime = (distance / 40) * 60; 
+        const estimatedTime = (distance / 40) * 60; // Assuming 40 km/h average speed
+        
+        // Get vehicle status for ETA calculation
+        let statusText = vehicle.status || "unknown";
+        let estimatedTimeAdjusted = estimatedTime;
+        
+        // Adjust ETA based on vehicle status
+        if (statusText === "moving" && vehicle.speed > 20) {
+          estimatedTimeAdjusted = (distance / 60) * 60; // If moving fast, assume 60 km/h
+        } else if (statusText === "stopped" || statusText === "idle") {
+          estimatedTimeAdjusted = estimatedTime * 1.5; // Add buffer for stopped/idle vehicles
+        }
+        
         nearby.push({
-          vehicle,
+          vehicle: vehicle,
           distance: distance.toFixed(2),
-          estimatedTime: estimatedTime.toFixed(0)
+          estimatedTime: Math.max(1, Math.ceil(estimatedTimeAdjusted)), // At least 1 minute
+          status: statusText,
+          speed: vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0
         });
       }
     }
   });
 
   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+  console.log(`Total nearby vehicles found: ${nearby.length}`);
   return nearby;
 }
+
+// function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
+//   const oldPopup = document.getElementById("sos-nearby-popup");
+//   if (oldPopup) oldPopup.remove();
+
+//   const popup = document.createElement("div");
+//   popup.id = "sos-nearby-popup";
+  
+//   let content = `
+//     <div class="sos-popup-content">
+//       <h3>SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
+//       <div class="sos-location">Location: ${sosVehicle.address || "Unknown"}</div>
+//       <div class="sos-coords">Coordinates: ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
+//       <div class="sos-time">Time: ${new Date().toLocaleTimeString()}</div>
+      
+//       <h4>Nearby Vehicles (within 5km):</h4>
+//   `;
+
+//   if (nearbyVehicles.length > 0) {
+//     content += `<ul class="nearby-vehicles-list">`;
+//     nearbyVehicles.forEach(vehicle => {
+//       content += `
+//         <li>
+//           <strong>${vehicle.vehicle.LicensePlateNumber || vehicle.vehicle.imei}</strong>
+//           - Distance: ${vehicle.distance} km
+//           - Estimated Time: ~${vehicle.estimatedTime} min
+//         </li>
+//       `;
+//     });
+//     content += `</ul>`;
+//   } else {
+//     content += `<p>No other vehicles found within 5km radius.</p>`;
+//   }
+
+//  content += `
+//     <button id="acknowledge-sos-btn" class="sos-ack-btn">Acknowledge SOS</button>
+//     <button id="minimize-sos-popup">Minimize</button>
+//     <button id="close-sos-popup">Close</button>
+//   `;
+
+//   popup.innerHTML = content;
+//   document.body.appendChild(popup);
+
+//   popup.style.position = "fixed";
+//   popup.style.left = "50%";
+//   popup.style.top = "50%";
+//   popup.style.transform = "translate(-50%, -50%)";
+//   popup.style.zIndex = "10000";
+//   popup.style.backgroundColor = "white";
+//   popup.style.padding = "20px";
+//   popup.style.borderRadius = "8px";
+//   popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+//   popup.style.maxWidth = "500px";
+//   popup.style.width = "90%";
+
+//   document.getElementById("acknowledge-sos-btn").onclick = () => {
+//     acknowledgeSOS(sosVehicle.imei);
+//     popup.remove();
+//   };
+
+//   document.getElementById("minimize-sos-popup").onclick = () => {
+//     popup.style.display = "none";
+//   };
+
+//   document.getElementById("close-sos-popup").onclick = () => {
+//     popup.remove();
+//   };
+// }
 
 function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   const oldPopup = document.getElementById("sos-nearby-popup");
@@ -880,65 +1133,198 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   const popup = document.createElement("div");
   popup.id = "sos-nearby-popup";
   
+  const formattedTime = new Date().toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    second: '2-digit' 
+  });
+  
+  const formattedDate = new Date().toLocaleDateString();
+  
   let content = `
-    <div class="sos-popup-content">
-      <h3>SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
-      <div class="sos-location">Location: ${sosVehicle.address || "Unknown"}</div>
-      <div class="sos-coords">Coordinates: ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
-      <div class="sos-time">Time: ${new Date().toLocaleTimeString()}</div>
+    <div class="sos-popup-content" style="font-family: Arial, sans-serif;">
+      <div style="background-color: #ff0000; color: white; padding: 15px; border-radius: 8px 8px 0 0;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">🚨</span> 
+          SOS ALERT - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}
+        </h3>
+      </div>
       
-      <h4>Nearby Vehicles (within 5km):</h4>
+      <div style="padding: 20px;">
+        <div style="margin-bottom: 15px;">
+          <div><strong>Vehicle:</strong> ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</div>
+          <div><strong>Location:</strong> ${sosVehicle.address || "Unknown location"}</div>
+          <div><strong>Coordinates:</strong> ${parseFloat(sosVehicle.latitude).toFixed(6)}, ${parseFloat(sosVehicle.longitude).toFixed(6)}</div>
+          <div><strong>Time:</strong> ${formattedTime} on ${formattedDate}</div>
+        </div>
+        
+        <h4 style="color: #d32f2f; border-bottom: 2px solid #eee; padding-bottom: 5px;">
+          Nearby Vehicles (within 5km radius):
+        </h4>
   `;
 
   if (nearbyVehicles.length > 0) {
-    content += `<ul class="nearby-vehicles-list">`;
-    nearbyVehicles.forEach(vehicle => {
+    content += `
+      <div style="max-height: 300px; overflow-y: auto; margin: 10px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #f5f5f5;">
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Vehicle</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Distance</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">ETA</th>
+              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    nearbyVehicles.forEach((item, index) => {
+      const statusColor = item.status === "moving" ? "#4caf50" : 
+                         item.status === "stopped" ? "#f44336" : 
+                         item.status === "idle" ? "#ff9800" : "#9e9e9e";
+      
       content += `
-        <li>
-          <strong>${vehicle.vehicle.LicensePlateNumber || vehicle.vehicle.imei}</strong>
-          - Distance: ${vehicle.distance} km
-          - Estimated Time: ~${vehicle.estimatedTime} min
-        </li>
+        <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">
+            <strong>${item.vehicle.LicensePlateNumber || item.vehicle.imei}</strong>
+          </td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">
+            ${item.distance} km
+          </td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">
+            ~${item.estimatedTime} min
+          </td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; color: ${statusColor};">
+            ${item.status} ${item.speed > 0 ? `(${item.speed.toFixed(0)} km/h)` : ''}
+          </td>
+        </tr>
       `;
     });
-    content += `</ul>`;
+    
+    content += `
+          </tbody>
+        </table>
+      </div>
+    `;
   } else {
-    content += `<p>No other vehicles found within 5km radius.</p>`;
+    content += `
+      <div style="padding: 20px; text-align: center; color: #666;">
+        <p style="font-size: 18px;">⚠️</p>
+        <p><strong>No other vehicles found within 5km radius.</strong></p>
+        <p>Consider checking wider area or alternative resources.</p>
+      </div>
+    `;
   }
 
  content += `
-    <button id="acknowledge-sos-btn" class="sos-ack-btn">Acknowledge SOS</button>
-    <button id="minimize-sos-popup">Minimize</button>
-    <button id="close-sos-popup">Close</button>
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button id="acknowledge-sos-btn" 
+                  style="padding: 10px 20px; background-color: #4caf50; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            ✅ Acknowledge SOS
+          </button>
+          <button id="view-on-map-btn" 
+                  style="padding: 10px 20px; background-color: #2196f3; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer;">
+            🗺️ View on Map
+          </button>
+          <button id="close-sos-popup" 
+                  style="padding: 10px 20px; background-color: #757575; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer;">
+            ✕ Close
+          </button>
+        </div>
+      </div>
+    </div>
   `;
 
   popup.innerHTML = content;
   document.body.appendChild(popup);
 
+  // Style the popup
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = "10000";
   popup.style.backgroundColor = "white";
-  popup.style.padding = "20px";
   popup.style.borderRadius = "8px";
-  popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-  popup.style.maxWidth = "500px";
-  popup.style.width = "90%";
+  popup.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
+  popup.style.width = "600px";
+  popup.style.maxWidth = "90vw";
+  popup.style.maxHeight = "80vh";
+  popup.style.overflow = "hidden";
 
+  // Add event listeners
   document.getElementById("acknowledge-sos-btn").onclick = () => {
     acknowledgeSOS(sosVehicle.imei);
     popup.remove();
   };
 
-  document.getElementById("minimize-sos-popup").onclick = () => {
-    popup.style.display = "none";
+  document.getElementById("view-on-map-btn").onclick = () => {
+    // Center map on SOS vehicle
+    const latLng = new google.maps.LatLng(
+      parseFloat(sosVehicle.latitude),
+      parseFloat(sosVehicle.longitude)
+    );
+    map.setZoom(16);
+    map.panTo(latLng);
+    
+    // Highlight the SOS vehicle
+    const marker = markers[sosVehicle.imei];
+    if (marker) {
+      const address = sosVehicle.address || "Location unknown";
+      setInfoWindowContent(infoWindow, marker, latLng, sosVehicle, address);
+      infoWindow.open(map, marker);
+    }
   };
 
   document.getElementById("close-sos-popup").onclick = () => {
     popup.remove();
   };
+}
+
+function playSOSAlertSound() {
+  try {
+    // Create audio context for alert sound
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Configure SOS sound pattern (short beeps)
+    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+    
+    // Repeat pattern
+    setTimeout(() => {
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode2 = audioContext.createGain();
+      
+      oscillator2.connect(gainNode2);
+      gainNode2.connect(audioContext.destination);
+      
+      oscillator2.frequency.setValueAtTime(1000, audioContext.currentTime);
+      oscillator2.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
+      
+      gainNode2.gain.setValueAtTime(0.5, audioContext.currentTime);
+      gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator2.start(audioContext.currentTime);
+      oscillator2.stop(audioContext.currentTime + 0.2);
+    }, 200);
+    
+  } catch (error) {
+    console.log("Audio not supported or user interaction required");
+  }
 }
 
 function vehicleInfoPage(licensePlateNumber) {
@@ -1620,6 +2006,30 @@ function updateVehicleData(vehicle) {
   showHidecar();
 }
 
+// function removeSOS(imei) {
+//   const popup = document.getElementById("sos-nearby-popup");
+//   if (popup) popup.remove();
+
+//   if (sosActiveMarkers[imei]) {
+//     sosActiveMarkers[imei].remove();
+//     delete sosActiveMarkers[imei];
+//   }
+
+//   const marker = markers[imei];
+//   if (marker && marker.content) {
+//     marker.content.classList.remove("vehicle-blink");
+//   }
+
+//   const vehicle = vehicleData.get(imei);
+//   if (vehicle) {
+//     vehicle.sos = "0";
+//     vehicleData.set(imei, vehicle);
+//   }
+
+//   const vehiclesArray = Array.from(vehicleData.values());
+//   renderVehicleCards(vehiclesArray);
+// }
+
 function removeSOS(imei) {
   const popup = document.getElementById("sos-nearby-popup");
   if (popup) popup.remove();
@@ -1632,16 +2042,23 @@ function removeSOS(imei) {
   const marker = markers[imei];
   if (marker && marker.content) {
     marker.content.classList.remove("vehicle-blink");
+    
+    // Restore original icon
+    const markerImage = marker.content.querySelector("img");
+    if (markerImage && markerImage.dataset.originalSrc) {
+      markerImage.src = markerImage.dataset.originalSrc;
+    }
   }
 
   const vehicle = vehicleData.get(imei);
   if (vehicle) {
     vehicle.sos = "0";
+    vehicle.sosActive = false;
     vehicleData.set(imei, vehicle);
   }
 
-  const vehiclesArray = Array.from(vehicleData.values());
-  renderVehicleCards(vehiclesArray);
+  // Update vehicle card
+  updateVehicleCard(vehicle);
 }
 
 function formatDateTime(dateString, timeString) {
