@@ -857,79 +857,84 @@ function triggerSOS(imei, marker) {
 
   // Add flashing effect to marker
   if (!sosActiveMarkers[imei]) {
-    // Create and add SOS siren/alert element
+    // Store the original marker content before modifying
+    const originalContent = marker.content.innerHTML;
+    marker.content.dataset.originalContent = originalContent;
+    
+    // Create a wrapper div to contain both icon and SOS indicator
+    const wrapperDiv = document.createElement("div");
+    wrapperDiv.className = "sos-marker-wrapper";
+    wrapperDiv.style.position = "relative";
+    wrapperDiv.style.display = "inline-block";
+    
+    // Add the original marker content
+    const iconContainer = document.createElement("div");
+    iconContainer.className = "marker-icon-container";
+    iconContainer.innerHTML = originalContent;
+    
+    // Create SOS siren/alert element
     const sosDiv = document.createElement("div");
-    sosDiv.className = "sos-blink";
-    sosDiv.innerHTML = "🚨"; // Emergency siren emoji
+    sosDiv.className = "sos-blink-indicator";
+    sosDiv.innerHTML = "🚨";
     sosDiv.style.position = "absolute";
-    sosDiv.style.top = "-25px";
+    sosDiv.style.top = "-35px"; // Position above the icon
     sosDiv.style.left = "50%";
     sosDiv.style.transform = "translateX(-50%)";
-    sosDiv.style.fontSize = "20px";
+    sosDiv.style.fontSize = "24px";
     sosDiv.style.fontWeight = "bold";
     sosDiv.style.color = "#ff0000";
     sosDiv.style.textShadow = "0 0 5px #fff, 0 0 10px #ff0000";
-    sosDiv.style.pointerEvents = "none";
-    sosDiv.style.zIndex = "1000";
-    sosDiv.style.animation = "sosBlink 1s infinite alternate";
+    sosDiv.style.pointerEvents = "none"; // Allow click-through
+    sosDiv.style.zIndex = "1001";
+    sosDiv.style.animation = "sosIndicatorBlink 1s infinite alternate";
     
-    // Add CSS animation if not already present
-    if (!document.querySelector('#sos-animation-style')) {
-      const style = document.createElement('style');
-      style.id = 'sos-animation-style';
-      style.textContent = `
-        @keyframes sosBlink {
-          0% { opacity: 1; transform: translateX(-50%) scale(1); }
-          50% { opacity: 0.5; transform: translateX(-50%) scale(1.2); }
-          100% { opacity: 1; transform: translateX(-50%) scale(1); }
-        }
-        
-        .vehicle-blink {
-          animation: vehicleBlink 0.8s infinite alternate;
-        }
-        
-        @keyframes vehicleBlink {
-          0% { filter: brightness(1) drop-shadow(0 0 5px red); }
-          100% { filter: brightness(1.5) drop-shadow(0 0 15px red); }
-        }
-        
-        .sos-blink-card {
-          animation: sosCardBlink 1s infinite alternate;
-          border: 2px solid red;
-          background-color: rgba(255, 0, 0, 0.1) !important;
-        }
-        
-        @keyframes sosCardBlink {
-          0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
-          100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // Append to marker
-    if (marker.content) {
-      marker.content.style.position = "relative";
-      marker.content.appendChild(sosDiv);
-    } else {
-      console.error("Marker content not found");
+    // Create pulsing circle effect
+    const pulseCircle = document.createElement("div");
+    pulseCircle.className = "sos-pulse-circle";
+    pulseCircle.style.position = "absolute";
+    pulseCircle.style.top = "50%";
+    pulseCircle.style.left = "50%";
+    pulseCircle.style.transform = "translate(-50%, -50%)";
+    pulseCircle.style.width = "70px";
+    pulseCircle.style.height = "70px";
+    pulseCircle.style.borderRadius = "50%";
+    pulseCircle.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
+    pulseCircle.style.pointerEvents = "none";
+    pulseCircle.style.zIndex = "999";
+    pulseCircle.style.animation = "pulseCircle 1.5s infinite";
+    
+    // Assemble the wrapper
+    wrapperDiv.appendChild(pulseCircle);
+    wrapperDiv.appendChild(iconContainer);
+    wrapperDiv.appendChild(sosDiv);
+    
+    // Replace marker content with wrapper
+    marker.content.innerHTML = "";
+    marker.content.appendChild(wrapperDiv);
+    
+    // Ensure marker content still has hover and click listeners
+    marker.content.style.cursor = "pointer";
+    marker.content.style.pointerEvents = "auto";
+    
+    // Add blink effect to vehicle icon itself
+    const markerImage = marker.content.querySelector("img");
+    if (markerImage) {
+      // Store original icon to restore later
+      markerImage.dataset.originalSrc = markerImage.src;
+      // Change to red alert icon or add red tint
+      markerImage.style.filter = "hue-rotate(300deg) brightness(1.2)";
+      markerImage.classList.add("vehicle-sos-icon");
     }
     
-    sosActiveMarkers[imei] = sosDiv;
+    sosActiveMarkers[imei] = {
+      wrapper: wrapperDiv,
+      sosIndicator: sosDiv,
+      pulseCircle: pulseCircle
+    };
     
-    // Add blink effect to vehicle icon
-    if (marker.content) {
-      marker.content.classList.add("vehicle-blink");
-      
-      // Change marker icon to red alert version
-      const markerImage = marker.content.querySelector("img");
-      if (markerImage) {
-        // Store original icon to restore later
-        markerImage.dataset.originalSrc = markerImage.src;
-        markerImage.src = "/static/images/car_red_alert.png"; // Create this icon or use existing red car
-      }
-    }
-
+    // Add hover listeners to ensure they still work
+    setupSOSHoverListeners(marker, imei);
+    
     // Find and show nearby vehicles
     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
     console.log(`Found ${nearbyVehicles.length} nearby vehicles`);
@@ -937,6 +942,191 @@ function triggerSOS(imei, marker) {
     
     // Also trigger audio alert (optional)
     playSOSAlertSound();
+    
+    // Ensure the vehicle card also gets highlighted
+    highlightSOSVehicleCard(imei);
+  }
+}
+
+function setupSOSHoverListeners(marker, imei) {
+  // Remove existing listeners if any
+  if (marker.__hoverListenersBound) {
+    marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
+    marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
+  }
+  
+  // Create new hover handlers
+  const mouseoverHandler = () => {
+    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+    if (!vehicleCard) return;
+    
+    // Scroll card into view
+    vehicleCard.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
+    
+    // Highlight vehicle card with SOS-specific styling
+    vehicleCard.classList.add("sos-hover-highlight");
+    
+    // Add intense glow effect to marker during hover
+    const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
+    if (sosIndicator) {
+      sosIndicator.style.animation = "sosIndicatorBlink 0.3s infinite alternate";
+      sosIndicator.style.fontSize = "28px";
+    }
+    
+    // Highlight on map with info window
+    const latLng = new google.maps.LatLng(
+      marker.position.lat,
+      marker.position.lng
+    );
+    
+    const vehicle = vehicleData.get(imei);
+    if (vehicle) {
+      const address = vehicle.address || "Location unknown";
+      setInfoWindowContent(
+        infoWindow,
+        marker,
+        latLng,
+        vehicle,
+        address
+      );
+      infoWindow.open(map, marker);
+      
+      // Briefly zoom closer
+      const currentZoom = map.getZoom();
+      if (currentZoom < 16) {
+        map.setZoom(16);
+      }
+      panToWithOffset(latLng, -200, 0);
+    }
+  };
+  
+  const mouseoutHandler = () => {
+    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+    if (vehicleCard) {
+      vehicleCard.classList.remove("sos-hover-highlight");
+    }
+    
+    // Restore normal SOS blinking
+    const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
+    if (sosIndicator) {
+      sosIndicator.style.animation = "sosIndicatorBlink 1s infinite alternate";
+      sosIndicator.style.fontSize = "24px";
+    }
+    
+    infoWindow.close();
+  };
+  
+  // Add click handler for SOS markers
+  const clickHandler = (e) => {
+    e.stopPropagation();
+    const vehicle = vehicleData.get(imei);
+    if (vehicle) {
+      const latLng = new google.maps.LatLng(
+        marker.position.lat,
+        marker.position.lng
+      );
+      const address = vehicle.address || "Location unknown";
+      setInfoWindowContent(
+        infoWindow,
+        marker,
+        latLng,
+        vehicle,
+        address
+      );
+      infoWindow.open(map, marker);
+      
+      // Show acknowledge button in info window for SOS
+      const acknowledgeBtn = document.createElement('button');
+      acknowledgeBtn.textContent = '🚨 Acknowledge SOS';
+      acknowledgeBtn.style.backgroundColor = '#ff0000';
+      acknowledgeBtn.style.color = 'white';
+      acknowledgeBtn.style.border = 'none';
+      acknowledgeBtn.style.padding = '8px 16px';
+      acknowledgeBtn.style.borderRadius = '4px';
+      acknowledgeBtn.style.cursor = 'pointer';
+      acknowledgeBtn.style.marginTop = '10px';
+      acknowledgeBtn.style.fontWeight = 'bold';
+      
+      acknowledgeBtn.onclick = () => {
+        acknowledgeSOS(imei);
+        infoWindow.close();
+      };
+      
+      // Append to info window content
+      setTimeout(() => {
+        const infoContent = document.querySelector('.gm-style-iw');
+        if (infoContent) {
+          const actionsDiv = document.createElement('div');
+          actionsDiv.style.marginTop = '10px';
+          actionsDiv.appendChild(acknowledgeBtn);
+          infoContent.appendChild(actionsDiv);
+        }
+      }, 100);
+    }
+  };
+  
+  // Attach listeners
+  marker.content.addEventListener('mouseover', mouseoverHandler);
+  marker.content.addEventListener('mouseout', mouseoutHandler);
+  marker.content.addEventListener('click', clickHandler);
+  
+  // Store references for cleanup
+  marker.__mouseoverHandler = mouseoverHandler;
+  marker.__mouseoutHandler = mouseoutHandler;
+  marker.__clickHandler = clickHandler;
+  marker.__hoverListenersBound = true;
+}
+
+function highlightSOSVehicleCard(imei) {
+  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+  if (vehicleCard) {
+    // Add SOS-specific card styling
+    vehicleCard.classList.add("sos-active-card");
+    
+    // Ensure card is visible and scroll into view
+    vehicleCard.style.display = "block";
+    vehicleCard.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
+    
+    // Add hover listeners to card
+    vehicleCard.addEventListener('mouseenter', function() {
+      const marker = markers[imei];
+      if (marker) {
+        const latLng = new google.maps.LatLng(
+          marker.position.lat,
+          marker.position.lng
+        );
+        
+        // Zoom and center on marker
+        map.setZoom(18);
+        panToWithOffset(latLng, -250, 0);
+        
+        // Show info window
+        const vehicle = vehicleData.get(imei);
+        if (vehicle) {
+          const address = vehicle.address || "Location unknown";
+          setInfoWindowContent(
+            infoWindow,
+            marker,
+            latLng,
+            vehicle,
+            address
+          );
+          infoWindow.open(map, marker);
+        }
+      }
+    });
+    
+    vehicleCard.addEventListener('mouseleave', function() {
+      infoWindow.close();
+    });
   }
 }
 
@@ -2034,20 +2224,35 @@ function removeSOS(imei) {
   const popup = document.getElementById("sos-nearby-popup");
   if (popup) popup.remove();
 
-  if (sosActiveMarkers[imei]) {
-    sosActiveMarkers[imei].remove();
-    delete sosActiveMarkers[imei];
-  }
-
+  // Remove SOS visual effects from marker
   const marker = markers[imei];
   if (marker && marker.content) {
-    marker.content.classList.remove("vehicle-blink");
-    
-    // Restore original icon
-    const markerImage = marker.content.querySelector("img");
-    if (markerImage && markerImage.dataset.originalSrc) {
-      markerImage.src = markerImage.dataset.originalSrc;
+    // Restore original content
+    if (marker.content.dataset.originalContent) {
+      marker.content.innerHTML = marker.content.dataset.originalContent;
     }
+    
+    // Remove hover listeners
+    if (marker.__hoverListenersBound) {
+      marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
+      marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
+      marker.content.removeEventListener('click', marker.__clickHandler);
+      delete marker.__hoverListenersBound;
+      delete marker.__mouseoverHandler;
+      delete marker.__mouseoutHandler;
+      delete marker.__clickHandler;
+    }
+    
+    // Restore original hover listeners
+    addHoverListenersForVehicle(imei);
+  }
+
+  // Clean up SOS active markers
+  if (sosActiveMarkers[imei]) {
+    if (sosActiveMarkers[imei].wrapper) {
+      sosActiveMarkers[imei].wrapper.remove();
+    }
+    delete sosActiveMarkers[imei];
   }
 
   const vehicle = vehicleData.get(imei);
@@ -2057,7 +2262,13 @@ function removeSOS(imei) {
     vehicleData.set(imei, vehicle);
   }
 
-  // Update vehicle card
+  // Update vehicle card styling
+  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+  if (vehicleCard) {
+    vehicleCard.classList.remove("sos-active-card", "sos-blink-card", "sos-hover-highlight");
+  }
+
+  // Update vehicle card content
   updateVehicleCard(vehicle);
 }
 
@@ -2782,6 +2993,65 @@ function resetVehicleCardStyles(vehicleCard) {
   strongElements.forEach((tag) => (tag.style.color = ""));
 }
 
+// function addHoverListenersForVehicle(imei) {
+//   const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+//   const marker = markers[imei];
+
+//   if (card && card.dataset.hoverBound !== "true") {
+//     card.dataset.hoverBound = "true";
+//     card.addEventListener("mouseover", () => {
+//       const currentMarker = markers[imei];
+//       if (!currentMarker) return;
+
+//       const latLng = new google.maps.LatLng(
+//         currentMarker.position.lat,
+//         currentMarker.position.lng
+//       );
+//       map.setZoom(19);
+//       panToWithOffset(latLng, -200, 0);
+
+//       const address = currentMarker.device.address || "Location unknown";
+//       setInfoWindowContent(
+//         infoWindow,
+//         currentMarker,
+//         latLng,
+//         currentMarker.device,
+//         address
+//       );
+//       infoWindow.open(map, currentMarker);
+//     });
+
+//     card.addEventListener("mouseout", () => {
+//       infoWindow.close();
+//     });
+//   }
+
+//   if (marker && !marker.__hoverListenersBound) {
+//     marker.__hoverListenersBound = true;
+
+//     marker.addEventListener("mouseover", () => {
+//       const vehicleCard = document.querySelector(
+//         `.vehicle-card[data-imei="${imei}"]`
+//       );
+//       if (!vehicleCard) return;
+
+//       vehicleCard.scrollIntoView({
+//         behavior: "smooth",
+//         block: "nearest",
+//         inline: "nearest",
+//       });
+//       highlightVehicleCardStyles(vehicleCard);
+//     });
+
+//     marker.addEventListener("mouseout", () => {
+//       const vehicleCard = document.querySelector(
+//         `.vehicle-card[data-imei="${imei}"]`
+//       );
+//       resetVehicleCardStyles(vehicleCard);
+//     });
+//   }
+// }
+
 function addHoverListenersForVehicle(imei) {
   const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
   const marker = markers[imei];
@@ -2792,11 +3062,21 @@ function addHoverListenersForVehicle(imei) {
       const currentMarker = markers[imei];
       if (!currentMarker) return;
 
+      // Check if this is an SOS vehicle
+      const isSOSVehicle = vehicleData.get(imei)?.sos === "1";
+      
       const latLng = new google.maps.LatLng(
         currentMarker.position.lat,
         currentMarker.position.lng
       );
-      map.setZoom(19);
+      
+      // Different zoom levels for SOS vs normal vehicles
+      if (isSOSVehicle) {
+        map.setZoom(18);
+      } else {
+        map.setZoom(16);
+      }
+      
       panToWithOffset(latLng, -200, 0);
 
       const address = currentMarker.device.address || "Location unknown";
@@ -2808,6 +3088,46 @@ function addHoverListenersForVehicle(imei) {
         address
       );
       infoWindow.open(map, currentMarker);
+      
+      // Special handling for SOS vehicles
+      if (isSOSVehicle) {
+        // Add SOS acknowledge button to info window
+        setTimeout(() => {
+          const infoWindowContent = document.querySelector('.gm-style-iw');
+          if (infoWindowContent && !infoWindowContent.querySelector('.sos-ack-button')) {
+            const ackButton = document.createElement('button');
+            ackButton.className = 'sos-ack-button';
+            ackButton.innerHTML = '🚨 Acknowledge SOS';
+            ackButton.style.cssText = `
+              background: linear-gradient(135deg, #ff0000, #ff5252);
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-weight: bold;
+              margin-top: 10px;
+              display: block;
+              width: 100%;
+              transition: all 0.3s ease;
+            `;
+            
+            ackButton.onmouseover = () => {
+              ackButton.style.background = 'linear-gradient(135deg, #ff5252, #ff0000)';
+            };
+            
+            ackButton.onmouseout = () => {
+              ackButton.style.background = 'linear-gradient(135deg, #ff0000, #ff5252)';
+            };
+            
+            ackButton.onclick = () => {
+              acknowledgeSOS(imei);
+            };
+            
+            infoWindowContent.appendChild(ackButton);
+          }
+        }, 100);
+      }
     });
 
     card.addEventListener("mouseout", () => {
@@ -2815,7 +3135,9 @@ function addHoverListenersForVehicle(imei) {
     });
   }
 
-  if (marker && !marker.__hoverListenersBound) {
+  if (marker && !marker.__hoverListenersBound && !vehicleData.get(imei)?.sosActive) {
+    // Only set up default hover listeners if not an active SOS vehicle
+    // (SOS vehicles get special listeners in setupSOSHoverListeners)
     marker.__hoverListenersBound = true;
 
     marker.addEventListener("mouseover", () => {

@@ -1139,6 +1139,103 @@ input:checked + .slider:before {
   }
 }
 
+/* SOS Indicator Blink Animation */
+@keyframes sosIndicatorBlink {
+  0% { 
+    opacity: 1; 
+    transform: translateX(-50%) scale(1); 
+    filter: drop-shadow(0 0 5px #ff0000);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: translateX(-50%) scale(1.2); 
+    filter: drop-shadow(0 0 15px #ff0000);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateX(-50%) scale(1); 
+    filter: drop-shadow(0 0 5px #ff0000);
+  }
+}
+
+/* Pulsing Circle Effect */
+@keyframes pulseCircle {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.7;
+    background-color: rgba(255, 0, 0, 0.3);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.3;
+    background-color: rgba(255, 0, 0, 0.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.7;
+    background-color: rgba(255, 0, 0, 0.3);
+  }
+}
+
+/* SOS Vehicle Icon Styling */
+.vehicle-sos-icon {
+  animation: sosIconPulse 1s infinite alternate;
+  filter: hue-rotate(300deg) brightness(1.2) drop-shadow(0 0 8px rgba(255, 0, 0, 0.7));
+}
+
+@keyframes sosIconPulse {
+  0% {
+    filter: hue-rotate(300deg) brightness(1.2) drop-shadow(0 0 5px rgba(255, 0, 0, 0.5));
+  }
+  100% {
+    filter: hue-rotate(300deg) brightness(1.5) drop-shadow(0 0 15px rgba(255, 0, 0, 0.9));
+  }
+}
+
+/* SOS Vehicle Card Styling */
+.sos-active-card {
+  border-left: 5px solid #ff0000 !important;
+  background: linear-gradient(90deg, rgba(255, 0, 0, 0.05) 0%, rgba(255, 255, 255, 0) 100%) !important;
+  animation: sosCardPulse 2s infinite alternate;
+}
+
+.sos-hover-highlight {
+  background-color: rgba(255, 0, 0, 0.1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3) !important;
+  transition: all 0.3s ease;
+}
+
+@keyframes sosCardPulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow: 0 4px 25px rgba(255, 0, 0, 0.4);
+  }
+}
+
+/* Ensure SOS marker is clickable */
+.sos-marker-wrapper {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.marker-icon-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.sos-blink-indicator {
+  pointer-events: none !important;
+  z-index: 1001 !important;
+}
+
+.sos-pulse-circle {
+  pointer-events: none !important;
+  z-index: 999 !important;
+}
+
 .sos-historic-card {
   border-left: 4px solid #ff9800 !important;
   background-color: rgba(255, 152, 0, 0.05) !important;
