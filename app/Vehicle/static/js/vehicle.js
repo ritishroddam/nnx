@@ -934,28 +934,47 @@ function createSOSAlertPanel() {
     position: fixed;
     top: 20px;
     right: 20px;
-    width: 300px;
-    max-height: 400px;
+    width: 550px;  /* Increased width for better table display */
+    max-height: 500px;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     z-index: 10000;
     overflow: hidden;
     display: none;
+    border: 2px solid #ff0000;
   `;
   
   panel.innerHTML = `
-    <div style="background: #ff0000; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="margin: 0; font-size: 16px;">🚨 Active SOS Alerts</h3>
-      <button id="close-sos-panel" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">×</button>
+    <div style="background: linear-gradient(135deg, #ff0000, #ff5252); color: white; padding: 12px; 
+                display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">🚨</span>
+        <h3 style="margin: 0; font-size: 16px; font-weight: bold;">Active SOS Alerts</h3>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="collapse-sos-panel" style="background: rgba(255,255,255,0.2); color: white; 
+                border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
+          Collapse All
+        </button>
+        <button id="close-sos-panel" style="background: none; border: none; color: white; 
+                cursor: pointer; font-size: 18px; font-weight: bold;">×</button>
+      </div>
     </div>
-    <div id="sos-alerts-container" style="max-height: 350px; overflow-y: auto;"></div>
+    <div id="sos-alerts-container" style="max-height: 436px; overflow-y: auto; padding: 0;"></div>
   `;
   
   document.body.appendChild(panel);
   
   document.getElementById("close-sos-panel").onclick = () => {
     panel.style.display = "none";
+  };
+  
+  document.getElementById("collapse-sos-panel").onclick = () => {
+    // Collapse all expanded details
+    document.querySelectorAll('.toggle-nearby-btn[data-expanded="true"]').forEach(btn => {
+      btn.click();
+    });
   };
   
   return panel;
@@ -981,38 +1000,50 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   if (nearbyVehicles.length > 0) {
     nearbyListHTML = `
       <div class="nearby-vehicles-details" style="margin-top: 10px; display: none;">
-        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
-          <thead>
-            <tr style="background-color: #f5f5f5;">
-              <th style="padding: 4px; text-align: left;">Vehicle</th>
-              <th style="padding: 4px; text-align: left;">Dist</th>
-              <th style="padding: 4px; text-align: left;">ETA</th>
-              <th style="padding: 4px; text-align: left;">Status</th>
-            </tr>
-          </thead>
-          <tbody>
+        <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
+          <strong>${nearbyVehicles.length} vehicles within 5km radius:</strong>
+        </div>
+        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
+          <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+            <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+              <tr style="background-color: #f5f5f5;">
+                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Vehicle</th>
+                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Distance</th>
+                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">ETA</th>
+                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
+                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Speed</th>
+              </tr>
+            </thead>
+            <tbody>
     `;
     
-    // Show top 5 nearest vehicles
-    const topVehicles = nearbyVehicles.slice(0, 5);
-    topVehicles.forEach((item, index) => {
+    // Show ALL vehicles with scroll
+    nearbyVehicles.forEach((item, index) => {
       const statusColor = item.status === "moving" ? "#4caf50" : 
                          item.status === "stopped" ? "#f44336" : 
                          item.status === "idle" ? "#ff9800" : "#9e9e9e";
       
+      // Get full status name
+      const statusName = getFullStatusName(item.status);
+      
       nearbyListHTML += `
         <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
-          <td style="padding: 4px; border-bottom: 1px solid #eee;">
-            <strong>${item.vehicle.LicensePlateNumber || item.vehicle.imei}</strong>
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
+            <strong style="cursor: pointer;" onclick="focusOnVehicle('${item.vehicle.imei}')">
+              ${item.vehicle.LicensePlateNumber || item.vehicle.imei}
+            </strong>
           </td>
-          <td style="padding: 4px; border-bottom: 1px solid #eee;">
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
             ${item.distance} km
           </td>
-          <td style="padding: 4px; border-bottom: 1px solid #eee;">
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
             ~${item.estimatedTime} min
           </td>
-          <td style="padding: 4px; border-bottom: 1px solid #eee; color: ${statusColor};">
-            ${item.status.charAt(0).toUpperCase()}
+          <td style="padding: 6px; border-bottom: 1px solid #eee; color: ${statusColor}; font-weight: 500;">
+            ${statusName}
+          </td>
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
+            ${item.speed ? item.speed.toFixed(0) : 0} km/h
           </td>
         </tr>
       `;
@@ -1021,10 +1052,10 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
     nearbyListHTML += `
           </tbody>
         </table>
-        ${nearbyVehicles.length > 5 ? 
-          `<div style="text-align: center; padding: 4px; font-size: 10px; color: #666;">
-            + ${nearbyVehicles.length - 5} more vehicles
-          </div>` : ''}
+        </div>
+        <div style="margin-top: 8px; font-size: 10px; color: #666; text-align: center;">
+          Scroll to see all ${nearbyVehicles.length} vehicles
+        </div>
       </div>
     `;
   }
@@ -1032,29 +1063,52 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   const alertDiv = document.createElement("div");
   alertDiv.id = alertId;
   alertDiv.style.cssText = `
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid #eee;
+    background-color: ${nearbyVehicles.length > 0 ? '#fff' : '#fff8e1'};
   `;
   
   alertDiv.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: start;">
       <div style="flex: 1;">
         <div style="font-weight: bold; color: #ff0000; display: flex; align-items: center; gap: 5px;">
-          <span>🚨</span>
-          <span>${sosVehicle.LicensePlateNumber || sosVehicle.imei}</span>
+          <span style="font-size: 16px;">🚨</span>
+          <span style="font-size: 14px;">${sosVehicle.LicensePlateNumber || sosVehicle.imei}</span>
         </div>
-        <div style="font-size: 12px; color: #666;">${sosVehicle.address || "Unknown location"}</div>
-        <div style="font-size: 11px; color: #999; cursor: pointer; margin-top: 5px;" 
-             class="toggle-nearby-btn" data-expanded="false">
-          📍 ${nearbyVehicles.length} nearby vehicles (click to view)
+        <div style="font-size: 12px; color: #666; margin-top: 2px;">${sosVehicle.address || "Unknown location"}</div>
+        
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+          <div style="font-size: 11px; color: #666; background: #f5f5f5; padding: 4px 8px; border-radius: 3px;">
+            📍 ${nearbyVehicles.length} vehicles within 5km
+          </div>
+          ${nearbyVehicles.length > 0 ? `
+            <button class="toggle-nearby-btn" data-expanded="false" 
+                    style="background: #2196f3; color: white; border: none; border-radius: 3px; 
+                           padding: 4px 8px; font-size: 11px; cursor: pointer;">
+              Show Details
+            </button>
+          ` : `
+            <div style="font-size: 11px; color: #d32f2f; background: #ffebee; padding: 4px 8px; border-radius: 3px;">
+              ⚠️ No vehicles nearby
+            </div>
+          `}
         </div>
+        
         ${nearbyListHTML}
       </div>
-      <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" 
-              style="background: #4caf50; color: white; border: none; border-radius: 4px; 
-                     padding: 5px 10px; cursor: pointer; font-size: 12px; font-weight: bold;">
-        Ack
-      </button>
+      
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" 
+                style="background: #4caf50; color: white; border: none; border-radius: 4px; 
+                       padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: bold;">
+          ✅ Ack
+        </button>
+        <button class="focus-on-sos-btn" data-imei="${sosVehicle.imei}"
+                style="background: #ff9800; color: white; border: none; border-radius: 4px; 
+                       padding: 6px 12px; cursor: pointer; font-size: 12px;">
+          🗺️ View
+        </button>
+      </div>
     </div>
   `;
   
@@ -1071,14 +1125,26 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
       if (detailsDiv) {
         if (isExpanded) {
           detailsDiv.style.display = 'none';
-          toggleBtn.innerHTML = `📍 ${nearbyVehicles.length} nearby vehicles (click to view)`;
+          toggleBtn.innerHTML = 'Show Details';
+          toggleBtn.style.background = '#2196f3';
           toggleBtn.setAttribute('data-expanded', 'false');
         } else {
           detailsDiv.style.display = 'block';
-          toggleBtn.innerHTML = `📍 ${nearbyVehicles.length} nearby vehicles (click to hide)`;
+          toggleBtn.innerHTML = 'Hide Details';
+          toggleBtn.style.background = '#757575';
           toggleBtn.setAttribute('data-expanded', 'true');
         }
       }
+    };
+  }
+  
+  // Add click handler for focus button
+  const focusBtn = alertDiv.querySelector('.focus-on-sos-btn');
+  if (focusBtn) {
+    focusBtn.onclick = (e) => {
+      e.stopPropagation();
+      const imei = e.target.getAttribute('data-imei');
+      focusOnVehicle(imei);
     };
   }
   
@@ -1098,27 +1164,36 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   
   // Click on alert to view on map
   alertDiv.onclick = (e) => {
-    // Don't trigger if clicking on toggle button or acknowledge button
+    // Don't trigger if clicking on buttons
     if (e.target.classList.contains('toggle-nearby-btn') || 
-        e.target.classList.contains('sos-panel-ack-btn')) {
+        e.target.classList.contains('sos-panel-ack-btn') ||
+        e.target.classList.contains('focus-on-sos-btn') ||
+        e.target.tagName === 'BUTTON') {
       return;
     }
     
-    const latLng = new google.maps.LatLng(
-      parseFloat(sosVehicle.latitude),
-      parseFloat(sosVehicle.longitude)
-    );
-    map.setZoom(16);
-    map.panTo(latLng);
-    
-    // Also highlight the SOS vehicle on the map
-    const marker = markers[sosVehicle.imei];
-    if (marker) {
-      const address = sosVehicle.address || "Location unknown";
-      setInfoWindowContent(infoWindow, marker, latLng, sosVehicle, address);
-      infoWindow.open(map, marker);
-    }
+    const imei = sosVehicle.imei;
+    focusOnVehicle(imei);
   };
+}
+
+function getFullStatusName(statusCode) {
+  switch(statusCode.toLowerCase()) {
+    case 'i':
+    case 'idle':
+      return 'Idle';
+    case 's':
+    case 'stopped':
+      return 'Stopped';
+    case 'm':
+    case 'moving':
+      return 'Moving';
+    case 'o':
+    case 'offline':
+      return 'Offline';
+    default:
+      return 'Unknown';
+  }
 }
 
 function setupSOSHoverListeners(marker, imei) {
