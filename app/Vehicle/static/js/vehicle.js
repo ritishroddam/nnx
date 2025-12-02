@@ -918,12 +918,107 @@ function triggerSOS(imei, marker) {
     
     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
     console.log(`Found ${nearbyVehicles.length} nearby vehicles`);
-    showNearbyVehiclesPopup(vehicle, nearbyVehicles);
+
+    addSOSAlertToPanel(vehicle, nearbyVehicles);
     
     playSOSAlertSound();
     
     highlightSOSVehicleCard(imei);
   }
+}
+
+function createSOSAlertPanel() {
+  const panel = document.createElement("div");
+  panel.id = "sos-alert-panel";
+  panel.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10000;
+    overflow: hidden;
+    display: none;
+  `;
+  
+  panel.innerHTML = `
+    <div style="background: #ff0000; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="margin: 0; font-size: 16px;">🚨 Active SOS Alerts</h3>
+      <button id="close-sos-panel" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">×</button>
+    </div>
+    <div id="sos-alerts-container" style="max-height: 350px; overflow-y: auto;"></div>
+  `;
+  
+  document.body.appendChild(panel);
+  
+  document.getElementById("close-sos-panel").onclick = () => {
+    panel.style.display = "none";
+  };
+  
+  return panel;
+}
+
+function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
+  let panel = document.getElementById("sos-alert-panel");
+  if (!panel) {
+    panel = createSOSAlertPanel();
+  }
+  
+  panel.style.display = "block";
+  
+  const container = document.getElementById("sos-alerts-container");
+  const alertId = `sos-alert-${sosVehicle.imei}`;
+  
+  // Remove existing alert for this vehicle
+  const existingAlert = document.getElementById(alertId);
+  if (existingAlert) existingAlert.remove();
+  
+  const alertDiv = document.createElement("div");
+  alertDiv.id = alertId;
+  alertDiv.style.cssText = `
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  `;
+  
+  alertDiv.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+      <div style="flex: 1;">
+        <div style="font-weight: bold; color: #ff0000;">${sosVehicle.LicensePlateNumber || sosVehicle.imei}</div>
+        <div style="font-size: 12px; color: #666;">${sosVehicle.address || "Unknown location"}</div>
+        <div style="font-size: 11px; color: #999;">${nearbyVehicles.length} nearby vehicles</div>
+      </div>
+      <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" style="background: #4caf50; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;">Ack</button>
+    </div>
+  `;
+  
+  container.insertBefore(alertDiv, container.firstChild);
+  
+  // Limit number of displayed alerts
+  const maxAlerts = 5;
+  const alerts = container.querySelectorAll('div[id^="sos-alert-"]');
+  if (alerts.length > maxAlerts) {
+    alerts[alerts.length - 1].remove();
+  }
+  
+  // Add click handler for acknowledge button
+  alertDiv.querySelector('.sos-panel-ack-btn').onclick = (e) => {
+    e.stopPropagation();
+    const imei = e.target.getAttribute('data-imei');
+    acknowledgeSOS(imei);
+  };
+  
+  // Click on alert to view on map
+  alertDiv.onclick = () => {
+    const latLng = new google.maps.LatLng(
+      parseFloat(sosVehicle.latitude),
+      parseFloat(sosVehicle.longitude)
+    );
+    map.setZoom(16);
+    map.panTo(latLng);
+  };
 }
 
 function setupSOSHoverListeners(marker, imei) {
@@ -1289,38 +1384,37 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   
   const formattedDate = new Date().toLocaleDateString();
   
+  // Compact content for smaller popup
   let content = `
     <div class="sos-popup-content" style="font-family: Arial, sans-serif;">
-      <div style="background-color: #ff0000; color: white; padding: 15px; border-radius: 8px 8px 0 0;">
-        <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 24px;">🚨</span> 
-          SOS ALERT - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}
+      <div style="background-color: #ff0000; color: white; padding: 10px; border-radius: 6px 6px 0 0;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px;">
+          <span style="font-size: 20px;">🚨</span> 
+          SOS - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}
         </h3>
       </div>
       
-      <div style="padding: 20px;">
-        <div style="margin-bottom: 15px;">
-          <div><strong>Vehicle:</strong> ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</div>
-          <div><strong>Location:</strong> ${sosVehicle.address || "Unknown location"}</div>
-          <div><strong>Coordinates:</strong> ${parseFloat(sosVehicle.latitude).toFixed(6)}, ${parseFloat(sosVehicle.longitude).toFixed(6)}</div>
-          <div><strong>Time:</strong> ${formattedTime} on ${formattedDate}</div>
+      <div style="padding: 15px;">
+        <div style="margin-bottom: 10px; font-size: 13px;">
+          <div><strong>Location:</strong> ${sosVehicle.address || "Unknown"}</div>
+          <div><strong>Time:</strong> ${formattedTime}</div>
         </div>
         
-        <h4 style="color: #d32f2f; border-bottom: 2px solid #eee; padding-bottom: 5px;">
-          Nearby Vehicles (within 5km radius):
+        <h4 style="color: #d32f2f; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 14px; margin-bottom: 10px;">
+          Nearby Vehicles (within 5km):
         </h4>
   `;
 
   if (nearbyVehicles.length > 0) {
     content += `
-      <div style="max-height: 300px; overflow-y: auto; margin: 10px 0;">
-        <table style="width: 100%; border-collapse: collapse;">
+      <div style="max-height: 200px; overflow-y: auto; margin: 8px 0; font-size: 12px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
           <thead>
             <tr style="background-color: #f5f5f5;">
-              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Vehicle</th>
-              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Distance</th>
-              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">ETA</th>
-              <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
+              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Vehicle</th>
+              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Dist</th>
+              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">ETA</th>
+              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -1333,17 +1427,17 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
       
       content += `
         <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
             <strong>${item.vehicle.LicensePlateNumber || item.vehicle.imei}</strong>
           </td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
             ${item.distance} km
           </td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">
+          <td style="padding: 6px; border-bottom: 1px solid #eee;">
             ~${item.estimatedTime} min
           </td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; color: ${statusColor};">
-            ${item.status} ${item.speed > 0 ? `(${item.speed.toFixed(0)} km/h)` : ''}
+          <td style="padding: 6px; border-bottom: 1px solid #eee; color: ${statusColor};">
+            ${item.status.charAt(0).toUpperCase()}
           </td>
         </tr>
       `;
@@ -1356,30 +1450,28 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
     `;
   } else {
     content += `
-      <div style="padding: 20px; text-align: center; color: #666;">
-        <p style="font-size: 18px;">⚠️</p>
-        <p><strong>No other vehicles found within 5km radius.</strong></p>
-        <p>Consider checking wider area or alternative resources.</p>
+      <div style="padding: 10px; text-align: center; color: #666; font-size: 12px;">
+        <p><strong>No vehicles within 5km.</strong></p>
       </div>
     `;
   }
 
- content += `
-        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+  content += `
+        <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: flex-end;">
           <button id="acknowledge-sos-btn" 
-                  style="padding: 10px 20px; background-color: #4caf50; color: white; 
-                         border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-            ✅ Acknowledge SOS
+                  style="padding: 8px 12px; background-color: #4caf50; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+            ✅ Acknowledge
           </button>
           <button id="view-on-map-btn" 
-                  style="padding: 10px 20px; background-color: #2196f3; color: white; 
-                         border: none; border-radius: 4px; cursor: pointer;">
-            🗺️ View on Map
+                  style="padding: 8px 12px; background-color: #2196f3; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            🗺️ Map
           </button>
           <button id="close-sos-popup" 
-                  style="padding: 10px 20px; background-color: #757575; color: white; 
-                         border: none; border-radius: 4px; cursor: pointer;">
-            ✕ Close
+                  style="padding: 8px 12px; background-color: #757575; color: white; 
+                         border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            ✕
           </button>
         </div>
       </div>
@@ -1396,12 +1488,13 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.zIndex = "10000";
   popup.style.backgroundColor = "white";
   popup.style.borderRadius = "8px";
-  popup.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
-  popup.style.width = "600px";
+  popup.style.boxShadow = "0 5px 15px rgba(0,0,0,0.3)";
+  popup.style.width = "400px"; // Reduced from 600px
   popup.style.maxWidth = "90vw";
-  popup.style.maxHeight = "80vh";
+  popup.style.maxHeight = "70vh";
   popup.style.overflow = "hidden";
 
+  // Add event handlers (same as before)
   document.getElementById("acknowledge-sos-btn").onclick = () => {
     acknowledgeSOS(sosVehicle.imei);
     popup.remove();
