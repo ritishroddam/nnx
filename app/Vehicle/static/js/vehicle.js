@@ -976,6 +976,59 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   const existingAlert = document.getElementById(alertId);
   if (existingAlert) existingAlert.remove();
   
+  // Format nearby vehicles list
+  let nearbyListHTML = '';
+  if (nearbyVehicles.length > 0) {
+    nearbyListHTML = `
+      <div class="nearby-vehicles-details" style="margin-top: 10px; display: none;">
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #f5f5f5;">
+              <th style="padding: 4px; text-align: left;">Vehicle</th>
+              <th style="padding: 4px; text-align: left;">Dist</th>
+              <th style="padding: 4px; text-align: left;">ETA</th>
+              <th style="padding: 4px; text-align: left;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    // Show top 5 nearest vehicles
+    const topVehicles = nearbyVehicles.slice(0, 5);
+    topVehicles.forEach((item, index) => {
+      const statusColor = item.status === "moving" ? "#4caf50" : 
+                         item.status === "stopped" ? "#f44336" : 
+                         item.status === "idle" ? "#ff9800" : "#9e9e9e";
+      
+      nearbyListHTML += `
+        <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
+          <td style="padding: 4px; border-bottom: 1px solid #eee;">
+            <strong>${item.vehicle.LicensePlateNumber || item.vehicle.imei}</strong>
+          </td>
+          <td style="padding: 4px; border-bottom: 1px solid #eee;">
+            ${item.distance} km
+          </td>
+          <td style="padding: 4px; border-bottom: 1px solid #eee;">
+            ~${item.estimatedTime} min
+          </td>
+          <td style="padding: 4px; border-bottom: 1px solid #eee; color: ${statusColor};">
+            ${item.status.charAt(0).toUpperCase()}
+          </td>
+        </tr>
+      `;
+    });
+    
+    nearbyListHTML += `
+          </tbody>
+        </table>
+        ${nearbyVehicles.length > 5 ? 
+          `<div style="text-align: center; padding: 4px; font-size: 10px; color: #666;">
+            + ${nearbyVehicles.length - 5} more vehicles
+          </div>` : ''}
+      </div>
+    `;
+  }
+  
   const alertDiv = document.createElement("div");
   alertDiv.id = alertId;
   alertDiv.style.cssText = `
@@ -986,15 +1039,48 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   alertDiv.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: start;">
       <div style="flex: 1;">
-        <div style="font-weight: bold; color: #ff0000;">${sosVehicle.LicensePlateNumber || sosVehicle.imei}</div>
+        <div style="font-weight: bold; color: #ff0000; display: flex; align-items: center; gap: 5px;">
+          <span>🚨</span>
+          <span>${sosVehicle.LicensePlateNumber || sosVehicle.imei}</span>
+        </div>
         <div style="font-size: 12px; color: #666;">${sosVehicle.address || "Unknown location"}</div>
-        <div style="font-size: 11px; color: #999;">${nearbyVehicles.length} nearby vehicles</div>
+        <div style="font-size: 11px; color: #999; cursor: pointer; margin-top: 5px;" 
+             class="toggle-nearby-btn" data-expanded="false">
+          📍 ${nearbyVehicles.length} nearby vehicles (click to view)
+        </div>
+        ${nearbyListHTML}
       </div>
-      <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" style="background: #4caf50; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;">Ack</button>
+      <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" 
+              style="background: #4caf50; color: white; border: none; border-radius: 4px; 
+                     padding: 5px 10px; cursor: pointer; font-size: 12px; font-weight: bold;">
+        Ack
+      </button>
     </div>
   `;
   
   container.insertBefore(alertDiv, container.firstChild);
+  
+  // Add click handler to toggle nearby vehicles details
+  const toggleBtn = alertDiv.querySelector('.toggle-nearby-btn');
+  if (toggleBtn) {
+    toggleBtn.onclick = (e) => {
+      e.stopPropagation();
+      const detailsDiv = alertDiv.querySelector('.nearby-vehicles-details');
+      const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
+      
+      if (detailsDiv) {
+        if (isExpanded) {
+          detailsDiv.style.display = 'none';
+          toggleBtn.innerHTML = `📍 ${nearbyVehicles.length} nearby vehicles (click to view)`;
+          toggleBtn.setAttribute('data-expanded', 'false');
+        } else {
+          detailsDiv.style.display = 'block';
+          toggleBtn.innerHTML = `📍 ${nearbyVehicles.length} nearby vehicles (click to hide)`;
+          toggleBtn.setAttribute('data-expanded', 'true');
+        }
+      }
+    };
+  }
   
   // Limit number of displayed alerts
   const maxAlerts = 5;
@@ -1011,13 +1097,27 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   };
   
   // Click on alert to view on map
-  alertDiv.onclick = () => {
+  alertDiv.onclick = (e) => {
+    // Don't trigger if clicking on toggle button or acknowledge button
+    if (e.target.classList.contains('toggle-nearby-btn') || 
+        e.target.classList.contains('sos-panel-ack-btn')) {
+      return;
+    }
+    
     const latLng = new google.maps.LatLng(
       parseFloat(sosVehicle.latitude),
       parseFloat(sosVehicle.longitude)
     );
     map.setZoom(16);
     map.panTo(latLng);
+    
+    // Also highlight the SOS vehicle on the map
+    const marker = markers[sosVehicle.imei];
+    if (marker) {
+      const address = sosVehicle.address || "Location unknown";
+      setInfoWindowContent(infoWindow, marker, latLng, sosVehicle, address);
+      infoWindow.open(map, marker);
+    }
   };
 }
 
