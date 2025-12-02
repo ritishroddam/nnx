@@ -971,7 +971,6 @@ function createSOSAlertPanel() {
   };
   
   document.getElementById("collapse-sos-panel").onclick = () => {
-    // Collapse all expanded details
     document.querySelectorAll('.toggle-nearby-btn[data-expanded="true"]').forEach(btn => {
       btn.click();
     });
