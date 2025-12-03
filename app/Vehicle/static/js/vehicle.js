@@ -81,7 +81,7 @@ var geofenceButton = null;
 var selectToggleButton = null;
 var selectMode = false;
 let currentPage = 1;
-const perPage = 100;
+let perPage = 100;
 let totalPages = 1;
 let totalVehicles = 0;
 let selectedVehicles = new Set();
@@ -92,7 +92,7 @@ let lastHourRender = 0;
 let totalVehicleCardCount = 0;
 
 let tableCurrentPage = 1;
-const tablePerPage = 100;
+let tablePerPage = 100;
 let tableFilteredData = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
