@@ -329,7 +329,7 @@ socket.on("vehicle_live_update", (data) => {
         
         console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°, Speed: ${newSpeed} km/h`);
         
-        animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 5000);
+        animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 10000);
         
         updateVehicleInfo(data);
 
