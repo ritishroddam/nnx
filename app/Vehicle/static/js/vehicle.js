@@ -91,6 +91,10 @@ let lastMinuteRender = 0;
 let lastHourRender = 0;
 let totalVehicleCardCount = 0;
 
+let tableCurrentPage = 1;
+const tablePerPage = 100;
+let tableFilteredData = [];
+
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
 
@@ -456,15 +460,15 @@ async function fetchVehicleData(page = 1) {
   }
 }
 
-function addPaginationControls() {
-  const existingPagination = document.getElementById("table-pagination");
-  if (existingPagination) existingPagination.remove();
-}
+// function addPaginationControls() {
+//   const existingPagination = document.getElementById("table-pagination");
+//   if (existingPagination) existingPagination.remove();
+// }
 
-function updatePaginationControls() {
-  const existingPagination = document.getElementById("table-pagination");
-  if (existingPagination) existingPagination.remove();
-}
+// function updatePaginationControls() {
+//   const existingPagination = document.getElementById("table-pagination");
+//   if (existingPagination) existingPagination.remove();
+// }
 
 function buildVehicleCardTemplate(vehicle, isDarkMode) {
   const lastUpdated = convertToDate(vehicle.date, vehicle.time);
@@ -2513,17 +2517,26 @@ function showMapView() {
   updateMap();
 }
 
+// function showListView() {
+//   document.getElementById("map").style.display = "none";
+//   document.getElementById("vehicle-table-container").style.display = "block";
+//   document.querySelector(".floating-card").style.display = "none";
+//   document.querySelector(".icon-legend-container").style.display = "none";
+
+//   if (!document.getElementById("table-pagination")) {
+//     addPaginationControls();
+//   }
+
+//   populateVehicleTable();
+// }
+
 function showListView() {
   document.getElementById("map").style.display = "none";
   document.getElementById("vehicle-table-container").style.display = "block";
   document.querySelector(".floating-card").style.display = "none";
   document.querySelector(".icon-legend-container").style.display = "none";
 
-  if (!document.getElementById("table-pagination")) {
-    addPaginationControls();
-  }
-
-  populateVehicleTable();
+  populateVehicleTable(); // This will now create pagination if needed
 }
 
 function refreshLastUpdatedDisplay() {
@@ -2605,21 +2618,383 @@ function updateMultiShareButton() {
     }
 }
 
+function createTablePagination() {
+  const existingPagination = document.getElementById("table-pagination");
+  if (existingPagination) existingPagination.remove();
+  
+  const paginationDiv = document.createElement("div");
+  paginationDiv.id = "table-pagination";
+  paginationDiv.className = "table-pagination";
+  paginationDiv.style.cssText = `
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 10px;
+    flex-wrap: wrap;
+  `;
+  
+  const totalPages = Math.ceil(tableFilteredData.length / tablePerPage);
+  
+  if (totalPages <= 1) return; // Don't show pagination if only one page
+  
+  // Previous button
+  const prevButton = document.createElement("button");
+  prevButton.innerHTML = "&laquo; Previous";
+  prevButton.disabled = tableCurrentPage === 1;
+  prevButton.style.cssText = `
+    padding: 8px 16px;
+    background-color: ${prevButton.disabled ? '#ccc' : '#007bff'};
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: ${prevButton.disabled ? 'not-allowed' : 'pointer'};
+    font-size: 14px;
+  `;
+  prevButton.onclick = () => {
+    if (tableCurrentPage > 1) {
+      tableCurrentPage--;
+      renderTablePage();
+    }
+  };
+  paginationDiv.appendChild(prevButton);
+  
+  // Page numbers
+  const pageNumbersContainer = document.createElement("div");
+  pageNumbersContainer.style.cssText = `
+    display: flex;
+    gap: 5px;
+  `;
+  
+  // Show first page, current page, and last page with ellipsis
+  const pagesToShow = [];
+  if (totalPages <= 7) {
+    // Show all pages if 7 or less
+    for (let i = 1; i <= totalPages; i++) {
+      pagesToShow.push(i);
+    }
+  } else {
+    // Always show first page
+    pagesToShow.push(1);
+    
+    if (tableCurrentPage > 3) {
+      pagesToShow.push('...');
+    }
+    
+    // Show pages around current page
+    const start = Math.max(2, tableCurrentPage - 1);
+    const end = Math.min(totalPages - 1, tableCurrentPage + 1);
+    
+    for (let i = start; i <= end; i++) {
+      if (!pagesToShow.includes(i)) {
+        pagesToShow.push(i);
+      }
+    }
+    
+    if (tableCurrentPage < totalPages - 2) {
+      pagesToShow.push('...');
+    }
+    
+    // Always show last page if not already included
+    if (!pagesToShow.includes(totalPages)) {
+      pagesToShow.push(totalPages);
+    }
+  }
+  
+  pagesToShow.forEach(page => {
+    if (page === '...') {
+      const ellipsis = document.createElement("span");
+      ellipsis.textContent = "...";
+      ellipsis.style.cssText = `
+        padding: 8px 12px;
+        font-size: 14px;
+        color: #666;
+      `;
+      pageNumbersContainer.appendChild(ellipsis);
+    } else {
+      const pageButton = document.createElement("button");
+      pageButton.textContent = page;
+      pageButton.style.cssText = `
+        padding: 8px 12px;
+        background-color: ${page === tableCurrentPage ? '#0056b3' : '#007bff'};
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        min-width: 40px;
+        font-weight: ${page === tableCurrentPage ? 'bold' : 'normal'};
+      `;
+      pageButton.onclick = () => {
+        tableCurrentPage = page;
+        renderTablePage();
+      };
+      pageNumbersContainer.appendChild(pageButton);
+    }
+  });
+  
+  paginationDiv.appendChild(pageNumbersContainer);
+  
+  // Next button
+  const nextButton = document.createElement("button");
+  nextButton.innerHTML = "Next &raquo;";
+  nextButton.disabled = tableCurrentPage === totalPages;
+  nextButton.style.cssText = `
+    padding: 8px 16px;
+    background-color: ${nextButton.disabled ? '#ccc' : '#007bff'};
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: ${nextButton.disabled ? 'not-allowed' : 'pointer'};
+    font-size: 14px;
+  `;
+  nextButton.onclick = () => {
+    if (tableCurrentPage < totalPages) {
+      tableCurrentPage++;
+      renderTablePage();
+    }
+  };
+  paginationDiv.appendChild(nextButton);
+  
+  // Page info
+  const pageInfo = document.createElement("div");
+  pageInfo.textContent = `Page ${tableCurrentPage} of ${totalPages} (${tableFilteredData.length} vehicles)`;
+  pageInfo.style.cssText = `
+    font-size: 14px;
+    color: #666;
+    margin-left: 15px;
+  `;
+  paginationDiv.appendChild(pageInfo);
+  
+  // Items per page selector
+  const perPageSelect = document.createElement("select");
+  perPageSelect.id = "table-items-per-page";
+  perPageSelect.style.cssText = `
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: 15px;
+  `;
+  
+  const options = [50, 100, 200, 500];
+  options.forEach(option => {
+    const opt = document.createElement("option");
+    opt.value = option;
+    opt.textContent = `${option} per page`;
+    opt.selected = option === tablePerPage;
+    perPageSelect.appendChild(opt);
+  });
+  
+  perPageSelect.onchange = function() {
+    tableCurrentPage = 1;
+    tablePerPage = parseInt(this.value);
+    renderTablePage();
+  };
+  
+  paginationDiv.appendChild(perPageSelect);
+  
+  // Insert pagination after the table
+  const tableContainer = document.querySelector(".table-container");
+  if (tableContainer) {
+    tableContainer.appendChild(paginationDiv);
+  }
+}
+
+// function populateVehicleTable() {
+//   const tableBody = document
+//     .getElementById("vehicle-table")
+//     .getElementsByTagName("tbody")[0];
+//   tableBody.innerHTML = ""; 
+//   const isDarkMode = document.body.classList.contains("dark-mode");
+
+//   showHidecar();
+//   const listContainer = document.getElementById("vehicle-list");
+//   const countContainer = document.getElementById("vehicle-count");
+//   listContainer.innerHTML = "";
+//   resetVehicleCardCount();
+//   countContainer.innerText = vehicleData.size;
+
+//   vehicleData.forEach((vehicle, imei) => {
+//     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
+//     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
+
+//     const speedValue =
+//       vehicle.speed !== null && vehicle.speed !== undefined
+//         ? convertSpeedToKmh(vehicle.speed).toFixed(2)
+//         : null;
+
+//     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
+//     const address = vehicle.address || "Location unknown";
+//     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
+
+//     const now = new Date();
+//     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
+//     const timeDiff = Math.abs(now - lastUpdated);
+//     let statusText =  vehicle.status;
+
+//     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
+//     const iconRed = "color:#d32f2f;";
+//     const sosIcon =
+//       vehicle.sos === "1"
+//         ? `<span class="material-symbols-outlined" style="${
+//             iconStyle + iconRed
+//           }">sos</span>`
+//         : "";
+//     const gpsIcon =
+//       statusText === "Offline" ? "location_disabled" : "my_location";
+    
+//     let ignitionIcon, ignitionColor;
+//     if (vehicle.ignition === "0" || vehicle.ignition === 0) {
+//       ignitionIcon = "key_off";
+//       ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
+//     } else {
+//       ignitionIcon = "key";
+//       ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
+//     }
+
+//     const ASUgsmValue = parseInt(vehicle.gsm);
+
+//     let gsmIcon, gsmColor;
+
+//     if (ASUgsmValue == 0) {
+//       gsmIcon = "signal_cellular_null";
+//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
+//     } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
+//       gsmIcon = "signal_cellular_1_bar";
+//       gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; 
+//     } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
+//       gsmIcon = "signal_cellular_2_bar";
+//       gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
+//     } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
+//       gsmIcon = "signal_cellular_3_bar";
+//       gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
+//     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
+//       gsmIcon = "signal_cellular_4_bar";
+//       gsmColor = isDarkMode ? "#81c784" : "#4caf50"; 
+//     } else {
+//       gsmIcon = "signal_cellular_off";
+//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
+//     }    
+
+//     const row = tableBody.insertRow();
+//     row.setAttribute('data-imei', imei);
+//     row.style.cursor = "pointer";
+    
+//     row.addEventListener('click', function(e) {
+//       if (e.target.tagName && e.target.tagName.toLowerCase() === 'a') return;
+//       if (e.target.closest && e.target.closest('a')) return;
+//       if (e.target.closest && e.target.closest('.vehicle-table-icons')) return;
+//       if (e.target.classList && e.target.classList.contains('material-symbols-outlined')) return;
+
+//       if (selectMode) {
+//         toggleRowSelection(this, imei);
+//       } else {
+//         try {
+//           window.open(url, '_blank');
+//         } catch (err) {
+//           console.error('Failed to open vehicle details:', err);
+//         }
+//       }
+//     });
+
+//     row.insertCell(0).innerText = vehicle.LicensePlateNumber
+//       ? vehicle.LicensePlateNumber
+//       : vehicle.imei;
+//     row.insertCell(1).innerText = vehicle.VehicleType;
+
+//     const lastUpdatedCell = row.insertCell(2);
+//     lastUpdatedCell.classList.add("last-updated-cell");
+//     lastUpdatedCell.innerText = formatLastUpdatedText(
+//       vehicle.date,
+//       vehicle.time
+//     );
+
+//     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
+//     row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
+//     row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
+
+//     const speedCell = row.insertCell(6);
+//     speedCell.innerText = speed;
+//     if (speedValue !== null && parseFloat(speedValue) > 60) {
+//       speedCell.style.border = "2px solid red";
+//     }
+
+//     row.insertCell(7).innerText = vehicle.distance
+//       ? parseFloat(vehicle.distance).toFixed(2)
+//       : "N/A";
+//     row.insertCell(8).innerText = vehicle.odometer; 
+
+//     const icons = `
+//       <div class="vehicle-table-icons">
+//         ${sosIcon}
+//         <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
+//         <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
+//         <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
+//       </div>
+//     `;
+//     row.insertCell(9).innerHTML = icons;
+
+//     row.addEventListener("dblclick", function (e) {
+//       if (e.target.tagName.toLowerCase() === "a") return;
+//       window.open(url, "_blank");
+//     });
+//   });
+  
+//   selectedVehicles.clear();
+//   updateMultiShareButton();
+//   showHidecar();
+// }
+
 function populateVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
-  tableBody.innerHTML = ""; 
+  tableBody.innerHTML = "";
+  
+  // Convert vehicleData Map to array for filtering
+  tableFilteredData = Array.from(vehicleData.values());
+  
+  // Apply search filter if there's a search term
+  const searchTerm = document
+    .getElementById("table-vehicle-search")
+    ?.value.trim()
+    .toLowerCase() || "";
+    
+  if (searchTerm) {
+    tableFilteredData = tableFilteredData.filter(vehicle => {
+      const plateNumber = vehicle.LicensePlateNumber
+        ? vehicle.LicensePlateNumber.toLowerCase()
+        : "";
+      return plateNumber.includes(searchTerm);
+    });
+  }
+  
+  // Reset to first page when populating
+  tableCurrentPage = 1;
+  
+  // Render the current page
+  renderTablePage();
+}
+
+// New function to render a specific page of the table
+function renderTablePage() {
+  const tableBody = document
+    .getElementById("vehicle-table")
+    .getElementsByTagName("tbody")[0];
+  tableBody.innerHTML = "";
+  
+  // Calculate start and end indices
+  const startIndex = (tableCurrentPage - 1) * tablePerPage;
+  const endIndex = Math.min(startIndex + tablePerPage, tableFilteredData.length);
+  
   const isDarkMode = document.body.classList.contains("dark-mode");
-
-  showHidecar();
-  const listContainer = document.getElementById("vehicle-list");
-  const countContainer = document.getElementById("vehicle-count");
-  listContainer.innerHTML = "";
-  resetVehicleCardCount();
-  countContainer.innerText = vehicleData.size;
-
-  vehicleData.forEach((vehicle, imei) => {
+  
+  // Render only the vehicles for the current page
+  for (let i = startIndex; i < endIndex; i++) {
+    const vehicle = tableFilteredData[i];
+    const imei = vehicle.imei;
+    
     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
@@ -2635,7 +3010,7 @@ function populateVehicleTable() {
     const now = new Date();
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const timeDiff = Math.abs(now - lastUpdated);
-    let statusText =  vehicle.status;
+    let statusText = vehicle.status;
 
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
@@ -2679,7 +3054,7 @@ function populateVehicleTable() {
     } else {
       gsmIcon = "signal_cellular_off";
       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-    }    
+    }
 
     const row = tableBody.insertRow();
     row.setAttribute('data-imei', imei);
@@ -2727,7 +3102,7 @@ function populateVehicleTable() {
     row.insertCell(7).innerText = vehicle.distance
       ? parseFloat(vehicle.distance).toFixed(2)
       : "N/A";
-    row.insertCell(8).innerText = vehicle.odometer; 
+    row.insertCell(8).innerText = vehicle.odometer;
 
     const icons = `
       <div class="vehicle-table-icons">
@@ -2738,16 +3113,14 @@ function populateVehicleTable() {
       </div>
     `;
     row.insertCell(9).innerHTML = icons;
-
-    row.addEventListener("dblclick", function (e) {
-      if (e.target.tagName.toLowerCase() === "a") return;
-      window.open(url, "_blank");
-    });
-  });
+  }
   
+  // Clear and recreate pagination controls
+  createTablePagination();
+  
+  // Clear selected vehicles when page changes
   selectedVehicles.clear();
   updateMultiShareButton();
-  showHidecar();
 }
 
 function showMultiShareLocationPopup() {
@@ -3053,21 +3426,42 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
+// function searchTable() {
+//   const searchTerm = document
+//     .getElementById("table-vehicle-search")
+//     .value.trim()
+//     .toLowerCase();
+//   const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
+
+//   tableRows.forEach((row) => {
+//     const plateNumber = row.cells[0].textContent.toLowerCase();
+//     if (plateNumber.includes(searchTerm)) {
+//       row.style.display = "";
+//     } else {
+//       row.style.display = "none";
+//     }
+//   });
+// }
+
 function searchTable() {
   const searchTerm = document
     .getElementById("table-vehicle-search")
     .value.trim()
     .toLowerCase();
-  const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
-
-  tableRows.forEach((row) => {
-    const plateNumber = row.cells[0].textContent.toLowerCase();
-    if (plateNumber.includes(searchTerm)) {
-      row.style.display = "";
-    } else {
-      row.style.display = "none";
-    }
+    
+  // Re-filter the data
+  tableFilteredData = Array.from(vehicleData.values()).filter(vehicle => {
+    const plateNumber = vehicle.LicensePlateNumber
+      ? vehicle.LicensePlateNumber.toLowerCase()
+      : "";
+    return plateNumber.includes(searchTerm);
   });
+  
+  // Reset to first page when searching
+  tableCurrentPage = 1;
+  
+  // Re-render the table
+  renderTablePage();
 }
 
 function searchVehicle() {
