@@ -190,7 +190,7 @@ function updateMarkerColor(marker, speed, lastUpdate) {
     marker.lastUpdate = lastUpdate;
 }
 
-function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, duration = 12000) {
+function animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, duration = 15000) {
     const startPosition = marker.currentPosition;
     const startCourse = marker.currentCourse || 0;
     const startTime = performance.now();
@@ -329,7 +329,7 @@ socket.on("vehicle_live_update", (data) => {
         
         console.log(`Vehicle ${data.LicensePlateNumber} update - Course: ${newCourse}°, Speed: ${newSpeed} km/h`);
         
-        animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 2000);
+        animateMarker(marker, newPosition, newCourse, newSpeed, newLastUpdate, 5000);
         
         updateVehicleInfo(data);
 
