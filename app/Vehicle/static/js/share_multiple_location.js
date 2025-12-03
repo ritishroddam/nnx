@@ -1,4 +1,20 @@
-window.onload = initMap();
+// window.onload = initMap();
+window.onload = function() {
+    initMap();
+    
+    // Extract token from URL
+    const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
+    if (tokenMatch && tokenMatch[1]) {
+        const token = tokenMatch[1];
+        startLinkStatusCheck(token);
+    }
+    
+    // Also add cache-busting on page load
+    if (window.performance && window.performance.navigation.type === 1) {
+        // Page was reloaded
+        console.log('Page was reloaded');
+    }
+};
 
 const socket = io("https://cordonnx.com", {
     transports: ["websocket"],
@@ -12,6 +28,7 @@ let map;
 let markers = {};
 let activeInfoWindow = null;
 let trackedVehicle = null;
+let linkCheckInterval;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -298,14 +315,47 @@ function highlightVehicleCard(licensePlate) {
     }
 }
 
-socket.on("connect", () => {
+// socket.on("connect", () => {
+//     console.log("Connected to socket for live updates");
+//     vehiclesData.forEach(vehicle => {
+//         socket.emit("subscribe_vehicle_updates", {
+//             LicensePlateNumber: vehicle.licensePlateNumber
+//         });
+//     });
+// })
+
+socket.on('connect', () => {
     console.log("Connected to socket for live updates");
+    
+    // Check link status via socket
+    const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
+    if (tokenMatch && tokenMatch[1]) {
+        const token = tokenMatch[1];
+        
+        // Check link status immediately
+        socket.emit('check_link_status', { token: token });
+        
+        // Check every minute
+        setInterval(() => {
+            socket.emit('check_link_status', { token: token });
+        }, 60000);
+    }
+    
     vehiclesData.forEach(vehicle => {
         socket.emit("subscribe_vehicle_updates", {
             LicensePlateNumber: vehicle.licensePlateNumber
         });
     });
-})
+});
+
+// Handle link status response
+socket.on('check_link_status_response', (data) => {
+    if (!data.valid) {
+        console.log('Link has expired via socket check');
+        // Redirect to expired page
+        window.location.href = '/link-expired-page?token=' + data.token;
+    }
+});
 
 socket.on("subscription_success", (data) => {
   console.log("Subscription successful:", data);
@@ -376,6 +426,74 @@ function updateVehicleInfo(vehicleData) {
         }
     }
 }
+
+function startLinkStatusCheck(token) {
+    // Check link status every 30 seconds
+    linkCheckInterval = setInterval(() => {
+        checkLinkStatus(token);
+    }, 30000); // 30 seconds
+}
+
+function checkLinkStatus(token) {
+    fetch(window.location.href, {
+        method: 'GET',
+        headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        }
+    })
+    .then(response => {
+        // If status is 410 (Gone), redirect to expired page
+        if (response.status === 410) {
+            clearInterval(linkCheckInterval);
+            // Force reload to show expired page
+            window.location.href = window.location.href + '?t=' + Date.now();
+        }
+        // Check if response is HTML (expired page) even with 200
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('text/html')) {
+            return response.text().then(text => {
+                // Check if it's the expired page by looking for specific content
+                if (text.includes('Link Expired') || text.includes('link_expired')) {
+                    clearInterval(linkCheckInterval);
+                    // Replace current page content with expired page
+                    document.open();
+                    document.write(text);
+                    document.close();
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error checking link status:', error);
+    });
+}
+
+// Add this to your HTML template or JS file
+function checkExpirationTime() {
+    // Get expiration time from server data
+    if (typeof share_info !== 'undefined' && share_info.to_datetime) {
+        const expirationTime = new Date(share_info.to_datetime);
+        const now = new Date();
+        
+        // If already expired
+        if (now > expirationTime) {
+            window.location.reload(true); // Force reload bypassing cache
+            return;
+        }
+        
+        // Schedule check for when it will expire
+        const timeUntilExpiration = expirationTime - now;
+        if (timeUntilExpiration > 0) {
+            setTimeout(() => {
+                window.location.reload(true);
+            }, timeUntilExpiration + 1000); // Add 1 second buffer
+        }
+    }
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', checkExpirationTime);
 
 function debugMarkerRotations() {
     console.log('Current marker rotations:');

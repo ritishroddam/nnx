@@ -1,4 +1,4 @@
-from flask import Blueprint, app, request, jsonify, render_template, abort, url_for
+from flask import Blueprint, app, request, jsonify, render_template, abort, url_for, make_response
 from datetime import datetime, timezone
 import pytz
 import secrets
@@ -89,8 +89,13 @@ def view_multiple_share_locations(token):
     info = links_collection.find_one({"token": token})
     now = datetime.now(timezone.utc)  
     
-    if not info or now < info['from_datetime'] or now > info['to_datetime']:
-        return render_template('link_expired.html'), 410
+    if not info or now < info['from_datetime'] or now > info['to_datetime']:    
+        response = make_response(render_template('link_expired.html'))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        response.status_code = 410
+        return response
 
     licensePlateNumbers = info['licensePlateNumber'] 
     vehicles_data = []
@@ -160,7 +165,12 @@ def view_share_location(licensePlateNumber, token):
     now = datetime.now(timezone.utc)  
     
     if not info or now < info['from_datetime'] or now > info['to_datetime']:
-        return render_template('link_expired.html'), 410
+        response = make_response(render_template('link_expired.html'))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        response.status_code = 410
+        return response
 
     licensePlateNumber = info['licensePlateNumber']
     vehicle = db['vehicle_inventory'].find_one({"LicensePlateNumber": licensePlateNumber},{"_id": 0, "IMEI":1})
