@@ -156,27 +156,6 @@ socket.on("disconnect", () => {
   console.warn("WebSocket disconnected");
 });
 
-// socket.on("vehicle_update", async function (data) {
-//   try {
-//     const updatedData = await updateData(data);
-//     updateVehicleData(updatedData);
-
-//     const lastUpdated = convertToDate(data.date, data.time);
-//     const now = new Date();
-//     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
-
-//     if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
-//       triggerSOS(data.imei, markers[data.imei]);
-//     } else if (data.sos === "1") {
-//       console.log(`Old SOS alert ignored for ${data.imei}`);
-//     }
-
-//     updateVehicleCard(updatedData);
-//   } catch (error) {
-//     console.error("Error in vehicle_update handler:", error);
-//   }
-// });
-
 socket.on("vehicle_update", async function (data) {
   try {
     const oldData = vehicleData.get(data.imei);
@@ -459,16 +438,6 @@ async function fetchVehicleData(page = 1) {
     return [];
   }
 }
-
-// function addPaginationControls() {
-//   const existingPagination = document.getElementById("table-pagination");
-//   if (existingPagination) existingPagination.remove();
-// }
-
-// function updatePaginationControls() {
-//   const existingPagination = document.getElementById("table-pagination");
-//   if (existingPagination) existingPagination.remove();
-// }
 
 function buildVehicleCardTemplate(vehicle, isDarkMode) {
   const lastUpdated = convertToDate(vehicle.date, vehicle.time);
@@ -807,34 +776,6 @@ function deg2rad(deg) {
   return deg * (Math.PI/180);
 }
 
-// function triggerSOS(imei, marker) {
-//   const vehicle = vehicleData.get(imei);
-//   if (!vehicle) return;
-
-//   if(vehicle.sosActive){
-//     console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
-//     return;
-//   }
-
-//   if (!sosActiveMarkers[imei]) {
-//     const sosDiv = document.createElement("div");
-//     sosDiv.className = "sos-blink";
-//     sosDiv.style.position = "absolute";
-//     sosDiv.style.top = "50%";
-//     sosDiv.style.left = "50%";
-//     sosDiv.style.pointerEvents = "none";
-//     marker.content.appendChild(sosDiv);
-//     sosActiveMarkers[imei] = sosDiv;
-//     marker.content.classList.add("vehicle-blink");
-
-//     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
-//     showNearbyVehiclesPopup(vehicle, nearbyVehicles);
-
-//   vehicle.sosActive = true;
-//   vehicleData.set(imei, vehicle);
-//   }
-// }
-
 function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle || !marker) {
@@ -994,11 +935,9 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   const container = document.getElementById("sos-alerts-container");
   const alertId = `sos-alert-${sosVehicle.imei}`;
   
-  // Remove existing alert for this vehicle
   const existingAlert = document.getElementById(alertId);
   if (existingAlert) existingAlert.remove();
   
-  // Format nearby vehicles list
   let nearbyListHTML = '';
   if (nearbyVehicles.length > 0) {
     nearbyListHTML = `
@@ -1020,13 +959,11 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
             <tbody>
     `;
     
-    // Show ALL vehicles with scroll
     nearbyVehicles.forEach((item, index) => {
       const statusColor = item.status === "moving" ? "#4caf50" : 
                          item.status === "stopped" ? "#f44336" : 
                          item.status === "idle" ? "#ff9800" : "#9e9e9e";
       
-      // Get full status name
       const statusName = getFullStatusName(item.status);
       
       nearbyListHTML += `
@@ -1117,7 +1054,6 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   
   container.insertBefore(alertDiv, container.firstChild);
   
-  // Add click handler to toggle nearby vehicles details
   const toggleBtn = alertDiv.querySelector('.toggle-nearby-btn');
   if (toggleBtn) {
     toggleBtn.onclick = (e) => {
@@ -1141,7 +1077,6 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
     };
   }
   
-  // Add click handler for focus button
   const focusBtn = alertDiv.querySelector('.focus-on-sos-btn');
   if (focusBtn) {
     focusBtn.onclick = (e) => {
@@ -1151,23 +1086,19 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
     };
   }
   
-  // Limit number of displayed alerts
   const maxAlerts = 5;
   const alerts = container.querySelectorAll('div[id^="sos-alert-"]');
   if (alerts.length > maxAlerts) {
     alerts[alerts.length - 1].remove();
   }
   
-  // Add click handler for acknowledge button
   alertDiv.querySelector('.sos-panel-ack-btn').onclick = (e) => {
     e.stopPropagation();
     const imei = e.target.getAttribute('data-imei');
     acknowledgeSOS(imei);
   };
   
-  // Click on alert to view on map
   alertDiv.onclick = (e) => {
-    // Don't trigger if clicking on buttons
     if (e.target.classList.contains('toggle-nearby-btn') || 
         e.target.classList.contains('sos-panel-ack-btn') ||
         e.target.classList.contains('focus-on-sos-btn') ||
@@ -1401,34 +1332,6 @@ function acknowledgeSOS(imei) {
   });
 }
 
-// function findNearbyVehicles(sosVehicle, radiusKm) {
-//   const nearby = [];
-//   const sosLat = parseFloat(sosVehicle.latitude);
-//   const sosLon = parseFloat(sosVehicle.longitude);
-
-//   vehicleData.forEach((vehicle, imei) => {
-//     if (imei === sosVehicle.imei) return; 
-    
-//     const vehicleLat = parseFloat(vehicle.latitude);
-//     const vehicleLon = parseFloat(vehicle.longitude);
-    
-//     if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
-//       const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
-//       if (distance <= radiusKm) {
-//         const estimatedTime = (distance / 40) * 60; 
-//         nearby.push({
-//           vehicle,
-//           distance: distance.toFixed(2),
-//           estimatedTime: estimatedTime.toFixed(0)
-//         });
-//       }
-//     }
-//   });
-
-//   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-//   return nearby;
-// }
-
 function findNearbyVehicles(sosVehicle, radiusKm) {
   const nearby = [];
   const sosLat = parseFloat(sosVehicle.latitude);
@@ -1479,74 +1382,6 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
   return nearby;
 }
 
-// function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
-//   const oldPopup = document.getElementById("sos-nearby-popup");
-//   if (oldPopup) oldPopup.remove();
-
-//   const popup = document.createElement("div");
-//   popup.id = "sos-nearby-popup";
-  
-//   let content = `
-//     <div class="sos-popup-content">
-//       <h3>SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
-//       <div class="sos-location">Location: ${sosVehicle.address || "Unknown"}</div>
-//       <div class="sos-coords">Coordinates: ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
-//       <div class="sos-time">Time: ${new Date().toLocaleTimeString()}</div>
-      
-//       <h4>Nearby Vehicles (within 5km):</h4>
-//   `;
-
-//   if (nearbyVehicles.length > 0) {
-//     content += `<ul class="nearby-vehicles-list">`;
-//     nearbyVehicles.forEach(vehicle => {
-//       content += `
-//         <li>
-//           <strong>${vehicle.vehicle.LicensePlateNumber || vehicle.vehicle.imei}</strong>
-//           - Distance: ${vehicle.distance} km
-//           - Estimated Time: ~${vehicle.estimatedTime} min
-//         </li>
-//       `;
-//     });
-//     content += `</ul>`;
-//   } else {
-//     content += `<p>No other vehicles found within 5km radius.</p>`;
-//   }
-
-//  content += `
-//     <button id="acknowledge-sos-btn" class="sos-ack-btn">Acknowledge SOS</button>
-//     <button id="minimize-sos-popup">Minimize</button>
-//     <button id="close-sos-popup">Close</button>
-//   `;
-
-//   popup.innerHTML = content;
-//   document.body.appendChild(popup);
-
-//   popup.style.position = "fixed";
-//   popup.style.left = "50%";
-//   popup.style.top = "50%";
-//   popup.style.transform = "translate(-50%, -50%)";
-//   popup.style.zIndex = "10000";
-//   popup.style.backgroundColor = "white";
-//   popup.style.padding = "20px";
-//   popup.style.borderRadius = "8px";
-//   popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-//   popup.style.maxWidth = "500px";
-//   popup.style.width = "90%";
-
-//   document.getElementById("acknowledge-sos-btn").onclick = () => {
-//     acknowledgeSOS(sosVehicle.imei);
-//     popup.remove();
-//   };
-
-//   document.getElementById("minimize-sos-popup").onclick = () => {
-//     popup.style.display = "none";
-//   };
-
-//   document.getElementById("close-sos-popup").onclick = () => {
-//     popup.remove();
-//   };
-// }
-
 function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   const oldPopup = document.getElementById("sos-nearby-popup");
   if (oldPopup) oldPopup.remove();
@@ -1562,7 +1397,6 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   
   const formattedDate = new Date().toLocaleDateString();
   
-  // Compact content for smaller popup
   let content = `
     <div class="sos-popup-content" style="font-family: Arial, sans-serif;">
       <div style="background-color: #ff0000; color: white; padding: 10px; border-radius: 6px 6px 0 0;">
@@ -1667,12 +1501,11 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.backgroundColor = "white";
   popup.style.borderRadius = "8px";
   popup.style.boxShadow = "0 5px 15px rgba(0,0,0,0.3)";
-  popup.style.width = "400px"; // Reduced from 600px
+  popup.style.width = "400px";
   popup.style.maxWidth = "90vw";
   popup.style.maxHeight = "70vh";
   popup.style.overflow = "hidden";
 
-  // Add event handlers (same as before)
   document.getElementById("acknowledge-sos-btn").onclick = () => {
     acknowledgeSOS(sosVehicle.imei);
     popup.remove();
@@ -2260,7 +2093,6 @@ function startHybridLastUpdatedLoop() {
   requestAnimationFrame(tick);
 }
 
-
 function convertToDate(ddmmyyyy, hhmmss) {
   let day = ddmmyyyy.substring(0, 2);
   let month = ddmmyyyy.substring(2, 4);
@@ -2411,30 +2243,6 @@ function updateVehicleData(vehicle) {
   showHidecar();
 }
 
-// function removeSOS(imei) {
-//   const popup = document.getElementById("sos-nearby-popup");
-//   if (popup) popup.remove();
-
-//   if (sosActiveMarkers[imei]) {
-//     sosActiveMarkers[imei].remove();
-//     delete sosActiveMarkers[imei];
-//   }
-
-//   const marker = markers[imei];
-//   if (marker && marker.content) {
-//     marker.content.classList.remove("vehicle-blink");
-//   }
-
-//   const vehicle = vehicleData.get(imei);
-//   if (vehicle) {
-//     vehicle.sos = "0";
-//     vehicleData.set(imei, vehicle);
-//   }
-
-//   const vehiclesArray = Array.from(vehicleData.values());
-//   renderVehicleCards(vehiclesArray);
-// }
-
 function removeSOS(imei) {
   const popup = document.getElementById("sos-nearby-popup");
   if (popup) popup.remove();
@@ -2517,26 +2325,13 @@ function showMapView() {
   updateMap();
 }
 
-// function showListView() {
-//   document.getElementById("map").style.display = "none";
-//   document.getElementById("vehicle-table-container").style.display = "block";
-//   document.querySelector(".floating-card").style.display = "none";
-//   document.querySelector(".icon-legend-container").style.display = "none";
-
-//   if (!document.getElementById("table-pagination")) {
-//     addPaginationControls();
-//   }
-
-//   populateVehicleTable();
-// }
-
 function showListView() {
   document.getElementById("map").style.display = "none";
   document.getElementById("vehicle-table-container").style.display = "block";
   document.querySelector(".floating-card").style.display = "none";
   document.querySelector(".icon-legend-container").style.display = "none";
 
-  populateVehicleTable(); // This will now create pagination if needed
+  populateVehicleTable(); 
 }
 
 function refreshLastUpdatedDisplay() {
@@ -2636,9 +2431,8 @@ function createTablePagination() {
   
   const totalPages = Math.ceil(tableFilteredData.length / tablePerPage);
   
-  if (totalPages <= 1) return; // Don't show pagination if only one page
+  if (totalPages <= 1) return; 
   
-  // Previous button
   const prevButton = document.createElement("button");
   prevButton.innerHTML = "&laquo; Previous";
   prevButton.disabled = tableCurrentPage === 1;
@@ -2659,29 +2453,24 @@ function createTablePagination() {
   };
   paginationDiv.appendChild(prevButton);
   
-  // Page numbers
   const pageNumbersContainer = document.createElement("div");
   pageNumbersContainer.style.cssText = `
     display: flex;
     gap: 5px;
   `;
   
-  // Show first page, current page, and last page with ellipsis
   const pagesToShow = [];
   if (totalPages <= 7) {
-    // Show all pages if 7 or less
     for (let i = 1; i <= totalPages; i++) {
       pagesToShow.push(i);
     }
   } else {
-    // Always show first page
     pagesToShow.push(1);
     
     if (tableCurrentPage > 3) {
       pagesToShow.push('...');
     }
     
-    // Show pages around current page
     const start = Math.max(2, tableCurrentPage - 1);
     const end = Math.min(totalPages - 1, tableCurrentPage + 1);
     
@@ -2695,7 +2484,6 @@ function createTablePagination() {
       pagesToShow.push('...');
     }
     
-    // Always show last page if not already included
     if (!pagesToShow.includes(totalPages)) {
       pagesToShow.push(totalPages);
     }
@@ -2794,157 +2582,11 @@ function createTablePagination() {
   
   paginationDiv.appendChild(perPageSelect);
   
-  // Insert pagination after the table
   const tableContainer = document.querySelector(".table-container");
   if (tableContainer) {
     tableContainer.appendChild(paginationDiv);
   }
 }
-
-// function populateVehicleTable() {
-//   const tableBody = document
-//     .getElementById("vehicle-table")
-//     .getElementsByTagName("tbody")[0];
-//   tableBody.innerHTML = ""; 
-//   const isDarkMode = document.body.classList.contains("dark-mode");
-
-//   showHidecar();
-//   const listContainer = document.getElementById("vehicle-list");
-//   const countContainer = document.getElementById("vehicle-count");
-//   listContainer.innerHTML = "";
-//   resetVehicleCardCount();
-//   countContainer.innerText = vehicleData.size;
-
-//   vehicleData.forEach((vehicle, imei) => {
-//     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
-//     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
-
-//     const speedValue =
-//       vehicle.speed !== null && vehicle.speed !== undefined
-//         ? convertSpeedToKmh(vehicle.speed).toFixed(2)
-//         : null;
-
-//     const speed = speedValue !== null ? `${speedValue} km/h` : "Unknown";
-//     const address = vehicle.address || "Location unknown";
-//     const url = `/routeHistory/vehicle/${vehicle.LicensePlateNumber}`;
-
-//     const now = new Date();
-//     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
-//     const timeDiff = Math.abs(now - lastUpdated);
-//     let statusText =  vehicle.status;
-
-//     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
-//     const iconRed = "color:#d32f2f;";
-//     const sosIcon =
-//       vehicle.sos === "1"
-//         ? `<span class="material-symbols-outlined" style="${
-//             iconStyle + iconRed
-//           }">sos</span>`
-//         : "";
-//     const gpsIcon =
-//       statusText === "Offline" ? "location_disabled" : "my_location";
-    
-//     let ignitionIcon, ignitionColor;
-//     if (vehicle.ignition === "0" || vehicle.ignition === 0) {
-//       ignitionIcon = "key_off";
-//       ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
-//     } else {
-//       ignitionIcon = "key";
-//       ignitionColor = isDarkMode ? "#4caf50" : "#2e7d32";
-//     }
-
-//     const ASUgsmValue = parseInt(vehicle.gsm);
-
-//     let gsmIcon, gsmColor;
-
-//     if (ASUgsmValue == 0) {
-//       gsmIcon = "signal_cellular_null";
-//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-//     } else if (ASUgsmValue > 0 && ASUgsmValue <= 8) {
-//       gsmIcon = "signal_cellular_1_bar";
-//       gsmColor = isDarkMode ? "#ffb74d" : "#ff9800"; 
-//     } else if (ASUgsmValue > 8 && ASUgsmValue <= 16) {
-//       gsmIcon = "signal_cellular_2_bar";
-//       gsmColor = isDarkMode ? "#ffe082" : "#ffc107";
-//     } else if (ASUgsmValue > 16 && ASUgsmValue <= 24) {
-//       gsmIcon = "signal_cellular_3_bar";
-//       gsmColor = isDarkMode ? "#d4e157" : "#cddc39"; 
-//     } else if (ASUgsmValue > 24 && ASUgsmValue <= 32) {
-//       gsmIcon = "signal_cellular_4_bar";
-//       gsmColor = isDarkMode ? "#81c784" : "#4caf50"; 
-//     } else {
-//       gsmIcon = "signal_cellular_off";
-//       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-//     }    
-
-//     const row = tableBody.insertRow();
-//     row.setAttribute('data-imei', imei);
-//     row.style.cursor = "pointer";
-    
-//     row.addEventListener('click', function(e) {
-//       if (e.target.tagName && e.target.tagName.toLowerCase() === 'a') return;
-//       if (e.target.closest && e.target.closest('a')) return;
-//       if (e.target.closest && e.target.closest('.vehicle-table-icons')) return;
-//       if (e.target.classList && e.target.classList.contains('material-symbols-outlined')) return;
-
-//       if (selectMode) {
-//         toggleRowSelection(this, imei);
-//       } else {
-//         try {
-//           window.open(url, '_blank');
-//         } catch (err) {
-//           console.error('Failed to open vehicle details:', err);
-//         }
-//       }
-//     });
-
-//     row.insertCell(0).innerText = vehicle.LicensePlateNumber
-//       ? vehicle.LicensePlateNumber
-//       : vehicle.imei;
-//     row.insertCell(1).innerText = vehicle.VehicleType;
-
-//     const lastUpdatedCell = row.insertCell(2);
-//     lastUpdatedCell.classList.add("last-updated-cell");
-//     lastUpdatedCell.innerText = formatLastUpdatedText(
-//       vehicle.date,
-//       vehicle.time
-//     );
-
-//     row.insertCell(3).innerText = `${vehicle.address || "Location unknown"}`;
-//     row.insertCell(4).innerText = latitude ? latitude.toFixed(4) : "N/A";
-//     row.insertCell(5).innerText = longitude ? longitude.toFixed(4) : "N/A";
-
-//     const speedCell = row.insertCell(6);
-//     speedCell.innerText = speed;
-//     if (speedValue !== null && parseFloat(speedValue) > 60) {
-//       speedCell.style.border = "2px solid red";
-//     }
-
-//     row.insertCell(7).innerText = vehicle.distance
-//       ? parseFloat(vehicle.distance).toFixed(2)
-//       : "N/A";
-//     row.insertCell(8).innerText = vehicle.odometer; 
-
-//     const icons = `
-//       <div class="vehicle-table-icons">
-//         ${sosIcon}
-//         <span class="material-symbols-outlined" style="${iconStyle}">${gpsIcon}</span>
-//         <span class="material-symbols-outlined" style="${iconStyle} color:${ignitionColor}">${ignitionIcon}</span>
-//         <span class="material-symbols-outlined" style="${iconStyle};color:${gsmColor};">${gsmIcon}</span>
-//       </div>
-//     `;
-//     row.insertCell(9).innerHTML = icons;
-
-//     row.addEventListener("dblclick", function (e) {
-//       if (e.target.tagName.toLowerCase() === "a") return;
-//       window.open(url, "_blank");
-//     });
-//   });
-  
-//   selectedVehicles.clear();
-//   updateMultiShareButton();
-//   showHidecar();
-// }
 
 function populateVehicleTable() {
   const tableBody = document
@@ -2952,10 +2594,8 @@ function populateVehicleTable() {
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = "";
   
-  // Convert vehicleData Map to array for filtering
   tableFilteredData = Array.from(vehicleData.values());
   
-  // Apply search filter if there's a search term
   const searchTerm = document
     .getElementById("table-vehicle-search")
     ?.value.trim()
@@ -2970,27 +2610,22 @@ function populateVehicleTable() {
     });
   }
   
-  // Reset to first page when populating
   tableCurrentPage = 1;
   
-  // Render the current page
   renderTablePage();
 }
 
-// New function to render a specific page of the table
 function renderTablePage() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = "";
   
-  // Calculate start and end indices
   const startIndex = (tableCurrentPage - 1) * tablePerPage;
   const endIndex = Math.min(startIndex + tablePerPage, tableFilteredData.length);
   
   const isDarkMode = document.body.classList.contains("dark-mode");
   
-  // Render only the vehicles for the current page
   for (let i = startIndex; i < endIndex; i++) {
     const vehicle = tableFilteredData[i];
     const imei = vehicle.imei;
@@ -3115,10 +2750,8 @@ function renderTablePage() {
     row.insertCell(9).innerHTML = icons;
   }
   
-  // Clear and recreate pagination controls
   createTablePagination();
   
-  // Clear selected vehicles when page changes
   selectedVehicles.clear();
   updateMultiShareButton();
 }
@@ -3587,65 +3220,6 @@ function resetVehicleCardStyles(vehicleCard) {
   if (lastUpdatedText) lastUpdatedText.style.color = "";
   strongElements.forEach((tag) => (tag.style.color = ""));
 }
-
-// function addHoverListenersForVehicle(imei) {
-//   const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-//   const marker = markers[imei];
-
-//   if (card && card.dataset.hoverBound !== "true") {
-//     card.dataset.hoverBound = "true";
-//     card.addEventListener("mouseover", () => {
-//       const currentMarker = markers[imei];
-//       if (!currentMarker) return;
-
-//       const latLng = new google.maps.LatLng(
-//         currentMarker.position.lat,
-//         currentMarker.position.lng
-//       );
-//       map.setZoom(19);
-//       panToWithOffset(latLng, -200, 0);
-
-//       const address = currentMarker.device.address || "Location unknown";
-//       setInfoWindowContent(
-//         infoWindow,
-//         currentMarker,
-//         latLng,
-//         currentMarker.device,
-//         address
-//       );
-//       infoWindow.open(map, currentMarker);
-//     });
-
-//     card.addEventListener("mouseout", () => {
-//       infoWindow.close();
-//     });
-//   }
-
-//   if (marker && !marker.__hoverListenersBound) {
-//     marker.__hoverListenersBound = true;
-
-//     marker.addEventListener("mouseover", () => {
-//       const vehicleCard = document.querySelector(
-//         `.vehicle-card[data-imei="${imei}"]`
-//       );
-//       if (!vehicleCard) return;
-
-//       vehicleCard.scrollIntoView({
-//         behavior: "smooth",
-//         block: "nearest",
-//         inline: "nearest",
-//       });
-//       highlightVehicleCardStyles(vehicleCard);
-//     });
-
-//     marker.addEventListener("mouseout", () => {
-//       const vehicleCard = document.querySelector(
-//         `.vehicle-card[data-imei="${imei}"]`
-//       );
-//       resetVehicleCardStyles(vehicleCard);
-//     });
-//   }
-// }
 
 function addHoverListenersForVehicle(imei) {
   const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
