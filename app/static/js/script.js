@@ -205,20 +205,6 @@ async function loadNotifications() {
     const data = await res.json();
     if (data.success) {
       countSpan.textContent = data.alerts.filter(a => !a.acknowledged).length;
-      countSpan.textContent = unreadCount;
-
-      const notificationBell = document.getElementById('notification-bell');
-      if (unreadCount > 0) {
-        notificationBell.classList.add('has-notifications');
-      } else {
-        notificationBell.classList.remove('has-notifications');
-      }
-
-      const notificationCountHeader = document.getElementById('notification-count-header');
-      if (notificationCountHeader) {
-        notificationCountHeader.textContent = unreadCount;
-      }
-
       list.innerHTML = "";
       if (data.alerts.length === 0) {
         list.innerHTML = "<li>No new alerts</li>";
@@ -258,19 +244,6 @@ async function loadNotifications() {
               li.querySelector('.unread-badge')?.remove();
               markReadBtn.remove();
               countSpan.textContent = parseInt(countSpan.textContent) - 1;
-              countSpan.textContent = unreadCount;
-
-                const notificationBell = document.getElementById('notification-bell');
-                if (unreadCount > 0) {
-                  notificationBell.classList.add('has-notifications');
-                } else {
-                  notificationBell.classList.remove('has-notifications');
-                }
-                
-                const notificationCountHeader = document.getElementById('notification-count-header');
-                if (notificationCountHeader) {
-                  notificationCountHeader.textContent = unreadCount;
-                }
             });
           }
           
