@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<title>Register Sub Account</title>
+<title>Register Supervisor Account</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block h1 %}
-Register Sub Account
+Register Supervisor Account
 {% endblock %}
 
 {% block block_container %}
@@ -508,7 +508,7 @@ Register Sub Account
 
         <div class="filter-container">
             <button id="add-admin-btn" class="btn-add-admin">
-                <i class="material-symbols-outlined">person_add</i> Add New Client Admin
+                <i class="material-symbols-outlined">person_add</i> Add New Supervisor
             </button>
         </div>
     </div>
@@ -517,7 +517,7 @@ Register Sub Account
     <div id="register-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Register Sub-Account</h3>
+                <h3 class="modal-title">Register Supervisor</h3>
                 <button class="close">&times;</button>
             </div>
             <form id="register-form" method="POST" action="{{ url_for('auth.register') }}">
