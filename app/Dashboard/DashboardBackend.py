@@ -218,18 +218,28 @@ def get_vehicle_range_data():
         
         if not imeis:
             return jsonify([]), 200
-   
+
+        print(f'[DEBUG] Called get_vehicle_range_data with range: {range_param}, imeis count: {len(imeis)}')
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
+        print(f'[DEBUG] Distance results count: {len(distance_results)}')
+        print(f'[DEBUG] calculating speed data...')
         speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)
+        print(f'[DEBUG] Speed results count: {len(speed_results)}')
+        print(f'[DEBUG] calculating time analysis data...')
         time_results = getTimeAnalysisBasedOnTime(imeis, start_of_day, end_of_day)
+        print(f'[DEBUG] Time analysis results count: {len(time_results)}')
         
         for result in distance_results:
             distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
             result['distanceTravelled'] = distanceTravelled if distanceTravelled >= 0 else 0
         
+        print(f'[DEBUG] fetching latest records...')
         latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
+        print(f'[DEBUG] Latest results count: {len(latest_results)}')
         
+        print(f'[DEBUG] fetching latest AIS140 records...')
         atlantaAis140LatestResults = atlantaAis140LatestCollection.find({"_id" : {"$in": imeis}})
+        print(f'[DEBUG] Latest AIS140 results fetched.')
         
         for doc in atlantaAis140LatestResults:
             data = atlantaAis140ToFront(doc)
@@ -243,6 +253,7 @@ def get_vehicle_range_data():
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         vehicle_data = []
         
+        print(f'[DEBUG] Compiling vehicle data...')
         for imei in imeis:
             distance = distance_dict.get(imei, {})
             speeds = speed_dict.get(imei, {})
@@ -355,6 +366,7 @@ def get_vehicle_range_data():
                     vehicle_data.append(vehicle_info)
                     print(f"  → INCLUDED in {status_filter}")
         
+        print(f'[DEBUG] Compiled vehicle data count: {len(vehicle_data)}')
         return jsonify(vehicle_data), 200
         
     except Exception as e:
@@ -379,7 +391,9 @@ def get_status_data():
         utc_now = datetime.now(timezone.utc)
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
+        print(f'[DEBUG] Called get_vehicle_range_data, received response')
         response = get_vehicle_range_data()
+        print(f'[DEBUG] Received response from get_vehicle_range_data')
         if isinstance(response, tuple):
             vehicle_data = response[0].json 
         else:
