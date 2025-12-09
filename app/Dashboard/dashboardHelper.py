@@ -18,11 +18,11 @@ atlantaAis140LatestCollection = db["atlantaAis140_latest"]
 def getDistanceBasedOnTime(imeis, fromDate, toDate):
     pipeline = [
         {"$match": {
+            "imei": {"$in":imeis},
             "date_time": {
                 "$gte": fromDate,
                 "$lt": toDate
             },
-            "imei": {"$in":imeis}
         }},
         {"$sort": {"date_time": -1}},
         {"$group": {
@@ -230,8 +230,8 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
         {
             "$match": 
             {
+                "imei": {"$in": imeis},
                 "date_time": {"$gte": fromDate, "$lt": toDate},
-                "imei": {"$in": imeis}
             }
         },
         {"$sort": {"imei": 1, "date_time": 1}},
@@ -257,8 +257,8 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
         {
             "$match": 
             {
+                "imei": {"$in": imeis},
                 "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
-                "imei": {"$in": imeis}
             }
         },
         {"$sort": {"imei": 1, "gps.timestamp": 1}},
