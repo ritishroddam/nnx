@@ -2,6 +2,7 @@
 
 {% block head %}
 <title>NX | Home</title>
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' https://maps.googleapis.com https://maps.gstatic.com 'unsafe-inline' 'unsafe-eval';">
 <link rel="stylesheet" href="{{ url_for('Vehicle.static', filename='css/vehicle.css') }}">
 <script defer type="module" src="{{ url_for('Vehicle.static', filename='js/vehicle.js') }}"></script>
 

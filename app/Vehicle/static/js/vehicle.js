@@ -90,6 +90,7 @@ let lastSecondRender = 0;
 let lastMinuteRender = 0;
 let lastHourRender = 0;
 let totalVehicleCardCount = 0;
+let audioContext = null;
 
 let tableCurrentPage = 1;
 let tablePerPage = 100;
@@ -379,7 +380,9 @@ async function fetchVehicleData(page = 1) {
     showSkeletonLoader(); 
     
     const response = await fetch(`/vehicle/api/vehicles`);
-    if (!response.ok) throw new Error("Failed to fetch vehicle data");
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
     const data = await response.json();
     
@@ -435,6 +438,20 @@ async function fetchVehicleData(page = 1) {
     return vehicles;
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
+    
+    const listContainer = document.getElementById("vehicle-list");
+    if (listContainer) {
+      listContainer.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #d32f2f;">
+          <h3>⚠️ Failed to Load Vehicle Data</h3>
+          <p>${error.message}</p>
+          <button onclick="fetchVehicleData()" style="padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Retry
+          </button>
+        </div>
+      `;
+    }
+    
     return [];
   }
 }
@@ -1130,120 +1147,151 @@ function getFullStatusName(statusCode) {
   }
 }
 
+// function setupSOSHoverListeners(marker, imei) {
+//   if (marker.__hoverListenersBound) {
+//     marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
+//     marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
+//   }
+  
+//   const mouseoverHandler = () => {
+//     const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+//     if (!vehicleCard) return;
+    
+//     vehicleCard.scrollIntoView({
+//       behavior: "smooth",
+//       block: "nearest",
+//       inline: "nearest"
+//     });
+    
+//     vehicleCard.classList.add("sos-hover-highlight");
+    
+//     const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
+//     if (sosIndicator) {
+//       sosIndicator.style.animation = "sosIndicatorBlink 0.3s infinite alternate";
+//       sosIndicator.style.fontSize = "28px";
+//     }
+    
+//     const latLng = new google.maps.LatLng(
+//       marker.position.lat,
+//       marker.position.lng
+//     );
+    
+//     const vehicle = vehicleData.get(imei);
+//     if (vehicle) {
+//       const address = vehicle.address || "Location unknown";
+//       setInfoWindowContent(
+//         infoWindow,
+//         marker,
+//         latLng,
+//         vehicle,
+//         address
+//       );
+//       infoWindow.open(map, marker);
+      
+//       const currentZoom = map.getZoom();
+//       if (currentZoom < 16) {
+//         map.setZoom(16);
+//       }
+//       panToWithOffset(latLng, -200, 0);
+//     }
+//   };
+  
+//   const mouseoutHandler = () => {
+//     const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
+//     if (vehicleCard) {
+//       vehicleCard.classList.remove("sos-hover-highlight");
+//     }
+    
+//     const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
+//     if (sosIndicator) {
+//       sosIndicator.style.animation = "sosIndicatorBlink 1s infinite alternate";
+//       sosIndicator.style.fontSize = "24px";
+//     }
+    
+//     infoWindow.close();
+//   };
+  
+//   const clickHandler = (e) => {
+//     e.stopPropagation();
+//     const vehicle = vehicleData.get(imei);
+//     if (vehicle) {
+//       const latLng = new google.maps.LatLng(
+//         marker.position.lat,
+//         marker.position.lng
+//       );
+//       const address = vehicle.address || "Location unknown";
+//       setInfoWindowContent(
+//         infoWindow,
+//         marker,
+//         latLng,
+//         vehicle,
+//         address
+//       );
+//       infoWindow.open(map, marker);
+      
+//       const acknowledgeBtn = document.createElement('button');
+//       acknowledgeBtn.textContent = '🚨 Acknowledge SOS';
+//       acknowledgeBtn.style.backgroundColor = '#ff0000';
+//       acknowledgeBtn.style.color = 'white';
+//       acknowledgeBtn.style.border = 'none';
+//       acknowledgeBtn.style.padding = '8px 16px';
+//       acknowledgeBtn.style.borderRadius = '4px';
+//       acknowledgeBtn.style.cursor = 'pointer';
+//       acknowledgeBtn.style.marginTop = '10px';
+//       acknowledgeBtn.style.fontWeight = 'bold';
+      
+//       acknowledgeBtn.onclick = () => {
+//         acknowledgeSOS(imei);
+//         infoWindow.close();
+//       };
+      
+//       setTimeout(() => {
+//         const infoContent = document.querySelector('.gm-style-iw');
+//         if (infoContent) {
+//           const actionsDiv = document.createElement('div');
+//           actionsDiv.style.marginTop = '10px';
+//           actionsDiv.appendChild(acknowledgeBtn);
+//           infoContent.appendChild(actionsDiv);
+//         }
+//       }, 100);
+//     }
+//   };
+  
+//   marker.content.addEventListener('mouseover', mouseoverHandler);
+//   marker.content.addEventListener('mouseout', mouseoutHandler);
+//   marker.content.addEventListener('click', clickHandler);
+  
+//   marker.__mouseoverHandler = mouseoverHandler;
+//   marker.__mouseoutHandler = mouseoutHandler;
+//   marker.__clickHandler = clickHandler;
+//   marker.__hoverListenersBound = true;
+// }
+
 function setupSOSHoverListeners(marker, imei) {
+  // Clean up existing listeners first
   if (marker.__hoverListenersBound) {
-    marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
-    marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
+    if (marker.__mouseoverHandler) {
+      marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
+    }
+    if (marker.__mouseoutHandler) {
+      marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
+    }
+    if (marker.__clickHandler) {
+      marker.content.removeEventListener('click', marker.__clickHandler);
+    }
   }
   
-  const mouseoverHandler = () => {
-    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-    if (!vehicleCard) return;
-    
-    vehicleCard.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest"
-    });
-    
-    vehicleCard.classList.add("sos-hover-highlight");
-    
-    const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
-    if (sosIndicator) {
-      sosIndicator.style.animation = "sosIndicatorBlink 0.3s infinite alternate";
-      sosIndicator.style.fontSize = "28px";
-    }
-    
-    const latLng = new google.maps.LatLng(
-      marker.position.lat,
-      marker.position.lng
-    );
-    
-    const vehicle = vehicleData.get(imei);
-    if (vehicle) {
-      const address = vehicle.address || "Location unknown";
-      setInfoWindowContent(
-        infoWindow,
-        marker,
-        latLng,
-        vehicle,
-        address
-      );
-      infoWindow.open(map, marker);
-      
-      const currentZoom = map.getZoom();
-      if (currentZoom < 16) {
-        map.setZoom(16);
-      }
-      panToWithOffset(latLng, -200, 0);
-    }
-  };
+  // Create new handlers
+  const mouseoverHandler = () => { /* ... */ };
+  const mouseoutHandler = () => { /* ... */ };
+  const clickHandler = (e) => { /* ... */ };
   
-  const mouseoutHandler = () => {
-    const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-    if (vehicleCard) {
-      vehicleCard.classList.remove("sos-hover-highlight");
-    }
-    
-    const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
-    if (sosIndicator) {
-      sosIndicator.style.animation = "sosIndicatorBlink 1s infinite alternate";
-      sosIndicator.style.fontSize = "24px";
-    }
-    
-    infoWindow.close();
-  };
-  
-  const clickHandler = (e) => {
-    e.stopPropagation();
-    const vehicle = vehicleData.get(imei);
-    if (vehicle) {
-      const latLng = new google.maps.LatLng(
-        marker.position.lat,
-        marker.position.lng
-      );
-      const address = vehicle.address || "Location unknown";
-      setInfoWindowContent(
-        infoWindow,
-        marker,
-        latLng,
-        vehicle,
-        address
-      );
-      infoWindow.open(map, marker);
-      
-      const acknowledgeBtn = document.createElement('button');
-      acknowledgeBtn.textContent = '🚨 Acknowledge SOS';
-      acknowledgeBtn.style.backgroundColor = '#ff0000';
-      acknowledgeBtn.style.color = 'white';
-      acknowledgeBtn.style.border = 'none';
-      acknowledgeBtn.style.padding = '8px 16px';
-      acknowledgeBtn.style.borderRadius = '4px';
-      acknowledgeBtn.style.cursor = 'pointer';
-      acknowledgeBtn.style.marginTop = '10px';
-      acknowledgeBtn.style.fontWeight = 'bold';
-      
-      acknowledgeBtn.onclick = () => {
-        acknowledgeSOS(imei);
-        infoWindow.close();
-      };
-      
-      setTimeout(() => {
-        const infoContent = document.querySelector('.gm-style-iw');
-        if (infoContent) {
-          const actionsDiv = document.createElement('div');
-          actionsDiv.style.marginTop = '10px';
-          actionsDiv.appendChild(acknowledgeBtn);
-          infoContent.appendChild(actionsDiv);
-        }
-      }, 100);
-    }
-  };
-  
+  // Add event listeners
   marker.content.addEventListener('mouseover', mouseoverHandler);
   marker.content.addEventListener('mouseout', mouseoutHandler);
   marker.content.addEventListener('click', clickHandler);
   
+  // Store references for cleanup
   marker.__mouseoverHandler = mouseoverHandler;
   marker.__mouseoutHandler = mouseoutHandler;
   marker.__clickHandler = clickHandler;
@@ -1534,6 +1582,14 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
 
 function playSOSAlertSound() {
   try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -1568,7 +1624,7 @@ function playSOSAlertSound() {
     }, 200);
     
   } catch (error) {
-    console.log("Audio not supported or user interaction required");
+    console.log("Audio not supported:", error);
   }
 }
 
@@ -2921,40 +2977,58 @@ function hideCard() {
 }
 
 async function initMap() {
-  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-  const offset = -5;
+  try {
+    const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+    const offset = -5;
 
-  const newCenter = {
-    lat: defaultCenter.lat,
-    lng: defaultCenter.lng + offset,
-  };
+    const newCenter = {
+      lat: defaultCenter.lat,
+      lng: defaultCenter.lng + offset,
+    };
 
-  const darkMode = document.body.classList.contains("dark-mode");
+    const darkMode = document.body.classList.contains("dark-mode");
 
-  const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+    const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
-  const { Map, LatLngBounds } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+    const { Map, LatLngBounds } = await google.maps.importLibrary("maps");
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-  map = new Map(document.getElementById("map"), {
-    center: newCenter,
-    mapId: mapId,
-    zoom: 5,
-    gestureHandling: "greedy",
-    zoomControl: true,
-    mapTypeControl: false, 
-    clickableIcons: false, 
-    zoomControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_BOTTOM,
-    },
-    fullscreenControl: true,
-    fullscreenControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_BOTTOM,
-    },
-  });
+    map = new Map(document.getElementById("map"), {
+      center: newCenter,
+      mapId: mapId,
+      zoom: 5,
+      gestureHandling: "greedy",
+      zoomControl: true,
+      mapTypeControl: false, 
+      clickableIcons: false, 
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
+      fullscreenControl: true,
+      fullscreenControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
+    });
 
-  geocoder = new google.maps.Geocoder();
-  infoWindow = new google.maps.InfoWindow();
+    geocoder = new google.maps.Geocoder();
+    infoWindow = new google.maps.InfoWindow();
+}catch (error) {
+    console.error("Failed to load Google Maps:", error);
+    
+    const mapDiv = document.getElementById("map");
+    if (mapDiv) {
+      mapDiv.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #d32f2f;">
+          <h3>⚠️ Map Loading Failed</h3>
+          <p>Please check your internet connection and try again.</p>
+          <p>If using an ad blocker, try disabling it for this site.</p>
+          <button onclick="location.reload()" style="padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Retry
+          </button>
+        </div>
+      `;
+    }
+  }
 }
 
 const themeToggle = document.getElementById("theme-toggle");
