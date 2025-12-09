@@ -219,7 +219,7 @@ def get_vehicle_range_data():
         if not imeis:
             return jsonify([]), 200
 
-        print(f'[DEBUG] Called get_vehicle_range_data with range: {range_param}, imeis count: {len(imeis)}')
+        print(f'[DEBUG] Calculating distance data...')
         distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
         print(f'[DEBUG] Distance results count: {len(distance_results)}')
         print(f'[DEBUG] calculating speed data...')
