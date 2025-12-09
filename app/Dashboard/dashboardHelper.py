@@ -279,8 +279,8 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
                         "records": 
                         {
                             "$push": {
-                                "timestamp": "$gps.timestamp",
-                                "ignition": "$telemetry.ignition",
+                                "date_time": "$gps.timestamp",
+                                "ignition": {"$toString": "$telemetry.ignition"},
                                 "speed": "$telemetry.speed"
                             }
                         }
