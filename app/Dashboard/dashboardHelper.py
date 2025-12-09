@@ -46,7 +46,7 @@ def getDistanceBasedOnTime(imeis, fromDate, toDate):
         if not distance:
             pipeline = [
                     {"$match": {
-                        "imei": {"$in": imei},
+                        "imei": imei,
                         "gps.timestamp": {"$gte": fromDate, "$lt": toDate}
                     }},
                     {"$sort": {"gps.timestamp": -1}},
@@ -79,7 +79,7 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
         pipeline = [
             {
                 "$match": {
-                    "imei": {"$in": imei},
+                    "imei": imei,
                     "date_time": {"$gte": fromDate, "$lt": toDate},
                     "ignition": "1",
                 }
@@ -122,7 +122,7 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
             pipeline = [
                     {
                         "$match": {
-                            "imei": {"$in": imei},
+                            "imei": imei,
                             "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                             "telemetry.ignition": 1,
                         }
@@ -150,7 +150,7 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
         pipeline = [
             {
                 "$match": {
-                    "imei": {"$in": imei},
+                    "imei": imei,
                     "date_time": {"$gte": fromDate, "$lt": toDate},
                     "ignition": "1",
                 }
@@ -239,7 +239,7 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
             {
                 "$match": 
                 {
-                    "imei": {"$in": imei},
+                    "imei": imei,
                     "date_time": {"$gte": fromDate, "$lt": toDate},
                 }
             },
@@ -267,7 +267,7 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
                 {
                     "$match": 
                     {
-                        "imei": {"$in": imeis},
+                        "imei": imei,
                         "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                     }
                 },
