@@ -21,7 +21,7 @@ def getDistanceBasedOnTime(imeis, fromDate, toDate):
     for imei in imeis:
         pipeline = [
             {"$match": {
-                "imei": {"$in":imei},
+                "imei": imei,
                 "date_time": {
                     "$gte": fromDate,
                     "$lt": toDate
@@ -193,7 +193,7 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
             pipeline = [
                 {
                     "$match": {
-                        "imei": {"$in": imeis},
+                        "imei": imei,
                         "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                         "telemetry.ignition": 1,
                         "telemetry.speed": {"$gt": 0}
