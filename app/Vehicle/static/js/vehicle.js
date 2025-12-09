@@ -2523,7 +2523,6 @@ function createTablePagination() {
   
   paginationDiv.appendChild(pageNumbersContainer);
   
-  // Next button
   const nextButton = document.createElement("button");
   nextButton.innerHTML = "Next &raquo;";
   nextButton.disabled = tableCurrentPage === totalPages;
@@ -2544,7 +2543,6 @@ function createTablePagination() {
   };
   paginationDiv.appendChild(nextButton);
   
-  // Page info
   const pageInfo = document.createElement("div");
   pageInfo.textContent = `Page ${tableCurrentPage} of ${totalPages} (${tableFilteredData.length} vehicles)`;
   pageInfo.style.cssText = `
@@ -2554,7 +2552,6 @@ function createTablePagination() {
   `;
   paginationDiv.appendChild(pageInfo);
   
-  // Items per page selector
   const perPageSelect = document.createElement("select");
   perPageSelect.id = "table-items-per-page";
   perPageSelect.style.cssText = `
@@ -2588,43 +2585,14 @@ function createTablePagination() {
   }
 }
 
-// function populateVehicleTable() {
-//   const tableBody = document
-//     .getElementById("vehicle-table")
-//     .getElementsByTagName("tbody")[0];
-//   tableBody.innerHTML = "";
-  
-//   tableFilteredData = Array.from(vehicleData.values());
-  
-//   const searchTerm = document
-//     .getElementById("table-vehicle-search")
-//     ?.value.trim()
-//     .toLowerCase() || "";
-    
-//   if (searchTerm) {
-//     tableFilteredData = tableFilteredData.filter(vehicle => {
-//       const plateNumber = vehicle.LicensePlateNumber
-//         ? vehicle.LicensePlateNumber.toLowerCase()
-//         : "";
-//       return plateNumber.includes(searchTerm);
-//     });
-//   }
-  
-//   tableCurrentPage = 1;
-  
-//   renderTablePage();
-// }
-
 function populateVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = "";
   
-  // Convert vehicleData Map to array for filtering
   tableFilteredData = Array.from(vehicleData.values());
   
-  // Apply search filter if there's a search term
   const searchTerm = document
     .getElementById("table-vehicle-search")
     ?.value.trim()
@@ -2639,27 +2607,22 @@ function populateVehicleTable() {
     });
   }
   
-  // Reset to first page when populating
   tableCurrentPage = 1;
   
-  // Render the current page
   renderTablePage();
 }
 
-// New function to render a specific page of the table
 function renderTablePage() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
   tableBody.innerHTML = "";
   
-  // Calculate start and end indices
   const startIndex = (tableCurrentPage - 1) * tablePerPage;
   const endIndex = Math.min(startIndex + tablePerPage, tableFilteredData.length);
   
   const isDarkMode = document.body.classList.contains("dark-mode");
   
-  // Render only the vehicles for the current page
   for (let i = startIndex; i < endIndex; i++) {
     const vehicle = tableFilteredData[i];
     const imei = vehicle.imei;
@@ -2784,10 +2747,8 @@ function renderTablePage() {
     row.insertCell(9).innerHTML = icons;
   }
   
-  // Clear and recreate pagination controls
   createTablePagination();
   
-  // Clear selected vehicles when page changes
   selectedVehicles.clear();
   updateMultiShareButton();
 }
@@ -3095,30 +3056,12 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
-// function searchTable() {
-//   const searchTerm = document
-//     .getElementById("table-vehicle-search")
-//     .value.trim()
-//     .toLowerCase();
-//   const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
-
-//   tableRows.forEach((row) => {
-//     const plateNumber = row.cells[0].textContent.toLowerCase();
-//     if (plateNumber.includes(searchTerm)) {
-//       row.style.display = "";
-//     } else {
-//       row.style.display = "none";
-//     }
-//   });
-// }
-
 function searchTable() {
   const searchTerm = document
     .getElementById("table-vehicle-search")
     .value.trim()
     .toLowerCase();
     
-  // Re-filter the data
   tableFilteredData = Array.from(vehicleData.values()).filter(vehicle => {
     const plateNumber = vehicle.LicensePlateNumber
       ? vehicle.LicensePlateNumber.toLowerCase()
@@ -3126,10 +3069,8 @@ function searchTable() {
     return plateNumber.includes(searchTerm);
   });
   
-  // Reset to first page when searching
   tableCurrentPage = 1;
   
-  // Re-render the table
   renderTablePage();
 }
 
