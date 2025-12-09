@@ -81,7 +81,7 @@ var geofenceButton = null;
 var selectToggleButton = null;
 var selectMode = false;
 let currentPage = 1;
-let perPage = 100;
+const perPage = 100;
 let totalPages = 1;
 let totalVehicles = 0;
 let selectedVehicles = new Set();
@@ -90,11 +90,6 @@ let lastSecondRender = 0;
 let lastMinuteRender = 0;
 let lastHourRender = 0;
 let totalVehicleCardCount = 0;
-let audioContext = null;
-
-let tableCurrentPage = 1;
-let tablePerPage = 100;
-let tableFilteredData = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -109,12 +104,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     userRole: userRole,
     userName: userName,
   });
-  
+
   geofenceButton = document.getElementById('geofence-toggle');
   if (geofenceButton) {
     geofenceButton.addEventListener('click', toggleGeofences);
   }
-  
+
+  // Select toggle (enable selecting rows for multi-share)
   selectToggleButton = document.getElementById('select-toggle');
   if (selectToggleButton) {
     selectToggleButton.addEventListener('click', function () {
@@ -124,6 +120,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         selectToggleButton.title = 'Selection mode enabled: click rows to select vehicles';
       } else {
         selectToggleButton.title = 'Enable selection mode for multi-share';
+        // clear current selection when disabling selection mode
         selectedVehicles.clear();
         document.querySelectorAll('#vehicle-table tbody tr.selected').forEach(row => row.classList.remove('selected'));
         updateMultiShareButton();
@@ -159,7 +156,6 @@ socket.on("disconnect", () => {
 
 socket.on("vehicle_update", async function (data) {
   try {
-    const oldData = vehicleData.get(data.imei);
     const updatedData = await updateData(data);
     updateVehicleData(updatedData);
 
@@ -167,14 +163,10 @@ socket.on("vehicle_update", async function (data) {
     const now = new Date();
     const hoursSinceUpdate = (now - lastUpdated) / (1000 * 60 * 60);
 
-    if ((data.sos === "1" || data.sos === 1) && 
-        (!oldData || oldData.sos !== "1")) {
-      console.log(`SOS triggered for ${data.imei}`);
+    if((data.sos === "1" || data.sos === 1) && (data.sos != oldDataMain[imei])) {
       triggerSOS(data.imei, markers[data.imei]);
-    } 
-    else if (oldData && oldData.sos === "1" && 
-             (data.sos === "0" || data.sos === 0)) {
-      removeSOS(data.imei);
+    } else if (data.sos === "1") {
+      console.log(`Old SOS alert ignored for ${data.imei}`);
     }
 
     updateVehicleCard(updatedData);
@@ -371,27 +363,25 @@ async function updateData(data) {
     }
     vehicleData.set(data.imei, data);
   }
-  
+
   return data;
 }
 
 async function fetchVehicleData(page = 1) {
   try {
     showSkeletonLoader(); 
-    
+
     const response = await fetch(`/vehicle/api/vehicles`);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error("Failed to fetch vehicle data");
 
     const data = await response.json();
-    
+
     const vehicles = data.vehicles || [];
-    
+
     currentPage = 1;
     totalPages = 1;
     totalVehicles = vehicles.length;
-    
+
     const now = new Date();
 
     vehicleData.clear();
@@ -438,22 +428,18 @@ async function fetchVehicleData(page = 1) {
     return vehicles;
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
-    
-    const listContainer = document.getElementById("vehicle-list");
-    if (listContainer) {
-      listContainer.innerHTML = `
-        <div style="padding: 20px; text-align: center; color: #d32f2f;">
-          <h3>⚠️ Failed to Load Vehicle Data</h3>
-          <p>${error.message}</p>
-          <button onclick="fetchVehicleData()" style="padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Retry
-          </button>
-        </div>
-      `;
-    }
-    
     return [];
   }
+}
+
+function addPaginationControls() {
+  const existingPagination = document.getElementById("table-pagination");
+  if (existingPagination) existingPagination.remove();
+}
+
+function updatePaginationControls() {
+  const existingPagination = document.getElementById("table-pagination");
+  if (existingPagination) existingPagination.remove();
 }
 
 function buildVehicleCardTemplate(vehicle, isDarkMode) {
@@ -693,20 +679,20 @@ async function toggleGeofences() {
         if (!geofenceToggle) {
             const response = await fetch('/geofence/api/geofences');
             if (!response.ok) throw new Error('Failed to fetch geofences');
-            
+
             const geofences = await response.json();
-            
+
             const activeGeofences = geofences.filter(geofence => geofence.is_active === true);
-            
+
             activeGeofences.forEach(geofence => {
                 let polygon;
-                
+
                 if (geofence.shape_type === 'polygon') {
                     const coordinates = geofence.coordinates.points.map(point => ({
                         lat: point.lat,
                         lng: point.lng
                     }));
-                    
+
                     polygon = new google.maps.Polygon({
                         paths: coordinates,
                         strokeColor: '#FF0000',
@@ -720,7 +706,7 @@ async function toggleGeofences() {
                 } else if (geofence.shape_type === 'circle') {
                     const center = geofence.coordinates.center;
                     const radius = geofence.coordinates.radius;
-                    
+
                     polygon = new google.maps.Circle({
                         center: new google.maps.LatLng(center.lat, center.lng),
                         radius: radius,
@@ -733,10 +719,10 @@ async function toggleGeofences() {
                         title: geofence.name
                     });
                 }
-                
+
                 if (polygon) {
                     geofencePolygons[geofence._id] = polygon;
-                    
+
                     const infoWindow = new google.maps.InfoWindow({
                         content: `
                             <div class="geofence-info">
@@ -747,7 +733,7 @@ async function toggleGeofences() {
                             </div>
                         `
                     });
-                    
+
                     if (geofence.shape_type === 'polygon') {
                         polygon.addListener('click', (event) => {
                             infoWindow.setPosition(event.latLng);
@@ -761,7 +747,7 @@ async function toggleGeofences() {
                     }
                 }
             });
-            
+
             geofenceToggle = true;
             geofenceButton.classList.add('active');
         } else {
@@ -795,550 +781,29 @@ function deg2rad(deg) {
 
 function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
-  if (!vehicle || !marker) {
-    console.error(`No vehicle or marker found for ${imei}`);
+  if (!vehicle) return;
+
+  if(vehicle.sosActive){
+    console.log(`Ignoring old SOS alert for ${imei} (last update ${hoursSinceUpdate.toFixed(1)} hours ago)`);
     return;
   }
-
-  if (vehicle.sosActive) {
-    console.log(`SOS already active for ${imei}`);
-    return;
-  }
-
-  vehicle.sosActive = true;
-  vehicle.sos = "1";
-  vehicleData.set(imei, vehicle);
-
-  console.log(`Triggering SOS for ${imei}`);
 
   if (!sosActiveMarkers[imei]) {
-    const originalContent = marker.content.innerHTML;
-    marker.content.dataset.originalContent = originalContent;
-    
-    const wrapperDiv = document.createElement("div");
-    wrapperDiv.className = "sos-marker-wrapper";
-    wrapperDiv.style.position = "relative";
-    wrapperDiv.style.display = "inline-block";
-    
-    const iconContainer = document.createElement("div");
-    iconContainer.className = "marker-icon-container";
-    iconContainer.innerHTML = originalContent;
-    
     const sosDiv = document.createElement("div");
-    sosDiv.className = "sos-blink-indicator";
-    sosDiv.innerHTML = "🚨";
+    sosDiv.className = "sos-blink";
     sosDiv.style.position = "absolute";
-    sosDiv.style.top = "-35px"; 
+    sosDiv.style.top = "50%";
     sosDiv.style.left = "50%";
-    sosDiv.style.transform = "translateX(-50%)";
-    sosDiv.style.fontSize = "24px";
-    sosDiv.style.fontWeight = "bold";
-    sosDiv.style.color = "#ff0000";
-    sosDiv.style.textShadow = "0 0 5px #fff, 0 0 10px #ff0000";
-    sosDiv.style.pointerEvents = "none"; 
-    sosDiv.style.zIndex = "1001";
-    sosDiv.style.animation = "sosIndicatorBlink 1s infinite alternate";
-    
-    const pulseCircle = document.createElement("div");
-    pulseCircle.className = "sos-pulse-circle";
-    pulseCircle.style.position = "absolute";
-    pulseCircle.style.top = "50%";
-    pulseCircle.style.left = "50%";
-    pulseCircle.style.transform = "translate(-50%, -50%)";
-    pulseCircle.style.width = "70px";
-    pulseCircle.style.height = "70px";
-    pulseCircle.style.borderRadius = "50%";
-    pulseCircle.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-    pulseCircle.style.pointerEvents = "none";
-    pulseCircle.style.zIndex = "999";
-    pulseCircle.style.animation = "pulseCircle 1.5s infinite";
-    
-    wrapperDiv.appendChild(pulseCircle);
-    wrapperDiv.appendChild(iconContainer);
-    wrapperDiv.appendChild(sosDiv);
-    
-    marker.content.innerHTML = "";
-    marker.content.appendChild(wrapperDiv);
-    
-    marker.content.style.cursor = "pointer";
-    marker.content.style.pointerEvents = "auto";
-    
-    const markerImage = marker.content.querySelector("img");
-    if (markerImage) {
-      markerImage.dataset.originalSrc = markerImage.src;
-      markerImage.style.filter = "hue-rotate(300deg) brightness(1.2)";
-      markerImage.classList.add("vehicle-sos-icon");
-    }
-    
-    sosActiveMarkers[imei] = {
-      wrapper: wrapperDiv,
-      sosIndicator: sosDiv,
-      pulseCircle: pulseCircle
-    };
-    
-    setupSOSHoverListeners(marker, imei);
-    
+    sosDiv.style.pointerEvents = "none";
+    marker.content.appendChild(sosDiv);
+    sosActiveMarkers[imei] = sosDiv;
+    marker.content.classList.add("vehicle-blink");
+
     const nearbyVehicles = findNearbyVehicles(vehicle, 5);
-    console.log(`Found ${nearbyVehicles.length} nearby vehicles`);
+    showNearbyVehiclesPopup(vehicle, nearbyVehicles);
 
-    addSOSAlertToPanel(vehicle, nearbyVehicles);
-    
-    playSOSAlertSound();
-    
-    highlightSOSVehicleCard(imei);
-  }
-}
-
-function createSOSAlertPanel() {
-  const panel = document.createElement("div");
-  panel.id = "sos-alert-panel";
-  panel.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 550px;  /* Increased width for better table display */
-    max-height: 500px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    z-index: 10000;
-    overflow: hidden;
-    display: none;
-    border: 2px solid #ff0000;
-  `;
-  
-  panel.innerHTML = `
-    <div style="background: linear-gradient(135deg, #ff0000, #ff5252); color: white; padding: 12px; 
-                display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 20px;">🚨</span>
-        <h3 style="margin: 0; font-size: 16px; font-weight: bold;">Active SOS Alerts</h3>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button id="collapse-sos-panel" style="background: rgba(255,255,255,0.2); color: white; 
-                border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
-          Collapse All
-        </button>
-        <button id="close-sos-panel" style="background: none; border: none; color: white; 
-                cursor: pointer; font-size: 18px; font-weight: bold;">×</button>
-      </div>
-    </div>
-    <div id="sos-alerts-container" style="max-height: 436px; overflow-y: auto; padding: 0;"></div>
-  `;
-  
-  document.body.appendChild(panel);
-  
-  document.getElementById("close-sos-panel").onclick = () => {
-    panel.style.display = "none";
-  };
-  
-  document.getElementById("collapse-sos-panel").onclick = () => {
-    document.querySelectorAll('.toggle-nearby-btn[data-expanded="true"]').forEach(btn => {
-      btn.click();
-    });
-  };
-  
-  return panel;
-}
-
-function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
-  let panel = document.getElementById("sos-alert-panel");
-  if (!panel) {
-    panel = createSOSAlertPanel();
-  }
-  
-  panel.style.display = "block";
-  
-  const container = document.getElementById("sos-alerts-container");
-  const alertId = `sos-alert-${sosVehicle.imei}`;
-  
-  const existingAlert = document.getElementById(alertId);
-  if (existingAlert) existingAlert.remove();
-  
-  let nearbyListHTML = '';
-  if (nearbyVehicles.length > 0) {
-    nearbyListHTML = `
-      <div class="nearby-vehicles-details" style="margin-top: 10px; display: none;">
-        <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
-          <strong>${nearbyVehicles.length} vehicles within 5km radius:</strong>
-        </div>
-        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
-          <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
-            <thead style="position: sticky; top: 0; background: white; z-index: 1;">
-              <tr style="background-color: #f5f5f5;">
-                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Vehicle</th>
-                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Distance</th>
-                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">ETA</th>
-                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
-                <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Speed</th>
-              </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    nearbyVehicles.forEach((item, index) => {
-      const statusColor = item.status === "moving" ? "#4caf50" : 
-                         item.status === "stopped" ? "#f44336" : 
-                         item.status === "idle" ? "#ff9800" : "#9e9e9e";
-      
-      const statusName = getFullStatusName(item.status);
-      
-      nearbyListHTML += `
-        <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            <strong style="cursor: pointer;" onclick="focusOnVehicle('${item.vehicle.imei}')">
-              ${item.vehicle.LicensePlateNumber || item.vehicle.imei}
-            </strong>
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            ${item.distance} km
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            ~${item.estimatedTime} min
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee; color: ${statusColor}; font-weight: 500;">
-            ${statusName}
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            ${item.speed ? item.speed.toFixed(0) : 0} km/h
-          </td>
-        </tr>
-      `;
-    });
-    
-    nearbyListHTML += `
-          </tbody>
-        </table>
-        </div>
-        <div style="margin-top: 8px; font-size: 10px; color: #666; text-align: center;">
-          Scroll to see all ${nearbyVehicles.length} vehicles
-        </div>
-      </div>
-    `;
-  }
-  
-  const alertDiv = document.createElement("div");
-  alertDiv.id = alertId;
-  alertDiv.style.cssText = `
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-    background-color: ${nearbyVehicles.length > 0 ? '#fff' : '#fff8e1'};
-  `;
-  
-  alertDiv.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: start;">
-      <div style="flex: 1;">
-        <div style="font-weight: bold; color: #ff0000; display: flex; align-items: center; gap: 5px;">
-          <span style="font-size: 16px;">🚨</span>
-          <span style="font-size: 14px;">${sosVehicle.LicensePlateNumber || sosVehicle.imei}</span>
-        </div>
-        <div style="font-size: 12px; color: #666; margin-top: 2px;">${sosVehicle.address || "Unknown location"}</div>
-        
-        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-          <div style="font-size: 11px; color: #666; background: #f5f5f5; padding: 4px 8px; border-radius: 3px;">
-            📍 ${nearbyVehicles.length} vehicles within 5km
-          </div>
-          ${nearbyVehicles.length > 0 ? `
-            <button class="toggle-nearby-btn" data-expanded="false" 
-                    style="background: #2196f3; color: white; border: none; border-radius: 3px; 
-                           padding: 4px 8px; font-size: 11px; cursor: pointer;">
-              Show Details
-            </button>
-          ` : `
-            <div style="font-size: 11px; color: #d32f2f; background: #ffebee; padding: 4px 8px; border-radius: 3px;">
-              ⚠️ No vehicles nearby
-            </div>
-          `}
-        </div>
-        
-        ${nearbyListHTML}
-      </div>
-      
-      <div style="display: flex; flex-direction: column; gap: 5px;">
-        <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" 
-                style="background: #4caf50; color: white; border: none; border-radius: 4px; 
-                       padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: bold;">
-          ✅ Ack
-        </button>
-        <button class="focus-on-sos-btn" data-imei="${sosVehicle.imei}"
-                style="background: #ff9800; color: white; border: none; border-radius: 4px; 
-                       padding: 6px 12px; cursor: pointer; font-size: 12px;">
-          🗺️ View
-        </button>
-      </div>
-    </div>
-  `;
-  
-  container.insertBefore(alertDiv, container.firstChild);
-  
-  const toggleBtn = alertDiv.querySelector('.toggle-nearby-btn');
-  if (toggleBtn) {
-    toggleBtn.onclick = (e) => {
-      e.stopPropagation();
-      const detailsDiv = alertDiv.querySelector('.nearby-vehicles-details');
-      const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
-      
-      if (detailsDiv) {
-        if (isExpanded) {
-          detailsDiv.style.display = 'none';
-          toggleBtn.innerHTML = 'Show Details';
-          toggleBtn.style.background = '#2196f3';
-          toggleBtn.setAttribute('data-expanded', 'false');
-        } else {
-          detailsDiv.style.display = 'block';
-          toggleBtn.innerHTML = 'Hide Details';
-          toggleBtn.style.background = '#757575';
-          toggleBtn.setAttribute('data-expanded', 'true');
-        }
-      }
-    };
-  }
-  
-  const focusBtn = alertDiv.querySelector('.focus-on-sos-btn');
-  if (focusBtn) {
-    focusBtn.onclick = (e) => {
-      e.stopPropagation();
-      const imei = e.target.getAttribute('data-imei');
-      focusOnVehicle(imei);
-    };
-  }
-  
-  const maxAlerts = 5;
-  const alerts = container.querySelectorAll('div[id^="sos-alert-"]');
-  if (alerts.length > maxAlerts) {
-    alerts[alerts.length - 1].remove();
-  }
-  
-  alertDiv.querySelector('.sos-panel-ack-btn').onclick = (e) => {
-    e.stopPropagation();
-    const imei = e.target.getAttribute('data-imei');
-    acknowledgeSOS(imei);
-  };
-  
-  alertDiv.onclick = (e) => {
-    if (e.target.classList.contains('toggle-nearby-btn') || 
-        e.target.classList.contains('sos-panel-ack-btn') ||
-        e.target.classList.contains('focus-on-sos-btn') ||
-        e.target.tagName === 'BUTTON') {
-      return;
-    }
-    
-    const imei = sosVehicle.imei;
-    focusOnVehicle(imei);
-  };
-}
-
-function getFullStatusName(statusCode) {
-  switch(statusCode.toLowerCase()) {
-    case 'i':
-    case 'idle':
-      return 'Idle';
-    case 's':
-    case 'stopped':
-      return 'Stopped';
-    case 'm':
-    case 'moving':
-      return 'Moving';
-    case 'o':
-    case 'offline':
-      return 'Offline';
-    default:
-      return 'Unknown';
-  }
-}
-
-// function setupSOSHoverListeners(marker, imei) {
-//   if (marker.__hoverListenersBound) {
-//     marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
-//     marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
-//   }
-  
-//   const mouseoverHandler = () => {
-//     const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-//     if (!vehicleCard) return;
-    
-//     vehicleCard.scrollIntoView({
-//       behavior: "smooth",
-//       block: "nearest",
-//       inline: "nearest"
-//     });
-    
-//     vehicleCard.classList.add("sos-hover-highlight");
-    
-//     const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
-//     if (sosIndicator) {
-//       sosIndicator.style.animation = "sosIndicatorBlink 0.3s infinite alternate";
-//       sosIndicator.style.fontSize = "28px";
-//     }
-    
-//     const latLng = new google.maps.LatLng(
-//       marker.position.lat,
-//       marker.position.lng
-//     );
-    
-//     const vehicle = vehicleData.get(imei);
-//     if (vehicle) {
-//       const address = vehicle.address || "Location unknown";
-//       setInfoWindowContent(
-//         infoWindow,
-//         marker,
-//         latLng,
-//         vehicle,
-//         address
-//       );
-//       infoWindow.open(map, marker);
-      
-//       const currentZoom = map.getZoom();
-//       if (currentZoom < 16) {
-//         map.setZoom(16);
-//       }
-//       panToWithOffset(latLng, -200, 0);
-//     }
-//   };
-  
-//   const mouseoutHandler = () => {
-//     const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-//     if (vehicleCard) {
-//       vehicleCard.classList.remove("sos-hover-highlight");
-//     }
-    
-//     const sosIndicator = marker.content.querySelector('.sos-blink-indicator');
-//     if (sosIndicator) {
-//       sosIndicator.style.animation = "sosIndicatorBlink 1s infinite alternate";
-//       sosIndicator.style.fontSize = "24px";
-//     }
-    
-//     infoWindow.close();
-//   };
-  
-//   const clickHandler = (e) => {
-//     e.stopPropagation();
-//     const vehicle = vehicleData.get(imei);
-//     if (vehicle) {
-//       const latLng = new google.maps.LatLng(
-//         marker.position.lat,
-//         marker.position.lng
-//       );
-//       const address = vehicle.address || "Location unknown";
-//       setInfoWindowContent(
-//         infoWindow,
-//         marker,
-//         latLng,
-//         vehicle,
-//         address
-//       );
-//       infoWindow.open(map, marker);
-      
-//       const acknowledgeBtn = document.createElement('button');
-//       acknowledgeBtn.textContent = '🚨 Acknowledge SOS';
-//       acknowledgeBtn.style.backgroundColor = '#ff0000';
-//       acknowledgeBtn.style.color = 'white';
-//       acknowledgeBtn.style.border = 'none';
-//       acknowledgeBtn.style.padding = '8px 16px';
-//       acknowledgeBtn.style.borderRadius = '4px';
-//       acknowledgeBtn.style.cursor = 'pointer';
-//       acknowledgeBtn.style.marginTop = '10px';
-//       acknowledgeBtn.style.fontWeight = 'bold';
-      
-//       acknowledgeBtn.onclick = () => {
-//         acknowledgeSOS(imei);
-//         infoWindow.close();
-//       };
-      
-//       setTimeout(() => {
-//         const infoContent = document.querySelector('.gm-style-iw');
-//         if (infoContent) {
-//           const actionsDiv = document.createElement('div');
-//           actionsDiv.style.marginTop = '10px';
-//           actionsDiv.appendChild(acknowledgeBtn);
-//           infoContent.appendChild(actionsDiv);
-//         }
-//       }, 100);
-//     }
-//   };
-  
-//   marker.content.addEventListener('mouseover', mouseoverHandler);
-//   marker.content.addEventListener('mouseout', mouseoutHandler);
-//   marker.content.addEventListener('click', clickHandler);
-  
-//   marker.__mouseoverHandler = mouseoverHandler;
-//   marker.__mouseoutHandler = mouseoutHandler;
-//   marker.__clickHandler = clickHandler;
-//   marker.__hoverListenersBound = true;
-// }
-
-function setupSOSHoverListeners(marker, imei) {
-  // Clean up existing listeners first
-  if (marker.__hoverListenersBound) {
-    if (marker.__mouseoverHandler) {
-      marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
-    }
-    if (marker.__mouseoutHandler) {
-      marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
-    }
-    if (marker.__clickHandler) {
-      marker.content.removeEventListener('click', marker.__clickHandler);
-    }
-  }
-  
-  // Create new handlers
-  const mouseoverHandler = () => { /* ... */ };
-  const mouseoutHandler = () => { /* ... */ };
-  const clickHandler = (e) => { /* ... */ };
-  
-  // Add event listeners
-  marker.content.addEventListener('mouseover', mouseoverHandler);
-  marker.content.addEventListener('mouseout', mouseoutHandler);
-  marker.content.addEventListener('click', clickHandler);
-  
-  // Store references for cleanup
-  marker.__mouseoverHandler = mouseoverHandler;
-  marker.__mouseoutHandler = mouseoutHandler;
-  marker.__clickHandler = clickHandler;
-  marker.__hoverListenersBound = true;
-}
-
-function highlightSOSVehicleCard(imei) {
-  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-  if (vehicleCard) {
-    vehicleCard.classList.add("sos-active-card");
-    
-    vehicleCard.style.display = "block";
-    vehicleCard.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest"
-    });
-    
-    vehicleCard.addEventListener('mouseenter', function() {
-      const marker = markers[imei];
-      if (marker) {
-        const latLng = new google.maps.LatLng(
-          marker.position.lat,
-          marker.position.lng
-        );
-        
-        map.setZoom(18);
-        panToWithOffset(latLng, -250, 0);
-        
-        const vehicle = vehicleData.get(imei);
-        if (vehicle) {
-          const address = vehicle.address || "Location unknown";
-          setInfoWindowContent(
-            infoWindow,
-            marker,
-            latLng,
-            vehicle,
-            address
-          );
-          infoWindow.open(map, marker);
-        }
-      }
-    });
-    
-    vehicleCard.addEventListener('mouseleave', function() {
-      infoWindow.close();
-    });
+  vehicle.sosActive = true;
+  vehicleData.set(imei, vehicle);
   }
 }
 
@@ -1347,11 +812,11 @@ function acknowledgeSOS(imei) {
   if (!vehicle) return;
 
   removeSOS(imei);
-  
+
   vehicle.sos = "0";
   vehicle.sosActive = false;
   vehicleData.set(imei, vehicle);
-  
+
   fetch('/alerts/acknowledge_sos', {
     method: 'POST',
     headers: {
@@ -1384,49 +849,27 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
   const nearby = [];
   const sosLat = parseFloat(sosVehicle.latitude);
   const sosLon = parseFloat(sosVehicle.longitude);
-  
-  console.log(`Finding vehicles near ${sosVehicle.LicensePlateNumber} at ${sosLat}, ${sosLon}`);
-
-  if (isNaN(sosLat) || isNaN(sosLon)) {
-    console.error("Invalid SOS vehicle coordinates");
-    return nearby;
-  }
 
   vehicleData.forEach((vehicle, imei) => {
     if (imei === sosVehicle.imei) return; 
-    
+
     const vehicleLat = parseFloat(vehicle.latitude);
     const vehicleLon = parseFloat(vehicle.longitude);
-    
+
     if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
       const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
-      console.log(`Distance to ${vehicle.LicensePlateNumber}: ${distance.toFixed(2)} km`);
-      
       if (distance <= radiusKm) {
         const estimatedTime = (distance / 40) * 60; 
-        
-        let statusText = vehicle.status || "unknown";
-        let estimatedTimeAdjusted = estimatedTime;
-        
-        if (statusText === "moving" && vehicle.speed > 20) {
-          estimatedTimeAdjusted = (distance / 60) * 60; 
-        } else if (statusText === "stopped" || statusText === "idle") {
-          estimatedTimeAdjusted = estimatedTime * 1.5; 
-        }
-        
         nearby.push({
-          vehicle: vehicle,
+          vehicle,
           distance: distance.toFixed(2),
-          estimatedTime: Math.max(1, Math.ceil(estimatedTimeAdjusted)), 
-          status: statusText,
-          speed: vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0
+          estimatedTime: estimatedTime.toFixed(0)
         });
       }
     }
   });
 
   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-  console.log(`Total nearby vehicles found: ${nearby.length}`);
   return nearby;
 }
 
@@ -1436,106 +879,37 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
 
   const popup = document.createElement("div");
   popup.id = "sos-nearby-popup";
-  
-  const formattedTime = new Date().toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    second: '2-digit' 
-  });
-  
-  const formattedDate = new Date().toLocaleDateString();
-  
+
   let content = `
-    <div class="sos-popup-content" style="font-family: Arial, sans-serif;">
-      <div style="background-color: #ff0000; color: white; padding: 10px; border-radius: 6px 6px 0 0;">
-        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px;">
-          <span style="font-size: 20px;">🚨</span> 
-          SOS - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}
-        </h3>
-      </div>
+    <div class="sos-popup-content">
+      <h3>SOS Alert - ${sosVehicle.LicensePlateNumber || sosVehicle.imei}</h3>
+      <div class="sos-location">Location: ${sosVehicle.address || "Unknown"}</div>
+      <div class="sos-coords">Coordinates: ${parseFloat(sosVehicle.latitude).toFixed(4)}, ${parseFloat(sosVehicle.longitude).toFixed(4)}</div>
+      <div class="sos-time">Time: ${new Date().toLocaleTimeString()}</div>
       
-      <div style="padding: 15px;">
-        <div style="margin-bottom: 10px; font-size: 13px;">
-          <div><strong>Location:</strong> ${sosVehicle.address || "Unknown"}</div>
-          <div><strong>Time:</strong> ${formattedTime}</div>
-        </div>
-        
-        <h4 style="color: #d32f2f; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 14px; margin-bottom: 10px;">
-          Nearby Vehicles (within 5km):
-        </h4>
+      <h4>Nearby Vehicles (within 5km):</h4>
   `;
 
   if (nearbyVehicles.length > 0) {
-    content += `
-      <div style="max-height: 200px; overflow-y: auto; margin: 8px 0; font-size: 12px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-          <thead>
-            <tr style="background-color: #f5f5f5;">
-              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Vehicle</th>
-              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Dist</th>
-              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">ETA</th>
-              <th style="padding: 6px; text-align: left; border-bottom: 1px solid #ddd;">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
-    
-    nearbyVehicles.forEach((item, index) => {
-      const statusColor = item.status === "moving" ? "#4caf50" : 
-                         item.status === "stopped" ? "#f44336" : 
-                         item.status === "idle" ? "#ff9800" : "#9e9e9e";
-      
+    content += `<ul class="nearby-vehicles-list">`;
+    nearbyVehicles.forEach(vehicle => {
       content += `
-        <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            <strong>${item.vehicle.LicensePlateNumber || item.vehicle.imei}</strong>
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            ${item.distance} km
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee;">
-            ~${item.estimatedTime} min
-          </td>
-          <td style="padding: 6px; border-bottom: 1px solid #eee; color: ${statusColor};">
-            ${item.status.charAt(0).toUpperCase()}
-          </td>
-        </tr>
+        <li>
+          <strong>${vehicle.vehicle.LicensePlateNumber || vehicle.vehicle.imei}</strong>
+          - Distance: ${vehicle.distance} km
+          - Estimated Time: ~${vehicle.estimatedTime} min
+        </li>
       `;
     });
-    
-    content += `
-          </tbody>
-        </table>
-      </div>
-    `;
+    content += `</ul>`;
   } else {
-    content += `
-      <div style="padding: 10px; text-align: center; color: #666; font-size: 12px;">
-        <p><strong>No vehicles within 5km.</strong></p>
-      </div>
-    `;
+    content += `<p>No other vehicles found within 5km radius.</p>`;
   }
 
-  content += `
-        <div style="margin-top: 15px; display: flex; gap: 8px; justify-content: flex-end;">
-          <button id="acknowledge-sos-btn" 
-                  style="padding: 8px 12px; background-color: #4caf50; color: white; 
-                         border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
-            ✅ Acknowledge
-          </button>
-          <button id="view-on-map-btn" 
-                  style="padding: 8px 12px; background-color: #2196f3; color: white; 
-                         border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-            🗺️ Map
-          </button>
-          <button id="close-sos-popup" 
-                  style="padding: 8px 12px; background-color: #757575; color: white; 
-                         border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-            ✕
-          </button>
-        </div>
-      </div>
-    </div>
+ content += `
+    <button id="acknowledge-sos-btn" class="sos-ack-btn">Acknowledge SOS</button>
+    <button id="minimize-sos-popup">Minimize</button>
+    <button id="close-sos-popup">Close</button>
   `;
 
   popup.innerHTML = content;
@@ -1547,85 +921,24 @@ function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = "10000";
   popup.style.backgroundColor = "white";
+  popup.style.padding = "20px";
   popup.style.borderRadius = "8px";
-  popup.style.boxShadow = "0 5px 15px rgba(0,0,0,0.3)";
-  popup.style.width = "400px";
-  popup.style.maxWidth = "90vw";
-  popup.style.maxHeight = "70vh";
-  popup.style.overflow = "hidden";
+  popup.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+  popup.style.maxWidth = "500px";
+  popup.style.width = "90%";
 
   document.getElementById("acknowledge-sos-btn").onclick = () => {
     acknowledgeSOS(sosVehicle.imei);
     popup.remove();
   };
 
-  document.getElementById("view-on-map-btn").onclick = () => {
-    const latLng = new google.maps.LatLng(
-      parseFloat(sosVehicle.latitude),
-      parseFloat(sosVehicle.longitude)
-    );
-    map.setZoom(16);
-    map.panTo(latLng);
-    
-    const marker = markers[sosVehicle.imei];
-    if (marker) {
-      const address = sosVehicle.address || "Location unknown";
-      setInfoWindowContent(infoWindow, marker, latLng, sosVehicle, address);
-      infoWindow.open(map, marker);
-    }
+  document.getElementById("minimize-sos-popup").onclick = () => {
+    popup.style.display = "none";
   };
 
   document.getElementById("close-sos-popup").onclick = () => {
     popup.remove();
   };
-}
-
-function playSOSAlertSound() {
-  try {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
-    
-    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
-    
-    setTimeout(() => {
-      const oscillator2 = audioContext.createOscillator();
-      const gainNode2 = audioContext.createGain();
-      
-      oscillator2.connect(gainNode2);
-      gainNode2.connect(audioContext.destination);
-      
-      oscillator2.frequency.setValueAtTime(1000, audioContext.currentTime);
-      oscillator2.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
-      
-      gainNode2.gain.setValueAtTime(0.5, audioContext.currentTime);
-      gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-      
-      oscillator2.start(audioContext.currentTime);
-      oscillator2.stop(audioContext.currentTime + 0.2);
-    }, 200);
-    
-  } catch (error) {
-    console.log("Audio not supported:", error);
-  }
 }
 
 function vehicleInfoPage(licensePlateNumber) {
@@ -1718,7 +1031,7 @@ function setInfoWindowContent(infoWindow, marker, latLng, device, address) {
     statusText === "Offline" ? "location_disabled" : "my_location";
 
   let ignitionIcon, ignitionColor;
-  
+
   if (device.ignition === "0" || device.ignition === 0) {
     ignitionIcon = "key_off";
     ignitionColor = isDarkMode ? "#ff5252" : "#d32f2f";
@@ -2057,7 +1370,9 @@ function formatLastUpdatedFromDate(lastUpdated, now = new Date()) {
     );
     lastUpdatedText = ` ${days} day ${hours} hours ago`;
   } else {
+    // fallback to absolute when very old
     const { formattedDate, formattedTime } = formatDateTime(
+      // reconstruct the "date" and "time" style output
       lastUpdatedToDDMMYY(lastUpdated),
       lastUpdatedToHHMMSS(lastUpdated)
     );
@@ -2094,12 +1409,14 @@ function updateLastUpdatedForRange(now, minAgeMs, maxAgeMs) {
 
     const text = formatLastUpdatedFromDate(last, now);
 
+    // Update card view
     const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
     if (card) {
       const span = card.querySelector(".last-updated-text");
       if (span) span.textContent = text;
     }
 
+    // Update table view
     const row = document.querySelector(
       `#vehicle-table tbody tr[data-imei="${imei}"]`
     );
@@ -2120,11 +1437,13 @@ function startHybridLastUpdatedLoop() {
 
     const now = new Date();
 
+    // < 1 minute old → update every second
     if (timestamp - lastSecondRender >= 1000) {
       updateLastUpdatedForRange(now, 0, 60 * 1000);
       lastSecondRender = timestamp;
     }
 
+    // 1 minute – 1 day old → update every minute
     if (timestamp - lastMinuteRender >= 60 * 1000) {
       updateLastUpdatedForRange(
         now,
@@ -2134,6 +1453,7 @@ function startHybridLastUpdatedLoop() {
       lastMinuteRender = timestamp;
     }
 
+    // > 1 day old → update every hour
     if (timestamp - lastHourRender >= 60 * 60 * 1000) {
       updateLastUpdatedForRange(
         now,
@@ -2148,6 +1468,7 @@ function startHybridLastUpdatedLoop() {
 
   requestAnimationFrame(tick);
 }
+
 
 function convertToDate(ddmmyyyy, hhmmss) {
   let day = ddmmyyyy.substring(0, 2);
@@ -2185,7 +1506,7 @@ function getCarIconBySpeed(speed, imei, date, time) {
 function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType, dayDiff) {
   const basePath = "/static/images/";
   let vehiclePrefix;
-  
+
   switch(vehicleType.toLowerCase()) {
     case 'truck':
       vehiclePrefix = 'truck';
@@ -2216,15 +1537,15 @@ function getVehicleIconUrlBySpeedAndType(speedInKmh, vehicleType, dayDiff) {
 function getVehicleIconBySpeed(speed, imei, date, time, vehicleType) {
   const speedInKmh = convertSpeedToKmh(speed);
   const type = vehicleType || 'car'; 
-  
+
   const now = new Date();
   const lastUpdateTime = convertToDate(date, time);
-  
+
   const timeDiff = now - lastUpdateTime;
   const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-  
+
   let iconUrl = getVehicleIconUrlBySpeedAndType(speedInKmh, type, dayDiff);
-  
+
   return iconUrl;
 }
 
@@ -2303,45 +1624,24 @@ function removeSOS(imei) {
   const popup = document.getElementById("sos-nearby-popup");
   if (popup) popup.remove();
 
-  const marker = markers[imei];
-  if (marker && marker.content) {
-    if (marker.content.dataset.originalContent) {
-      marker.content.innerHTML = marker.content.dataset.originalContent;
-    }
-    
-    if (marker.__hoverListenersBound) {
-      marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
-      marker.content.removeEventListener('mouseout', marker.__mouseoutHandler);
-      marker.content.removeEventListener('click', marker.__clickHandler);
-      delete marker.__hoverListenersBound;
-      delete marker.__mouseoverHandler;
-      delete marker.__mouseoutHandler;
-      delete marker.__clickHandler;
-    }
-    
-    addHoverListenersForVehicle(imei);
+  if (sosActiveMarkers[imei]) {
+    sosActiveMarkers[imei].remove();
+    delete sosActiveMarkers[imei];
   }
 
-  if (sosActiveMarkers[imei]) {
-    if (sosActiveMarkers[imei].wrapper) {
-      sosActiveMarkers[imei].wrapper.remove();
-    }
-    delete sosActiveMarkers[imei];
+  const marker = markers[imei];
+  if (marker && marker.content) {
+    marker.content.classList.remove("vehicle-blink");
   }
 
   const vehicle = vehicleData.get(imei);
   if (vehicle) {
     vehicle.sos = "0";
-    vehicle.sosActive = false;
     vehicleData.set(imei, vehicle);
   }
 
-  const vehicleCard = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-  if (vehicleCard) {
-    vehicleCard.classList.remove("sos-active-card", "sos-blink-card", "sos-hover-highlight");
-  }
-
-  updateVehicleCard(vehicle);
+  const vehiclesArray = Array.from(vehicleData.values());
+  renderVehicleCards(vehiclesArray);
 }
 
 function formatDateTime(dateString, timeString) {
@@ -2387,7 +1687,11 @@ function showListView() {
   document.querySelector(".floating-card").style.display = "none";
   document.querySelector(".icon-legend-container").style.display = "none";
 
-  populateVehicleTable(); 
+  if (!document.getElementById("table-pagination")) {
+    addPaginationControls();
+  }
+
+  populateVehicleTable();
 }
 
 function refreshLastUpdatedDisplay() {
@@ -2440,13 +1744,13 @@ function toggleRowSelection(row, imei) {
         selectedVehicles.add(imei);
         row.classList.add('selected');
     }
-    
+
     updateMultiShareButton();
 }
 
 function updateMultiShareButton() {
     let multiShareBtn = document.getElementById('multi-share-btn');
-    
+
     if (!multiShareBtn && selectedVehicles.size > 0) {
         multiShareBtn = document.createElement('button');
         multiShareBtn.id = 'multi-share-btn';
@@ -2461,7 +1765,7 @@ function updateMultiShareButton() {
         multiShareBtn.style.border = 'none';
         multiShareBtn.style.borderRadius = '5px';
         multiShareBtn.style.cursor = 'pointer';
-        
+
         multiShareBtn.addEventListener('click', showMultiShareLocationPopup);
         document.body.appendChild(multiShareBtn);
     } else if (multiShareBtn && selectedVehicles.size === 0) {
@@ -2469,223 +1773,21 @@ function updateMultiShareButton() {
     }
 }
 
-function createTablePagination() {
-  const existingPagination = document.getElementById("table-pagination");
-  if (existingPagination) existingPagination.remove();
-  
-  const paginationDiv = document.createElement("div");
-  paginationDiv.id = "table-pagination";
-  paginationDiv.className = "table-pagination";
-  paginationDiv.style.cssText = `
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0;
-    gap: 10px;
-    flex-wrap: wrap;
-  `;
-  
-  const totalPages = Math.ceil(tableFilteredData.length / tablePerPage);
-  
-  if (totalPages <= 1) return; 
-  
-  const prevButton = document.createElement("button");
-  prevButton.innerHTML = "&laquo; Previous";
-  prevButton.disabled = tableCurrentPage === 1;
-  prevButton.style.cssText = `
-    padding: 8px 16px;
-    background-color: ${prevButton.disabled ? '#ccc' : '#007bff'};
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: ${prevButton.disabled ? 'not-allowed' : 'pointer'};
-    font-size: 14px;
-  `;
-  prevButton.onclick = () => {
-    if (tableCurrentPage > 1) {
-      tableCurrentPage--;
-      renderTablePage();
-    }
-  };
-  paginationDiv.appendChild(prevButton);
-  
-  const pageNumbersContainer = document.createElement("div");
-  pageNumbersContainer.style.cssText = `
-    display: flex;
-    gap: 5px;
-  `;
-  
-  const pagesToShow = [];
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) {
-      pagesToShow.push(i);
-    }
-  } else {
-    pagesToShow.push(1);
-    
-    if (tableCurrentPage > 3) {
-      pagesToShow.push('...');
-    }
-    
-    const start = Math.max(2, tableCurrentPage - 1);
-    const end = Math.min(totalPages - 1, tableCurrentPage + 1);
-    
-    for (let i = start; i <= end; i++) {
-      if (!pagesToShow.includes(i)) {
-        pagesToShow.push(i);
-      }
-    }
-    
-    if (tableCurrentPage < totalPages - 2) {
-      pagesToShow.push('...');
-    }
-    
-    if (!pagesToShow.includes(totalPages)) {
-      pagesToShow.push(totalPages);
-    }
-  }
-  
-  pagesToShow.forEach(page => {
-    if (page === '...') {
-      const ellipsis = document.createElement("span");
-      ellipsis.textContent = "...";
-      ellipsis.style.cssText = `
-        padding: 8px 12px;
-        font-size: 14px;
-        color: #666;
-      `;
-      pageNumbersContainer.appendChild(ellipsis);
-    } else {
-      const pageButton = document.createElement("button");
-      pageButton.textContent = page;
-      pageButton.style.cssText = `
-        padding: 8px 12px;
-        background-color: ${page === tableCurrentPage ? '#0056b3' : '#007bff'};
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        min-width: 40px;
-        font-weight: ${page === tableCurrentPage ? 'bold' : 'normal'};
-      `;
-      pageButton.onclick = () => {
-        tableCurrentPage = page;
-        renderTablePage();
-      };
-      pageNumbersContainer.appendChild(pageButton);
-    }
-  });
-  
-  paginationDiv.appendChild(pageNumbersContainer);
-  
-  // Next button
-  const nextButton = document.createElement("button");
-  nextButton.innerHTML = "Next &raquo;";
-  nextButton.disabled = tableCurrentPage === totalPages;
-  nextButton.style.cssText = `
-    padding: 8px 16px;
-    background-color: ${nextButton.disabled ? '#ccc' : '#007bff'};
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: ${nextButton.disabled ? 'not-allowed' : 'pointer'};
-    font-size: 14px;
-  `;
-  nextButton.onclick = () => {
-    if (tableCurrentPage < totalPages) {
-      tableCurrentPage++;
-      renderTablePage();
-    }
-  };
-  paginationDiv.appendChild(nextButton);
-  
-  // Page info
-  const pageInfo = document.createElement("div");
-  pageInfo.textContent = `Page ${tableCurrentPage} of ${totalPages} (${tableFilteredData.length} vehicles)`;
-  pageInfo.style.cssText = `
-    font-size: 14px;
-    color: #666;
-    margin-left: 15px;
-  `;
-  paginationDiv.appendChild(pageInfo);
-  
-  // Items per page selector
-  const perPageSelect = document.createElement("select");
-  perPageSelect.id = "table-items-per-page";
-  perPageSelect.style.cssText = `
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    margin-left: 15px;
-  `;
-  
-  const options = [50, 100, 200, 500];
-  options.forEach(option => {
-    const opt = document.createElement("option");
-    opt.value = option;
-    opt.textContent = `${option} per page`;
-    opt.selected = option === tablePerPage;
-    perPageSelect.appendChild(opt);
-  });
-  
-  perPageSelect.onchange = function() {
-    tableCurrentPage = 1;
-    tablePerPage = parseInt(this.value);
-    renderTablePage();
-  };
-  
-  paginationDiv.appendChild(perPageSelect);
-  
-  const tableContainer = document.querySelector(".table-container");
-  if (tableContainer) {
-    tableContainer.appendChild(paginationDiv);
-  }
-}
-
 function populateVehicleTable() {
   const tableBody = document
     .getElementById("vehicle-table")
     .getElementsByTagName("tbody")[0];
-  tableBody.innerHTML = "";
-  
-  tableFilteredData = Array.from(vehicleData.values());
-  
-  const searchTerm = document
-    .getElementById("table-vehicle-search")
-    ?.value.trim()
-    .toLowerCase() || "";
-    
-  if (searchTerm) {
-    tableFilteredData = tableFilteredData.filter(vehicle => {
-      const plateNumber = vehicle.LicensePlateNumber
-        ? vehicle.LicensePlateNumber.toLowerCase()
-        : "";
-      return plateNumber.includes(searchTerm);
-    });
-  }
-  
-  tableCurrentPage = 1;
-  
-  renderTablePage();
-}
-
-function renderTablePage() {
-  const tableBody = document
-    .getElementById("vehicle-table")
-    .getElementsByTagName("tbody")[0];
-  tableBody.innerHTML = "";
-  
-  const startIndex = (tableCurrentPage - 1) * tablePerPage;
-  const endIndex = Math.min(startIndex + tablePerPage, tableFilteredData.length);
-  
+  tableBody.innerHTML = ""; 
   const isDarkMode = document.body.classList.contains("dark-mode");
-  
-  for (let i = startIndex; i < endIndex; i++) {
-    const vehicle = tableFilteredData[i];
-    const imei = vehicle.imei;
-    
+
+  showHidecar();
+  const listContainer = document.getElementById("vehicle-list");
+  const countContainer = document.getElementById("vehicle-count");
+  listContainer.innerHTML = "";
+  resetVehicleCardCount();
+  countContainer.innerText = vehicleData.size;
+
+  vehicleData.forEach((vehicle, imei) => {
     const latitude = vehicle.latitude ? parseFloat(vehicle.latitude) : null;
     const longitude = vehicle.longitude ? parseFloat(vehicle.longitude) : null;
 
@@ -2701,7 +1803,7 @@ function renderTablePage() {
     const now = new Date();
     const lastUpdated = convertToDate(vehicle.date, vehicle.time);
     const timeDiff = Math.abs(now - lastUpdated);
-    let statusText = vehicle.status;
+    let statusText =  vehicle.status;
 
     const iconStyle = "font-size:22px;vertical-align:middle;margin-right:2px;";
     const iconRed = "color:#d32f2f;";
@@ -2713,7 +1815,7 @@ function renderTablePage() {
         : "";
     const gpsIcon =
       statusText === "Offline" ? "location_disabled" : "my_location";
-    
+
     let ignitionIcon, ignitionColor;
     if (vehicle.ignition === "0" || vehicle.ignition === 0) {
       ignitionIcon = "key_off";
@@ -2745,21 +1847,24 @@ function renderTablePage() {
     } else {
       gsmIcon = "signal_cellular_off";
       gsmColor = isDarkMode ? "#ff5252" : "#d32f2f"; 
-    }
+    }    
 
     const row = tableBody.insertRow();
     row.setAttribute('data-imei', imei);
     row.style.cursor = "pointer";
-    
+
     row.addEventListener('click', function(e) {
+      // Ignore clicks on links or icon controls
       if (e.target.tagName && e.target.tagName.toLowerCase() === 'a') return;
       if (e.target.closest && e.target.closest('a')) return;
       if (e.target.closest && e.target.closest('.vehicle-table-icons')) return;
       if (e.target.classList && e.target.classList.contains('material-symbols-outlined')) return;
 
       if (selectMode) {
+        // In selection mode, toggle selection of the row
         toggleRowSelection(this, imei);
       } else {
+        // Not in selection mode: open vehicle details on single click
         try {
           window.open(url, '_blank');
         } catch (err) {
@@ -2793,7 +1898,7 @@ function renderTablePage() {
     row.insertCell(7).innerText = vehicle.distance
       ? parseFloat(vehicle.distance).toFixed(2)
       : "N/A";
-    row.insertCell(8).innerText = vehicle.odometer;
+    row.insertCell(8).innerText = vehicle.odometer; 
 
     const icons = `
       <div class="vehicle-table-icons">
@@ -2804,12 +1909,16 @@ function renderTablePage() {
       </div>
     `;
     row.insertCell(9).innerHTML = icons;
-  }
-  
-  createTablePagination();
-  
+
+    row.addEventListener("dblclick", function (e) {
+      if (e.target.tagName.toLowerCase() === "a") return;
+      window.open(url, "_blank");
+    });
+  });
+
   selectedVehicles.clear();
   updateMultiShareButton();
+  showHidecar();
 }
 
 function showMultiShareLocationPopup() {
@@ -2823,12 +1932,12 @@ function showMultiShareLocationPopup() {
 
     const popup = document.createElement("div");
     popup.id = "multi-share-location-popup";
-    
+
     const selectedPlates = Array.from(selectedVehicles).map(imei => {
         const vehicle = vehicleData.get(imei);
         return vehicle.LicensePlateNumber;
     }).filter(plate => plate); 
-    
+
     popup.innerHTML = `
     <div class="share-popup-content" style="min-width: 500px;">
       <h3>Share Live Location - Multiple Vehicles</h3>
@@ -2851,7 +1960,7 @@ function showMultiShareLocationPopup() {
       <button id="close-multi-share-popup" style="margin-top:10px;background:#aaa;color:#fff;">Close</button>
     </div>
   `;
-  
+
   document.body.appendChild(popup);
 
   popup.style.position = "fixed";
@@ -2921,7 +2030,7 @@ function showMultiShareLocationPopup() {
           to_datetime,
         }),
       });
-      
+
       const data = await res.json();
       if (data.link) {
         input.value = data.link;
@@ -2977,58 +2086,40 @@ function hideCard() {
 }
 
 async function initMap() {
-  try {
-    const defaultCenter = { lat: 20.5937, lng: 78.9629 };
-    const offset = -5;
+  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+  const offset = -5;
 
-    const newCenter = {
-      lat: defaultCenter.lat,
-      lng: defaultCenter.lng + offset,
-    };
+  const newCenter = {
+    lat: defaultCenter.lat,
+    lng: defaultCenter.lng + offset,
+  };
 
-    const darkMode = document.body.classList.contains("dark-mode");
+  const darkMode = document.body.classList.contains("dark-mode");
 
-    const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+  const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
-    const { Map, LatLngBounds } = await google.maps.importLibrary("maps");
-    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  const { Map, LatLngBounds } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-    map = new Map(document.getElementById("map"), {
-      center: newCenter,
-      mapId: mapId,
-      zoom: 5,
-      gestureHandling: "greedy",
-      zoomControl: true,
-      mapTypeControl: false, 
-      clickableIcons: false, 
-      zoomControlOptions: {
-        position: google.maps.ControlPosition.RIGHT_BOTTOM,
-      },
-      fullscreenControl: true,
-      fullscreenControlOptions: {
-        position: google.maps.ControlPosition.RIGHT_BOTTOM,
-      },
-    });
+  map = new Map(document.getElementById("map"), {
+    center: newCenter,
+    mapId: mapId,
+    zoom: 5,
+    gestureHandling: "greedy",
+    zoomControl: true,
+    mapTypeControl: false, 
+    clickableIcons: false, 
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
+    fullscreenControl: true,
+    fullscreenControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_BOTTOM,
+    },
+  });
 
-    geocoder = new google.maps.Geocoder();
-    infoWindow = new google.maps.InfoWindow();
-}catch (error) {
-    console.error("Failed to load Google Maps:", error);
-    
-    const mapDiv = document.getElementById("map");
-    if (mapDiv) {
-      mapDiv.innerHTML = `
-        <div style="padding: 20px; text-align: center; color: #d32f2f;">
-          <h3>⚠️ Map Loading Failed</h3>
-          <p>Please check your internet connection and try again.</p>
-          <p>If using an ad blocker, try disabling it for this site.</p>
-          <button onclick="location.reload()" style="padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Retry
-          </button>
-        </div>
-      `;
-    }
-  }
+  geocoder = new google.maps.Geocoder();
+  infoWindow = new google.maps.InfoWindow();
 }
 
 const themeToggle = document.getElementById("theme-toggle");
@@ -3065,7 +2156,7 @@ function createAdvancedMarker(latLng, iconUrl, rotation, device) {
 
   const vehicleType = device.VehicleType || 'car';
   const size = getVehicleIconSize(vehicleType);
-  
+
   const markerContent = document.createElement("div");
   markerContent.className = "custom-marker";
   markerContent.style.width = `${size.width}px`;
@@ -3133,42 +2224,21 @@ function updateAdvancedMarker(marker, latLng, iconUrl, rotation) {
   addMarkerClickListener(marker, latLng, marker.device, coords);
 }
 
-// function searchTable() {
-//   const searchTerm = document
-//     .getElementById("table-vehicle-search")
-//     .value.trim()
-//     .toLowerCase();
-//   const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
-
-//   tableRows.forEach((row) => {
-//     const plateNumber = row.cells[0].textContent.toLowerCase();
-//     if (plateNumber.includes(searchTerm)) {
-//       row.style.display = "";
-//     } else {
-//       row.style.display = "none";
-//     }
-//   });
-// }
-
 function searchTable() {
   const searchTerm = document
     .getElementById("table-vehicle-search")
     .value.trim()
     .toLowerCase();
-    
-  // Re-filter the data
-  tableFilteredData = Array.from(vehicleData.values()).filter(vehicle => {
-    const plateNumber = vehicle.LicensePlateNumber
-      ? vehicle.LicensePlateNumber.toLowerCase()
-      : "";
-    return plateNumber.includes(searchTerm);
+  const tableRows = document.querySelectorAll("#vehicle-table tbody tr");
+
+  tableRows.forEach((row) => {
+    const plateNumber = row.cells[0].textContent.toLowerCase();
+    if (plateNumber.includes(searchTerm)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
   });
-  
-  // Reset to first page when searching
-  tableCurrentPage = 1;
-  
-  // Re-render the table
-  renderTablePage();
 }
 
 function searchVehicle() {
@@ -3305,19 +2375,11 @@ function addHoverListenersForVehicle(imei) {
       const currentMarker = markers[imei];
       if (!currentMarker) return;
 
-      const isSOSVehicle = vehicleData.get(imei)?.sos === "1";
-      
       const latLng = new google.maps.LatLng(
         currentMarker.position.lat,
         currentMarker.position.lng
       );
-      
-      if (isSOSVehicle) {
-        map.setZoom(18);
-      } else {
-        map.setZoom(16);
-      }
-      
+      map.setZoom(19);
       panToWithOffset(latLng, -200, 0);
 
       const address = currentMarker.device.address || "Location unknown";
@@ -3329,44 +2391,6 @@ function addHoverListenersForVehicle(imei) {
         address
       );
       infoWindow.open(map, currentMarker);
-      
-      if (isSOSVehicle) {
-        setTimeout(() => {
-          const infoWindowContent = document.querySelector('.gm-style-iw');
-          if (infoWindowContent && !infoWindowContent.querySelector('.sos-ack-button')) {
-            const ackButton = document.createElement('button');
-            ackButton.className = 'sos-ack-button';
-            ackButton.innerHTML = '🚨 Acknowledge SOS';
-            ackButton.style.cssText = `
-              background: linear-gradient(135deg, #ff0000, #ff5252);
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 4px;
-              cursor: pointer;
-              font-weight: bold;
-              margin-top: 10px;
-              display: block;
-              width: 100%;
-              transition: all 0.3s ease;
-            `;
-            
-            ackButton.onmouseover = () => {
-              ackButton.style.background = 'linear-gradient(135deg, #ff5252, #ff0000)';
-            };
-            
-            ackButton.onmouseout = () => {
-              ackButton.style.background = 'linear-gradient(135deg, #ff0000, #ff5252)';
-            };
-            
-            ackButton.onclick = () => {
-              acknowledgeSOS(imei);
-            };
-            
-            infoWindowContent.appendChild(ackButton);
-          }
-        }, 100);
-      }
     });
 
     card.addEventListener("mouseout", () => {
@@ -3374,7 +2398,7 @@ function addHoverListenersForVehicle(imei) {
     });
   }
 
-  if (marker && !marker.__hoverListenersBound && !vehicleData.get(imei)?.sosActive) {
+  if (marker && !marker.__hoverListenersBound) {
     marker.__hoverListenersBound = true;
 
     marker.addEventListener("mouseover", () => {
