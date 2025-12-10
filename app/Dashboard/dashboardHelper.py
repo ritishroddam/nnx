@@ -142,14 +142,14 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
 def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
     timeAnalysisData = []
     for imei in imeis:
-        timeAnalysisDatum = [] 
-        
+        records = []
+
         data = list(atlanta_collection.find(
             {
                 "imei": imei,
                 "date_time": {"$gte": fromDate, "$lt": toDate},
             },
-            sort = [("date_time", ASCENDING), ("imei", ASCENDING)]
+            sort=[("date_time", ASCENDING), ("imei", ASCENDING)]
         ))
         
         if not data:
@@ -158,32 +158,27 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
                     "imei": imei,
                     "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                 },
-                sort = [("gps.timestamp", ASCENDING), ("imei", ASCENDING)]
+                sort=[("gps.timestamp", ASCENDING), ("imei", ASCENDING)]
             ))
             
             for datum in data:
-                timeAnalysisDatum.append({
-                    "_id": imei,
-                    "records": { 
-                        "date_time": datum.get("gps", {}).get("timestamp"),
-                        "ignition": str(datum.get("telemetry", {}).get("ignition")),
-                        "speed": float(datum.get("telemetry", {}).get("speed", 0)),
-                    },
+                records.append({
+                    "date_time": datum.get("gps", {}).get("timestamp"),
+                    "ignition": str(datum.get("telemetry", {}).get("ignition")),
+                    "speed": float(datum.get("telemetry", {}).get("speed", 0)),
                 })
-
-            timeAnalysisData.extend(timeAnalysisDatum)
-            continue
-        
-        for datum in data:
-            timeAnalysisDatum.append({
-                "_id": imei,
-                "records": { 
+        else:
+            for datum in data:
+                records.append({
                     "date_time": datum.get("date_time"),
                     "ignition": datum.get("ignition"),
                     "speed": float(datum.get("speed", 0)),
-                },
+                })
+
+        if records:
+            timeAnalysisData.append({
+                "_id": imei,
+                "records": records
             })
-            
-        timeAnalysisData.extend(timeAnalysisDatum)
         
     return timeAnalysisData
