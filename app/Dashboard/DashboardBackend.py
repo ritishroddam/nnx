@@ -3,6 +3,7 @@ from unittest import result
 from flask import Blueprint, jsonify, render_template, request
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+import eventlet
 
 from app.database import db
 from app.models import User
@@ -42,6 +43,17 @@ def format_seconds(seconds):
         return f"{minutes} minutes"
     else:
         return f"{seconds} seconds"
+    
+def fetch_range_batches(imeis, start_of_day, end_of_day):
+    pool = eventlet.GreenPool(size=3)
+    funcs = (
+        (getDistanceBasedOnTime, 'distance'),
+        (getSpeedDataBasedOnTime, 'speed'),
+        (getTimeAnalysisBasedOnTime, 'time'),
+    )
+    jobs = {name: pool.spawn(func, imeis, start_of_day, end_of_day)
+            for func, name in funcs}
+    return tuple(job.wait() for job in jobs.values())
 
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
 @jwt_required()
@@ -219,15 +231,7 @@ def get_vehicle_range_data():
         if not imeis:
             return jsonify([]), 200
 
-        print(f'[DEBUG] Calculating distance data...')
-        distance_results = getDistanceBasedOnTime(imeis, start_of_day, end_of_day)
-        print(f'[DEBUG] Distance results count: {len(distance_results)}')
-        print(f'[DEBUG] calculating speed data...')
-        speed_results = getSpeedDataBasedOnTime(imeis, start_of_day, end_of_day)
-        print(f'[DEBUG] Speed results count: {len(speed_results)}')
-        print(f'[DEBUG] calculating time analysis data...')
-        time_results = getTimeAnalysisBasedOnTime(imeis, start_of_day, end_of_day)
-        print(f'[DEBUG] Time analysis results count: {len(time_results)}')
+        distance_results, speed_results, time_results = fetch_range_batches(imeis, start_of_day, end_of_day)
         
         for result in distance_results:
             distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
@@ -273,6 +277,10 @@ def get_vehicle_range_data():
             
             for record in time_records:
                 curr_time = record["date_time"]
+                
+                if not curr_time or prev_time and curr_time < prev_time:
+                    continue
+                
                 ignition = record.get("ignition")
                 speed = record.get("speed", 0.0)
                 
