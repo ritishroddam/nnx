@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function fetchDashboardData() {
     try {
-      if (userRole !== "admin") {
+      if (userRole !== "admin") {return;}
       const response = await fetch("/dashboard/dashboard_data");
       const data = await response.json();
 
@@ -468,8 +468,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.querySelector(".card:nth-child(3) h3").textContent =
           data.customers || 0;
       }
-      return;
-     } else {
+      else {
         console.error("Error fetching dashboard data:", data.error);
       }
     } catch (error) {
