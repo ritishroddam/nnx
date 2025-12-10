@@ -1,6 +1,6 @@
 import dis
 import traceback
-from flask import Blueprint, jsonify, render_template, request
+from pymongo import ASCENDING, DESCENDING
 from datetime import datetime, timedelta, timezone
 from app.database import db
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
@@ -19,276 +19,166 @@ atlantaAis140LatestCollection = db["atlantaAis140_latest"]
 def getDistanceBasedOnTime(imeis, fromDate, toDate):
     distances = []
     for imei in imeis:
-        pipeline = [
-            {"$match": {
+        imeiStartData = atlanta_collection.find_one(
+            {
                 "imei": imei,
                 "date_time": {
                     "$gte": fromDate,
                     "$lt": toDate
                 },
-            }},
-            {"$sort": {"date_time": -1}},
-            {"$group": {
-                "_id": "$imei",
-                "last_odometer": {"$first": "$odometer"},
-                "first_odometer": {"$last": "$odometer"}
-            }},
-            {"$project": {
-                "_id": 0,
-                "imei": "$_id",
-                "first_odometer": 1,
-                "last_odometer": 1
-            }}
-        ]
-
-        distance = list(atlanta_collection.aggregate(pipeline))
-
-        if not distance:
-            pipeline = [
-                    {"$match": {
-                        "imei": imei,
-                        "gps.timestamp": {"$gte": fromDate, "$lt": toDate}
-                    }},
-                    {"$sort": {"gps.timestamp": -1}},
-                    {
-                        "$group": {
-                            "_id": "$imei",
-                            "last_odometer": {"$first": "$telemetry.odometer"},
-                            "first_odometer": {"$last": "$telemetry.odometer"}
-                        }
+            },
+            sort=[("date_time", ASCENDING)]
+        )
+        
+        if imeiStartData:
+            imeiEndData = atlanta_collection.find_one(
+                {
+                    "imei": imei,
+                    "date_time": {
+                        "$gte": fromDate,
+                        "$lt": toDate
                     },
-                    {"$project": {
-                        "_id": 0,
-                        "imei": "$_id",
-                        "first_odometer": 1,
-                        "last_odometer": 1
-                    }}
-                ]
-
-            distance = list(atlantaAis140Collection.aggregate(pipeline))
-
-        distances.extend(distance)
+                },
+                sort=[("date_time", DESCENDING)]
+            )
+            distance = [{
+                "imei": imei,
+                "first_odometer": imeiStartData.get("odometer", 0),
+                "last_odometer": imeiEndData.get("odometer", 0)
+            }]
+            distances.extend(distance)
+            continue
+        else:
+            imeiStartData = atlantaAis140Collection.find_one(
+                {
+                    "imei": imei,
+                    "gps.timestamp": {
+                        "$gte": fromDate,
+                        "$lt": toDate
+                    },
+                },
+                sort=[("gps.timestamp", ASCENDING)]
+            )
+            
+            if not imeiStartData:
+                continue
+            
+            imeiEndData = atlantaAis140Collection.find_one(
+                {
+                    "imei": imei,
+                    "gps.timestamp": {
+                        "$gte": fromDate,
+                        "$lt": toDate
+                    },
+                },
+                sort=[("gps.timestamp", DESCENDING)]
+            )
+            
+            distance = [{
+                "imei": imei,
+                "first_odometer": imeiStartData.get("telemetry", {}).get("odometer", 0),
+                "last_odometer": imeiEndData.get("telemetry", {}).get("odometer", 0)
+            }]
+            distances.extend(distance)
 
     return distances
 
 def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
     speed_data = []
-    avgSpeedsRaw = []
     
     for imei in imeis:
-        pipeline = [
-            {
-                "$match": {
-                    "imei": imei,
-                    "date_time": {"$gte": fromDate, "$lt": toDate},
-                    "ignition": "1",
-                }
-            },
-            {
-                "$addFields": {
-                    "speed_float": {
-                        "$convert": {
-                            "input": "$speed",
-                            "to": "double",
-                            "onError": 0,
-                            "onNull": 0
-                        }
-                    }
-                }
-            },
-            {
-                "$match": {
-                    "speed_float": {"$gt": 0}
-                }
-            },
-            {
-                "$group": {
-                    "_id": "$imei",
-                    "max_speed": {"$max": "$speed_float"}
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "imei": "$_id",
-                    "max_speed": 1
-                }
-            }
-        ]
-
-        speed_datum = list(atlanta_collection.aggregate(pipeline))
-
-        if not speed_datum:
-            pipeline = [
-                    {
-                        "$match": {
-                            "imei": imei,
-                            "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
-                            "telemetry.ignition": 1,
-                        }
-                    },
-                    {"$sort": {"gps.timestamp": -1}},
-                    {
-                        "$group": {
-                            "_id": "$imei",
-                            "max_speed": {"$max": "$telemetry.speed"},
-                        }
-                    },
-                    {
-                        "$project": {
-                            "_id": 0,
-                            "imei": "$_id",
-                            "max_speed": 1,
-                        }
-                    }
-                ]
-
-            speed_datum = list(atlantaAis140Collection.aggregate(pipeline))
+        max_speed = 0.00
+        speeds = []
             
-        speed_data.extend(speed_datum)
-
-        pipeline = [
+        data = list(atlanta_collection.find(
             {
-                "$match": {
+                "imei": imei,
+                "date_time": {"$gte": fromDate, "$lt": toDate},
+                "ignition": "1",
+            }, {"_id": 0, "speed": 1}
+        ))
+        
+        if not data:
+            data = list(atlantaAis140Collection.find(
+                {
                     "imei": imei,
-                    "date_time": {"$gte": fromDate, "$lt": toDate},
-                    "ignition": "1",
-                }
-            },
-            {
-                "$addFields": {
-                    "speed_float": {
-                        "$convert": {
-                            "input": "$speed",
-                            "to": "double",
-                            "onError": 0,
-                            "onNull": 0
-                        }
-                    }
-                }
-            },
-            {
-                "$match": {
-                    "speed_float": {"$gt": 0}
-                }
-            },
-            {
-                "$group": {
-                    "_id": "$imei",
-                    "speeds": {"$push": "$speed_float"}
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "imei": "$_id",
-                    "speeds": 1
-                }
-            }
-        ]
-
-        avgSpeedRaw = list(atlanta_collection.aggregate(pipeline))
+                    "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
+                    "telemetry.ignition": 1,
+                }, {"_id": 0, "telemetry.speed": 1}
+            ))
+            
+            for datum in data:
+                if float(datum.get("telemetry", {}).get("speed", 0)) > max_speed:
+                    max_speed = float(datum.get("telemetry", {}).get("speed", 0))
+                    
+                if float(datum.get("telemetry", {}).get("speed", 0)) >= 0:
+                    speeds.append(float(datum.get("telemetry", {}).get("speed", 0)))
+            
+            averageSpeed = sum(speeds) / len(speeds) if speeds else 0.00
+            
+            speed_data.append({
+                "imei": imei,
+                "max_speed": max_speed,
+                "avg_speed": averageSpeed
+            })
+            continue
         
-        if not avgSpeedRaw:
-            pipeline = [
-                {
-                    "$match": {
-                        "imei": imei,
-                        "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
-                        "telemetry.ignition": 1,
-                        "telemetry.speed": {"$gt": 0}
-                    },
-                },
-                {
-                    "$group": {
-                        "_id": "$imei",
-                        "speeds": {"$push": "$telemetry.speed"}
-                    },
-                },
-                {
-                    "$project": {
-                        "_id": 0,
-                        "imei": "$_id",
-                        "speeds": 1
-                    }
-                }
-            ]
-
-            avgSpeedRaw = list(atlantaAis140Collection.aggregate(pipeline))
+        for datum in data:
+            if float(datum.get("speed", 0)) > max_speed:
+                max_speed = float(datum.get("speed", 0))
+            if float(datum.get("speed", 0)) >= 0:
+                speeds.append(float(datum.get("speed", 0)))
         
-        avgSpeedsRaw.extend(avgSpeedRaw)
+        averageSpeed = sum(speeds) / len(speeds) if speeds else 0.00
         
-    for avg in avgSpeedsRaw:
-        if len(avg["speeds"]) > 0:
-            avg_speed = sum(avg["speeds"]) / len(avg["speeds"])
-        else:
-            avg_speed = 0
-        
-        for data in speed_data:
-            if data["imei"] == avg["imei"]:
-                data["avg_speed"] = avg_speed
-                break
-    
+        speed_data.append({
+            "imei": imei,
+            "max_speed": max_speed,
+            "avg_speed": averageSpeed
+        })
 
     return speed_data
 
 def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
     timeAnalysisData = []
     for imei in imeis:
-        pipeline = [
+        records = []
+
+        data = list(atlanta_collection.find(
             {
-                "$match": 
+                "imei": imei,
+                "date_time": {"$gte": fromDate, "$lt": toDate},
+            },
+            sort=[("date_time", ASCENDING), ("imei", ASCENDING)]
+        ))
+        
+        if not data:
+            data = list(atlantaAis140Collection.find(
                 {
                     "imei": imei,
-                    "date_time": {"$gte": fromDate, "$lt": toDate},
-                }
-            },
-            {"$sort": {"imei": 1, "date_time": 1}},
-            {
-                "$group": 
-                {
-                    "_id": "$imei",
-                    "records": 
-                    {
-                        "$push": {
-                            "date_time": "$date_time",
-                            "ignition": "$ignition",
-                            "speed": {"$toDouble": "$speed"}
-                        }
-                    }
-                }
-            }
-        ]
-
-        timeAnalysisDatum = list(atlanta_collection.aggregate(pipeline))
-
-        if not timeAnalysisDatum:
-            pipeline = [
-                {
-                    "$match": 
-                    {
-                        "imei": imei,
-                        "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
-                    }
+                    "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                 },
-                {"$sort": {"imei": 1, "gps.timestamp": 1}},
-                {
-                    "$group": 
-                    {
-                        "_id": "$imei",
-                        "records": 
-                        {
-                            "$push": {
-                                "date_time": "$gps.timestamp",
-                                "ignition": {"$toString": "$telemetry.ignition"},
-                                "speed": "$telemetry.speed"
-                            }
-                        }
-                    }
-                }
-            ]
+                sort=[("gps.timestamp", ASCENDING), ("imei", ASCENDING)]
+            ))
+            
+            for datum in data:
+                records.append({
+                    "date_time": datum.get("gps", {}).get("timestamp"),
+                    "ignition": str(datum.get("telemetry", {}).get("ignition")),
+                    "speed": float(datum.get("telemetry", {}).get("speed", 0)),
+                })
+        else:
+            for datum in data:
+                records.append({
+                    "date_time": datum.get("date_time"),
+                    "ignition": datum.get("ignition"),
+                    "speed": float(datum.get("speed", 0)),
+                })
 
-            timeAnalysisDatum = list(atlantaAis140Collection.aggregate(pipeline))
-        timeAnalysisData.extend(timeAnalysisDatum)
+        if records:
+            timeAnalysisData.append({
+                "_id": imei,
+                "records": records
+            })
         
     return timeAnalysisData
