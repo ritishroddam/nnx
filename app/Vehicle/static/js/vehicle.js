@@ -3232,44 +3232,6 @@ function addHoverListenersForVehicle(imei) {
         address
       );
       infoWindow.open(map, currentMarker);
-      
-      if (isSOSVehicle) {
-        setTimeout(() => {
-          const infoWindowContent = document.querySelector('.gm-style-iw');
-          if (infoWindowContent && !infoWindowContent.querySelector('.sos-ack-button')) {
-            const ackButton = document.createElement('button');
-            ackButton.className = 'sos-ack-button';
-            ackButton.innerHTML = '🚨 Acknowledge SOS';
-            ackButton.style.cssText = `
-              background: linear-gradient(135deg, #ff0000, #ff5252);
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 4px;
-              cursor: pointer;
-              font-weight: bold;
-              margin-top: 10px;
-              display: block;
-              width: 100%;
-              transition: all 0.3s ease;
-            `;
-            
-            ackButton.onmouseover = () => {
-              ackButton.style.background = 'linear-gradient(135deg, #ff5252, #ff0000)';
-            };
-            
-            ackButton.onmouseout = () => {
-              ackButton.style.background = 'linear-gradient(135deg, #ff0000, #ff5252)';
-            };
-            
-            ackButton.onclick = () => {
-              acknowledgeSOS(imei);
-            };
-            
-            infoWindowContent.appendChild(ackButton);
-          }
-        }, 100);
-      }
     });
 
     card.addEventListener("mouseout", () => {
