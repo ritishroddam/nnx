@@ -606,6 +606,36 @@ async function updateTheme() {
 }
 
 /* -------------------------
+    Theme observer (watchBodyTheme)
+   -------------------------*/
+function watchBodyTheme({ debounceMs = 80 } = {}) {
+  const body = document.body;
+  if (!body) return { disconnect: () => {} };
+
+  let timer = null;
+  const mo = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.attributeName === "class") {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          updateTheme().catch((e) => console.error("theme observer updateTheme failed:", e));
+        }, debounceMs);
+        break;
+      }
+    }
+  });
+
+  mo.observe(body, { attributes: true, attributeFilter: ["class"] });
+
+  return {
+    disconnect() {
+      clearTimeout(timer);
+      try { mo.disconnect(); } catch (e) { /* ignore */ }
+    }
+  };
+}
+
+/* -------------------------
    Map helpers (initMap/fallbackToDefaultLocation)
    -------------------------*/
 async function initMap() {
@@ -697,14 +727,6 @@ async function fetchStatusData() {
    Event wiring
    -------------------------*/
 async function attachEventListeners() {
-  const themeToggle = safeEl("theme-toggle");
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      updateTheme().catch(console.error);
-    });
-  }
-
   const runningBtn = safeEl("running-vehicles");
   if (runningBtn) runningBtn.addEventListener("click", () => showStatusPopup('running', 'Running Vehicles'));
 
@@ -851,6 +873,8 @@ async function initDashboard() {
   isDarkMode = document.body.classList.contains("dark-mode");
   centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
   Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
+
+  window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
 
   await attachEventListeners();
 
