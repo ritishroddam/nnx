@@ -1614,7 +1614,7 @@ body.dark-mode .select-toggle-btn.active {
 #sos-alert-panel {
   position: fixed;
   top: 50% !important;
-  left: 50% !important;
+  left: 85% !important;
   transform: translate(-50%, -50%) !important;
   width: 550px;
   max-height: 500px;
