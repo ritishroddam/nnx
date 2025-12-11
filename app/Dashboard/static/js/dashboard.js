@@ -569,8 +569,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             legend: {
               position: "top",
               labels: {
-                // Chart.js v3+ expects `color` at labels level; keep font config too
-                color: isDarkMode ? "#E0E0E0" : "#2f2f2f",
+                color: isDarkMode ? "#ccc" : "black",
                 font: {
                   size: 14,
                   weight: "bold",
@@ -578,7 +577,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 generateLabels: (chart) => {
                   const original =
                     Chart.overrides.doughnut.plugins.legend.labels.generateLabels;
-                  // note: call original to keep Chart.js label generation consistent
                   const labels = original.call(this, chart);
                   labels.forEach((label) => {
                     label.className = "chart-label";
