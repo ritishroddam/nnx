@@ -55,6 +55,200 @@ def fetch_range_batches(imeis, start_of_day, end_of_day):
             for func, name in funcs}
     return tuple(job.wait() for job in jobs.values())
 
+def _empty_status_counters():
+    return {
+        'runningVehicles': 0,
+        'idleVehicles': 0,
+        'parkedVehicles': 0,
+        'speedVehicles': 0,
+        'overspeedVehicles': 0,
+        'offlineVehicles': 0,
+        'disconnectedVehicles': 0,
+        'noGpsVehicles': 0,
+        'totalVehicles': 0,
+    }
+    
+def build_vehicle_snapshot(range_param="1day", status_filter=None, include_location=True):
+    utc_now = datetime.now(timezone.utc)
+    range_map = {
+        "1hour": timedelta(hours=1),
+        "6hours": timedelta(hours=6),
+        "12hours": timedelta(hours=12),
+        "1day": timedelta(days=1),
+        "2days": timedelta(days=2),
+        "4days": timedelta(days=4),
+        "7days": timedelta(days=7),
+        "14days": timedelta(days=14),
+        "30days": timedelta(days=30),
+    }
+    delta = range_map.get(range_param, timedelta(days=1))
+    start_of_day = utc_now - delta
+    end_of_day = utc_now
+
+    vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
+    imeis = getCollectionImeis(vehicleInvyImeis)
+
+    if not imeis:
+        return [], _empty_status_counters()
+
+    distance_results, speed_results, time_results = fetch_range_batches(imeis, start_of_day, end_of_day)
+    for result in distance_results:
+        distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
+        result['distanceTravelled'] = max(distanceTravelled, 0)
+
+    latest_results = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
+    for doc in atlantaAis140LatestCollection.find({"_id": {"$in": imeis}}):
+        latest_results.append(atlantaAis140ToFront(doc))
+
+    speed_dict = {result['imei']: result for result in speed_results}
+    distance_dict = {result['imei']: result for result in distance_results}
+    latest_dict = {result['_id']: result for result in latest_results}
+    time_dict = {result['_id']: result['records'] for result in time_results}
+
+    twenty_four_hours_ago = utc_now - timedelta(hours=24)
+    counters = _empty_status_counters()
+    vehicle_data = []
+
+    for imei in imeis:
+        latest = latest_dict.get(imei)
+        if not latest:
+            continue
+
+        distance = distance_dict.get(imei, {})
+        speeds = speed_dict.get(imei, {})
+        time_records = time_dict.get(imei, [])
+
+        vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
+
+        driving_time = timedelta()
+        idle_time = timedelta()
+        number_of_stops = 0
+        prev_ignition = None
+        prev_time = None
+
+        for record in time_records:
+            curr_time = record.get("date_time")
+            if not curr_time or (prev_time and curr_time < prev_time):
+                continue
+
+            ignition = record.get("ignition")
+            speed_val = float(record.get("speed", 0.0))
+
+            if prev_time is not None:
+                delta_t = curr_time - prev_time
+                if prev_ignition == "1" and speed_val > 0:
+                    driving_time += delta_t
+                elif prev_ignition == "1" and speed_val == 0:
+                    idle_time += delta_t
+
+            if prev_ignition == "0" and ignition == "1":
+                number_of_stops += 1
+
+            prev_ignition = ignition
+            prev_time = curr_time
+
+        last_update = None
+        if latest.get("date") and latest.get("time"):
+            try:
+                last_update = datetime.strptime(
+                    latest.get("date") + latest.get("time"),
+                    '%d%m%y%H%M%S'
+                ).replace(tzinfo=timezone.utc)
+            except ValueError:
+                last_update = None
+
+        is_offline = last_update is None or last_update < twenty_four_hours_ago
+        try:
+            current_speed = float(latest.get("speed", 0))
+        except (ValueError, TypeError):
+            current_speed = 0.0
+
+        ignition_state = str(latest.get("ignition", "0"))
+        main_power = str(latest.get("main_power", "1"))
+        gps_ok = bool(latest.get("gps", True))
+
+        counters['totalVehicles'] += 1
+        if is_offline:
+            counters['offlineVehicles'] += 1
+        else:
+            if ignition_state == "1" and current_speed > 0:
+                counters['runningVehicles'] += 1
+            elif ignition_state == "1" and current_speed == 0:
+                counters['idleVehicles'] += 1
+            elif ignition_state == "0" and current_speed == 0:
+                counters['parkedVehicles'] += 1
+
+        if not is_offline and ignition_state == "1" and 40 <= current_speed < 60:
+            counters['speedVehicles'] += 1
+        if not is_offline and ignition_state == "1" and current_speed >= 60:
+            counters['overspeedVehicles'] += 1
+        if main_power == "0":
+            counters['disconnectedVehicles'] += 1
+        if not gps_ok:
+            counters['noGpsVehicles'] += 1
+
+        location_value = None
+        if include_location:
+            try:
+                location_value = safe_geocode(latest.get("latitude"), latest.get("longitude"))
+            except Exception:
+                location_value = None
+
+        vehicle_info = {
+            "imei": imei,
+            "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
+            "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
+            "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
+            "location": location_value,
+            "latitude": latest.get("latitude", "N/A"),
+            "longitude": latest.get("longitude", "N/A"),
+            "speed": latest.get("speed", "0.0"),
+            "ignition": latest.get("ignition", "0"),
+            "gsm": latest.get("gsm_sig", "0"),
+            "sos": latest.get("sos", "0"),
+            "main_power": main_power,
+            "gps": gps_ok,
+            "odometer": latest.get("odometer", "N/A"),
+            "date": latest.get("date"),
+            "time": latest.get("time"),
+            "distance": round(distance.get("distanceTravelled", 0), 2),
+            "max_speed": speeds.get("max_speed", 0),
+            "avg_speed": round(speeds.get("avg_speed", 0), 2),
+            "driving_time": format_seconds(driving_time.total_seconds()),
+            "idle_time": format_seconds(idle_time.total_seconds()),
+            "number_of_stops": number_of_stops,
+            "is_offline": is_offline,
+            "last_updated": format_last_updated(latest.get("date"), latest.get("time")),
+        }
+
+        should_include = True
+        if status_filter:
+            filter_checks = {
+                "running": ignition_state == "1" and current_speed > 0 and not is_offline,
+                "idle": ignition_state == "1" and current_speed == 0 and not is_offline,
+                "parked": ignition_state == "0" and current_speed == 0 and not is_offline,
+                "speed": ignition_state == "1" and 40 <= current_speed < 60 and not is_offline,
+                "overspeed": ignition_state == "1" and current_speed >= 60 and not is_offline,
+                "offline": is_offline,
+                "disconnected": main_power == "0",
+                "noGps": not gps_ok,
+            }
+            should_include = filter_checks.get(status_filter, False)
+
+        if should_include:
+            vehicle_data.append(vehicle_info)
+
+    return vehicle_data, counters
+
+def format_last_updated(date_str, time_str):
+    if not date_str or not time_str:
+        return "N/A"
+    try:
+        dt = datetime.strptime(date_str + time_str, '%d%m%y%H%M%S')
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
+    except:
+        return "N/A"
+
 @dashboard_bp.route('/dashboard_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin')  
@@ -195,253 +389,23 @@ def atlanta_distance_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_vehicle_range_data():
     try:
-        utc_now = datetime.now(timezone.utc)
         range_param = request.args.get("range", "1day")
         status_filter = request.args.get("status")
-        
-        range_map = {
-            "1hour": timedelta(hours=1),
-            "6hours": timedelta(hours=6),
-            "12hours": timedelta(hours=12),
-            "1day": timedelta(days=1),
-            "2days": timedelta(days=2),
-            "4days": timedelta(days=4),
-            "7days": timedelta(days=7),
-            "14days": timedelta(days=14),
-            "30days": timedelta(days=30),
-        }
-        
-        delta = range_map.get(range_param, timedelta(days=1))
-        start_of_day = utc_now - delta
-        end_of_day = utc_now
-        
-        vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
-        
-        imeis = getCollectionImeis(vehicleInvyImeis)
-        
-        if not imeis:
-            return jsonify([]), 200
-
-        distance_results, speed_results, time_results = fetch_range_batches(imeis, start_of_day, end_of_day)
-        
-        for result in distance_results:
-            distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
-            result['distanceTravelled'] = distanceTravelled if distanceTravelled >= 0 else 0
-        
-        print(f'[DEBUG] fetching latest records...')
-        latest_results = list(atlantaLatestCollection.find({"_id" : {"$in": imeis}}))
-        print(f'[DEBUG] Latest results count: {len(latest_results)}')
-        
-        print(f'[DEBUG] fetching latest AIS140 records...')
-        atlantaAis140LatestResults = atlantaAis140LatestCollection.find({"_id" : {"$in": imeis}})
-        print(f'[DEBUG] Latest AIS140 results fetched.')
-        
-        for doc in atlantaAis140LatestResults:
-            data = atlantaAis140ToFront(doc)
-            latest_results.append(data)
-        
-        speed_dict = {result['imei']: result for result in speed_results}
-        distance_dict = {result['imei']: result for result in distance_results}
-        latest_dict = {result['_id']: result for result in latest_results}
-        time_dict = {result['_id']: result['records'] for result in time_results}
-        
-        twenty_four_hours_ago = utc_now - timedelta(hours=24)
-        vehicle_data = []
-        
-        print(f'[DEBUG] Compiling vehicle data...')
-        for imei in imeis:
-            distance = distance_dict.get(imei, {})
-            speeds = speed_dict.get(imei, {})
-            latest = latest_dict.get(imei, {})
-            time_records = time_dict.get(imei, [])
-            
-            if not latest:
-                continue
-                
-            vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
-            
-            driving_time = timedelta()
-            idle_time = timedelta()
-            number_of_stops = 0
-            prev_ignition = None
-            prev_time = None
-            
-            for record in time_records:
-                curr_time = record["date_time"]
-                
-                if not curr_time or prev_time and curr_time < prev_time:
-                    continue
-                
-                ignition = record.get("ignition")
-                speed = record.get("speed", 0.0)
-                
-                if prev_time is not None:
-                    delta = curr_time - prev_time
-                    
-                    if prev_ignition == "1" and speed > 0:
-                        driving_time += delta
-                    elif prev_ignition == "1" and speed == 0:
-                        idle_time += delta
-                
-                if prev_ignition == "0" and ignition == "1":
-                    number_of_stops += 1
-                
-                prev_ignition = ignition
-                prev_time = curr_time
-            
-            last_update = None
-            if latest.get("date") and latest.get("time"):
-                try:
-                    last_update = datetime.strptime(
-                        latest.get("date") + latest.get("time"),
-                        '%d%m%y%H%M%S'
-                    )
-                    last_update = last_update.replace(tzinfo=timezone.utc)
-                except ValueError as e:
-                    print(f"Error parsing date/time: {e}")
-                    last_update = None
-            
-            is_offline = last_update is None or last_update < twenty_four_hours_ago
-            
-            vehicle_info = {
-                "imei": imei,
-                "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
-                "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
-                "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
-                "location": safe_geocode(latest.get("latitude"), latest.get("longitude")),
-                "latitude": latest.get("latitude", "N/A"),
-                "longitude": latest.get("longitude", "N/A"),
-                "speed": latest.get("speed", "0.0"),
-                "ignition": latest.get("ignition", "0"),
-                "gsm": latest.get("gsm_sig", "0"),
-                "sos": latest.get("sos", "0"),
-                "main_power": latest.get("main_power", "1"),
-                "gps": latest.get("gps", True),
-                "odometer": latest.get("odometer", "N/A"),
-                "date": latest.get("date", None),
-                "time": latest.get("time", None),
-                "distance": round(distance.get("distanceTravelled", 0), 2),
-                "max_speed": speeds.get("max_speed", 0),
-                "avg_speed": round(speeds.get("avg_speed", 0), 2),
-                "driving_time": format_seconds(driving_time.total_seconds()),
-                "idle_time": format_seconds(idle_time.total_seconds()),
-                "number_of_stops": number_of_stops,
-                "is_offline": is_offline,
-                "last_updated": format_last_updated(latest.get("date"), latest.get("time"))
-            }
-            
-            if not status_filter:
-                vehicle_data.append(vehicle_info)
-            else:
-                try:
-                    speed = float(vehicle_info.get("speed", 0))
-                except (ValueError, TypeError):
-                    speed = 0.0
-                
-                ignition = str(vehicle_info.get("ignition", "0"))
-                is_offline = vehicle_info.get("is_offline", False)
-                main_power = str(vehicle_info.get("main_power", "1"))
-                
-                print(f"DEBUG Filter: {vehicle_info.get('registration')} - speed={speed}, ignition={ignition}, offline={is_offline}, filter={status_filter}")
-                
-                should_include = False
-                
-                if status_filter == "running" and ignition == "1" and speed > 0 and not is_offline:
-                    should_include = True
-                elif status_filter == "idle" and ignition == "1" and speed == 0 and not is_offline:
-                    should_include = True
-                elif status_filter == "parked" and ignition == "0" and speed == 0 and not is_offline:
-                    should_include = True
-                elif status_filter == "speed" and ignition == "1" and 40 <= speed < 60 and not is_offline:
-                    should_include = True
-                elif status_filter == "overspeed" and ignition == "1" and speed >= 60 and not is_offline:
-                    should_include = True
-                elif status_filter == "offline" and is_offline:
-                    should_include = True
-                elif status_filter == "disconnected" and main_power == "0":
-                    should_include = True
-                
-                if should_include:
-                    vehicle_data.append(vehicle_info)
-                    print(f"  → INCLUDED in {status_filter}")
-        
-        print(f'[DEBUG] Compiled vehicle data count: {len(vehicle_data)}')
+        vehicle_data, _ = build_vehicle_snapshot(range_param, status_filter, include_location=True)
         return jsonify(vehicle_data), 200
-        
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
-
-def format_last_updated(date_str, time_str):
-    if not date_str or not time_str:
-        return "N/A"
-    try:
-        dt = datetime.strptime(date_str + time_str, '%d%m%y%H%M%S')
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-    except:
-        return "N/A"
 
 @dashboard_bp.route('/get_status_data', methods=['GET'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
-        utc_now = datetime.now(timezone.utc)
-        twenty_four_hours_ago = utc_now - timedelta(hours=24)
-        
-        print(f'[DEBUG] Called get_vehicle_range_data, received response')
-        response = get_vehicle_range_data()
-        print(f'[DEBUG] Received response from get_vehicle_range_data')
-        if isinstance(response, tuple):
-            vehicle_data = response[0].json 
-        else:
-            vehicle_data = response.json
-        
-        counters = {
-            'runningVehicles': 0,
-            'idleVehicles': 0,
-            'parkedVehicles': 0,
-            'speedVehicles': 0,
-            'overspeedVehicles': 0,
-            'offlineVehicles': 0,
-            'disconnectedVehicles': 0,
-            'noGpsVehicles': 0,
-            'totalVehicles': len(vehicle_data)
-        }
-
-        for vehicle in vehicle_data:
-            try:
-                speed = float(vehicle.get("speed", 0))
-            except (ValueError, TypeError):
-                speed = 0.0
-            
-            ignition = str(vehicle.get("ignition", "0"))
-            is_offline = vehicle.get("is_offline", False)
-            main_power = str(vehicle.get("main_power", "1"))
-            gps = vehicle.get("gps", True)
-
-            if is_offline:
-                counters['offlineVehicles'] += 1
-            elif ignition == "1" and speed > 0 and not is_offline:
-                counters['runningVehicles'] += 1
-            elif ignition == "1" and speed == 0 and not is_offline:
-                counters['idleVehicles'] += 1
-            elif ignition == "0" and speed == 0 and not is_offline:
-                counters['parkedVehicles'] += 1
-            
-            if ignition == "1" and 40 <= speed < 60 and not is_offline:
-                counters['speedVehicles'] += 1
-            elif ignition == "1" and speed >= 60 and not is_offline:
-                counters['overspeedVehicles'] += 1
-            
-            if main_power == "0":
-                counters['disconnectedVehicles'] += 1
-            if not gps:
-                counters['noGpsVehicles'] += 1
-
+        range_param = request.args.get("range", "1day")
+        _, counters = build_vehicle_snapshot(range_param, include_location=False)
         return jsonify(counters), 200
-
     except Exception as e:
         print(f"Error fetching status data: {e}")
         return jsonify({"error": "Failed to fetch status data"}), 500
