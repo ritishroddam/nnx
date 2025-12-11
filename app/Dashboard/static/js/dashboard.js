@@ -539,48 +539,61 @@ async function fetchDistanceTravelledData() {
    Theme handling
    -------------------------*/
 async function updateTheme() {
-  // read latest DOM class
-  isDarkMode = document.body.classList.contains("dark-mode");
-  centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
-  Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
+  try {
+    isDarkMode = document.body.classList.contains("dark-mode");
 
-  await initMap();
+    centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
 
-  // update devicesChart colors
-  if (devicesChart) {
-    devicesChart.options.plugins = devicesChart.options.plugins || {};
-    devicesChart.options.plugins.legend = devicesChart.options.plugins.legend || {};
-    devicesChart.options.plugins.legend.labels = devicesChart.options.plugins.legend.labels || {};
-    devicesChart.options.plugins.legend.labels.color = isDarkMode ? "#ccc" : "#2f2f2f";
+    Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
-    if (devicesChart.options.scales) {
-      if (devicesChart.options.scales.x) {
-        devicesChart.options.scales.x.ticks = devicesChart.options.scales.x.ticks || {};
-        devicesChart.options.scales.x.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
-        devicesChart.options.scales.x.grid = devicesChart.options.scales.x.grid || {};
-        devicesChart.options.scales.x.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+    if (devicesChart) {
+      devicesChart.options = devicesChart.options || {};
+      devicesChart.options.plugins = devicesChart.options.plugins || {};
+      devicesChart.options.plugins.legend = devicesChart.options.plugins.legend || {};
+      devicesChart.options.plugins.legend.labels = devicesChart.options.plugins.legend.labels || {};
+      devicesChart.options.plugins.legend.labels.color = isDarkMode ? "#ccc" : "#2f2f2f";
+
+      if (devicesChart.options.scales) {
+        if (devicesChart.options.scales.x) {
+          devicesChart.options.scales.x.ticks = devicesChart.options.scales.x.ticks || {};
+          devicesChart.options.scales.x.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
+          devicesChart.options.scales.x.grid = devicesChart.options.scales.x.grid || {};
+          devicesChart.options.scales.x.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+        }
+        if (devicesChart.options.scales.y) {
+          devicesChart.options.scales.y.ticks = devicesChart.options.scales.y.ticks || {};
+          devicesChart.options.scales.y.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
+          devicesChart.options.scales.y.grid = devicesChart.options.scales.y.grid || {};
+          devicesChart.options.scales.y.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+        }
       }
-      if (devicesChart.options.scales.y) {
-        devicesChart.options.scales.y.ticks = devicesChart.options.scales.y.ticks || {};
-        devicesChart.options.scales.y.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
-        devicesChart.options.scales.y.grid = devicesChart.options.scales.y.grid || {};
-        devicesChart.options.scales.y.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
-      }
+
+      devicesChart.data.datasets[0].backgroundColor = isDarkMode
+        ? "rgba(204, 204, 204, 0.2)"
+        : "rgba(47, 47, 47, 0.2)";
+      devicesChart.data.datasets[0].borderColor = isDarkMode ? "#ccc" : "#2f2f2f";
+      devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode ? "#ccc" : "#2f2f2f";
+      devicesChart.data.datasets[0].pointBorderColor = isDarkMode ? "black" : "white";
+
+      devicesChart.update();
     }
 
-    devicesChart.data.datasets[0].backgroundColor = isDarkMode ? "rgba(204, 204, 204, 0.2)" : "rgba(47, 47, 47, 0.2)";
-    devicesChart.data.datasets[0].borderColor = isDarkMode ? "#ccc" : "#2f2f2f";
-    devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode ? "#ccc" : "#2f2f2f";
-    devicesChart.data.datasets[0].pointBorderColor = isDarkMode ? "black" : "white";
-    devicesChart.update();
-  }
+    if (pieChart) {
+      pieChart.destroy();
+      pieChart = null;
+    }
+    await renderPieChart();
 
-  // re-render pie so gradients update
-  if (pieChart) {
-    pieChart.destroy();
-    pieChart = null;
+    setTimeout(() => {
+      initMap().catch((e) => {
+        console.error("Error re-initializing map after theme change:", e);
+        displayFlashMessage("Map failed to reload after theme change.", "warning");
+      });
+    }, 120);
+  } catch (e) {
+    console.error("updateTheme error:", e);
+    displayFlashMessage("Failed to apply theme changes to charts.", "warning");
   }
-  await renderPieChart();
 }
 
 /* -------------------------
@@ -677,9 +690,12 @@ async function fetchStatusData() {
 async function attachEventListeners() {
   const themeToggle = safeEl("theme-toggle");
   if (themeToggle) {
-    themeToggle.addEventListener("click", async () => {
-      // update theme based on current DOM class
-      await updateTheme();
+    // run updateTheme after a micro-task so any DOM class toggle executes first
+    themeToggle.addEventListener("click", () => {
+      // run on next tick to ensure body.dark-mode has been toggled by other code already
+      setTimeout(() => {
+        updateTheme().catch((e) => console.error("Error updating theme:", e));
+      }, 50);
     });
   }
 
