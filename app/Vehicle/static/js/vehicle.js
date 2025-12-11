@@ -95,6 +95,9 @@ let tableCurrentPage = 1;
 let tablePerPage = 100;
 let tableFilteredData = [];
 
+var activeSOSAlerts = new Set();
+var sosAlertButton = null;
+
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
 
@@ -136,6 +139,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       currentFilterValue = event.target.value || "all";
       applyFilterToAllVehicles();
     });
+  }
+  sosAlertButton = document.getElementById('sos-alert-toggle');
+  if (sosAlertButton) {
+    sosAlertButton.addEventListener('click', toggleSOSAlertPanel);
   }
 });
 
@@ -776,6 +783,25 @@ function deg2rad(deg) {
   return deg * (Math.PI/180);
 }
 
+function updateSOSAlertButton() {
+  const sosButtonContainer = document.getElementById('sos-alert-button-container');
+  const sosAlertCount = document.getElementById('sos-alert-count');
+  
+  if (activeSOSAlerts.size > 0) {
+    sosButtonContainer.style.display = 'block';
+    sosAlertCount.textContent = activeSOSAlerts.size;
+    
+    sosAlertButton.style.animation = 'sosButtonPulse 1s infinite';
+  } else {
+    sosButtonContainer.style.display = 'none';
+    
+    const sosPanel = document.getElementById('sos-alert-panel');
+    if (sosPanel) {
+      sosPanel.style.display = 'none';
+    }
+  }
+}
+
 function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle || !marker) {
@@ -791,6 +817,8 @@ function triggerSOS(imei, marker) {
   vehicle.sosActive = true;
   vehicle.sos = "1";
   vehicleData.set(imei, vehicle);
+
+  activeSOSAlerts.add(imei);
 
   console.log(`Triggering SOS for ${imei}`);
 
@@ -865,6 +893,8 @@ function triggerSOS(imei, marker) {
     console.log(`Found ${nearbyVehicles.length} nearby vehicles`);
 
     addSOSAlertToPanel(vehicle, nearbyVehicles);
+
+    updateSOSAlertButton();
     
     playSOSAlertSound();
     
@@ -877,9 +907,10 @@ function createSOSAlertPanel() {
   panel.id = "sos-alert-panel";
   panel.style.cssText = `
     position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 550px;  /* Increased width for better table display */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 550px;
     max-height: 500px;
     background: white;
     border-radius: 8px;
@@ -895,7 +926,7 @@ function createSOSAlertPanel() {
                 display: flex; justify-content: space-between; align-items: center;">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 20px;">🚨</span>
-        <h3 style="margin: 0; font-size: 16px; font-weight: bold;">Active SOS Alerts</h3>
+        <h3 style="margin: 0; font-size: 16px; font-weight: bold;">Active SOS Alerts (${activeSOSAlerts.size})</h3>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <button id="collapse-sos-panel" style="background: rgba(255,255,255,0.2); color: white; 
@@ -921,6 +952,15 @@ function createSOSAlertPanel() {
     });
   };
   
+  document.addEventListener('click', (e) => {
+    if (panel.style.display === 'block' && 
+        !panel.contains(e.target) && 
+        e.target !== sosAlertButton && 
+        !sosAlertButton.contains(e.target)) {
+      panel.style.display = 'none';
+    }
+  });
+  
   return panel;
 }
 
@@ -929,8 +969,7 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   if (!panel) {
     panel = createSOSAlertPanel();
   }
-  
-  panel.style.display = "block";
+
   
   const container = document.getElementById("sos-alerts-container");
   const alertId = `sos-alert-${sosVehicle.imei}`;
@@ -998,7 +1037,24 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
         </div>
       </div>
     `;
+    updateSOSAlertButton();
   }
+
+  function toggleSOSAlertPanel() {
+  const panel = document.getElementById('sos-alert-panel');
+  if (!panel) return;
+  
+  if (panel.style.display === 'block' || panel.style.display === '') {
+    panel.style.display = 'none';
+  } else {
+    if (activeSOSAlerts.size > 0) {
+      panel.style.display = 'block';
+      panel.style.top = '50%';
+      panel.style.left = '50%';
+      panel.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+}
   
   const alertDiv = document.createElement("div");
   alertDiv.id = alertId;
@@ -1303,6 +1359,8 @@ function acknowledgeSOS(imei) {
   vehicle.sos = "0";
   vehicle.sosActive = false;
   vehicleData.set(imei, vehicle);
+
+  activeSOSAlerts.delete(imei);
   
   fetch('/alerts/acknowledge_sos', {
     method: 'POST',
@@ -1323,6 +1381,21 @@ function acknowledgeSOS(imei) {
       if (vehicleCard) {
         vehicleCard.classList.remove('sos-blink-card');
       }
+
+      updateSOSAlertButton();
+
+       const alertDiv = document.getElementById(`sos-alert-${imei}`);
+      if (alertDiv) {
+        alertDiv.remove();
+      }
+      
+      if (activeSOSAlerts.size === 0) {
+        const sosPanel = document.getElementById('sos-alert-panel');
+        if (sosPanel) {
+          sosPanel.style.display = 'none';
+        }
+      }
+
     } else {
       console.error('Failed to acknowledge SOS:', data.message);
     }
@@ -2286,6 +2359,15 @@ function removeSOS(imei) {
   }
 
   updateVehicleCard(vehicle);
+
+    activeSOSAlerts.delete(imei);
+  
+  updateSOSAlertButton();
+  
+  const alertDiv = document.getElementById(`sos-alert-${imei}`);
+  if (alertDiv) {
+    alertDiv.remove();
+  }
 }
 
 function formatDateTime(dateString, timeString) {
