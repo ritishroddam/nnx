@@ -936,15 +936,14 @@ function createSOSAlertPanel() {
   panel.id = "sos-alert-panel";
   panel.style.cssText = `
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 550px;
-    max-height: 500px;
+    top: 20px;
+    right: 20px;
+    width: 400px;  /* Reduced width */
+    max-height: 70vh;  /* Use viewport height instead of fixed height */
     background: white;
     border-radius: 8px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    z-index: 10000;
+    z-index: 9999;  /* Lower than flash messages which should be 10000+ */
     overflow: hidden;
     display: none;
     border: 2px solid #ff0000;
@@ -966,7 +965,7 @@ function createSOSAlertPanel() {
                 cursor: pointer; font-size: 18px; font-weight: bold;">×</button>
       </div>
     </div>
-    <div id="sos-alerts-container" style="max-height: 436px; overflow-y: auto; padding: 0;"></div>
+    <div id="sos-alerts-container" style="max-height: calc(70vh - 50px); overflow-y: auto; padding: 0;"></div>
   `;
   
   document.body.appendChild(panel);
