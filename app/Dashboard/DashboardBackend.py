@@ -316,7 +316,6 @@ def atlanta_pie_data():
                 
             speed = float(latest_data.get("speed", 0))
             ignition = latest_data.get("ignition", "0")
-            print(speed, ignition)
             if ignition == "1" or ignition == 1:
                 if speed > 0:
                     moving_vehicles += 1
