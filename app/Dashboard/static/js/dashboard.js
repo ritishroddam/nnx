@@ -68,13 +68,30 @@ function formatLastUpdatedText(date, time) {
 /* -------------------------
    Fetch & data helpers
    -------------------------*/
-async function fetchJSON(url, opts = {}) {
-  const res = await fetch(url, opts);
-  if (!res.ok) {
+async function fetchJSON(url, opts = {}, config = { showUserError: false, userMessage: null }) {
+  try {
+    const res = await fetch(url, opts);
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Request failed: ${res.status}`);
+    if (!res.ok) {
+      const errMsg = body.error || `Request failed (${res.status})`;
+      console.error(`fetchJSON error for ${url}:`, errMsg);
+      if (config.showUserError) {
+        displayFlashMessage(config.userMessage || `Failed to load data. (${res.status})`, "danger");
+      }
+      throw new Error(errMsg);
+    }
+    return body;
+  } catch (err) {
+    // network / JSON parse errors
+    console.error(`fetchJSON network/error for ${url}:`, err);
+    if (config.showUserError) {
+      displayFlashMessage(
+        config.userMessage || "Network error. Please check your connection and try again.",
+        "danger"
+      );
+    }
+    throw err;
   }
-  return res.json();
 }
 
 async function fetchFilteredVehicleData(status) {
@@ -308,9 +325,7 @@ async function showStatusPopup(status, title) {
   if (popup) popup.classList.add('active');
 
   try {
-    const response = await fetch(`/dashboard/get_vehicle_range_data?status=${status}`);
-    if (!response.ok) throw new Error(`Server returned ${response.status}`);
-    const data = await response.json();
+    const data = await fetchJSON(`/dashboard/get_vehicle_range_data?status=${status}`, {}, { showUserError: true, userMessage: "Failed to load vehicles list." });
     const filteredData = Array.isArray(data) ? data : [];
     statusPopupTableData = filteredData;
 
@@ -356,11 +371,13 @@ async function renderPieChart() {
     if (vehiclesEl) vehiclesEl.classList.remove('loaded');
     if (skeletonEl) skeletonEl.classList.remove('loaded');
 
-    const response = await fetch(API.pieData);
-    const data = await response.json();
+    const data = await fetchJSON(API.pieData, {}, { showUserError: true, userMessage: "Failed to load vehicle summary chart." });
     if (!response.ok) throw new Error(data.error || "Unknown error fetching pie chart data");
 
-    if (data.total_devices === undefined) throw new Error("Invalid data format received");
+    if (data.total_devices === undefined) {
+      displayFlashMessage("Received invalid data for vehicle summary.", "danger");
+      throw new Error("Invalid data format received");
+    }
 
     // fallback values
     const disconnected = typeof data.disconnected_vehicles !== "undefined" ? data.disconnected_vehicles : 0;
@@ -472,6 +489,11 @@ async function renderPieChart() {
     if (skeletonEl) skeletonEl.classList.add('loaded');
   } catch (error) {
     console.error("❌ Error rendering pie chart:", error);
+
+    if (!error.message || error.message.indexOf("Request failed") === -1) {
+      displayFlashMessage("Could not render vehicle summary chart.", "danger");
+    }
+
     const vehiclesEl = safeEl('vehiclesChart');
     const skeletonEl = safeEl('pieChartSkeleton');
     if (vehiclesEl) vehiclesEl.classList.add('loaded');
@@ -507,7 +529,7 @@ function initDevicesChart() {
 
 async function fetchDistanceTravelledData() {
   try {
-    const data = await fetchJSON(API.distanceData);
+    const data = await fetchJSON(API.distanceData, {}, { showUserError: true, userMessage: "Failed to load distance travelled data." });
     if (!devicesChart) initDevicesChart();
     devicesChart.data.labels = data.labels || [];
     devicesChart.data.datasets[0].data = data.distances || [];
@@ -596,6 +618,7 @@ async function initMap() {
     }
   } catch (err) {
     console.error("Error initializing map:", err);
+    displayFlashMessage("Map failed to load. Traffic and location features may be unavailable.", "warning");
   }
 }
 
@@ -622,9 +645,8 @@ async function fallbackToDefaultLocation() {
    -------------------------*/
 async function fetchDashboardData() {
   try {
-    // avoid unnecessary calls for non-admin
     if (typeof userRole !== "undefined" && userRole !== "admin") return;
-    const data = await fetchJSON(API.dashboardData);
+    const data = await fetchJSON(API.dashboardData, {}, { showUserError: true, userMessage: "Unable to load dashboard summary." });
     const cards = document.querySelectorAll(".card");
     if (cards && cards.length >= 3) {
       cards[0].querySelector("h3").textContent = data.devices || 0;
@@ -633,12 +655,13 @@ async function fetchDashboardData() {
     }
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
+    displayFlashMessage("Map fallback failed. Map is unavailable.", "warning");
   }
 }
 
 async function fetchStatusData() {
   try {
-    const data = await fetchJSON(API.statusData);
+    const data = await fetchJSON(API.statusData, {}, { showUserError: true, userMessage: "Unable to load status counts." });
     const setText = (id, text) => { const el = safeEl(id); if (el) el.textContent = text; };
 
     setText("running-vehicles-count", `${data.runningVehicles} / ${data.totalVehicles}`);
@@ -780,7 +803,9 @@ function attachEventListeners() {
    -------------------------*/
 async function fetchVehicleDistances(range = "1day") {
   try {
-    const data = await fetchJSON(`${API.vehicleRangeData}?range=${range}`);
+    const data = await fetchJSON(
+        `${API.vehicleRangeData}?range=${range}`, {}, 
+        {showUserError: true, userMessage: "Failed to load vehicle data" });
     const tableBody = safeEl("vehicleTable");
     if (!tableBody) return;
     tableBody.innerHTML = "";
