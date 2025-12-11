@@ -333,7 +333,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   const themeToggle = document.getElementById("theme-toggle");
   themeToggle.addEventListener("click", function () {
-    const isDarkMode = document.body.classList.contains("dark-mode");
+    let isDarkMode = document.body.classList.contains("dark-mode");
 
     if (isDarkMode) {
       Chart.defaults.color = "#ccc";
