@@ -515,7 +515,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       let gradient1, gradient2, gradient3, gradient4;
       let hover1, hover2, hover3, hover4;
-      let centerColor = isDarkMode ? "black" : "#ccc";
+      let centerColor = isDarkMode ? "red" : "#green";
 
       if (isDarkMode) {
         gradient1 = makeGradient("#1B5BBE", "#4A90E2");
