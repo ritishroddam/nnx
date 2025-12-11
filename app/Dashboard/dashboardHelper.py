@@ -142,7 +142,6 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
 def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
     timeAnalysisData = []
     for imei in imeis:
-        print(f'[DEBUG] Processing IMEI: {imei}')
         records = []
 
         data = list(atlanta_collection.find(
