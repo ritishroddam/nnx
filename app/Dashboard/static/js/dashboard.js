@@ -541,55 +541,78 @@ async function fetchDistanceTravelledData() {
 async function updateTheme() {
   try {
     isDarkMode = document.body.classList.contains("dark-mode");
-
     centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
-
     Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
     if (devicesChart) {
-      devicesChart.options = devicesChart.options || {};
-      devicesChart.options.plugins = devicesChart.options.plugins || {};
-      devicesChart.options.plugins.legend = devicesChart.options.plugins.legend || {};
-      devicesChart.options.plugins.legend.labels = devicesChart.options.plugins.legend.labels || {};
-      devicesChart.options.plugins.legend.labels.color = isDarkMode ? "#ccc" : "#2f2f2f";
+      try {
+        const existingLabels = devicesChart.options?.plugins?.legend?.labels;
+        const safeLabels = {};
 
-      if (devicesChart.options.scales) {
-        if (devicesChart.options.scales.x) {
-          devicesChart.options.scales.x.ticks = devicesChart.options.scales.x.ticks || {};
-          devicesChart.options.scales.x.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
-          devicesChart.options.scales.x.grid = devicesChart.options.scales.x.grid || {};
-          devicesChart.options.scales.x.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+        if (existingLabels && typeof existingLabels === "object" && !Array.isArray(existingLabels)) {
+          Object.keys(existingLabels).forEach((k) => {
+            if (typeof existingLabels[k] !== "function") {
+              safeLabels[k] = existingLabels[k];
+            }
+          });
         }
-        if (devicesChart.options.scales.y) {
-          devicesChart.options.scales.y.ticks = devicesChart.options.scales.y.ticks || {};
-          devicesChart.options.scales.y.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
-          devicesChart.options.scales.y.grid = devicesChart.options.scales.y.grid || {};
-          devicesChart.options.scales.y.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+
+        safeLabels.color = isDarkMode ? "#ccc" : "#2f2f2f";
+
+        devicesChart.options = devicesChart.options || {};
+        devicesChart.options.plugins = devicesChart.options.plugins || {};
+        devicesChart.options.plugins.legend = {
+          ...(devicesChart.options.plugins.legend && typeof devicesChart.options.plugins.legend === "object"
+            ? Object.fromEntries(Object.entries(devicesChart.options.plugins.legend).filter(([k, v]) => typeof v !== "function" && k !== "labels"))
+            : {}),
+          labels: safeLabels,
+        };
+        if (!devicesChart.options.scales) devicesChart.options.scales = {};
+        if (!devicesChart.options.scales.x) devicesChart.options.scales.x = {};
+        if (!devicesChart.options.scales.x.ticks) devicesChart.options.scales.x.ticks = {};
+        if (!devicesChart.options.scales.x.grid) devicesChart.options.scales.x.grid = {};
+
+        if (!devicesChart.options.scales.y) devicesChart.options.scales.y = {};
+        if (!devicesChart.options.scales.y.ticks) devicesChart.options.scales.y.ticks = {};
+        if (!devicesChart.options.scales.y.grid) devicesChart.options.scales.y.grid = {};
+
+        devicesChart.options.scales.x.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
+        devicesChart.options.scales.x.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+        devicesChart.options.scales.y.ticks.color = isDarkMode ? "#ccc" : "#2f2f2f";
+        devicesChart.options.scales.y.grid.color = isDarkMode ? "#787878" : "#d8d8d8";
+
+        if (devicesChart.data && devicesChart.data.datasets && devicesChart.data.datasets[0]) {
+          devicesChart.data.datasets[0].backgroundColor = isDarkMode
+            ? "rgba(204, 204, 204, 0.2)"
+            : "rgba(47, 47, 47, 0.2)";
+          devicesChart.data.datasets[0].borderColor = isDarkMode ? "#ccc" : "#2f2f2f";
+          devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode ? "#ccc" : "#2f2f2f";
+          devicesChart.data.datasets[0].pointBorderColor = isDarkMode ? "black" : "white";
         }
+
+        devicesChart.update();
+      } catch (innerErr) {
+        console.error("updateTheme: failed to update devicesChart safely:", innerErr);
+      }
+    }
+
+    try {
+      if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
       }
 
-      devicesChart.data.datasets[0].backgroundColor = isDarkMode
-        ? "rgba(204, 204, 204, 0.2)"
-        : "rgba(47, 47, 47, 0.2)";
-      devicesChart.data.datasets[0].borderColor = isDarkMode ? "#ccc" : "#2f2f2f";
-      devicesChart.data.datasets[0].pointBackgroundColor = isDarkMode ? "#ccc" : "#2f2f2f";
-      devicesChart.data.datasets[0].pointBorderColor = isDarkMode ? "black" : "white";
-
-      devicesChart.update();
+      await renderPieChart();
+    } catch (pieErr) {
+      console.error("updateTheme: failed to re-render pie:", pieErr);
     }
-
-    if (pieChart) {
-      pieChart.destroy();
-      pieChart = null;
-    }
-    await renderPieChart();
-
+    
     setTimeout(() => {
       initMap().catch((e) => {
         console.error("Error re-initializing map after theme change:", e);
         displayFlashMessage("Map failed to reload after theme change.", "warning");
       });
-    }, 120);
+    }, 150);
   } catch (e) {
     console.error("updateTheme error:", e);
     displayFlashMessage("Failed to apply theme changes to charts.", "warning");
