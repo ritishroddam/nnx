@@ -494,37 +494,84 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error("Invalid data format received");
       }
 
+      // ensure safe value for the optional fourth segment
+      const disconnected = typeof data.disconnected_vehicles !== "undefined"
+        ? data.disconnected_vehicles
+        : 0;
+
       if (window.pieChart) {
         window.pieChart.destroy();
       }
 
       const ctx = document.getElementById("vehiclesChart").getContext("2d");
 
-      const gradient1 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient1.addColorStop(0, "#7bb83d");
-      gradient1.addColorStop(1, "#a1d072");
+      // Indigo / Slate Blue palette (mono-hue) - light & dark variants
+      // Light Mode gradients:
+      // 1: #EEF1FF -> #C9D4FF
+      // 2: #C9D4FF -> #8FA6FF
+      // 3: #8FA6FF -> #4E6FF3
+      // 4: #4E6FF3 -> #2A46A3
+      //
+      // Dark Mode gradients:
+      // 1: #6E8CFF -> #5671E3
+      // 2: #5671E3 -> #445AC0
+      // 3: #445AC0 -> #2F428F
+      // 4: #2F428F -> #1E295C
 
-      const gradient2 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient2.addColorStop(0, "#33669a");
-      gradient2.addColorStop(1, "#538cc6");
+      // helper to create gradient with given stops
+      function makeGradient(y0color, y1color) {
+        const g = ctx.createLinearGradient(0, 0, 0, 400);
+        g.addColorStop(0, y0color);
+        g.addColorStop(1, y1color);
+        return g;
+      }
 
-      const gradient3 = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient3.addColorStop(0, "#bfbfbf");
-      gradient3.addColorStop(1, "#f2f2f2");
+      let gradient1, gradient2, gradient3, gradient4;
+      let hover1, hover2, hover3, hover4;
+      let centerColor = isDarkMode ? "#E0E0E0" : "#2f2f2f";
+
+      if (isDarkMode) {
+        gradient1 = makeGradient("#6E8CFF", "#5671E3");
+        gradient2 = makeGradient("#5671E3", "#445AC0");
+        gradient3 = makeGradient("#445AC0", "#2F428F");
+        gradient4 = makeGradient("#2F428F", "#1E295C");
+
+        // hover colors: pick slightly brighter single-shade colors for hover
+        hover1 = "#6E8CFF";
+        hover2 = "#5671E3";
+        hover3 = "#445AC0";
+        hover4 = "#2F428F";
+      } else {
+        gradient1 = makeGradient("#EEF1FF", "#C9D4FF");
+        gradient2 = makeGradient("#C9D4FF", "#8FA6FF");
+        gradient3 = makeGradient("#8FA6FF", "#4E6FF3");
+        gradient4 = makeGradient("#4E6FF3", "#2A46A3");
+
+        hover1 = "#C9D4FF";
+        hover2 = "#8FA6FF";
+        hover3 = "#4E6FF3";
+        hover4 = "#2A46A3";
+      }
 
       const chartConfig = {
         type: "doughnut",
         data: {
-          labels: ["Moving Vehicles", "Idle Vehicles", "Offline Vehicles"],
+          labels: [
+            "Moving Vehicles",
+            "Idle Vehicles",
+            "Offline Vehicles",
+            "Disconnected Vehicles",
+          ],
           datasets: [
             {
               data: [
                 data.moving_vehicles,
                 data.idle_vehicles,
                 data.offline_vehicles,
+                disconnected,
               ],
-              backgroundColor: [gradient1, gradient2, gradient3],
-              hoverBackgroundColor: ["#7bb83d", "#33669a", "#bfbfbf"],
+              backgroundColor: [gradient1, gradient2, gradient3, gradient4],
+              hoverBackgroundColor: [hover1, hover2, hover3, hover4],
               borderWidth: 0,
             },
           ],
@@ -535,18 +582,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             legend: {
               position: "top",
               labels: {
+                // Chart.js v3+ expects `color` at labels level; keep font config too
+                color: isDarkMode ? "#E0E0E0" : "#2f2f2f",
                 font: {
                   size: 14,
                   weight: "bold",
-                  color: isDarkMode ? "#e0e0e0" : "#2f2f2f",
                 },
                 generateLabels: (chart) => {
                   const original =
-                    Chart.overrides.doughnut.plugins.legend.labels
-                      .generateLabels;
+                    Chart.overrides.doughnut.plugins.legend.labels.generateLabels;
+                  // note: call original to keep Chart.js label generation consistent
                   const labels = original.call(this, chart);
                   labels.forEach((label) => {
-                    label.text = label.text;
                     label.className = "chart-label";
                   });
                   return labels;
@@ -590,8 +637,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             },
           },
-          rotation: -90,       
-          circumference: 180,   
+          rotation: -90,
+          circumference: 180,
         },
         plugins: [
           {
