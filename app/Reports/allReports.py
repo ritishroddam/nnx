@@ -1110,7 +1110,14 @@ def process_speed_report(imei, vehicle, date_filter):
         rows =[]
         
         vehicle_number = vehicle["LicensePlateNumber"]
+        speedFlag = False
         for doc in data:
+            if float(doc.get('speed', 0)) < speedThreshold:
+                speedFlag = False
+                continue
+
+            if speedFlag:
+                continue
             
             lat = doc.get("latitude") if doc.get("latitude") not in ("", None) else None
             lng = doc.get("longitude") if doc.get("longitude") not in ("", None) else None
@@ -1127,6 +1134,8 @@ def process_speed_report(imei, vehicle, date_filter):
                 "LOCATION": location,
                 "SPEED": doc.get('speed', '')
             })
+            
+            speedFlag = True
 
         if not rows:
             return None
