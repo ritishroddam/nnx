@@ -48,6 +48,54 @@ function showSkeletonLoader() {
   vehicleList.innerHTML = `<div id="skeleton-loader">${skeletonHTML}</div>`;
 }
 
+function toggleSOSAlertPanel() {
+  const panel = document.getElementById('sos-alert-panel');
+  if (!panel) return;
+  
+  if (panel.style.display === 'block' || panel.style.display === '') {
+    panel.style.display = 'none';
+  } else {
+    if (activeSOSAlerts.size > 0) {
+      panel.style.display = 'block';
+      panel.style.top = '50%';
+      panel.style.left = '50%';
+      panel.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+}
+
+function updateSOSAlertButton() {
+  const sosButtonContainer = document.getElementById('sos-alert-button-container');
+  const sosAlertCount = document.getElementById('sos-alert-count');
+  
+  if (activeSOSAlerts.size > 0) {
+    sosButtonContainer.style.display = 'block';
+    sosAlertCount.textContent = activeSOSAlerts.size;
+
+  const panel = document.getElementById('sos-alert-panel');
+   if (panel) {
+     const panelHeader = panel.querySelector('h3');
+     if (panelHeader) {
+       panelHeader.textContent = `Active SOS Alerts (${activeSOSAlerts.size})`;
+     }
+   }  
+    
+  if (sosAlertButton) {
+      sosAlertButton.style.animation = 'sosButtonPulse 1s infinite';
+    }
+  } else {
+    sosButtonContainer.style.display = 'none';
+    
+    const sosPanel = document.getElementById('sos-alert-panel');
+    if (sosPanel) {
+      sosPanel.style.display = 'none';
+    }
+    
+    if (sosAlertButton) {
+      sosAlertButton.style.animation = '';
+    }
+  }
+}
 
 const sidebar = document.querySelector('.sidebar');
 const floatingCard = document.querySelector('.floating-card');
@@ -783,25 +831,6 @@ function deg2rad(deg) {
   return deg * (Math.PI/180);
 }
 
-function updateSOSAlertButton() {
-  const sosButtonContainer = document.getElementById('sos-alert-button-container');
-  const sosAlertCount = document.getElementById('sos-alert-count');
-  
-  if (activeSOSAlerts.size > 0) {
-    sosButtonContainer.style.display = 'block';
-    sosAlertCount.textContent = activeSOSAlerts.size;
-    
-    sosAlertButton.style.animation = 'sosButtonPulse 1s infinite';
-  } else {
-    sosButtonContainer.style.display = 'none';
-    
-    const sosPanel = document.getElementById('sos-alert-panel');
-    if (sosPanel) {
-      sosPanel.style.display = 'none';
-    }
-  }
-}
-
 function triggerSOS(imei, marker) {
   const vehicle = vehicleData.get(imei);
   if (!vehicle || !marker) {
@@ -970,7 +999,6 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
     panel = createSOSAlertPanel();
   }
 
-  
   const container = document.getElementById("sos-alerts-container");
   const alertId = `sos-alert-${sosVehicle.imei}`;
   
@@ -1039,22 +1067,6 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
     `;
     updateSOSAlertButton();
   }
-
-  function toggleSOSAlertPanel() {
-  const panel = document.getElementById('sos-alert-panel');
-  if (!panel) return;
-  
-  if (panel.style.display === 'block' || panel.style.display === '') {
-    panel.style.display = 'none';
-  } else {
-    if (activeSOSAlerts.size > 0) {
-      panel.style.display = 'block';
-      panel.style.top = '50%';
-      panel.style.left = '50%';
-      panel.style.transform = 'translate(-50%, -50%)';
-    }
-  }
-}
   
   const alertDiv = document.createElement("div");
   alertDiv.id = alertId;
@@ -1109,6 +1121,11 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   `;
   
   container.insertBefore(alertDiv, container.firstChild);
+
+  const panelHeader = panel.querySelector('h3');
+  if (panelHeader) {
+    panelHeader.textContent = `Active SOS Alerts (${activeSOSAlerts.size})`;
+  }
   
   const toggleBtn = alertDiv.querySelector('.toggle-nearby-btn');
   if (toggleBtn) {
@@ -1384,7 +1401,7 @@ function acknowledgeSOS(imei) {
 
       updateSOSAlertButton();
 
-       const alertDiv = document.getElementById(`sos-alert-${imei}`);
+      const alertDiv = document.getElementById(`sos-alert-${imei}`);
       if (alertDiv) {
         alertDiv.remove();
       }
