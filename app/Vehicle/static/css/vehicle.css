@@ -1627,10 +1627,6 @@ body.dark-mode .select-toggle-btn.active {
   border: 2px solid #ff0000;
 }
 
-#sos-alert-button-container {
-  display: none !important;
-}
-
 @keyframes sosBlink {
   0% { 
     opacity: 1; 
