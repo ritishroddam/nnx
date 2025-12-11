@@ -64,27 +64,72 @@ function toggleSOSAlertPanel() {
   }
 }
 
+// function updateSOSAlertButton() {
+//   const sosButtonContainer = document.getElementById('sos-alert-button-container');
+//   const sosAlertCount = document.getElementById('sos-alert-count');
+  
+//   if (activeSOSAlerts.size > 0) {
+//     sosButtonContainer.style.display = 'block';
+//     sosAlertCount.textContent = activeSOSAlerts.size;
+
+//   const panel = document.getElementById('sos-alert-panel');
+//    if (panel) {
+//      const panelHeader = panel.querySelector('h3');
+//      if (panelHeader) {
+//        panelHeader.textContent = `Active SOS Alerts (${activeSOSAlerts.size})`;
+//      }
+//    }  
+    
+//   if (sosAlertButton) {
+//       sosAlertButton.style.animation = 'sosButtonPulse 1s infinite';
+//     }
+//   } else {
+//     sosButtonContainer.style.display = 'none';
+    
+//     const sosPanel = document.getElementById('sos-alert-panel');
+//     if (sosPanel) {
+//       sosPanel.style.display = 'none';
+//     }
+    
+//     if (sosAlertButton) {
+//       sosAlertButton.style.animation = '';
+//     }
+//   }
+// }
+
 function updateSOSAlertButton() {
   const sosButtonContainer = document.getElementById('sos-alert-button-container');
   const sosAlertCount = document.getElementById('sos-alert-count');
   
-  if (activeSOSAlerts.size > 0) {
+  // Recalculate active SOS alerts to ensure accuracy
+  let actualActiveSOS = 0;
+  vehicleData.forEach((vehicle, imei) => {
+    if (vehicle.sos === "1" || vehicle.sos === 1) {
+      actualActiveSOS++;
+    }
+  });
+  
+  // Also check the activeSOSAlerts Set for consistency
+  const activeCount = Math.max(activeSOSAlerts.size, actualActiveSOS);
+  
+  if (activeCount > 0) {
     sosButtonContainer.style.display = 'block';
-    sosAlertCount.textContent = activeSOSAlerts.size;
+    sosAlertCount.textContent = activeCount;
 
-  const panel = document.getElementById('sos-alert-panel');
-   if (panel) {
-     const panelHeader = panel.querySelector('h3');
-     if (panelHeader) {
-       panelHeader.textContent = `Active SOS Alerts (${activeSOSAlerts.size})`;
-     }
-   }  
+    const panel = document.getElementById('sos-alert-panel');
+    if (panel) {
+      const panelHeader = panel.querySelector('h3');
+      if (panelHeader) {
+        panelHeader.textContent = `Active SOS Alerts (${activeCount})`;
+      }
+    }    
     
-  if (sosAlertButton) {
+    if (sosAlertButton) {
       sosAlertButton.style.animation = 'sosButtonPulse 1s infinite';
     }
   } else {
     sosButtonContainer.style.display = 'none';
+    sosAlertCount.textContent = '0';
     
     const sosPanel = document.getElementById('sos-alert-panel');
     if (sosPanel) {
@@ -189,9 +234,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   }
   sosAlertButton = document.getElementById('sos-alert-toggle');
-  if (sosAlertButton) {
+   if (sosAlertButton) {
+    const sosButtonContainer = document.getElementById('sos-alert-button-container');
+    if (sosButtonContainer) {
+      sosButtonContainer.style.display = 'none';
+    }
     sosAlertButton.addEventListener('click', toggleSOSAlertPanel);
   }
+  activeSOSAlerts = new Set();
 });
 
 socket.on("authentication_success", (data) => {
@@ -439,6 +489,8 @@ async function fetchVehicleData(page = 1) {
     const data = await response.json();
     
     const vehicles = data.vehicles || [];
+
+    activeSOSAlerts.clear();
     
     currentPage = 1;
     totalPages = 1;
@@ -2376,7 +2428,7 @@ function removeSOS(imei) {
 
   updateVehicleCard(vehicle);
 
-    activeSOSAlerts.delete(imei);
+  activeSOSAlerts.delete(imei);
   
   updateSOSAlertButton();
   

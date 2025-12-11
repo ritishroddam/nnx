@@ -1613,8 +1613,8 @@ body.dark-mode .select-toggle-btn.active {
 
 #sos-alert-panel {
   position: fixed;
-  top: 50% !important;
-  left: 85% !important;
+  top: 48% !important;
+  left: 86.5% !important;
   transform: translate(-50%, -50%) !important;
   width: 550px;
   max-height: 500px;
@@ -1625,6 +1625,10 @@ body.dark-mode .select-toggle-btn.active {
   overflow: hidden;
   display: none;
   border: 2px solid #ff0000;
+}
+
+#sos-alert-button-container {
+  display: none !important;
 }
 
 @keyframes sosBlink {
