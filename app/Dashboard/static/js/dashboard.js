@@ -505,19 +505,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const ctx = document.getElementById("vehiclesChart").getContext("2d");
 
-      // Indigo / Slate Blue palette (mono-hue) - light & dark variants
-      // Light Mode gradients:
-      // 1: #EEF1FF -> #C9D4FF
-      // 2: #C9D4FF -> #8FA6FF
-      // 3: #8FA6FF -> #4E6FF3
-      // 4: #4E6FF3 -> #2A46A3
-      //
-      // Dark Mode gradients:
-      // 1: #6E8CFF -> #5671E3
-      // 2: #5671E3 -> #445AC0
-      // 3: #445AC0 -> #2F428F
-      // 4: #2F428F -> #1E295C
-
       // helper to create gradient with given stops
       function makeGradient(y0color, y1color) {
         const g = ctx.createLinearGradient(0, 0, 0, 400);
@@ -531,26 +518,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       let centerColor = isDarkMode ? "#E0E0E0" : "#2f2f2f";
 
       if (isDarkMode) {
-        gradient1 = makeGradient("#6E8CFF", "#5671E3");
-        gradient2 = makeGradient("#5671E3", "#445AC0");
-        gradient3 = makeGradient("#445AC0", "#2F428F");
-        gradient4 = makeGradient("#2F428F", "#1E295C");
+        gradient1 = makeGradient("#2F428F", "#1E295C");
+        gradient2 = makeGradient("#445AC0", "#2F428F");
+        gradient3 = makeGradient("#5671E3", "#445AC0");
+        gradient4 = makeGradient("#6E8CFF", "#5671E3");
 
         // hover colors: pick slightly brighter single-shade colors for hover
-        hover1 = "#6E8CFF";
-        hover2 = "#5671E3";
-        hover3 = "#445AC0";
-        hover4 = "#2F428F";
+        hover1 = "#2F428F";
+        hover2 = "#445AC0";
+        hover3 = "#5671E3";
+        hover4 = "#6E8CFF";
       } else {
-        gradient1 = makeGradient("#EEF1FF", "#C9D4FF");
-        gradient2 = makeGradient("#C9D4FF", "#8FA6FF");
-        gradient3 = makeGradient("#8FA6FF", "#4E6FF3");
-        gradient4 = makeGradient("#4E6FF3", "#2A46A3");
+        gradient1 = makeGradient("#4E6FF3", "#2A46A3");
+        gradient2 = makeGradient("#8FA6FF", "#4E6FF3");
+        gradient3 = makeGradient("#C9D4FF", "#8FA6FF");
+        gradient4 = makeGradient("#EEF1FF", "#C9D4FF");
 
-        hover1 = "#C9D4FF";
-        hover2 = "#8FA6FF";
-        hover3 = "#4E6FF3";
-        hover4 = "#2A46A3";
+        hover1 = "#2A46A3";
+        hover2 = "#4E6FF3";
+        hover3 = "#8FA6FF";
+        hover4 = "#C9D4FF";
       }
 
       const chartConfig = {
@@ -559,16 +546,16 @@ document.addEventListener("DOMContentLoaded", async () => {
           labels: [
             "Moving Vehicles",
             "Idle Vehicles",
+            "Parked Vehicles",
             "Offline Vehicles",
-            "Disconnected Vehicles",
           ],
           datasets: [
             {
               data: [
                 data.moving_vehicles,
                 data.idle_vehicles,
+                data.parked_vehicles,
                 data.offline_vehicles,
-                disconnected,
               ],
               backgroundColor: [gradient1, gradient2, gradient3, gradient4],
               hoverBackgroundColor: [hover1, hover2, hover3, hover4],
