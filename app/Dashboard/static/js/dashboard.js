@@ -515,7 +515,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       let gradient1, gradient2, gradient3, gradient4;
       let hover1, hover2, hover3, hover4;
-      let centerColor = isDarkMode ? "#E0E0E0" : "#2f2f2f";
+      let centerColor = isDarkMode ? "black" : "#ccc";
 
       if (isDarkMode) {
         gradient1 = makeGradient("#1B5BBE", "#4A90E2");
@@ -569,7 +569,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             legend: {
               position: "top",
               labels: {
-                color: isDarkMode ? "#ccc" : "black",
+                color: isDarkMode ? "black" : "#ccc",
                 font: {
                   size: 14,
                   weight: "bold",
