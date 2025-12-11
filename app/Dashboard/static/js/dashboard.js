@@ -390,19 +390,19 @@ async function renderPieChart() {
     let hover1, hover2, hover3, hover4;
 
     if (isDarkMode) {
-      gradient1 = makeGradient(ctx, "#4A5D7A", "#3C77A8");
-      gradient2 = makeGradient(ctx, "#3C77A8", "#2C87D1");
-      gradient3 = makeGradient(ctx, "#2C87D1", "#1F6DC2");
-      gradient4 = makeGradient(ctx, "#1F6DC2", "#153A74");
+      gradient4 = makeGradient(ctx, "#4A5D7A", "#3C77A8");
+      gradient3 = makeGradient(ctx, "#3C77A8", "#2C87D1");
+      gradient2 = makeGradient(ctx, "#2C87D1", "#1F6DC2");
+      gradient1 = makeGradient(ctx, "#1F6DC2", "#153A74");
 
-      hover1 = "#3C77A8"; hover2 = "#2C87D1"; hover3 = "#1F6DC2"; hover4 = "#153A74";
+      hover4 = "#3C77A8"; hover3 = "#2C87D1"; hover2 = "#1F6DC2"; hover1 = "#153A74";
     } else {
-      gradient1 = makeGradient(ctx, "#E3F2FF", "#C7E4FF");
-      gradient2 = makeGradient(ctx, "#C7E4FF", "#99C9FF");
-      gradient3 = makeGradient(ctx, "#99C9FF", "#4A90E2");
-      gradient4 = makeGradient(ctx, "#4A90E2", "#1B5BBE");
+      gradient4 = makeGradient(ctx, "#E3F2FF", "#C7E4FF");
+      gradient3 = makeGradient(ctx, "#C7E4FF", "#99C9FF");
+      gradient2 = makeGradient(ctx, "#99C9FF", "#4A90E2");
+      gradient1 = makeGradient(ctx, "#4A90E2", "#1B5BBE");
 
-      hover1 = "#C7E4FF"; hover2 = "#99C9FF"; hover3 = "#4A90E2"; hover4 = "#1B5BBE";
+      hover4 = "#C7E4FF"; hover3 = "#99C9FF"; hover2 = "#4A90E2"; hover1 = "#1B5BBE";
     }
 
     const chartConfig = {
@@ -538,11 +538,13 @@ async function fetchDistanceTravelledData() {
 /* -------------------------
    Theme handling
    -------------------------*/
-function updateTheme() {
+async function updateTheme() {
   // read latest DOM class
   isDarkMode = document.body.classList.contains("dark-mode");
   centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
   Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
+
+  await initMap();
 
   // update devicesChart colors
   if (devicesChart) {
@@ -578,12 +580,7 @@ function updateTheme() {
     pieChart.destroy();
     pieChart = null;
   }
-  renderPieChart();
-
-  // re-init map style (mapId) with a small delay to allow DOM class to update
-  setTimeout(() => {
-    initMap().catch((e) => console.error("Error re-initializing map:", e));
-  }, 150);
+  await renderPieChart();
 }
 
 /* -------------------------
@@ -677,12 +674,12 @@ async function fetchStatusData() {
 /* -------------------------
    Event wiring
    -------------------------*/
-function attachEventListeners() {
+async function attachEventListeners() {
   const themeToggle = safeEl("theme-toggle");
   if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
+    themeToggle.addEventListener("click", async () => {
       // update theme based on current DOM class
-      updateTheme();
+      await updateTheme();
     });
   }
 
@@ -833,7 +830,7 @@ async function initDashboard() {
   centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
   Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
-  attachEventListeners();
+  await attachEventListeners();
 
   // initialize map & charts
   await initMap();
