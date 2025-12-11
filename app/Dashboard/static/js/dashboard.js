@@ -324,12 +324,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initMap();
 
   const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
-  let centerColor = "#2f2f2f";
-  Chart.defaults.color = "#2f2f2f";
+  Chart.defaults.color = "black";
   const isDarkMode = document.body.classList.contains("dark-mode");
   if (isDarkMode) {
     Chart.defaults.color = "#ccc";
-    centerColor = "#ccc";
   }
   const themeToggle = document.getElementById("theme-toggle");
   themeToggle.addEventListener("click", function () {
@@ -337,10 +335,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (isDarkMode) {
       Chart.defaults.color = "#ccc";
-      centerColor = "#ccc";
     } else {
-      Chart.defaults.color = "#2f2f2f";
-      centerColor = "#2f2f2f";
+      Chart.defaults.color = "black";
     }
 
     if (devicesChart) {
