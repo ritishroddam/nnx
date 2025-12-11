@@ -518,26 +518,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       let centerColor = isDarkMode ? "#E0E0E0" : "#2f2f2f";
 
       if (isDarkMode) {
-        gradient1 = makeGradient("#2F428F", "#1E295C");
-        gradient2 = makeGradient("#445AC0", "#2F428F");
-        gradient3 = makeGradient("#5671E3", "#445AC0");
-        gradient4 = makeGradient("#6E8CFF", "#5671E3");
+        gradient1 = makeGradient("#1B5BBE", "#4A90E2");
+        gradient2 = makeGradient("#4A90E2", "#99C9FF");
+        gradient3 = makeGradient("#99C9FF", "#C7E4FF");
+        gradient4 = makeGradient("#C7E4FF", "#E3F2FF");
 
         // hover colors: pick slightly brighter single-shade colors for hover
-        hover1 = "#2F428F";
-        hover2 = "#445AC0";
-        hover3 = "#5671E3";
-        hover4 = "#6E8CFF";
+        hover1 = "#153A74";
+        hover2 = "#1F6DC2";
+        hover3 = "#2C87D1";
+        hover4 = "#3C77A8";
       } else {
-        gradient1 = makeGradient("#4E6FF3", "#2A46A3");
-        gradient2 = makeGradient("#8FA6FF", "#4E6FF3");
-        gradient3 = makeGradient("#C9D4FF", "#8FA6FF");
-        gradient4 = makeGradient("#EEF1FF", "#C9D4FF");
+        gradient1 = makeGradient("#153A74", "#1F6DC2");
+        gradient2 = makeGradient("#1F6DC2", "#2C87D1");
+        gradient3 = makeGradient("#2C87D1", "#3C77A8");
+        gradient4 = makeGradient("#3C77A8", "#4A5D7A");
 
-        hover1 = "#2A46A3";
-        hover2 = "#4E6FF3";
-        hover3 = "#8FA6FF";
-        hover4 = "#C9D4FF";
+        hover1 = "#1B5BBE";
+        hover2 = "#4A90E2";
+        hover3 = "#99C9FF";
+        hover4 = "#C7E4FF";
       }
 
       const chartConfig = {
