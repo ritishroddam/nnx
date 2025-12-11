@@ -690,9 +690,7 @@ async function fetchStatusData() {
 async function attachEventListeners() {
   const themeToggle = safeEl("theme-toggle");
   if (themeToggle) {
-    // run updateTheme after a micro-task so any DOM class toggle executes first
     themeToggle.addEventListener("click", () => {
-      // run on next tick to ensure body.dark-mode has been toggled by other code already
       setTimeout(() => {
         updateTheme().catch((e) => console.error("Error updating theme:", e));
       }, 50);
