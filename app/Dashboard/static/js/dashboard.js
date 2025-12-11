@@ -362,7 +362,6 @@ function makeGradient(ctx, y0color, y1color) {
   return g;
 }
 
-/* Render pie chart using the indigo/blue mono-hue gradients (or any palette) */
 async function renderPieChart() {
   try {
     const vehiclesEl = safeEl('vehiclesChart');
@@ -372,14 +371,12 @@ async function renderPieChart() {
     if (skeletonEl) skeletonEl.classList.remove('loaded');
 
     const data = await fetchJSON(API.pieData, {}, { showUserError: true, userMessage: "Failed to load vehicle summary chart." });
-    if (!response.ok) throw new Error(data.error || "Unknown error fetching pie chart data");
 
     if (data.total_devices === undefined) {
       displayFlashMessage("Received invalid data for vehicle summary.", "danger");
       throw new Error("Invalid data format received");
     }
 
-    // fallback values
     const disconnected = typeof data.disconnected_vehicles !== "undefined" ? data.disconnected_vehicles : 0;
     if (pieChart) {
       pieChart.destroy();
@@ -389,7 +386,6 @@ async function renderPieChart() {
     const ctx = (vehiclesEl && vehiclesEl.getContext) ? vehiclesEl.getContext("2d") : null;
     if (!ctx) throw new Error("Canvas context not available");
 
-    // choose gradients based on theme (these were suggested/approved earlier)
     let gradient1, gradient2, gradient3, gradient4;
     let hover1, hover2, hover3, hover4;
 
