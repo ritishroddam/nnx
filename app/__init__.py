@@ -33,7 +33,13 @@ def create_app(config_name='default'):
         pass
 
     jwt.init_app(app)
-    socketio.init_app(app, cors_allowed_origins="*", transports=["websocket"])
+    socketio.init_app(
+        app, 
+        cors_allowed_origins="*", 
+        transports=["websocket"],
+        ping_interval=25,
+        ping_timeout=60,
+    )
 
     @socketio.event
     def connect():

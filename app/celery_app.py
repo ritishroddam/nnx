@@ -1,6 +1,6 @@
 from celery import Celery
 
-celery = Celery(__name__)
+celery = Celery(__name__, include=["app.Reports.allReports"])
 
 def init_celery(app):
     celery.conf.update(
