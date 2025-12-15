@@ -381,51 +381,32 @@ async function backgroundMap() {
 
   if (!toggle) return;
 
-  // Support both global .sidebar and dashboard-specific .dashboard-sidebar
-  const sidebars = Array.from(document.querySelectorAll(".sidebar, .dashboard-sidebar"));
-
-  function openSidebar() {
-    document.body.classList.add("sidebar-open");
-    if (backdrop) backdrop.style.display = "block";
-  }
-  function closeSidebar() {
-    document.body.classList.remove("sidebar-open");
-    if (backdrop) backdrop.style.display = "none";
-  }
-
   toggle.addEventListener("click", function (e) {
     e.stopPropagation();
-    if (document.body.classList.contains("sidebar-open")) {
-      closeSidebar();
-    } else {
-      openSidebar();
-    }
+    document.body.classList.toggle("sidebar-open");
   });
 
   // clicking backdrop closes sidebar
   if (backdrop) {
-    backdrop.addEventListener("click", function (e) {
-      e.stopPropagation();
-      closeSidebar();
+    backdrop.addEventListener("click", function () {
+      document.body.classList.remove("sidebar-open");
     });
   }
 
-  // click outside any sidebar closes it (mobile)
+  // click outside sidebar closes it (mobile)
   document.addEventListener("click", function (e) {
-    // If clicked inside any sidebar or toggle button, ignore
-    if (e.target.closest("#mobile-menu-toggle")) return;
-    if (sidebars.some(s => s && s.contains(e.target))) return;
-    closeSidebar();
-  });
-
-  // prevent clicks inside sidebars from closing it
-  sidebars.forEach((sidebarEl) => {
-    if (sidebarEl) {
-      sidebarEl.addEventListener("click", function (e) {
-        e.stopPropagation();
-      });
+    if (!e.target.closest(".sidebar") && !e.target.closest("#mobile-menu-toggle")) {
+      document.body.classList.remove("sidebar-open");
     }
   });
+
+  // prevent clicks inside sidebar from closing it
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) {
+    sidebar.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  }
 })();
 
 window.onload = async function () {
