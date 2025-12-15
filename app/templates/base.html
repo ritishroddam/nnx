@@ -259,6 +259,38 @@
 
     {% block content %}{% endblock %}
 
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toggle = document.getElementById('mobile-menu-toggle');
+            var backdrop = document.getElementById('mobile-backdrop');
+            var sidebar = document.querySelector('.dashboard-sidebar');
+            if (!toggle) return;
+
+            toggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.body.classList.toggle('sidebar-open');
+            });
+
+            if (backdrop) {
+                backdrop.addEventListener('click', function () {
+                    document.body.classList.remove('sidebar-open');
+                });
+            }
+
+            // close when clicking outside sidebar
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.dashboard-sidebar') && !e.target.closest('#mobile-menu-toggle')) {
+                    document.body.classList.remove('sidebar-open');
+                }
+            });
+
+            // prevent clicks inside sidebar from closing
+            if (sidebar) {
+                sidebar.addEventListener('click', function (e) { e.stopPropagation(); });
+            }
+        });
+        </script>
+
 </body>
 
 </html>

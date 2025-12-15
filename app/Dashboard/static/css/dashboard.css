@@ -165,6 +165,8 @@
   margin-right: 0;
   flex-shrink: 0;
 }
+    /* Mobile override: make dashboard-sidebar overlay on top, arrange inner panels, white background when toggled */
+    :root { --topbar-height: 56px; }
 
 .weather-info {
   display: flex;
@@ -273,6 +275,85 @@
 
 .graph-container {
   flex: 0 1 380px;          
+    /* Sidebar overlays content from the top and hidden by default */
+    .dashboard-sidebar {
+      position: fixed;
+      top: var(--topbar-height);
+      left: 0;
+      right: 0;
+      width: 100%;
+      max-height: calc(100vh - var(--topbar-height));
+      overflow-y: auto;
+      transform: translateY(-120%);
+      transition: transform 220ms ease-in-out;
+      z-index: 10050;
+      padding: 12px 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border-radius: 0 0 12px 12px;
+      background: transparent;
+    }
+
+    /* When mobile menu toggles, body will have `sidebar-open` class */
+    body.sidebar-open .dashboard-sidebar {
+      transform: translateY(0);
+      background: #ffffff;
+    }
+
+    /* Make sidebar panels full width and stacked for readability */
+    .dashboard-sidebar .datetime-container,
+    .dashboard-sidebar .weather-container,
+    .dashboard-sidebar .traffic-container,
+    .dashboard-sidebar .alerts-container {
+      width: calc(100% - 24px);
+      min-width: 0;
+      margin: 8px auto;
+      padding: 12px;
+      background: #fff;
+      color: #222;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    /* Compact the weather layout row for mobile */
+    .weather-container {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .weather-section {
+      width: auto;
+      height: auto;
+    }
+
+    /* Reduce map height for mobile so it doesn't dominate the sidebar */
+    .dashboard-sidebar #map {
+      height: 180px;
+      min-height: 140px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    /* Ensure main content sits below topbar and can still be scrolled */
+    .dashboard-content {
+      margin-top: var(--topbar-height);
+      height: calc(100vh - var(--topbar-height));
+    }
+
+    /* Prevent page behind overlay from scrolling while sidebar is open */
+    body.sidebar-open {
+      overflow: hidden;
+    }
+
+    /* Keep cards readable when overlayed */
+    body.sidebar-open .dashboard-sidebar .datetime-container,
+    body.sidebar-open .dashboard-sidebar .weather-container,
+    body.sidebar-open .dashboard-sidebar .traffic-container {
+      background: #fff;
+      color: #222;
+    }
   max-width: 400px;
   min-width: 260px;
   display: flex;
