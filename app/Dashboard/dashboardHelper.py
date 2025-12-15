@@ -148,7 +148,7 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
             {
                 "imei": imei,
                 "date_time": {"$gte": fromDate, "$lt": toDate},
-            },
+            }, {"_id": 0, "date_time": 1, "ignition": 1, "speed": 1},
             sort=[("date_time", ASCENDING), ("imei", ASCENDING)]
         ))
         
@@ -157,7 +157,7 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
                 {
                     "imei": imei,
                     "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
-                },
+                }, {"_id": 0, "gps.timestamp": 1, "telemetry.ignition": 1, "telemetry.speed": 1},
                 sort=[("gps.timestamp", ASCENDING), ("imei", ASCENDING)]
             ))
             
