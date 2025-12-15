@@ -1489,14 +1489,12 @@
     width: 100%;
   }
 
-  /* Traffic map smaller on mobile */
   .dashboard-sidebar #map,
   .dashboard-sidebar #traffic-container #map {
     height: 220px !important;
     min-height: 160px;
   }
 
-  /* Reduce padding for the main block container so content fits */
   .block-container {
     left: 1%;
     right: 1%;
@@ -1505,10 +1503,27 @@
     padding: 8px;
   }
 
-  /* Ensure pie skeleton / canvas display correctly */
   .pie-chart-skeleton,
   #vehiclesChart {
     height: 260px !important;
   }
 }
-/* ...existing code... */
+
+@media (max-width: 900px) {
+  #vehicleLiveData,
+  .vehicleLiveTable {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vehicleLiveTable table {
+    display: block;
+    min-width: 720px;
+    width: auto;
+  }
+
+  .vehicleLiveTable th,
+  .vehicleLiveTable td {
+    white-space: nowrap;
+  }
+}
