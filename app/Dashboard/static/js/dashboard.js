@@ -395,7 +395,7 @@ async function renderPieChart() {
       gradient2 = makeGradient(ctx, "#2C87D1", "#1F6DC2");
       gradient1 = makeGradient(ctx, "#1F6DC2", "#153A74");
 
-      hover4 = "#3C77A8"; hover3 = "#2C87D1"; hover2 = "#1F6DC2"; hover1 = "#153A74";
+      hover4 = "#3C77A8"; hover3 = "#4A90E2"; hover2 = "#1F6DC2"; hover1 = "#153A74";
     } else {
       gradient4 = makeGradient(ctx, "#E3F2FF", "#C7E4FF");
       gradient3 = makeGradient(ctx, "#C7E4FF", "#99C9FF");
