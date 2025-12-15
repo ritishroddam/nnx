@@ -374,6 +374,41 @@ async function backgroundMap() {
   const bgMap = new Map(document.getElementById("displayMap"), mapOptions);
 }
 
+// Mobile sidebar toggle: show/hide sidebar and backdrop on small screens
+(function () {
+  const toggle = document.getElementById("mobile-menu-toggle");
+  const backdrop = document.getElementById("mobile-backdrop");
+
+  if (!toggle) return;
+
+  toggle.addEventListener("click", function (e) {
+    e.stopPropagation();
+    document.body.classList.toggle("sidebar-open");
+  });
+
+  // clicking backdrop closes sidebar
+  if (backdrop) {
+    backdrop.addEventListener("click", function () {
+      document.body.classList.remove("sidebar-open");
+    });
+  }
+
+  // click outside sidebar closes it (mobile)
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".sidebar") && !e.target.closest("#mobile-menu-toggle")) {
+      document.body.classList.remove("sidebar-open");
+    }
+  });
+
+  // prevent clicks inside sidebar from closing it
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) {
+    sidebar.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  }
+})();
+
 window.onload = async function () {
   await backgroundMap();
 };

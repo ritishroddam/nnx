@@ -718,79 +718,93 @@ body.dark-mode .profile-hover .profile-settings-link {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* Mobile sidebar overlay + toggle support */
+.topbar .mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: inherit;
+  padding: 6px;
+}
+
+/* Backdrop for mobile sidebar */
+.mobile-backdrop {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 10000;
+}
+
+/* Mobile-specific behavior */
 @media (max-width: 900px) {
-  /* Keep sidebar on the left instead of moving it to the top */
+  .topbar .mobile-menu-btn {
+    display: block;
+  }
+
+  /* Make sidebar overlay from left on mobile, hidden by default */
   .sidebar {
-    top: 11vh;                 /* same offset as desktop topbar */
-    left: 1%;
-    width: 60px;               /* collapsed width for small screens */
-    height: calc(100% - 11vh); /* full height below the topbar */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 6px;
-    border-radius: 12px;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    left: 0;
+    top: 56px; /* matches topbar height on mobile */
+    height: calc(100vh - 56px);
+    width: 220px;
+    border-radius: 0;
+    padding: 12px 8px;
+    transform: translateX(-120%);
+    transition: transform 0.22s ease-in-out;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
   }
 
-  /* Make menu vertically scrollable if content overflows */
-  .sidebar .menu {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-left: 0;
-    overflow-y: auto;
-    max-height: 100%;
-    -webkit-overflow-scrolling: touch;
-    align-items: center;
+  /* When opened via toggle, slide in */
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+    z-index: 10005;
   }
 
-  .menu-item {
-    padding: 8px 6px;
-    white-space: nowrap;
-    border-radius: 6px;
-  }
-
-  /* keep labels hidden in collapsed state; show on hover/focus */
+  /* show full labels when overlaid */
+  .sidebar .sidebar-Extended-Logo,
   .sidebar-text {
+    display: inline-block;
+    opacity: 1;
+  }
+
+  /* prevent underlying content interaction while sidebar open */
+  .mobile-backdrop {
+    top: 56px;
+    bottom: 0;
     display: none;
   }
-
-  /* adjust block-container/topbar so content stays visible */
-  .block-container {
-    top: 11%;
-    left: 5.5%;
-    right: 1%;
-    border-radius: 12px;
+  body.sidebar-open .mobile-backdrop {
+    display: block;
   }
 
-  .topbar {
-    top: 2%;
+  /* Make block-container remain full width; mobile sidebar overlays content */
+  .block-container {
     left: 1%;
-    width: 98%;
+    right: 1%;
+    top: 11%;
+    transition: none;
+  }
+
+  /* ensure the topbar is positioned correctly */
+  .topbar {
+    top: 0.5rem;
+    left: 1%;
+    width: calc(98% - 44px);
   }
 }
 
 @media (max-width: 600px) {
   .sidebar {
-    height: 50px;
-    padding: 0 8px;
-  }
-
-  .menu-item i {
-    min-width: 30px;
-    font-size: 18px;
-  }
-
-  .block-container {
+    width: 200px;
     top: 50px;
-    left: 0.5%;
-    right: 0.5%;
-    padding: 8px;
+    height: calc(100vh - 50px);
   }
-
-  .topbar {
+  .mobile-backdrop {
     top: 50px;
   }
 }

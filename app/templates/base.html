@@ -52,6 +52,10 @@
             <h1>{% block h1 %} {% endblock %}</h1>
             <div class="topbar-icons">
                 {% block topbar_icons %}{% endblock %}
+                <!-- Mobile menu toggle -->
+                <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open menu">
+                    <i class="material-symbols-outlined">menu</i>
+                </button>
                 <div class="theme-toggle" id="theme-toggle">
                     <i class="material-symbols-outlined">light_mode</i>
                 </div>
@@ -106,6 +110,8 @@
                 </div>
             </div>
         </div>
++    <!-- Mobile backdrop used to close sidebar when open -->
++    <div id="mobile-backdrop" class="mobile-backdrop" aria-hidden="true"></div>
 
         <div class="main-content">
             <div class="sidebar">
