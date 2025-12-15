@@ -1511,4 +1511,80 @@
     height: 260px !important;
   }
 }
-/* ...existing code... */
+
+@media (max-width: 900px) {
+  /* Make mobile toggle put sidebar on top, content below */
+  body.sidebar-open .dashboard-main-layout {
+    display: flex;
+    flex-direction: column-reverse; /* sidebar will render above content */
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  /* Ensure dashboard-sidebar becomes full-width overlay that pushes content below */
+  .dashboard-sidebar {
+    width: 100%;
+    position: relative;
+    transform: translateY(0); /* visible by default when toggled via body.sidebar-open */
+    transition: none;
+    margin: 0;
+    padding: 8px 12px;
+    z-index: 10060;
+    background: transparent;
+  }
+
+  /* When not open, keep sidebar visually collapsed (user can toggle) */
+  :not(body.sidebar-open) .dashboard-sidebar {
+    transform: translateY(-120%);
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* When open, make panels full width and stacked */
+  body.sidebar-open .dashboard-sidebar {
+    position: relative; /* keep in flow so column-reverse shows it on top */
+    background: #fff;
+    padding: 10px 12px;
+  }
+
+  body.sidebar-open .dashboard-sidebar .datetime-container,
+  body.sidebar-open .dashboard-sidebar .weather-container,
+  body.sidebar-open .dashboard-sidebar .traffic-container,
+  body.sidebar-open .dashboard-sidebar .alerts-container {
+    width: 100% !important;
+    margin: 8px 0 !important;
+    padding: 12px !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    border-radius: 10px;
+    background: #fff;
+    color: #222;
+  }
+
+  /* ensure map in sidebar doesn't overflow */
+  body.sidebar-open .dashboard-sidebar #map {
+    height: 180px !important;
+    min-height: 140px;
+    border-radius: 8px;
+  }
+
+  /* dashboard-content should remain scrollable below sidebar */
+  .dashboard-content {
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* show backdrop when sidebar open */
+  body.sidebar-open ~ #mobile-backdrop,
+  body.sidebar-open #mobile-backdrop {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--topbar-height);
+    bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 10050;
+  }
+}
