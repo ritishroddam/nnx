@@ -1510,43 +1510,20 @@
 }
 
 @media (max-width: 900px) {
-  /* keep horizontal scroll but keep first column visible */
+  #vehicleLiveData,
   .vehicleLiveTable {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding-left: 6px; /* small gutter so first column isn't flush to edge */
   }
 
   .vehicleLiveTable table {
+    display: block;
     min-width: 720px;
     width: auto;
-    margin: 0;
   }
 
-  /* Make the first column sticky so it's always visible while horizontally scrolling */
-  .vehicleLiveTable th:first-child,
-  .vehicleLiveTable td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 7;
-    background: #fff;
-    box-shadow: 2px 0 6px rgba(0,0,0,0.04);
-  }
-
-  /* Dark-mode color for the sticky column */
-  .dark-mode .vehicleLiveTable th:first-child,
-  .dark-mode .vehicleLiveTable td:first-child {
-    background: #1e1e1e;
-  }
-
-  /* If sidebar is open (mobile-menu-toggle), ensure content is vertically stacked and visible */
-  body.sidebar-open .dashboard-main-layout {
-    display: flex;
-    flex-direction: column-reverse; /* sidebar on top, content below */
-  }
-
-  /* ensure dashboard content keeps its own horizontal scroll area */
-  body.sidebar-open .dashboard-content {
-    overflow-x: auto;
+  .vehicleLiveTable th,
+  .vehicleLiveTable td {
+    white-space: nowrap;
   }
 }
