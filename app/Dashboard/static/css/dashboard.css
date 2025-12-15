@@ -1314,93 +1314,120 @@
 }
 
 @media (max-width: 900px) {
-  .dashboard-row {
+  /* Stack main layout vertically and remove fixed heights so content scrolls naturally */
+  .dashboard-main-layout {
+    display: flex;
     flex-direction: column;
-    gap: 24px;
-    align-items: stretch;
+    gap: 16px;
+    padding: 12px;
+    height: auto;
+    min-height: 0;
   }
+
+  /* Make primary content full width and allow it to grow */
+  .dashboard-content {
+    flex: 1 1 auto;
+    width: 100%;
+    margin-right: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  /* Convert sidebar to horizontal/stacked blocks on mobile */
+  .dashboard-sidebar {
+    width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    top: 0;
+    margin: 0;
+    padding: 8px 0;
+    z-index: 2;
+  }
+
+  /* Make sidebar inner panels tile responsively */
+  .dashboard-sidebar .datetime-container,
+  .dashboard-sidebar .weather-section,
+  .dashboard-sidebar .traffic-container,
+  .dashboard-sidebar .alerts-container {
+    width: calc(50% - 12px);
+    min-width: 140px;
+  }
+
+  /* Full width for charts / graph containers */
   .graph-container,
-  #vehicleSetion {
-    max-width: 100%;
-    min-width: 0;
+  #vehicleSetion,
+  .card-chart {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
   }
+
+  /* Keep charts responsive and limit height */
+  .card-chart canvas,
   .graph-container canvas,
-  .card-chart canvas {
-    max-width: 100%;
+  #vehiclesChart,
+  #devicesChart {
+    width: 100% !important;
     height: 220px !important;
   }
-}
 
-@keyframes loadingDots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
-}
+  /* Vehicle live table adapts height */
+  .vehicleLiveTable {
+    width: 100%;
+    height: auto;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes zoomIn {
-  from {
-    transform: scale(0.5);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes glowPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 20px #fc0, 0 0 30px #fc0;
-  }
-  50% {
-    box-shadow: 0 0 40px gold, 0 0 60px gold;
-  }
-}
-
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateX(-50%) translateY(0);
-  }
-  50% {
-    transform: translateX(-50%) translateY(-10px);
-  }
-}
-
-@keyframes scroll {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
+  /* Status cards -> stacked */
+  .status-container,
+  .status-row-container {
     flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
   }
+
+  .status-card {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Cards stack */
   .cards {
     flex-direction: column;
   }
+
   .card {
-    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  /* Traffic map smaller on mobile */
+  .dashboard-sidebar #map,
+  .dashboard-sidebar #traffic-container #map {
+    height: 220px !important;
+    min-height: 160px;
+  }
+
+  /* Reduce padding for the main block container so content fits */
+  .block-container {
+    left: 1%;
+    right: 1%;
+    top: 12%;
+    border-radius: 12px;
+    padding: 8px;
+  }
+
+  /* Ensure pie skeleton / canvas display correctly */
+  .pie-chart-skeleton,
+  #vehiclesChart {
+    height: 260px !important;
   }
 }
+/* ...existing code... */
