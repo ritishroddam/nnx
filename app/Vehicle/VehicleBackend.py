@@ -73,26 +73,22 @@ def getVehicleStatus(imei_list):
 
         for imei in imei_list:
             data_cursor = atlantaAis140Status_collection.aggregate([
-            {"$match": {"_id": imei}},
-            {"$project": {
-                "_id": 1,
-                "latest": 1,
-                "history": {
-                "$slice": [
-                    {
-                    "$map": {
-                        "input": "$history",
-                        "as": "h",
-                        "in": {
-                        "date_time": "$$h.date_time",
-                        "ignition": "$$h.ignition",
-                        "speed": "$$h.speed"
+                {"$match": {"_id": imei}},
+                {"$project": {
+                    "_id": 1,
+                    "latest": 1,
+                    "history": {
+                        "$map": {
+                            "input": "$history",
+                            "as": "h",
+                            "in": {
+                                "date_time": "$$h.date_time",
+                                "ignition": "$$h.ignition",
+                                "speed": "$$h.speed"
+                            }
                         }
                     }
-                    },
-                ]
-                }
-            }}
+                }}
             ])
             data = next(data_cursor, None)
             
