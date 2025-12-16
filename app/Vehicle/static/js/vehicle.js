@@ -308,19 +308,22 @@ function shouldDisplayVehicle(device, now = new Date()) {
 }
 
 function updateVehicleVisibility(imei, now = new Date()) {
-
   const toggle = document.getElementById("toggle-card-switch");
   if (!toggle?.checked) return;
 
   const marker = markers[imei];
   if (!marker) return;
 
-  const visible = shouldDisplayVehicle(marker.device, now);
-  marker.map = visible ? map : null;
-
   const card = document.querySelector(`.vehicle-card[data-imei="${imei}"]`);
-  if (card) {
-    card.style.display = visible ? "" : "none";
+  const wasVisible = card ? card.style.display !== "none" : false;
+
+  const visible = shouldDisplayVehicle(marker.device || vehicleData.get(imei), now);
+  marker.map = visible ? map : null;
+  if (card) card.style.display = visible ? "" : "none";
+
+  if (visible !== wasVisible) {
+    const delta = visible ? 1 : -1;
+    setVehicleCardCount(Math.max(0, totalVehicleCardCount + delta));
   }
 }
 
@@ -345,6 +348,7 @@ function updateVehicleCounterDisplay() {
 }
 
 function applyFilterToAllVehicles() {
+  totalVehicleCardCount = 0
   const now = new Date();
   vehicleData.forEach((_, imei) => updateVehicleVisibility(imei, now));
   updateVehicleCounterDisplay();
@@ -700,7 +704,6 @@ function updateVehicleCard(data) {
     );
     vehicleElement.style.zIndex = isSosBlink ? "10" : "";
     listContainer.appendChild(vehicleElement);
-    incrementVehicleCardCount();
     addHoverListenersForVehicle(data.imei);
     updateVehicleVisibility(imei);
   }
