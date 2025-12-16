@@ -341,6 +341,10 @@ function shouldDisplayVehicle(device, now = new Date()) {
 }
 
 function updateVehicleVisibility(imei, now = new Date()) {
+
+  const toggle = document.getElementById("toggle-card-switch");
+  if (!toggle?.checked) return;
+
   const marker = markers[imei];
   if (!marker) return;
 
@@ -2381,7 +2385,7 @@ function updateVehicleData(vehicle) {
 
   lastDataReceivedTime[imei] = new Date();
   updateVehicleVisibility(imei);
-  showHidecar();
+  // showHidecar();
 }
 
 function removeSOS(imei) {
@@ -3044,11 +3048,8 @@ function showHidecar() {
 }
 
 function showCard() {
-  const vehicleCard = document.querySelectorAll(".vehicle-card");
-  vehicleCard.forEach((tag) => {
-    tag.style.display = "block";
-  });
-
+  applyFilterToAllVehicles();
+  
   const sliderButton = document.querySelector(".slider-card-button");
   if (sliderButton) {
     sliderButton.classList.remove("active");
