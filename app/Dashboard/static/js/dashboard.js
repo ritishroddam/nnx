@@ -909,3 +909,42 @@ async function initDashboard() {
 document.addEventListener("DOMContentLoaded", () => {
   initDashboard().catch((e) => console.error("Init error:", e));
 });
+
+/* Ensure vehicle table scroll is reset when mobile menu toggles so left columns are visible */
+function ensureVehicleTableVisible() {
+  try {
+    const container = document.querySelector('.vehicleLiveTable');
+    if (!container) return;
+    // reset any horizontal scroll
+    container.scrollLeft = 0;
+    // also ensure inner table margin is reset
+    const inner = container.querySelector('table');
+    if (inner) inner.style.marginLeft = '0';
+  } catch (e) {
+    console.warn('ensureVehicleTableVisible error:', e);
+  }
+}
+
+// Observe body class changes for `mobile-menu-toggle` and reset table scroll when toggled
+(function watchMobileMenuToggle() {
+  const body = document.body;
+  if (!body) return;
+  try {
+    const mo = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.attributeName === 'class') {
+          // small delay to allow layout to settle
+          setTimeout(() => {
+            ensureVehicleTableVisible();
+          }, 50);
+          break;
+        }
+      }
+    });
+    mo.observe(body, { attributes: true, attributeFilter: ['class'] });
+    // keep reference for potential cleanup
+    window.__mobileMenuObserver = mo;
+  } catch (e) {
+    console.warn('watchMobileMenuToggle setup failed:', e);
+  }
+})();

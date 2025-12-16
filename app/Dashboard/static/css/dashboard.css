@@ -1569,3 +1569,25 @@
     min-width: 0 !important;
     table-layout: auto !important;
   }
+
+  /* If some left-side mobile nav overlays the viewport, ensure main layout isn't pushed right */
+  body.mobile-menu-toggle .dashboard-main-layout,
+  .mobile-menu-toggle .dashboard-main-layout {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    transform: none !important;
+    overflow-x: visible !important;
+  }
+
+  /* Remove any left-offset on the dashboard content when mobile menu active */
+  body.mobile-menu-toggle .dashboard-content,
+  .mobile-menu-toggle .dashboard-content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  /* Reset any unexpected left margin on the inner vehicle table */
+  body.mobile-menu-toggle .vehicleLiveTable table,
+  .mobile-menu-toggle .vehicleLiveTable table {
+    margin-left: 0 !important;
+  }
