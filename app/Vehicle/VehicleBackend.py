@@ -51,25 +51,53 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
-        results = list(status_collection.find(
-            {"_id": {"$in": imei_list}},
-            {
+        pipeline = [
+            {"$match": {"_id": {"$in": imei_list}}},
+            {"$project": {
                 "_id": 1,
                 "latest": 1,
-                "history": 1,
-                "history.date_time": 1,
-                "history.ignition": 1,
-                "history.speed": 1
-            }
-        ))
-        
+                "history": {
+                    "$map": {
+                        "input": "$history",
+                        "as": "h",
+                        "in": {
+                            "date_time": "$$h.date_time",
+                            "ignition": "$$h.ignition",
+                            "speed": "$$h.speed"
+                        }
+                    }
+                }
+            }}
+        ]
+        results = list(status_collection.aggregate(pipeline))
+
         for imei in imei_list:
-            data = atlantaAis140Status_collection.find_one(
-                {"_id": imei},
-                {"_id": 1, "latest": 1, "history": 1, "history.date_time": 1, "history.ignition": 1, "history.speed": 1}
-            )
-            if data:
-                results.append(data)
+            data_cursor = atlantaAis140Status_collection.aggregate([
+            {"$match": {"_id": imei}},
+            {"$project": {
+                "_id": 1,
+                "latest": 1,
+                "history": {
+                "$slice": [
+                    {
+                    "$map": {
+                        "input": "$history",
+                        "as": "h",
+                        "in": {
+                        "date_time": "$$h.date_time",
+                        "ignition": "$$h.ignition",
+                        "speed": "$$h.speed"
+                        }
+                    }
+                    },
+                ]
+                }
+            }}
+            ])
+            data = next(data_cursor, None)
+            
+        if data:
+            results.append(data)
         
         statuses = []
 
