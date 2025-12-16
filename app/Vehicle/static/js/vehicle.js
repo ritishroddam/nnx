@@ -348,7 +348,6 @@ function updateVehicleCounterDisplay() {
 }
 
 function applyFilterToAllVehicles() {
-  totalVehicleCardCount = 0
   const now = new Date();
   vehicleData.forEach((_, imei) => updateVehicleVisibility(imei, now));
   updateVehicleCounterDisplay();
