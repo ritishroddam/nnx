@@ -51,10 +51,23 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
-        results = list(status_collection.find({"_id": {"$in": imei_list}}))
+        results = list(status_collection.find(
+            {"_id": {"$in": imei_list}},
+            {
+                "_id": 1,
+                "latest": 1,
+                "history": 1,
+                "history.date_time": 1,
+                "history.ignition": 1,
+                "history.speed": 1
+            }
+        ))
         
         for imei in imei_list:
-            data = atlantaAis140Status_collection.find_one({"_id": imei})
+            data = atlantaAis140Status_collection.find_one(
+                {"_id": imei},
+                {"_id": 1, "latest": 1, "history": 1, "history.date_time": 1, "history.ignition": 1, "history.speed": 1}
+            )
             if data:
                 results.append(data)
         
