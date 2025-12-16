@@ -67,22 +67,6 @@
     width: 100% !important;
     height: auto !important;
   }
-
-  /* Ensure horizontal scrolling of vehicle live table when mobile menu toggled */
-  body.mobile-menu-toggle .vehicleLiveTable {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  /* keep the table layout so horizontal scroll works smoothly and all columns are reachable */
-  body.mobile-menu-toggle .vehicleLiveTable table {
-    display: table !important;
-    min-width: 900px; /* wide enough for all columns; adjust if you add more columns */
-    table-layout: auto !important;
-  }
-
-  /* ensure pagination controls fit */
-  #vehicleTablePagination { box-sizing: border-box; width: 100%; padding: 8px 12px; }
 }
 
 /* If needed, ensure the popup overlays remain on top */

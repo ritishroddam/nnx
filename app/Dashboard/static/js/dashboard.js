@@ -14,11 +14,6 @@ let map = null;
 let trafficLayer = null;
 let marker = null;
 
-// --- Added: client-side pagination state for vehicle table (mobile) ---
-let vehicleDistanceData = [];
-let vehicleTableCurrentPage = 1;
-let vehicleTablePerPage = 100;
-
 const API = {
   dashboardData: "/dashboard/dashboard_data",
   statusData: "/dashboard/get_status_data",
