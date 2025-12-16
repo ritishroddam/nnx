@@ -1,0 +1,75 @@
+/* Responsive tweaks to ensure vehicleLiveData is visible when mobile menu toggles */
+@media (max-width: 900px) {
+  /* Stack dashboard rows vertically and allow full width */
+  .dashboard-row, #vehicleLiveData {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #vehicleLiveData {
+    padding: 12px !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+
+  /* Let the table flow and be horizontally scrollable on small screens */
+  .vehicleLiveTable {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  .vehicleLiveTable table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Ensure chart containers can shrink on narrow viewports */
+  #vehicleSetion, .graph-container {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Make sidebar slide in/out and not permanently cover main content */
+  .dashboard-sidebar {
+    position: fixed !important;
+    top: var(--topbar-height, 56px) !important;
+    right: 0 !important;
+    height: calc(100% - var(--topbar-height, 56px)) !important;
+    width: 320px !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.22s ease !important;
+    z-index: 1200 !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important;
+  }
+
+  /* When mobile menu is toggled, slide the sidebar in and push content slightly */
+  body.mobile-menu-toggle .dashboard-sidebar {
+    transform: translateX(0) !important;
+  }
+
+  /* Push the main content horizontally so it remains visible when sidebar opens */
+  body.mobile-menu-toggle .dashboard-content {
+    margin-right: 320px !important;
+    transition: margin-right 0.22s ease !important;
+    z-index: 100 !important;
+  }
+
+  /* Minor visual fixes for card/chart areas */
+  .card-chart canvas, .graph-container canvas {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* If needed, ensure the popup overlays remain on top */
+#statusPopup, #statusPopupOverlay {
+  z-index: 1300;
+}
