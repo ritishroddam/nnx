@@ -930,20 +930,27 @@ function ensureVehicleTableVisible() {
   const body = document.body;
   if (!body) return;
   try {
+    // observe class changes anywhere in the document (covers toggles on other elements)
     const mo = new MutationObserver((mutations) => {
       for (const m of mutations) {
-        if (m.attributeName === 'class') {
-          // small delay to allow layout to settle
-          setTimeout(() => {
-            ensureVehicleTableVisible();
-          }, 50);
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          setTimeout(() => ensureVehicleTableVisible(), 50);
           break;
         }
       }
     });
-    mo.observe(body, { attributes: true, attributeFilter: ['class'] });
-    // keep reference for potential cleanup
+    try { mo.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['class'] }); } catch (e) {
+      // fallback to observing body only
+      mo.observe(body, { attributes: true, attributeFilter: ['class'] });
+    }
     window.__mobileMenuObserver = mo;
+
+    // also ensure visibility on load and resize
+    window.addEventListener('resize', () => setTimeout(ensureVehicleTableVisible, 50));
+    // run a few times after load to catch dynamic UI changes
+    ensureVehicleTableVisible();
+    let run = 0;
+    const t = setInterval(() => { ensureVehicleTableVisible(); run += 1; if (run > 6) clearInterval(t); }, 500);
   } catch (e) {
     console.warn('watchMobileMenuToggle setup failed:', e);
   }

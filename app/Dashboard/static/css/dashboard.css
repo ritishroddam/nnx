@@ -1591,3 +1591,20 @@
   .mobile-menu-toggle .vehicleLiveTable table {
     margin-left: 0 !important;
   }
+
+  /* Bring table above any left-side overlay so it's visible */
+  body.mobile-menu-toggle .vehicleLiveTable,
+  .mobile-menu-toggle .vehicleLiveTable {
+    position: relative !important;
+    z-index: 9999 !important;
+    background: transparent !important;
+  }
+
+  body.mobile-menu-toggle .vehicleLiveTable table,
+  .mobile-menu-toggle .vehicleLiveTable table {
+    position: relative !important;
+    left: 0 !important;
+    transform: none !important;
+    margin-left: 0 !important;
+    z-index: 10000 !important;
+  }
