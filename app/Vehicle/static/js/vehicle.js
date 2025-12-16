@@ -64,39 +64,6 @@ function toggleSOSAlertPanel() {
   }
 }
 
-// function updateSOSAlertButton() {
-//   const sosButtonContainer = document.getElementById('sos-alert-button-container');
-//   const sosAlertCount = document.getElementById('sos-alert-count');
-  
-//   if (activeSOSAlerts.size > 0) {
-//     sosButtonContainer.style.display = 'block';
-//     sosAlertCount.textContent = activeSOSAlerts.size;
-
-//   const panel = document.getElementById('sos-alert-panel');
-//    if (panel) {
-//      const panelHeader = panel.querySelector('h3');
-//      if (panelHeader) {
-//        panelHeader.textContent = `Active SOS Alerts (${activeSOSAlerts.size})`;
-//      }
-//    }  
-    
-//   if (sosAlertButton) {
-//       sosAlertButton.style.animation = 'sosButtonPulse 1s infinite';
-//     }
-//   } else {
-//     sosButtonContainer.style.display = 'none';
-    
-//     const sosPanel = document.getElementById('sos-alert-panel');
-//     if (sosPanel) {
-//       sosPanel.style.display = 'none';
-//     }
-    
-//     if (sosAlertButton) {
-//       sosAlertButton.style.animation = '';
-//     }
-//   }
-// }
-
 function updateSOSAlertButton() {
   const sosButtonContainer = document.getElementById('sos-alert-button-container');
   const sosAlertCount = document.getElementById('sos-alert-count');
@@ -735,6 +702,7 @@ function updateVehicleCard(data) {
     listContainer.appendChild(vehicleElement);
     incrementVehicleCardCount();
     addHoverListenersForVehicle(data.imei);
+    updateVehicleVisibility(imei);
   }
 }
 
@@ -3049,7 +3017,7 @@ function showHidecar() {
 
 function showCard() {
   applyFilterToAllVehicles();
-  
+
   const sliderButton = document.querySelector(".slider-card-button");
   if (sliderButton) {
     sliderButton.classList.remove("active");
