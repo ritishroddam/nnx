@@ -1527,3 +1527,45 @@
     white-space: nowrap;
   }
 }
+
+  /* Mobile menu toggle fixes: hide the right sidebar and allow vehicle area to use full width
+     Support both `body.mobile-menu-toggle` and a generic `.mobile-menu-toggle` ancestor. */
+  body.mobile-menu-toggle .dashboard-sidebar,
+  .mobile-menu-toggle .dashboard-sidebar {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.mobile-menu-toggle .dashboard-content,
+  .mobile-menu-toggle .dashboard-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body.mobile-menu-toggle #vehicleLiveData,
+  .mobile-menu-toggle #vehicleLiveData {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Make the table horizontally scrollable rather than clipping columns */
+  body.mobile-menu-toggle .vehicleLiveTable,
+  .mobile-menu-toggle .vehicleLiveTable {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.mobile-menu-toggle .vehicleLiveTable table,
+  .mobile-menu-toggle .vehicleLiveTable table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: auto !important;
+  }
