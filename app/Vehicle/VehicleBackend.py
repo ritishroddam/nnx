@@ -220,16 +220,14 @@ def getVehicleDistances(imei):
 
         distances_atlanta = getDistanceBasedOnTime(imei, start_of_day, end_of_day)
 
-        distances = []
+        distances = {}
         
         for distance in distances_atlanta:
             first_odometer = float(distance.get('first_odometer', 0) or 0)
             last_odometer = float(distance.get('last_odometer', 0) or 0)
             distance_traveled = last_odometer - first_odometer
-            distances.append({
-                distance['imei']: distance_traveled if distance_traveled >= 0 else 0,
-            })
-
+            distances[distance['imei']] = distance_traveled if distance_traveled >= 0 else 0
+            
         return distances
     except Exception as e:
         print(f"Error fetching distances: {e}")
