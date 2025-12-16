@@ -227,47 +227,10 @@ def getVehicleDistances(imei):
             last_odometer = float(distance.get('last_odometer', 0) or 0)
             distance_traveled = last_odometer - first_odometer
             distances.append({
-                'imei': distance['imei'],
-                'distance_traveled': distance_traveled if distance_traveled >= 0 else 0
+                distance['imei']: distance_traveled if distance_traveled >= 0 else 0,
             })
 
-        missingImeis = list(set(imei) - {item['imei'] for item in distances})
-        
-        pipeline = [
-            {"$match": {
-                "imei": {"$in": missingImeis},
-                "gps.timestamp": {"$gte": start_of_day, "$lt": end_of_day}
-            }},
-            {"$sort": {"gps.timestamp": -1}},
-            {
-                "$group": {
-                    "_id": "$imei",
-                    "last_odometer": {"$first": "$telemetry.odometer"},
-                    "first_odometer": {"$last": "$telemetry.odometer"}
-                }
-            },
-            {"$project": {
-                "_id": 0,
-                "imei": "$_id",
-                "first_odometer": 1,
-                "last_odometer": 1
-            }}
-        ]
-        
-        distances_ais140 = list(atlantaAis140_collection.aggregate(pipeline))
-        
-        for distance in distances_ais140:
-            first_odometer = float(distance.get('first_odometer', 0) or 0)
-            last_odometer = float(distance.get('last_odometer', 0) or 0)
-            distance_traveled = last_odometer - first_odometer
-            distances.append({
-                'imei': distance['imei'],
-                'distance_traveled': distance_traveled
-            })
-        
-        allDistances = {item['imei']: item['distance_traveled'] for item in distances}
-
-        return allDistances
+        return distances
     except Exception as e:
         print(f"Error fetching distances: {e}")
         flash("Error fetching distances", "danger")
