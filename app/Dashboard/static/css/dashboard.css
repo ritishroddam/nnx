@@ -165,7 +165,6 @@
   margin-right: 0;
   flex-shrink: 0;
 }
-    /* Mobile override: make dashboard-sidebar overlay on top, arrange inner panels, white background when toggled */
     :root { --topbar-height: 56px; }
 
 .weather-info {
@@ -275,7 +274,6 @@
 
 .graph-container {
   flex: 0 1 380px;          
-    /* Sidebar overlays content from the top and hidden by default */
     .dashboard-sidebar {
       position: fixed;
       top: var(--topbar-height);
@@ -293,13 +291,11 @@
       background: transparent;
     }
 
-    /* When mobile menu toggles, body will have `sidebar-open` class */
     body.sidebar-open .dashboard-sidebar {
       transform: translateY(0);
       background: #ffffff;
     }
 
-    /* Make sidebar panels full width and stacked for readability */
     .dashboard-sidebar .datetime-container,
     .dashboard-sidebar .weather-container,
     .dashboard-sidebar .traffic-container,
@@ -314,7 +310,6 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     }
 
-    /* Compact the weather layout row for mobile */
     .weather-container {
       display: flex;
       flex-direction: row;
@@ -328,7 +323,6 @@
       height: auto;
     }
 
-    /* Reduce map height for mobile so it doesn't dominate the sidebar */
     .dashboard-sidebar #map {
       height: 180px;
       min-height: 140px;
@@ -336,18 +330,15 @@
       overflow: hidden;
     }
 
-    /* Ensure main content sits below topbar and can still be scrolled */
     .dashboard-content {
       margin-top: var(--topbar-height);
       height: calc(100vh - var(--topbar-height));
     }
 
-    /* Prevent page behind overlay from scrolling while sidebar is open */
     body.sidebar-open {
       overflow: hidden;
     }
 
-    /* Keep cards readable when overlayed */
     body.sidebar-open .dashboard-sidebar .datetime-container,
     body.sidebar-open .dashboard-sidebar .weather-container,
     body.sidebar-open .dashboard-sidebar .traffic-container {
@@ -681,109 +672,6 @@
   flex: 1;
   min-width: 45%;
 }
-
-/* //////////////////////////////////// */
-
-/* .status-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-radius: 28px;
-  padding: 18px 0 18px 0;
-  margin: 24px 0 18px 0;
-  box-shadow: none;
-  gap: 0;
-}
-
-.status-card {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 120px;
-  padding: 0 12px;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-
-.dark-mode .status-container {
-  color: #ccc;
-}
-
-.status-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.dark-mode .status-card {
-  color: #ccc;
-}
-
-.status-card i {
-  font-size: 1.1em;
-  color: #111;
-  margin: 0;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.dark-mode .status-card i {
-  color: #ccc;
-}
-
-.status-label {
-  font-size: .9em;
-  font-weight: 700;
-  color: #111;
-  margin-top: 0.3em;
-  margin-bottom: 0;
-  line-height: 1.1;
-  word-break: break-word;
-  letter-spacing: 0.01em;
-}
-
-.dark-mode .status-label {
-  color: #ccc;
-}
-
-.status-card span {
-  display: block;
-  font-size: 16px;
-}
-
-.status-count {
-  font-size: 2.0em;
-  font-weight: 500;
-  color: #111;
-  margin: 0;
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 1;
-}
-
-.dark-mode .status-count {
-  color: #ccc;
-}
-
-.status-card span:not(.status-count) {
-  display: block;
-  font-size: 1.05em;
-  font-weight: 600;
-  color: #111;
-  margin-top: 0;
-  margin-bottom: 0;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
-}
-
-.status-card > * {
-  margin-bottom: 0;
-} */
 
 .status-container {
   display: flex;
@@ -1395,7 +1283,6 @@
 }
 
 @media (max-width: 900px) {
-  /* Stack main layout vertically and remove fixed heights so content scrolls naturally */
   .dashboard-main-layout {
     display: flex;
     flex-direction: column;
@@ -1405,7 +1292,6 @@
     min-height: 0;
   }
 
-  /* Make primary content full width and allow it to grow */
   .dashboard-content {
     flex: 1 1 auto;
     width: 100%;
@@ -1417,7 +1303,6 @@
     padding: 0;
   }
 
-  /* Convert sidebar to horizontal/stacked blocks on mobile */
   .dashboard-sidebar {
     width: 100%;
     flex-shrink: 0;
@@ -1432,7 +1317,6 @@
     z-index: 2;
   }
 
-  /* Make sidebar inner panels tile responsively */
   .dashboard-sidebar .datetime-container,
   .dashboard-sidebar .weather-section,
   .dashboard-sidebar .traffic-container,
@@ -1441,7 +1325,6 @@
     min-width: 140px;
   }
 
-  /* Full width for charts / graph containers */
   .graph-container,
   #vehicleSetion,
   .card-chart {
@@ -1450,7 +1333,6 @@
     min-width: 0 !important;
   }
 
-  /* Keep charts responsive and limit height */
   .card-chart canvas,
   .graph-container canvas,
   #vehiclesChart,
@@ -1459,7 +1341,6 @@
     height: 220px !important;
   }
 
-  /* Vehicle live table adapts height */
   .vehicleLiveTable {
     width: 100%;
     height: auto;
@@ -1467,7 +1348,6 @@
     overflow-y: auto;
   }
 
-  /* Status cards -> stacked */
   .status-container,
   .status-row-container {
     flex-direction: column;
@@ -1480,7 +1360,6 @@
     width: 100%;
   }
 
-  /* Cards stack */
   .cards {
     flex-direction: column;
   }
