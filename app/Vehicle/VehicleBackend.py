@@ -51,53 +51,12 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
-        pipeline = [
-            {"$match": {"_id": {"$in": imei_list}}},
-            {"$project": {
-                "_id": 1,
-                "latest": 1,
-                "history": {
-                    "$map": {
-                        "input": "$history",
-                        "as": "h",
-                        "in": {
-                            "date_time": "$$h.date_time",
-                            "ignition": "$$h.ignition",
-                            "speed": "$$h.speed"
-                        }
-                    }
-                }
-            }}
-        ]
-        results = list(status_collection.aggregate(pipeline))
-
+        results = list(status_collection.find({"_id": {"$in": imei_list}}))
+        
         for imei in imei_list:
-            data_cursor = atlantaAis140Status_collection.aggregate([
-            {"$match": {"_id": imei}},
-            {"$project": {
-                "_id": 1,
-                "latest": 1,
-                "history": {
-                "$slice": [
-                    {
-                    "$map": {
-                        "input": "$history",
-                        "as": "h",
-                        "in": {
-                        "date_time": "$$h.date_time",
-                        "ignition": "$$h.ignition",
-                        "speed": "$$h.speed"
-                        }
-                    }
-                    },
-                ]
-                }
-            }}
-            ])
-            data = next(data_cursor, None)
-            
-        if data:
-            results.append(data)
+            data = atlantaAis140Status_collection.find_one({"_id": imei})
+            if data:
+                results.append(data)
         
         statuses = []
 
@@ -261,54 +220,15 @@ def getVehicleDistances(imei):
 
         distances_atlanta = getDistanceBasedOnTime(imei, start_of_day, end_of_day)
 
-        distances = []
+        distances = {}
         
         for distance in distances_atlanta:
             first_odometer = float(distance.get('first_odometer', 0) or 0)
             last_odometer = float(distance.get('last_odometer', 0) or 0)
             distance_traveled = last_odometer - first_odometer
-            distances.append({
-                'imei': distance['imei'],
-                'distance_traveled': distance_traveled if distance_traveled >= 0 else 0
-            })
-
-        missingImeis = list(set(imei) - {item['imei'] for item in distances})
-        
-        pipeline = [
-            {"$match": {
-                "imei": {"$in": missingImeis},
-                "gps.timestamp": {"$gte": start_of_day, "$lt": end_of_day}
-            }},
-            {"$sort": {"gps.timestamp": -1}},
-            {
-                "$group": {
-                    "_id": "$imei",
-                    "last_odometer": {"$first": "$telemetry.odometer"},
-                    "first_odometer": {"$last": "$telemetry.odometer"}
-                }
-            },
-            {"$project": {
-                "_id": 0,
-                "imei": "$_id",
-                "first_odometer": 1,
-                "last_odometer": 1
-            }}
-        ]
-        
-        distances_ais140 = list(atlantaAis140_collection.aggregate(pipeline))
-        
-        for distance in distances_ais140:
-            first_odometer = float(distance.get('first_odometer', 0) or 0)
-            last_odometer = float(distance.get('last_odometer', 0) or 0)
-            distance_traveled = last_odometer - first_odometer
-            distances.append({
-                'imei': distance['imei'],
-                'distance_traveled': distance_traveled
-            })
-        
-        allDistances = {item['imei']: item['distance_traveled'] for item in distances}
-
-        return allDistances
+            distances[distance['imei']] = distance_traveled if distance_traveled >= 0 else 0
+            
+        return distances
     except Exception as e:
         print(f"Error fetching distances: {e}")
         flash("Error fetching distances", "danger")
