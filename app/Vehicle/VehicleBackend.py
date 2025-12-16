@@ -46,77 +46,266 @@ def format_seconds(seconds):
     else:
         return f"{seconds} seconds"
     
+# def getVehicleStatus(imei_list):
+#     try:
+#         utc_now = datetime.now(timezone('UTC'))
+#         twenty_four_hours_ago = utc_now - timedelta(hours=24)
+        
+#         results = list(status_collection.find({"_id": {"$in": imei_list}}))
+        
+#         for imei in imei_list:
+#             data = atlantaAis140Status_collection.find_one({"_id": imei})
+#             if data:
+#                 results.append(data)
+        
+#         statuses = []
+
+#         print("Processing vehicle status results")
+#         for item in results:
+#             imei = item["_id"]
+#             latest = item["latest"]
+#             history = item["history"]
+#             now = utc_now
+
+#             if latest["date_time"] < twenty_four_hours_ago:
+#                 status = "offline"
+#                 status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
+#                 status_time_str = format_seconds(status_time_delta)
+#             else:
+#                 ignition = str(latest.get("ignition"))
+#                 speed = float(latest.get("speed", 0))
+#                 current_status = None
+#                 if ignition == "0":
+#                     current_status = "stopped"
+#                 elif ignition == "1" and speed > 0:
+#                     current_status = "moving"
+#                 elif ignition == "1" and speed == 0.0:
+#                     current_status = "idle"
+#                 else:
+#                     current_status = "unknown"
+
+#                 last_change_time = latest["date_time"]
+#                 for h in history[1:]:
+#                     h_ignition = str(h.get("ignition"))
+#                     h_speed = float(h.get("speed", 0))
+#                     if current_status == "moving" and not (h_ignition == "1" and h_speed > 0):
+#                         break
+#                     if current_status == "idle" and not (h_ignition == "1" and h_speed == 0):
+#                         break
+#                     if current_status == "stopped" and not (h_ignition == "0"):
+#                         break
+#                     last_change_time = h["date_time"]
+
+#                 status = current_status
+#                 status_time_delta = (now - last_change_time).total_seconds() * 1000
+#                 status_time_str = format_seconds(status_time_delta)
+
+#             statuses.append({
+#                 "imei": imei,
+#                 "status": status,
+#                 "status_time_delta": status_time_delta,
+#                 "status_time_str": status_time_str,
+#                 "date": latest["date"],
+#                 "time": latest["time"],
+#                 "ignition": latest.get("ignition"),
+#                 "speed": latest.get("speed"),
+#                 "gsm_sig": latest.get("gsm_sig"),
+#             })
+#         missingImeis = set(imei_list) - {item['imei'] for item in statuses}
+#         return (statuses, missingImeis)
+
+#     except Exception as e:
+#         print(f"Error in getVehicleStatus: {e}")
+#         return []
+
 def getVehicleStatus(imei_list):
     try:
+        if not imei_list:
+            return [], set()
+
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
-        
-        results = list(status_collection.find({"_id": {"$in": imei_list}}))
-        
-        for imei in imei_list:
-            data = atlantaAis140Status_collection.find_one({"_id": imei})
-            if data:
-                results.append(data)
-        
+
+        base_projection = {
+            "_id": 1,
+            "latest": 1,
+            "history": {"$ifNull": ["$history", []]},
+        }
+
+        pipeline = [
+            {"$match": {"_id": {"$in": imei_list}}},
+            {"$project": base_projection},
+            {"$addFields": {"priority": 0}},
+            {"$unionWith": {
+                "coll": "atlantaAis140Status",
+                "pipeline": [
+                    {"$match": {"_id": {"$in": imei_list}}},
+                    {"$project": base_projection},
+                    {"$addFields": {"priority": 1}}
+                ]
+            }},
+            {"$sort": {"_id": 1, "priority": 1}},
+            {"$group": {"_id": "$_id", "doc": {"$first": "$$ROOT"}}},
+            {"$replaceRoot": {"newRoot": "$doc"}},
+            {"$addFields": {
+                "latest_date_time": "$latest.date_time",
+                "latest_speed": {
+                    "$convert": {"input": {"$ifNull": ["$latest.speed", 0]}, "to": "double", "onError": 0}
+                },
+                "latest_ignition": {"$toString": {"$ifNull": ["$latest.ignition", "0"]}}
+            }},
+            {"$addFields": {
+                "is_offline": {
+                    "$or": [
+                        {"$eq": ["$latest_date_time", None]},
+                        {"$lt": ["$latest_date_time", twenty_four_hours_ago]}
+                    ]
+                }
+            }},
+            {"$addFields": {
+                "status": {
+                    "$cond": [
+                        "$is_offline",
+                        "offline",
+                        {
+                            "$switch": {
+                                "branches": [
+                                    {"case": {"$eq": ["$latest_ignition", "0"]}, "then": "stopped"},
+                                    {"case": {"$and": [
+                                        {"$eq": ["$latest_ignition", "1"]},
+                                        {"$gt": ["$latest_speed", 0]}
+                                    ]}, "then": "moving"},
+                                    {"case": {"$and": [
+                                        {"$eq": ["$latest_ignition", "1"]},
+                                        {"$lte": ["$latest_speed", 0]}
+                                    ]}, "then": "idle"}
+                                ],
+                                "default": "unknown"
+                            }
+                        }
+                    ]
+                }
+            }},
+            {"$addFields": {
+                "historyTail": {
+                    "$cond": [
+                        {"$gt": [{"$size": "$history"}, 1]},
+                        {"$slice": ["$history", 1, {"$subtract": [{"$size": "$history"}, 1]}]},
+                        []
+                    ]
+                }
+            }},
+            {"$addFields": {
+                "statusTracker": {
+                    "$reduce": {
+                        "input": "$historyTail",
+                        "initialValue": {"timestamp": "$latest_date_time", "keep": True},
+                        "in": {
+                            "$cond": [
+                                "$$value.keep",
+                                {
+                                    "$let": {
+                                        "vars": {
+                                            "histIgn": {"$toString": {"$ifNull": ["$$this.ignition", "0"]}},
+                                            "histSpeed": {
+                                                "$convert": {"input": {"$ifNull": ["$$this.speed", 0]}, "to": "double", "onError": 0}
+                                            },
+                                            "currStatus": "$status"
+                                        },
+                                        "in": {
+                                            "$let": {
+                                                "vars": {
+                                                    "matches": {
+                                                        "$switch": {
+                                                            "branches": [
+                                                                {"case": {"$eq": ["$$currStatus", "moving"]},
+                                                                 "then": {"$and": [
+                                                                     {"$eq": ["$$histIgn", "1"]},
+                                                                     {"$gt": ["$$histSpeed", 0]}
+                                                                 ]}},
+                                                                {"case": {"$eq": ["$$currStatus", "idle"]},
+                                                                 "then": {"$and": [
+                                                                     {"$eq": ["$$histIgn", "1"]},
+                                                                     {"$eq": ["$$histSpeed", 0]}
+                                                                 ]}},
+                                                                {"case": {"$eq": ["$$currStatus", "stopped"]},
+                                                                 "then": {"$eq": ["$$histIgn", "0"]}}
+                                                            ],
+                                                            "default": False
+                                                        }
+                                                    }
+                                                },
+                                                "in": {
+                                                    "$cond": [
+                                                        "$$matches",
+                                                        {"timestamp": "$$this.date_time", "keep": True},
+                                                        {"timestamp": "$$value.timestamp", "keep": False}
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "$$value"
+                            ]
+                        }
+                    }
+                }
+            }},
+            {"$addFields": {
+                "status_since": {
+                    "$cond": [
+                        "$is_offline",
+                        "$latest_date_time",
+                        {"$ifNull": ["$statusTracker.timestamp", "$latest_date_time"]}
+                    ]
+                }
+            }},
+            {"$addFields": {
+                "status_time_delta_ms": {
+                    "$cond": [
+                        {"$and": ["$status_since", True]},
+                        {"$dateDiff": {"start": "$status_since", "end": utc_now, "unit": "millisecond"}},
+                        0
+                    ]
+                }
+            }},
+            {"$project": {
+                "_id": 1,
+                "latest": 1,
+                "status": 1,
+                "status_since": 1,
+                "status_time_delta_ms": 1,
+                "latest_date_time": 1
+            }}
+        ]
+
+        raw_statuses = list(status_collection.aggregate(pipeline))
+
         statuses = []
+        missingImeis = set(imei_list)
 
-        print("Processing vehicle status results")
-        for item in results:
-            imei = item["_id"]
-            latest = item["latest"]
-            history = item["history"]
-            now = utc_now
-
-            if latest["date_time"] < twenty_four_hours_ago:
-                status = "offline"
-                status_time_delta = (now - latest["date_time"]).total_seconds() * 1000
-                status_time_str = format_seconds(status_time_delta)
-            else:
-                ignition = str(latest.get("ignition"))
-                speed = float(latest.get("speed", 0))
-                current_status = None
-                if ignition == "0":
-                    current_status = "stopped"
-                elif ignition == "1" and speed > 0:
-                    current_status = "moving"
-                elif ignition == "1" and speed == 0.0:
-                    current_status = "idle"
-                else:
-                    current_status = "unknown"
-
-                last_change_time = latest["date_time"]
-                for h in history[1:]:
-                    h_ignition = str(h.get("ignition"))
-                    h_speed = float(h.get("speed", 0))
-                    if current_status == "moving" and not (h_ignition == "1" and h_speed > 0):
-                        break
-                    if current_status == "idle" and not (h_ignition == "1" and h_speed == 0):
-                        break
-                    if current_status == "stopped" and not (h_ignition == "0"):
-                        break
-                    last_change_time = h["date_time"]
-
-                status = current_status
-                status_time_delta = (now - last_change_time).total_seconds() * 1000
-                status_time_str = format_seconds(status_time_delta)
-
+        for doc in raw_statuses:
+            imei = doc["_id"]
+            latest = doc.get("latest", {}) or {}
+            delta_ms = doc.get("status_time_delta_ms", 0) or 0
             statuses.append({
                 "imei": imei,
-                "status": status,
-                "status_time_delta": status_time_delta,
-                "status_time_str": status_time_str,
-                "date": latest["date"],
-                "time": latest["time"],
+                "status": doc.get("status", "unknown"),
+                "status_time_delta": delta_ms,
+                "status_time_str": format_seconds(delta_ms),
+                "date": latest.get("date"),
+                "time": latest.get("time"),
                 "ignition": latest.get("ignition"),
                 "speed": latest.get("speed"),
                 "gsm_sig": latest.get("gsm_sig"),
             })
-        missingImeis = set(imei_list) - {item['imei'] for item in statuses}
-        return (statuses, missingImeis)
+            missingImeis.discard(imei)
 
+        return statuses, missingImeis
     except Exception as e:
         print(f"Error in getVehicleStatus: {e}")
-        return []
+        return [], set()
 
 def getStopTimeToday(imei):
     try:
