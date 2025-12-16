@@ -264,8 +264,12 @@ def getVehicleStatus(imei_list):
             {"$addFields": {
                 "status_time_delta_ms": {
                     "$cond": [
-                        {"$and": ["$status_since", True]},
-                        {"$dateDiff": {"start": "$status_since", "end": utc_now, "unit": "millisecond"}},
+                        {"$ne": ["$status_since", None]},
+                        {"$dateDiff": {
+                            "startDate": "$status_since",
+                            "endDate": {"$literal": utc_now},
+                            "unit": "millisecond"
+                        }},
                         0
                     ]
                 }
