@@ -919,7 +919,20 @@ function ensureVehicleTableVisible() {
     container.scrollLeft = 0;
     // also ensure inner table margin is reset
     const inner = container.querySelector('table');
-    if (inner) inner.style.marginLeft = '0';
+    if (inner) {
+      inner.style.marginLeft = '0';
+      // attempt to bring the first header/cell into view
+      const firstHeader = inner.querySelector('th') || inner.querySelector('td');
+      if (firstHeader && typeof firstHeader.scrollIntoView === 'function') {
+        try {
+          firstHeader.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+          // small nudge to container scrollLeft as fallback
+          container.scrollLeft = 0;
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
   } catch (e) {
     console.warn('ensureVehicleTableVisible error:', e);
   }
