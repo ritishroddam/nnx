@@ -858,8 +858,18 @@ input:checked .slider:before {
     transition: all 0.3s ease;
 }
 
+.dark-mode  .btn-toggle .toggle-btn {
+    background-color: #444;
+    border-color: #666;
+    color: #ddd;
+}
+
 .btn-toggle .toggle-btn:hover {
     background-color: #e0e0e0;
+}
+
+.dark-mode  .btn-toggle .toggle-btn:hover {
+    background-color: #555;
 }
 
 @media (max-width: 768px) {
