@@ -469,6 +469,8 @@ async function fetchVehicleData(page = 1) {
     currentPage = 1;
     totalPages = 1;
     totalVehicles = vehicles.length;
+    const vehicleListCountEl = document.getElementById('vehicle-list-count');
+    if (vehicleListCountEl) vehicleListCountEl.textContent = String(totalVehicles);
     
     const now = new Date();
 
