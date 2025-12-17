@@ -576,7 +576,7 @@ function renderGeofenceList() {
   geofences.forEach((gf) => {
     const li = document.createElement("li");
     li.className = "geofence-list-item";
-    li.dataset.geofenceId = gf._id;
+    li.dataset.geofenceId = gf._id; 
 
     const content = document.createElement("div");
     content.className = "geofence-item-content";
