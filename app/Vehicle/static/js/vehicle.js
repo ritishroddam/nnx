@@ -1189,11 +1189,16 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
     alerts[alerts.length - 1].remove();
   }
   
-  alertDiv.querySelector('.sos-panel-ack-btn').onclick = (e) => {
-    e.stopPropagation();
-    const imei = e.target.getAttribute('data-imei');
-    acknowledgeSOS(imei);
-  };
+  const sosAckBtn = alertDiv.querySelector('.sos-panel-ack-btn');
+  if (sosAckBtn) {
+    sosAckBtn.onclick = (e) => {
+      e.stopPropagation();
+      const btn = e.currentTarget || e.target.closest('.sos-panel-ack-btn');
+      if (!btn) return;
+      const imei = btn.getAttribute('data-imei');
+      if (imei) acknowledgeSOS(imei);
+    };
+  }
   
   alertDiv.onclick = (e) => {
     if (e.target.classList.contains('toggle-nearby-btn') || 
