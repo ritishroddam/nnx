@@ -1,6 +1,7 @@
 /* -------------------------
    Top-level state & config
    -------------------------*/
+const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
 let currentSort = { column: "distance", direction: "desc" };
 let currentStatusFilter = null;
 let statusPopupTableData = [];
