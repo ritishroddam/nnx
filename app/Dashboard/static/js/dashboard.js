@@ -916,19 +916,6 @@ async function initDashboard() {
 
   window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
 
-  await attachEventListeners();
-
-  // initialize map & charts
-  await initMap();
-  initDevicesChart();
-
-  // fetch data once at load
-  fetchStatusData();
-  fetchDashboardData();
-  await renderPieChart();
-  await fetchDistanceTravelledData();
-  await fetchVehicleDistances(currentRange);
-
   // start clock
   setInterval(() => {
     const now = new Date();
@@ -943,6 +930,19 @@ async function initDashboard() {
     if (clockEl) clockEl.textContent = clockStr;
     if (dateEl) dateEl.textContent = dateStr;
   }, 1000);
+
+  await attachEventListeners();
+
+  // initialize map & charts
+  await initMap();
+  initDevicesChart();
+
+  // fetch data once at load
+  fetchStatusData();
+  fetchDashboardData();
+  await renderPieChart();
+  await fetchDistanceTravelledData();
+  await fetchVehicleDistances(currentRange);
 }
 
 /* wire DOMContentLoaded to the init */
