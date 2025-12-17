@@ -68,6 +68,6 @@ tmux new-window -t cordonnx
 # Window 1 → Celery
 tmux send-keys -t cordonnx:1 "cd $APP_DIR" C-m
 tmux send-keys -t cordonnx:1 "source venv/bin/activate" C-m
-tmux send-keys -t cordonnx:1 "CELERY_BROKER_URL=redis://localhost:6379/0 CELERY_RESULT_BACKEND=redis://localhost:6379/0 celery -A app.celery_app.celery worker -l info" C-m
+tmux send-keys -t cordonnx:1 "CELERY_BROKER_URL=redis://localhost:6379/0 CELERY_RESULT_BACKEND=redis://localhost:6379/0 celery -A app.celery_app.celery worker -P eventlet -c 200 -l info" C-m
 
 echo "🎉 Deployment complete!"
