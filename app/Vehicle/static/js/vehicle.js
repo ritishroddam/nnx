@@ -1133,11 +1133,6 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
       </div>
       
       <div style="display: flex; flex-direction: column; gap: 5px;">
-        <button class="sos-panel-ack-btn" data-imei="${sosVehicle.imei}" 
-                style="background: #4caf50; color: white; border: none; border-radius: 4px; 
-                       padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: bold;">
-          ✅ Ack
-        </button>
         <button class="focus-on-sos-btn" data-imei="${sosVehicle.imei}"
                 style="background: #ff9800; color: white; border: none; border-radius: 4px; 
                        padding: 6px 12px; cursor: pointer; font-size: 12px;">
@@ -1181,8 +1176,10 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   if (focusBtn) {
     focusBtn.onclick = (e) => {
       e.stopPropagation();
-      const imei = e.target.getAttribute('data-imei');
-      focusOnVehicle(imei);
+      const btn = e.currentTarget || e.target.closest('.focus-on-sos-btn');
+      if (!btn) return;
+      const imei = btn.getAttribute('data-imei');
+      if (imei) focusOnVehicle(imei);
     };
   }
   
