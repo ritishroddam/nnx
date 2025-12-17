@@ -212,13 +212,18 @@ async function loadNotifications() {
         data.alerts.forEach((alert) => {
           const li = document.createElement("li");
           li.className = alert.acknowledged ? "notification-read" : "notification-unread";
+          // Only show mark-read button for specific alert types
+          const showMarkRead = !alert.acknowledged && (
+            alert.type === "Panic Alert" || alert.type === "Main Power Discontinue alert"
+          );
+
           li.innerHTML = `
             <div class="notification-content">
               <strong>${alert.type}</strong> - ${alert.vehicle} 
               <br><small>${new Date(alert.date_time).toLocaleString()}</small>
               ${alert.acknowledged ? '' : '<span class="unread-badge"></span>'}
             </div>
-            ${!alert.acknowledged ? `
+            ${showMarkRead ? `
             <div class="notification-actions">
               <button class="mark-read-btn" data-alert-id="${alert.id}">
                 <i class="fas fa-check"></i>
