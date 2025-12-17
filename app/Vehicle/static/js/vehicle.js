@@ -1232,6 +1232,36 @@ function getFullStatusName(statusCode) {
   }
 }
 
+function focusOnVehicle(imei) {
+  try {
+    const vehicle = vehicleData.get(imei);
+    const marker = markers[imei];
+    if (!vehicle || !marker) {
+      console.warn(`focusOnVehicle: no vehicle or marker found for imei=${imei}`);
+      return;
+    }
+
+    const lat = marker.position?.lat ?? marker.getPosition?.().lat();
+    const lng = marker.position?.lng ?? marker.getPosition?.().lng();
+    if (lat == null || lng == null) {
+      console.warn(`focusOnVehicle: marker has no coordinates for imei=${imei}`);
+      return;
+    }
+
+    const latLng = new google.maps.LatLng(lat, lng);
+
+    const currentZoom = map.getZoom ? map.getZoom() : 15;
+    if (currentZoom < 16) map.setZoom(16);
+    panToWithOffset(latLng, -200, 0);
+
+    const address = vehicle.address || "Location unknown";
+    setInfoWindowContent(infoWindow, marker, latLng, vehicle, address);
+    infoWindow.open(map, marker);
+  } catch (err) {
+    console.error('focusOnVehicle error:', err);
+  }
+}
+
 function setupSOSHoverListeners(marker, imei) {
   if (marker.__hoverListenersBound) {
     marker.content.removeEventListener('mouseover', marker.__mouseoverHandler);
