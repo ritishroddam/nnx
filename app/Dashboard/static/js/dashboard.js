@@ -651,6 +651,8 @@ async function initMap() {
       trafficLayer = new TrafficLayer();
       trafficLayer.setMap(map);
       marker = new AdvancedMarkerElement({ position: location, map, title: "Your Location" });
+
+      getWeather(location.lat, location.lng);
     };
 
     if (navigator.geolocation) {
@@ -680,9 +682,30 @@ async function fallbackToDefaultLocation() {
     trafficLayer.setMap(map);
 
     marker = new AdvancedMarkerElement({ position: defaultLocation, map, title: "Your Location" });
+
+    getWeather(defaultLocation.lat, defaultLocation.lng);
   } catch (error) {
     console.error("Error initializing fallback location:", error);
   }
+}
+
+function getWeather(lat, lon) {
+  let url;
+  if (!lat || !lon) {
+    url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
+  } else {
+    url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  }
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      displayWeather(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching weather data:", error);
+      document.getElementById("weather").innerHTML =
+        "<p>Failed to fetch weather data.</p>";
+    });
 }
 
 /* -------------------------
