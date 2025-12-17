@@ -421,6 +421,10 @@ body {
   cursor: pointer;
 }
 
+.dark-mode  .notification .badge {
+  color: #ff6f61;
+}
+
 .notification .badge1 {
   position: absolute;
   top: -7px;
@@ -661,7 +665,7 @@ body.dark-mode .profile-hover .profile-settings-link {
 .dark-mode .notification-dropdown {
   background: #222;
   color: #ccc;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+  box-shadow: #cccccc90 0 0 10px;
 }
 
 .notification-dropdown li {
@@ -683,7 +687,7 @@ body.dark-mode .profile-hover .profile-settings-link {
 }
 
 .dark-mode .notification-header {
-  color: #ccc;
+  color: white;
   border-bottom: 1px solid #444;
 }
 
@@ -713,6 +717,7 @@ body.dark-mode .profile-hover .profile-settings-link {
 .dark-mode  #notification-list li {
   border-bottom: 1px solid #444;
   color: #ccc;
+  background-color: black;
 }
 
 #notification-list li:last-child {
