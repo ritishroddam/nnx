@@ -690,6 +690,22 @@ async function fallbackToDefaultLocation() {
   }
 }
 
+function displayWeather(data) {
+  const weatherDiv = document.getElementById("weather");
+  const iconCode = data.weather[0].icon;
+  const weatherHTML = `
+                      <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon"/>
+                      <div class="weather-info">
+                        <div class="city"><strong>${data.name}</strong></div>
+                        <div class="desc">${data.weather[0].description}</div>
+                        <div class="temp">Temperature: ${data.main.temp} °C</div>
+                        <div class="humidity">Humidity: ${data.main.humidity}%</div>
+                        <div class="wind">Wind Speed: ${data.wind.speed} m/s</div>
+                      </div>
+              `;
+  weatherDiv.innerHTML = weatherHTML;
+}
+
 function getWeather(lat, lon) {
   let url;
   if (!lat || !lon) {
