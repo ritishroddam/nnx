@@ -214,7 +214,7 @@ async function loadNotifications() {
           li.className = alert.acknowledged ? "notification-read" : "notification-unread";
           // Only show mark-read button for specific alert types
           const showMarkRead = !alert.acknowledged && (
-            alert.type === "Panic Alert" || alert.type === "Main Power Discontinue alert"
+            alert.type === "Panic Alert" || alert.type === "Main Power Discontinue Alert"
           );
 
           li.innerHTML = `
