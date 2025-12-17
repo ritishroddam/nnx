@@ -20,6 +20,7 @@
     background: #1e1e1e;
     border-color: #2d2d2d;
     color: #e0e0e0;
+    box-shadow: 0 0 10px #cccccc90;
 }
 
 .geofence-panel h2 {
