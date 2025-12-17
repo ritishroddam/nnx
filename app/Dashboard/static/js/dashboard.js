@@ -1,6 +1,7 @@
 /* -------------------------
    Top-level state & config
    -------------------------*/
+const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
 let currentSort = { column: "distance", direction: "desc" };
 let currentStatusFilter = null;
 let statusPopupTableData = [];
@@ -651,6 +652,8 @@ async function initMap() {
       trafficLayer = new TrafficLayer();
       trafficLayer.setMap(map);
       marker = new AdvancedMarkerElement({ position: location, map, title: "Your Location" });
+
+      getWeather(location.lat, location.lng);
     };
 
     if (navigator.geolocation) {
@@ -680,9 +683,46 @@ async function fallbackToDefaultLocation() {
     trafficLayer.setMap(map);
 
     marker = new AdvancedMarkerElement({ position: defaultLocation, map, title: "Your Location" });
+
+    getWeather(defaultLocation.lat, defaultLocation.lng);
   } catch (error) {
     console.error("Error initializing fallback location:", error);
   }
+}
+
+function displayWeather(data) {
+  const weatherDiv = document.getElementById("weather");
+  const iconCode = data.weather[0].icon;
+  const weatherHTML = `
+                      <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Weather icon"/>
+                      <div class="weather-info">
+                        <div class="city"><strong>${data.name}</strong></div>
+                        <div class="desc">${data.weather[0].description}</div>
+                        <div class="temp">Temperature: ${data.main.temp} °C</div>
+                        <div class="humidity">Humidity: ${data.main.humidity}%</div>
+                        <div class="wind">Wind Speed: ${data.wind.speed} m/s</div>
+                      </div>
+              `;
+  weatherDiv.innerHTML = weatherHTML;
+}
+
+function getWeather(lat, lon) {
+  let url;
+  if (!lat || !lon) {
+    url = `https://api.openweathermap.org/data/2.5/weather?lat=12.9716&lon=77.5946&appid=${apiKey}&units=metric`;
+  } else {
+    url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  }
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      displayWeather(data);
+    })
+    .catch((error) => {
+      console.error("Error fetching weather data:", error);
+      document.getElementById("weather").innerHTML =
+        "<p>Failed to fetch weather data.</p>";
+    });
 }
 
 /* -------------------------
@@ -874,21 +914,18 @@ async function initDashboard() {
   centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
   Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
-  window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
+  // window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
 
-  await attachEventListeners();
-
-  // initialize map & charts
-  await initMap();
-  initDevicesChart();
-
-  // fetch data once at load
-  fetchStatusData();
-  fetchDashboardData();
-  await renderPieChart();
-  await fetchDistanceTravelledData();
-  await fetchVehicleDistances(currentRange);
-
+  const themeBtn = document.getElementById("theme-toggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      // wait for class toggle done in base script, then refresh charts/map
+      setTimeout(() => {
+        updateTheme().catch((e) => console.error("theme toggle updateTheme failed:", e));
+      }, 0);
+    });
+  }
+  
   // start clock
   setInterval(() => {
     const now = new Date();
@@ -903,6 +940,19 @@ async function initDashboard() {
     if (clockEl) clockEl.textContent = clockStr;
     if (dateEl) dateEl.textContent = dateStr;
   }, 1000);
+
+  await attachEventListeners();
+
+  // initialize map & charts
+  await initMap();
+  initDevicesChart();
+
+  // fetch data once at load
+  fetchStatusData();
+  fetchDashboardData();
+  await renderPieChart();
+  await fetchDistanceTravelledData();
+  await fetchVehicleDistances(currentRange);
 }
 
 /* wire DOMContentLoaded to the init */
