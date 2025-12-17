@@ -96,8 +96,14 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
         distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
         result['distanceTravelled'] = max(distanceTravelled, 0)
 
-    latest_results = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
-    for doc in atlantaAis140LatestCollection.find({"_id": {"$in": imeis}}):
+    latest_results = list(atlantaLatestCollection.find(
+        {"_id": {"$in": imeis}}, 
+        {"_id": 1, "imei": 1, "latitude": 1, "longitude": 1, "speed": 1, "ignition": 1, "gsm_sig": 1, "sos": 1, "main_power": 1, "gps": 1, "odometer": 1, "date": 1, "time": 1, "date_time": 1,},
+    ))
+    for doc in atlantaAis140LatestCollection.find(
+        {"_id": {"$in": imeis}},
+        {"_id": 1, "imei": 1, "gps.lat": 1, "gps.lon": 1, "telemetry.speed": 1, "telemetry.ignition": 1, "network.gsmSignal": 1, "telemetry.emergencyStatus": 1, "telemetry.mainPower": 1, "gps.gpsStatus": 1, "telemetry.odometer": 1, "gps.timestamp": 1},
+    ):
         latest_results.append(atlantaAis140ToFront(doc))
 
     speed_dict = {result['imei']: result for result in speed_results}
@@ -148,14 +154,10 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
             prev_time = curr_time
 
         last_update = None
-        if latest.get("date") and latest.get("time"):
-            try:
-                last_update = datetime.strptime(
-                    latest.get("date") + latest.get("time"),
-                    '%d%m%y%H%M%S'
-                ).replace(tzinfo=timezone.utc)
-            except ValueError:
-                last_update = None
+        if latest.get("date_time"):
+            last_update = latest.get("date_time")
+        else:
+            last_update = None
 
         is_offline = last_update is None or last_update < twenty_four_hours_ago
         try:
@@ -165,7 +167,7 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
 
         ignition_state = str(latest.get("ignition", "0"))
         main_power = str(latest.get("main_power", "1"))
-        gps_ok = bool(latest.get("gps", True))
+        gps_ok = bool(True if latest.get("gps") in ["A"] else False)
 
         counters['totalVehicles'] += 1
         if is_offline:
