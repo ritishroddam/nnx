@@ -914,7 +914,22 @@ async function initDashboard() {
   centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
   Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
-  window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
+  // window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
+
+  const themeBtn = document.getElementById("theme-toggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      // wait for class toggle done in base script, then refresh charts/map
+      setTimeout(() => {
+        updateTheme().catch((e) => console.error("theme toggle updateTheme failed:", e));
+      }, 0);
+    });
+  }
+
+  // start clock
+  setInterval(() => {
+    // ...existing code...
+  }, 1000);  
 
   // start clock
   setInterval(() => {
