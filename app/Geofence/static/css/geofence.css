@@ -459,13 +459,12 @@ input:checked .switch::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fafafa;
     transition: all 0.2s;
 }
 
 .dark-mode #geofenceList li {
-    background: #3a3a3a;
     color: #ddd;
+    box-shadow: 0 0 10px #cccccc90;
 }
 
 #geofenceList li:hover {
