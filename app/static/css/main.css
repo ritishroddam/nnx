@@ -658,10 +658,18 @@ body.dark-mode .profile-hover .profile-settings-link {
   overflow-y: auto;
 }
 
+.dark-mode .notification-dropdown {
+  background: #222;
+  color: #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
 .notification-dropdown li {
   display: flex;
   align-items: center;
 }
+
+.dark-mode 
 
 .notification-dropdown li:hover {
   background-color: #e9ecef;
