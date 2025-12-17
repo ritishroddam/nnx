@@ -682,12 +682,21 @@ body.dark-mode .profile-hover .profile-settings-link {
   color: black;
 }
 
+.dark-mode .notification-header {
+  color: #ccc;
+  border-bottom: 1px solid #444;
+}
+
 #notification-list {
   max-height: 300px;
   overflow-y: auto;
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.dark-mode  #notification-list li {
+  color: #ccc;
 }
 
 #notification-list li:hover {
@@ -710,6 +719,11 @@ body.dark-mode .profile-hover .profile-settings-link {
   text-align: right;
   background: #fafafa;
   border-top: 1px solid #eee;
+}
+
+.dark-mode .notification-footer {
+  background: #222;
+  border-top: 1px solid #444;
 }
 
 .notification-footer a {
