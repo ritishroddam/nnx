@@ -695,7 +695,7 @@ body.dark-mode .profile-hover .profile-settings-link {
   padding: 0;
 }
 
-.dark-mode  #notification-list li {
+.dark-mode  #notification-list{
   color: #ccc;
 }
 
@@ -708,6 +708,11 @@ body.dark-mode .profile-hover .profile-settings-link {
   border-bottom: 1px solid #f5f5f5;
   cursor: pointer;
   color: #555;
+}
+
+.dark-mode  #notification-list li {
+  border-bottom: 1px solid #444;
+  color: #ccc;
 }
 
 #notification-list li:last-child {
