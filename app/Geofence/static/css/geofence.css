@@ -870,6 +870,7 @@ input:checked .slider:before {
 
 .dark-mode  .btn-toggle .toggle-btn:hover {
     background-color: #000;
+    color: #fff;
 }
 
 @media (max-width: 768px) {
