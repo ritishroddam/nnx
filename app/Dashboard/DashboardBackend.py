@@ -91,9 +91,7 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
     if not imeis:
         return [], _empty_status_counters()
 
-    print("[DEBUG] Fetching range data")
     distance_results, speed_results, time_results = fetch_range_batches(imeis, start_of_day, end_of_day)
-    print("[DEBUG] Fetched range data")
     for result in distance_results:
         distanceTravelled = float(result.get('last_odometer', 0)) - float(result.get('first_odometer', 0))
         result['distanceTravelled'] = max(distanceTravelled, 0)
@@ -242,7 +240,6 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
         if should_include:
             vehicle_data.append(vehicle_info)
 
-    print(f"[DEBUG] Built vehicle snapshot")
     return vehicle_data, counters
 
 def format_last_updated(date_str, time_str):
