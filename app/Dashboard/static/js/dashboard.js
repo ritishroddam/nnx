@@ -925,12 +925,7 @@ async function initDashboard() {
       }, 0);
     });
   }
-
-  // start clock
-  setInterval(() => {
-    // ...existing code...
-  }, 1000);  
-
+  
   // start clock
   setInterval(() => {
     const now = new Date();
