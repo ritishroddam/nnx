@@ -742,6 +742,14 @@ body.dark-mode .profile-hover .profile-settings-link {
   font-size: 13px;
 }
 
+.notification-footer a:hover {
+  text-decoration: underline;
+}
+
+.dark-mode  .notification-footer a {
+  color: #4fc3f7;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
