@@ -233,9 +233,16 @@ async function loadNotifications() {
           
           li.addEventListener("click", function(e) {
             if (!e.target.closest('.mark-read-btn')) {
-              window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(
-                alert.type
-              )}&from_notification=true`;
+              let endpoint = alert.type
+                .toLowerCase()
+                .replace(/\s+/g, "_")
+                .replace(/_alert$/, "");
+
+              if (endpoint.includes("main_power_discontinue") || endpoint.includes("main_power")) {
+                endpoint = "main_power_off";
+              }
+
+              window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(endpoint)}&from_notification=true`;
             }
           });
 
