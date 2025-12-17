@@ -1564,8 +1564,8 @@ body.dark-mode .select-toggle-btn.active {
   color: white;
   border: none;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1589,9 +1589,9 @@ body.dark-mode .select-toggle-btn.active {
   background: white;
   color: #ff0000;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 14px;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
   font-weight: bold;
   display: flex;
   align-items: center;
