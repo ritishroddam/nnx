@@ -402,9 +402,77 @@ def get_vehicle_range_data():
 @roles_required('admin', 'clientAdmin', 'user')
 def get_status_data():
     try:
-        range_param = request.args.get("range", "1day")
-        _, counters = build_vehicle_snapshot(range_param, include_location=False)
-        return jsonify(counters), 200
+        vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
+        
+        imeis = getCollectionImeis(vehicleInvyImeis)
+        
+        if not imeis:
+            return jsonify(_empty_status_counters), 200
+
+        latest_records = list(atlantaLatestCollection.find({"_id": {"$in": imeis}}))
+        atlantaAis140Records = list(atlantaAis140LatestCollection.find({"_id": {"$in": imeis}}))
+        
+        for doc in atlantaAis140Records:
+            data = atlantaAis140ToFront(doc)
+            latest_records.append(data)
+        
+        now = datetime.now(timezone.utc)
+        twenty_four_hours_ago = now - timedelta(hours=24)
+        
+        running_vehicles = 0
+        idle_vehicles = 0
+        parked_vehicles = 0
+        speed_vehicles = 0
+        overspeed_vehicles = 0
+        offline_vehicles = 0
+        disconnected_vehicles = 0
+        total_vehicles = 0
+        
+        for latest_data in latest_records:
+            total_vehicles += 1
+            lastUpdate = latest_data.get("date_time")
+            
+            is_offline = lastUpdate is None or lastUpdate < twenty_four_hours_ago
+            
+            main_power = int(latest_data.get("main_power", "1"))
+            
+            if not main_power:
+                disconnected_vehicles += 1
+            
+            if is_offline:
+                offline_vehicles += 1
+                continue
+            
+            ignition = int(latest_data.get("ignition", "0"))
+            
+            if not ignition:
+                parked_vehicles += 1
+                continue
+            
+            speed = float(latest_data.get("speed", 0))
+            
+            if speed == 0:
+                idle_vehicles += 1
+                continue
+            elif 40 <= speed < 60:
+                speed_vehicles += 1
+                running_vehicles += 1
+                continue
+            elif speed >= 60:
+                overspeed_vehicles += 1
+                continue
+            
+        
+        return jsonify({
+            "runningVehicles": running_vehicles,
+            "idleVehicles": idle_vehicles,
+            "parkedVehicles": parked_vehicles,
+            "speedVehicles": speed_vehicles,
+            "overspeedVehicles": overspeed_vehicles,
+            "offlineVehicles": offline_vehicles,
+            "disconnectedVehicles": disconnected_vehicles,
+            "totalVehicles": total_vehicles,
+        }), 200
     except Exception as e:
         print(f"Error fetching status data: {e}")
         return jsonify({"error": "Failed to fetch status data"}), 500
