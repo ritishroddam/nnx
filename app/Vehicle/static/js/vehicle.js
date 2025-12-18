@@ -871,6 +871,14 @@ function triggerSOS(imei, marker) {
     return;
   }
 
+  if (marker.__animationFrame) {
+    cancelAnimationFrame(marker.__animationFrame);
+    delete marker.__animationFrame;
+  }
+
+  marker.__immediate = true;
+
+
   vehicle.sosActive = true;
   vehicle.sos = "1";
   vehicleData.set(imei, vehicle);
@@ -956,6 +964,17 @@ function triggerSOS(imei, marker) {
     playSOSAlertSound();
     
     highlightSOSVehicleCard(imei);
+
+   try {
+      const lat = marker.position?.lat ?? (marker.getPosition ? marker.getPosition().lat() : null);
+      const lng = marker.position?.lng ?? (marker.getPosition ? marker.getPosition().lng() : null);
+      if (lat != null && lng != null) {
+        marker.position = { lat, lng };
+        marker.currentPosition = new google.maps.LatLng(lat, lng);
+      }
+    } catch (e) {
+      // ignore
+    }  
   }
 }
 
@@ -2073,35 +2092,118 @@ function updateMap() {
   applyFilterToAllVehicles();
 }
 
+// function animateMarker(marker, newPosition, duration = 14000) {
+//   let startPosition = new google.maps.LatLng(
+//     marker.position.lat,
+//     marker.position.lng
+//   );
+//   if (!startPosition) {
+//     console.error("Marker's start position is not defined.");
+//     return;
+//   }
+//   const startTime = performance.now();
+
+//   function moveMarker(currentTime) {
+//     const elapsedTime = currentTime - startTime;
+//     const progress = Math.min(elapsedTime / duration, 1);
+//     const lat =
+//       startPosition.lat() +
+//       (newPosition.lat() - startPosition.lat()) * progress;
+//     const lng =
+//       startPosition.lng() +
+//       (newPosition.lng() - startPosition.lng()) * progress;
+
+//     marker.position = new google.maps.LatLng(lat, lng);
+
+//     if (progress < 1) {
+//       requestAnimationFrame(moveMarker);
+//     }
+//   }
+
+//   requestAnimationFrame(moveMarker);
+// }
+
 function animateMarker(marker, newPosition, duration = 14000) {
-  let startPosition = new google.maps.LatLng(
-    marker.position.lat,
-    marker.position.lng
-  );
-  if (!startPosition) {
-    console.error("Marker's start position is not defined.");
+  // New: ease function
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  if (!marker) return;
+
+  // Cancel any ongoing animation for this marker
+  if (marker.__animationFrame) {
+    cancelAnimationFrame(marker.__animationFrame);
+    delete marker.__animationFrame;
+  }
+
+  // If duration is <= 0, apply position immediately (used for immediate SOS)
+  if (duration <= 0 || marker.__immediate) {
+    try {
+      // set marker.position immediately
+      if (newPosition instanceof google.maps.LatLng) {
+        marker.position = { lat: newPosition.lat(), lng: newPosition.lng() };
+      } else if (newPosition.lat && typeof newPosition.lat === "function") {
+        marker.position = { lat: newPosition.lat(), lng: newPosition.lng() };
+      } else {
+        marker.position = { lat: newPosition.lat, lng: newPosition.lng };
+      }
+      // also keep a currentPosition reference for future animations
+      marker.currentPosition = new google.maps.LatLng(marker.position.lat, marker.position.lng);
+    } finally {
+      delete marker.__immediate;
+    }
     return;
   }
-  const startTime = performance.now();
 
-  function moveMarker(currentTime) {
-    const elapsedTime = currentTime - startTime;
-    const progress = Math.min(elapsedTime / duration, 1);
-    const lat =
-      startPosition.lat() +
-      (newPosition.lat() - startPosition.lat()) * progress;
-    const lng =
-      startPosition.lng() +
-      (newPosition.lng() - startPosition.lng()) * progress;
-
-    marker.position = new google.maps.LatLng(lat, lng);
-
-    if (progress < 1) {
-      requestAnimationFrame(moveMarker);
+  // Determine start position (prefer marker.currentPosition if present)
+  let startLatLng;
+  if (marker.currentPosition && marker.currentPosition instanceof google.maps.LatLng) {
+    startLatLng = marker.currentPosition;
+  } else {
+    // marker.position may be {lat, lng} or google.maps.LatLng-like
+    if (marker.position && typeof marker.position.lat === "function") {
+      startLatLng = marker.position;
+    } else if (marker.position && typeof marker.position.lat === "number") {
+      startLatLng = new google.maps.LatLng(marker.position.lat, marker.position.lng);
+    } else {
+      // fallback to newPosition
+      startLatLng =
+        newPosition instanceof google.maps.LatLng
+          ? newPosition
+          : new google.maps.LatLng(newPosition.lat, newPosition.lng);
     }
   }
 
-  requestAnimationFrame(moveMarker);
+  const startTime = performance.now();
+  const fromLat = startLatLng.lat();
+  const fromLng = startLatLng.lng();
+  const toLat = newPosition instanceof google.maps.LatLng ? newPosition.lat() : newPosition.lat;
+  const toLng = newPosition instanceof google.maps.LatLng ? newPosition.lng() : newPosition.lng;
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const rawProgress = Math.min(elapsed / duration, 1);
+    const eased = easeInOutCubic(rawProgress);
+
+    const lat = fromLat + (toLat - fromLat) * eased;
+    const lng = fromLng + (toLng - fromLng) * eased;
+
+    const currentLatLng = new google.maps.LatLng(lat, lng);
+    marker.position = { lat: lat, lng: lng };
+    marker.currentPosition = currentLatLng;
+
+    if (marker.content && marker.content.style) {
+    }
+
+    if (rawProgress < 1) {
+      marker.__animationFrame = requestAnimationFrame(step);
+    } else {
+      delete marker.__animationFrame;
+    }
+  }
+
+  marker.__animationFrame = requestAnimationFrame(step);
 }
 
 function parseCoordinates(lat, lng) {
