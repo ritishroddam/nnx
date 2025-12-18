@@ -19,7 +19,7 @@ class Config:
     JSON_SORT_KEYS = False
     
     GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY') or 'AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84'
-    MONGO_URI = "mongodb://doadmin:4l239y815dQan0Vo@mongodb+srv://cordonnxDB-4f7df3c7.mongo.ondigitalocean.com/?tls=true&authSource=admin"
+    MONGO_URI = "mongodb+srv://doadmin:U6bOV204y9r75Iz3@db-mongodb-blr1-96186-51f75312.mongo.ondigitalocean.com/admin?authSource=admin&tls=true"
     CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
     CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
     
