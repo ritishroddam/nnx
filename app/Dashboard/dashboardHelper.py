@@ -90,22 +90,22 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
         max_speed = 0.00
         speeds = []
             
-        data = list(atlanta_collection.find(
+        data = atlanta_collection.find(
             {
                 "imei": imei,
                 "date_time": {"$gte": fromDate, "$lt": toDate},
                 "ignition": "1",
             }, {"_id": 0, "speed": 1}
-        ))
+        )
         
         if not data:
-            data = list(atlantaAis140Collection.find(
+            data = atlantaAis140Collection.find(
                 {
                     "imei": imei,
                     "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                     "telemetry.ignition": 1,
                 }, {"_id": 0, "telemetry.speed": 1}
-            ))
+            )
             
             for datum in data:
                 if float(datum.get("telemetry", {}).get("speed", 0)) > max_speed:
@@ -144,22 +144,22 @@ def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
     for imei in imeis:
         records = []
 
-        data = list(atlanta_collection.find(
+        data = atlanta_collection.find(
             {
                 "imei": imei,
                 "date_time": {"$gte": fromDate, "$lt": toDate},
             }, {"_id": 0, "date_time": 1, "ignition": 1, "speed": 1},
             sort=[("date_time", ASCENDING), ("imei", ASCENDING)]
-        ))
+        )
         
         if not data:
-            data = list(atlantaAis140Collection.find(
+            data = atlantaAis140Collection.find(
                 {
                     "imei": imei,
                     "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
                 }, {"_id": 0, "gps.timestamp": 1, "telemetry.ignition": 1, "telemetry.speed": 1},
                 sort=[("gps.timestamp", ASCENDING), ("imei", ASCENDING)]
-            ))
+            )
             
             for datum in data:
                 records.append({
