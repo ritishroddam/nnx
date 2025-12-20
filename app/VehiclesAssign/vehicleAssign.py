@@ -19,20 +19,19 @@ def assign_vehicles():
     if request.method == 'GET':
         company_id = get_jwt().get('company_id')
         companyName = get_jwt().get('company')
-        vehicles = [vehicle for vehicle in vehicle_collection.find({"CompanyName": companyName})]
-        users = [user for user in db['users'].find({"company": company_id, "role": "user"}, {"_id": 1, "username": 1})]
+        vehicles = list(vehicle_collection.find({"CompanyName": companyName}))
+        users = list(db['users'].find({"company": company_id, "role": "user"}, {"_id": 1, "username": 1}))
         
         assignedData = {}
         
         for user in users:
-            assigned_vehicles = vehicle_collection.find(
+            assigned_vehicles = list(vehicle_collection.find(
                 {
                     "CompanyName": companyName,
                     "AssignedUsers": user["_id"],
                 },
                 {"_id": 1, "LicensePlateNumber": 1}
-            )
-            assign_vehicles = [vehicle for vehicle in assigned_vehicles]
+            ))
             
             if not assigned_vehicles:
                 continue
@@ -78,7 +77,7 @@ def assign_vehicles():
 def get_unassigned_vehicles(user_id):
     try:
         companyName = get_jwt().get('company')
-        unassigned_vehicles = vehicle_collection.find(
+        unassigned_vehicles = list(vehicle_collection.find(
             {
                 "CompanyName": companyName,
                 "$or": [
@@ -87,8 +86,7 @@ def get_unassigned_vehicles(user_id):
                 ]
             },
             {"_id": 1, "LicensePlateNumber": 1}
-        )
-        unassigned_vehicles = [vehicle for vehicle in unassigned_vehicles]
+        ))
         for vehicle in unassigned_vehicles:
             vehicle["_id"] = str(vehicle["_id"])
 

@@ -51,8 +51,7 @@ def show_vehicle_data(LicensePlateNumber):
             {"$limit": 50}
         ]
 
-        vehicle_data = atlanta_collection.aggregate(pipeline)
-        vehicle_data = [v for v in vehicle_data]
+        vehicle_data = list(atlanta_collection.aggregate(pipeline))
         
         if not vehicle_data:
             pipeline = [
@@ -61,8 +60,7 @@ def show_vehicle_data(LicensePlateNumber):
                 {'$limit': 50},
             ]
             
-            vehicleAisData = atlantaAIS140_collection.aggregate(pipeline)
-            vehicleAisData = [v for v in vehicleAisData]
+            vehicleAisData = list(atlantaAIS140_collection.aggregate(pipeline))
             
             if not vehicleAisData:
                 flash(f"Data for vehicle with License Plate Number '{LicensePlateNumber}' does not exist.", "warning")
@@ -155,8 +153,7 @@ def show_vehicle_data(LicensePlateNumber):
                 "IMEI": vehicleData.get("IMEI", "Unknown"),
             })
 
-        alerts = db['sos_logs'].find({"imei": vehicleData['IMEI']})
-        alerts = [a for a in alerts]
+        alerts = list(db['sos_logs'].find({"imei": vehicleData['IMEI']}))
 
         return render_template('vehicle.html', vehicle_data=processed_data, recent_data=recent_data, alerts=alerts)
     except Exception as e:
@@ -183,8 +180,7 @@ def fetch_live_data(imei):
                 {"$project": projection},
                 {"$limit": 1}
             ]
-            data = atlanta_collection.aggregate(pipeline)
-            data = [d for d in data]
+            data = list(atlanta_collection.aggregate(pipeline))
             
             if not data:
                 wanted_fields = {k for k, v in projection.items() if v and k != "_id"}
@@ -202,8 +198,7 @@ def fetch_live_data(imei):
                     {"$limit": 1}
                 ]
                 
-                data = atlantaAIS140_collection.aggregate(pipeline)
-                data = [d for d in data]
+                data = list(atlantaAIS140_collection.aggregate(pipeline))
                 
                 if not data:
                     return jsonify({"error": "No data found for the specified vehicle"}), 404
@@ -276,8 +271,7 @@ def fetch_live_data(imei):
 @jwt_required()
 def fetch_vehicle_alerts(imei):
     try:
-        alerts = db["sos_logs"].find({"imei": imei}, {"_id": 0})
-        alerts = [a for a in alerts]
+        alerts = list(db["sos_logs"].find({"imei": imei}, {"_id": 0}))
 
         if not alerts:
             return jsonify([])
@@ -305,8 +299,7 @@ def get_alerts():
         if not imei:
             return jsonify({"error": "IMEI is required"}), 400
 
-        alerts = db["sos_logs"].find({"imei": imei}, {"_id": 0, "latitude": 1, "longitude": 1, "location": 1, "timestamp": 1})
-        alerts = [a for a in alerts]
+        alerts = list(db["sos_logs"].find({"imei": imei}, {"_id": 0, "latitude": 1, "longitude": 1, "location": 1, "timestamp": 1}))
 
         formatted_alerts = [
             {

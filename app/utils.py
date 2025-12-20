@@ -44,14 +44,14 @@ def get_filtered_results(collection_name, vehicle_inventory_name="vehicle_invent
     if 'admin' in user_roles:
         results = collection.find(collection_query)
     elif 'user' in user_roles:
-        inventory_data = vehicle_inventory.find({
+        inventory_data = list(vehicle_inventory.find({
             'CompanyName': userCompany,
             'AssignedUsers': ObjectId(userID)
-        })
+        }))
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         results = collection.find({"imei": {"$in": imei_list}, **collection_query})
     else:
-        inventory_data = vehicle_inventory.find({'CompanyName': userCompany})
+        inventory_data = list(vehicle_inventory.find({'CompanyName': userCompany}))
         imei_list = [vehicle.get('IMEI') for vehicle in inventory_data if vehicle.get('IMEI')]
         results = collection.find({"imei": {"$in": imei_list}, **collection_query})
 
@@ -104,7 +104,7 @@ def get_vehicle_data_for_claims(claims):
         })
     else:
         cursor = vehicle_inventory.find({'CompanyName': user_company})
-    return [doc for doc in cursor]
+    return list(cursor)
 
 def getGeofences(claims, *, company: str | None = None, created_by: str | None = None):
     """

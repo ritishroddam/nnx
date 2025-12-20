@@ -26,7 +26,7 @@ company_config_collection = db['company_config']
 @vehicleDetails_bp.route('/page')
 @jwt_required()
 def page():
-    companiesData = [company for company in companies_collection.find({}, {"_id": 0, "Company Name": 1})]
+    companiesData = list(companies_collection.find({}, {"_id": 0, "Company Name": 1}))
     companies_data = [{"name": company["Company Name"]} for company in companiesData]
     
     return render_template(
@@ -56,8 +56,7 @@ def get_device_inventory():
 @jwt_required()
 def get_companies():
     try:
-        companies = companies_collection.find({}, {"_id": 1, "Company Name": 1})
-        companies = [c for c in companies]
+        companies = list(companies_collection.find({}, {"_id": 1, "Company Name": 1}))
         company_list = [{"id": str(company["_id"]), "name": company["Company Name"]} for company in companies]
         return jsonify(company_list), 200
     except Exception as e:
@@ -68,7 +67,7 @@ def get_companies():
 @jwt_required()
 def get_cities():
     try:
-        cities = [city for city in cities_collection.find({}, {"_id": 0, "name": 1, "state_name": 1})]
+        cities = list(cities_collection.find({}, {"_id": 0, "name": 1, "state_name": 1}))
         city_list = [{"city": city["name"], "state": city["state_name"]} for city in cities]
         return jsonify(city_list), 200
     except Exception as e:
@@ -437,7 +436,7 @@ def download_vehicle_template():
 @vehicleDetails_bp.route('/download_excel')
 @jwt_required()
 def download_excel():
-    sims = [item for item in vehicle_collection.find({}, {"_id": 0, "AssignedUsers": 0})]
+    sims = list(vehicle_collection.find({}, {"_id": 0, "AssignedUsers": 0})) 
     
     if not sims:
         return "No data available", 404

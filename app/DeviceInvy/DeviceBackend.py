@@ -34,8 +34,7 @@ def page():
     skip = (page - 1) * per_page
     
     total_devices = collection.count_documents({})
-    devices = collection.find({})
-    devices = [device for device in devices]
+    devices = list(collection.find({}))
     
     imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
     
@@ -68,9 +67,7 @@ def get_devices_paginated():
         skip = (page - 1) * per_page
 
         total = collection.count_documents({})
-        devices = collection.find({}).skip(skip).limit(per_page)
-        
-        devices = [device for device in devices]
+        devices = list(collection.find({}).skip(skip).limit(per_page))
 
         imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
 
@@ -122,19 +119,17 @@ def search_devices():
             ]
         }
         
-        devices = collection.find(query)
-        devices = [device for device in devices]
+        devices = list(collection.find(query))
         
         if not devices:
             return jsonify([])
             
         imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
         
-        vehiclesData = vehicle_collection.find(
+        vehiclesData = list(vehicle_collection.find(
             {"IMEI": {"$in": imeiList}}, 
             {"_id": 0, "LicensePlateNumber": 1, "CompanyName": 1, "IMEI":1}
-        )
-        vehiclesData = [vehicle for vehicle in vehiclesData]
+        ))
         
         VehicleData = {vehicle['IMEI']: vehicle for vehicle in vehiclesData}
         
@@ -347,8 +342,7 @@ def download_excel():
         "_id": 0,
     }
     
-    devices = collection.find({}, projection)
-    devices = [device for device in devices]
+    devices = list(collection.find({}, projection))
     
     imeiList = [device['IMEI'] for device in devices if 'IMEI' in device]
     

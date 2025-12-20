@@ -16,16 +16,14 @@ companyColection = db['customers_list']
 @jwt_required()
 @roles_required('admin')  
 def index():
-    subscribedVehicles = moveInSyncSubscribed.find({}, {'_id': 0})
-    subscribedVehicles = [vehicle for vehicle in subscribedVehicles]
+    subscribedVehicles = list(moveInSyncSubscribed.find({}, {'_id': 0}))
     
     subscribedVehiclesNumber = [vehicle['LicensePlateNumber'] for vehicle in subscribedVehicles]
     
-    notSubcribedVehicles = vehicleCollection.find(
+    notSubcribedVehicles = list(vehicleCollection.find(
         {"LicensePlateNumber": {"$nin": subscribedVehiclesNumber}},
         {"_id": 0, "LicensePlateNumber": 1,}
-    )
-    notSubcribedVehicles = [vehicle for vehicle in notSubcribedVehicles]
+    ))
     
     notSubcribedVehiclesNumbers = [vehicle['LicensePlateNumber'] for vehicle in notSubcribedVehicles]
     
@@ -46,9 +44,7 @@ def subscribeVehicles():
         vehicleNumbers = request.form.getlist('vehicleNumbers')
 
         if vehicleNumbers:
-            vehicleDetails = vehicleCollection.find({"LicensePlateNumber": {"$in": vehicleNumbers}}, {"_id": 0,})
-            vehicleDetails = [vehicle for vehicle in vehicleDetails]
-            
+            vehicleDetails = list(vehicleCollection.find({"LicensePlateNumber": {"$in": vehicleNumbers}}, {"_id": 0,}))
             if not vehicleDetails:
                 return jsonify({"message": "No vehicles found for the provided vehicle numbers"}), 404
         else:
@@ -58,8 +54,7 @@ def subscribeVehicles():
             if not companyColection.find_one({"Company Name": companyName}):
                 return jsonify({"message": "Invalid company name provided"}), 400
             
-            vehicleDetails = vehicleCollection.find({"CompanyName": companyName}, {"_id": 0,})
-            vehicleDetails = [vehicle for vehicle in vehicleDetails]
+            vehicleDetails = list(vehicleCollection.find({"CompanyName": companyName}, {"_id": 0,}))
             
             alreadySubscribedVehicles = moveInSyncSubscribed.distinct("LicensePlateNumber", {"CompanyName": companyName})
             

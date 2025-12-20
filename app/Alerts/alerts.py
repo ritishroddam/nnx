@@ -145,10 +145,7 @@ def get_alerts():
     total_count = collection.count_documents(query)
 
     # Apply pagination
-    records = collection.find(query, {'imei': 0}).sort('date_time', -1).skip(skip).limit(per_page)
-    records = [record for record in records]
-    if not records:
-        records = []
+    records = list(collection.find(query, {'imei': 0}).sort('date_time', -1).skip(skip).limit(per_page))
     
     for record in records:
         if 'date_time' in record:
@@ -300,9 +297,7 @@ def notification_alerts():
 @alerts_bp.route('/')
 @jwt_required()
 def page():
-    vehicleData = get_vehicle_data()
-    vehicleData = [v for v in vehicleData]
-    
+    vehicleData = list(get_vehicle_data())
     if not vehicleData:
         vehicles = []
     else:

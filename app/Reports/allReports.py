@@ -370,11 +370,9 @@ def process_panic_report(imei, vehicle_number, date_filter):
         query = {'imei': imei}
         query.update(date_filter or {})
 
-        data = db['sos_logs'].find(
+        data = list(db['sos_logs'].find(
             query, projection,
-        ).sort('date_time', -1)
-        
-        data = [datum for datum in data]
+        ).sort('date_time', -1))
 
         if not data:
             return None
@@ -1082,16 +1080,16 @@ def add_speed_metrics(rows):
         avg_speed = round(sum(speeds) / len(speeds), 2)
         max_speed = round(max(speeds), 2)
         
-        columns = list(rows[0].keys())
+        columns = list(rows[0].keys());
         
-        summary = OrderedDict()
+        summary = OrderedDict();
         
-        summary[columns[0]] = "Average Speed"
-        summary[columns[1]] = avg_speed
-        summary[columns[2]] = "Maximum Speed"
-        summary[columns[3]] = max_speed
+        summary[columns[0]] = "Average Speed";
+        summary[columns[1]] = avg_speed;
+        summary[columns[2]] = "Maximum Speed";
+        summary[columns[3]] = max_speed;
         for i in range(4, len(columns)):
-            summary[columns[i]] = ""
+            summary[columns[i]] = "";
             
         return rows + [summary]
     except Exception as e:
@@ -1156,22 +1154,19 @@ def index():
     print(f"[DEBUG] User roles: {user_roles}")
 
     if 'admin' in user_roles:
-        vehicles = db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0})
-        vehicles = [v for v in vehicles]
+        vehicles = list(db['vehicle_inventory'].find({}, {"LicensePlateNumber": 1, "_id": 0}))
         reports = []
         return render_template('allReport.html', vehicles=vehicles, reports=reports)
     if 'clientAdmin' in user_roles:
         userCompany = claims.get('company')
         userCompanyID = claims.get('company_id')
-        vehicles = db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0})
-        vehicles = [v for v in vehicles]
+        vehicles = list(db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0}))
         reports = []
         return render_template('allReport.html', vehicles=vehicles, reports=reports)
     else:
         userCompany = claims.get('company')
         userName = claims.get('username')
-        vehicles = db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0})
-        vehicles = [v for v in vehicles]
+        vehicles = list(db['vehicle_inventory'].find({"CompanyName": userCompany}, {"LicensePlateNumber": 1, "_id": 0}))
         reports = []
         return render_template('allReport.html', vehicles=vehicles, reports=reports)
  
@@ -1195,7 +1190,7 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
         rows = []
 
         if vehicle_number == "all":
-            vehicles = get_vehicle_data_for_claims(claims)
+            vehicles = list(get_vehicle_data_for_claims(claims))    
             imei_to_plate = {v["IMEI"]: v for v in vehicles if v.get("IMEI") and v.get("LicensePlateNumber")}
             vehicleInvyImeis = list(imei_to_plate.keys())
                 
@@ -1796,16 +1791,14 @@ def get_recent_reports():
         if end_date:
             q['created_at']['$lt'] = end_date
 
-        reports = db['generated_reports'].find(
+        reports = list(db['generated_reports'].find(
             q,
             {
                 '_id': 1, 'report_name': 1, 'report_type': 1, 'vehicle_number': 1,
                 'size': 1, 'generated_at': 1, 'created_at': 1, 'status': 1, 'progress': 1,
                 'range_start_utc': 1, 'range_end_utc': 1, 'task_id': 1, 'error_message': 1
             }
-        ).sort([('updated_at', -1), ('created_at', -1)]).limit(50)
-        
-        reports = [r for r in reports]
+        ).sort([('updated_at', -1), ('created_at', -1)]).limit(50))
 
         return jsonify({
             'success': True,

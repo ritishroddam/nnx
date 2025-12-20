@@ -62,12 +62,9 @@ def get_raw_logs():
         end_date = ist.localize(end_date).astimezone(timezone('UTC'))
 
     query = {"imei": imei, "timestamp": {"$gte": start_date, "$lt": end_date}}
-    raw_logs = rawLogsCollection.find(query, {"_id": 0}).sort("timestamp", -1)
-    raw_logs = [log for log in raw_logs]
-    
+    raw_logs = list(rawLogsCollection.find(query, {"_id": 0}).sort("timestamp", -1))
     if not raw_logs:
-        raw_logs = rawLogsAtlantaAis140Collection.find(query, {"_id": 0}).sort("timestamp", -1)
-        raw_logs = [log for log in raw_logs]
+        raw_logs = list(rawLogsAtlantaAis140Collection.find(query, {"_id": 0}).sort("timestamp", -1))
     
     logs = []
     if raw_logs:
@@ -134,8 +131,7 @@ def subscribe_to_raw_log():
 @jwt_required()
 @roles_required('admin')
 def get_vehicles():
-    vehicles = vehicleCollection.find({}, {"LicensePlateNumber": 1, "_id": 0})
-    vehicles = [vehicle['LicensePlateNumber'] for vehicle in vehicles]
+    vehicles = list(vehicleCollection.find({}, {"LicensePlateNumber": 1, "_id": 0}))
     return jsonify(vehicles), 200
 
 @rawLogs_bp.route('/downloadPDF', methods=['POST'])
@@ -162,16 +158,14 @@ def download_pdf():
         end_date = ist.localize(end_date).astimezone(timezone('UTC'))
 
     query = {"LicensePlateNumber": licensePlateNumber, "timestamp": {"$gte": start_date, "$lt": end_date}}
-    logs = rawLogsCollection.find(query, {"_id": 0})
-    logs = [log for log in logs]
+    logs = list(rawLogsCollection.find(query, {"_id": 0}))
 
     if not logs:
-        logs = rawLogsAtlantaAis140Collection.find(query, {"_id": 0})
-        logs = [log for log in logs]
+        logs = list(rawLogsAtlantaAis140Collection.find(query, {"_id": 0}))
     
     if not logs:
         return jsonify({"error": "No logs found for the given criteria"}), 404
-    
+
     # Create a PDF
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)

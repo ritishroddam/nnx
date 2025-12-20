@@ -30,11 +30,9 @@ def get_geofences():
         user_company = claims.get('company')
         
         if 'admin' in user_roles:
-            geofences = geofence_collection.find()
-            geofences = [geofence for geofence in geofences]
+            geofences = list(geofence_collection.find())
         else:
-            geofences = geofence_collection.find({'company': user_company})
-            geofences = [geofence for geofence in geofences]
+            geofences = list(geofence_collection.find({'company': user_company}))
         
         for geofence in geofences:
             geofence['_id'] = str(geofence['_id'])
