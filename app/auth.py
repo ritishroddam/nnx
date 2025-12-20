@@ -218,39 +218,6 @@ def refresh():
         flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
         return
 
-# @auth_bp.route('/register', methods=['GET', 'POST'])
-# @roles_required('admin', 'clientAdmin')
-# def register():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#         company = request.form.get('company')
-        
-#         if User.find_by_username(username):
-#             flash('Username already taken', 'danger')
-#             return redirect(url_for('auth.register'))
-        
-#         if User.find_by_email(email):
-#             flash('Email already registered', 'danger')
-#             return redirect(url_for('auth.register'))
-        
-#         User.create_user(username, email, password, company, role = 'user', disabled=0)
-#         flash('Registration successful. Please login.', 'success')
-#         return redirect(request.referrer or url_for('auth.login'))
-
-#     claims = get_jwt()
-#     user_role = claims.get('roles', [])  
-#     print(f"User Role: {user_role}")
-#     if 'admin' in user_role:
-#         companies = db.customers_list.find()
-#         return render_template('register.html', companies=companies)
-#     elif 'clientAdmin' in user_role:
-#         return render_template('register.html')
-#     else:
-#         flash('Unauthorized access', 'danger')
-#         return redirect(url_for('auth.unauthorized'))
-
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
 def register():
@@ -416,37 +383,6 @@ def user_operations(user_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-# @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
-# @jwt_required()
-# @roles_required('admin')
-# def register_client_admin():
-    
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#         company = request.form.get('company')
-
-#         if not all([username, email, password, company]):
-#             flash('All fields are required', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-
-#         if User.find_by_username(username):
-#             flash('Username already exists', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-            
-#         if User.find_by_email(email):
-#             flash('Email already registered', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-        
-#         User.create_user(username, email, password, company, role='clientAdmin')
-#         flash('Admin registration successful. Please login.', 'success')
-#         return redirect(request.referrer or url_for('auth.login'))
-
-#     companies = db.customers_list.find()
-    
-#     return render_template('register_client_admin.html', companies=companies)
-
 @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
 @jwt_required()
 @roles_required('admin')
@@ -556,32 +492,6 @@ def register_admin():
         return redirect(url_for('auth.login'))
     
     return render_template('register_admin.html') 
-
-# @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
-# @roles_required('admin')
-# def register_inventory():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#         role = request.form.get('role')
-
-#         existing_user = User.find_by_username(username)
-#         existing_email = User.find_by_email(email)
-
-#         if existing_user:
-#             flash('Username already exists', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-            
-#         if existing_email:
-#             flash('Email already registered', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-        
-#         User.create_user(username, email, password, "none", role, disabled=0)
-#         flash('Admin registration successful. Please login.', 'success')
-#         return redirect(request.referrer or url_for('auth.login'))
-    
-#     return render_template('register_inventory.html') 
 
 @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
 @roles_required('admin')

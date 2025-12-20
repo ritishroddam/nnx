@@ -28,12 +28,14 @@ def format_date(date_str):
 @jwt_required()
 def page():
     vehicle_collection = db['vehicle_inventory']
-    vehicles = list(vehicle_collection.find({}, {'SIM': 1, 'imei': 1}))
+    vehicles = vehicle_collection.find({}, {'SIM': 1, 'imei': 1})
+    vehicles = [v for v in vehicles]
     
     sim_to_imei = {v['SIM']: v.get('imei', 'N/A') 
                   for v in vehicles if 'SIM' in v}
     
-    sims = list(collection.find({}))
+    sims = collection.find({})
+    sims = [s for s in sims]
     for sim in sims:
         if sim['MobileNumber'] in sim_to_imei:
             sim['IMEI'] = sim_to_imei[sim['MobileNumber']]
@@ -49,11 +51,13 @@ def page():
 @jwt_required()
 def get_sims_by_status(status):
     try:
-        vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
+        vehicle_sims = db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1})
+        vehicle_sims = [v for v in vehicle_sims]
         allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
         sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
 
-        all_sims = list(collection.find({}))
+        all_sims = collection.find({})
+        all_sims = [s for s in all_sims]
         
         results = []
         for sim in all_sims:
@@ -109,7 +113,8 @@ def search_sims():
     if not search_query:
         return jsonify([])
     
-    vehicle_sims = list(db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1}))
+    vehicle_sims = db['vehicle_inventory'].find({}, {'sim_number': 1, 'imei': 1})
+    vehicle_sims = [v for v in vehicle_sims]
     allocated_sim_numbers = {v['sim_number'] for v in vehicle_sims if 'sim_number' in v}
     sim_to_imei = {v['sim_number']: v.get('imei', 'N/A') for v in vehicle_sims if 'sim_number' in v}
 
@@ -122,7 +127,8 @@ def search_sims():
         ]
     }
     
-    matching_sims = list(collection.find(query))
+    matching_sims = collection.find(query)
+    matching_sims = [s for s in matching_sims]
     
     results = []
     for sim in matching_sims:
@@ -365,12 +371,14 @@ def download_template():
 @jwt_required()
 def download_excel():
     try:
-        sims = list(collection.find({}))
+        sims = collection.find({})
+        sims = [s for s in sims]
         if not sims:
             return jsonify({"error": "No data available"}), 404
 
         vehicle_collection = db['vehicle_inventory']
-        vehicles = list(vehicle_collection.find({}, {'sim_number': 1, 'imei': 1}))
+        vehicles = vehicle_collection.find({}, {'sim_number': 1, 'imei': 1})
+        vehicles = [v for v in vehicles]
         sim_to_imei = {v.get('sim_number'): v.get('imei', 'N/A') for v in vehicles if 'sim_number' in v}
 
 
@@ -511,11 +519,13 @@ def get_sims_paginated():
             ]
 
         total = collection.count_documents(mongo_query)
-        sims = list(collection.find(mongo_query).skip(skip).limit(per_page))
+        sims = collection.find(mongo_query).skip(skip).limit(per_page)
+        sims = [s for s in sims]
         simList = [sim.get('MobileNumber') for sim in sims]
 
         vehicle_collection = db['vehicle_inventory']
-        vehicles = list(vehicle_collection.find({"SIM": {"$in": simList}}, {'SIM': 1, 'IMEI': 1}))
+        vehicles = vehicle_collection.find({"SIM": {"$in": simList}}, {'SIM': 1, 'IMEI': 1})
+        vehicles = [v for v in vehicles]
         sim_to_imei = {v.get('SIM'): v.get('IMEI') for v in vehicles}
 
         processed = []

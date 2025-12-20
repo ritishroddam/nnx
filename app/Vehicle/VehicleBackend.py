@@ -51,7 +51,8 @@ def getVehicleStatus(imei_list):
         utc_now = datetime.now(timezone('UTC'))
         twenty_four_hours_ago = utc_now - timedelta(hours=24)
         
-        results = list(status_collection.find({"_id": {"$in": imei_list}}))
+        results = status_collection.find({"_id": {"$in": imei_list}})
+        results = [r for r in results]
         
         for imei in imei_list:
             data = atlantaAis140Status_collection.find_one({"_id": imei})
@@ -166,7 +167,8 @@ def getStopTimeToday(imei):
             }}
         ]
 
-        result = list(atlanta_collection.aggregate(pipeline))
+        result = atlanta_collection.aggregate(pipeline)
+        result = [item for item in result]
         
         missingImeis = list(set(imei) - {item['imei'] for item in result})
         
@@ -192,7 +194,7 @@ def getStopTimeToday(imei):
                 }}
         ]
 
-        distances = list(atlantaAis140_collection.aggregate(pipeline))
+        distances = [item for item in atlantaAis140_collection.aggregate(pipeline)]
 
         for distance in distances:
             stoppageTime = timedelta(0)
@@ -242,7 +244,7 @@ def build_vehicle_data(inventory_data, distances, stoppage_times, statuses, imei
     status_lookup = {item['imei']: item for item in statuses}
 
     print("[DEBUG] Fetching Vehicle data from atlanta collection")
-    vehicleData = list(atlantaLatest_collection.find({"_id": {"$in": imei_list}}, {"timestamp": 0}))
+    vehicleData = [item for item in atlantaLatest_collection.find({"_id": {"$in": imei_list}}, {"timestamp": 0})]
 
     for imei in imei_list:
         data = atlantaAis140Latest_collection.find_one({"_id": imei})
@@ -314,7 +316,7 @@ def get_vehicles():
 
         inventory_data = get_vehicle_data()
         
-        vehicleInvyImeis = list(inventory_data.distinct("IMEI"))
+        vehicleInvyImeis = [item for item in inventory_data.distinct("IMEI")]
         
         imei_list = getCollectionImeis(vehicleInvyImeis)
         

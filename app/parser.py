@@ -97,12 +97,13 @@ def getData(imei, date_filter, projection, speedThreshold = None):
     if not speedThreshold:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        data = list(db["atlanta"].find(query, projection).sort("date_time", ASCENDING))
+        data = db["atlanta"].find(query, projection).sort("date_time", ASCENDING)
     else:
         query = {"imei": imei, "gps": "A"}
         query.update(date_filter or {})
-        data = list(db["atlanta"].find(query, projection).sort("date_time", DESCENDING))
-        
+        data = db["atlanta"].find(query, projection).sort("date_time", DESCENDING)
+    
+    data = [record for record in data]
     if data:
         return data
 
@@ -132,9 +133,11 @@ def getData(imei, date_filter, projection, speedThreshold = None):
         )
     
     if not speedThreshold:
-        ais140_data = list(ais140_cursor.sort("gps.timestamp", ASCENDING))
+        ais140_data = ais140_cursor.sort("gps.timestamp", ASCENDING)
+        ais140_data = [datum for datum in ais140_data]
     else:
-        ais140_data = list(ais140_cursor.sort("gps.timestamp", DESCENDING))
+        ais140_data = ais140_cursor.sort("gps.timestamp", DESCENDING)
+        ais140_data = [datum for datum in ais140_data]
 
     if not ais140_data:
         return []

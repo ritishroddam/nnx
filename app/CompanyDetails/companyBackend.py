@@ -18,7 +18,8 @@ fs = gridfs.GridFS(db)
 @company_bp.route('/page')
 @jwt_required()
 def page():
-    customers = list(customers_collection.find())
+    customers = customers_collection.find()
+    customers = [customer for customer in customers]
     unique_companies = customers_collection.distinct('Company Name')
     for company in customers:
         company.pop('companyLogo', None)
@@ -269,7 +270,8 @@ def get_customers_paginated():
         skip = (page - 1) * per_page
 
         total = customers_collection.count_documents({})
-        customers = list(customers_collection.find({}).skip(skip).limit(per_page))
+        customers = customers_collection.find({}).skip(skip).limit(per_page)
+        customers = [customer for customer in customers]
 
         for customer in customers:
             customer['_id'] = str(customer['_id'])

@@ -123,7 +123,9 @@ def create_app(config_name='default'):
                     return
                 
             if userRole in ['user']:
-                assignedVehicles = list(db['vehicle_inventory'].find({"AssignedUsers": ObjectId(user_id)}, {"LicensePlateNumber": 1, "_id": 0}))
+                assignedVehicles = db['vehicle_inventory'].find({"AssignedUsers": ObjectId(user_id)}, {"LicensePlateNumber": 1, "_id": 0})
+                assignedVehicles = [vehicle for vehicle in assignedVehicles]
+                
                 if assignedVehicles:
                     assignedVehiclesList = [vehicle['LicensePlateNumber'] for vehicle in assignedVehicles]
                     join_room(f"user_{user_id}")
