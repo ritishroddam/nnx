@@ -631,18 +631,24 @@ function renderGeofenceList() {
     actions.className = "geofence-actions";
 
     const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-    editBtn.className = "edit-btn";
+    editBtn.className = "action-icon edit-icon edit-btn";
+    editBtn.title = "Edit geofence";
+    editBtn.setAttribute('aria-label', 'Edit geofence');
+    editBtn.innerHTML = `<span class="material-icons" aria-hidden="true">edit</span>`;
     editBtn.onclick = () => startEditGeofence(gf);
 
     const viewBtn = document.createElement("button");
-    viewBtn.textContent = "View";
-    viewBtn.className = "view-btn";
+    viewBtn.className = "action-icon view-icon view-btn";
+    viewBtn.title = "View geofence";
+    viewBtn.setAttribute('aria-label', 'View geofence');
+    viewBtn.innerHTML = `<span class="material-icons" aria-hidden="true">visibility</span>`;
     viewBtn.onclick = () => zoomToGeofence(gf);
 
     const delBtn = document.createElement("button");
-    delBtn.textContent = "Delete";
-    delBtn.className = "delete-btn";
+    delBtn.className = "action-icon delete-icon delete-btn";
+    delBtn.title = "Delete geofence";
+    delBtn.setAttribute('aria-label', 'Delete geofence');
+    delBtn.innerHTML = `<span class="material-icons" aria-hidden="true">delete</span>`;
     delBtn.onclick = () => deleteGeofence(gf._id);
 
     actions.appendChild(editBtn);

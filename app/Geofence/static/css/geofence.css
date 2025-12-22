@@ -103,61 +103,94 @@
     transition: all 0.2s ease;
 }
 
-.toggle-btn.active {
-    background: #3b82f6;
-    color: white;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+.geofence-status-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
 }
 
-.toggle-btn:not(.active):hover {
-    background: #e2e8f0;
-    color: #374151;
+.geofence-status-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.dark-mode .toggle-btn:not(.active):hover {
-    background: #404040;
-    color: #e0e0e0;
+.geofence-status-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #dc2626;
+    transition: .3s;
+    border-radius: 20px;
+    border: 2px solid transparent;
 }
 
-.toggle-btn.active .toggle-btn {
-    border-left-color: #28a745;
+.geofence-status-switch input:checked + .geofence-status-slider {
+    background-color: #10b981;
 }
 
-.toggle-btn:has(.toggle-btn.active) {
-    border-right-color: #28a745;
+.geofence-status-slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 4px;
+    background-color: white;
+    transition: .25s;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-.shape-controls {
-    margin-bottom: 20px;
-    padding: 16px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+.geofence-status-switch input:focus + .geofence-status-slider {
+    box-shadow: 0 0 1px #28a745;
 }
 
-.dark-mode .shape-controls {
-    background: #2d2d2d;
-    border-color: #404040;
+.geofence-status-switch input:checked + .geofence-status-slider:before {
+    transform: translateX(18px);
 }
 
-.shape-controls label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #374151;
-    font-weight: 600;
+/* Icon action buttons */
+.geofence-actions .action-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.15s ease, transform 0.12s ease;
+}
+.geofence-actions .action-icon svg {
+    width: 18px;
+    height: 18px;
+}
+.geofence-actions .action-icon:hover {
+    background: rgba(0,0,0,0.06);
+    transform: translateY(-2px);
 }
 
-.dark-mode .shape-controls label {
-    color: #e2e8f0;
+/* Material icon support inside action buttons */
+.geofence-actions .action-icon .material-icons {
+    font-size: 18px;
+    line-height: 1;
+    display: inline-block;
+    color: inherit;
 }
 
-#radiusSlider {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: #e2e8f0;
-    outline: none;
+.geofence-actions .edit-icon { color: #ffc107; }
+.geofence-actions .view-icon { color: #3b82f6; }
+.geofence-actions .delete-icon { color: #ef4444; }
+
+.dark-mode .geofence-actions .action-icon:hover {
+    background: rgba(255,255,255,0.04);
 }
 
 #radiusSlider::-webkit-slider-thumb {
