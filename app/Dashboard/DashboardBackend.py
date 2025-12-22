@@ -1,3 +1,4 @@
+import time
 import traceback
 from unittest import result
 from flask import Blueprint, jsonify, render_template, request
@@ -27,6 +28,8 @@ distance_travelled_collection = db['distanceTravelled']
 vehicle_inventory = db["vehicle_inventory"]
 atlantaAis140Collection = db["atlantaAis140"]
 atlantaAis140LatestCollection = db["atlantaAis140_latest"]
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 def format_seconds(seconds):
     if seconds >= 86400:
@@ -82,8 +85,15 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
         "30days": timedelta(days=30),
     }
     delta = range_map.get(range_param, timedelta(days=1))
-    start_of_day = utc_now - delta
-    end_of_day = utc_now
+    
+    if delta >= timedelta(days=1):
+        ist_now = datetime.now(IST)
+        start_of_day = ist_now - delta
+        start_of_day = start_of_day.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+        end_of_day = ist_now.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(timezone.utc)
+    else:
+        start_of_day = utc_now - delta
+        end_of_day = utc_now
 
     vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
     imeis = getCollectionImeis(vehicleInvyImeis)
