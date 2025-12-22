@@ -666,10 +666,9 @@ function renderGeofenceList() {
 
     content.appendChild(headerDiv);
     content.appendChild(metaDiv);
-
+    content.appendChild(actions);
+    
     li.appendChild(content);
-    // place actions to the right of the list item so they occupy the end space
-    li.appendChild(actions);
     list.appendChild(li);
   });
 }
