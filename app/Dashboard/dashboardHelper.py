@@ -54,79 +54,54 @@ def _build_time_record(imei, fromDate, toDate):
     return None
 
 def getDistanceBasedOnTime(imeis, fromDate, toDate):
+    pool = eventlet.GreenPool(size=10)
     distances = []
-    for imei in imeis:
-        imeiStartData = atlanta_collection.find_one(
-            {
-                "imei": imei,
-                "date_time": {
-                    "$gte": fromDate,
-                    "$lt": toDate
-                },
-            },
-            sort=[("date_time", ASCENDING)]
+
+    def worker(imei):
+        start = atlanta_collection.find_one(
+            {"imei": imei, "date_time": {"$gte": fromDate, "$lt": toDate}},
+            sort=[("date_time", ASCENDING)],
         )
-        
-        if imeiStartData:
-            imeiEndData = atlanta_collection.find_one(
-                {
-                    "imei": imei,
-                    "date_time": {
-                        "$gte": fromDate,
-                        "$lt": toDate
-                    },
-                },
-                sort=[("date_time", DESCENDING)]
+        if start:
+            end = atlanta_collection.find_one(
+                {"imei": imei, "date_time": {"$gte": fromDate, "$lt": toDate}},
+                sort=[("date_time", DESCENDING)],
             )
-            distance = [{
+            return {
                 "imei": imei,
-                "first_odometer": imeiStartData.get("odometer", 0),
-                "last_odometer": imeiEndData.get("odometer", 0)
-            }]
-            distances.extend(distance)
-            continue
-        else:
-            imeiStartData = atlantaAis140Collection.find_one(
-                {
-                    "imei": imei,
-                    "gps.timestamp": {
-                        "$gte": fromDate,
-                        "$lt": toDate
-                    },
-                },
-                sort=[("gps.timestamp", ASCENDING)]
-            )
-            
-            if not imeiStartData:
-                continue
-            
-            imeiEndData = atlantaAis140Collection.find_one(
-                {
-                    "imei": imei,
-                    "gps.timestamp": {
-                        "$gte": fromDate,
-                        "$lt": toDate
-                    },
-                },
-                sort=[("gps.timestamp", DESCENDING)]
-            )
-            
-            distance = [{
-                "imei": imei,
-                "first_odometer": imeiStartData.get("telemetry", {}).get("odometer", 0),
-                "last_odometer": imeiEndData.get("telemetry", {}).get("odometer", 0)
-            }]
-            distances.extend(distance)
+                "first_odometer": start.get("odometer", 0),
+                "last_odometer": end.get("odometer", 0),
+            }
+
+        start = atlantaAis140Collection.find_one(
+            {"imei": imei, "gps.timestamp": {"$gte": fromDate, "$lt": toDate}},
+            sort=[("gps.timestamp", ASCENDING)],
+        )
+        if not start:
+            return None
+        end = atlantaAis140Collection.find_one(
+            {"imei": imei, "gps.timestamp": {"$gte": fromDate, "$lt": toDate}},
+            sort=[("gps.timestamp", DESCENDING)],
+        )
+        return {
+            "imei": imei,
+            "first_odometer": start.get("telemetry", {}).get("odometer", 0),
+            "last_odometer": end.get("telemetry", {}).get("odometer", 0),
+        }
+
+    for result in pool.imap(worker, imeis):
+        if result:
+            distances.append(result)
 
     return distances
 
 def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
+    pool = eventlet.GreenPool(size=10)
     speed_data = []
-    
-    for imei in imeis:
+
+    def worker(imei):
         max_speed = 0.00
         speeds = []
-            
         data = list(atlanta_collection.find(
             {
                 "imei": imei,
@@ -134,7 +109,6 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
                 "ignition": "1",
             }, {"_id": 0, "speed": 1}
         ))
-        
         if not data:
             data = list(atlantaAis140Collection.find(
                 {
@@ -143,36 +117,26 @@ def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
                     "telemetry.ignition": 1,
                 }, {"_id": 0, "telemetry.speed": 1}
             ))
-            
             for datum in data:
-                if float(datum.get("telemetry", {}).get("speed", 0)) > max_speed:
-                    max_speed = float(datum.get("telemetry", {}).get("speed", 0))
-                    
-                if float(datum.get("telemetry", {}).get("speed", 0)) >= 0:
-                    speeds.append(float(datum.get("telemetry", {}).get("speed", 0)))
-            
-            averageSpeed = sum(speeds) / len(speeds) if speeds else 0.00
-            
-            speed_data.append({
-                "imei": imei,
-                "max_speed": max_speed,
-                "avg_speed": averageSpeed
-            })
-            continue
-        
-        for datum in data:
-            if float(datum.get("speed", 0)) > max_speed:
-                max_speed = float(datum.get("speed", 0))
-            if float(datum.get("speed", 0)) >= 0:
-                speeds.append(float(datum.get("speed", 0)))
-        
-        averageSpeed = sum(speeds) / len(speeds) if speeds else 0.00
-        
-        speed_data.append({
-            "imei": imei,
-            "max_speed": max_speed,
-            "avg_speed": averageSpeed
-        })
+                val = float(datum.get("telemetry", {}).get("speed", 0) or 0)
+                if val > max_speed:
+                    max_speed = val
+                if val >= 0:
+                    speeds.append(val)
+        else:
+            for datum in data:
+                val = float(datum.get("speed", 0) or 0)
+                if val > max_speed:
+                    max_speed = val
+                if val >= 0:
+                    speeds.append(val)
+
+        avg_speed = sum(speeds) / len(speeds) if speeds else 0.00
+        return {"imei": imei, "max_speed": max_speed, "avg_speed": avg_speed}
+
+    for result in pool.imap(worker, imeis):
+        if result:
+            speed_data.append(result)
 
     return speed_data
 
