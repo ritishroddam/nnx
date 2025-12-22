@@ -1,4 +1,3 @@
-import traceback
 from pymongo import ASCENDING, DESCENDING
 from datetime import datetime, timedelta, timezone
 import eventlet

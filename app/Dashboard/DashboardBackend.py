@@ -1,6 +1,3 @@
-import time
-import traceback
-from unittest import result
 from flask import Blueprint, jsonify, render_template, request
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
@@ -434,7 +431,6 @@ def get_vehicle_range_data():
         return jsonify(vehicle_data), 200
     except Exception as e:
         print(f"🚨 Error fetching vehicle distances: {e}")
-        print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 @dashboard_bp.route('/get_status_data', methods=['GET'])
