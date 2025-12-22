@@ -17,15 +17,35 @@ async function geofenceMapFunction() {
     return;
   }
 
+  // pick mapId based on current theme (dark / light)
+  const darkMode = document.body.classList.contains("dark-mode");
+  const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
+
   const { Map } = await google.maps.importLibrary("maps");
   await google.maps.importLibrary("geometry");
 
   await google.maps.importLibrary("places");
 
+  // clear previous overlays/draw if any (safe re-init)
+  try {
+    if (window.geofenceOverlays) {
+      window.geofenceOverlays.forEach(o => {
+        try { if (o && o.setMap) o.setMap(null); } catch(e){}
+      });
+      window.geofenceOverlays = [];
+    }
+    if (editOverlay) { try { editOverlay.setMap(null); } catch (e) {} editOverlay = null; }
+    if (window.searchMarker) { try { window.searchMarker.setMap(null); } catch(e){} window.searchMarker = null; }
+    if (draw && typeof draw.clear === "function") { try { draw.clear(); } catch(e){} }
+  } catch (e) {
+    console.warn("Cleanup before geofence map init failed:", e);
+  }
+
   geofenceMap = new Map(mapElement, {
     center: { lat: 20.5937, lng: 78.9629 },
     zoom: 5,
     disableDoubleClickZoom: true,
+    mapId: mapId,
   });
 
   const TerraNS = window.terraDraw || window.TerraDraw || {};
@@ -805,3 +825,24 @@ window.onload = async function () {
   try { await backgroundMap(); } catch (e) {}
   await geofenceMapFunction();
 };
+
+(function attachThemeListener() {
+  const themeToggle = document.getElementById("theme-toggle");
+  if (!themeToggle) return;
+  themeToggle.addEventListener("click", () => {
+    setTimeout(async () => {
+      try {
+        if (draw && typeof draw.clear === "function") {
+          try { draw.clear(); } catch(e){}
+        }
+        if (window.geofenceOverlays) {
+          window.geofenceOverlays.forEach(o => { try { if (o && o.setMap) o.setMap(null); } catch(e){} });
+          window.geofenceOverlays = [];
+        }
+        await geofenceMapFunction();
+      } catch (e) {
+        console.error("Failed to reinitialize geofence map on theme change:", e);
+      }
+    }, 100);
+  });
+})();
