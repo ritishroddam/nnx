@@ -484,11 +484,12 @@ input:checked .switch::after {
 #geofenceList li {
     padding: 12px 5px;
     margin-bottom: 10px;
-    border-radius: 6px;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     transition: all 0.2s;
+    box-shadow: 0 2px  8px rgba(0, 0, 0, 0.1);
 }
 
 .dark-mode #geofenceList li {
