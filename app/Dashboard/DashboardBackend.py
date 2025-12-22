@@ -90,7 +90,7 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
         ist_now = datetime.now(IST)
         start_of_day = ist_now - delta
         start_of_day = start_of_day.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
-        end_of_day = ist_now.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(timezone.utc)
+        end_of_day = utc_now
     else:
         start_of_day = utc_now - delta
         end_of_day = utc_now
