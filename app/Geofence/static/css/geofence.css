@@ -418,11 +418,11 @@ input:checked .switch::after {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #999;
+    border: 1px solid #ccc;
 }
 
 .dark-mode .map-container {
-    border: 1px solid #e8ecef;
+    border: 1px solid #ccc;
 }
 
 #geofenceMap {
