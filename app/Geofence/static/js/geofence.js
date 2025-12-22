@@ -634,21 +634,30 @@ function renderGeofenceList() {
     editBtn.className = "action-icon edit-icon edit-btn";
     editBtn.title = "Edit geofence";
     editBtn.setAttribute('aria-label', 'Edit geofence');
-    editBtn.innerHTML = `<span class="material-icons" aria-hidden="true">edit</span>`;
+    editBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+      </svg>`;
     editBtn.onclick = () => startEditGeofence(gf);
 
     const viewBtn = document.createElement("button");
     viewBtn.className = "action-icon view-icon view-btn";
     viewBtn.title = "View geofence";
     viewBtn.setAttribute('aria-label', 'View geofence');
-    viewBtn.innerHTML = `<span class="material-icons" aria-hidden="true">visibility</span>`;
+    viewBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 6.5C7 6.5 2.73 9.61 1 13c1.73 3.39 6 6.5 11 6.5s9.27-3.11 11-6.5C21.27 9.61 17 6.5 12 6.5zm0 9a3 3 0 110-6 3 3 0 010 6z"/>
+      </svg>`;
     viewBtn.onclick = () => zoomToGeofence(gf);
 
     const delBtn = document.createElement("button");
     delBtn.className = "action-icon delete-icon delete-btn";
     delBtn.title = "Delete geofence";
     delBtn.setAttribute('aria-label', 'Delete geofence');
-    delBtn.innerHTML = `<span class="material-icons" aria-hidden="true">delete</span>`;
+    delBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </svg>`;
     delBtn.onclick = () => deleteGeofence(gf._id);
 
     actions.appendChild(editBtn);
