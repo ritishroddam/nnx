@@ -121,6 +121,62 @@ def getDistanceBasedOnTime(imeis, fromDate, toDate):
 
     return distances
 
+def getSpeedDataBasedOnTime(imeis, fromDate, toDate):
+    speed_data = []
+    
+    for imei in imeis:
+        max_speed = 0.00
+        speeds = []
+            
+        data = list(atlanta_collection.find(
+            {
+                "imei": imei,
+                "date_time": {"$gte": fromDate, "$lt": toDate},
+                "ignition": "1",
+            }, {"_id": 0, "speed": 1}
+        ))
+        
+        if not data:
+            data = list(atlantaAis140Collection.find(
+                {
+                    "imei": imei,
+                    "gps.timestamp": {"$gte": fromDate, "$lt": toDate},
+                    "telemetry.ignition": 1,
+                }, {"_id": 0, "telemetry.speed": 1}
+            ))
+            
+            for datum in data:
+                if float(datum.get("telemetry", {}).get("speed", 0)) > max_speed:
+                    max_speed = float(datum.get("telemetry", {}).get("speed", 0))
+                    
+                if float(datum.get("telemetry", {}).get("speed", 0)) >= 0:
+                    speeds.append(float(datum.get("telemetry", {}).get("speed", 0)))
+            
+            averageSpeed = sum(speeds) / len(speeds) if speeds else 0.00
+            
+            speed_data.append({
+                "imei": imei,
+                "max_speed": max_speed,
+                "avg_speed": averageSpeed
+            })
+            continue
+        
+        for datum in data:
+            if float(datum.get("speed", 0)) > max_speed:
+                max_speed = float(datum.get("speed", 0))
+            if float(datum.get("speed", 0)) >= 0:
+                speeds.append(float(datum.get("speed", 0)))
+        
+        averageSpeed = sum(speeds) / len(speeds) if speeds else 0.00
+        
+        speed_data.append({
+            "imei": imei,
+            "max_speed": max_speed,
+            "avg_speed": averageSpeed
+        })
+
+    return speed_data
+
 def getTimeAnalysisBasedOnTime(imeis, fromDate, toDate):
     pool = eventlet.GreenPool(size=10)
     timeAnalysisData = []
