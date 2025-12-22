@@ -758,8 +758,8 @@ input:checked .slider:before {
 .geofence-status-switch {
     position: relative;
     display: inline-block;
-    width: 52px;
-    height: 24px;
+    width: 42px;
+    height: 22px;
 }
 
 .geofence-status-switch input {
