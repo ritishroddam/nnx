@@ -329,7 +329,6 @@ input:checked .switch::after {
     gap: 16px;
     padding: 14px 16px;
     margin-bottom: 12px;
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
     border-radius: 10px;
     border: 1px solid #e6eef8;
     box-shadow: 0 6px 18px rgba(16,24,40,0.04);
@@ -338,7 +337,6 @@ input:checked .switch::after {
 }
 
 .dark-mode .geofence-list-item {
-    background: linear-gradient(180deg, #1e1e1e, #232323);
     border-color: #2f2f2f;
     box-shadow: none;
     color: #e6eef8;
