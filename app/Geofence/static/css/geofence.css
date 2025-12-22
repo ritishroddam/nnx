@@ -154,7 +154,6 @@
     transform: translateX(18px);
 }
 
-/* Icon action buttons */
 .geofence-actions .action-icon {
     width: 36px;
     height: 36px;
@@ -168,14 +167,17 @@
     background: transparent;
     transition: background 0.15s ease, transform 0.12s ease;
 }
+
 .geofence-actions .action-icon svg {
     width: 18px;
     height: 18px;
 }
+
 .geofence-actions .action-icon:hover {
     background: rgba(0,0,0,0.06);
     transform: translateY(-2px);
 }
+
 .geofence-actions .edit-icon svg { color: #ffc107; }
 .geofence-actions .view-icon svg { color: #3b82f6; }
 .geofence-actions .delete-icon svg { color: #ef4444; }
@@ -358,6 +360,14 @@ input:checked .switch::after {
     flex: 1;
 }
 
+/* Ensure content occupies left space and actions are aligned to the right */
+.geofence-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
 .geofence-item-header {
     display: flex;
     justify-content: space-between;
@@ -390,7 +400,9 @@ input:checked .switch::after {
 .geofence-actions {
     display: flex;
     gap: 8px;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
+    margin-left: 12px;
 }
 
 .geofence-actions button {
