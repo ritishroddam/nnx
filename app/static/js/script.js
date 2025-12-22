@@ -242,7 +242,34 @@ async function loadNotifications() {
                 endpoint = "main_power_off";
               }
 
-              window.location.href = `/alerts/?alert_id=${alert.id}&alert_type=${encodeURIComponent(endpoint)}&from_notification=true`;
+              // If notification includes a timestamp, open alerts page with a narrow
+              // date range around that timestamp so the specific alert is loaded
+              // and can be highlighted by the alerts page.
+              try {
+                const alertDate = alert.date_time ? new Date(alert.date_time) : null;
+                if (alertDate && !isNaN(alertDate.getTime())) {
+                  const start = new Date(alertDate);
+                  start.setMinutes(start.getMinutes() - 1);
+                  const end = new Date(alertDate);
+                  end.setMinutes(end.getMinutes() + 1);
+
+                  const formatForInput = (d) => {
+                    const offset = d.getTimezoneOffset() * 60000;
+                    return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+                  };
+
+                  const startStr = encodeURIComponent(formatForInput(start));
+                  const endStr = encodeURIComponent(formatForInput(end));
+
+                  window.location.href = `/alerts/?alert_id=${encodeURIComponent(alert.id)}&alert_type=${encodeURIComponent(endpoint)}&from_notification=true&startDate=${startStr}&endDate=${endStr}`;
+                  return;
+                }
+              } catch (err) {
+                console.warn('Failed to parse alert date for redirect', err);
+              }
+
+              // Fallback: open alerts page without date params
+              window.location.href = `/alerts/?alert_id=${encodeURIComponent(alert.id)}&alert_type=${encodeURIComponent(endpoint)}&from_notification=true`;
             }
           });
 
