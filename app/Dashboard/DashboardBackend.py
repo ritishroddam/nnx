@@ -10,7 +10,7 @@ from app.database import db
 from app.models import User
 from app.utils import roles_required, get_vehicle_data
 from app.parser import atlantaAis140ToFront, getCollectionImeis
-from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime, getTimeAnalysisBasedOnTime, _process_vehicle_snapshot
+from app.Dashboard.dashboardHelper import getDistanceBasedOnTime, getSpeedDataBasedOnTime, getTimeAnalysisBasedOnTime
 from app.geocoding import safe_geocode
 
 
@@ -70,7 +70,121 @@ def _empty_status_counters():
         'noGpsVehicles': 0,
         'totalVehicles': 0,
     }
-    
+
+def _process_vehicle_snapshot(
+    imei,
+    latest_dict,
+    distance_dict,
+    speed_dict,
+    time_dict,
+    vehicle_inventory,
+    twenty_four_hours_ago,
+    include_location,
+):
+    latest = latest_dict.get(imei)
+    if not latest:
+        return None, _empty_status_counters()
+
+    distance = distance_dict.get(imei, {})
+    speeds = speed_dict.get(imei, {})
+    time_records = time_dict.get(imei, [])
+
+    vehicle_doc = vehicle_inventory.find_one({"IMEI": imei}) or {}
+
+    driving_time = timedelta()
+    idle_time = timedelta()
+    number_of_stops = 0
+    prev_ignition = None
+    prev_time = None
+
+    for record in time_records:
+        curr_time = record.get("date_time")
+        if not curr_time or (prev_time and curr_time < prev_time):
+            continue
+
+        ignition = record.get("ignition")
+        speed_val = float(record.get("speed", 0.0))
+
+        if prev_time is not None:
+            delta_t = curr_time - prev_time
+            if prev_ignition == "1" and speed_val > 0:
+                driving_time += delta_t
+            elif prev_ignition == "1" and speed_val == 0:
+                idle_time += delta_t
+
+        if prev_ignition == "0" and ignition == "1":
+            number_of_stops += 1
+
+        prev_ignition = ignition
+        prev_time = curr_time
+
+    last_update = latest.get("date_time")
+    is_offline = last_update is None or last_update < twenty_four_hours_ago
+    try:
+        current_speed = float(latest.get("speed", 0))
+    except (ValueError, TypeError):
+        current_speed = 0.0
+
+    ignition_state = str(latest.get("ignition", "0"))
+    main_power = str(latest.get("main_power", "1"))
+    gps_ok = bool(True if latest.get("gps") in ["A"] else False)
+
+    counters_delta = _empty_status_counters()
+    counters_delta["totalVehicles"] += 1
+    if is_offline:
+        counters_delta["offlineVehicles"] += 1
+    else:
+        if ignition_state == "1" and current_speed > 0:
+            counters_delta["runningVehicles"] += 1
+        elif ignition_state == "1" and current_speed == 0:
+            counters_delta["idleVehicles"] += 1
+        elif ignition_state == "0" and current_speed == 0:
+            counters_delta["parkedVehicles"] += 1
+
+    if not is_offline and ignition_state == "1" and 40 <= current_speed < 60:
+        counters_delta["speedVehicles"] += 1
+    if not is_offline and ignition_state == "1" and current_speed >= 60:
+        counters_delta["overspeedVehicles"] += 1
+    if main_power == "0":
+        counters_delta["disconnectedVehicles"] += 1
+    if not gps_ok:
+        counters_delta["noGpsVehicles"] += 1
+
+    location_value = None
+    if include_location:
+        try:
+            location_value = safe_geocode(latest.get("latitude"), latest.get("longitude"))
+        except Exception:
+            location_value = None
+
+    vehicle_info = {
+        "imei": imei,
+        "registration": vehicle_doc.get("LicensePlateNumber", "N/A"),
+        "VehicleType": vehicle_doc.get("VehicleType", "N/A"),
+        "CompanyName": vehicle_doc.get("CompanyName", "N/A"),
+        "location": location_value,
+        "latitude": latest.get("latitude", "N/A"),
+        "longitude": latest.get("longitude", "N/A"),
+        "speed": latest.get("speed", "0.0"),
+        "ignition": latest.get("ignition", "0"),
+        "gsm": latest.get("gsm_sig", "0"),
+        "sos": latest.get("sos", "0"),
+        "main_power": main_power,
+        "gps": gps_ok,
+        "odometer": latest.get("odometer", "N/A"),
+        "date": latest.get("date"),
+        "time": latest.get("time"),
+        "distance": round(distance.get("distanceTravelled", 0), 2),
+        "max_speed": speeds.get("max_speed", 0),
+        "avg_speed": round(speeds.get("avg_speed", 0), 2),
+        "driving_time": format_seconds(driving_time.total_seconds()),
+        "idle_time": format_seconds(idle_time.total_seconds()),
+        "number_of_stops": number_of_stops,
+        "is_offline": is_offline,
+        "last_updated": format_last_updated(latest.get("date"), latest.get("time")),
+    }
+    return vehicle_info, counters_delta
+
 def build_vehicle_snapshot(range_param="1day", status_filter=None, include_location=True):
     utc_now = datetime.now(timezone.utc)
     range_map = {
