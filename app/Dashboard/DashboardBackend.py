@@ -272,7 +272,7 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
         is_offline = vehicle_info["is_offline"]
         main_power = vehicle_info["main_power"]
         gps_ok = vehicle_info["gps"]
-        vehicle_data_info = vehicle_inventory = db["vehicle_inventory"].find_one({"IMEI": imei}) or {}
+        vehicle_data_info = vehicle_inventory.find_one({"IMEI": imei}) or {}
         if vehicle_data_info:
             slowSpeedThreshold = int(vehicle_data_info.get("slowSpeed", "40"))
             normalSpeedThreshold = int(vehicle_data_info.get("normalSpeed", "60"))
