@@ -1,0 +1,80 @@
+/* Lightweight skeleton styles for dashboard loaders */
+
+/* Generic skeleton box */
+.skeleton-box,
+.cards-skeleton,
+.pie-chart-skeleton,
+.devices-skeleton,
+.table-skeleton,
+.status-skeleton,
+.weather-skeleton,
+.map-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 37%, #f0f0f0 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Cards skeleton layout */
+#cardsSkeleton {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+#cardsSkeleton .card-skeleton-box,
+.card-skeleton-box {
+  width: 100%;
+  height: 78px;
+  border-radius: 8px;
+}
+
+/* Status skeleton rows */
+#statusSkeleton { margin-bottom: 12px; }
+#statusSkeleton .status-row-skeleton { display:flex; gap:12px; }
+.status-card-skel { flex:1; height:72px; border-radius:8px; }
+
+/* Pie skeleton */
+#pieChartSkeleton { width: 220px; height: 220px; border-radius:50%; position:relative; }
+#pieChartSkeleton .skeleton-center { position:absolute; left:50%; top:50%; width:86px; height:86px; transform:translate(-50%,-50%); border-radius:50%; }
+#pieChartSkeleton .skeleton-arc { position:absolute; width:100%; height:100%; border-radius:50%; }
+
+/* Devices skeleton */
+#devicesSkeleton { width:100%; height:180px; border-radius:8px; margin-bottom:8px; }
+
+/* Table skeleton */
+#tableSkeleton { width:100%; padding:8px 0; }
+#tableSkeleton .table-row-skel { height:42px; margin:6px 0; border-radius:6px; }
+
+/* Map & weather skeletons */
+#mapSkeleton { width:100%; height:160px; border-radius:8px; margin-bottom:8px; }
+#weatherSkeleton { width:100%; height:120px; border-radius:8px; margin-bottom:8px; }
+
+/* Hide skeletons when loaded via .loaded class */
+.cards-skeleton.loaded,
+.status-skeleton.loaded,
+.pie-chart-skeleton.loaded,
+.devices-skeleton.loaded,
+.table-skeleton.loaded,
+.map-skeleton.loaded,
+.weather-skeleton.loaded {
+  display: none !important;
+}
+
+/* Provide small helper skeleton elements */
+.cards-skeleton .card-skeleton-box { background: #f2f2f2; }
+
+/* ensure skeletons don't interfere with layout spacing */
+.cards { margin-bottom: 12px; }
+
+/* dark-mode adjustments */
+body.dark-mode .cards-skeleton,
+body.dark-mode .status-skeleton,
+body.dark-mode .devices-skeleton,
+body.dark-mode .table-skeleton,
+body.dark-mode .map-skeleton,
+body.dark-mode .weather-skeleton { background: linear-gradient(90deg,#3a3a3a 25%, #2f2f2f 37%, #3a3a3a 63%); }

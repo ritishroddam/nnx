@@ -3,6 +3,7 @@
 {% block head %}
 <title>Dashboard</title>
 <link rel="stylesheet" href="{{ url_for('Dashboard.static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('Dashboard.static', filename='css/dashboard.skeleton.css') }}">
 <link rel="stylesheet" href="{{ url_for('Dashboard.static', filename='css/dashboard.responsive.css') }}">
 <script defer src="{{ url_for('Dashboard.static', filename='js/dashboard.js') }}"></script>
 <link rel="stylesheet"
@@ -24,6 +25,9 @@ Dashboard
 {% block block_container %}
 <section class="dashboard-main-layout">
   <div class="dashboard-content">
+    <!-- Cards skeleton (visible until counts load) -->
+    <div id="cardsSkeleton" class="cards-skeleton"></div>
+
     {% if role == 'admin' %}
     <div class="cards">
       <div class="card" id="card1">
@@ -51,6 +55,9 @@ Dashboard
   <span>Configured Vehicle's</span>
   <hr>
 </div>
+
+<!-- Status skeleton (shown until status counts are loaded) -->
+<div id="statusSkeleton" class="status-skeleton"></div>
 
 <div class="status-container">
   <div class="status-row-container">
@@ -127,6 +134,8 @@ Dashboard
       </div>
 
       <div id="vehicleSetion">
+        <!-- devices skeleton -->
+        <div id="devicesSkeleton" class="devices-skeleton"></div>
         <div class="card-chart">
           <canvas id="devicesChart"></canvas>
         </div>
@@ -150,6 +159,9 @@ Dashboard
           <button class="range-btn" data-range="14days">14 days</button>
           <button class="range-btn" data-range="30days">30 days</button> -->
         </div>
+        <!-- table skeleton (until vehicle rows load) -->
+        <div id="tableSkeleton" class="table-skeleton"></div>
+
         <button id="downloadExcelBtn" class="btn btn-success excel-btn" style="margin-bottom: 10px;" title="Download Excel">
         <i class="material-symbols-outlined">file_save</i>
         </button>
@@ -185,6 +197,8 @@ Dashboard
       <div id="date"></div>
       </div>
     </div>
+      <!-- weather skeleton -->
+      <div id="weatherSkeleton" class="weather-skeleton"></div>
       <div class="weather-container">
         <h1>Weather</h1>
         <div id="weather">
@@ -193,6 +207,8 @@ Dashboard
       </div>
     <div class="traffic-container" id="traffic-container">
       <h3>Live Traffic Updates</h3>
+      <!-- map skeleton -->
+      <div id="mapSkeleton" class="map-skeleton"></div>
       <div id="map"></div>
     </div>
   </aside>

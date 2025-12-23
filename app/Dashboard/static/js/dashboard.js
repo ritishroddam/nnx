@@ -30,6 +30,13 @@ function safeEl(id) {
   return document.getElementById(id);
 }
 
+function setSkeletonLoaded(id, loaded = true) {
+  const el = safeEl(id);
+  if (!el) return;
+  if (loaded) el.classList.add('loaded');
+  else el.classList.remove('loaded');
+}
+
 function formatStatusTime(seconds) {
   if (!Number.isFinite(seconds)) return "0s";
   if (seconds >= 86400) {
@@ -531,6 +538,8 @@ async function fetchDistanceTravelledData() {
     devicesChart.data.labels = data.labels || [];
     devicesChart.data.datasets[0].data = data.distances || [];
     devicesChart.update();
+    // hide devices skeleton
+    setSkeletonLoaded('devicesSkeleton', true);
   } catch (error) {
     console.error("Error fetching distance data:", error);
   }
@@ -653,6 +662,8 @@ async function initMap() {
       trafficLayer.setMap(map);
       marker = new AdvancedMarkerElement({ position: location, map, title: "Your Location" });
 
+      // hide map skeleton
+      setSkeletonLoaded('mapSkeleton', true);
       getWeather(location.lat, location.lng);
     };
 
@@ -704,6 +715,8 @@ function displayWeather(data) {
                       </div>
               `;
   weatherDiv.innerHTML = weatherHTML;
+  // hide weather skeleton
+  setSkeletonLoaded('weatherSkeleton', true);
 }
 
 function getWeather(lat, lon) {
@@ -738,6 +751,8 @@ async function fetchDashboardData() {
       cards[1].querySelector("h3").textContent = data.sims || 0;
       cards[2].querySelector("h3").textContent = data.customers || 0;
     }
+    // hide cards skeleton
+    setSkeletonLoaded('cardsSkeleton', true);
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
     displayFlashMessage("Map fallback failed. Map is unavailable.", "warning");
@@ -758,6 +773,8 @@ async function fetchStatusData() {
     setText("disconnected-vehicles-count", `${data.disconnectedVehicles} / ${data.totalVehicles}`);
 
     window.statusCounts = data;
+    // hide status skeleton
+    setSkeletonLoaded('statusSkeleton', true);
   } catch (error) {
     console.error("Error fetching status data:", error);
   }
@@ -900,6 +917,8 @@ async function fetchVehicleDistances(range = "1day") {
     });
 
     afterTableRender();
+    // hide table skeleton
+    setSkeletonLoaded('tableSkeleton', true);
   } catch (error) {
     console.error("Error fetching vehicle distances:", error);
   }
