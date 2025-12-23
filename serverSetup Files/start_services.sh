@@ -12,7 +12,7 @@ tmux new -d -s cordonnx
 
 # Gunicorn in window 0
 tmux send-keys -t cordonnx:0 "source venv/bin/activate" C-m
-tmux send-keys -t cordonnx:0 "CELERY_BROKER_URL=redis://localhost:6379/0 CELERY_RESULT_BACKEND=redis://localhost:6379/0 exec ./venv/bin/gunicorn run:app -k eventlet -w 1 --worker-connections 1000 --bind 0.0.0.0:5000" C-m
+tmux send-keys -t cordonnx:0 "CELERY_BROKER_URL=redis://localhost:6379/0 CELERY_RESULT_BACKEND=redis://localhost:6379/0 exec ./venv/bin/gunicorn run:app -k eventlet -w 1 --worker-connections 1000 --timeout 180 --bind 0.0.0.0:5000" C-m
 
 # Celery in window 1
 tmux new-window -t cordonnx
