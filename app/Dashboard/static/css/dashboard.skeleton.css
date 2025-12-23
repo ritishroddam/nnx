@@ -1,6 +1,3 @@
-/* Lightweight skeleton styles for dashboard loaders */
-
-/* Generic skeleton box */
 .skeleton-box,
 .cards-skeleton,
 .pie-chart-skeleton,
@@ -20,7 +17,6 @@
   100% { background-position: -100% 0; }
 }
 
-/* Cards skeleton layout */
 #cardsSkeleton {
   display: flex;
   gap: 16px;
@@ -33,17 +29,14 @@
   border-radius: 8px;
 }
 
-/* Status skeleton rows */
 #statusSkeleton { margin-bottom: 12px; }
 #statusSkeleton .status-row-skeleton { display:flex; gap:12px; }
 .status-card-skel { flex:1; height:72px; border-radius:8px; }
 
-/* Pie skeleton */
-/* Pie skeleton - show as a semi-circle loader (top half) */
 #pieChartSkeleton {
   width: 240px;
-  height: 120px; /* half the circle height to create a semi-circle */
-  border-radius: 120px 120px 0 0; /* rounded top corners */
+  height: 120px; 
+  border-radius: 120px 120px 0 0; 
   position: relative;
   overflow: hidden;
   background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 37%, #f0f0f0 63%);
@@ -51,7 +44,6 @@
   animation: shimmer 1.2s linear infinite;
 }
 
-/* Decorative inner arc to simulate the doughnut hollow */
 #pieChartSkeleton::before {
   content: "";
   position: absolute;
@@ -64,7 +56,6 @@
   background: rgba(255,255,255,0.5);
 }
 
-/* small center/label placeholder below the semi-circle */
 #pieChartSkeleton .skeleton-center {
   position: absolute;
   left: 50%;
@@ -76,14 +67,11 @@
   background: rgba(255,255,255,0.6);
 }
 
-/* hide original full-circle arc elements if present */
 #pieChartSkeleton .skeleton-arc { display: none; }
 
-/* Devices skeleton */
-/* Card-chart / devices skeleton: match card-chart height and provide subtle lines */
 #devicesSkeleton {
   width: 100%;
-  height: 240px; /* larger area to match chart canvas */
+  height: 240px; 
   border-radius: 8px;
   margin-bottom: 8px;
   position: relative;
@@ -92,7 +80,6 @@
   animation: shimmer 1.2s linear infinite;
 }
 
-/* horizontal guide lines to mimic chart grid */
 #devicesSkeleton::before,
 #devicesSkeleton::after {
   content: "";
@@ -102,18 +89,16 @@
   height: 1px;
   background: rgba(255,255,255,0.6);
 }
+
 #devicesSkeleton::before { top: 40%; }
 #devicesSkeleton::after { top: 70%; }
 
-/* Table skeleton */
 #tableSkeleton { width:100%; padding:8px 0; }
 #tableSkeleton .table-row-skel { height:42px; margin:6px 0; border-radius:6px; }
 
-/* Map & weather skeletons */
 #mapSkeleton { width:100%; height:160px; border-radius:8px; margin-bottom:8px; }
 #weatherSkeleton { width:100%; height:120px; border-radius:8px; margin-bottom:8px; }
 
-/* Hide skeletons when loaded via .loaded class */
 .cards-skeleton.loaded,
 .status-skeleton.loaded,
 .pie-chart-skeleton.loaded,
@@ -124,13 +109,10 @@
   display: none !important;
 }
 
-/* Provide small helper skeleton elements */
 .cards-skeleton .card-skeleton-box { background: #f2f2f2; }
 
-/* ensure skeletons don't interfere with layout spacing */
 .cards { margin-bottom: 12px; }
 
-/* dark-mode adjustments */
 body.dark-mode .cards-skeleton,
 body.dark-mode .status-skeleton,
 body.dark-mode .devices-skeleton,

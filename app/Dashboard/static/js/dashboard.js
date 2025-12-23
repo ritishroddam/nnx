@@ -1,14 +1,11 @@
-/* -------------------------
-   Top-level state & config
-   -------------------------*/
 const apiKey = "365ddab9f6e0165c415605dd9f1178f8";
 let currentSort = { column: "distance", direction: "desc" };
 let currentStatusFilter = null;
 let statusPopupTableData = [];
 let currentRange = "1day";
 
-let isDarkMode = false;          // mutable, updated on init & toggle
-let centerColor = "#2f2f2f";     // used by pie center plugin
+let isDarkMode = false;   
+let centerColor = "#2f2f2f";    
 let devicesChart = null;
 let pieChart = null;
 let map = null;
@@ -23,9 +20,6 @@ const API = {
   distanceData: "/dashboard/atlanta_distance_data"
 };
 
-/* -------------------------
-   Utility functions
-   -------------------------*/
 function safeEl(id) {
   return document.getElementById(id);
 }
@@ -73,9 +67,6 @@ function formatLastUpdatedText(date, time) {
   }
 }
 
-/* -------------------------
-   Fetch & data helpers
-   -------------------------*/
 async function fetchJSON(url, opts = {}, config = { showUserError: false, userMessage: null }) {
   try {
     const res = await fetch(url, opts);
@@ -90,7 +81,6 @@ async function fetchJSON(url, opts = {}, config = { showUserError: false, userMe
     }
     return body;
   } catch (err) {
-    // network / JSON parse errors
     console.error(`fetchJSON network/error for ${url}:`, err);
     if (config.showUserError) {
       displayFlashMessage(
@@ -137,9 +127,6 @@ async function fetchFilteredVehicleData(status) {
   }
 }
 
-/* -------------------------
-   UI / Table rendering
-   -------------------------*/
 function applySortIcons(column, direction, selector = '.vehicleLiveTable table') {
   document.querySelectorAll(`${selector} th`).forEach((th) => {
     const icon = th.querySelector(".sort-icon");
@@ -212,7 +199,6 @@ function afterTableRender() {
   currentSort = { column: "distance", direction: "desc" };
 }
 
-/* Renders the status popup table */
 function renderStatusPopupTable(data) {
   const tableBody = safeEl('statusPopupTableBody');
   if (!tableBody) return;
@@ -310,9 +296,6 @@ function renderStatusPopupTable(data) {
   setupTableSorting('#statusPopupTable');
 }
 
-/* -------------------------
-   Status popup behavior
-   -------------------------*/
 async function showStatusPopup(status, title) {
   currentStatusFilter = status;
   const titleEl = safeEl('statusPopupTitle');
@@ -358,11 +341,6 @@ async function showStatusPopup(status, title) {
   }
 }
 
-/* -------------------------
-   Charts: pie & devices (line)
-   -------------------------*/
-
-/* Helper used by pie chart to create linear gradients */
 function makeGradient(ctx, y0color, y1color) {
   const g = ctx.createLinearGradient(0, 0, 0, 400);
   g.addColorStop(0, y0color);
@@ -505,13 +483,11 @@ async function renderPieChart() {
   }
 }
 
-/* Initialize the devices (line) chart */
 function initDevicesChart() {
   const devicesCanvas = safeEl("devicesChart");
   if (!devicesCanvas) return null;
   const ctx = devicesCanvas.getContext("2d");
 
-  // If already created, return it
   if (devicesChart) return devicesChart;
 
   devicesChart = new Chart(ctx, {
@@ -538,16 +514,12 @@ async function fetchDistanceTravelledData() {
     devicesChart.data.labels = data.labels || [];
     devicesChart.data.datasets[0].data = data.distances || [];
     devicesChart.update();
-    // hide devices skeleton
     setSkeletonLoaded('devicesSkeleton', true);
   } catch (error) {
     console.error("Error fetching distance data:", error);
   }
 }
 
-/* -------------------------
-   Helper to rebuild devicesChart cleanly
-   -------------------------*/
 function rebuildDevicesChart() {
   try {
     const preserved = devicesChart
@@ -578,20 +550,14 @@ function rebuildDevicesChart() {
   }
 }
 
-/* -------------------------
-   Theme handling
-   -------------------------*/
 async function updateTheme() {
   try {
-    // read latest DOM class
     isDarkMode = document.body.classList.contains("dark-mode");
     centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
     Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
-    // Rebuild devicesChart (safe) rather than mutating Chart internals
     rebuildDevicesChart();
 
-    // re-render pie (pie uses isDarkMode when built)
     try {
       if (pieChart) {
         try { pieChart.destroy(); } catch (e) { /* ignore */ }
@@ -602,7 +568,6 @@ async function updateTheme() {
       console.error("updateTheme: failed to re-render pie:", pieErr);
     }
 
-    // re-init map after a short delay (map init can be heavy)
     setTimeout(() => {
       initMap().catch((e) => {
         console.error("Error re-initializing map after theme change:", e);
@@ -615,9 +580,6 @@ async function updateTheme() {
   }
 }
 
-/* -------------------------
-    Theme observer (watchBodyTheme)
-   -------------------------*/
 function watchBodyTheme({ debounceMs = 80 } = {}) {
   const body = document.body;
   if (!body) return { disconnect: () => {} };
@@ -645,9 +607,6 @@ function watchBodyTheme({ debounceMs = 80 } = {}) {
   };
 }
 
-/* -------------------------
-   Map helpers (initMap/fallbackToDefaultLocation)
-   -------------------------*/
 async function initMap() {
   try {
     const { Map, TrafficLayer } = await google.maps.importLibrary("maps");
@@ -662,7 +621,6 @@ async function initMap() {
       trafficLayer.setMap(map);
       marker = new AdvancedMarkerElement({ position: location, map, title: "Your Location" });
 
-      // hide map skeleton
       setSkeletonLoaded('mapSkeleton', true);
       getWeather(location.lat, location.lng);
     };
@@ -715,7 +673,6 @@ function displayWeather(data) {
                       </div>
               `;
   weatherDiv.innerHTML = weatherHTML;
-  // hide weather skeleton
   setSkeletonLoaded('weatherSkeleton', true);
 }
 
@@ -738,9 +695,6 @@ function getWeather(lat, lon) {
     });
 }
 
-/* -------------------------
-   Other small features
-   -------------------------*/
 async function fetchDashboardData() {
   try {
     if (typeof userRole !== "undefined" && userRole !== "admin") return;
@@ -751,7 +705,6 @@ async function fetchDashboardData() {
       cards[1].querySelector("h3").textContent = data.sims || 0;
       cards[2].querySelector("h3").textContent = data.customers || 0;
     }
-    // hide cards skeleton
     setSkeletonLoaded('cardsSkeleton', true);
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
@@ -773,16 +726,12 @@ async function fetchStatusData() {
     setText("disconnected-vehicles-count", `${data.disconnectedVehicles} / ${data.totalVehicles}`);
 
     window.statusCounts = data;
-    // hide status skeleton
     setSkeletonLoaded('statusSkeleton', true);
   } catch (error) {
     console.error("Error fetching status data:", error);
   }
 }
 
-/* -------------------------
-   Event wiring
-   -------------------------*/
 async function attachEventListeners() {
   const runningBtn = safeEl("running-vehicles");
   if (runningBtn) runningBtn.addEventListener("click", () => showStatusPopup('running', 'Running Vehicles'));
@@ -822,7 +771,6 @@ async function attachEventListeners() {
       const table = document.querySelector("#statusPopup table");
       if (!table) return;
       const tableClone = table.cloneNode(true);
-      // transform status icons into readable text for excel
       const rows = tableClone.querySelectorAll('tbody tr');
       rows.forEach(row => {
         const cells = row.cells;
@@ -845,7 +793,6 @@ async function attachEventListeners() {
 
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.table_to_sheet(tableClone);
-      // try converting date strings in column 2 to excel dates
       if (ws['!ref']) {
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let R = range.s.r; R <= range.e.r; ++R) {
@@ -868,7 +815,6 @@ async function attachEventListeners() {
     });
   }
 
-  // range selector
   document.querySelectorAll("#range-selector .range-btn").forEach((btn) => {
     btn.addEventListener("click", async function () {
       document.querySelectorAll("#range-selector .range-btn").forEach((b) => b.classList.remove("active"));
@@ -878,7 +824,6 @@ async function attachEventListeners() {
     });
   });
 
-  // Download entire vehicle table Excel
   const downloadExcelBtn = safeEl("downloadExcelBtn");
   if (downloadExcelBtn) {
     downloadExcelBtn.addEventListener("click", function () {
@@ -892,9 +837,6 @@ async function attachEventListeners() {
   }
 }
 
-/* -------------------------
-   Misc fetchers & UI updates
-   -------------------------*/
 async function fetchVehicleDistances(range = "1day") {
   try {
     const data = await fetchJSON(
@@ -917,35 +859,26 @@ async function fetchVehicleDistances(range = "1day") {
     });
 
     afterTableRender();
-    // hide table skeleton
     setSkeletonLoaded('tableSkeleton', true);
   } catch (error) {
     console.error("Error fetching vehicle distances:", error);
   }
 }
 
-/* -------------------------
-   Initialization
-   -------------------------*/
 async function initDashboard() {
-  // initial theme state
   isDarkMode = document.body.classList.contains("dark-mode");
   centerColor = isDarkMode ? "#ccc" : "#2f2f2f";
   Chart.defaults.color = isDarkMode ? "#ccc" : "#2f2f2f";
 
-  // window.__themeWatcher = watchBodyTheme({ debounceMs: 80 });
-
   const themeBtn = document.getElementById("theme-toggle");
   if (themeBtn) {
     themeBtn.addEventListener("click", () => {
-      // wait for class toggle done in base script, then refresh charts/map
       setTimeout(() => {
         updateTheme().catch((e) => console.error("theme toggle updateTheme failed:", e));
       }, 0);
     });
   }
   
-  // start clock
   setInterval(() => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, "0");
@@ -962,11 +895,9 @@ async function initDashboard() {
 
   await attachEventListeners();
 
-  // initialize map & charts
   await initMap();
   initDevicesChart();
 
-  // fetch data once at load
   fetchStatusData();
   fetchDashboardData();
   await renderPieChart();
@@ -974,7 +905,6 @@ async function initDashboard() {
   await fetchVehicleDistances(currentRange);
 }
 
-/* wire DOMContentLoaded to the init */
 document.addEventListener("DOMContentLoaded", () => {
   initDashboard().catch((e) => console.error("Init error:", e));
 });
