@@ -130,7 +130,11 @@
 }
 
 .geofence-status-switch input:checked + .geofence-status-slider {
-    background-color: #10b981;
+    background-color: darkgreen;
+}
+
+.dark-mode .geofence-status-switch input:checked + .geofence-status-slider {
+    border-color: #28a745;
 }
 
 .geofence-status-slider:before {
@@ -169,8 +173,8 @@
 }
 
 .geofence-actions .action-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
 }
 
 .geofence-actions .action-icon:hover {
@@ -182,8 +186,11 @@
 .geofence-actions .view-icon svg { color: #3b82f6; }
 .geofence-actions .delete-icon svg { color: #ef4444; }
 
+.dark-mode .geofence-actions .edit-icon svg { color: #d4af37; }
+.dark-mode .geofence-actions .view-icon svg { color: #60a5fa; }
+.dark-mode .geofence-actions .delete-icon svg { color: #f87171; }
+
 .dark-mode .geofence-actions .action-icon:hover {
-    /* Keep the same footprint as light mode hover to avoid layout shift */
     background: rgba(255,255,255,0.06);
     transform: translateY(-2px);
     outline: none;
@@ -752,57 +759,6 @@ input:checked .slider:before {
 
 .dark-mode .geofence-status-label {
     color: #e2e8f0;
-}
-
-.geofence-status-switch {
-    position: relative;
-    display: inline-block;
-    width: 42px;
-    height: 22px;
-}
-
-.geofence-status-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.geofence-status-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #dc2626;
-    transition: .4s;
-    border-radius: 24px;
-    border: 2px solid transparent;
-}
-
-.geofence-status-switch input:checked + .geofence-status-slider {
-    background-color: #10b981;
-}
-
-.geofence-status-slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.geofence-status-switch input:focus + .geofence-status-slider {
-    box-shadow: 0 0 1px #28a745;
-}
-
-.geofence-status-switch input:checked + .geofence-status-slider:before {
-    transform: translateX(20px);
 }
 
 .geofence-status-text {
