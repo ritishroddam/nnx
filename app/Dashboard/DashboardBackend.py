@@ -490,13 +490,14 @@ def get_status_data():
             if speed == 0:
                 idle_vehicles += 1
                 continue
-            elif 40 <= speed < 60:
-                speed_vehicles += 1
+            else: 
                 running_vehicles += 1
-                continue
-            elif speed >= 60:
-                overspeed_vehicles += 1
-                continue
+                if 40 <= speed < 60:
+                    speed_vehicles += 1
+                    continue
+                elif speed >= 60:
+                    overspeed_vehicles += 1
+                    continue
             
         
         return jsonify({
