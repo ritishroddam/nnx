@@ -439,6 +439,9 @@ def get_vehicle_range_data():
 def get_status_data():
     try:
         vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
+        vehicelsData = list(get_vehicle_data())
+        
+        vehiclesDataImeiMap = {str(vehicle.get("IMEI")): vehicle for vehicle in vehicelsData}
         
         imeis = getCollectionImeis(vehicleInvyImeis)
         
@@ -487,15 +490,23 @@ def get_status_data():
             
             speed = float(latest_data.get("speed", 0))
             
+            vehicle = vehiclesDataImeiMap.get(str(latest_data.get("imei")))
+            if vehicle:
+                slowSpeedThreshold = int(vehicle.get("slowSpeed", "40"))
+                normalSpeedThreshold = int(vehicle.get("normalSpeed", "60"))
+            else: 
+                slowSpeedThreshold = 40
+                normalSpeedThreshold = 60
+            
             if speed == 0:
                 idle_vehicles += 1
                 continue
             else: 
                 running_vehicles += 1
-                if 40 <= speed < 60:
+                if slowSpeedThreshold <= speed < normalSpeedThreshold:
                     speed_vehicles += 1
                     continue
-                elif speed >= 60:
+                elif speed >= normalSpeedThreshold:
                     overspeed_vehicles += 1
                     continue
             
