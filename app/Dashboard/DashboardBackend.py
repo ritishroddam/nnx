@@ -194,9 +194,10 @@ def _process_vehicle_snapshot(
 def build_vehicle_snapshot(range_param="1day", status_filter=None, include_location=True):
     utc_now = datetime.now(timezone.utc)
     if status_filter:
-        range_param = "1hour"
+        range_param = "1minute"
         
     range_map = {
+        "1minute": timedelta(minutes=1),
         "1hour": timedelta(hours=1),
         "6hours": timedelta(hours=6),
         "12hours": timedelta(hours=12),
@@ -271,13 +272,20 @@ def build_vehicle_snapshot(range_param="1day", status_filter=None, include_locat
         is_offline = vehicle_info["is_offline"]
         main_power = vehicle_info["main_power"]
         gps_ok = vehicle_info["gps"]
+        vehicle_data_info = vehicle_inventory = db["vehicle_inventory"].find_one({"IMEI": imei}) or {}
+        if vehicle_data_info:
+            slowSpeedThreshold = int(vehicle_data_info.get("slowSpeed", "40"))
+            normalSpeedThreshold = int(vehicle_data_info.get("normalSpeed", "60"))
+        else:
+            slowSpeedThreshold = 40
+            normalSpeedThreshold = 60
         if status_filter:
             filter_checks = {
                 "running": ignition_state == "1" and current_speed > 0 and not is_offline,
                 "idle": ignition_state == "1" and current_speed == 0 and not is_offline,
                 "parked": ignition_state == "0" and current_speed == 0 and not is_offline,
-                "speed": ignition_state == "1" and 40 <= current_speed < 60 and not is_offline,
-                "overspeed": ignition_state == "1" and current_speed >= 60 and not is_offline,
+                "speed": ignition_state == "1" and slowSpeedThreshold <= current_speed < normalSpeedThreshold and not is_offline,
+                "overspeed": ignition_state == "1" and current_speed >= normalSpeedThreshold and not is_offline,
                 "offline": is_offline,
                 "disconnected": main_power == "0",
                 "noGps": not gps_ok,
