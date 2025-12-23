@@ -193,6 +193,9 @@ def _process_vehicle_snapshot(
 
 def build_vehicle_snapshot(range_param="1day", status_filter=None, include_location=True):
     utc_now = datetime.now(timezone.utc)
+    if status_filter:
+        range_param = "1hour"
+        
     range_map = {
         "1hour": timedelta(hours=1),
         "6hours": timedelta(hours=6),
