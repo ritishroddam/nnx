@@ -131,17 +131,26 @@ def _process_vehicle_snapshot(
     if is_offline:
         counters_delta["offlineVehicles"] += 1
     else:
-        if ignition_state == "1" and current_speed > 0:
-            counters_delta["runningVehicles"] += 1
-        elif ignition_state == "1" and current_speed == 0:
-            counters_delta["idleVehicles"] += 1
-        elif ignition_state == "0" and current_speed == 0:
+        if ignition_state == "0":
             counters_delta["parkedVehicles"] += 1
+        else: 
+            if current_speed == 0:
+                counters_delta["idleVehicles"] += 1
+            elif current_speed > 0:
+                counters_delta["runningVehicles"] += 1
+            
+            if vehicle_doc:
+                slowSpeedThreshold = int(vehicle_doc.get("slowSpeed", "40"))
+                normalSpeedThreshold = int(vehicle_doc.get("normalSpeed", "60"))
+            else: 
+                slowSpeedThreshold = 40
+                normalSpeedThreshold = 60
 
-    if not is_offline and ignition_state == "1" and 40 <= current_speed < 60:
-        counters_delta["speedVehicles"] += 1
-    if not is_offline and ignition_state == "1" and current_speed >= 60:
-        counters_delta["overspeedVehicles"] += 1
+            if slowSpeedThreshold <= current_speed < normalSpeedThreshold:
+                counters_delta["speedVehicles"] += 1
+            if current_speed >= normalSpeedThreshold:
+                counters_delta["overspeedVehicles"] += 1
+                
     if main_power == "0":
         counters_delta["disconnectedVehicles"] += 1
     if not gps_ok:
@@ -439,9 +448,6 @@ def get_vehicle_range_data():
 def get_status_data():
     try:
         vehicleInvyImeis = list(get_vehicle_data().distinct("IMEI"))
-        vehicelsData = list(get_vehicle_data())
-        
-        vehiclesDataImeiMap = {str(vehicle.get("IMEI")): vehicle for vehicle in vehicelsData}
         
         imeis = getCollectionImeis(vehicleInvyImeis)
         
@@ -490,7 +496,7 @@ def get_status_data():
             
             speed = float(latest_data.get("speed", 0))
             
-            vehicle = vehiclesDataImeiMap.get(str(latest_data.get("imei")))
+            vehicle = vehicle_inventory.find_one({"IMEI": latest_data.get("imei")}) or {}
             if vehicle:
                 slowSpeedThreshold = int(vehicle.get("slowSpeed", "40"))
                 normalSpeedThreshold = int(vehicle.get("normalSpeed", "60"))
