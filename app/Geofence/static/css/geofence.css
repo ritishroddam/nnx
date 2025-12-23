@@ -133,7 +133,7 @@
     background-color: darkgreen;
 }
 
-.dark-mode .geofence-status-switch input:checked + .geofence-status-slider {
+.dark-mode .geofence-status-switch input:checked .geofence-status-slider {
     border-color: #28a745;
 }
 
