@@ -184,6 +184,7 @@
 
 .dark-mode .geofence-actions .edit-icon svg { color: #d4af37; }
 .dark-mode .geofence-actions .view-icon svg { color: #60a5fa; }
+.dark-mode .geofence-actions .delete-icon svg { color: #f87171; }
 
 .dark-mode .geofence-actions .action-icon:hover {
     background: rgba(255,255,255,0.06);
