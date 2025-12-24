@@ -1074,13 +1074,19 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
   
   const existingAlert = document.getElementById(alertId);
   if (existingAlert) existingAlert.remove();
+
+  nearbyVehicles = Array.isArray(nearbyVehicles) ? nearbyVehicles.filter(v => v && (v.status || "").toString().toLowerCase() !== "offline") : [];
+  const DISPLAY_MAX = 8;
+  const displayedNearby = nearbyVehicles.slice(0, DISPLAY_MAX);
+  const totalNearbyCount = nearbyVehicles.length;
+
   
-  let nearbyListHTML = '';
-  if (nearbyVehicles.length > 0) {
+let nearbyListHTML = '';
+  if (displayedNearby.length > 0) {
     nearbyListHTML = `
       <div class="nearby-vehicles-details" style="margin-top: 10px; display: none;">
         <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
-          <strong>${nearbyVehicles.length} vehicles within 5km radius:</strong>
+          <strong>${totalNearbyCount} vehicles within 5km radius (showing ${displayedNearby.length})</strong>
         </div>
         <div style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
           <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
@@ -1095,14 +1101,14 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
             </thead>
             <tbody>
     `;
-    
-    nearbyVehicles.forEach((item, index) => {
-      const statusColor = item.status === "moving" ? "#4caf50" : 
-                         item.status === "stopped" ? "#f44336" : 
+
+    displayedNearby.forEach((item, index) => {
+      const statusColor = item.status === "moving" ? "#4caf50" :
+                         item.status === "stopped" ? "#f44336" :
                          item.status === "idle" ? "#ff9800" : "#9e9e9e";
-      
+
       const statusName = getFullStatusName(item.status);
-      
+
       nearbyListHTML += `
         <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
           <td style="padding: 6px; border-bottom: 1px solid #eee;">
@@ -1125,13 +1131,13 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
         </tr>
       `;
     });
-    
+
     nearbyListHTML += `
           </tbody>
         </table>
         </div>
         <div style="margin-top: 8px; font-size: 10px; color: #666; text-align: center;">
-          Scroll to see all ${nearbyVehicles.length} vehicles
+          Scroll to see all ${displayedNearby.length} visible vehicles
         </div>
       </div>
     `;
@@ -1545,11 +1551,11 @@ function acknowledgeSOS(imei) {
   });
 }
 
-function findNearbyVehicles(sosVehicle, radiusKm) {
+function findNearbyVehicles(sosVehicle, radiusKm, { maxResults = 8 } = {}) {
   const nearby = [];
   const sosLat = parseFloat(sosVehicle.latitude);
   const sosLon = parseFloat(sosVehicle.longitude);
-  
+
   console.log(`Finding vehicles near ${sosVehicle.LicensePlateNumber} at ${sosLat}, ${sosLon}`);
 
   if (isNaN(sosLat) || isNaN(sosLon)) {
@@ -1558,41 +1564,43 @@ function findNearbyVehicles(sosVehicle, radiusKm) {
   }
 
   vehicleData.forEach((vehicle, imei) => {
-    if (imei === sosVehicle.imei) return; 
-    
+    if (imei === sosVehicle.imei) return;
+
     const vehicleLat = parseFloat(vehicle.latitude);
     const vehicleLon = parseFloat(vehicle.longitude);
-    
-    if (!isNaN(vehicleLat) && !isNaN(vehicleLon)) {
-      const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
-      console.log(`Distance to ${vehicle.LicensePlateNumber}: ${distance.toFixed(2)} km`);
-      
-      if (distance <= radiusKm) {
-        const estimatedTime = (distance / 40) * 60; 
-        
-        let statusText = vehicle.status || "unknown";
-        let estimatedTimeAdjusted = estimatedTime;
-        
-        if (statusText === "moving" && vehicle.speed > 20) {
-          estimatedTimeAdjusted = (distance / 60) * 60; 
-        } else if (statusText === "stopped" || statusText === "idle") {
-          estimatedTimeAdjusted = estimatedTime * 1.5; 
-        }
-        
-        nearby.push({
-          vehicle: vehicle,
-          distance: distance.toFixed(2),
-          estimatedTime: Math.max(1, Math.ceil(estimatedTimeAdjusted)), 
-          status: statusText,
-          speed: vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0
-        });
+    if (isNaN(vehicleLat) || isNaN(vehicleLon)) return;
+
+    const status = (vehicle.status || "").toString().toLowerCase();
+    if (status === "offline") return;
+
+    const distance = calculateDistance(sosLat, sosLon, vehicleLat, vehicleLon);
+    console.log(`Distance to ${vehicle.LicensePlateNumber}: ${distance.toFixed(2)} km`);
+
+    if (distance <= radiusKm) {
+      const estimatedTime = (distance / 40) * 60;
+
+      let statusText = vehicle.status || "unknown";
+      let estimatedTimeAdjusted = estimatedTime;
+
+      if (statusText === "moving" && vehicle.speed > 20) {
+        estimatedTimeAdjusted = (distance / 60) * 60;
+      } else if (statusText === "stopped" || statusText === "idle") {
+        estimatedTimeAdjusted = estimatedTime * 1.5;
       }
+
+      nearby.push({
+        vehicle: vehicle,
+        distance: distance.toFixed(2),
+        estimatedTime: Math.max(1, Math.ceil(estimatedTimeAdjusted)),
+        status: statusText,
+        speed: vehicle.speed ? convertSpeedToKmh(vehicle.speed) : 0
+      });
     }
   });
 
   nearby.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-  console.log(`Total nearby vehicles found: ${nearby.length}`);
-  return nearby;
+
+  return nearby.slice(0, Math.max(0, parseInt(maxResults, 10)));
 }
 
 function showNearbyVehiclesPopup(sosVehicle, nearbyVehicles) {
