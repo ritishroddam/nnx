@@ -1036,13 +1036,15 @@ function createSOSAlertPanel() {
   };
 
   document.getElementById("dismiss-all-sos-panel").onclick = () => {
-    // mark all current active alerts as dismissed and remove their DOM entries
     const container = document.getElementById('sos-alerts-container');
     const alerts = container ? Array.from(container.querySelectorAll('div[id^="sos-alert-"]')) : [];
     alerts.forEach(a => {
       const id = a.id;
       const imei = id.replace('sos-alert-', '');
-      if (imei) dismissedSOSAlerts.add(imei);
+      if (imei) {
+        dismissedSOSAlerts.add(imei);
+        activeSOSAlerts.delete(imei);
+      }
       a.remove();
     });
     updateSOSAlertButton();
