@@ -71,13 +71,14 @@ function updateSOSAlertButton() {
   // Recalculate active SOS alerts to ensure accuracy
   let actualActiveSOS = 0;
   vehicleData.forEach((vehicle, imei) => {
-    if (vehicle.sos === "1" || vehicle.sos === 1) {
+    if ((vehicle.sos === "1" || vehicle.sos === 1) && !dismissedSOSAlerts.has(imei)) {
       actualActiveSOS++;
     }
   });
-  
-  // Also check the activeSOSAlerts Set for consistency
-  const activeCount = Math.max(activeSOSAlerts.size, actualActiveSOS);
+
+  // Also check the activeSOSAlerts Set for consistency but exclude dismissed ones
+  const activeSetCount = Array.from(activeSOSAlerts).filter(i => !dismissedSOSAlerts.has(i)).length;
+  const activeCount = Math.max(activeSetCount, actualActiveSOS);
   
   if (activeCount > 0) {
     sosButtonContainer.style.display = 'block';
@@ -157,6 +158,7 @@ let tableFilteredData = [];
 
 var activeSOSAlerts = new Set();
 var sosAlertButton = null;
+var dismissedSOSAlerts = new Set();
 
 document.addEventListener("DOMContentLoaded", async function () {
   let companyNames = null;
@@ -884,6 +886,8 @@ function triggerSOS(imei, marker) {
   vehicleData.set(imei, vehicle);
 
   activeSOSAlerts.add(imei);
+  // If user previously dismissed this alert, clear the dismissal so it shows again
+  dismissedSOSAlerts.delete(imei);
 
   console.log(`Triggering SOS for ${imei}`);
 
@@ -1008,6 +1012,10 @@ function createSOSAlertPanel() {
                 border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
           Collapse All
         </button>
+        <button id="dismiss-all-sos-panel" style="background: rgba(0,0,0,0.12); color: white; 
+                border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
+          Dismiss All
+        </button>
         <button id="close-sos-panel" style="background: none; border: none; color: white; 
                 cursor: pointer; font-size: 18px; font-weight: bold;">×</button>
       </div>
@@ -1025,6 +1033,20 @@ function createSOSAlertPanel() {
     document.querySelectorAll('.toggle-nearby-btn[data-expanded="true"]').forEach(btn => {
       btn.click();
     });
+  };
+
+  document.getElementById("dismiss-all-sos-panel").onclick = () => {
+    // mark all current active alerts as dismissed and remove their DOM entries
+    const container = document.getElementById('sos-alerts-container');
+    const alerts = container ? Array.from(container.querySelectorAll('div[id^="sos-alert-"]')) : [];
+    alerts.forEach(a => {
+      const id = a.id;
+      const imei = id.replace('sos-alert-', '');
+      if (imei) dismissedSOSAlerts.add(imei);
+      a.remove();
+    });
+    updateSOSAlertButton();
+    panel.style.display = 'none';
   };
   
   document.addEventListener('click', (e) => {
@@ -1157,6 +1179,11 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
                        padding: 6px 12px; cursor: pointer; font-size: 12px;">
           🗺️ View
         </button>
+        <button class="dismiss-sos-btn" data-imei="${sosVehicle.imei}"
+                style="background: #9e9e9e; color: white; border: none; border-radius: 4px; 
+                       padding: 6px 12px; cursor: pointer; font-size: 12px;">
+          ✕ Dismiss
+        </button>
       </div>
     </div>
   `;
@@ -1216,6 +1243,22 @@ function addSOSAlertToPanel(sosVehicle, nearbyVehicles) {
       if (!btn) return;
       const imei = btn.getAttribute('data-imei');
       if (imei) acknowledgeSOS(imei);
+    };
+  }
+
+  const dismissBtnLocal = alertDiv.querySelector('.dismiss-sos-btn');
+  if (dismissBtnLocal) {
+    dismissBtnLocal.onclick = (e) => {
+      e.stopPropagation();
+      const btn = e.currentTarget || e.target.closest('.dismiss-sos-btn');
+      if (!btn) return;
+      const imei = btn.getAttribute('data-imei');
+      if (!imei) return;
+      // mark as dismissed locally (do not acknowledge on server)
+      dismissedSOSAlerts.add(imei);
+      const ad = document.getElementById(`sos-alert-${imei}`);
+      if (ad) ad.remove();
+      updateSOSAlertButton();
     };
   }
   
