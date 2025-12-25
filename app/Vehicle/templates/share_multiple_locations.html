@@ -15,42 +15,6 @@
     
     <script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
             ({ key: "AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84", v: "weekly" });</script>
-    
-    <script>
-        const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
-        const shareToken = "{{ token }}";
-
-        function formatDateTime(dateStr) {
-            if (!dateStr) return 'Unknown';
-            const date = new Date(dateStr);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            const timeStr = date.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: true 
-            });
-            return `${day}/${month}/${year} ${timeStr}`;
-        }
-
-        function formatSpeed(speed) {
-            if (speed === null || speed === undefined || speed === '') {
-                return 'No Speed';
-            }
-            const speedNum = parseInt(speed);
-            if (speedNum === 0) {
-                return `Stopped: ${speed} kmph`;
-            }
-            return `Moving: ${speed} kmph`;
-        }
-
-        vehiclesData.forEach(vehicle => {
-            vehicle.formattedDateTime = formatDateTime(vehicle.date_time);
-            vehicle.formattedSpeed = formatSpeed(vehicle.speed);
-        });
-    </script>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84&libraries=geometry"></script>
@@ -63,7 +27,6 @@
         </div>
         
         <div class="content-wrapper">
-            <!-- Cards Container on the Left -->
             <div class="cards-container">
                 <div class="vehicles-list">
                     <h3>Vehicles:</h3>
@@ -102,7 +65,6 @@
                 </div>
             </div>
             
-            <!-- Map Container on the Right -->
             <div class="map-container">
                 <div id="map"></div>
             </div>
@@ -113,7 +75,7 @@
         </div>
     </div>
 
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             const updateTimeElements = document.querySelectorAll('.update-time');
             updateTimeElements.forEach(el => {
@@ -131,6 +93,6 @@
                 }
             });
         });
-    </script>
+    </script> -->
 </body>
 </html>

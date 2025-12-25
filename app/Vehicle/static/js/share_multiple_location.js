@@ -1,17 +1,13 @@
-// window.onload = initMap();
 window.onload = function() {
     initMap();
     
-    // Extract token from URL
     const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
     if (tokenMatch && tokenMatch[1]) {
         const token = tokenMatch[1];
         startLinkStatusCheck(token);
     }
     
-    // Also add cache-busting on page load
     if (window.performance && window.performance.navigation.type === 1) {
-        // Page was reloaded
         console.log('Page was reloaded');
     }
 };
@@ -315,27 +311,15 @@ function highlightVehicleCard(licensePlate) {
     }
 }
 
-// socket.on("connect", () => {
-//     console.log("Connected to socket for live updates");
-//     vehiclesData.forEach(vehicle => {
-//         socket.emit("subscribe_vehicle_updates", {
-//             LicensePlateNumber: vehicle.licensePlateNumber
-//         });
-//     });
-// })
-
 socket.on('connect', () => {
     console.log("Connected to socket for live updates");
     
-    // Check link status via socket
     const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
     if (tokenMatch && tokenMatch[1]) {
         const token = tokenMatch[1];
         
-        // Check link status immediately
         socket.emit('check_link_status', { token: token });
         
-        // Check every minute
         setInterval(() => {
             socket.emit('check_link_status', { token: token });
         }, 60000);
@@ -348,11 +332,9 @@ socket.on('connect', () => {
     });
 });
 
-// Handle link status response
 socket.on('check_link_status_response', (data) => {
     if (!data.valid) {
         console.log('Link has expired via socket check');
-        // Redirect to expired page
         window.location.href = '/link-expired-page?token=' + data.token;
     }
 });
@@ -428,10 +410,9 @@ function updateVehicleInfo(vehicleData) {
 }
 
 function startLinkStatusCheck(token) {
-    // Check link status every 30 seconds
     linkCheckInterval = setInterval(() => {
         checkLinkStatus(token);
-    }, 30000); // 30 seconds
+    }, 30000); 
 }
 
 function checkLinkStatus(token) {
@@ -443,20 +424,15 @@ function checkLinkStatus(token) {
         }
     })
     .then(response => {
-        // If status is 410 (Gone), redirect to expired page
         if (response.status === 410) {
             clearInterval(linkCheckInterval);
-            // Force reload to show expired page
             window.location.href = window.location.href + '?t=' + Date.now();
         }
-        // Check if response is HTML (expired page) even with 200
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('text/html')) {
             return response.text().then(text => {
-                // Check if it's the expired page by looking for specific content
                 if (text.includes('Link Expired') || text.includes('link_expired')) {
                     clearInterval(linkCheckInterval);
-                    // Replace current page content with expired page
                     document.open();
                     document.write(text);
                     document.close();
@@ -469,31 +445,75 @@ function checkLinkStatus(token) {
     });
 }
 
-// Add this to your HTML template or JS file
 function checkExpirationTime() {
-    // Get expiration time from server data
     if (typeof share_info !== 'undefined' && share_info.to_datetime) {
         const expirationTime = new Date(share_info.to_datetime);
         const now = new Date();
         
-        // If already expired
         if (now > expirationTime) {
-            window.location.reload(true); // Force reload bypassing cache
+            window.location.reload(true); 
             return;
         }
         
-        // Schedule check for when it will expire
         const timeUntilExpiration = expirationTime - now;
         if (timeUntilExpiration > 0) {
             setTimeout(() => {
                 window.location.reload(true);
-            }, timeUntilExpiration + 1000); // Add 1 second buffer
+            }, timeUntilExpiration + 1000); 
         }
     }
 }
 
-// Call this when page loads
-document.addEventListener('DOMContentLoaded', checkExpirationTime);
+const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
+const shareToken = "{{ token }}";
+
+function formatDateTime(dateStr) {
+    if (!dateStr) return 'Unknown';
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const timeStr = date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: true 
+    });
+    return `${day}/${month}/${year} ${timeStr}`;
+}
+
+function formatSpeed(speed) {
+    if (speed === null || speed === undefined || speed === '') {
+        return 'No Speed';
+    }
+    const speedNum = parseInt(speed);
+    if (speedNum === 0) {
+        return `Stopped: ${speed} kmph`;
+    }
+    return `Moving: ${speed} kmph`;
+}
+
+vehiclesData.forEach(vehicle => {
+    vehicle.formattedDateTime = formatDateTime(vehicle.date_time);
+    vehicle.formattedSpeed = formatSpeed(vehicle.speed);
+});
+
+document.addEventListener('DOMContentLoaded', checkExpirationTime, function() {
+            const updateTimeElements = document.querySelectorAll('.update-time');
+            updateTimeElements.forEach(el => {
+                const dateStr = el.textContent.trim();
+                if (dateStr) {
+                    el.textContent = formatDateTime(dateStr);
+                }
+            });
+const speedElements = document.querySelectorAll('.speed-status');
+        speedElements.forEach(el => {
+            const speedText = el.textContent.trim();
+            if (speedText === 'Unknown Speed') {
+                el.textContent = 'No Speed';
+            }
+        });
+});        
 
 function debugMarkerRotations() {
     console.log('Current marker rotations:');
