@@ -115,7 +115,6 @@ def upload_customers():
             flash(f"Missing required columns: {', '.join(missing_headers)}", 'danger')
             return redirect(url_for('CompanyDetails.page'))
 
-        # Replace NaN/None with empty string
         df = df.fillna("")
 
         logo_id = ObjectId("683970cc1ae3f41668357362")
@@ -145,8 +144,7 @@ def upload_customers():
                     continue
             
             record['companyLogo'] = logo_id
-            # Ensure required fields are present and not empty
-            row_num = records.index(record) + 2  # +2 for header and 0-indexing
+            row_num = records.index(record) + 2  
             missing_fields = [field for field in required_fields if not record.get(field, "")]
             if missing_fields:
                 errors.append(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}")
@@ -236,7 +234,7 @@ def edit_customer(customer_id):
             return jsonify({'success': False, 'message': 'Phone Number must be 10 digits.'}), 400
 
         result = customers_collection.update_one(
-            {'_id': object_id},   # fixed: do not wrap ObjectId again
+            {'_id': object_id},   
             {'$set': updated_data}
         )
         if result.modified_count > 0:

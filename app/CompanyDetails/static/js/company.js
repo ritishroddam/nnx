@@ -1,6 +1,3 @@
-// NOTE: Filtering is handled by the Selectize/native binding inside DOMContentLoaded
-// to ensure the Selectize instance triggers the same handler. See filterByCompanyValue().
-
 document.getElementById("uploadBtn").addEventListener("click", function() {
   const modal = document.getElementById("uploadModal");
   if (modal) modal.classList.remove("hidden");
@@ -142,7 +139,6 @@ document.getElementById("manualForm").addEventListener("submit", function(event)
 
   let valid = true;
 
-  // Phone number validation
   if (!/^\d{10}$/.test(phoneValue)) {
     phoneError.textContent = "Phone Number must be exactly 10 digits.";
     phoneError.classList.remove("hidden");
@@ -296,9 +292,7 @@ function filterByCompanyValue(filterValue) {
       if (filterValue == null) filterValue = '';
       const fv = filterValue.toString().trim().toLowerCase();
 
-      // If user selected the explicit All Companies token -> fetch full dataset and render it
       if (fv === '__all__') {
-        // first request to get total count (fast)
         const metaResp = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=1`, {
           method: "GET",
           headers: {
@@ -313,7 +307,6 @@ function filterByCompanyValue(filterValue) {
         const total = meta.total || 0;
         const perPage = total > 0 ? total : 10000;
 
-        // fetch all customers in one go
         const resp = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
           method: "GET",
           headers: {
@@ -330,17 +323,15 @@ function filterByCompanyValue(filterValue) {
         document.getElementById('totalCompaniesCount').textContent = customers.length;
         renderCustomerTable(customers);
         const paginationDiv = document.getElementById('companyPagination');
-        if (paginationDiv) paginationDiv.innerHTML = ''; // hide pagination while showing all
+        if (paginationDiv) paginationDiv.innerHTML = ''; 
         return;
       }
 
-      // empty selection -> restore paginated view (first page)
       if (fv === '') {
         await fetchAndRenderCustomers(1);
         return;
       }
 
-      // default: fetch all customers (use known totalRows if available) and filter client-side
       const perPage = (typeof totalRows === 'number' && totalRows > 0) ? totalRows : 10000;
       const response = await fetch(`/companyDetails/get_customers_paginated?page=1&per_page=${perPage}`, {
         method: "GET",
@@ -358,13 +349,11 @@ function filterByCompanyValue(filterValue) {
       const data = await response.json();
       const customers = data.customers || [];
 
-      // filter across complete dataset
       const filtered = customers.filter(c => {
         const name = (c['Company Name'] || '').toString().toLowerCase();
         return name.includes(fv);
       });
 
-      // render filtered results and hide pagination while filtered
       document.getElementById('totalCompaniesCount').textContent = filtered.length;
       renderCustomerTable(filtered);
       const paginationDiv = document.getElementById('companyPagination');

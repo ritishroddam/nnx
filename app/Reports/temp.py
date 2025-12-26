@@ -105,22 +105,18 @@ report_configs = {
 def save_and_return_report(output, data, report_type, vehicle_number):
     print(f"[DEBUG] Entering save_and_return_report with report_type={report_type}, vehicle_number={vehicle_number}")
     
-    # Create a copy of the buffer content before uploading
     buffer_content = output.getvalue()
     
-    # Generate unique filename
     timestamp = datetime.now(pytz.UTC).astimezone(IST).strftime('%d-%b-%Y %I:%M:%S %p')
     report_filename = f"{report_type}_report_{vehicle_number if vehicle_number != 'all' else 'ALL_VEHICLES'}_{timestamp}.xlsx"
     remote_path = f"reports/{get_jwt_identity()}/{report_filename}"
     print(f"[DEBUG] Generated report filename: {report_filename}")
     print(f"[DEBUG] Uploading report to remote path: {remote_path}")
 
-    # Create a new BytesIO object for S3 upload
     upload_buffer = BytesIO(buffer_content)
     s3.upload_fileobj(upload_buffer, SPACE_NAME, remote_path)
     upload_buffer.close()
 
-    # Save metadata to MongoDB
     report_metadata = {
         'user_id': get_jwt_identity(),
         'report_name': data.get("reportName") if report_type == "custom" else report_type.replace('-', ' ').title() + ' Report',
@@ -267,14 +263,12 @@ def add_speed_metrics(df):
             df['speed'] = pd.to_numeric(df['speed'], errors='coerce')
             avg_speed = df['speed'].mean()
             max_speed = df['speed'].max()
-            # Prepare summary row: ["Average Speed", value, "Maximum Speed", value, ...empty...]
             summary = [""] * len(df.columns)
             summary[0] = "Average Speed"
             summary[1] = round(avg_speed, 2) if not pd.isna(avg_speed) else ""
             summary[2] = "Maximum Speed"
             summary[3] = round(max_speed, 2) if not pd.isna(max_speed) else ""
             summary_row = pd.DataFrame([summary], columns=df.columns)
-            # Insert summary row at the top
             df = pd.concat([summary_row, df], ignore_index=True)
     except Exception as e:
         print(f"Error adding speed metrics: {str(e)}")
@@ -387,7 +381,6 @@ def download_custom_report():
         from_date = data.get("fromDate")
         to_date = data.get("toDate")
 
-        # Handle "all" vehicles
         if vehicle_number == "all":
             claims = get_jwt()
             user_roles = claims.get('roles', [])
@@ -423,7 +416,6 @@ def download_custom_report():
                     {field: 1 for field in atlanta_fields + ["imei"]}
                 ).sort("date_time", 1)) if atlanta_fields else []
 
-                # Get all vehicle_inventory data at once
                 vehicle_inventory_data_map = {}
                 if vehicle_inventory_fields:
                     for v in db['vehicle_inventory'].find(
@@ -432,7 +424,6 @@ def download_custom_report():
                     ):
                         vehicle_inventory_data_map[v["IMEI"]] = v
 
-                # Group atlanta_data by IMEI
                 from collections import defaultdict
                 grouped = defaultdict(list)
                 for rec in atlanta_data:
@@ -454,7 +445,6 @@ def download_custom_report():
                     df = process_df(df, license_plate, fields)
                     if df is not None:
                         if report_type != "odometer-daily-distance" and idx > 0:
-                            # Insert a separator row
                             sep_row = pd.DataFrame([{df.columns[0]: f"--- {license_plate} ---", **{col: "" for col in df.columns[1:]}}])
                             all_dfs.append(sep_row)
                         all_dfs.append(df)
@@ -505,7 +495,6 @@ def download_custom_report():
                 download_name=report_filename
             )
 
-        # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
@@ -566,7 +555,6 @@ def download_custom_report():
                 as_attachment=True,
                 download_name=report_filename
             )
-        # Standard reports for single vehicle
         if report_type not in report_configs:
             return jsonify({"success": False, "message": "Invalid report type", "category": "danger"}), 400
         config = report_configs[report_type]
@@ -787,7 +775,6 @@ def download_panic_report():
             cols = ['Vehicle Number', 'date_time'] + [col for col in df.columns if col not in ['Vehicle Number', 'date_time']]
             df = df[cols]
 
-        # Add Location column
         df['Location'] = df.apply(
             lambda row: geocodeInternal(row['latitude'], row['longitude'])
             if pd.notnull(row['latitude']) and row['latitude'] != "" and
@@ -806,10 +793,9 @@ def download_panic_report():
         if 'speed' in df.columns:
             df = add_speed_metrics(df)
 
-        # Generate Excel
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name="Panic Report")  # ensure it's flushed
+            df.to_excel(writer, index=False, sheet_name="Panic Report")  
         output.seek(0)
 
         report_filename = save_and_return_report(output, data, "Panic", vehicle_number)
@@ -878,7 +864,6 @@ def view_report_preview():
                     {field: 1 for field in atlanta_fields + ["imei"]}
                 ).sort("date_time", 1)) if atlanta_fields else []
 
-                # Get all vehicle_inventory data at once
                 vehicle_inventory_data_map = {}
                 if vehicle_inventory_fields:
                     for v in db['vehicle_inventory'].find(
@@ -887,7 +872,6 @@ def view_report_preview():
                     ):
                         vehicle_inventory_data_map[v["IMEI"]] = v
 
-                # Group atlanta_data by IMEI
                 from collections import defaultdict
                 grouped = defaultdict(list)
                 for rec in atlanta_data:
@@ -909,7 +893,6 @@ def view_report_preview():
                     df = process_df(df, license_plate, fields)
                     if df is not None:
                         if report_type != "odometer-daily-distance" and idx > 0:
-                            # Insert a separator dict
                             sep_dict = OrderedDict((col, "") for col in df.columns)
                             sep_dict[df.columns[0]] = f"--- {license_plate} ---"
                             all_dfs.append(pd.DataFrame([sep_dict]))
@@ -948,8 +931,6 @@ def view_report_preview():
                 return jsonify({"success": True, "data": []})
 
             final_df = pd.concat(all_dfs, ignore_index=True)
-            # --- Keep this block as is for column order and JSON output ---
-            # (You can adjust all_possible_columns logic as needed)
             report_type_for_columns = report_type if report_type != "custom" else custom_report_name
             all_possible_columns = ['Vehicle Number']
             if report_type_for_columns == 'odometer-daily-distance':
@@ -978,7 +959,6 @@ def view_report_preview():
 
             return Response(json_str, mimetype='application/json')
 
-        # Single vehicle
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number},
             {"IMEI": 1, "LicensePlateNumber": 1, "_id": 0}
@@ -1047,7 +1027,6 @@ def view_report_preview():
         if df is None or df.empty:
             return jsonify({"success": True, "data": []})
 
-        # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
         if report_type == 'odometer-daily-distance':
             all_possible_columns.extend(['Total Distance (km)', 'Start Odometer', 'End Odometer'])
@@ -1132,7 +1111,6 @@ def get_recent_reports():
 @jwt_required()
 def download_report(report_id):
     try:
-        # Fetch report metadata from the database
         report = db['generated_reports'].find_one({
             '_id': ObjectId(report_id),
             'user_id': get_jwt_identity()
@@ -1141,15 +1119,12 @@ def download_report(report_id):
         if not report:
             return jsonify({'success': False, 'message': 'Report not found'}), 404
 
-        # Construct the full path for the file in DigitalOcean Spaces
-        file_path = report['path']  # e.g., "reports/superadmin/stoppage_report_KA72CC1586_07-Jul-2025 02:15:09 PM.xlsx"
+        file_path = report['path'] 
 
-        # Download the file from DigitalOcean Spaces
         output = BytesIO()
         s3.download_fileobj(SPACE_NAME, file_path, output)
-        output.seek(0)  # Reset the file pointer to the beginning
+        output.seek(0) 
 
-        # Send the file to the user
         return send_file(
             output,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

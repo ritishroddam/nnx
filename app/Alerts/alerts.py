@@ -141,10 +141,8 @@ def get_alerts():
             },
         }
 
-    # Total for pagination (if needed later)
     total_count = collection.count_documents(query)
 
-    # Apply pagination
     records = list(collection.find(query, {'imei': 0}).sort('date_time', -1).skip(skip).limit(per_page))
     
     for record in records:
@@ -334,7 +332,6 @@ def acknowledge_alert():
         if not alert_id:
             return jsonify({"success": False, "message": "Missing required fields"}), 400
 
-        # Check if alert exists in either collection
         alert = db['atlanta'].find_one({"_id": ObjectId(alert_id)})
         source_collection = 'atlanta'
         if not alert:
@@ -343,7 +340,6 @@ def acknowledge_alert():
             if not alert:
                 return jsonify({"success": False, "message": "Alert not found"}), 404
 
-        # Check if already acknowledged
         existing_ack = db['Ack_alerts'].find_one({"alert_id": alert_id})
         if existing_ack:
             return jsonify({"success": True, "message": "Alert already acknowledged", "alert_id": alert_id})

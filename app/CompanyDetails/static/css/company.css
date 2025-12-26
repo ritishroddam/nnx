@@ -546,7 +546,6 @@ th {
   margin-bottom: 0;
 }
 
-/* Responsive: Stack columns on smaller screens */
 @media (max-width: 1000px) {
   .company-modal-content .form-container {
     grid-template-columns: 1fr 1fr;
@@ -558,7 +557,6 @@ th {
   }
 }
 
-/* Professional Pagination Styles */
 .pagination-container {
   display: flex;
   justify-content: space-between;
@@ -713,7 +711,6 @@ th {
   transform: translateY(1px);
 }
 
-/* Remove spinner arrows from number input */
 .page-input::-webkit-outer-spin-button,
 .page-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -732,7 +729,6 @@ th {
   }
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .pagination-container {
     flex-direction: column;

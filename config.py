@@ -30,7 +30,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    JWT_COOKIE_SECURE = True  # For development only
+    JWT_COOKIE_SECURE = True  
 
 config = {
     'development': DevelopmentConfig,

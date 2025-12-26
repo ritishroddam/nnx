@@ -68,15 +68,13 @@ function updateSOSAlertButton() {
   const sosButtonContainer = document.getElementById('sos-alert-button-container');
   const sosAlertCount = document.getElementById('sos-alert-count');
   
-  // Recalculate active SOS alerts to ensure accuracy
-  let actualActiveSOS = 0;
-  vehicleData.forEach((vehicle, imei) => {
-    if ((vehicle.sos === "1" || vehicle.sos === 1) && !dismissedSOSAlerts.has(imei)) {
-      actualActiveSOS++;
-    }
-  });
+let actualActiveSOS = 0;
+vehicleData.forEach((vehicle, imei) => {
+  if ((vehicle.sos === "1" || vehicle.sos === 1) && !dismissedSOSAlerts.has(imei)) {
+    actualActiveSOS++;
+  }
+});
 
-  // Also check the activeSOSAlerts Set for consistency but exclude dismissed ones
   const activeSetCount = Array.from(activeSOSAlerts).filter(i => !dismissedSOSAlerts.has(i)).length;
   const activeCount = Math.max(activeSetCount, actualActiveSOS);
   
@@ -1261,7 +1259,6 @@ let nearbyListHTML = '';
       if (!btn) return;
       const imei = btn.getAttribute('data-imei');
       if (!imei) return;
-      // mark as dismissed locally (do not acknowledge on server)
       dismissedSOSAlerts.add(imei);
       const ad = document.getElementById(`sos-alert-${imei}`);
       if (ad) ad.remove();

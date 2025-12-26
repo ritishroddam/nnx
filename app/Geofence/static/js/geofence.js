@@ -17,7 +17,6 @@ async function geofenceMapFunction() {
     return;
   }
 
-  // pick mapId based on current theme (dark / light)
   const darkMode = document.body.classList.contains("dark-mode");
   const mapId = darkMode ? "e426c1ad17485d79" : "dc4a8996aab2cac9";
 
@@ -26,7 +25,6 @@ async function geofenceMapFunction() {
 
   await google.maps.importLibrary("places");
 
-  // clear previous overlays/draw if any (safe re-init)
   try {
     if (window.geofenceOverlays) {
       window.geofenceOverlays.forEach(o => {

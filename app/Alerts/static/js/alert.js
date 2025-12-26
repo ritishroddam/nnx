@@ -16,10 +16,10 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentEndpoint =
     sessionStorage.getItem("currentAlertEndpoint") || "panic";
   let currentAlertId = null;
-  let ITEMS_PER_PAGE = 100;         // keep default page size
-  let allAlerts = [];               // holds current page rows only
+  let ITEMS_PER_PAGE = 100;        
+  let allAlerts = [];               
   let currentPage = 1;
-  let totalAlertsCount = 0;         // total from backend
+  let totalAlertsCount = 0;        
   let totalPages = 1;
 
 
@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     XLSX.writeFile(wb, filename);
   }
+
 
   ////////////////// Download PDF  /////////////////////
   downloadPDFBtn.addEventListener("click", function () {
@@ -343,7 +344,6 @@ async function loadAlerts(page = 1) {
         throw new Error(data.message || `Server error ${res.status}`);
       }
 
-      // backend returns only the requested page rows
       allAlerts = data.alerts || [];
       currentPage = data.page || currentPage;
       ITEMS_PER_PAGE = data.per_page || ITEMS_PER_PAGE;
@@ -359,7 +359,6 @@ async function loadAlerts(page = 1) {
   }
 
   function updateTableAndPagination() {
-    // display the current page rows returned by backend
     displayAlerts(allAlerts);
     updatePagination();
   }
@@ -643,20 +642,6 @@ function createPaginationControls(totalPagesArg, currentPageArg) {
   }
 
   setDefaultDateRange();
-  
-//   function highlightAlertFromURL() {
-//     const params = new URLSearchParams(window.location.search);
-//     const alertId = params.get("alert_id");
-//     if (alertId) {
-//         setTimeout(() => {
-//             const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
-//             if (row) {
-//                 row.style.background = "#ffe082";
-//                 row.scrollIntoView({ behavior: "smooth", block: "center" });
-//             }
-//         }, 200); 
-//     }
-// }
 
 function highlightAlertFromURL() {
   const params = new URLSearchParams(window.location.search);
@@ -665,7 +650,6 @@ function highlightAlertFromURL() {
   const fromNotification = params.get("from_notification");
 
   if (alertId) {
-    // Switch to correct tab first if needed
     if (alertType) {
       const endpoint = alertType.toLowerCase().replace(/\s+/g, '_').replace('_alert', '');
       const card = document.querySelector(`.alert-card[data-endpoint="${endpoint}"]`);
@@ -676,7 +660,6 @@ function highlightAlertFromURL() {
         currentEndpoint = endpoint;
         sessionStorage.setItem("currentAlertEndpoint", currentEndpoint);
         
-        // Load alerts and then highlight
         loadAlerts().then(() => {
           setTimeout(() => highlightSpecificAlert(alertId, fromNotification), 300);
         });
@@ -684,7 +667,6 @@ function highlightAlertFromURL() {
       }
     }
     
-    // If already on correct tab, just highlight
     setTimeout(() => highlightSpecificAlert(alertId, fromNotification), 300);
   }
 }
@@ -692,21 +674,17 @@ function highlightAlertFromURL() {
 function highlightSpecificAlert(alertId, fromNotification) {
   const row = document.querySelector(`tr[data-alert-id="${alertId}"]`);
   if (row) {
-    // Add highlight style
     row.style.transition = "background-color 0.5s ease";
     row.style.backgroundColor = fromNotification ? "#fff9c4" : "#ffe082";
     
-    // Scroll to the alert
     row.scrollIntoView({ behavior: "smooth", block: "center" });
     
-    // Remove highlight after 5 seconds
     setTimeout(() => {
       row.style.backgroundColor = "";
     }, 5000);
   }
 }
 
-// Add this CSS to your styles (or in a style tag)
 const style = document.createElement('style');
 style.textContent = `
   @keyframes highlight {

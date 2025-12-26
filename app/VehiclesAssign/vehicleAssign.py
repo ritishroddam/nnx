@@ -50,13 +50,11 @@ def assign_vehicles():
             return redirect(url_for('VehicleAssign.assign_vehicles'))
     
         try:
-            # 1. Remove this user from all vehicles in this company
             companyName = get_jwt().get('company')
             vehicle_collection.update_many(
                 {"CompanyName": companyName, "AssignedUsers": ObjectId(user_id)},
                 {"$pull": {"AssignedUsers": ObjectId(user_id)}}
             )
-            # 2. Add this user to the selected vehicles
             for vehicle_id in vehicle_ids:
                 vehicle_collection.update_one(
                     {"_id": ObjectId(vehicle_id)},

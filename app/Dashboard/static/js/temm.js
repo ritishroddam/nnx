@@ -490,7 +490,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error("Invalid data format received");
       }
 
-      // ensure safe value for the optional fourth segment
       const disconnected = typeof data.disconnected_vehicles !== "undefined"
         ? data.disconnected_vehicles
         : 0;
@@ -501,7 +500,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const ctx = document.getElementById("vehiclesChart").getContext("2d");
 
-      // helper to create gradient with given stops
       function makeGradient(y0color, y1color) {
         const g = ctx.createLinearGradient(0, 0, 0, 400);
         g.addColorStop(0, y0color);
@@ -519,7 +517,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         gradient3 = makeGradient("#99C9FF", "#C7E4FF");
         gradient4 = makeGradient("#C7E4FF", "#E3F2FF");
 
-        // hover colors: pick slightly brighter single-shade colors for hover
         hover1 = "#153A74";
         hover2 = "#1F6DC2";
         hover3 = "#2C87D1";
@@ -975,7 +972,6 @@ document.getElementById('statusPopupExcelBtn').addEventListener('click', functio
             const cellAddress = {c: 2, r: R}; 
             const cellRef = XLSX.utils.encode_cell(cellAddress);
             if (ws[cellRef] && ws[cellRef].t === 's') {
-                // Try to parse the date string
                 const dateValue = new Date(ws[cellRef].v);
                 if (!isNaN(dateValue.getTime())) {
                     ws[cellRef].t = 'n';

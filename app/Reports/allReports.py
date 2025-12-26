@@ -731,13 +731,11 @@ def process_daily_report(imei, vehicle_doc, date_filter):
         if not records:
             return None
 
-        # Thresholds (fallbacks if missing in inventory record)
         normal_speed = float(vehicle_doc.get("normalSpeed") or vehicle_doc.get("normal_speed") or 60)
         license_plate = vehicle_doc.get("LicensePlateNumber", "")
 
         tz_ist = IST
 
-        # Bucket records by IST date
         day_buckets = defaultdict(list)
         for r in records:
             dt = r.get("date_time")
@@ -746,7 +744,6 @@ def process_daily_report(imei, vehicle_doc, date_filter):
             dt_ist = dt.astimezone(tz_ist)
             r["_dt_ist"] = dt_ist
             r["_date_key"] = dt_ist.date()
-            # Normalize numeric
             try:
                 r["_speed_f"] = float(r.get("speed", 0) or 0)
             except:
@@ -761,19 +758,15 @@ def process_daily_report(imei, vehicle_doc, date_filter):
         for day, recs in sorted(day_buckets.items()):
             if not recs:
                 continue
-            # First ignition ON record
             first_on = next((r for r in recs if str(r.get("ignition", "")).strip() == "1"), None)
-            # Last ignition OFF record (search from end)
             last_off = None
             for r in reversed(recs):
                 if str(r.get("ignition", "")).strip() == "0":
                     last_off = r
                     break
-            # Fallbacks
             first_on = first_on or recs[0]
             last_off = last_off or recs[-1]
 
-            # Odometer start/end
             odo_start = first_on.get("_odo_f")
             odo_end = last_off.get("_odo_f")
             distance = None
@@ -782,19 +775,15 @@ def process_daily_report(imei, vehicle_doc, date_filter):
                 if diff >= 0:
                     distance = round(diff, 2)
 
-            # Locations
             start_loc = safe_geocode(first_on.get("latitude"), first_on.get("longitude"))
             stop_loc = safe_geocode(last_off.get("latitude"), last_off.get("longitude"))
 
-            # Speed stats
             speeds = [r["_speed_f"] for r in recs if r["_speed_f"] is not None]
             avg_speed = round(sum(s for s in speeds if s > 0) / len([s for s in speeds if s > 0]), 2) if any(s > 0 for s in speeds) else 0.0
             max_speed = round(max(speeds), 2) if speeds else 0.0
 
-            # Way points
             total_way_points = len(recs)
 
-            # Durations
             running_seconds = 0
             idle_seconds = 0
             stoppage_seconds = 0
@@ -809,21 +798,16 @@ def process_daily_report(imei, vehicle_doc, date_filter):
                         delta = 0
                     prev_ign = str(prev.get("ignition", "")).strip()
                     prev_speed = prev["_speed_f"]
-                    # Running
                     if prev_ign == "1" and prev_speed > 0:
                         running_seconds += delta
-                    # Idle
                     if prev_ign == "1" and prev_speed == 0:
                         idle_seconds += delta
-                    # Stoppage
                     if prev_ign == "0":
                         stoppage_seconds += delta
-                    # Overspeed
                     if prev_speed >= normal_speed:
                         overspeed_seconds += delta
                 prev = r
 
-            # Overspeed count (number of records with speed >= threshold)
             overspeed_count = sum(1 for r in recs if r["_speed_f"] >= normal_speed)
 
             row = {
@@ -1217,7 +1201,6 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                     if df is None or df.empty:
                         report_progress(((idx + 1) / total) * 100)
                         continue
-                    # separator after first
                     if idx > 0:
                         sep_df = pd.DataFrame([{
                             "Vehicle Number": f"--- {vdoc.get('LicensePlateNumber','')} ---",
@@ -1468,12 +1451,10 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
                 ordered_data = add_speed_metrics(ordered_data)  
             report_progress(100)
             return ordered_data 
+        
+                
+    ####################Single Vehicle####################
 
-        ######################################################
-        ######################################################
-        ####################Single Vehicle####################
-        ######################################################
-        ######################################################
 
         vehicle = db['vehicle_inventory'].find_one(
             {"LicensePlateNumber": vehicle_number}
@@ -1583,7 +1564,6 @@ def _build_report_sync(report_type, vehicle_number, date_filter, claims, on_prog
 
         if df is None or df.empty:
             raise ValueError(f"No Data Found")  
-        # --- Keep this block as is for column order and JSON output ---
         all_possible_columns = ['Vehicle Number']
         if report_type == 'distance':
             all_possible_columns.extend(['Total Distance (km)', 'Start Odometer','Start Location', 
@@ -1661,7 +1641,6 @@ def generate_report_task(self, params):
         buf.close()
         bump(90)
 
-        # 3) Mark success and store metadata
         _update_report(report_id, {
             'status': 'SUCCESS',
             'progress': 100,
@@ -1867,7 +1846,6 @@ def download_report(report_id):
 @jwt_required()
 def view_report(report_id):
     try:
-        # Get pagination params
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 50))
         skip = (page - 1) * per_page

@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Main user and vehicle selectize for the assignment form
   const userSelect = $("#users").selectize({
     plugins: ["restore_on_backspace"],
     placeholder: "Select users...",
@@ -36,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
     create: false,
   });
 
-  // Initialize Selectize for all inline edit dropdowns
   document.querySelectorAll('.edit-vehicles-select').forEach(function(select) {
     $(select).selectize({
       plugins: ["remove_button"],
@@ -49,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (selectizeControl) selectizeControl.style.display = "none";
   });
 
-  // Inline editing logic
   document.querySelectorAll(".edit-assignment-btn").forEach(btn => {
     btn.addEventListener("click", function () {
       const userId = this.getAttribute("data-user-id");
@@ -59,20 +56,17 @@ document.addEventListener("DOMContentLoaded", function () {
       const saveBtn = row.querySelector(".save-assignment-btn");
       const cancelBtn = row.querySelector(".cancel-assignment-btn");
 
-      // Hide span, show select
       assignedSpan.style.display = "none";
       select.parentElement.querySelector('.selectize-control').style.display = "inline-block";
-      select.style.display = "none"; // hide the original select
+      select.style.display = "none"; 
       this.style.display = "none";
       saveBtn.style.display = "inline-block";
       cancelBtn.style.display = "inline-block";
 
-      // Preselect assigned vehicles
       const assignedPlates = assignedSpan.textContent.split(",").map(s => s.trim()).filter(Boolean);
       const vehicleOptions = window.vehicleOptions || {};
       const selectedIds = assignedPlates.map(plate => vehicleOptions[plate]).filter(Boolean);
 
-      // Set selectize value
       const selectize = $(select)[0].selectize;
       selectize.setValue(selectedIds, true);
     });
@@ -86,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
       row.querySelector(".edit-assignment-btn").style.display = "inline-block";
       row.querySelector(".save-assignment-btn").style.display = "none";
       row.querySelector(".cancel-assignment-btn").style.display = "none";
-      // Hide selectize control
       const select = row.querySelector(".edit-vehicles-select");
       select.parentElement.querySelector('.selectize-control').style.display = "none";
     });

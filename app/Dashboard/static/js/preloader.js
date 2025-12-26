@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Create preloader container
   const preloaderContainer = document.createElement("div");
   preloaderContainer.classList.add("preloader-overlay");
   preloaderContainer.innerHTML = `
@@ -10,38 +9,30 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   `;
 
-  // Add preloader to the body
   document.body.appendChild(preloaderContainer);
 
-  // Add blur effect on the page content
   document.body.style.filter = "blur(5px)";
 
-  // Simulate an async operation (like checking connection or loading data)
   function checkConnection() {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Simulate successful connection/data load
         resolve(true);
-      }, 2000); // You can replace this with your actual connection logic
+      }, 2000);
     });
   }
 
-  // Check connection status or data loading
   checkConnection().then((isConnected) => {
     if (isConnected) {
-      // Remove blur and hide the preloader after the connection/data is loaded
       document.body.style.filter = "blur(0)";
       preloaderContainer.classList.add("clear-blur");
 
-      // Move preloader off the screen after a brief delay
       setTimeout(() => {
         preloaderContainer.classList.add("preloader-hidden");
         preloaderContainer.classList.add("preloader-move-out");
-      }, 3000); // Adjust timing if needed
+      }, 3000); 
     }
   });
 
-  // Add the CSS styles for the preloader
   const styleElement = document.createElement("style");
   styleElement.innerHTML = `
     .preloader-overlay {
@@ -117,6 +108,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   `;
 
-  // Append the styles to the document head
   document.head.appendChild(styleElement);
 });

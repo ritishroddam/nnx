@@ -194,5 +194,4 @@ def download_pdf():
     pdf_path = os.path.join(os.getcwd(), "raw_logs_report.pdf")
     pdf.output(pdf_path)
 
-    # Send the file as a response
     return send_file(pdf_path, as_attachment=True)

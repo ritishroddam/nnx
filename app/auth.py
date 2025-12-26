@@ -218,39 +218,6 @@ def refresh():
         flash(f'An error occurred while refreshing the token:{Exception}', 'danger')
         return
 
-# @auth_bp.route('/register', methods=['GET', 'POST'])
-# @roles_required('admin', 'clientAdmin')
-# def register():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#         company = request.form.get('company')
-        
-#         if User.find_by_username(username):
-#             flash('Username already taken', 'danger')
-#             return redirect(url_for('auth.register'))
-        
-#         if User.find_by_email(email):
-#             flash('Email already registered', 'danger')
-#             return redirect(url_for('auth.register'))
-        
-#         User.create_user(username, email, password, company, role = 'user', disabled=0)
-#         flash('Registration successful. Please login.', 'success')
-#         return redirect(request.referrer or url_for('auth.login'))
-
-#     claims = get_jwt()
-#     user_role = claims.get('roles', [])  
-#     print(f"User Role: {user_role}")
-#     if 'admin' in user_role:
-#         companies = db.customers_list.find()
-#         return render_template('register.html', companies=companies)
-#     elif 'clientAdmin' in user_role:
-#         return render_template('register.html')
-#     else:
-#         flash('Unauthorized access', 'danger')
-#         return redirect(url_for('auth.unauthorized'))
-
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @roles_required('admin', 'clientAdmin')
 def register():
@@ -276,13 +243,10 @@ def register():
     user_role = claims.get('roles', [])  
     print(f"User Role: {user_role}")
     
-    # Fetch existing users with role 'user' for display in table
     existing_users = []
     if 'admin' in user_role:
         companies = db.customers_list.find()
-        # Get all users with role 'user'
         for user in db.users.find({"role": "user"}):
-            # Get company name
             company_name = "Unknown Company"
             company_id = user.get("company", "")
             
@@ -303,13 +267,11 @@ def register():
         
         return render_template('register.html', companies=companies, existing_users=existing_users, role='admin')
     elif 'clientAdmin' in user_role:
-        # For clientAdmin, only show users from their company
         company_id = claims.get('company_id', '')
         existing_users = []
         
         if company_id and company_id != "none":
             for user in db.users.find({"role": "user", "company": company_id}):
-                # Get company name
                 company_name = "Unknown Company"
                 try:
                     company = db.customers_list.find_one({"_id": ObjectId(company_id)})
@@ -330,8 +292,6 @@ def register():
         flash('Unauthorized access', 'danger')
         return redirect(url_for('auth.unauthorized'))
     
-
-# Add these new API endpoints for edit and delete operations
 @auth_bp.route('/api/user/<user_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 @roles_required('admin', 'clientAdmin')
@@ -341,17 +301,14 @@ def user_operations(user_id):
         user_role = claims.get('roles', [])
         user_company_id = claims.get('company_id', '')
         
-        # Check if user exists
         user = db.users.find_one({"_id": ObjectId(user_id)})
         if not user:
             return jsonify({"success": False, "error": "User not found"}), 404
         
-        # For clientAdmin, ensure they can only modify users from their company
         if 'clientAdmin' in user_role and user.get('company') != user_company_id:
             return jsonify({"success": False, "error": "Unauthorized access"}), 403
         
         if request.method == 'GET':
-            # Get user details for editing
             company_name = "Unknown Company"
             company_id = user.get("company", "")
             
@@ -375,19 +332,16 @@ def user_operations(user_id):
             })
             
         elif request.method == 'PUT':
-            # Update user details
             data = request.json
             update_data = {}
             
             if 'username' in data:
-                # Check if username is already taken by another user
                 existing_user = db.users.find_one({"username": data['username'], "_id": {"$ne": ObjectId(user_id)}})
                 if existing_user:
                     return jsonify({"success": False, "error": "Username already taken"}), 400
                 update_data['username'] = data['username']
             
             if 'email' in data:
-                # Check if email is already registered by another user
                 existing_email = db.users.find_one({"email": data['email'], "_id": {"$ne": ObjectId(user_id)}})
                 if existing_email:
                     return jsonify({"success": False, "error": "Email already registered"}), 400
@@ -397,7 +351,6 @@ def user_operations(user_id):
                 update_data['company'] = data['company']
             
             if 'password' in data and data['password']:
-                # Hash the new password
                 hashed_password = User.change_password(data['password'])
                 update_data['password'] = hashed_password
             
@@ -409,52 +362,18 @@ def user_operations(user_id):
             return jsonify({"success": True, "message": "User updated successfully"})
             
         elif request.method == 'DELETE':
-            # Delete user
             db.users.delete_one({"_id": ObjectId(user_id)})
             return jsonify({"success": True, "message": "User deleted successfully"})
             
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-# @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
-# @jwt_required()
-# @roles_required('admin')
-# def register_client_admin():
-    
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#         company = request.form.get('company')
-
-#         if not all([username, email, password, company]):
-#             flash('All fields are required', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-
-#         if User.find_by_username(username):
-#             flash('Username already exists', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-            
-#         if User.find_by_email(email):
-#             flash('Email already registered', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-        
-#         User.create_user(username, email, password, company, role='clientAdmin')
-#         flash('Admin registration successful. Please login.', 'success')
-#         return redirect(request.referrer or url_for('auth.login'))
-
-#     companies = db.customers_list.find()
-    
-#     return render_template('register_client_admin.html', companies=companies)
-
 @auth_bp.route('/register-client-admin', methods=['GET', 'POST'])
 @jwt_required()
 @roles_required('admin')
 def register_client_admin():
-    # Get all client admins for display
     client_admins = []
     for user in db.users.find({"role": "clientAdmin"}):
-        # Get company name
         company_name = "Unknown Company"
         company_id = user.get("company", "")
         
@@ -510,7 +429,6 @@ def toggle_disable_client_admin(user_id):
         if not user:
             return jsonify({"success": False, "error": "User not found"}), 404
             
-        # Toggle disabled status (0 = active, 1 = disabled)
         new_disabled_status = 1 if user.get('disabled', 0) == 0 else 0
         
         db.users.update_one(
@@ -557,32 +475,6 @@ def register_admin():
     
     return render_template('register_admin.html') 
 
-# @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
-# @roles_required('admin')
-# def register_inventory():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#         role = request.form.get('role')
-
-#         existing_user = User.find_by_username(username)
-#         existing_email = User.find_by_email(email)
-
-#         if existing_user:
-#             flash('Username already exists', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-            
-#         if existing_email:
-#             flash('Email already registered', 'danger')
-#             return redirect(url_for('auth.register_client_admin'))
-        
-#         User.create_user(username, email, password, "none", role, disabled=0)
-#         flash('Admin registration successful. Please login.', 'success')
-#         return redirect(request.referrer or url_for('auth.login'))
-    
-#     return render_template('register_inventory.html') 
-
 @auth_bp.route('/register-inventory', methods=['GET', 'POST'])
 @roles_required('admin')
 def register_inventory():
@@ -597,22 +489,20 @@ def register_inventory():
 
         if existing_user:
             flash('Username already exists', 'danger')
-            return redirect(url_for('auth.register_inventory'))  # Fixed redirect
+            return redirect(url_for('auth.register_inventory')) 
             
         if existing_email:
             flash('Email already registered', 'danger')
-            return redirect(url_for('auth.register_inventory'))  # Fixed redirect
+            return redirect(url_for('auth.register_inventory')) 
         
         User.create_user(username, email, password, "none", role)
         flash('Inventory user registration successful.', 'success')
         return redirect(url_for('auth.register_inventory'))
     
-    # Query each role separately and convert cursors to lists
     device_users = list(User.find_by_role('device')) if hasattr(User, 'find_by_role') else []
     sim_users = list(User.find_by_role('sim')) if hasattr(User, 'find_by_role') else []
     vehicle_users = list(User.find_by_role('vehicle')) if hasattr(User, 'find_by_role') else []
     
-    # Combine all inventory users
     inventory_users = device_users + sim_users + vehicle_users
     
     return render_template('register_inventory.html', inventory_users=inventory_users)

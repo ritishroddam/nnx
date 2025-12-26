@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const logsOption = document.querySelector(".logs-option");
   const subscribeOption = document.querySelector(".subscribe-option");
 
-  // Toggle between views
   toggleSlider.addEventListener("click", function () {
     if (rawLogsView.classList.contains("active")) {
       rawLogsView.classList.remove("active");
@@ -29,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Fetch raw logs based on form input
   document.getElementById("rawLogsForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     const licensePlateNumber = document.getElementById("licensePlateNumberRaw").value.trim();
@@ -101,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Download logs as PDF
   async function downloadPDF(vehicle) {
     try {
       const licensePlateNumber = document.getElementById("licensePlateNumberRaw").value.trim();
@@ -143,17 +140,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Fetch and populate vehicle dropdown
   async function fetchVehicles() {
     try {
       const response = await fetch("/rawLogs/getVehicles");
       if (response.status === 200) {
         const vehicles = await response.json();
         const vehicleDropdown = document.getElementById("vehicleDropdown");
-        vehicleDropdown.innerHTML = ""; // Clear existing options
+        vehicleDropdown.innerHTML = ""; 
         vehicles.forEach((vehicle) => {
           const option = document.createElement("option");
-          option.value = vehicle.LicensePlateNumber; // Ensure correct field name
+          option.value = vehicle.LicensePlateNumber; 
           option.textContent = vehicle.LicensePlateNumber;
           vehicleDropdown.appendChild(option);
         });
@@ -173,7 +169,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Subscribe to vehicles
   document.getElementById("subscribeForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     const selectedVehicles = Array.from(document.getElementById("vehicleDropdown").selectedOptions).map(
@@ -205,6 +200,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Initialize
   fetchVehicles();
 });

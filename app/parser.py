@@ -42,7 +42,6 @@ def _convert_date_time_emit(date):
     if not date:
         now = datetime.now(timezone(timedelta(hours=5, minutes=30)))
         return now.strftime("%d%m%y"), now.strftime("%H%M%S")
-    # Convert UTC datetime to IST (UTC+5:30)
     ist = date.astimezone(timezone(timedelta(hours=5, minutes=30)))
     return ist.strftime("%d%m%y"), ist.strftime("%H%M%S")
 

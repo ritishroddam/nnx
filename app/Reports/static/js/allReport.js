@@ -108,7 +108,6 @@ function setSelectValue(id, val) {
 }
 
 function setCompositeFromDate(prefix, dateObj){
-  // prefix: 'fromDate' | 'toDate'
   const pad=n=>n.toString().padStart(2,'0');
   const dateStr = `${dateObj.getFullYear()}-${pad(dateObj.getMonth()+1)}-${pad(dateObj.getDate())}`;
   let h24 = dateObj.getHours();
@@ -124,7 +123,6 @@ function setCompositeFromDate(prefix, dateObj){
 }
 
 function clampCustomRange(){
-  // If any part is missing, set defaults first
   const needDefaults =
     !document.getElementById('fromDateDate').value ||
     !getSelectValue('fromDateHour') ||
@@ -152,13 +150,11 @@ function clampCustomRange(){
   }
 
   const now = new Date();
-  // Force "to" not in future
   if (to > now) {
     to = now;
     setCompositeFromDate('toDate', to);
     displayFlashMessage('To date cannot be in the future','warning');
   }
-  // Also prevent "from" in future
   if (from > now) {
     from = now;
     setCompositeFromDate('fromDate', from);
@@ -185,6 +181,7 @@ function clampCustomRange(){
   syncHiddenInputs();
   return true;
 }
+
 function buildISOFromParts(prefix){
   const date = document.getElementById(prefix+'Date').value;
   const hour12 = getSelectValue(prefix+'Hour') || '12';
@@ -214,7 +211,6 @@ function parseLocal(dtStr){
 
 function getFilenameFromDisposition(disposition) {
   if (!disposition) return null;
-  // Handles: filename*=UTF-8''encodedname ; filename="name" ; filename=name
   const rfc5987 = /filename\*=UTF-8''([^;]+)/i;
   const quoted = /filename="([^"]+)"/i;
   const simple = /filename=([^;]+)/i;
@@ -259,7 +255,6 @@ function openStoredReport(id){
       openPreview(js.metadata.report_name, js.data||[]);
     }).catch(e=>console.error(e));
 }
-
 
 function formatTimeAgo(date) {
     const seconds = Math.floor((new Date() - date) / 1000);
@@ -457,7 +452,6 @@ function applySelectize(){
   selIds.forEach(id=>{
     const el = document.querySelector(id);
     if(!el) return;
-    // Skip if already initialized by Selectize
     const inst = window.jQuery && $(el)[0] && $(el)[0].selectize;
     if (inst) return;
     $(el).selectize({
@@ -517,7 +511,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       genView.classList.toggle('active', !isRecent);
       recView.classList.toggle('active', isRecent);
       if (isRecent) {
-        // Rebind in case Selectize got initialized after DOMContentLoaded
         bindReportRangeChange();
         const range = (document.getElementById('reportDateRange')?.value) || 'today';
         loadRecentReports(range);
@@ -807,12 +800,10 @@ function loadReportPreviewPage(reportId, page, perPage) {
     }).catch(e => console.error(e));
 }
 
-// Update openStoredReport to use paginated preview
 function openStoredReport(id) {
   loadReportPreviewPage(id, previewCurrentPage, previewRowsPerPage);
 }
 
-// Update openPreview to not reset pagination controls
 function openPreview(title, rows) {
   document.getElementById('reportPreviewModalTitle').textContent = title + ' Report Preview';
   document.getElementById('reportPreviewTableContainer').innerHTML = buildTable(rows);

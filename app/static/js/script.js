@@ -212,7 +212,6 @@ async function loadNotifications() {
         data.alerts.forEach((alert) => {
           const li = document.createElement("li");
           li.className = alert.acknowledged ? "notification-read" : "notification-unread";
-          // Only show mark-read button for specific alert types
           const showMarkRead = !alert.acknowledged && (
             alert.type === "Panic Alert" || alert.type === "Main Power Discontinue Alert"
           );
@@ -242,9 +241,6 @@ async function loadNotifications() {
                 endpoint = "main_power_off";
               }
 
-              // If notification includes a timestamp, open alerts page with a narrow
-              // date range around that timestamp so the specific alert is loaded
-              // and can be highlighted by the alerts page.
               try {
                 const alertDate = alert.date_time ? new Date(alert.date_time) : null;
                 if (alertDate && !isNaN(alertDate.getTime())) {
@@ -268,7 +264,6 @@ async function loadNotifications() {
                 console.warn('Failed to parse alert date for redirect', err);
               }
 
-              // Fallback: open alerts page without date params
               window.location.href = `/alerts/?alert_id=${encodeURIComponent(alert.id)}&alert_type=${encodeURIComponent(endpoint)}&from_notification=true`;
             }
           });
@@ -296,7 +291,6 @@ async function loadNotifications() {
   }
 }
 
-// Add new function to acknowledge notification alerts
 async function acknowledgeNotificationAlert(alertId) {
   try {
     const response = await fetch("/alerts/acknowledge", {
@@ -413,7 +407,6 @@ async function backgroundMap() {
   const bgMap = new Map(document.getElementById("displayMap"), mapOptions);
 }
 
-// Mobile sidebar toggle: show/hide sidebar and backdrop on small screens
 (function () {
   const toggle = document.getElementById("mobile-menu-toggle");
   const backdrop = document.getElementById("mobile-backdrop");
@@ -425,21 +418,18 @@ async function backgroundMap() {
     document.body.classList.toggle("sidebar-open");
   });
 
-  // clicking backdrop closes sidebar
   if (backdrop) {
     backdrop.addEventListener("click", function () {
       document.body.classList.remove("sidebar-open");
     });
   }
 
-  // click outside sidebar closes it (mobile)
   document.addEventListener("click", function (e) {
     if (!e.target.closest(".sidebar") && !e.target.closest("#mobile-menu-toggle")) {
       document.body.classList.remove("sidebar-open");
     }
   });
 
-  // prevent clicks inside sidebar from closing it
   const sidebar = document.querySelector(".sidebar");
   if (sidebar) {
     sidebar.addEventListener("click", function (e) {

@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     tilt: 0,
     heading: 0,
     zoom: 2.5,
-    center: { lat: 0, lng: 0 }, // Equator
+    center: { lat: 0, lng: 0 }, 
   };
 
   const mapOptions = {
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const map = new Map(document.getElementById("map"), mapOptions);
 
   function animatePan() {
-    currentLng += 0.2; // Adjust speed here
+    currentLng += 0.2;
     if (currentLng > 180) currentLng = -180;
     map.setCenter({ lat: 0, lng: currentLng });
     panAnimationId = requestAnimationFrame(animatePan);
