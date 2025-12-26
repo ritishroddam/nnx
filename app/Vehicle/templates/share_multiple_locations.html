@@ -7,6 +7,30 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
+    <script>
+        window.onload = function() {
+            initMap();
+            
+            const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
+            if (tokenMatch && tokenMatch[1]) {
+                const token = tokenMatch[1];
+                startLinkStatusCheck(token);
+            }
+            
+            if (window.performance && window.performance.navigation.type === 1) {
+                console.log('Page was reloaded');
+            }
+        };
+        
+        const socket = io("https://cordonnx.com", {
+            transports: ["websocket"],
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+        });
+    </script>
+
     <title>Shared Vehicle Locations</title>
     
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/cordonNXTabIcon.png') }}">
@@ -75,7 +99,7 @@
         </div>
     </div>
 
-    <!-- <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const updateTimeElements = document.querySelectorAll('.update-time');
             updateTimeElements.forEach(el => {
@@ -93,6 +117,6 @@
                 }
             });
         });
-    </script> -->
+    </script>
 </body>
 </html>

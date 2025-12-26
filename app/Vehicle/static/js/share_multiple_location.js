@@ -1,25 +1,3 @@
-window.onload = function() {
-    initMap();
-    
-    const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
-    if (tokenMatch && tokenMatch[1]) {
-        const token = tokenMatch[1];
-        startLinkStatusCheck(token);
-    }
-    
-    if (window.performance && window.performance.navigation.type === 1) {
-        console.log('Page was reloaded');
-    }
-};
-
-const socket = io("https://cordonnx.com", {
-    transports: ["websocket"],
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-})
-
 let map;
 let markers = {};
 let activeInfoWindow = null;
@@ -498,22 +476,7 @@ vehiclesData.forEach(vehicle => {
     vehicle.formattedSpeed = formatSpeed(vehicle.speed);
 });
 
-document.addEventListener('DOMContentLoaded', checkExpirationTime, function() {
-            const updateTimeElements = document.querySelectorAll('.update-time');
-            updateTimeElements.forEach(el => {
-                const dateStr = el.textContent.trim();
-                if (dateStr) {
-                    el.textContent = formatDateTime(dateStr);
-                }
-            });
-const speedElements = document.querySelectorAll('.speed-status');
-        speedElements.forEach(el => {
-            const speedText = el.textContent.trim();
-            if (speedText === 'Unknown Speed') {
-                el.textContent = 'No Speed';
-            }
-        });
-});        
+document.addEventListener('DOMContentLoaded', checkExpirationTime);
 
 function debugMarkerRotations() {
     console.log('Current marker rotations:');
