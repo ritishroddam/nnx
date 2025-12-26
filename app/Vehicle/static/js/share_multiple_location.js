@@ -1,17 +1,3 @@
-window.onload = function() {
-    initMap();
-    
-    const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
-    if (tokenMatch && tokenMatch[1]) {
-        const token = tokenMatch[1];
-        startLinkStatusCheck(token);
-    }
-    
-    if (window.performance && window.performance.navigation.type === 1) {
-        console.log('Page was reloaded');
-    }
-};
-
 const socket = io("https://cordonnx.com", {
     transports: ["websocket"],
     reconnection: true,
@@ -524,3 +510,17 @@ function debugMarkerRotations() {
 }
 
 setTimeout(debugMarkerRotations, 3000);
+
+window.onload = function() {
+    initMap();
+    
+    const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
+    if (tokenMatch && tokenMatch[1]) {
+        const token = tokenMatch[1];
+        startLinkStatusCheck(token);
+    }
+    
+    if (window.performance && window.performance.navigation.type === 1) {
+        console.log('Page was reloaded');
+    }
+};
