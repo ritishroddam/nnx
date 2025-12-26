@@ -1,10 +1,38 @@
-let map;
+let vehiclesData = [];
 let markers = {};
+let map;
 let activeInfoWindow = null;
 let trackedVehicle = null;
 let linkCheckInterval;
+let shareToken = "";
+
+try {
+    const jsonStr = '{{ share_info.vehicles | tojson | safe }}';
+    if (jsonStr && jsonStr !== 'undefined' && jsonStr.trim() !== '') {
+        vehiclesData = JSON.parse(jsonStr);
+        
+        vehiclesData.forEach(vehicle => {
+            vehicle.formattedDateTime = formatDateTime(vehicle.date_time);
+            vehicle.formattedSpeed = formatSpeed(vehicle.speed);
+        });
+    }
+} catch (error) {
+    console.error('Error parsing vehicles data:', error);
+    vehiclesData = [];
+}
+
+try {
+    shareToken = "{{ token }}";
+} catch (error) {
+    console.error('Error getting token:', error);
+}
 
 async function initMap() {
+    if (!vehiclesData || vehiclesData.length === 0) {
+        console.warn('No vehicles data available');
+        return;
+    }
+
     const { Map } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker")
     const bounds = new google.maps.LatLngBounds();
@@ -290,6 +318,7 @@ function highlightVehicleCard(licensePlate) {
 }
 
 socket.on('connect', () => {
+    if (!vehiclesData || vehiclesData.length === 0) return;
     console.log("Connected to socket for live updates");
     
     const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
@@ -442,8 +471,8 @@ function checkExpirationTime() {
     }
 }
 
-const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
-const shareToken = "{{ token }}";
+// const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
+// const shareToken = "{{ token }}";
 
 function formatDateTime(dateStr) {
     if (!dateStr) return 'Unknown';
