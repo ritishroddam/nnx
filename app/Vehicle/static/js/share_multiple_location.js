@@ -25,8 +25,6 @@ let markers = {};
 let activeInfoWindow = null;
 let trackedVehicle = null;
 let linkCheckInterval;
-const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
-const shareToken = "{{ token }}";
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -115,6 +113,9 @@ async function initMap() {
     }
     setupCardHoverEvents();
 }
+
+const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
+const shareToken = "{{ token }}";
 
 function createRotatableMarker(course = 0, speed = 0, lastUpdate = null, vehicleType = 'car') {
     function _getVehicleIconSize(type) {
