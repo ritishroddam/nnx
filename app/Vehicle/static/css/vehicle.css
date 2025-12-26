@@ -1606,6 +1606,10 @@ body.dark-mode .select-toggle-btn.active {
   font-family: 'Roboto', Arial, sans-serif;
 }
 
+.dark-mode #vehicle-counter{
+  color: #ccc;
+}
+
 @keyframes sosButtonPulse {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
