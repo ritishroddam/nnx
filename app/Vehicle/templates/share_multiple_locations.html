@@ -18,6 +18,29 @@
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHlZGVWKK4ibhGfF__nv9B55VxCc-US84&libraries=geometry"></script>
+    <script>
+        window.onload = function() {
+            initMap();
+            
+            const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
+            if (tokenMatch && tokenMatch[1]) {
+                const token = tokenMatch[1];
+                startLinkStatusCheck(token);
+            }
+            
+            if (window.performance && window.performance.navigation.type === 1) {
+                console.log('Page was reloaded');
+            }
+        };
+        
+        const socket = io("https://cordonnx.com", {
+            transports: ["websocket"],
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+        });
+    </script>
 </head>
 <body>
     <div class="container">
