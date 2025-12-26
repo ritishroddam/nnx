@@ -1,38 +1,34 @@
-let vehiclesData = [];
-let markers = {};
+window.onload = function() {
+    initMap();
+    
+    const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
+    if (tokenMatch && tokenMatch[1]) {
+        const token = tokenMatch[1];
+        startLinkStatusCheck(token);
+    }
+    
+    if (window.performance && window.performance.navigation.type === 1) {
+        console.log('Page was reloaded');
+    }
+};
+
+const socket = io("https://cordonnx.com", {
+    transports: ["websocket"],
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+})
+
+const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
+const shareToken = "{{ token }}";
 let map;
+let markers = {};
 let activeInfoWindow = null;
 let trackedVehicle = null;
 let linkCheckInterval;
-let shareToken = "";
-
-try {
-    const jsonStr = '{{ share_info.vehicles | tojson | safe }}';
-    if (jsonStr && jsonStr !== 'undefined' && jsonStr.trim() !== '') {
-        vehiclesData = JSON.parse(jsonStr);
-        
-        vehiclesData.forEach(vehicle => {
-            vehicle.formattedDateTime = formatDateTime(vehicle.date_time);
-            vehicle.formattedSpeed = formatSpeed(vehicle.speed);
-        });
-    }
-} catch (error) {
-    console.error('Error parsing vehicles data:', error);
-    vehiclesData = [];
-}
-
-try {
-    shareToken = "{{ token }}";
-} catch (error) {
-    console.error('Error getting token:', error);
-}
 
 async function initMap() {
-    if (!vehiclesData || vehiclesData.length === 0) {
-        console.warn('No vehicles data available');
-        return;
-    }
-
     const { Map } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker")
     const bounds = new google.maps.LatLngBounds();
@@ -318,7 +314,6 @@ function highlightVehicleCard(licensePlate) {
 }
 
 socket.on('connect', () => {
-    if (!vehiclesData || vehiclesData.length === 0) return;
     console.log("Connected to socket for live updates");
     
     const tokenMatch = window.location.pathname.match(/\/shared-multiple\/([^\/]+)/);
@@ -471,9 +466,6 @@ function checkExpirationTime() {
     }
 }
 
-// const vehiclesData = JSON.parse('{{ share_info.vehicles | tojson | safe }}');
-// const shareToken = "{{ token }}";
-
 function formatDateTime(dateStr) {
     if (!dateStr) return 'Unknown';
     const date = new Date(dateStr);
@@ -505,7 +497,22 @@ vehiclesData.forEach(vehicle => {
     vehicle.formattedSpeed = formatSpeed(vehicle.speed);
 });
 
-document.addEventListener('DOMContentLoaded', checkExpirationTime);
+document.addEventListener('DOMContentLoaded', checkExpirationTime, function() {
+            const updateTimeElements = document.querySelectorAll('.update-time');
+            updateTimeElements.forEach(el => {
+                const dateStr = el.textContent.trim();
+                if (dateStr) {
+                    el.textContent = formatDateTime(dateStr);
+                }
+            });
+const speedElements = document.querySelectorAll('.speed-status');
+        speedElements.forEach(el => {
+            const speedText = el.textContent.trim();
+            if (speedText === 'Unknown Speed') {
+                el.textContent = 'No Speed';
+            }
+        });
+});        
 
 function debugMarkerRotations() {
     console.log('Current marker rotations:');
