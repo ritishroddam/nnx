@@ -1577,6 +1577,11 @@ body.dark-mode .select-toggle-btn.active {
   animation: sosButtonPulse 2s infinite;
 }
 
+.dark-mode .sos-alert-toggle-btn {
+  background: linear-gradient(135deg, #ff5252, #ff0000);
+  box-shadow: 0 4px 8px rgba(255, 82, 82, 0.5);
+}
+
 .sos-alert-toggle-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 12px rgba(255, 0, 0, 0.4);
@@ -1597,6 +1602,12 @@ body.dark-mode .select-toggle-btn.active {
   align-items: center;
   justify-content: center;
   border: 2px solid #ff0000;
+}
+
+.dark-mode .sos-alert-count {
+  background: #333;
+  color: #ff5252;
+  border: 2px solid #ff5252;
 }
 
 #vehicle-counter{
